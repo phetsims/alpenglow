@@ -6,6 +6,8 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
+window.assertions.enableAssertSlow();
+
 import qunitStart from '../../chipper/js/sim-tests/qunitStart.js';
 import './cag/ClippableFaceTests.js';
 
