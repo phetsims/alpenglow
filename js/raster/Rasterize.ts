@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BoundedSubpath, ClippableFace, ClippableFaceAccumulator, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, alpenglow } from '../imports.js';
+import { BoundedSubpath, ClippableFace, ClippableFaceAccumulator, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, alpenglow, EdgedFace, EdgedClippedFace } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -37,14 +37,14 @@ export type RasterizationOptions = {
 
   edgeIntersectionMethod?: 'quadratic' | 'boundsTree' | 'arrayBoundsTree';
 
-  // - 'polygonal' will simply use PolygonalFace for every input face
-  // - 'edged' will simply use EdgedFace for every input face
-  // - 'fullyCombined' will use EdgedFace, but will combine ALL faces with equivalent RenderPrograms into one.
-  // - 'simplifyingCombined' will use EdgedFace, but will (a) only combine compatible faces if they touch, and (b)
-  //   will remove edges between compatible faces.
-  // - 'traced' will use PolygonalFace, and will function similarly to simplifyingCombined, but will trace out the
-  //   resulting polygonal faces.
-  renderableFaceMethod?: 'polygonal' | 'edged' | 'fullyCombined' | 'simplifyingCombined' | 'traced';
+  renderableFaceType?: 'polygonal' | 'edged' | 'edgedClipped';
+
+  // - 'simple' will simply pass through the edges to the renderable faces
+  // - 'fullyCombined' will combine ALL faces with equivalent RenderPrograms into one.
+  // - 'simplifyingCombined' will (a) only combine compatible faces if they touch, and (b) will remove edges between
+  //    compatible faces.
+  // - 'traced' will function similarly to simplifyingCombined, but will trace out the resulting polygonal faces.
+  renderableFaceMethod?: 'simple' | 'fullyCombined' | 'simplifyingCombined' | 'traced';
 
   splitPrograms?: boolean;
 
@@ -58,6 +58,7 @@ const DEFAULT_OPTIONS = {
   polygonFilterWindowMultiplier: 1,
   edgeIntersectionSortMethod: 'center-min-max',
   edgeIntersectionMethod: 'arrayBoundsTree',
+  renderableFaceType: 'polygonal',
   renderableFaceMethod: 'traced',
   splitPrograms: true,
   log: null
@@ -935,6 +936,12 @@ export default class Rasterize {
       log && window.performance && window.performance.measure( name, `${name}-start`, `${name}-end` );
     };
 
+    const scratchAccumulator = {
+      polygonal: PolygonalFace.getScratchAccumulator(),
+      edged: EdgedFace.getScratchAccumulator(),
+      edgedClipped: EdgedClippedFace.getScratchAccumulator()
+    }[ options.renderableFaceType ];
+
     markStart( 'rasterize' );
 
     const polygonFiltering: PolygonFilterType = options.polygonFiltering;
@@ -1095,11 +1102,12 @@ export default class Rasterize {
 
         markStart( 'renderable-faces' );
         let renderableFaces: RenderableFace[];
-        if ( options.renderableFaceMethod === 'polygonal' ) {
-          renderableFaces = FaceConversion.toPolygonalRenderableFaces( renderedFaces, fromIntegerMatrix );
-        }
-        else if ( options.renderableFaceMethod === 'edged' ) {
-          renderableFaces = FaceConversion.toEdgedRenderableFaces( renderedFaces, fromIntegerMatrix );
+
+        // Set up the correct bounds in case we use edgedClipped.
+        scratchAccumulator.setAccumulationBounds( tileBounds.minX, tileBounds.minY, tileBounds.maxX, tileBounds.maxY );
+
+        if ( options.renderableFaceMethod === 'simple' ) {
+          renderableFaces = FaceConversion.toRenderableFaces( renderedFaces, fromIntegerMatrix, scratchAccumulator );
         }
         else if ( options.renderableFaceMethod === 'fullyCombined' ) {
           renderableFaces = FaceConversion.toFullyCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );
@@ -1113,6 +1121,7 @@ export default class Rasterize {
         else {
           throw new Error( 'unknown renderableFaceMethod' );
         }
+
         markEnd( 'renderable-faces' );
         if ( tileLog ) { tileLog.initialRenderableFaces = renderableFaces; }
 

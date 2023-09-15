@@ -789,6 +789,13 @@ export default class EdgedClippedFace implements ClippableFace {
   }
 
   /**
+   * Returns a singleton accumulator for this type of face.
+   */
+  public static getScratchAccumulator(): ClippableFaceAccumulator {
+    return scratchAccumulator;
+  }
+
+  /**
    * Returns a new accumulator for this type of face.
    */
   public getAccumulator(): ClippableFaceAccumulator {
@@ -858,6 +865,8 @@ export class EdgedClippedFaceAccumulator implements ClippableFaceAccumulator {
   private minYCount = 0;
   private maxXCount = 0;
   private maxYCount = 0;
+
+  public readonly usesEndPoint = true;
 
   public addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void {
     if (

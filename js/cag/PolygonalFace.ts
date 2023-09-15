@@ -516,6 +516,13 @@ export default class PolygonalFace implements ClippableFace {
   }
 
   /**
+   * Returns a singleton accumulator for this type of face.
+   */
+  public static getScratchAccumulator(): ClippableFaceAccumulator {
+    return scratchAccumulator;
+  }
+
+  /**
    * Returns a new accumulator for this type of face.
    */
   public getAccumulator(): ClippableFaceAccumulator {
@@ -567,6 +574,8 @@ export class PolygonalFaceAccumulator implements ClippableFaceAccumulator {
   // TODO: try out the default of full collinear. Might hurt some performance, but might be a performance win if we are
   // TODO: creating lots of extra points
   private simplifier = new ClipSimplifier();
+
+  public readonly usesEndPoint = false;
 
   public addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void {
     assert && assert( startX !== endX || startY !== endY, 'Points should not be identical' );

@@ -554,30 +554,30 @@ an UI and Display made for visual testing and debugging.
       else if ( type === 'box' || type === 'bilinear' || type === 'mitchellNetravali' ) {
 
         const filtering = {
-          box: phet.scenery.PolygonFilterType.Box,
-          bilinear: phet.scenery.PolygonFilterType.Bilinear,
-          mitchellNetravali: phet.scenery.PolygonFilterType.MitchellNetravali
+          box: phet.alpenglow.PolygonFilterType.Box,
+          bilinear: phet.alpenglow.PolygonFilterType.Bilinear,
+          mitchellNetravali: phet.alpenglow.PolygonFilterType.MitchellNetravali
         }[ type ];
 
-        const program = new phet.scenery.RenderBlendCompose(
-          phet.scenery.RenderComposeType.Over,
-          phet.scenery.RenderBlendType.Normal,
-          new phet.scenery.RenderPathBoolean(
-            new phet.scenery.RenderPath( 'nonzero', [ polygon ] ),
-            new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 0, 1 ) ),
-            new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 0, 0 ) )
+        const program = new phet.alpenglow.RenderBlendCompose(
+          phet.alpenglow.RenderComposeType.Over,
+          phet.alpenglow.RenderBlendType.Normal,
+          new phet.alpenglow.RenderPathBoolean(
+            new phet.alpenglow.RenderPath( 'nonzero', [ polygon ] ),
+            new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 0, 1 ) ),
+            new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 0, 0 ) )
           ),
-          new phet.scenery.RenderColor( phet.dot.v4( 1, 1, 1, 1 ) )
+          new phet.alpenglow.RenderColor( phet.dot.v4( 1, 1, 1, 1 ) )
         ).transformed( phet.dot.Matrix3.scaling( window.devicePixelRatio ) );
 
         const outputWidth = width * window.devicePixelRatio;
         const outputHeight = height * window.devicePixelRatio;
 
-        const raster = new phet.scenery.CombinedRaster( outputWidth, outputHeight );
-        phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputWidth, outputHeight ), {
+        const raster = new phet.alpenglow.CombinedRaster( outputWidth, outputHeight );
+        phet.alpenglow.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputWidth, outputHeight ), {
           polygonFiltering: filtering
         } );
-        const canvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
+        const canvas = phet.alpenglow.Rasterize.imageDataToCanvas( raster.toImageData() );
 
         const styleCanvas = canvas => {
           canvas.style.width = `${width}px`;
@@ -981,9 +981,9 @@ an UI and Display made for visual testing and debugging.
         canvas.style.left = '20px ';
       };
 
-      const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
-      phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
-      const canvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
+      const raster = new phet.alpenglow.CombinedRaster( outputSize, outputSize );
+      phet.alpenglow.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
+      const canvas = phet.alpenglow.Rasterize.imageDataToCanvas( raster.toImageData() );
 
       styleCanvas( canvas );
       document.body.appendChild( canvas );
@@ -1008,9 +1008,9 @@ an UI and Display made for visual testing and debugging.
         canvas.style.left = '20px ';
       };
 
-      const raster = new phet.scenery.CombinedRaster( outputSize, outputSize );
-      phet.scenery.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
-      const canvas = phet.scenery.Rasterize.imageDataToCanvas( raster.toImageData() );
+      const raster = new phet.alpenglow.CombinedRaster( outputSize, outputSize );
+      phet.alpenglow.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ) );
+      const canvas = phet.alpenglow.Rasterize.imageDataToCanvas( raster.toImageData() );
 
       styleCanvas( canvas );
       document.body.appendChild( canvas );
@@ -1087,8 +1087,11 @@ an UI and Display made for visual testing and debugging.
         // edgeIntersectionMethod: 'boundsTree',
         // edgeIntersectionMethod: 'arrayBoundsTree',
 
-        // renderableFaceMethod: 'polygonal',
-        // renderableFaceMethod: 'edged',
+        // renderableFaceType: 'polygonal',
+        // renderableFaceType: 'edged',
+        // renderableFaceType: 'edgedClipped',
+
+        // renderableFaceMethod: 'simple',
         // renderableFaceMethod: 'fullyCombined',
         // renderableFaceMethod: 'simplifyingCombined',
         // renderableFaceMethod: 'traced',
@@ -1247,7 +1250,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       const toPremulClient = ( ...args ) => {
-        return phet.alpenglow.RenderColor.from( ...args ).colorConverted( phet.scenery.RenderColorSpace.sRGB, clientColorSpace );
+        return phet.alpenglow.RenderColor.from( ...args ).colorConverted( phet.alpenglow.RenderColorSpace.sRGB, clientColorSpace );
       };
 
       const toPremulOklab = ( ...args ) => {
@@ -1280,8 +1283,8 @@ an UI and Display made for visual testing and debugging.
         imageResampleType
       ) ) ), 0.8 );
       const bBlendColorSpace = phet.alpenglow.RenderColorSpace.premultipliedOklab;
-      // const bBlendColorSpace = phet.scenery.RenderColorSpace.premultipliedDisplayP3;
-      // const b = phet.scenery.RenderPathBoolean.fromInside( pathB, new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ).colorConverted( phet.scenery.RenderColorSpace.displayP3, clientColorSpace ) );
+      // const bBlendColorSpace = phet.alpenglow.RenderColorSpace.premultipliedDisplayP3;
+      // const b = phet.scenery.RenderPathBoolean.fromInside( pathB, new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ).colorConverted( phet.alpenglow.RenderColorSpace.displayP3, clientColorSpace ) );
       const b = phet.alpenglow.RenderColorSpaceConversion.convert( phet.alpenglow.RenderPathBoolean.fromInside( pathB, new phet.alpenglow.RenderRadialGradient(
         phet.dot.Matrix3.IDENTITY,
         new phet.dot.Vector2( 10, 10 ),
@@ -1828,7 +1831,7 @@ an UI and Display made for visual testing and debugging.
 
       if ( SHOW_SOLID_COLORS ) {
         rasterLog.renderableFaces.forEach( face => {
-          if ( face.renderProgram instanceof phet.scenery.RenderColor ) {
+          if ( face.renderProgram instanceof phet.alpenglow.RenderColor ) {
             offsetNode.addChild( new phet.scenery.Path( face.face.getShape().transformed( fromRenderMatrix ), { fill: phet.alpenglow.RenderColor.premultipliedSRGBToColor( face.renderProgram.color ) } ) );
           }
         } );
@@ -2002,7 +2005,7 @@ an UI and Display made for visual testing and debugging.
 
           const paddedValue = 0.9 * value + 0.05;
 
-          const color = phet.scenery.RenderColor.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
+          const color = phet.alpenglow.RenderColor.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
 
           const index = 4 * ( i * width + j );
           imageData.data[ index ] = color.r;
@@ -2079,7 +2082,7 @@ an UI and Display made for visual testing and debugging.
 
           const paddedValue = 0.95 - 0.9 * value;
 
-          const color = phet.scenery.RenderColor.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
+          const color = phet.alpenglow.RenderColor.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
 
           const index = 4 * ( i * width + j );
           imageData.data[ index ] = color.r;
@@ -2657,7 +2660,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
 
       const SHOW_OUTLINES = true;
 
-      const vectorCanvas = new phet.scenery.VectorCanvas( outputSize, outputSize, 'display-p3', phet.scenery.PolygonFilterType.Box );
+      const vectorCanvas = new phet.scenery.VectorCanvas( outputSize, outputSize, 'display-p3', phet.alpenglow.PolygonFilterType.Box );
 
       const p = ( x, y ) => phet.dot.v2( x * outputSize, y * outputSize );
       const s = s => s * outputSize;
@@ -2755,22 +2758,22 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
   window.executeTest = function() {
     setTimeout( async function() {
 
-      // const program = new phet.scenery.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) );
+      // const program = new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) );
       // const program = new phet.scenery.RenderBarycentricBlend(
       //   phet.dot.v2( 0, 0 ),
       //   phet.dot.v2( 1, 1 ),
       //   phet.dot.v2( 0, 1 ),
       //   phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
-      //   new phet.scenery.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
-      //   new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
-      //   new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) )
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) )
       // );
       // const program = new phet.scenery.RenderLinearBlend(
       //   phet.dot.v2( 1, 0 ),
       //   0.25,
       //   phet.scenery.RenderLinearBlendAccuracy.Accurate,
-      //   new phet.scenery.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
-      //   new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) )
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) )
       // );
       // const program = new phet.scenery.RenderLinearBlend(
       //   phet.dot.v2( 1, 0 ),
@@ -2781,24 +2784,24 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       //     phet.dot.v2( 1, 1 ),
       //     phet.dot.v2( 0, 1 ),
       //     phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
-      //     new phet.scenery.RenderColor( phet.dot.v4( 1, 0, 0, 0 ) ),
-      //     new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 0 ) ),
-      //     new phet.scenery.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 0 ) ),
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 0 ) ),
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
       //   ),
       //   new phet.scenery.RenderBarycentricBlend(
       //     phet.dot.v2( 0, 0 ),
       //     phet.dot.v2( 1, 1 ),
       //     phet.dot.v2( 0, 1 ),
       //     phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
-      //     new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 1, 0 ) ),
-      //     new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 0, 1 ) ),
-      //     new phet.scenery.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 0 ) ),
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 0, 1 ) ),
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
       //   )
       // );
       const program = new phet.scenery.RenderStack( [
-        new phet.scenery.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) ),
-        new phet.scenery.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
-        new phet.scenery.RenderColor( phet.dot.v4( 0.5, 0, 0, 1 ) ),
+        new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) ),
+        new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
+        new phet.alpenglow.RenderColor( phet.dot.v4( 0.5, 0, 0, 1 ) ),
       ] );
 
       const instructions = [];

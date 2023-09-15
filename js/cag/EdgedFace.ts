@@ -516,6 +516,13 @@ export default class EdgedFace implements ClippableFace {
   }
 
   /**
+   * Returns a singleton accumulator for this type of face.
+   */
+  public static getScratchAccumulator(): ClippableFaceAccumulator {
+    return scratchAccumulator;
+  }
+
+  /**
    * Returns a new accumulator for this type of face.
    */
   public getAccumulator(): ClippableFaceAccumulator {
@@ -569,6 +576,8 @@ alpenglow.register( 'EdgedFace', EdgedFace );
 export class EdgedFaceAccumulator implements ClippableFaceAccumulator {
 
   private edges: LinearEdge[] = [];
+
+  public readonly usesEndPoint = true;
 
   public addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void {
     assert && assert( startX !== endX || startY !== endY, 'Points should not be identical' );

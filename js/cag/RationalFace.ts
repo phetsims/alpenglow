@@ -6,12 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, ClipSimplifier, EdgedFace, isWindingIncluded, LinearEdge, PolygonalFace, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, alpenglow, WindingMap } from '../imports.js';
+import { alpenglow, BigRational, ClippableFaceAccumulator, ClipSimplifier, EdgedFace, isWindingIncluded, LinearEdge, PolygonalFace, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, WindingMap } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
 const traceSimplifier = new ClipSimplifier();
+
+const nanVector = new Vector2( NaN, NaN );
 
 export default class RationalFace {
   public readonly holes: RationalBoundary[] = [];
@@ -21,6 +23,28 @@ export default class RationalFace {
   public processed = false;
 
   public constructor( public readonly boundary: RationalBoundary ) {}
+
+  public toAccumulator( accumulator: ClippableFaceAccumulator, matrix: Matrix3 = Matrix3.IDENTITY ): void {
+    for ( let i = -1; i < this.holes.length; i++ ) {
+      const boundary = i === -1 ? this.boundary : this.holes[ i ];
+
+      for ( let j = 0; j < boundary.edges.length; j++ ) {
+        const edge = boundary.edges[ j ];
+
+        const p0 = matrix.timesVector2( edge.p0float );
+        const p1 = accumulator.usesEndPoint ? matrix.timesVector2( edge.p1float ) : nanVector;
+
+        accumulator.addEdge(
+          p0.x, p0.y,
+          p1.x, p1.y,
+          p0,
+          accumulator.usesEndPoint ? p1 : null
+        );
+      }
+
+      accumulator.markNewPolygon();
+    }
+  }
 
   public toPolygonalFace( matrix: Matrix3 ): PolygonalFace {
     return new PolygonalFace( [

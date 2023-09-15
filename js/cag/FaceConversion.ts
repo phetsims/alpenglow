@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { EdgedFace, LinearEdge, PolygonalFace, RationalFace, RenderableFace, RenderProgram, alpenglow } from '../imports.js';
+import { alpenglow, ClippableFaceAccumulator, EdgedFace, LinearEdge, PolygonalFace, RationalFace, RenderableFace, RenderProgram } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 
@@ -22,6 +22,34 @@ class AccumulatingFace {
 }
 
 export default class FaceConversion {
+  public static toRenderableFaces(
+    faces: RationalFace[],
+    fromIntegerMatrix: Matrix3,
+    accumulator: ClippableFaceAccumulator
+  ): RenderableFace[] {
+    const renderableFaces: RenderableFace[] = [];
+
+    for ( let i = 0; i < faces.length; i++ ) {
+      const face = faces[ i ];
+
+      face.toAccumulator( accumulator, fromIntegerMatrix );
+
+      const clippableFace = accumulator.finalizeFace();
+
+      if ( clippableFace ) {
+        renderableFaces.push( new RenderableFace(
+          clippableFace,
+          face.renderProgram!,
+          // TODO: HEY HEY why are we double transforming the points? Just get the bounds... from the clippable face?
+          // TODO: Or... get the bounds during the accumulation process?
+          face.getBounds( fromIntegerMatrix )
+        ) );
+      }
+    }
+
+    return renderableFaces;
+  }
+
   public static toPolygonalRenderableFaces(
     faces: RationalFace[],
     fromIntegerMatrix: Matrix3
