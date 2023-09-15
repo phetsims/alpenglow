@@ -1113,7 +1113,8 @@ export default class Rasterize {
           renderableFaces = FaceConversion.toFullyCombinedRenderableFaces( renderedFaces, fromIntegerMatrix, scratchAccumulator );
         }
         else if ( options.renderableFaceMethod === 'simplifyingCombined' ) {
-          renderableFaces = FaceConversion.toSimplifyingCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );
+          assert && assert( options.renderableFaceType !== 'polygonal', 'simplifyingCombined does not sort data for polygonal output' );
+          renderableFaces = FaceConversion.toSimplifyingCombinedRenderableFaces( renderedFaces, fromIntegerMatrix, scratchAccumulator );
         }
         else if ( options.renderableFaceMethod === 'traced' ) {
           renderableFaces = FaceConversion.toTracedRenderableFaces( renderedFaces, fromIntegerMatrix );

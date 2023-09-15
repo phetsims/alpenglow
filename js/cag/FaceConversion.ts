@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ClippableFaceAccumulator, EdgedFace, LinearEdge, PolygonalFace, RationalFace, RenderableFace, RenderProgram } from '../imports.js';
+import { alpenglow, ClippableFace, ClippableFaceAccumulator, EdgedFace, LinearEdge, PolygonalFace, RationalFace, RenderableFace, RenderProgram } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 
@@ -18,7 +18,7 @@ class AccumulatingFace {
   public facesToProcess: RationalFace[] = [];
   public renderProgram: RenderProgram | null = null;
   public bounds: Bounds2 = Bounds2.NOTHING.copy();
-  public clippedEdges: LinearEdge[] = [];
+  public clippableFace: ClippableFace | null = null;
 }
 
 export default class FaceConversion {
@@ -109,7 +109,8 @@ export default class FaceConversion {
   // that we combine (thus switching to EdgedFaces with unsorted edges).
   public static toSimplifyingCombinedRenderableFaces(
     faces: RationalFace[],
-    fromIntegerMatrix: Matrix3
+    fromIntegerMatrix: Matrix3,
+    accumulator: ClippableFaceAccumulator
   ): RenderableFace[] {
 
     const accumulatedFaces: AccumulatingFace[] = [];
@@ -158,22 +159,27 @@ export default class FaceConversion {
           ] ) {
             for ( const edge of boundary.edges ) {
               if ( !isFaceCompatible( edge.reversed.face! ) ) {
-                newAccumulatedFace.clippedEdges.push( new LinearEdge(
-                  fromIntegerMatrix.timesVector2( edge.p0float ),
-                  fromIntegerMatrix.timesVector2( edge.p1float )
-                ) );
+                const startPoint = fromIntegerMatrix.timesVector2( edge.p0float );
+                const endPoint = fromIntegerMatrix.timesVector2( edge.p1float );
+                accumulator.addEdge( startPoint.x, startPoint.y, endPoint.x, endPoint.y, startPoint, endPoint );
               }
             }
           }
         }
+
+        newAccumulatedFace.clippableFace = accumulator.finalizeFace();
       }
     } );
 
-    return accumulatedFaces.map( accumulatedFace => new RenderableFace(
-      new EdgedFace( accumulatedFace.clippedEdges ),
-      accumulatedFace.renderProgram!,
-      accumulatedFace.bounds
-    ) );
+    return accumulatedFaces.filter( accumulatedFace => !!accumulatedFace.clippableFace ).map( accumulatedFace => {
+      assert && assert( accumulatedFace.clippableFace );
+
+      return new RenderableFace(
+        accumulatedFace.clippableFace!,
+        accumulatedFace.renderProgram!,
+        accumulatedFace.bounds
+      );
+    } );
   }
 
   /**
