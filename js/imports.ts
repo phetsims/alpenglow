@@ -119,7 +119,7 @@ export { default as PolygonalBoolean } from './cag/PolygonalBoolean.js';
 
 export { default as CohenSutherlandClipping } from './clip/CohenSutherlandClipping.js';
 export { default as PolygonClipping } from './clip/PolygonClipping.js';
-export type { GridClipCallback, PolygonCompleteCallback } from './clip/PolygonClipping.js';
+export type { GridClipCallback, BinaryClipCallback, PolygonCompleteCallback, BinaryPolygonCompleteCallback } from './clip/PolygonClipping.js';
 
 export { default as FaceConversion } from './cag/FaceConversion.js';
 
