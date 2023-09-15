@@ -1107,10 +1107,10 @@ export default class Rasterize {
         scratchAccumulator.setAccumulationBounds( tileBounds.minX, tileBounds.minY, tileBounds.maxX, tileBounds.maxY );
 
         if ( options.renderableFaceMethod === 'simple' ) {
-          renderableFaces = FaceConversion.toRenderableFaces( renderedFaces, fromIntegerMatrix, scratchAccumulator );
+          renderableFaces = FaceConversion.toSimpleRenderableFaces( renderedFaces, fromIntegerMatrix, scratchAccumulator );
         }
         else if ( options.renderableFaceMethod === 'fullyCombined' ) {
-          renderableFaces = FaceConversion.toFullyCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );
+          renderableFaces = FaceConversion.toFullyCombinedRenderableFaces( renderedFaces, fromIntegerMatrix, scratchAccumulator );
         }
         else if ( options.renderableFaceMethod === 'simplifyingCombined' ) {
           renderableFaces = FaceConversion.toSimplifyingCombinedRenderableFaces( renderedFaces, fromIntegerMatrix );

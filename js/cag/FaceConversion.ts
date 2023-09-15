@@ -22,7 +22,7 @@ class AccumulatingFace {
 }
 
 export default class FaceConversion {
-  public static toRenderableFaces(
+  public static toSimpleRenderableFaces(
     faces: RationalFace[],
     fromIntegerMatrix: Matrix3,
     accumulator: ClippableFaceAccumulator
@@ -52,7 +52,8 @@ export default class FaceConversion {
 
   public static toFullyCombinedRenderableFaces(
     faces: RationalFace[],
-    fromIntegerMatrix: Matrix3
+    fromIntegerMatrix: Matrix3,
+    accumulator: ClippableFaceAccumulator
   ): RenderableFace[] {
 
     const faceEquivalenceClasses: Set<RationalFace>[] = [];
@@ -82,30 +83,22 @@ export default class FaceConversion {
     for ( let i = 0; i < faceEquivalenceClasses.length; i++ ) {
       const faces = faceEquivalenceClasses[ i ];
 
-      const clippedEdges: LinearEdge[] = [];
       let renderProgram: RenderProgram | null = null;
       const bounds = Bounds2.NOTHING.copy();
 
       for ( const face of faces ) {
         renderProgram = face.renderProgram!;
-        bounds.includeBounds( face.getBounds( fromIntegerMatrix ) );
 
-        for ( const boundary of [
-          face.boundary,
-          ...face.holes
-        ] ) {
-          for ( const edge of boundary.edges ) {
-            if ( !faces.has( edge.reversed.face! ) ) {
-              clippedEdges.push( new LinearEdge(
-                fromIntegerMatrix.timesVector2( edge.p0float ),
-                fromIntegerMatrix.timesVector2( edge.p1float )
-              ) );
-            }
-          }
-        }
+        // TODO: don't double transform the points, just get the bounds from the clippable face
+        bounds.includeBounds( face.getBounds( fromIntegerMatrix ) );
+        face.toAccumulator( accumulator, fromIntegerMatrix );
       }
 
-      renderableFaces.push( new RenderableFace( new EdgedFace( clippedEdges ), renderProgram!, bounds ) );
+      const clippedFace = accumulator.finalizeFace();
+
+      if ( clippedFace ) {
+        renderableFaces.push( new RenderableFace( clippedFace, renderProgram!, bounds ) );
+      }
     }
 
     return renderableFaces;
