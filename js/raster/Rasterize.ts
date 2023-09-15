@@ -15,9 +15,14 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 
 export type RasterizationOptions = {
-  // TODO: doc
+  // We'll write our results into the output raster at this x,y offset. NOTE: This is not needed when tiling, if we are
+  // rendering a region that goes from x:(100,200), by default we will output into the raster at x:(100,200). This
+  // should be used if we want to e.g. render a region that goes from x:(100,200) into the raster at x:(0,100).
   outputRasterOffset?: Vector2;
 
+  // Tiling is splitting our processing into (tileSize x tileSize) chunks BEFORE sending our processing to the CAG.
+  // Each tile will get CAG'ed separately, and then we'll combine the results. This is useful for large images, where
+  // it can reduce the edge-intersection costs. In addition, it will likely be helpful for parallelization.
   tileSize?: number;
 
   // TODO: doc
