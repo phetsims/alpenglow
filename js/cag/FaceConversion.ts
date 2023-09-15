@@ -50,42 +50,6 @@ export default class FaceConversion {
     return renderableFaces;
   }
 
-  public static toPolygonalRenderableFaces(
-    faces: RationalFace[],
-    fromIntegerMatrix: Matrix3
-  ): RenderableFace[] {
-
-    // TODO: naming with above!!
-    const renderableFaces: RenderableFace[] = [];
-    for ( let i = 0; i < faces.length; i++ ) {
-      const face = faces[ i ];
-      renderableFaces.push( new RenderableFace(
-        face.toPolygonalFace( fromIntegerMatrix ),
-        face.renderProgram!,
-        face.getBounds( fromIntegerMatrix )
-      ) );
-    }
-    return renderableFaces;
-  }
-
-  public static toEdgedRenderableFaces(
-    faces: RationalFace[],
-    fromIntegerMatrix: Matrix3
-  ): RenderableFace[] {
-
-    // TODO: naming with above!!
-    const renderableFaces: RenderableFace[] = [];
-    for ( let i = 0; i < faces.length; i++ ) {
-      const face = faces[ i ];
-      renderableFaces.push( new RenderableFace(
-        face.toEdgedFace( fromIntegerMatrix ),
-        face.renderProgram!,
-        face.getBounds( fromIntegerMatrix )
-      ) );
-    }
-    return renderableFaces;
-  }
-
   public static toFullyCombinedRenderableFaces(
     faces: RationalFace[],
     fromIntegerMatrix: Matrix3

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BigRational, ClippableFaceAccumulator, ClipSimplifier, EdgedFace, isWindingIncluded, LinearEdge, PolygonalFace, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, WindingMap } from '../imports.js';
+import { alpenglow, BigRational, ClippableFaceAccumulator, ClipSimplifier, isWindingIncluded, PolygonalFace, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, WindingMap } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -44,24 +44,6 @@ export default class RationalFace {
 
       accumulator.markNewPolygon();
     }
-  }
-
-  public toPolygonalFace( matrix: Matrix3 ): PolygonalFace {
-    return new PolygonalFace( [
-      this.boundary.toTransformedPolygon( matrix ),
-      ...this.holes.map( hole => hole.toTransformedPolygon( matrix ) )
-    ] );
-  }
-
-  public toEdgedFace( matrix: Matrix3 ): EdgedFace {
-    return new EdgedFace( this.toLinearEdges( matrix ) );
-  }
-
-  public toLinearEdges( matrix: Matrix3 ): LinearEdge[] {
-    return [
-      ...this.boundary.toTransformedLinearEdges( matrix ),
-      ...this.holes.flatMap( hole => hole.toTransformedLinearEdges( matrix ) )
-    ];
   }
 
   public getEdges(): RationalHalfEdge[] {
