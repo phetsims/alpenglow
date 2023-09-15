@@ -14,7 +14,6 @@ import Vector2 from '../../../dot/js/Vector2.js';
 
 QUnit.module( 'ClippableFace' );
 
-
 const polygonalFace = new PolygonalFace( [ [
   phet.dot.v2( 0, 0 ),
   phet.dot.v2( 1, 0 ),
