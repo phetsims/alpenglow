@@ -1,4 +1,4 @@
-// Copyright 2013-2022, University of Colorado Boulder
+// Copyright 2023, University of Colorado Boulder
 
 /**
  * The main 'alpenglow' namespace object for the exported (non-Require.js) API. Used internally
