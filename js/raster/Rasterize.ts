@@ -37,6 +37,13 @@ export type RasterizationOptions = {
 
   edgeIntersectionMethod?: 'quadratic' | 'boundsTree' | 'arrayBoundsTree';
 
+  // - 'polygonal' will simply use PolygonalFace for every input face
+  // - 'edged' will simply use EdgedFace for every input face
+  // - 'fullyCombined' will use EdgedFace, but will combine ALL faces with equivalent RenderPrograms into one.
+  // - 'simplifyingCombined' will use EdgedFace, but will (a) only combine compatible faces if they touch, and (b)
+  //   will remove edges between compatible faces.
+  // - 'traced' will use PolygonalFace, and will function similarly to simplifyingCombined, but will trace out the
+  //   resulting polygonal faces.
   renderableFaceMethod?: 'polygonal' | 'edged' | 'fullyCombined' | 'simplifyingCombined' | 'traced';
 
   splitPrograms?: boolean;
