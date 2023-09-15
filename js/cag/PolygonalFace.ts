@@ -511,21 +511,21 @@ export default class PolygonalFace implements ClippableFace {
   /**
    * Returns a singleton accumulator for this type of face.
    */
-  public getScratchAccumulator(): ClippableFaceAccumulator {
+  public getScratchAccumulator(): ClippableFaceAccumulator<PolygonalFace> {
     return scratchAccumulator;
   }
 
   /**
    * Returns a singleton accumulator for this type of face.
    */
-  public static getScratchAccumulator(): ClippableFaceAccumulator {
+  public static getScratchAccumulator(): ClippableFaceAccumulator<PolygonalFace> {
     return scratchAccumulator;
   }
 
   /**
    * Returns a new accumulator for this type of face.
    */
-  public getAccumulator(): ClippableFaceAccumulator {
+  public getAccumulator(): ClippableFaceAccumulator<PolygonalFace> {
     return new PolygonalFaceAccumulator();
   }
 
@@ -568,7 +568,7 @@ export default class PolygonalFace implements ClippableFace {
 
 alpenglow.register( 'PolygonalFace', PolygonalFace );
 
-export class PolygonalFaceAccumulator implements ClippableFaceAccumulator {
+export class PolygonalFaceAccumulator implements ClippableFaceAccumulator<PolygonalFace> {
 
   private polygons: Vector2[][] = [];
   // TODO: try out the default of full collinear. Might hurt some performance, but might be a performance win if we are

@@ -150,7 +150,8 @@ export default class PolygonalBoolean {
       fromIntegerMatrix,
       getFaceData,
       createOutputFace,
-      isFaceDataCompatible
+      isFaceDataCompatible,
+      PolygonalFace.getScratchAccumulator()
     );
   }
 }

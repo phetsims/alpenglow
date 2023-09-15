@@ -6,12 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BigRational, ClippableFaceAccumulator, ClipSimplifier, isWindingIncluded, PolygonalFace, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, WindingMap } from '../imports.js';
+import { alpenglow, BigRational, ClippableFace, ClippableFaceAccumulator, isWindingIncluded, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, WindingMap } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-
-const traceSimplifier = new ClipSimplifier();
 
 const nanVector = new Vector2( NaN, NaN );
 
@@ -446,13 +444,14 @@ export default class RationalFace {
    * equivalent face data separate if they don't border). It will also remove edges that border between faces
    * that we combine, and will connect edges to keep things polygonal!
    */
-  public static traceCombineFaces<FaceData, OutputFace>(
+  public static traceCombineFaces<FaceData, OutputFace, ClippableFaceType extends ClippableFace>(
     faces: RationalFace[],
     fromIntegerMatrix: Matrix3,
     getFaceData: ( face: RationalFace ) => FaceData,
-    createOutputFace: ( face: PolygonalFace, faceData: FaceData, bounds: Bounds2 ) => OutputFace,
+    createOutputFace: ( face: ClippableFaceType, faceData: FaceData, bounds: Bounds2 ) => OutputFace,
     // null is for the unbounded face
-    isFaceDataCompatible: ( faceData1: FaceData, faceData2: FaceData | null ) => boolean
+    isFaceDataCompatible: ( faceData1: FaceData, faceData2: FaceData | null ) => boolean,
+    accumulator: ClippableFaceAccumulator<ClippableFaceType>
   ): OutputFace[] {
 
     // In summary, we'll find an edge between incompatible faces, and then we'll trace that edge (staying only on edges
@@ -493,9 +492,6 @@ export default class RationalFace {
 
       if ( !startingFace.processed ) {
         startingFace.processed = true;
-
-        // A list of polygons we'll append into (for our OutputFace).
-        const polygons: Vector2[][] = [];
 
         // A list of edges remaining to process. NOTE: some of these may be marked as "processed", we will just ignore
         // those. Any time we run across a new compatible face, we'll dump its edges in here.
@@ -557,7 +553,7 @@ export default class RationalFace {
 
             // Add the first edge
             let currentEdge = startingEdge;
-            traceSimplifier.addTransformed( fromIntegerMatrix, currentEdge.p0float.x, currentEdge.p0float.y );
+            currentEdge.addTransformedToAccumulator( accumulator, fromIntegerMatrix );
             currentEdge.processed = true;
 
             do {
@@ -575,22 +571,23 @@ export default class RationalFace {
 
               // Add subsequent edges
               currentEdge = nextEdge;
-              traceSimplifier.addTransformed( fromIntegerMatrix, currentEdge.p0float.x, currentEdge.p0float.y );
+              currentEdge.addTransformedToAccumulator( accumulator, fromIntegerMatrix );
               currentEdge.processed = true;
             } while ( currentEdge !== startingEdge );
 
-            const polygon = traceSimplifier.finalize();
-            if ( polygon.length >= 3 ) {
-              polygons.push( polygon );
-            }
+            accumulator.markNewPolygon();
           }
         }
 
-        outputFaces.push( createOutputFace(
-          new PolygonalFace( polygons ),
-          faceData,
-          bounds
-        ) );
+        const clippableFace = accumulator.finalizeFace();
+
+        if ( clippableFace ) {
+          outputFaces.push( createOutputFace(
+            clippableFace,
+            faceData,
+            bounds
+          ) );
+        }
       }
     }
 

@@ -784,21 +784,21 @@ export default class EdgedClippedFace implements ClippableFace {
   /**
    * Returns a singleton accumulator for this type of face.
    */
-  public getScratchAccumulator(): ClippableFaceAccumulator {
+  public getScratchAccumulator(): ClippableFaceAccumulator<EdgedClippedFace> {
     return scratchAccumulator;
   }
 
   /**
    * Returns a singleton accumulator for this type of face.
    */
-  public static getScratchAccumulator(): ClippableFaceAccumulator {
+  public static getScratchAccumulator(): ClippableFaceAccumulator<EdgedClippedFace> {
     return scratchAccumulator;
   }
 
   /**
    * Returns a new accumulator for this type of face.
    */
-  public getAccumulator(): ClippableFaceAccumulator {
+  public getAccumulator(): ClippableFaceAccumulator<EdgedClippedFace> {
     return new EdgedClippedFaceAccumulator();
   }
 
@@ -854,7 +854,7 @@ export default class EdgedClippedFace implements ClippableFace {
 
 alpenglow.register( 'EdgedClippedFace', EdgedClippedFace );
 
-export class EdgedClippedFaceAccumulator implements ClippableFaceAccumulator {
+export class EdgedClippedFaceAccumulator implements ClippableFaceAccumulator<EdgedClippedFace> {
 
   private edges: LinearEdge[] = [];
   private minX = 0;

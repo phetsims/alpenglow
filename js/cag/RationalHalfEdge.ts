@@ -6,8 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, BigRationalVector2, RationalBoundary, RationalFace, alpenglow, WindingMap } from '../imports.js';
+import { BigRational, BigRationalVector2, RationalBoundary, RationalFace, alpenglow, WindingMap, ClippableFaceAccumulator } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 
 // Instead of storing vertices, we can get away with storing half-edges, with a linked list of next/previous and the
 // opposite half edge. This is like a half-edge winged data structure.
@@ -115,6 +116,32 @@ export default class RationalHalfEdge {
 
     // Now, we're sorting "identically overlapping" half-edges
     return this.edgeId < other.edgeId ? -1 : ( this.edgeId > other.edgeId ? 1 : 0 );
+  }
+
+  // TODO: use in more places
+  public addTransformedToAccumulator( accumulator: ClippableFaceAccumulator, fromIntegerMatrix: Matrix3 ): void {
+    // unrolled for performance
+    const m00 = fromIntegerMatrix.m00();
+    const m01 = fromIntegerMatrix.m01();
+    const m02 = fromIntegerMatrix.m02();
+    const m10 = fromIntegerMatrix.m10();
+    const m11 = fromIntegerMatrix.m11();
+    const m12 = fromIntegerMatrix.m12();
+
+    const p0x = this.p0float.x;
+    const p0y = this.p0float.y;
+    const p1x = this.p1float.x;
+    const p1y = this.p1float.y;
+
+    // TODO: figure out if we should check accumulator.usesEndPoint, probably faster to skip the branch
+    accumulator.addEdge(
+      m00 * p0x + m01 * p0y + m02,
+      m10 * p0x + m11 * p0y + m12,
+      m00 * p1x + m01 * p1y + m02,
+      m10 * p1x + m11 * p1y + m12,
+      null,
+      null
+    );
   }
 
   public static filterAndConnectHalfEdges( rationalHalfEdges: RationalHalfEdge[] ): RationalHalfEdge[] {

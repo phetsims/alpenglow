@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ClippableFace, ClippableFaceAccumulator, EdgedFace, LinearEdge, PolygonalFace, RationalFace, RenderableFace, RenderProgram } from '../imports.js';
+import { alpenglow, ClippableFace, ClippableFaceAccumulator, RationalFace, RenderableFace, RenderProgram } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 
@@ -189,17 +189,19 @@ export default class FaceConversion {
    */
   public static toTracedRenderableFaces(
     faces: RationalFace[],
-    fromIntegerMatrix: Matrix3
+    fromIntegerMatrix: Matrix3,
+    accumulator: ClippableFaceAccumulator
   ): RenderableFace[] {
 
     return RationalFace.traceCombineFaces(
       faces,
       fromIntegerMatrix,
       ( face: RationalFace ): RenderProgram => face.renderProgram!,
-      ( face: PolygonalFace, renderProgram: RenderProgram, bounds: Bounds2 ) => new RenderableFace( face, renderProgram, bounds ),
+      ( face: ClippableFace, renderProgram: RenderProgram, bounds: Bounds2 ) => new RenderableFace( face, renderProgram, bounds ),
       ( programA: RenderProgram, programB: RenderProgram | null ) => {
         return !!programB && programA.equals( programB );
-      }
+      },
+      accumulator
     );
   }
 }

@@ -1117,7 +1117,7 @@ export default class Rasterize {
           renderableFaces = FaceConversion.toSimplifyingCombinedRenderableFaces( renderedFaces, fromIntegerMatrix, scratchAccumulator );
         }
         else if ( options.renderableFaceMethod === 'traced' ) {
-          renderableFaces = FaceConversion.toTracedRenderableFaces( renderedFaces, fromIntegerMatrix );
+          renderableFaces = FaceConversion.toTracedRenderableFaces( renderedFaces, fromIntegerMatrix, scratchAccumulator );
         }
         else {
           throw new Error( 'unknown renderableFaceMethod' );

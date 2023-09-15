@@ -235,7 +235,7 @@ type ClippableFace = {
 export default ClippableFace;
 
 // A type for building up a face from edges and new-polygon markers
-export type ClippableFaceAccumulator = {
+export type ClippableFaceAccumulator<FaceType extends ClippableFace = ClippableFace> = {
   addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void;
   markNewPolygon(): void;
 
@@ -244,7 +244,7 @@ export type ClippableFaceAccumulator = {
   setAccumulationBounds( minX: number, minY: number, maxX: number, maxY: number ): void;
 
   // Will reset it to the initial state also
-  finalizeFace(): ClippableFace | null;
+  finalizeFace(): FaceType | null;
 
   // Will reset without creating a face
   reset(): void;
