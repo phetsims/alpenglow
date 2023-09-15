@@ -18,4 +18,3 @@ QUnit.skip( 'circular edge clip A', assert => {
 
   assert.ok( Math.abs( insideFace.getArea() + outsideFace.getArea() - edgedFace.getArea() ) < 1e-5, 'area' );
 } );
-
