@@ -20,7 +20,8 @@ export default class RenderFilter extends RenderProgram {
   public constructor(
     public readonly program: RenderProgram,
     public readonly colorMatrix: Matrix4,
-    public readonly colorTranslation: Vector4
+    public readonly colorTranslation: Vector4,
+    logic?: RenderFilterLogic
   ) {
     const alphaBasedOnColor = colorMatrix.m30() !== 0 || colorMatrix.m31() !== 0 || colorMatrix.m32() !== 0;
 
@@ -51,7 +52,7 @@ export default class RenderFilter extends RenderProgram {
       isFullyOpaque
     );
 
-    this.logic = new RenderFilterLogic( this.colorMatrix, this.colorTranslation );
+    this.logic = logic || new RenderFilterLogic( this.colorMatrix, this.colorTranslation );
   }
 
   public override getName(): string {
@@ -60,7 +61,7 @@ export default class RenderFilter extends RenderProgram {
 
   public override withChildren( children: RenderProgram[] ): RenderFilter {
     assert && assert( children.length === 1 );
-    return new RenderFilter( children[ 0 ], this.colorMatrix, this.colorTranslation );
+    return new RenderFilter( children[ 0 ], this.colorMatrix, this.colorTranslation, this.logic );
   }
 
   protected override equalsTyped( other: this ): boolean {

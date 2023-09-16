@@ -70,7 +70,7 @@ export { default as RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearBl
 export type { SerializedRenderLinearBlend } from './render-program/RenderLinearBlend.js';
 export { default as RenderBarycentricBlend, RenderBarycentricBlendLogic, RenderInstructionBarycentricBlend, RenderBarycentricBlendAccuracy } from './render-program/RenderBarycentricBlend.js';
 export type { SerializedRenderBarycentricBlend } from './render-program/RenderBarycentricBlend.js';
-export { default as RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy } from './render-program/RenderBarycentricPerspectiveBlend.js';
+export { default as RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendLogic, RenderBarycentricPerspectiveBlendAccuracy, RenderInstructionBarycentricPerspectiveBlend } from './render-program/RenderBarycentricPerspectiveBlend.js';
 export type { SerializedRenderBarycentricPerspectiveBlend } from './render-program/RenderBarycentricPerspectiveBlend.js';
 export { default as RenderLinearGradient, RenderLinearGradientAccuracy } from './render-program/RenderLinearGradient.js';
 export type { SerializedRenderLinearGradient } from './render-program/RenderLinearGradient.js';

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderProgram, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderProgram, alpenglow, SerializedRenderProgram, RenderExecutionStack, RenderExecutor, RenderInstruction } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -25,6 +25,8 @@ alpenglow.register( 'RenderBarycentricPerspectiveBlendAccuracy', RenderBarycentr
 
 export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
 
+  public readonly logic: RenderBarycentricPerspectiveBlendLogic;
+
   public constructor(
     public readonly pointA: Vector3,
     public readonly pointB: Vector3,
@@ -32,7 +34,8 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
     public readonly accuracy: RenderBarycentricPerspectiveBlendAccuracy,
     public readonly a: RenderProgram,
     public readonly b: RenderProgram,
-    public readonly c: RenderProgram
+    public readonly c: RenderProgram,
+    logic?: RenderBarycentricPerspectiveBlendLogic
   ) {
     assert && assert( pointA.isFinite() );
     assert && assert( pointB.isFinite() );
@@ -50,6 +53,8 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
       false,
       accuracy === RenderBarycentricPerspectiveBlendAccuracy.Centroid
     );
+
+    this.logic = logic || new RenderBarycentricPerspectiveBlendLogic( this.pointA, this.pointB, this.pointC, this.accuracy );
   }
 
   public override getName(): string {
@@ -58,7 +63,7 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
 
   public override withChildren( children: RenderProgram[] ): RenderBarycentricPerspectiveBlend {
     assert && assert( children.length === 3 );
-    return new RenderBarycentricPerspectiveBlend( this.pointA, this.pointB, this.pointC, this.accuracy, children[ 0 ], children[ 1 ], children[ 2 ] );
+    return new RenderBarycentricPerspectiveBlend( this.pointA, this.pointB, this.pointC, this.accuracy, children[ 0 ], children[ 1 ], children[ 2 ], this.logic );
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
@@ -102,39 +107,20 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
   }
 
   public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    const aColor = this.a.evaluate( context );
+    const bColor = this.b.evaluate( context );
+    const cColor = this.c.evaluate( context );
 
-    const point = this.accuracy === RenderBarycentricPerspectiveBlendAccuracy.Centroid ? context.centroid : context.writeBoundsCentroid( scratchCentroid );
-    const pA = this.pointA;
-    const pB = this.pointB;
-    const pC = this.pointC;
+    const vector = new Vector4( 0, 0, 0, 0 );
+    this.logic.apply( vector, context, aColor, bColor, cColor );
+    return vector;
+  }
 
-    // TODO: can precompute things like this!!!
-    // TODO: factor out common things!
-    const det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
-
-    const lambdaA = ( ( pB.y - pC.y ) * ( point.x - pC.x ) + ( pC.x - pB.x ) * ( point.y - pC.y ) ) / det;
-    const lambdaB = ( ( pC.y - pA.y ) * ( point.x - pC.x ) + ( pA.x - pC.x ) * ( point.y - pC.y ) ) / det;
-    const lambdaC = 1 - lambdaA - lambdaB;
-
-    const aColor = this.a.evaluate( context ).timesScalar( 1 / pA.z );
-    const bColor = this.b.evaluate( context ).timesScalar( 1 / pB.z );
-    const cColor = this.c.evaluate( context ).timesScalar( 1 / pC.z );
-    const z = 1 / ( lambdaA / pA.z + lambdaB / pB.z + lambdaC / pC.z );
-
-    assert && assert( aColor.isFinite(), `Color A must be finite: ${aColor}` );
-    assert && assert( bColor.isFinite(), `Color B must be finite: ${bColor}` );
-    assert && assert( cColor.isFinite(), `Color C must be finite: ${cColor}` );
-    assert && assert( z > 0, 'z must be positive' );
-    assert && assert( isFinite( lambdaA ), 'Lambda A must be finite' );
-    assert && assert( isFinite( lambdaB ), 'Lambda B must be finite' );
-    assert && assert( isFinite( lambdaC ), 'Lambda C must be finite' );
-
-    return new Vector4(
-      aColor.x * lambdaA + bColor.x * lambdaB + cColor.x * lambdaC,
-      aColor.y * lambdaA + bColor.y * lambdaB + cColor.y * lambdaC,
-      aColor.z * lambdaA + bColor.z * lambdaB + cColor.z * lambdaC,
-      aColor.w * lambdaA + bColor.w * lambdaB + cColor.w * lambdaC
-    ).timesScalar( z );
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    this.c.writeInstructions( instructions );
+    this.b.writeInstructions( instructions );
+    this.a.writeInstructions( instructions );
+    instructions.push( new RenderInstructionBarycentricPerspectiveBlend( this.logic ) );
   }
 
   public override serialize(): SerializedRenderBarycentricPerspectiveBlend {
@@ -164,6 +150,98 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
 }
 
 alpenglow.register( 'RenderBarycentricPerspectiveBlend', RenderBarycentricPerspectiveBlend );
+
+export class RenderBarycentricPerspectiveBlendLogic {
+
+  // TODO: potentially on WebGPU, compute the 1/z values early (depending on whether it's worth it to store those)
+  // TODO: actually, can we just pack those into the z-spots of the vectors?
+  public det: number;
+  public diffA: Vector2;
+  public diffB: Vector2;
+
+  public constructor(
+    public readonly pointA: Vector3,
+    public readonly pointB: Vector3,
+    public readonly pointC: Vector3,
+    public readonly accuracy: RenderBarycentricPerspectiveBlendAccuracy
+  ) {
+    const pA = pointA;
+    const pB = pointB;
+    const pC = pointC;
+
+    this.det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
+    this.diffA = new Vector2( pB.y - pC.y, pC.x - pB.x );
+    this.diffB = new Vector2( pC.y - pA.y, pA.x - pC.x );
+
+    /*
+    NOTES FOR THE FUTURE: Here were the original formulas
+    const det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
+    const lambdaA = ( ( pB.y - pC.y ) * ( point.x - pC.x ) + ( pC.x - pB.x ) * ( point.y - pC.y ) ) / det;
+    const lambdaB = ( ( pC.y - pA.y ) * ( point.x - pC.x ) + ( pA.x - pC.x ) * ( point.y - pC.y ) ) / det;
+     */
+  }
+
+  public apply( output: Vector4, context: RenderEvaluationContext, aColor: Vector4, bColor: Vector4, cColor: Vector4 ): void {
+
+    const point = this.accuracy === RenderBarycentricPerspectiveBlendAccuracy.Centroid ? context.centroid : context.writeBoundsCentroid( scratchCentroid );
+
+    const pointA = this.pointA;
+    const pointB = this.pointB;
+    const pointC = this.pointC;
+
+    const lambdaA = ( this.diffA.x * ( point.x - pointC.x ) + this.diffA.y * ( point.y - pointC.y ) ) / this.det;
+    const lambdaB = ( this.diffB.x * ( point.x - pointC.x ) + this.diffB.y * ( point.y - pointC.y ) ) / this.det;
+    const lambdaC = 1 - lambdaA - lambdaB;
+
+    assert && assert( isFinite( lambdaA ), 'Lambda A must be finite' );
+    assert && assert( isFinite( lambdaB ), 'Lambda B must be finite' );
+    assert && assert( isFinite( lambdaC ), 'Lambda C must be finite' );
+
+    assert && assert( pointA.z !== 0 );
+    assert && assert( pointB.z !== 0 );
+    assert && assert( pointC.z !== 0 );
+
+    const z = 1 / ( lambdaA / pointA.z + lambdaB / pointB.z + lambdaC / pointC.z );
+
+    assert && assert( aColor.isFinite(), `Color A must be finite: ${aColor}` );
+    assert && assert( bColor.isFinite(), `Color B must be finite: ${bColor}` );
+    assert && assert( cColor.isFinite(), `Color C must be finite: ${cColor}` );
+    assert && assert( z > 0, 'z must be positive' );
+
+    output.setXYZW(
+      z * ( aColor.x * lambdaA / pointA.z + bColor.x * lambdaB / pointB.z + cColor.x * lambdaC / pointC.z ),
+      z * ( aColor.y * lambdaA / pointA.z + bColor.y * lambdaB / pointB.z + cColor.y * lambdaC / pointC.z ),
+      z * ( aColor.z * lambdaA / pointA.z + bColor.z * lambdaB / pointB.z + cColor.z * lambdaC / pointC.z ),
+      z * ( aColor.w * lambdaA / pointA.z + bColor.w * lambdaB / pointB.z + cColor.w * lambdaC / pointC.z )
+    );
+  }
+}
+
+const scratchAColor = new Vector4( 0, 0, 0, 0 );
+const scratchBColor = new Vector4( 0, 0, 0, 0 );
+const scratchCColor = new Vector4( 0, 0, 0, 0 );
+const scratchResult = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionBarycentricPerspectiveBlend extends RenderInstruction {
+  public constructor(
+    public readonly logic: RenderBarycentricPerspectiveBlendLogic
+  ) {
+    super();
+  }
+
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const aColor = stack.popInto( scratchAColor );
+    const bColor = stack.popInto( scratchBColor );
+    const cColor = stack.popInto( scratchCColor );
+
+    this.logic.apply( scratchResult, context, aColor, bColor, cColor );
+    stack.push( scratchResult );
+  }
+}
 
 export type SerializedRenderBarycentricPerspectiveBlend = {
   type: 'RenderBarycentricPerspectiveBlend';
