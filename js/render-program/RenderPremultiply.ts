@@ -26,7 +26,8 @@ export default class RenderPremultiply extends RenderColorSpaceConversion {
   }
 
   public override writeInstructions( instructions: RenderInstruction[] ): void {
-    instructions.push( instructionSingleton );
+    this.program.writeInstructions( instructions );
+    instructions.push( RenderInstructionPremultiply.INSTANCE );
   }
 }
 
@@ -48,6 +49,6 @@ export class RenderInstructionPremultiply extends RenderInstruction {
       scratchVector.w
     );
   }
-}
 
-const instructionSingleton = new RenderInstructionPremultiply();
+  public static readonly INSTANCE = new RenderInstructionPremultiply();
+}

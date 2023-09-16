@@ -9,11 +9,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderPathBoolean, RenderProgram, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderPathBoolean, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor } from '../imports.js';
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderFilter extends RenderProgram {
+
+  public readonly logic: RenderFilterLogic;
+
   public constructor(
     public readonly program: RenderProgram,
     public readonly colorMatrix: Matrix4,
@@ -47,6 +50,8 @@ export default class RenderFilter extends RenderProgram {
       isFullyTransparent,
       isFullyOpaque
     );
+
+    this.logic = new RenderFilterLogic( this.colorMatrix, this.colorTranslation );
   }
 
   public override getName(): string {
@@ -88,6 +93,10 @@ export default class RenderFilter extends RenderProgram {
     return RenderFilter.applyFilter( source, this.colorMatrix, this.colorTranslation );
   }
 
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    instructions.push( new RenderInstructionFilter( this.logic ) );
+  }
+
   public static applyFilter( color: Vector4, colorMatrix: Matrix4, colorTranslation: Vector4 ): Vector4 {
     // TODO: GC friendly optimizations?
     return colorMatrix.timesVector4( color ).plus( colorTranslation );
@@ -119,6 +128,33 @@ export default class RenderFilter extends RenderProgram {
 }
 
 alpenglow.register( 'RenderFilter', RenderFilter );
+
+export class RenderFilterLogic {
+  public constructor(
+    public readonly colorMatrix: Matrix4,
+    public readonly colorTranslation: Vector4
+  ) {}
+}
+
+const scratchVector = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionFilter extends RenderInstruction {
+  public constructor(
+    public readonly logic: RenderFilterLogic
+  ) {
+    super();
+  }
+
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    stack.readTop( scratchVector );
+    RenderFilter.applyFilter( scratchVector, this.logic.colorMatrix, this.logic.colorTranslation );
+    stack.writeTop( scratchVector );
+  }
+}
 
 export type SerializedRenderFilter = {
   type: 'RenderFilter';

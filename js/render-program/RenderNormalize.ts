@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderPathBoolean, RenderProgram, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderPathBoolean, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderNormalize extends RenderProgram {
@@ -61,6 +61,11 @@ export default class RenderNormalize extends RenderProgram {
     }
   }
 
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    this.program.writeInstructions( instructions );
+    instructions.push( RenderInstructionNormalize.INSTANCE );
+  }
+
   public override serialize(): SerializedRenderNormalize {
     return {
       type: 'RenderNormalize',
@@ -74,6 +79,33 @@ export default class RenderNormalize extends RenderProgram {
 }
 
 alpenglow.register( 'RenderNormalize', RenderNormalize );
+
+const scratchVector = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionNormalize extends RenderInstruction {
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    stack.readTop( scratchVector );
+
+    const magnitude = scratchVector.magnitude;
+    if ( magnitude === 0 ) {
+      stack.writeTop( Vector4.ZERO );
+    }
+    else {
+      stack.writeTopValues(
+        scratchVector.x / magnitude,
+        scratchVector.y / magnitude,
+        scratchVector.z / magnitude,
+        scratchVector.w / magnitude
+      );
+    }
+  }
+
+  public static readonly INSTANCE = new RenderInstructionNormalize();
+}
 
 export type SerializedRenderNormalize = {
   type: 'RenderNormalize';

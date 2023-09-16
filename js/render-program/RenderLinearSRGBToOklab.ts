@@ -26,7 +26,8 @@ export default class RenderLinearSRGBToOklab extends RenderColorSpaceConversion 
   }
 
   public override writeInstructions( instructions: RenderInstruction[] ): void {
-    instructions.push( instructionSingleton );
+    this.program.writeInstructions( instructions );
+    instructions.push( RenderInstructionLinearSRGBToOklab.INSTANCE );
   }
 }
 
@@ -60,6 +61,6 @@ export class RenderInstructionLinearSRGBToOklab extends RenderInstruction {
       scratchVector.w
     );
   }
-}
 
-const instructionSingleton = new RenderInstructionLinearSRGBToOklab();
+  public static readonly INSTANCE = new RenderInstructionLinearSRGBToOklab();
+}

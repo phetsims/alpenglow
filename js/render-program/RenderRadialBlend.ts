@@ -125,12 +125,12 @@ export default class RenderRadialBlend extends RenderProgram {
     instructions.push( new RenderInstructionComputeRadialValue( this.logic, zeroLocation, oneLocation, blendLocation ) );
     instructions.push( zeroLocation );
     this.zero.writeInstructions( instructions );
-    instructions.push( new RenderInstructionReturn() );
+    instructions.push( RenderInstructionReturn.INSTANCE );
     instructions.push( oneLocation );
     this.one.writeInstructions( instructions );
-    instructions.push( new RenderInstructionReturn() );
+    instructions.push( RenderInstructionReturn.INSTANCE );
     instructions.push( blendLocation );
-    instructions.push( new RenderInstructionLinearBlend() );
+    instructions.push( RenderInstructionLinearBlend.INSTANCE );
   }
 
   public override serialize(): SerializedRenderRadialBlend {

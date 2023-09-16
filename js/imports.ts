@@ -36,7 +36,7 @@ export { default as RenderColorSpace } from './render-program/RenderColorSpace.j
 export { default as RenderColorSpaceConversion } from './render-program/RenderColorSpaceConversion.js';
 export { default as RenderAlpha } from './render-program/RenderAlpha.js';
 export type { SerializedRenderAlpha } from './render-program/RenderAlpha.js';
-export { default as RenderNormalize } from './render-program/RenderNormalize.js';
+export { default as RenderNormalize, RenderInstructionNormalize } from './render-program/RenderNormalize.js';
 export type { SerializedRenderNormalize } from './render-program/RenderNormalize.js';
 export { default as RenderPremultiply, RenderInstructionPremultiply } from './render-program/RenderPremultiply.js';
 export { default as RenderUnpremultiply, RenderInstructionUnpremultiply } from './render-program/RenderUnpremultiply.js';
@@ -58,7 +58,7 @@ export { default as RenderNormalDebug } from './render-program/RenderNormalDebug
 export type { SerializedRenderNormalDebug } from './render-program/RenderNormalDebug.js';
 export { default as RenderPhong } from './render-program/RenderPhong.js';
 export type { SerializedRenderPhong } from './render-program/RenderPhong.js';
-export { default as RenderFilter } from './render-program/RenderFilter.js';
+export { default as RenderFilter, RenderFilterLogic, RenderInstructionFilter } from './render-program/RenderFilter.js';
 export type { SerializedRenderFilter } from './render-program/RenderFilter.js';
 export { default as RenderGradientStop } from './render-program/RenderGradientStop.js';
 export type { SerializedRenderGradientStop } from './render-program/RenderGradientStop.js';

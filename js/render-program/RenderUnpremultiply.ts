@@ -26,7 +26,8 @@ export default class RenderUnpremultiply extends RenderColorSpaceConversion {
   }
 
   public override writeInstructions( instructions: RenderInstruction[] ): void {
-    instructions.push( instructionSingleton );
+    this.program.writeInstructions( instructions );
+    instructions.push( RenderInstructionUnpremultiply.INSTANCE );
   }
 }
 
@@ -57,6 +58,6 @@ export class RenderInstructionUnpremultiply extends RenderInstruction {
       );
     }
   }
-}
 
-const instructionSingleton = new RenderInstructionUnpremultiply();
+  public static readonly INSTANCE = new RenderInstructionUnpremultiply();
+}

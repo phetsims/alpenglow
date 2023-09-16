@@ -134,12 +134,12 @@ export default class RenderLinearBlend extends RenderProgram {
     instructions.push( new RenderInstructionComputeLinearValue( this.logic, zeroLocation, oneLocation, blendLocation ) );
     instructions.push( zeroLocation );
     this.zero.writeInstructions( instructions );
-    instructions.push( new RenderInstructionReturn() );
+    instructions.push( RenderInstructionReturn.INSTANCE );
     instructions.push( oneLocation );
     this.one.writeInstructions( instructions );
-    instructions.push( new RenderInstructionReturn() );
+    instructions.push( RenderInstructionReturn.INSTANCE );
     instructions.push( blendLocation );
-    instructions.push( new RenderInstructionLinearBlend() );
+    instructions.push( RenderInstructionLinearBlend.INSTANCE );
   }
 
   public override serialize(): SerializedRenderLinearBlend {
@@ -251,6 +251,8 @@ export class RenderInstructionLinearBlend extends RenderInstruction {
       );
     }
   }
+
+  public static readonly INSTANCE = new RenderInstructionLinearBlend();
 }
 
 export type SerializedRenderLinearBlend = {

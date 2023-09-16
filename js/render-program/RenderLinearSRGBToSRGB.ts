@@ -26,7 +26,8 @@ export default class RenderLinearSRGBToSRGB extends RenderColorSpaceConversion {
   }
 
   public override writeInstructions( instructions: RenderInstruction[] ): void {
-    instructions.push( instructionSingleton );
+    this.program.writeInstructions( instructions );
+    instructions.push( RenderInstructionLinearSRGBToSRGB.INSTANCE );
   }
 }
 
@@ -56,6 +57,6 @@ export class RenderInstructionLinearSRGBToSRGB extends RenderInstruction {
       scratchVector.w
     );
   }
-}
 
-const instructionSingleton = new RenderInstructionLinearSRGBToSRGB();
+  public static readonly INSTANCE = new RenderInstructionLinearSRGBToSRGB();
+}

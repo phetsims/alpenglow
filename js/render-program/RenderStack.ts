@@ -140,7 +140,7 @@ export default class RenderStack extends RenderProgram {
 
     const endLocation = new RenderInstructionLocation();
     const opaqueJump = new RenderInstructionOpaqueJump( endLocation ); // we'll have this listed multiple times
-    const blend = new RenderInstructionStackBlend(); // TODO: figure out how copies of instructions should work here
+    const blend = RenderInstructionStackBlend.INSTANCE;
 
     this.children[ this.children.length - 1 ].writeInstructions( instructions );
 
@@ -220,6 +220,8 @@ export class RenderInstructionStackBlend extends RenderInstruction {
       backgroundAlpha * background.w + foreground.w
     );
   }
+
+  public static readonly INSTANCE = new RenderInstructionStackBlend();
 }
 
 export type SerializedRenderStack = {

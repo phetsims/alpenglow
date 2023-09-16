@@ -61,6 +61,8 @@ export class RenderInstructionReturn extends RenderInstruction {
   ): void {
     executor.return();
   }
+
+  public static readonly INSTANCE = new RenderInstructionReturn();
 }
 
 export class RenderInstructionMultiplyScalar extends RenderInstruction {

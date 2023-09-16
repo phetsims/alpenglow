@@ -26,7 +26,8 @@ export default class RenderLinearDisplayP3ToLinearSRGB extends RenderColorSpaceC
   }
 
   public override writeInstructions( instructions: RenderInstruction[] ): void {
-    instructions.push( instructionSingleton );
+    this.program.writeInstructions( instructions );
+    instructions.push( RenderInstructionLinearDisplayP3ToLinearSRGB.INSTANCE );
   }
 }
 
@@ -51,6 +52,6 @@ export class RenderInstructionLinearDisplayP3ToLinearSRGB extends RenderInstruct
       scratchVector.w
     );
   }
-}
 
-const instructionSingleton = new RenderInstructionLinearDisplayP3ToLinearSRGB();
+  public static readonly INSTANCE = new RenderInstructionLinearDisplayP3ToLinearSRGB();
+}
