@@ -46,7 +46,7 @@ export { default as RenderOklabToLinearSRGB, RenderInstructionOklabToLinearSRGB 
 export { default as RenderLinearSRGBToOklab, RenderInstructionLinearSRGBToOklab } from './render-program/RenderLinearSRGBToOklab.js';
 export { default as RenderLinearDisplayP3ToLinearSRGB, RenderInstructionLinearDisplayP3ToLinearSRGB } from './render-program/RenderLinearDisplayP3ToLinearSRGB.js';
 export { default as RenderLinearSRGBToLinearDisplayP3, RenderInstructionLinearSRGBToLinearDisplayP3 } from './render-program/RenderLinearSRGBToLinearDisplayP3.js';
-export { default as RenderBlendCompose } from './render-program/RenderBlendCompose.js';
+export { default as RenderBlendCompose, RenderBlendComposeLogic, RenderInstructionBlendCompose } from './render-program/RenderBlendCompose.js';
 export type { SerializedRenderBlendCompose } from './render-program/RenderBlendCompose.js';
 export { default as RenderStack, RenderInstructionOpaqueJump, RenderInstructionStackBlend } from './render-program/RenderStack.js';
 export type { SerializedRenderStack } from './render-program/RenderStack.js';

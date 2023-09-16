@@ -6,16 +6,20 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderProgram, RenderStack, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderProgram, RenderStack, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 
 export default class RenderBlendCompose extends RenderProgram {
+
+  public readonly logic: RenderBlendComposeLogic;
+
   public constructor(
     public readonly composeType: RenderComposeType,
     public readonly blendType: RenderBlendType,
     public readonly a: RenderProgram,
-    public readonly b: RenderProgram
+    public readonly b: RenderProgram,
+    logic?: RenderBlendComposeLogic
   ) {
     let isFullyTransparent = false;
     let isFullyOpaque = false;
@@ -71,6 +75,8 @@ export default class RenderBlendCompose extends RenderProgram {
       isFullyTransparent,
       isFullyOpaque
     );
+
+    this.logic = logic || new RenderBlendComposeLogic( this.composeType, this.blendType );
   }
 
   public override getName(): string {
@@ -79,7 +85,7 @@ export default class RenderBlendCompose extends RenderProgram {
 
   public override withChildren( children: RenderProgram[] ): RenderBlendCompose {
     assert && assert( children.length === 2 );
-    return new RenderBlendCompose( this.composeType, this.blendType, children[ 0 ], children[ 1 ] );
+    return new RenderBlendCompose( this.composeType, this.blendType, children[ 0 ], children[ 1 ], this.logic );
   }
 
   protected override equalsTyped( other: this ): boolean {
@@ -197,6 +203,12 @@ export default class RenderBlendCompose extends RenderProgram {
     const b = this.b.evaluate( context );
 
     return RenderBlendCompose.blendCompose( a, b, this.composeType, this.blendType );
+  }
+
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    this.b.writeInstructions( instructions );
+    this.a.writeInstructions( instructions );
+    instructions.push( new RenderInstructionBlendCompose( this.logic ) );
   }
 
   protected override getExtraDebugString(): string {
@@ -511,6 +523,38 @@ export default class RenderBlendCompose extends RenderProgram {
 }
 
 alpenglow.register( 'RenderBlendCompose', RenderBlendCompose );
+
+export class RenderBlendComposeLogic {
+  public constructor(
+    public readonly composeType: RenderComposeType,
+    public readonly blendType: RenderBlendType
+  ) {}
+}
+
+const scratchAColor = new Vector4( 0, 0, 0, 0 );
+const scratchBColor = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionBlendCompose extends RenderInstruction {
+  public constructor(
+    public readonly logic: RenderBlendComposeLogic
+  ) {
+    super();
+  }
+
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const aColor = stack.popInto( scratchAColor );
+    const bColor = stack.popInto( scratchBColor );
+
+    // TODO: could prevent more allocations
+    const result = RenderBlendCompose.blendCompose( aColor, bColor, this.logic.composeType, this.logic.blendType );
+
+    stack.push( result );
+  }
+}
 
 export type SerializedRenderBlendCompose = {
   type: 'RenderBlendCompose';
