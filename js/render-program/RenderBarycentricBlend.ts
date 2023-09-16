@@ -106,46 +106,8 @@ export default class RenderBarycentricBlend extends RenderProgram {
     const cColor = this.c.evaluate( context );
 
     const vector = new Vector4( 0, 0, 0, 0 );
-    RenderBarycentricBlend.applyProgram(
-      vector, context, this.logic, aColor, bColor, cColor
-    );
+    this.logic.apply( vector, context, aColor, bColor, cColor );
     return vector;
-  }
-
-  // TODO: Separation of logic and evaluation context
-  public static applyProgram(
-    vector: Vector4,
-    context: RenderEvaluationContext,
-    logic: RenderBarycentricBlendLogic,
-    aColor: Vector4,
-    bColor: Vector4,
-    cColor: Vector4
-  ): void {
-    if ( assert ) {
-      if ( logic.accuracy === RenderBarycentricBlendAccuracy.Accurate ) {
-        assert( context.hasCentroid() );
-      }
-    }
-
-    const point = logic.accuracy === RenderBarycentricBlendAccuracy.Accurate ? context.centroid : context.writeBoundsCentroid( scratchCentroid );
-    const pA = logic.pointA;
-    const pB = logic.pointB;
-    const pC = logic.pointC;
-
-    // TODO: can precompute things like this!!!
-    // TODO: factor out common things!
-    const det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
-
-    const lambdaA = ( ( pB.y - pC.y ) * ( point.x - pC.x ) + ( pC.x - pB.x ) * ( point.y - pC.y ) ) / det;
-    const lambdaB = ( ( pC.y - pA.y ) * ( point.x - pC.x ) + ( pA.x - pC.x ) * ( point.y - pC.y ) ) / det;
-    const lambdaC = 1 - lambdaA - lambdaB;
-
-    vector.setXYZW(
-      aColor.x * lambdaA + bColor.x * lambdaB + cColor.x * lambdaC,
-      aColor.y * lambdaA + bColor.y * lambdaB + cColor.y * lambdaC,
-      aColor.z * lambdaA + bColor.z * lambdaB + cColor.z * lambdaC,
-      aColor.w * lambdaA + bColor.w * lambdaB + cColor.w * lambdaC
-    );
   }
 
   public override writeInstructions( instructions: RenderInstruction[] ): void {
@@ -184,13 +146,55 @@ export default class RenderBarycentricBlend extends RenderProgram {
 alpenglow.register( 'RenderBarycentricBlend', RenderBarycentricBlend );
 
 export class RenderBarycentricBlendLogic {
-  // TODO: Update this so we store the better logic
+
+  // NOTE: Only det/diffA/diffB/pointC/accuracy are used in the apply() method
+  public det: number;
+  public diffA: Vector2;
+  public diffB: Vector2;
+
   public constructor(
     public readonly pointA: Vector2,
     public readonly pointB: Vector2,
     public readonly pointC: Vector2,
     public readonly accuracy: RenderBarycentricBlendAccuracy
-  ) {}
+  ) {
+    const pA = pointA;
+    const pB = pointB;
+    const pC = pointC;
+
+    this.det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
+    this.diffA = new Vector2( pB.y - pC.y, pC.x - pB.x );
+    this.diffB = new Vector2( pC.y - pA.y, pA.x - pC.x );
+
+    /*
+    NOTES FOR THE FUTURE: Here were the original formulas
+    const det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
+    const lambdaA = ( ( pB.y - pC.y ) * ( point.x - pC.x ) + ( pC.x - pB.x ) * ( point.y - pC.y ) ) / det;
+    const lambdaB = ( ( pC.y - pA.y ) * ( point.x - pC.x ) + ( pA.x - pC.x ) * ( point.y - pC.y ) ) / det;
+     */
+  }
+
+  public apply( output: Vector4, context: RenderEvaluationContext, aColor: Vector4, bColor: Vector4, cColor: Vector4 ): void {
+    if ( assert ) {
+      if ( this.accuracy === RenderBarycentricBlendAccuracy.Accurate ) {
+        assert( context.hasCentroid() );
+      }
+    }
+
+    const point = this.accuracy === RenderBarycentricBlendAccuracy.Accurate ? context.centroid : context.writeBoundsCentroid( scratchCentroid );
+    const pointC = this.pointC;
+
+    const lambdaA = ( this.diffA.x * ( point.x - pointC.x ) + this.diffA.y * ( point.y - pointC.y ) ) / this.det;
+    const lambdaB = ( this.diffB.x * ( point.x - pointC.x ) + this.diffB.y * ( point.y - pointC.y ) ) / this.det;
+    const lambdaC = 1 - lambdaA - lambdaB;
+
+    output.setXYZW(
+      aColor.x * lambdaA + bColor.x * lambdaB + cColor.x * lambdaC,
+      aColor.y * lambdaA + bColor.y * lambdaB + cColor.y * lambdaC,
+      aColor.z * lambdaA + bColor.z * lambdaB + cColor.z * lambdaC,
+      aColor.w * lambdaA + bColor.w * lambdaB + cColor.w * lambdaC
+    );
+  }
 }
 
 const scratchAColor = new Vector4( 0, 0, 0, 0 );
@@ -214,9 +218,7 @@ export class RenderInstructionBarycentricBlend extends RenderInstruction {
     const bColor = stack.popInto( scratchBColor );
     const cColor = stack.popInto( scratchCColor );
 
-    RenderBarycentricBlend.applyProgram(
-      scratchResult, context, this.logic, aColor, bColor, cColor
-    );
+    this.logic.apply( scratchResult, context, aColor, bColor, cColor );
     stack.push( scratchResult );
   }
 }
