@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpaceConversion, RenderLinearDisplayP3ToLinearSRGB, RenderProgram, alpenglow } from '../imports.js';
+import { RenderColor, RenderColorSpaceConversion, RenderLinearDisplayP3ToLinearSRGB, RenderProgram, alpenglow, RenderInstruction, RenderExecutionStack, RenderEvaluationContext, RenderExecutor } from '../imports.js';
+import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderLinearSRGBToLinearDisplayP3 extends RenderColorSpaceConversion {
   public constructor(
@@ -23,9 +24,36 @@ export default class RenderLinearSRGBToLinearDisplayP3 extends RenderColorSpaceC
     assert && assert( children.length === 1 );
     return new RenderLinearSRGBToLinearDisplayP3( children[ 0 ] );
   }
+
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    instructions.push( instructionSingleton );
+  }
 }
 
 RenderLinearSRGBToLinearDisplayP3.prototype.inverse = RenderLinearDisplayP3ToLinearSRGB;
 RenderLinearDisplayP3ToLinearSRGB.prototype.inverse = RenderLinearSRGBToLinearDisplayP3;
 
 alpenglow.register( 'RenderLinearSRGBToLinearDisplayP3', RenderLinearSRGBToLinearDisplayP3 );
+
+const scratchVector = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionLinearSRGBToLinearDisplayP3 extends RenderInstruction {
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const matrix = RenderColor.sRGBToDisplayP3Matrix;
+
+    stack.readTop( scratchVector );
+
+    stack.writeTopValues(
+      matrix.m00() * scratchVector.x + matrix.m01() * scratchVector.y + matrix.m02() * scratchVector.z,
+      matrix.m10() * scratchVector.x + matrix.m11() * scratchVector.y + matrix.m12() * scratchVector.z,
+      matrix.m20() * scratchVector.x + matrix.m21() * scratchVector.y + matrix.m22() * scratchVector.z,
+      scratchVector.w
+    );
+  }
+}
+
+const instructionSingleton = new RenderInstructionLinearSRGBToLinearDisplayP3();

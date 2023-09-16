@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpaceConversion, RenderProgram, alpenglow } from '../imports.js';
+import { RenderColor, RenderColorSpaceConversion, RenderProgram, alpenglow, RenderInstruction, RenderExecutionStack, RenderEvaluationContext, RenderExecutor } from '../imports.js';
+import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderSRGBToLinearSRGB extends RenderColorSpaceConversion {
   public constructor(
@@ -23,6 +24,35 @@ export default class RenderSRGBToLinearSRGB extends RenderColorSpaceConversion {
     assert && assert( children.length === 1 );
     return new RenderSRGBToLinearSRGB( children[ 0 ] );
   }
+
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    instructions.push( instructionSingleton );
+  }
 }
 
 alpenglow.register( 'RenderSRGBToLinearSRGB', RenderSRGBToLinearSRGB );
+
+const scratchVector = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionSRGBToLinearSRGB extends RenderInstruction {
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    // https://entropymine.com/imageworsener/srgbformula/ (a more precise formula for sRGB)
+    // sRGB to Linear
+    // 0 ≤ S ≤ 0.0404482362771082 : L = S/12.92
+    // 0.0404482362771082 < S ≤ 1 : L = ((S+0.055)/1.055)^2.4
+
+    stack.readTop( scratchVector );
+    stack.writeTopValues(
+      scratchVector.x <= 0.0404482362771082 ? scratchVector.x / 12.92 : Math.pow( ( scratchVector.x + 0.055 ) / 1.055, 2.4 ),
+      scratchVector.y <= 0.0404482362771082 ? scratchVector.y / 12.92 : Math.pow( ( scratchVector.y + 0.055 ) / 1.055, 2.4 ),
+      scratchVector.z <= 0.0404482362771082 ? scratchVector.z / 12.92 : Math.pow( ( scratchVector.z + 0.055 ) / 1.055, 2.4 ),
+      scratchVector.w
+    );
+  }
+}
+
+const instructionSingleton = new RenderInstructionSRGBToLinearSRGB();

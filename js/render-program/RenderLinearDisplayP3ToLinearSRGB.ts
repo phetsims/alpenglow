@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpaceConversion, RenderProgram, alpenglow } from '../imports.js';
+import { RenderColor, RenderColorSpaceConversion, RenderProgram, alpenglow, RenderInstruction, RenderExecutionStack, RenderEvaluationContext, RenderExecutor } from '../imports.js';
+import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderLinearDisplayP3ToLinearSRGB extends RenderColorSpaceConversion {
   public constructor(
@@ -23,6 +24,33 @@ export default class RenderLinearDisplayP3ToLinearSRGB extends RenderColorSpaceC
     assert && assert( children.length === 1 );
     return new RenderLinearDisplayP3ToLinearSRGB( children[ 0 ] );
   }
+
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    instructions.push( instructionSingleton );
+  }
 }
 
 alpenglow.register( 'RenderLinearDisplayP3ToLinearSRGB', RenderLinearDisplayP3ToLinearSRGB );
+
+const scratchVector = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionLinearDisplayP3ToLinearSRGB extends RenderInstruction {
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const matrix = RenderColor.displayP3TosRGBMatrix;
+
+    stack.readTop( scratchVector );
+
+    stack.writeTopValues(
+      matrix.m00() * scratchVector.x + matrix.m01() * scratchVector.y + matrix.m02() * scratchVector.z,
+      matrix.m10() * scratchVector.x + matrix.m11() * scratchVector.y + matrix.m12() * scratchVector.z,
+      matrix.m20() * scratchVector.x + matrix.m21() * scratchVector.y + matrix.m22() * scratchVector.z,
+      scratchVector.w
+    );
+  }
+}
+
+const instructionSingleton = new RenderInstructionLinearDisplayP3ToLinearSRGB();
