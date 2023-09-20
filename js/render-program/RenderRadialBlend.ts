@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { LinearEdge, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { alpenglow, LinearEdge, RenderColor, RenderEvaluationContext, RenderInstruction, RenderInstructionComputeBlendRatio, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, SerializedRenderProgram } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -122,7 +122,7 @@ export default class RenderRadialBlend extends RenderProgram {
     const oneLocation = new RenderInstructionLocation();
     const blendLocation = new RenderInstructionLocation();
 
-    instructions.push( new RenderInstructionComputeRadialBlendRatio( this.logic, zeroLocation, oneLocation, blendLocation ) );
+    instructions.push( new RenderInstructionComputeBlendRatio( this.logic, zeroLocation, oneLocation, blendLocation ) );
     instructions.push( zeroLocation );
     this.zero.writeInstructions( instructions );
     instructions.push( RenderInstructionReturn.INSTANCE );
@@ -240,44 +240,6 @@ export class RenderRadialBlendLogic {
     assert && assert( isFinite( t ) );
 
     return t;
-  }
-}
-
-export class RenderInstructionComputeRadialBlendRatio extends RenderInstruction {
-  public constructor(
-    public readonly logic: RenderRadialBlendLogic,
-    public readonly zeroLocation: RenderInstructionLocation,
-    public readonly oneLocation: RenderInstructionLocation,
-    public readonly blendLocation: RenderInstructionLocation
-  ) {
-    super();
-  }
-
-  public override execute(
-    stack: RenderExecutionStack,
-    context: RenderEvaluationContext,
-    executor: RenderExecutor
-  ): void {
-    const t = this.logic.computeLinearValue( context );
-    stack.pushNumber( t );
-
-    // Queue these up to be in "reverse" order
-    executor.jump( this.blendLocation );
-
-    const hasZero = t < 1;
-    const hasOne = t > 0;
-
-    if ( !hasZero || !hasOne ) {
-      stack.pushValues( 0, 0, 0, 0 );
-    }
-
-    if ( hasZero ) {
-      executor.call( this.zeroLocation );
-    }
-
-    if ( hasOne ) {
-      executor.call( this.oneLocation );
-    }
   }
 }
 

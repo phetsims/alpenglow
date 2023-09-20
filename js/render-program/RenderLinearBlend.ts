@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, alpenglow, SerializedRenderProgram, RenderRadialBlendLogic } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -131,7 +131,7 @@ export default class RenderLinearBlend extends RenderProgram {
     const oneLocation = new RenderInstructionLocation();
     const blendLocation = new RenderInstructionLocation();
 
-    instructions.push( new RenderInstructionComputeLinearBlendRatio( this.logic, zeroLocation, oneLocation, blendLocation ) );
+    instructions.push( new RenderInstructionComputeBlendRatio( this.logic, zeroLocation, oneLocation, blendLocation ) );
     instructions.push( zeroLocation );
     this.zero.writeInstructions( instructions );
     instructions.push( RenderInstructionReturn.INSTANCE );
@@ -184,9 +184,9 @@ export class RenderLinearBlendLogic {
   }
 }
 
-export class RenderInstructionComputeLinearBlendRatio extends RenderInstruction {
+export class RenderInstructionComputeBlendRatio extends RenderInstruction {
   public constructor(
-    public readonly logic: RenderLinearBlendLogic,
+    public readonly logic: RenderLinearBlendLogic | RenderRadialBlendLogic,
     public readonly zeroLocation: RenderInstructionLocation,
     public readonly oneLocation: RenderInstructionLocation,
     public readonly blendLocation: RenderInstructionLocation

@@ -66,7 +66,7 @@ export { default as RenderLinearRange } from './render-program/RenderLinearRange
 export { default as RenderImage } from './render-program/RenderImage.js';
 export type { SerializedRenderImage } from './render-program/RenderImage.js';
 export type { default as RenderImageable, SerializedRenderImageable } from './render-program/RenderImageable.js';
-export { default as RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearBlendLogic, RenderInstructionComputeLinearBlendRatio, RenderInstructionLinearBlend } from './render-program/RenderLinearBlend.js';
+export { default as RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearBlendLogic, RenderInstructionComputeBlendRatio, RenderInstructionLinearBlend } from './render-program/RenderLinearBlend.js';
 export type { SerializedRenderLinearBlend } from './render-program/RenderLinearBlend.js';
 export { default as RenderBarycentricBlend, RenderBarycentricBlendLogic, RenderInstructionBarycentricBlend, RenderBarycentricBlendAccuracy } from './render-program/RenderBarycentricBlend.js';
 export type { SerializedRenderBarycentricBlend } from './render-program/RenderBarycentricBlend.js';
