@@ -95,6 +95,7 @@ export default class RenderFilter extends RenderProgram {
   }
 
   public override writeInstructions( instructions: RenderInstruction[] ): void {
+    this.program.writeInstructions( instructions );
     instructions.push( new RenderInstructionFilter( this.logic ) );
   }
 

@@ -63,7 +63,7 @@ export type { SerializedRenderFilter } from './render-program/RenderFilter.js';
 export { default as RenderGradientStop } from './render-program/RenderGradientStop.js';
 export type { SerializedRenderGradientStop } from './render-program/RenderGradientStop.js';
 export { default as RenderLinearRange } from './render-program/RenderLinearRange.js';
-export { default as RenderImage } from './render-program/RenderImage.js';
+export { default as RenderImage, RenderImageLogic, RenderInstructionImage } from './render-program/RenderImage.js';
 export type { SerializedRenderImage } from './render-program/RenderImage.js';
 export type { default as RenderImageable, SerializedRenderImageable } from './render-program/RenderImageable.js';
 export { default as RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearBlendLogic, RenderInstructionComputeBlendRatio, RenderInstructionLinearBlend } from './render-program/RenderLinearBlend.js';
