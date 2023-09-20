@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearRange, RenderProgram, alpenglow, SerializedRenderGradientStop } from '../imports.js';
+import { RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearRange, RenderProgram, alpenglow, SerializedRenderGradientStop, RenderInstruction, RenderRadialGradientLogic, RenderInstructionLocation, RenderExecutionStack, RenderExecutor, RenderInstructionReturn, RenderInstructionLinearBlend } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -112,6 +112,20 @@ export default class RenderLinearGradient extends RenderProgram {
 
   public override evaluate( context: RenderEvaluationContext ): Vector4 {
     return RenderGradientStop.evaluate( context, this.stops, this.logic.computeLinearValue( context ) );
+  }
+
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    const stopLocations = this.stops.map( stop => new RenderInstructionLocation() );
+    const blendLocation = new RenderInstructionLocation();
+
+    instructions.push( new RenderInstructionComputeGradientRatio( this.logic, stopLocations, blendLocation ) );
+    for ( let i = 0; i < this.stops.length; i++ ) {
+      instructions.push( stopLocations[ i ] );
+      this.stops[ i ].program.writeInstructions( instructions );
+      instructions.push( RenderInstructionReturn.INSTANCE );
+    }
+    instructions.push( blendLocation );
+    instructions.push( RenderInstructionLinearBlend.INSTANCE );
   }
 
   public override split( face: RenderableFace ): RenderableFace[] {
@@ -264,6 +278,66 @@ export class RenderLinearGradientLogic {
     const rawT = gradDelta.magnitude > 0 ? localDelta.dot( gradDelta ) / gradDelta.dot( gradDelta ) : 0;
 
     return RenderImage.extend( this.extend, rawT );
+  }
+}
+
+export class RenderInstructionComputeGradientRatio extends RenderInstruction {
+  public constructor(
+    public readonly logic: RenderLinearGradientLogic | RenderRadialGradientLogic,
+    public readonly stopLocations: RenderInstructionLocation[],
+    public readonly blendLocation: RenderInstructionLocation
+  ) {
+    super();
+  }
+
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    const t = this.logic.computeLinearValue( context );
+    const ratios = this.logic.ratios;
+
+    let i = -1;
+    while ( i < ratios.length - 1 && ratios[ i + 1 ] < t ) {
+      i++;
+    }
+
+    // Queue these up to be in "reverse" order
+    executor.jump( this.blendLocation );
+
+    if ( i === -1 ) {
+      stack.pushNumber( 0 );
+      stack.pushValues( 0, 0, 0, 0 );
+      executor.call( this.stopLocations[ 0 ] );
+    }
+    else if ( i === ratios.length - 1 ) {
+      stack.pushNumber( 1 );
+      stack.pushValues( 0, 0, 0, 0 );
+      executor.call( this.stopLocations[ i ] );
+    }
+    else {
+      const before = ratios[ i ];
+      const after = ratios[ i + 1 ];
+      const ratio = ( t - before ) / ( after - before );
+
+      stack.pushNumber( ratio );
+
+      const hasBefore = ratio < 1;
+      const hasAfter = ratio > 0;
+
+      if ( !hasBefore || !hasAfter ) {
+        stack.pushValues( 0, 0, 0, 0 );
+      }
+
+      if ( hasBefore ) {
+        executor.call( this.stopLocations[ i ] );
+      }
+
+      if ( hasAfter ) {
+        executor.call( this.stopLocations[ i + 1 ] );
+      }
+    }
   }
 }
 

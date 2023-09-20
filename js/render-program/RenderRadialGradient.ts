@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ClippableFace, RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderLinearRange, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, SerializedRenderGradientStop } from '../imports.js';
+import { alpenglow, ClippableFace, RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderInstruction, RenderInstructionComputeGradientRatio, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderLinearRange, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, SerializedRenderGradientStop } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -135,6 +135,20 @@ export default class RenderRadialGradient extends RenderProgram {
 
   public override evaluate( context: RenderEvaluationContext ): Vector4 {
     return RenderGradientStop.evaluate( context, this.stops, this.getLogic().computeLinearValue( context ) );
+  }
+
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    const stopLocations = this.stops.map( stop => new RenderInstructionLocation() );
+    const blendLocation = new RenderInstructionLocation();
+
+    instructions.push( new RenderInstructionComputeGradientRatio( this.getLogic(), stopLocations, blendLocation ) );
+    for ( let i = 0; i < this.stops.length; i++ ) {
+      instructions.push( stopLocations[ i ] );
+      this.stops[ i ].program.writeInstructions( instructions );
+      instructions.push( RenderInstructionReturn.INSTANCE );
+    }
+    instructions.push( blendLocation );
+    instructions.push( RenderInstructionLinearBlend.INSTANCE );
   }
 
   public override split( face: RenderableFace ): RenderableFace[] {
