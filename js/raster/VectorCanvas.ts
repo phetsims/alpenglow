@@ -183,6 +183,7 @@ export default class VectorCanvas {
       Vector2.ZERO,
       this.polygonFiltering,
       1,
+      'evaluation',
       null
     );
 

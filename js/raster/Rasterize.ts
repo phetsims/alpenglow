@@ -6,13 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BoundedSubpath, ClippableFace, ClippableFaceAccumulator, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds, alpenglow, EdgedFace, EdgedClippedFace } from '../imports.js';
+import { alpenglow, BoundedSubpath, ClippableFace, ClippableFaceAccumulator, EdgedClippedFace, EdgedFace, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderEvaluator, RenderExecutor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
+
+type RenderExecutionMethod = 'evaluation' | 'instructions';
 
 export type RasterizationOptions = {
   // We'll write our results into the output raster at this x,y offset. NOTE: This is not needed when tiling, if we are
@@ -48,6 +50,8 @@ export type RasterizationOptions = {
 
   splitPrograms?: boolean;
 
+  executionMethod?: RenderExecutionMethod;
+
   log?: RasterLog | null;
 };
 
@@ -61,10 +65,12 @@ const DEFAULT_OPTIONS = {
   renderableFaceType: 'polygonal',
   renderableFaceMethod: 'traced',
   splitPrograms: true,
+  executionMethod: 'instructions',
   log: null
 } as const;
 
 const scratchFullAreaVector = new Vector2( 0, 0 );
+const scratchEvaluationOutputVector = new Vector4( 0, 0, 0, 0 );
 
 const scratchEvaluationContext = new RenderEvaluationContext();
 
@@ -81,7 +87,8 @@ const terminalPolygonalFaceAccumulators: PolygonalFaceAccumulator[] = [];
 class RasterizationContext {
   public constructor(
     public outputRaster: OutputRaster,
-    public renderProgram: RenderProgram,
+    // EITHER evaluator will be non-null, OR constClientColor/constOutputColor will be non-null
+    public evaluate: RenderEvaluator | null,
     public constClientColor: Vector4 | null,
     public constOutputColor: Vector4 | null,
     public outputRasterOffset: Vector2,
@@ -90,7 +97,9 @@ class RasterizationContext {
     public polygonFilterWindowMultiplier: number,
     public needs: RenderProgramNeeds,
     public log: RasterLog | null
-  ) {}
+  ) {
+    assert && assert( evaluate || ( constClientColor && constOutputColor ) );
+  }
 }
 
 export default class Rasterize {
@@ -207,15 +216,23 @@ export default class Rasterize {
   ): void {
     assert && assert( isFinite( area ) );
 
-    const color = context.constClientColor || context.renderProgram.evaluate( scratchEvaluationContext.set(
-      pixelFace,
-      context.needs.needsArea ? area : NaN,
-      centroid,
-      x, y, x + 1, y + 1
-    ) );
+    const color = scratchEvaluationOutputVector;
+
+    if ( context.constClientColor ) {
+      color.set( context.constClientColor );
+    }
+    else {
+      context.evaluate!( scratchEvaluationContext.set(
+        pixelFace,
+        context.needs.needsArea ? area : NaN,
+        centroid,
+        x, y, x + 1, y + 1
+      ), color );
+    }
 
     if ( context.polygonFiltering === PolygonFilterType.Box ) {
-      context.outputRaster.addClientPartialPixel( color.timesScalar( area ), x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
+      color.multiplyScalar( area );
+      context.outputRaster.addClientPartialPixel( color, x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
     }
     else {
       assert && assert( pixelFace );
@@ -270,7 +287,6 @@ export default class Rasterize {
       }
     }
     else {
-      const renderProgram = context.renderProgram;
       const needs = context.needs;
       const polygonFiltering = context.polygonFiltering;
       const outputRaster = context.outputRaster;
@@ -279,7 +295,7 @@ export default class Rasterize {
       const pixelArea = needs.needsArea ? 1 : NaN; // NaNs to hopefully hard-error
       for ( let y = minY; y < maxY; y++ ) {
         for ( let x = minX; x < maxX; x++ ) {
-          const color = renderProgram.evaluate( scratchEvaluationContext.set(
+          const color = context.evaluate!( scratchEvaluationContext.set(
             null,
             pixelArea,
             needs.needsCentroid ? scratchFullAreaVector.setXY( x + 0.5, y + 0.5 ) : nanVector,
@@ -287,7 +303,7 @@ export default class Rasterize {
             y,
             x + 1,
             y + 1
-          ) );
+          ), scratchEvaluationOutputVector );
           if ( polygonFiltering === PolygonFilterType.Box ) {
             outputRaster.addClientFullPixel( color, x + outputRasterOffset.x, y + outputRasterOffset.y );
           }
@@ -781,12 +797,12 @@ export default class Rasterize {
                     }
                   }
                   else {
-                    const color = context.renderProgram.evaluate( scratchEvaluationContext.set(
+                    const color = context.evaluate!( scratchEvaluationContext.set(
                       tFace,
                       context.needs.needsArea ? tArea : NaN, // NaNs to hopefully hard-error
                       context.needs.needsCentroid ? tFace.getCentroid( tArea ) : nanVector,
                       tMinX, tMinY, tMaxX, tMaxY
-                    ) );
+                    ), scratchEvaluationOutputVector );
                     context.outputRaster.addClientPartialPixel( color.timesScalar( getContribution( tFace.getTransformed( transformMatrix ) ) ), x + context.outputRasterOffset.x, y + context.outputRasterOffset.y );
                   }
                 };
@@ -844,8 +860,11 @@ export default class Rasterize {
     outputRasterOffset: Vector2,
     polygonFiltering: PolygonFilterType,
     polygonFilterWindowMultiplier: number,
+    executionMethod: RenderExecutionMethod,
     log: RasterLog | null
   ): void {
+    const executor = new RenderExecutor();
+
     for ( let i = 0; i < renderableFaces.length; i++ ) {
       const renderableFace = renderableFaces[ i ];
       const renderProgram = renderableFace.renderProgram;
@@ -855,9 +874,22 @@ export default class Rasterize {
       const constClientColor = renderProgram instanceof RenderColor ? renderProgram.color : null;
       const constOutputColor = constClientColor !== null ? outputRaster.colorConverter.clientToOutput( constClientColor ).copy() : null;
 
+      let evaluator: RenderEvaluator | null = null;
+      if ( !constOutputColor ) {
+        if ( executionMethod === 'instructions' ) {
+          executor.loadRenderProgram( renderProgram );
+          evaluator = executor.evaluator;
+        }
+        else {
+          assert && assert( executionMethod === 'evaluation' );
+
+          evaluator = renderProgram.getEvaluator();
+        }
+      }
+
       const context = new RasterizationContext(
         outputRaster,
-        renderProgram,
+        evaluator,
         constClientColor,
         constOutputColor,
         outputRasterOffset,
@@ -1150,6 +1182,7 @@ export default class Rasterize {
       options.outputRasterOffset,
       polygonFiltering,
       polygonFilterWindowMultiplier,
+      options.executionMethod,
       log
     );
     markEnd( 'rasterize-accumulate' );

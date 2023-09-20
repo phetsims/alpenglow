@@ -24,6 +24,7 @@ export { default as RenderExecutionStack } from './render-program/RenderExecutio
 export { default as RenderExecutor } from './render-program/RenderExecutor.js';
 export { default as RenderInstruction, RenderInstructionLocation, RenderInstructionReturn, RenderInstructionPush, RenderInstructionMultiplyScalar } from './render-program/RenderInstruction.js';
 export { default as RenderProgram } from './render-program/RenderProgram.js';
+export type { RenderEvaluator } from './render-program/RenderProgram.js';
 export type { SerializedRenderColorSpaceConversion } from './render-program/RenderColorSpaceConversion.js';
 export type { SerializedRenderProgram } from './render-program/RenderProgram.js';
 export { default as RenderPath } from './render-program/RenderPath.js';

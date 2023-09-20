@@ -6,9 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderEvaluationContext, RenderInstruction, RenderInstructionLocation, alpenglow } from '../imports.js';
+import { RenderEvaluationContext, RenderInstruction, RenderInstructionLocation, alpenglow, RenderProgram, RenderEvaluator } from '../imports.js';
 import RenderExecutionStack from './RenderExecutionStack.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+
+// Should be kept empty
+const scratchInstructions: RenderInstruction[] = [];
 
 export default class RenderExecutor {
 
@@ -17,6 +20,18 @@ export default class RenderExecutor {
   private instructions: RenderInstruction[] = [];
   private instructionIndex = 0;
   private isDone = false;
+
+  public readonly evaluator: RenderEvaluator;
+
+  public constructor() {
+    this.evaluator = this.execute.bind( this );
+  }
+
+  public loadRenderProgram( renderProgram: RenderProgram ): void {
+    renderProgram.writeInstructions( scratchInstructions );
+    this.loadInstructions( scratchInstructions );
+    scratchInstructions.length = 0;
+  }
 
   public loadInstructions( instructions: RenderInstruction[] ): void {
     this.instructions.length = 0;
@@ -36,7 +51,14 @@ export default class RenderExecutor {
     this.updateIndices();
   }
 
-  public execute( context: RenderEvaluationContext, output: Vector4 ): void {
+  public reset(): void {
+    this.stack.reset();
+    this.indexStack.length = 0;
+    this.instructionIndex = 0;
+    this.isDone = false;
+  }
+
+  public execute( context: RenderEvaluationContext, output: Vector4 ): Vector4 {
     const stack = this.stack;
     const instructions = this.instructions;
 
@@ -52,6 +74,8 @@ export default class RenderExecutor {
 
     assert && assert( this.stack.getLength() === 1 );
     stack.popInto( output );
+
+    return output;
   }
 
   public jump( location: RenderInstructionLocation ): void {

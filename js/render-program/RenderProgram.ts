@@ -10,6 +10,9 @@ import { ClippableFace, PolygonalFace, RenderableFace, RenderAlpha, RenderBaryce
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
+// Output should be chained (the `output` parameter should be returned, for convenience)
+export type RenderEvaluator = ( context: RenderEvaluationContext, output: Vector4 ) => Vector4;
+
 export default abstract class RenderProgram {
 
   public readonly children: RenderProgram[];
@@ -135,6 +138,12 @@ export default abstract class RenderProgram {
 
   protected equalsTyped( other: this ): boolean {
     return true;
+  }
+
+  public getEvaluator(): RenderEvaluator {
+    return ( context: RenderEvaluationContext, output: Vector4 ): Vector4 => {
+      return output.set( this.evaluate( context ) );
+    };
   }
 
   /**
