@@ -54,7 +54,7 @@ export { default as RenderPlanar } from './render-program/RenderPlanar.js';
 export { default as RenderDepthSort } from './render-program/RenderDepthSort.js';
 export type { SerializedRenderDepthSort } from './render-program/RenderDepthSort.js';
 export { default as RenderLight } from './render-program/RenderLight.js';
-export { default as RenderNormalDebug } from './render-program/RenderNormalDebug.js';
+export { default as RenderNormalDebug, RenderInstructionNormalDebug } from './render-program/RenderNormalDebug.js';
 export type { SerializedRenderNormalDebug } from './render-program/RenderNormalDebug.js';
 export { default as RenderPhong } from './render-program/RenderPhong.js';
 export type { SerializedRenderPhong } from './render-program/RenderPhong.js';

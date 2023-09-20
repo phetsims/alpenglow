@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderLight, RenderProgram, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderLight, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderPhong extends RenderProgram {
@@ -166,6 +166,19 @@ export default class RenderPhong extends RenderProgram {
     );
   }
 
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    for ( let i = 0; i < this.lights.length; i++ ) {
+      this.lights[ i ].colorProgram.writeInstructions( instructions );
+      this.lights[ i ].directionProgram.writeInstructions( instructions );
+    }
+    this.normalProgram.writeInstructions( instructions );
+    this.positionProgram.writeInstructions( instructions );
+    this.specularColorProgram.writeInstructions( instructions );
+    this.diffuseColorProgram.writeInstructions( instructions );
+    this.ambientColorProgram.writeInstructions( instructions );
+    instructions.push( new RenderInstructionPhong( this.alpha, this.lights.length ) );
+  }
+
   public override serialize(): SerializedRenderPhong {
     return {
       type: 'RenderPhong',
@@ -181,6 +194,73 @@ export default class RenderPhong extends RenderProgram {
 }
 
 alpenglow.register( 'RenderPhong', RenderPhong );
+
+const scratchAmbientVector = new Vector4( 0, 0, 0, 0 );
+const scratchDiffuseVector = new Vector4( 0, 0, 0, 0 );
+const scratchSpecularVector = new Vector4( 0, 0, 0, 0 );
+const scratchPositionVector = new Vector4( 0, 0, 0, 0 );
+const scratchNormalVector = new Vector4( 0, 0, 0, 0 );
+const scratchLightDirectionVector = new Vector4( 0, 0, 0, 0 );
+const scratchLightColorVector = new Vector4( 0, 0, 0, 0 );
+const scratchOutputVector = new Vector4( 0, 0, 0, 0 );
+const scratchViewDirectionVector = new Vector4( 0, 0, 0, 0 );
+const scratchReflectionVector = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionPhong extends RenderInstruction {
+  public constructor(
+    public readonly alpha: number,
+    public readonly numLights: number
+  ) {
+    super();
+  }
+
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    stack.popInto( scratchAmbientVector );
+    stack.popInto( scratchDiffuseVector );
+    stack.popInto( scratchSpecularVector );
+    stack.popInto( scratchPositionVector );
+    stack.popInto( scratchNormalVector );
+
+    scratchOutputVector.set( scratchAmbientVector );
+
+    // TODO: don't assume camera is at origin?
+    scratchViewDirectionVector.set( scratchPositionVector ).negate().normalize();
+
+    for ( let i = 0; i < this.numLights; i++ ) {
+      stack.popInto( scratchLightDirectionVector );
+      stack.popInto( scratchLightColorVector );
+
+      const dot = scratchNormalVector.dot( scratchLightDirectionVector );
+      if ( dot > 0 ) {
+        scratchReflectionVector.set( scratchNormalVector ).multiplyScalar( 2 * dot ).subtract( scratchLightDirectionVector );
+        const specularContribution = Math.pow( scratchReflectionVector.dot( scratchViewDirectionVector ), this.alpha );
+
+        scratchOutputVector.addXYZW(
+          scratchLightColorVector.x * scratchDiffuseVector.x * dot +
+          scratchLightColorVector.x * scratchSpecularVector.x * specularContribution,
+          scratchLightColorVector.y * scratchDiffuseVector.y * dot +
+          scratchLightColorVector.y * scratchSpecularVector.y * specularContribution,
+          scratchLightColorVector.z * scratchDiffuseVector.z * dot +
+          scratchLightColorVector.z * scratchSpecularVector.z * specularContribution,
+          scratchLightColorVector.w * scratchDiffuseVector.w +
+          scratchLightColorVector.w * scratchSpecularVector.w // keep alphas
+        );
+      }
+    }
+
+    // clamp for now
+    stack.pushValues(
+      Math.min( 1, scratchOutputVector.x ),
+      Math.min( 1, scratchOutputVector.y ),
+      Math.min( 1, scratchOutputVector.z ),
+      Math.min( 1, scratchOutputVector.w )
+    );
+  }
+}
 
 export type SerializedRenderPhong = {
   type: 'RenderPhong';

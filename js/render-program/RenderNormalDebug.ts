@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderProgram, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderNormalDebug extends RenderProgram {
@@ -64,6 +64,11 @@ export default class RenderNormalDebug extends RenderProgram {
     return this.getNormalDebug( normal );
   }
 
+  public override writeInstructions( instructions: RenderInstruction[] ): void {
+    this.normalProgram.writeInstructions( instructions );
+    instructions.push( RenderInstructionNormalDebug.INSTANCE );
+  }
+
   public override serialize(): SerializedRenderNormalDebug {
     return {
       type: 'RenderNormalDebug',
@@ -77,6 +82,26 @@ export default class RenderNormalDebug extends RenderProgram {
 }
 
 alpenglow.register( 'RenderNormalDebug', RenderNormalDebug );
+
+const scratchVector = new Vector4( 0, 0, 0, 0 );
+
+export class RenderInstructionNormalDebug extends RenderInstruction {
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    stack.readTop( scratchVector );
+    stack.writeTopValues(
+      scratchVector.x * 0.5 + 0.5,
+      scratchVector.y * 0.5 + 0.5,
+      scratchVector.z * 0.5 + 0.5,
+      1
+    );
+  }
+
+  public static readonly INSTANCE = new RenderInstructionNormalDebug();
+}
 
 export type SerializedRenderNormalDebug = {
   type: 'RenderNormalDebug';
