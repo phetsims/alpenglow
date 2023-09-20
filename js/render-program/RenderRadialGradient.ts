@@ -6,11 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderLinearRange, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, alpenglow, SerializedRenderGradientStop } from '../imports.js';
+import { alpenglow, ClippableFace, RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderLinearRange, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, SerializedRenderGradientStop } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import Utils from '../../../dot/js/Utils.js';
 
 export enum RenderRadialGradientAccuracy {
   SplitAccurate = 0,
@@ -28,7 +27,7 @@ const toProgram = ( item: RenderGradientStop ): RenderProgram => item.program;
 
 export default class RenderRadialGradient extends RenderProgram {
 
-  private logic: RadialGradientLogic | null = null;
+  private logic: RenderRadialGradientLogic | null = null;
 
   public constructor(
     public readonly transform: Matrix3,
@@ -117,12 +116,25 @@ export default class RenderRadialGradient extends RenderProgram {
     }
   }
 
-  public override evaluate( context: RenderEvaluationContext ): Vector4 {
+  public getLogic(): RenderRadialGradientLogic {
     if ( this.logic === null ) {
-      this.logic = new RadialGradientLogic( this );
+      this.logic = new RenderRadialGradientLogic(
+        this.transform,
+        this.start,
+        this.startRadius,
+        this.end,
+        this.endRadius,
+        this.stops.map( stop => stop.ratio ),
+        this.extend,
+        this.accuracy
+      );
     }
 
-    return this.logic.evaluate( context, this.accuracy );
+    return this.logic;
+  }
+
+  public override evaluate( context: RenderEvaluationContext ): Vector4 {
+    return RenderGradientStop.evaluate( context, this.stops, this.getLogic().computeLinearValue( context ) );
   }
 
   public override split( face: RenderableFace ): RenderableFace[] {
@@ -282,7 +294,7 @@ enum RadialGradientType {
   Cone = 4
 }
 
-class RadialGradientLogic {
+export class RenderRadialGradientLogic {
 
   private readonly xform: Matrix3;
   private readonly focal_x: number;
@@ -290,15 +302,24 @@ class RadialGradientLogic {
   private readonly kind: RadialGradientType;
   private readonly isSwapped: boolean;
 
-  public constructor( public readonly radialGradient: RenderRadialGradient ) {
+  public constructor(
+    public readonly transform: Matrix3,
+    public readonly start: Vector2,
+    public readonly startRadius: number,
+    public readonly end: Vector2,
+    public readonly endRadius: number,
+    public readonly ratios: number[], // should be sorted!!
+    public readonly extend: RenderExtend,
+    public readonly accuracy: RenderRadialGradientAccuracy
+  ) {
     // Two-point conical gradient based on Vello, based on https://skia.org/docs/dev/design/conical/
-    let p0 = radialGradient.start;
-    let p1 = radialGradient.end;
-    let r0 = radialGradient.startRadius;
-    let r1 = radialGradient.endRadius;
+    let p0 = start;
+    let p1 = end;
+    let r0 = startRadius;
+    let r1 = endRadius;
 
     const GRADIENT_EPSILON = 1 / ( 1 << 12 );
-    const userToGradient = radialGradient.transform.inverted();
+    const userToGradient = transform.inverted();
 
     // Output variables
     let xform: Matrix3 | null = null;
@@ -361,10 +382,9 @@ class RadialGradientLogic {
     this.isSwapped = isSwapped;
   }
 
-  public evaluate(
-    context: RenderEvaluationContext,
-    accuracy: RenderRadialGradientAccuracy
-  ): Vector4 {
+  public computeLinearValue(
+    context: RenderEvaluationContext
+  ): number {
     const focal_x = this.focal_x;
     const radius = this.radius;
     const kind = this.kind;
@@ -381,9 +401,9 @@ class RadialGradientLogic {
     const t_sign = Math.sign( 1 - focal_x );
 
     const point = (
-      accuracy === RenderRadialGradientAccuracy.UnsplitCentroid ||
-      accuracy === RenderRadialGradientAccuracy.SplitCentroid ||
-      accuracy === RenderRadialGradientAccuracy.SplitAccurate
+      this.accuracy === RenderRadialGradientAccuracy.UnsplitCentroid ||
+      this.accuracy === RenderRadialGradientAccuracy.SplitCentroid ||
+      this.accuracy === RenderRadialGradientAccuracy.SplitAccurate
     ) ? context.centroid : context.writeBoundsCentroid( scratchVectorA );
 
     // Pixel-specifics
@@ -412,16 +432,15 @@ class RadialGradientLogic {
       is_valid = a >= 0 && t >= 0;
     }
     if ( is_valid ) {
-      t = RenderImage.extend( this.radialGradient.extend, focal_x + t_sign * t );
+      t = RenderImage.extend( this.extend, focal_x + t_sign * t );
       if ( is_swapped ) {
         t = 1 - t;
       }
 
-      return RenderGradientStop.evaluate( context, this.radialGradient.stops, t );
+      return t;
     }
     else {
-      // Invalid is a checkerboard red/yellow
-      return ( Utils.roundSymmetric( context.centroid.x ) + Utils.roundSymmetric( context.centroid.y ) ) % 2 === 0 ? new Vector4( 1, 0, 0, 1 ) : new Vector4( 1, 1, 0, 1 );
+      return NaN;
     }
   }
 }

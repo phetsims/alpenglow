@@ -131,7 +131,7 @@ export default class RenderLinearBlend extends RenderProgram {
     const oneLocation = new RenderInstructionLocation();
     const blendLocation = new RenderInstructionLocation();
 
-    instructions.push( new RenderInstructionComputeLinearValue( this.logic, zeroLocation, oneLocation, blendLocation ) );
+    instructions.push( new RenderInstructionComputeLinearBlendRatio( this.logic, zeroLocation, oneLocation, blendLocation ) );
     instructions.push( zeroLocation );
     this.zero.writeInstructions( instructions );
     instructions.push( RenderInstructionReturn.INSTANCE );
@@ -184,7 +184,7 @@ export class RenderLinearBlendLogic {
   }
 }
 
-export class RenderInstructionComputeLinearValue extends RenderInstruction {
+export class RenderInstructionComputeLinearBlendRatio extends RenderInstruction {
   public constructor(
     public readonly logic: RenderLinearBlendLogic,
     public readonly zeroLocation: RenderInstructionLocation,

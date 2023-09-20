@@ -262,9 +262,8 @@ export class RenderLinearGradientLogic {
     const gradDelta = this.gradDelta;
 
     const rawT = gradDelta.magnitude > 0 ? localDelta.dot( gradDelta ) / gradDelta.dot( gradDelta ) : 0;
-    const mappedT = RenderImage.extend( this.extend, rawT );
 
-    return mappedT;
+    return RenderImage.extend( this.extend, rawT );
   }
 }
 

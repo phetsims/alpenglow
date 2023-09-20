@@ -122,7 +122,7 @@ export default class RenderRadialBlend extends RenderProgram {
     const oneLocation = new RenderInstructionLocation();
     const blendLocation = new RenderInstructionLocation();
 
-    instructions.push( new RenderInstructionComputeRadialValue( this.logic, zeroLocation, oneLocation, blendLocation ) );
+    instructions.push( new RenderInstructionComputeRadialBlendRatio( this.logic, zeroLocation, oneLocation, blendLocation ) );
     instructions.push( zeroLocation );
     this.zero.writeInstructions( instructions );
     instructions.push( RenderInstructionReturn.INSTANCE );
@@ -243,7 +243,7 @@ export class RenderRadialBlendLogic {
   }
 }
 
-export class RenderInstructionComputeRadialValue extends RenderInstruction {
+export class RenderInstructionComputeRadialBlendRatio extends RenderInstruction {
   public constructor(
     public readonly logic: RenderRadialBlendLogic,
     public readonly zeroLocation: RenderInstructionLocation,
