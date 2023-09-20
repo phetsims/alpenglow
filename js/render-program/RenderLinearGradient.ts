@@ -26,9 +26,7 @@ const toProgram = ( item: RenderGradientStop ): RenderProgram => item.program;
 
 export default class RenderLinearGradient extends RenderProgram {
 
-  public readonly inverseTransform: Matrix3;
-  private readonly isIdentity: boolean;
-  private readonly gradDelta: Vector2;
+  public readonly logic: RenderLinearGradientLogic;
 
   public constructor(
     public readonly transform: Matrix3,
@@ -36,7 +34,8 @@ export default class RenderLinearGradient extends RenderProgram {
     public readonly end: Vector2,
     public readonly stops: RenderGradientStop[], // should be sorted!!
     public readonly extend: RenderExtend,
-    public readonly accuracy: RenderLinearGradientAccuracy
+    public readonly accuracy: RenderLinearGradientAccuracy,
+    logic?: RenderLinearGradientLogic
   ) {
     assert && assert( transform.isFinite() );
     assert && assert( start.isFinite() );
@@ -58,9 +57,7 @@ export default class RenderLinearGradient extends RenderProgram {
       accuracy === RenderLinearGradientAccuracy.UnsplitCentroid || accuracy === RenderLinearGradientAccuracy.SplitAccurate
     );
 
-    this.inverseTransform = transform.inverted();
-    this.isIdentity = transform.isIdentity();
-    this.gradDelta = end.minus( start );
+    this.logic = logic || new RenderLinearGradientLogic( this.transform, this.start, this.end, this.stops.map( stop => stop.ratio ), this.extend, this.accuracy );
   }
 
   public override getName(): string {
@@ -71,7 +68,7 @@ export default class RenderLinearGradient extends RenderProgram {
     assert && assert( children.length === this.stops.length );
     return new RenderLinearGradient( this.transform, this.start, this.end, this.stops.map( ( stop, i ) => {
       return new RenderGradientStop( stop.ratio, children[ i ] );
-    } ), this.extend, this.accuracy );
+    } ), this.extend, this.accuracy, this.logic );
   }
 
   public override isSplittable(): boolean {
@@ -113,29 +110,8 @@ export default class RenderLinearGradient extends RenderProgram {
     }
   }
 
-  private useInternalCentroid(): boolean {
-    return this.accuracy === RenderLinearGradientAccuracy.UnsplitCentroid || this.accuracy === RenderLinearGradientAccuracy.SplitAccurate;
-  }
-
   public override evaluate( context: RenderEvaluationContext ): Vector4 {
-    assert && this.useInternalCentroid() && assert( context.hasCentroid() );
-
-    const point = this.useInternalCentroid() ?
-                  scratchLinearGradientVector0.set( context.centroid ) :
-                  context.writeBoundsCentroid( scratchLinearGradientVector0 );
-
-    const localPoint = point;
-    if ( !this.isIdentity ) {
-      this.inverseTransform.multiplyVector2( localPoint );
-    }
-
-    const localDelta = localPoint.subtract( this.start ); // MUTABLE, changes localPoint
-    const gradDelta = this.gradDelta;
-
-    const t = gradDelta.magnitude > 0 ? localDelta.dot( gradDelta ) / gradDelta.dot( gradDelta ) : 0;
-    const mappedT = RenderImage.extend( this.extend, t );
-
-    return RenderGradientStop.evaluate( context, this.stops, mappedT );
+    return RenderGradientStop.evaluate( context, this.stops, this.logic.computeLinearValue( context ) );
   }
 
   public override split( face: RenderableFace ): RenderableFace[] {
@@ -246,6 +222,51 @@ export default class RenderLinearGradient extends RenderProgram {
 }
 
 alpenglow.register( 'RenderLinearGradient', RenderLinearGradient );
+
+export class RenderLinearGradientLogic {
+
+  public readonly inverseTransform: Matrix3;
+  private readonly isIdentity: boolean;
+  private readonly gradDelta: Vector2;
+
+  public constructor(
+    public readonly transform: Matrix3,
+    public readonly start: Vector2,
+    public readonly end: Vector2,
+    public readonly ratios: number[],
+    public readonly extend: RenderExtend,
+    public readonly accuracy: RenderLinearGradientAccuracy
+  ) {
+    this.inverseTransform = transform.inverted();
+    this.isIdentity = transform.isIdentity();
+    this.gradDelta = end.minus( start );
+  }
+
+  public computeLinearValue(
+    context: RenderEvaluationContext
+  ): number {
+    const useCentroid = this.accuracy === RenderLinearGradientAccuracy.UnsplitCentroid ||
+                        this.accuracy === RenderLinearGradientAccuracy.SplitAccurate;
+
+    assert && useCentroid && assert( context.hasCentroid() );
+
+    const localPoint = useCentroid ?
+      scratchLinearGradientVector0.set( context.centroid ) :
+      context.writeBoundsCentroid( scratchLinearGradientVector0 );
+
+    if ( !this.isIdentity ) {
+      this.inverseTransform.multiplyVector2( localPoint );
+    }
+
+    const localDelta = localPoint.subtract( this.start ); // MUTABLE, changes localPoint
+    const gradDelta = this.gradDelta;
+
+    const rawT = gradDelta.magnitude > 0 ? localDelta.dot( gradDelta ) / gradDelta.dot( gradDelta ) : 0;
+    const mappedT = RenderImage.extend( this.extend, rawT );
+
+    return mappedT;
+  }
+}
 
 export type SerializedRenderLinearGradient = {
   type: 'RenderLinearGradient';
