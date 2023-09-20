@@ -1644,6 +1644,8 @@ export default class PolygonClipping {
   /**
    * From "Another Simple but Faster Method for 2D Line Clipping" (2019)
    * by Dimitrios Matthes and Vasileios Drakopoulos
+   *
+   * TODO: documentation (that it mutates points)
    */
   private static matthesDrakopoulosClip(
     p0: Vector2, p1: Vector2,

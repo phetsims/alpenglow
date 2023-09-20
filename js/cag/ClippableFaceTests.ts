@@ -164,7 +164,7 @@ QUnit.test( 'getMitchellNetravaliFiltered B', assert => {
   testWithFaces( f => f.getMitchellNetravaliFiltered( 1, 1, 0, 0 ), assert.ok.bind( assert ) );
 } );
 
-QUnit.skip( 'getBinaryLineClip area', assert => {
+QUnit.skip( 'getBinaryCircularClip area', assert => {
   testWithFaces( f => new Vector2(
     f.getBinaryCircularClip( new Vector2( 0.5, 0.5 ), 0.25, 0.1 ).insideFace.getArea(),
     f.getBinaryCircularClip( new Vector2( 0.5, 0.5 ), 0.25, 0.1 ).outsideFace.getArea()
