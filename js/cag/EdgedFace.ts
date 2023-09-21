@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, EdgedClippedFace, GridClipCallback, LinearEdge, PolygonalFace, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, SerializedLinearEdge } from '../imports.js';
+import { alpenglow, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, EdgedClippedFace, GridClipCallback, GridClipping, LinearEdge, PolygonalFace, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, SerializedLinearEdge } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -410,7 +410,7 @@ export default class EdgedFace implements ClippableFace {
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
 
-      PolygonClipping.gridClipIterate(
+      GridClipping.gridClipIterate(
         edge.startPoint, edge.endPoint,
         minX, minY, maxX, maxY,
         stepX, stepY, stepWidth, stepHeight,

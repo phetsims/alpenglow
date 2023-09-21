@@ -620,7 +620,7 @@ an UI and Display made for visual testing and debugging.
           polygons.push( [] );
         }
 
-        phet.scenery.PolygonClipping.gridClipIterate( polygon[ 0 ], polygon[ 1 ], 0, 0, width, height, stepX, stepY, stepWidth, stepHeight, ( cellX, cellY, startX, startY, endX, endY ) => {
+        phet.scenery.GridClipping.gridClipIterate( polygon[ 0 ], polygon[ 1 ], 0, 0, width, height, stepX, stepY, stepWidth, stepHeight, ( cellX, cellY, startX, startY, endX, endY ) => {
           const polygon = polygons[ cellY * stepWidth + cellX ];
           if ( !polygon.length ) {
             polygon.push( phet.dot.v2( startX, startY ) );
@@ -821,7 +821,7 @@ an UI and Display made for visual testing and debugging.
 
       const showLineBetween = ( polygonIndex, index ) => {
         // debugger;
-        phet.scenery.PolygonClipping.gridClipIterate(
+        phet.scenery.GridClipping.gridClipIterate(
           face.polygons[ polygonIndex ][ index ], face.polygons[ polygonIndex ][ ( index + 1 ) % face.polygons[ polygonIndex ].length ],
           minX, minY, maxX, maxY,
           1, 1, width, height,
@@ -872,7 +872,7 @@ an UI and Display made for visual testing and debugging.
 
   window.badGridSingleTest = function() {
     setTimeout( async () => {
-      phet.scenery.PolygonClipping.gridClipIterate(
+      phet.scenery.GridClipping.gridClipIterate(
         phet.dot.v2( 13, 120 ),
         phet.dot.v2( 0, 120 ),
         0, 106, 13, 121,
@@ -910,7 +910,7 @@ an UI and Display made for visual testing and debugging.
           const startPoint = polygon[ i ];
           const endPoint = polygon[ ( i + 1 ) % polygon.length ];
 
-          phet.scenery.PolygonClipping.gridClipIterate( startPoint, endPoint, 0, 0, width, height, stepX, stepY, stepWidth, stepHeight, ( cellX, cellY, startX, startY, endX, endY ) => {
+          phet.scenery.GridClipping.gridClipIterate( startPoint, endPoint, 0, 0, width, height, stepX, stepY, stepWidth, stepHeight, ( cellX, cellY, startX, startY, endX, endY ) => {
             simplifiers[ cellY * stepWidth + cellX ].add( startX, startY );
           } );
         }
