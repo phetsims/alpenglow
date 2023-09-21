@@ -2392,7 +2392,7 @@ an UI and Display made for visual testing and debugging.
       // const normal = phet.dot.v2( 1, 0 );
       // const normal = phet.dot.v2( 0, 1 );
 
-      const polygons = phet.scenery.PolygonClipping.binaryStripeClipPolygon( polygon, normal, values );
+      const polygons = phet.scenery.StripeClipping.binaryStripeClipPolygon( polygon, normal, values );
 
       console.log( polygons );
 
@@ -2401,7 +2401,7 @@ an UI and Display made for visual testing and debugging.
         const p0 = polygon[ i ];
         const p1 = polygon[ ( i + 1 ) % polygon.length ];
 
-        phet.scenery.PolygonClipping.binaryStripeClipEdge( p0, p1, normal, values, 0.1111, clippedEdgeCollection );
+        phet.scenery.StripeClipping.binaryStripeClipEdge( p0, p1, normal, values, 0.1111, clippedEdgeCollection );
       }
 
       console.log( clippedEdgeCollection );

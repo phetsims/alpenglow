@@ -14,7 +14,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, EdgedFace, GridClipCallback, GridClipping, LinearEdge, PolygonalFace, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, SerializedLinearEdge } from '../imports.js';
+import { alpenglow, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, EdgedFace, GridClipCallback, GridClipping, LinearEdge, PolygonalFace, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, SerializedLinearEdge, StripeClipping } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -577,11 +577,11 @@ export default class EdgedClippedFace implements ClippableFace {
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
 
-      PolygonClipping.binaryStripeClipEdge( edge.startPoint, edge.endPoint, normal, values, fakeCornerPerpendicular, edgesCollection );
+      StripeClipping.binaryStripeClipEdge( edge.startPoint, edge.endPoint, normal, values, fakeCornerPerpendicular, edgesCollection );
     }
 
     this.forEachImplicitEdge( ( startPoint, endPoint ) => {
-      PolygonClipping.binaryStripeClipEdge( startPoint, endPoint, normal, values, fakeCornerPerpendicular, edgesCollection );
+      StripeClipping.binaryStripeClipEdge( startPoint, endPoint, normal, values, fakeCornerPerpendicular, edgesCollection );
     } );
 
     if ( assert ) {

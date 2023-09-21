@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedClippedFace, EdgedFace, GridClipCallback, GridClipping, LinearEdge, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali } from '../imports.js';
+import { alpenglow, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedClippedFace, EdgedFace, GridClipCallback, GridClipping, LinearEdge, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, StripeClipping } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -375,7 +375,7 @@ export default class PolygonalFace implements ClippableFace {
     for ( let i = 0; i < this.polygons.length; i++ ) {
       const polygon = this.polygons[ i ];
 
-      const polygons = PolygonClipping.binaryStripeClipPolygon( polygon, normal, values );
+      const polygons = StripeClipping.binaryStripeClipPolygon( polygon, normal, values );
 
       assert && assert( polygonsCollection.length === polygons.length );
 

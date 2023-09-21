@@ -121,6 +121,7 @@ export { default as PolygonalBoolean } from './cag/PolygonalBoolean.js';
 export { default as CohenSutherlandClipping } from './clip/CohenSutherlandClipping.js';
 export { default as LineClipping } from './clip/LineClipping.js';
 export { default as BoundsClipping } from './clip/BoundsClipping.js';
+export { default as StripeClipping } from './clip/StripeClipping.js';
 export { default as GridClipping } from './clip/GridClipping.js';
 export type { GridClipCallback } from './clip/GridClipping.js';
 export { default as CircularClipping } from './clip/CircularClipping.js';
