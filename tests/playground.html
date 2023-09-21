@@ -2189,7 +2189,7 @@ an UI and Display made for visual testing and debugging.
       const maxAngle = Math.PI / 4;
       // const center = phet.dot.v2( 0.25, 0.25 );
 
-      phet.scenery.PolygonClipping.binaryCircularClipEdges( edges, center, radius, maxAngle, left, right );
+      phet.scenery.CircularClipping.binaryCircularClipEdges( edges, center, radius, maxAngle, left, right );
 
       left = phet.scenery.LinearEdge.withOppositesRemoved( left );
       right = phet.scenery.LinearEdge.withOppositesRemoved( right );
@@ -2278,7 +2278,7 @@ an UI and Display made for visual testing and debugging.
       const maxAngle = Math.PI / 4;
       // const center = phet.dot.v2( 0.25, 0.25 );
 
-      phet.scenery.PolygonClipping.binaryCircularClipPolygon( polygons, center, radius, maxAngle, leftPolygons, rightPolygons );
+      phet.scenery.CircularClipping.binaryCircularClipPolygon( polygons, center, radius, maxAngle, leftPolygons, rightPolygons );
 
       // console.log( left.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' ) );
       // console.log( right.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' ) );
@@ -3688,7 +3688,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       // outsideStartOutsideCandidateReversedEdgesREVERSED: [p0a, p2a]CW, [p2a, p1a]CW, [p1a, p0a]CW
       // insideCandidateEdges: [p0a, p1a]CCW, [p1a, p2a]CCW, [p2a, p0a]CCW
 
-      phet.scenery.PolygonClipping.binaryCircularClipPolygon( [ [
+      phet.scenery.CircularClipping.binaryCircularClipPolygon( [ [
         phet.dot.v2( -20.69990234375, -2.0387695312500007 ),
         phet.dot.v2( 18.34404296875, 9.80498046875 ),
         phet.dot.v2( -11.555859375, 17.294482421875 )

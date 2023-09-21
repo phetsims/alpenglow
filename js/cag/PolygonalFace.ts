@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BoundsClipping, ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedClippedFace, EdgedFace, GridClipCallback, LinearEdge, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali } from '../imports.js';
+import { alpenglow, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedClippedFace, EdgedFace, GridClipCallback, LinearEdge, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -407,7 +407,7 @@ export default class PolygonalFace implements ClippableFace {
     const insidePolygons: Vector2[][] = [];
     const outsidePolygons: Vector2[][] = [];
 
-    PolygonClipping.binaryCircularClipPolygon( this.polygons, center, radius, maxAngleSplit, insidePolygons, outsidePolygons );
+    CircularClipping.binaryCircularClipPolygon( this.polygons, center, radius, maxAngleSplit, insidePolygons, outsidePolygons );
 
     return {
       insideFace: new PolygonalFace( insidePolygons ),
