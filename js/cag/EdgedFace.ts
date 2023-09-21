@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, EdgedClippedFace, GridClipCallback, GridClipping, LinearEdge, PolygonalFace, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, SerializedLinearEdge, StripeClipping } from '../imports.js';
+import { alpenglow, BinaryClipping, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, EdgedClippedFace, GridClipCallback, GridClipping, LinearEdge, PolygonalFace, PolygonBilinear, PolygonCompleteCallback, PolygonMitchellNetravali, SerializedLinearEdge, StripeClipping } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -280,7 +280,7 @@ export default class EdgedFace implements ClippableFace {
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
 
-      PolygonClipping.binaryXClipEdge( edge.startPoint, edge.endPoint, x, fakeCornerY, minEdges, maxEdges );
+      BinaryClipping.binaryXClipEdge( edge.startPoint, edge.endPoint, x, fakeCornerY, minEdges, maxEdges );
     }
 
     assert && assert( minEdges.every( e => e.startPoint.x <= x && e.endPoint.x <= x ) );
@@ -305,7 +305,7 @@ export default class EdgedFace implements ClippableFace {
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
 
-      PolygonClipping.binaryYClipEdge( edge.startPoint, edge.endPoint, y, fakeCornerX, minEdges, maxEdges );
+      BinaryClipping.binaryYClipEdge( edge.startPoint, edge.endPoint, y, fakeCornerX, minEdges, maxEdges );
     }
 
     assert && assert( minEdges.every( e => e.startPoint.y <= y && e.endPoint.y <= y ) );
@@ -330,7 +330,7 @@ export default class EdgedFace implements ClippableFace {
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
 
-      PolygonClipping.binaryLineClipEdge( edge.startPoint, edge.endPoint, normal, value, fakeCornerPerpendicular, minEdges, maxEdges );
+      BinaryClipping.binaryLineClipEdge( edge.startPoint, edge.endPoint, normal, value, fakeCornerPerpendicular, minEdges, maxEdges );
     }
 
     assert && assert( minEdges.every( e => normal.dot( e.startPoint ) <= value + 1e-8 && normal.dot( e.endPoint ) <= value + 1e-8 ) );

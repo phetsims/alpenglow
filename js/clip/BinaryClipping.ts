@@ -1,7 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * General clipping types and utilities
+ * Clipping arbitrary (degenerate, non-convex, self-intersecting, etc.) polygons based on binary criteria (e.g.
+ * left/right, inside/outside).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -27,7 +28,7 @@ export type BinaryPolygonCompleteCallback = (
   isMinFace: boolean
 ) => void;
 
-export default class PolygonClipping {
+export default class BinaryClipping {
 
   // Returns if all done
   private static binaryInitialPush(
@@ -139,7 +140,7 @@ export default class PolygonClipping {
     const intersection = new Vector2( x, y );
     const fakeCorner = new Vector2( x, fakeCornerY );
 
-    PolygonClipping.binaryPushClipEdges(
+    BinaryClipping.binaryPushClipEdges(
       startPoint, endPoint,
       startCmp, endCmp,
       fakeCorner,
@@ -174,7 +175,7 @@ export default class PolygonClipping {
     const intersection = new Vector2( x, y );
     const fakeCorner = new Vector2( fakeCornerX, y );
 
-    PolygonClipping.binaryPushClipEdges(
+    BinaryClipping.binaryPushClipEdges(
       startPoint, endPoint,
       startCmp, endCmp,
       fakeCorner,
@@ -224,7 +225,7 @@ export default class PolygonClipping {
     const intersection = perpendicular.timesScalar( intersectionPerp / perpPerp ).add( basePoint );
     const fakeCorner = perpendicular.timesScalar( fakeCornerPerpendicular ).add( basePoint );
 
-    PolygonClipping.binaryPushClipEdges(
+    BinaryClipping.binaryPushClipEdges(
       startPoint, endPoint,
       startCmp, endCmp,
       fakeCorner,
@@ -369,4 +370,4 @@ export default class PolygonClipping {
   }
 }
 
-alpenglow.register( 'PolygonClipping', PolygonClipping );
+alpenglow.register( 'BinaryClipping', BinaryClipping );

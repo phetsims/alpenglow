@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedClippedFace, EdgedFace, GridClipCallback, GridClipping, LinearEdge, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, StripeClipping } from '../imports.js';
+import { alpenglow, BinaryClipping, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedClippedFace, EdgedFace, GridClipCallback, GridClipping, LinearEdge, PolygonBilinear, PolygonCompleteCallback, PolygonMitchellNetravali, StripeClipping } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -287,7 +287,7 @@ export default class PolygonalFace implements ClippableFace {
       const minPolygon: Vector2[] = [];
       const maxPolygon: Vector2[] = [];
 
-      PolygonClipping.binaryXClipPolygon( polygon, x, minPolygon, maxPolygon );
+      BinaryClipping.binaryXClipPolygon( polygon, x, minPolygon, maxPolygon );
 
       minPolygon.length && minPolygons.push( minPolygon );
       maxPolygon.length && maxPolygons.push( maxPolygon );
@@ -318,7 +318,7 @@ export default class PolygonalFace implements ClippableFace {
       const minPolygon: Vector2[] = [];
       const maxPolygon: Vector2[] = [];
 
-      PolygonClipping.binaryYClipPolygon( polygon, y, minPolygon, maxPolygon );
+      BinaryClipping.binaryYClipPolygon( polygon, y, minPolygon, maxPolygon );
 
       minPolygon.length && minPolygons.push( minPolygon );
       maxPolygon.length && maxPolygons.push( maxPolygon );
@@ -349,7 +349,7 @@ export default class PolygonalFace implements ClippableFace {
       const minPolygon: Vector2[] = [];
       const maxPolygon: Vector2[] = [];
 
-      PolygonClipping.binaryLineClipPolygon( polygon, normal, value, minPolygon, maxPolygon );
+      BinaryClipping.binaryLineClipPolygon( polygon, normal, value, minPolygon, maxPolygon );
 
       minPolygon.length && minPolygons.push( minPolygon );
       maxPolygon.length && maxPolygons.push( maxPolygon );

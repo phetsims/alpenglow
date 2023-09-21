@@ -125,8 +125,8 @@ export { default as StripeClipping } from './clip/StripeClipping.js';
 export { default as GridClipping } from './clip/GridClipping.js';
 export type { GridClipCallback } from './clip/GridClipping.js';
 export { default as CircularClipping } from './clip/CircularClipping.js';
-export { default as PolygonClipping } from './clip/PolygonClipping.js';
-export type { BinaryClipCallback, PolygonCompleteCallback, BinaryPolygonCompleteCallback } from './clip/PolygonClipping.js';
+export { default as BinaryClipping } from './clip/BinaryClipping.js';
+export type { BinaryClipCallback, PolygonCompleteCallback, BinaryPolygonCompleteCallback } from './clip/BinaryClipping.js';
 
 export { default as FaceConversion } from './cag/FaceConversion.js';
 

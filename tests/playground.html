@@ -2123,11 +2123,11 @@ an UI and Display made for visual testing and debugging.
       const left = [];
       const right = [];
 
-      // phet.scenery.PolygonClipping.binaryXClipPolygon( polygon, 0.25, left, right );
-      // phet.scenery.PolygonClipping.binaryYClipPolygon( polygon, 0.25, left, right );
+      // phet.scenery.BinaryClipping.binaryXClipPolygon( polygon, 0.25, left, right );
+      // phet.scenery.BinaryClipping.binaryYClipPolygon( polygon, 0.25, left, right );
 
-      // phet.scenery.PolygonClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 0.5, 0.5 ), 0.5, left, right );
-      phet.scenery.PolygonClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 1, 1 ), 1, left, right );
+      // phet.scenery.BinaryClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 0.5, 0.5 ), 0.5, left, right );
+      phet.scenery.BinaryClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 1, 1 ), 1, left, right );
 
       scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
         stroke: 'green',
