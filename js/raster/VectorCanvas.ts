@@ -12,7 +12,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { CombinedRaster, CombinedRasterOptions, getPolygonFilterGridBounds, LinearEdge, PolygonalBoolean, PolygonalFace, PolygonClipping, PolygonFilterType, Rasterize, RenderableFace, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, RenderStack, alpenglow } from '../imports.js';
+import { alpenglow, BoundsClipping, CombinedRaster, CombinedRasterOptions, getPolygonFilterGridBounds, LinearEdge, PolygonalBoolean, PolygonalFace, PolygonFilterType, Rasterize, RenderableFace, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, RenderStack } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -69,7 +69,7 @@ export default class VectorCanvas {
   private fillRenderProgram( renderPath: RenderPath, renderProgram: RenderProgram ): void {
     const bounds = renderPath.getBounds();
 
-    renderPath = new RenderPath( renderPath.fillRule, renderPath.subpaths.map( subpath => PolygonClipping.boundsClipPolygon(
+    renderPath = new RenderPath( renderPath.fillRule, renderPath.subpaths.map( subpath => BoundsClipping.boundsClipPolygon(
       subpath,
       this.bounds.minX, this.bounds.minY, this.bounds.maxX, this.bounds.maxY, this.bounds.centerX, this.bounds.centerY
     ) ) );

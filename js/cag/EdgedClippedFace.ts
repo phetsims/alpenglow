@@ -14,7 +14,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, ClippableFaceAccumulator, EdgedFace, GridClipCallback, LinearEdge, PolygonalFace, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, alpenglow, SerializedLinearEdge } from '../imports.js';
+import { alpenglow, BoundsClipping, ClippableFace, ClippableFaceAccumulator, EdgedFace, GridClipCallback, LinearEdge, PolygonalFace, PolygonBilinear, PolygonClipping, PolygonCompleteCallback, PolygonMitchellNetravali, SerializedLinearEdge } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -452,7 +452,7 @@ export default class EdgedClippedFace implements ClippableFace {
 
     for ( let i = 0; i < this.edges.length; i++ ) {
       const edge = this.edges[ i ];
-      PolygonClipping.boundsClipEdge(
+      BoundsClipping.boundsClipEdge(
         edge.startPoint, edge.endPoint,
         minX, minY, maxX, maxY, centerX, centerY,
         edges
@@ -460,7 +460,7 @@ export default class EdgedClippedFace implements ClippableFace {
     }
 
     this.forEachImplicitEdge( ( startPoint, endPoint ) => {
-      PolygonClipping.boundsClipEdge(
+      BoundsClipping.boundsClipEdge(
         startPoint, endPoint,
         minX, minY, maxX, maxY, centerX, centerY,
         edges

@@ -5,7 +5,7 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-import { LinearEdge, PolygonClipping, alpenglow } from '../imports.js';
+import { alpenglow, BoundsClipping, LinearEdge } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 
@@ -248,7 +248,7 @@ export default class PolygonMitchellNetravali {
   private static evaluateWith( polygon: Vector2[], evaluator: Case, transpose: boolean, bounds: Bounds2 ): number {
     let sum = 0;
 
-    const clippedPolygon = PolygonClipping.boundsClipPolygon(
+    const clippedPolygon = BoundsClipping.boundsClipPolygon(
       polygon,
       bounds.minX, bounds.minY, bounds.maxX, bounds.maxY, bounds.centerX, bounds.centerY
     );

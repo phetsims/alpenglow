@@ -1946,7 +1946,7 @@ an UI and Display made for visual testing and debugging.
       const examplePoint = phet.dot.v2( 4.5, 5.5 );
       const exampleBounds = new phet.dot.Bounds2( examplePoint.x, examplePoint.y, examplePoint.x + 1, examplePoint.y + 1 );
 
-      const exampleClip = phet.scenery.PolygonClipping.boundsClipPolygon(
+      const exampleClip = phet.scenery.BoundsClipping.boundsClipPolygon(
         polygon,
         exampleBounds.minX, exampleBounds.minY, exampleBounds.maxX, exampleBounds.maxY, exampleBounds.centerX, exampleBounds.centerY
       );
@@ -2529,7 +2529,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       scene.addChild( container );
 
       const addBounds = bounds => {
-        const outPolygon = phet.scenery.PolygonClipping.boundsClipPolygon(
+        const outPolygon = phet.scenery.BoundsClipping.boundsClipPolygon(
           inPolygon,
           bounds.minX, bounds.minY, bounds.maxX, bounds.maxY, bounds.centerX, bounds.centerY
         );

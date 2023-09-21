@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BoundedSubpath, PolygonClipping, RationalIntersection, RenderPath, alpenglow } from '../imports.js';
+import { alpenglow, BoundedSubpath, BoundsClipping, RationalIntersection, RenderPath } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -111,7 +111,7 @@ export default class IntegerEdge {
       // NOTE: This is a variant that will fully optimize out "doesn't contribute anything" bits to an empty array
       // If a path is fully outside of the clip region, we won't create integer edges out of it.
       // TODO: Optimize our allocations or other parts so that we don't always create a ton of new vectors here
-      const clippedSubpath = goesOutsideBounds ? PolygonClipping.boundsClipPolygon( subpath, minX, minY, maxX, maxY, centerX, centerY ) : subpath;
+      const clippedSubpath = goesOutsideBounds ? BoundsClipping.boundsClipPolygon( subpath, minX, minY, maxX, maxY, centerX, centerY ) : subpath;
 
       for ( let k = 0; k < clippedSubpath.length; k++ ) {
         // TODO: when micro-optimizing, improve this pattern so we only have one access each iteration
