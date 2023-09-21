@@ -13,6 +13,29 @@
 
 export { default as alpenglow } from './alpenglow.js';
 
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as u64 } from '../wgsl/math/u64.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as i64 } from '../wgsl/math/i64.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as q128 } from '../wgsl/math/q128.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as ZERO_u64 } from '../wgsl/math/ZERO_u64.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as ONE_u64 } from '../wgsl/math/ONE_u64.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as ZERO_q128 } from '../wgsl/math/ZERO_q128.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as ONE_q128 } from '../wgsl/math/ONE_q128.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as u32_to_u64 } from '../wgsl/math/u32_to_u64.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as i32_to_i64 } from '../wgsl/math/i32_to_i64.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as add_u32_u32_to_u64 } from '../wgsl/math/add_u32_u32_to_u64.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as mul_u32_u32_to_u64 } from '../wgsl/math/mul_u32_u32_to_u64.js';
+
 export { default as PolygonFilterType, getPolygonFilterWidth, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand, getPolygonFilterGridBounds } from './render-program/PolygonFilterType.js';
 export { default as Mesh } from './render-program/Mesh.js';
 export { default as RenderBlendType } from './render-program/RenderBlendType.js';
