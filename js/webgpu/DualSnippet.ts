@@ -45,7 +45,10 @@ export default class DualSnippet {
 
     const dependencies = resolvedSource.imports.map( importSource => DualSnippet.fromSource( importSource, includesMap, sourceToSnippetMap ) );
 
-    return new DualSnippet( resolvedSource.before, resolvedSource.after, dependencies );
+    const snippet = new DualSnippet( resolvedSource.before, resolvedSource.after, dependencies );
+    sourceToSnippetMap.set( source, snippet );
+
+    return snippet;
   }
 
   /**

@@ -302,8 +302,7 @@ expectInOutTest(
     ...nToU32s( -25n ),
     ...nToU32s( 7n ),
     ...nToU32s( 1024n )
-  ] ).buffer,
-  true
+  ] ).buffer
 );
 
 expectInOutTest(
@@ -386,8 +385,7 @@ expectInOutTest(
     ...nToU32s( 0xf9fe432c7aca8bfan << 61n ),
     ...nToU32s( 0xf9fe432c7aca8bfan << 62n ),
     ...nToU32s( 0xf9fe432c7aca8bfan << 63n )
-  ] ).buffer,
-  true
+  ] ).buffer
 );
 
 expectInOutTest(
@@ -470,8 +468,7 @@ expectInOutTest(
     ...nToU32s( 0xf9fe432c7aca8bfan >> 61n ),
     ...nToU32s( 0xf9fe432c7aca8bfan >> 62n ),
     ...nToU32s( 0xf9fe432c7aca8bfan >> 63n )
-  ] ).buffer,
-  true
+  ] ).buffer
 );
 
 expectInOutTest(
@@ -496,8 +493,7 @@ expectInOutTest(
     0,
     1,
     1
-  ] ).buffer,
-  true
+  ] ).buffer
 );
 
 expectInOutTest(
@@ -524,8 +520,7 @@ expectInOutTest(
     -1, // 5 < 7
     1, // 7 > 5
     0 // -12 = -12
-  ] ).buffer,
-  true
+  ] ).buffer
 );
 
 expectInOutTest(
@@ -552,8 +547,7 @@ expectInOutTest(
     -1, // 5 < 7
     1, // 5 > -7
     0 // -12 = -12
-  ] ).buffer,
-  true
+  ] ).buffer
 );
 
 {
@@ -587,8 +581,7 @@ expectInOutTest(
     new Uint32Array( [
       ...nToU32s( cn ),
       ...nToU32s( fn )
-    ] ).buffer,
-    true
+    ] ).buffer
   );
 }
 
@@ -623,8 +616,7 @@ expectInOutTest(
     new Uint32Array( [
       ...nToU32s( cn ),
       ...nToU32s( fn )
-    ] ).buffer,
-    true
+    ] ).buffer
   );
 }
 
@@ -659,8 +651,7 @@ expectInOutTest(
     new Uint32Array( [
       ...nToU32s( cn ),
       ...nToU32s( fn )
-    ] ).buffer,
-    true
+    ] ).buffer
   );
 }
 
@@ -686,8 +677,7 @@ expectInOutTest(
   new Uint32Array( [
     ...nToU32s( 0xf9fe432c7aca8bfan * 0x583b15971ad94165n ),
     ...nToU32s( 0x1a951ef9n * 0xa629b1b2n )
-  ] ).buffer,
-  true
+  ] ).buffer
 );
 
 expectInOutTest(
@@ -721,8 +711,7 @@ expectInOutTest(
     ...nToU32s( -35n ),
     ...nToU32s( -35n ),
     ...nToU32s( 35n )
-  ] ).buffer,
-  true
+  ] ).buffer
 );
 
 expectInOutTest(
@@ -755,8 +744,7 @@ expectInOutTest(
     ...nToU32s( 0xf9fe432c7aca8bfan % 0x583b15971ad94165n ),
     ...nToU32s( 0x19fe432c7aca8bfan / 0x1b5dcn ),
     ...nToU32s( 0x19fe432c7aca8bfan % 0x1b5dcn )
-  ] ).buffer,
-  true
+  ] ).buffer
 );
 
 {
@@ -786,8 +774,7 @@ expectInOutTest(
     new Uint32Array( [
       ...nToU32s( 5n ),
       ...nToU32s( gcd0 )
-    ] ).buffer,
-    true
+    ] ).buffer
   );
 }
 
@@ -820,8 +807,7 @@ expectInOutTest(
     ...nToU32s( 25n ),
     ...nToU32s( 0n ), // 0/100 => 0/1
     ...nToU32s( 1n )
-  ] ).buffer,
-  true
+  ] ).buffer
 );
 
 expectInOutTest(
@@ -1020,6 +1006,5 @@ expectInOutTest(
     0, 0, 0, 0,
     // p1 py
     0, 0, 0, 0
-  ] ).buffer,
-  true
+  ] ).buffer
 );
