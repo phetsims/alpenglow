@@ -88,6 +88,11 @@ export { default as wgsl_LineSegmentIntersection } from '../wgsl/math/LineSegmen
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_intersect_line_segments } from '../wgsl/math/intersect_line_segments.js';
 
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_sRGB_to_linear_sRGB } from '../wgsl/color/sRGB_to_linear_sRGB.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_linear_sRGB_to_sRGB } from '../wgsl/color/linear_sRGB_to_sRGB.js';
+
 export { default as DualSnippet } from './webgpu/DualSnippet.js';
 export type { DualSnippetSource } from './webgpu/DualSnippet.js';
 

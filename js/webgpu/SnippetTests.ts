@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DualSnippet, DualSnippetSource, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_subtract_i64_i64 } from '../imports.js';
+import { DualSnippet, DualSnippetSource, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_sRGB_to_sRGB, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64 } from '../imports.js';
+import Vector3 from '../../../dot/js/Vector3.js';
 
 QUnit.module( 'Snippet' );
 
@@ -222,6 +223,24 @@ const devicePromise: Promise<GPUDevice | null> = ( async () => {
     return null;
   }
 } )();
+
+const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice ) => Promise<string | null> ) => {
+  QUnit.test( name, async assert => {
+    const done = assert.async();
+
+    const device = await devicePromise;
+
+    if ( !device ) {
+      assert.expect( 0 );
+    }
+    else {
+      const result = await test( device );
+      assert.ok( result === null, result || '' );
+    }
+
+    done();
+  } );
+};
 
 const expectInOutTest = (
   name: string,
@@ -1008,3 +1027,60 @@ expectInOutTest(
     0, 0, 0, 0
   ] ).buffer
 );
+
+const vec3Test = ( name: string, source: DualSnippetSource, f: ( v: Vector3 ) => Vector3, inputVectors: Vector3[] ) => {
+  asyncTestWithDevice( name, async device => {
+    const dispatchSize = inputVectors.length;
+
+    const outputArray = new Float32Array( dispatchSize * 3 );
+
+    await runInOut(
+      device,
+      `
+        let in = i * 3u;
+        let out = i * 3u;
+        let a = bitcast<vec3<f32>>( vec3( input[ in + 0u ], input[ in + 1u ], input[ in + 2u ] ) );
+        let c = bitcast<vec3<u32>>( ${name}( a ) );
+        output[ out + 0u ] = c.x;
+        output[ out + 1u ] = c.y;
+        output[ out + 2u ] = c.z;
+      `,
+      [ DualSnippet.fromSource( source ) ],
+      dispatchSize,
+      new Float32Array( inputVectors.flatMap( v => [ v.x, v.y, v.z ] ) ).buffer,
+      outputArray.buffer
+    );
+
+    const actualVectors = [];
+    for ( let i = 0; i < dispatchSize; i++ ) {
+      actualVectors.push( new Vector3( outputArray[ i * 3 ], outputArray[ i * 3 + 1 ], outputArray[ i * 3 + 2 ] ) );
+    }
+
+    const expectedVectors = inputVectors.map( f );
+
+    for ( let i = 0; i < dispatchSize; i++ ) {
+      const actual = actualVectors[ i ];
+      const expected = expectedVectors[ i ];
+
+      if ( !expected.equalsEpsilon( actual, 1e-5 ) ) {
+        return `${name} failure expected: ${expected}, actual: ${actual}, i:${i}`;
+      }
+    }
+
+    return null;
+  } );
+};
+
+vec3Test( 'linear_sRGB_to_sRGB', wgsl_linear_sRGB_to_sRGB, ( color: Vector3 ) => {
+  return RenderColor.linearToSRGB( color.toVector4() ).toVector3();
+}, [
+  new Vector3( 0.9, 0.0, 0.0001 ),
+  new Vector3( 0.99, 0.5, 0.002 )
+] );
+
+vec3Test( 'sRGB_to_linear_sRGB', wgsl_sRGB_to_linear_sRGB, ( color: Vector3 ) => {
+  return RenderColor.sRGBToLinear( color.toVector4() ).toVector3();
+}, [
+  new Vector3( 0.9, 0.0, 0.0001 ),
+  new Vector3( 0.99, 0.5, 0.002 )
+] );
