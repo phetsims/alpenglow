@@ -4,17 +4,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-const lsto_third = 1.0 / 3.0;
+#import ../math/cbrt
 
 fn linear_sRGB_to_oklab( color: vec3f ) -> vec3f {
   let l = 0.4122214708 * color.r + 0.5363325363 * color.g + 0.0514459929 * color.b;
   let m = 0.2119034982 * color.r + 0.6806995451 * color.g + 0.1073969566 * color.b;
   let s = 0.0883024619 * color.r + 0.2817188376 * color.g + 0.6299787005 * color.b;
 
-  // TODO: should we use https://www.shadertoy.com/view/wts3RX? or a faster cube-root?
-  let l_ = pow( l, lsto_third );
-  let m_ = pow( m, lsto_third );
-  let s_ = pow( s, lsto_third );
+  let l_ = cbrt( l );
+  let m_ = cbrt( m );
+  let s_ = cbrt( s );
 
   return vec3(
     0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_,

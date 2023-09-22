@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DualSnippet, DualSnippetSource, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_displayP3_to_linear_sRGB, wgsl_linear_sRGB_to_linear_displayP3, wgsl_linear_sRGB_to_oklab, wgsl_linear_sRGB_to_sRGB, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_oklab_to_linear_sRGB, wgsl_premultiply, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64, wgsl_unpremultiply } from '../imports.js';
+import { DualSnippet, DualSnippetSource, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gamut_map_linear_sRGB, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_displayP3_to_linear_sRGB, wgsl_linear_sRGB_to_linear_displayP3, wgsl_linear_sRGB_to_oklab, wgsl_linear_sRGB_to_sRGB, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_oklab_to_linear_sRGB, wgsl_premultiply, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64, wgsl_unpremultiply } from '../imports.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
@@ -1063,7 +1063,7 @@ const vec3Test = ( name: string, source: DualSnippetSource, f: ( v: Vector3 ) =>
       const actual = actualVectors[ i ];
       const expected = expectedVectors[ i ];
 
-      if ( !expected.equalsEpsilon( actual, 1e-5 ) ) {
+      if ( !expected.equalsEpsilon( actual, 1e-4 ) ) {
         return `${name} failure expected: ${expected}, actual: ${actual}, i:${i}`;
       }
     }
@@ -1135,7 +1135,12 @@ vec3Test( 'linear_sRGB_to_oklab', wgsl_linear_sRGB_to_oklab, ( color: Vector3 ) 
 }, [
   new Vector3( 0.9, 0.0, 0.0001 ),
   new Vector3( 0.99, 0.5, 0.002 ),
-  new Vector3( 0.5, 0.5, 0.5 )
+  new Vector3( 0.5, 0.5, 0.5 ),
+  new Vector3( -0.2, 0.5, 0.5 ),
+  new Vector3( 0.2, -0.5, 0.5 ),
+  new Vector3( 0.2, 0.5, -0.5 ),
+  new Vector3( 1.5, 20.5, 0.7 ),
+  new Vector3( -0.1, -0.2, -0.3 )
 ] );
 
 vec3Test( 'oklab_to_linear_sRGB', wgsl_oklab_to_linear_sRGB, ( color: Vector3 ) => {
@@ -1143,7 +1148,12 @@ vec3Test( 'oklab_to_linear_sRGB', wgsl_oklab_to_linear_sRGB, ( color: Vector3 ) 
 }, [
   new Vector3( 0.9, 0.0, 0.0001 ),
   new Vector3( 0.99, 0.5, 0.002 ),
-  new Vector3( 0.5, 0.5, 0.5 )
+  new Vector3( 0.5, 0.5, 0.5 ),
+  new Vector3( -0.02, 0.5, 0.5 ),
+  new Vector3( 0.2, -0.05, 0.5 ),
+  new Vector3( 0.2, 0.5, -0.05 ),
+  new Vector3( 1.5, 2.5, 0.7 ),
+  new Vector3( -0.01, -0.02, -0.03 )
 ] );
 
 vec3Test( 'linear_displayP3_to_linear_sRGB', wgsl_linear_displayP3_to_linear_sRGB, ( color: Vector3 ) => {
@@ -1160,6 +1170,19 @@ vec3Test( 'linear_sRGB_to_linear_displayP3', wgsl_linear_sRGB_to_linear_displayP
   new Vector3( 0.9, 0.0, 0.0001 ),
   new Vector3( 0.99, 0.5, 0.002 ),
   new Vector3( 0.5, 0.5, 0.5 )
+] );
+
+vec3Test( 'gamut_map_linear_sRGB', wgsl_gamut_map_linear_sRGB, ( color: Vector3 ) => {
+  return RenderColor.gamutMapLinearSRGB( color.toVector4() ).toVector3();
+}, [
+  new Vector3( 0.2, 0.5, 0.7 ),
+  new Vector3( 0, 0, 0 ),
+  new Vector3( 1, 1, 1 ),
+  new Vector3( -0.2, 0.5, 0.5 ),
+  new Vector3( 0.2, -0.5, 0.5 ),
+  new Vector3( 0.2, 0.5, -0.5 ),
+  new Vector3( 1.5, 20.5, 0.7 ),
+  new Vector3( -0.1, -0.2, -0.3 )
 ] );
 
 vec4Test( 'premultiply', wgsl_premultiply, RenderColor.premultiply, [

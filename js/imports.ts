@@ -87,6 +87,8 @@ export { default as wgsl_IntersectionPoint } from '../wgsl/math/IntersectionPoin
 export { default as wgsl_LineSegmentIntersection } from '../wgsl/math/LineSegmentIntersection.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_intersect_line_segments } from '../wgsl/math/intersect_line_segments.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_cbrt } from '../wgsl/math/cbrt.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_sRGB_to_linear_sRGB } from '../wgsl/color/sRGB_to_linear_sRGB.js';
@@ -104,6 +106,10 @@ export { default as wgsl_oklab_to_linear_sRGB } from '../wgsl/color/oklab_to_lin
 export { default as wgsl_linear_displayP3_to_linear_sRGB } from '../wgsl/color/linear_displayP3_to_linear_sRGB.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_linear_sRGB_to_linear_displayP3 } from '../wgsl/color/linear_sRGB_to_linear_displayP3.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_is_color_in_range } from '../wgsl/color/is_color_in_range.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_gamut_map_linear_sRGB } from '../wgsl/color/gamut_map_linear_sRGB.js';
 
 export { default as DualSnippet } from './webgpu/DualSnippet.js';
 export type { DualSnippetSource } from './webgpu/DualSnippet.js';
