@@ -88,6 +88,9 @@ export { default as wgsl_LineSegmentIntersection } from '../wgsl/math/LineSegmen
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_intersect_line_segments } from '../wgsl/math/intersect_line_segments.js';
 
+export { default as DualSnippet } from './webgpu/DualSnippet.js';
+export type { DualSnippetSource } from './webgpu/DualSnippet.js';
+
 export { default as PolygonFilterType, getPolygonFilterWidth, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand, getPolygonFilterGridBounds } from './render-program/PolygonFilterType.js';
 export { default as Mesh } from './render-program/Mesh.js';
 export { default as RenderBlendType } from './render-program/RenderBlendType.js';
