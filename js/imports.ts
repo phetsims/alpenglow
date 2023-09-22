@@ -112,6 +112,10 @@ export { default as wgsl_is_color_in_range } from '../wgsl/color/is_color_in_ran
 export { default as wgsl_gamut_map_linear_sRGB } from '../wgsl/color/gamut_map_linear_sRGB.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_gamut_map_linear_displayP3 } from '../wgsl/color/gamut_map_linear_displayP3.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_gamut_map_premul_sRGB } from '../wgsl/color/gamut_map_premul_sRGB.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_gamut_map_premul_displayP3 } from '../wgsl/color/gamut_map_premul_displayP3.js';
 
 export { default as DualSnippet } from './webgpu/DualSnippet.js';
 export type { DualSnippetSource } from './webgpu/DualSnippet.js';
