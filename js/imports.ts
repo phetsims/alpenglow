@@ -92,6 +92,10 @@ export { default as wgsl_intersect_line_segments } from '../wgsl/math/intersect_
 export { default as wgsl_sRGB_to_linear_sRGB } from '../wgsl/color/sRGB_to_linear_sRGB.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_linear_sRGB_to_sRGB } from '../wgsl/color/linear_sRGB_to_sRGB.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_premultiply } from '../wgsl/color/premultiply.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_unpremultiply } from '../wgsl/color/unpremultiply.js';
 
 export { default as DualSnippet } from './webgpu/DualSnippet.js';
 export type { DualSnippetSource } from './webgpu/DualSnippet.js';

@@ -6,8 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DualSnippet, DualSnippetSource, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_sRGB_to_sRGB, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64 } from '../imports.js';
+import { DualSnippet, DualSnippetSource, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_sRGB_to_sRGB, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_premultiply, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64, wgsl_unpremultiply } from '../imports.js';
 import Vector3 from '../../../dot/js/Vector3.js';
+import Vector4 from '../../../dot/js/Vector4.js';
 
 QUnit.module( 'Snippet' );
 
@@ -1071,6 +1072,50 @@ const vec3Test = ( name: string, source: DualSnippetSource, f: ( v: Vector3 ) =>
   } );
 };
 
+const vec4Test = ( name: string, source: DualSnippetSource, f: ( v: Vector4 ) => Vector4, inputVectors: Vector4[] ) => {
+  asyncTestWithDevice( name, async device => {
+    const dispatchSize = inputVectors.length;
+
+    const outputArray = new Float32Array( dispatchSize * 4 );
+
+    await runInOut(
+      device,
+      `
+        let in = i * 4u;
+        let out = i * 4u;
+        let a = bitcast<vec4<f32>>( vec4( input[ in + 0u ], input[ in + 1u ], input[ in + 2u ], input[ in + 3u ] ) );
+        let c = bitcast<vec4<u32>>( ${name}( a ) );
+        output[ out + 0u ] = c.x;
+        output[ out + 1u ] = c.y;
+        output[ out + 2u ] = c.z;
+        output[ out + 3u ] = c.w;
+      `,
+      [ DualSnippet.fromSource( source ) ],
+      dispatchSize,
+      new Float32Array( inputVectors.flatMap( v => [ v.x, v.y, v.z, v.w ] ) ).buffer,
+      outputArray.buffer
+    );
+
+    const actualVectors = [];
+    for ( let i = 0; i < dispatchSize; i++ ) {
+      actualVectors.push( new Vector4( outputArray[ i * 4 ], outputArray[ i * 4 + 1 ], outputArray[ i * 4 + 2 ], outputArray[ i * 4 + 3 ] ) );
+    }
+
+    const expectedVectors = inputVectors.map( f );
+
+    for ( let i = 0; i < dispatchSize; i++ ) {
+      const actual = actualVectors[ i ];
+      const expected = expectedVectors[ i ];
+
+      if ( !expected.equalsEpsilon( actual, 1e-5 ) ) {
+        return `${name} failure expected: ${expected}, actual: ${actual}, i:${i}`;
+      }
+    }
+
+    return null;
+  } );
+};
+
 vec3Test( 'linear_sRGB_to_sRGB', wgsl_linear_sRGB_to_sRGB, ( color: Vector3 ) => {
   return RenderColor.linearToSRGB( color.toVector4() ).toVector3();
 }, [
@@ -1083,4 +1128,16 @@ vec3Test( 'sRGB_to_linear_sRGB', wgsl_sRGB_to_linear_sRGB, ( color: Vector3 ) =>
 }, [
   new Vector3( 0.9, 0.0, 0.0001 ),
   new Vector3( 0.99, 0.5, 0.002 )
+] );
+
+vec4Test( 'premultiply', wgsl_premultiply, RenderColor.premultiply, [
+  new Vector4( 1, 0.5, 0, 0 ),
+  new Vector4( 1, 0.5, 0, 0.25 ),
+  new Vector4( 1, 0.5, 0, 1 )
+] );
+
+vec4Test( 'unpremultiply', wgsl_unpremultiply, RenderColor.unpremultiply, [
+  new Vector4( 0, 0, 0, 0 ),
+  new Vector4( 0.25, 0.125, 0, 0.25 ),
+  new Vector4( 1, 0.5, 0, 1 )
 ] );
