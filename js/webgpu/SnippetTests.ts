@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DualSnippet, DualSnippetSource, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_sRGB_to_oklab, wgsl_linear_sRGB_to_sRGB, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_oklab_to_linear_sRGB, wgsl_premultiply, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64, wgsl_unpremultiply } from '../imports.js';
+import { DualSnippet, DualSnippetSource, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_displayP3_to_linear_sRGB, wgsl_linear_sRGB_to_linear_displayP3, wgsl_linear_sRGB_to_oklab, wgsl_linear_sRGB_to_sRGB, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_oklab_to_linear_sRGB, wgsl_premultiply, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64, wgsl_unpremultiply } from '../imports.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
@@ -1140,6 +1140,22 @@ vec3Test( 'linear_sRGB_to_oklab', wgsl_linear_sRGB_to_oklab, ( color: Vector3 ) 
 
 vec3Test( 'oklab_to_linear_sRGB', wgsl_oklab_to_linear_sRGB, ( color: Vector3 ) => {
   return RenderColor.oklabToLinear( color.toVector4() ).toVector3();
+}, [
+  new Vector3( 0.9, 0.0, 0.0001 ),
+  new Vector3( 0.99, 0.5, 0.002 ),
+  new Vector3( 0.5, 0.5, 0.5 )
+] );
+
+vec3Test( 'linear_displayP3_to_linear_sRGB', wgsl_linear_displayP3_to_linear_sRGB, ( color: Vector3 ) => {
+  return RenderColor.linearDisplayP3ToLinear( color.toVector4() ).toVector3();
+}, [
+  new Vector3( 0.9, 0.0, 0.0001 ),
+  new Vector3( 0.99, 0.5, 0.002 ),
+  new Vector3( 0.5, 0.5, 0.5 )
+] );
+
+vec3Test( 'linear_sRGB_to_linear_displayP3', wgsl_linear_sRGB_to_linear_displayP3, ( color: Vector3 ) => {
+  return RenderColor.linearToLinearDisplayP3( color.toVector4() ).toVector3();
 }, [
   new Vector3( 0.9, 0.0, 0.0001 ),
   new Vector3( 0.99, 0.5, 0.002 ),

@@ -100,6 +100,10 @@ export { default as wgsl_unpremultiply } from '../wgsl/color/unpremultiply.js';
 export { default as wgsl_linear_sRGB_to_oklab } from '../wgsl/color/linear_sRGB_to_oklab.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_oklab_to_linear_sRGB } from '../wgsl/color/oklab_to_linear_sRGB.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_linear_displayP3_to_linear_sRGB } from '../wgsl/color/linear_displayP3_to_linear_sRGB.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_linear_sRGB_to_linear_displayP3 } from '../wgsl/color/linear_sRGB_to_linear_displayP3.js';
 
 export { default as DualSnippet } from './webgpu/DualSnippet.js';
 export type { DualSnippetSource } from './webgpu/DualSnippet.js';
