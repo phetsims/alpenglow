@@ -32,10 +32,18 @@ export default class DualSnippet {
     private readonly dependencies: DualSnippet[] = []
   ) {}
 
-  public static fromSource( source: DualSnippetSource, includesMap: Record<string, boolean> = {} ): DualSnippet {
+  public static fromSource(
+    source: DualSnippetSource,
+    includesMap: Record<string, boolean> = {},
+    sourceToSnippetMap: Map<DualSnippetSource, DualSnippet> = new Map<DualSnippetSource, DualSnippet>()
+  ): DualSnippet {
+    if ( sourceToSnippetMap.has( source ) ) {
+      return sourceToSnippetMap.get( source )!;
+    }
+
     const resolvedSource = source( includesMap );
 
-    const dependencies = resolvedSource.imports.map( importSource => DualSnippet.fromSource( importSource, includesMap ) );
+    const dependencies = resolvedSource.imports.map( importSource => DualSnippet.fromSource( importSource, includesMap, sourceToSnippetMap ) );
 
     return new DualSnippet( resolvedSource.before, resolvedSource.after, dependencies );
   }
