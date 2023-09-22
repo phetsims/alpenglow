@@ -18,6 +18,7 @@ import RenderExtend from './RenderExtend.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import RenderResampleType from './RenderResampleType.js';
 import { Color, ColorMatrixFilter, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Sprites, TColor, Text, TPaint } from '../../../scenery/js/imports.js';
+import ConstructorOf from '../../../phet-core/js/types/ConstructorOf.js';
 
 // TODO: better for this?
 const piecewiseOptions = {
@@ -193,7 +194,12 @@ const colorFromTColor = ( paint: TColor ): Vector4 => {
     paint = new Color( paint );
   }
 
-  return RenderColor.premultiply( RenderColor.colorToSRGB( paint ) );
+  return RenderColor.premultiply( new Vector4(
+    paint.red / 255,
+    paint.green / 255,
+    paint.blue / 255,
+    paint.alpha
+  ) );
 };
 
 export default class RenderFromNode {
@@ -388,6 +394,28 @@ export default class RenderFromNode {
 
     const obj = program.simplified().serialize();
     return pretty ? JSON.stringify( obj, null, 2 ) : JSON.stringify( obj );
+  }
+
+  public static premultipliedSRGBToColor( premultiplied: Vector4 ): Color {
+    const sRGB = RenderColor.unpremultiply( premultiplied );
+
+    return new Color(
+      sRGB.x * 255,
+      sRGB.y * 255,
+      sRGB.z * 255,
+      sRGB.w
+    );
+  }
+
+  public static colorFrom( ...args: ConstructorParameters<ConstructorOf<Color>> ): RenderColor {
+    // @ts-expect-error We're passing Color's constructor arguments in
+    const color = new Color( ...args );
+    return new RenderColor( new Vector4(
+      color.red / 255,
+      color.green / 255,
+      color.blue / 255,
+      color.alpha
+    ) );
   }
 }
 

@@ -1253,11 +1253,11 @@ an UI and Display made for visual testing and debugging.
       };
 
       const toPremulClient = ( ...args ) => {
-        return phet.alpenglow.RenderColor.from( ...args ).colorConverted( phet.alpenglow.RenderColorSpace.sRGB, clientColorSpace );
+        return phet.alpenglow.RenderFromNode.colorFrom( ...args ).colorConverted( phet.alpenglow.RenderColorSpace.sRGB, clientColorSpace );
       };
 
       const toPremulOklab = ( ...args ) => {
-        return phet.alpenglow.RenderColor.from( ...args ).colorConverted( phet.alpenglow.RenderColorSpace.sRGB, phet.alpenglow.RenderColorSpace.premultipliedOklab );
+        return phet.alpenglow.RenderFromNode.colorFrom( ...args ).colorConverted( phet.alpenglow.RenderColorSpace.sRGB, phet.alpenglow.RenderColorSpace.premultipliedOklab );
       };
 
       const premulLinearToClient = renderProgram => renderProgram.colorConverted( phet.alpenglow.RenderColorSpace.premultipliedLinearSRGB, clientColorSpace );
@@ -1835,7 +1835,7 @@ an UI and Display made for visual testing and debugging.
       if ( SHOW_SOLID_COLORS ) {
         rasterLog.renderableFaces.forEach( face => {
           if ( face.renderProgram instanceof phet.alpenglow.RenderColor ) {
-            offsetNode.addChild( new phet.scenery.Path( face.face.getShape().transformed( fromRenderMatrix ), { fill: phet.alpenglow.RenderColor.premultipliedSRGBToColor( face.renderProgram.color ) } ) );
+            offsetNode.addChild( new phet.scenery.Path( face.face.getShape().transformed( fromRenderMatrix ), { fill: phet.alpenglow.RenderFromNode.premultipliedSRGBToColor( face.renderProgram.color ) } ) );
           }
         } );
       }
@@ -2008,7 +2008,7 @@ an UI and Display made for visual testing and debugging.
 
           const paddedValue = 0.9 * value + 0.05;
 
-          const color = phet.alpenglow.RenderColor.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
+          const color = phet.alpenglow.RenderFromNode.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
 
           const index = 4 * ( i * width + j );
           imageData.data[ index ] = color.r;
@@ -2085,7 +2085,7 @@ an UI and Display made for visual testing and debugging.
 
           const paddedValue = 0.95 - 0.9 * value;
 
-          const color = phet.alpenglow.RenderColor.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
+          const color = phet.alpenglow.RenderFromNode.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
 
           const index = 4 * ( i * width + j );
           imageData.data[ index ] = color.r;

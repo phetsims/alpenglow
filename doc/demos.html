@@ -132,14 +132,14 @@
           phet.dot.v2( 90, 90 ),
           phet.dot.v2( 105, 35 )
         ] ] ),
-        RenderColor.from( 'black' ),
-        RenderColor.from( 'white' )
+        RenderFromNode.colorFrom( 'black' ),
+        RenderFromNode.colorFrom( 'white' )
       ),
       new RenderPathBoolean(
         new RenderPath( 'nonzero', [
           ...shapeToPolygons( Shape.regularPolygon( 20, 5 ).transformed( Matrix3.translation( 100, 100 ) ) )
         ] ),
-        RenderColor.from( 'red' ),
+        RenderFromNode.colorFrom( 'red' ),
         RenderColor.TRANSPARENT
       ),
       new RenderPathBoolean(
@@ -148,7 +148,7 @@
           phet.dot.v2( 45, 105 ),
           phet.dot.v2( 90, 90 ),
         ] ] ),
-        RenderColor.from( 'blue' ),
+        RenderFromNode.colorFrom( 'blue' ),
         RenderColor.TRANSPARENT
       )
     ] );
@@ -386,8 +386,8 @@
               v2( 128, 128 ),
               v2( 0, 128 )
             ] ] ),
-            RenderColor.from( 'black' ),
-            RenderColor.from( 'white' )
+            RenderFromNode.colorFrom( 'black' ),
+            RenderFromNode.colorFrom( 'white' )
           ),
           ...polygons.map( ( polygon, i ) => new RenderPathBoolean(
             new RenderPath( 'nonzero', [ polygon ] ),
@@ -436,8 +436,8 @@
 
       const program = new RenderPathBoolean(
         new RenderPath( 'nonzero', [ polygon ] ),
-        RenderColor.from( 'black' ),
-        RenderColor.from( 'white' )
+        RenderFromNode.colorFrom( 'black' ),
+        RenderFromNode.colorFrom( 'white' )
       );
 
       return getRasterizedElement( program, width, height, {
@@ -471,8 +471,8 @@
           v2( 0, 0 ),
           v2( width, 0 ),
           [
-            new RenderGradientStop( 0, RenderColor.from( color1 ).colorConverted( clientSpace, colorSpace ) ),
-            new RenderGradientStop( 1, RenderColor.from( color2 ).colorConverted( clientSpace, colorSpace ) )
+            new RenderGradientStop( 0, RenderFromNode.colorFrom( color1 ).colorConverted( clientSpace, colorSpace ) ),
+            new RenderGradientStop( 1, RenderFromNode.colorFrom( color2 ).colorConverted( clientSpace, colorSpace ) )
           ],
           RenderExtend.Pad,
           RenderLinearGradientAccuracy.SplitAccurate
@@ -482,7 +482,7 @@
     };
 
     const program = new RenderStack( [
-      RenderColor.from( 'black' ),
+      RenderFromNode.colorFrom( 'black' ),
       getTwoStop( 0, 64, 'blue', 'white' ),
       getTwoStop( 64, 80, 'rgba(0,200,0,1)', 'white' ),
       getTwoStop( 80, 96, 'red', 'white' ),
@@ -537,7 +537,7 @@
       ),
       new RenderPathBoolean(
         new RenderPath( 'nonzero', shapeToPolygons( Shape.polygon( [ redPoint, greenPoint, bluePoint ] ).getStrokedShape( new LineStyles( { lineWidth: 0.5 }) ) ) ),
-        RenderColor.from( 'black' ).colorConverted( sRGB, clientSpace ),
+        RenderFromNode.colorFrom( 'black' ).colorConverted( sRGB, clientSpace ),
         RenderColor.TRANSPARENT
       )
     ] );
@@ -655,7 +655,7 @@
     const outerBlendSpace = RenderColorSpace.premultipliedDisplayP3;
 
     const program = new RenderStack( [
-      RenderColor.from( 'black' ),
+      RenderFromNode.colorFrom( 'black' ),
       new RenderLinearGradient(
         Matrix3.IDENTITY,
         v2( 0, 0 ), v2( width, 0 ),
@@ -816,8 +816,8 @@
       const program = new RenderStack( [
         new RenderPathBoolean(
           new RenderPath( 'nonzero', polygons ),
-          RenderColor.from( 'black' ),
-          RenderColor.from( 'white' )
+          RenderFromNode.colorFrom( 'black' ),
+          RenderFromNode.colorFrom( 'white' )
         )
       ] );
 

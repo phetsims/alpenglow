@@ -6,17 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColorSpace, RenderEvaluationContext, RenderInstruction, RenderInstructionPush, RenderProgram, alpenglow } from '../imports.js';
+import { alpenglow, RenderColorSpace, RenderEvaluationContext, RenderInstruction, RenderInstructionPush, RenderProgram } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import ConstructorOf from '../../../phet-core/js/types/ConstructorOf.js';
-import { Color } from '../../../scenery/js/imports.js';
 
 // TODO: consider transforms as a node itself? Meh probably excessive?
-
-const scratchCombinedVector = new Vector4( 0, 0, 0, 0 );
 
 const sRGBRedChromaticity = new Vector2( 0.64, 0.33 );
 const sRGBGreenChromaticity = new Vector2( 0.3, 0.6 );
@@ -41,18 +37,6 @@ export default class RenderColor extends RenderProgram {
     );
 
     this.isSimplified = true;
-  }
-
-  // TODO: remove Color (Scenery) dependency)
-  public static from( ...args: ConstructorParameters<ConstructorOf<Color>> ): RenderColor {
-    // @ts-expect-error We're passing Color's constructor arguments in
-    const color = new Color( ...args );
-    return new RenderColor( new Vector4(
-      color.red / 255,
-      color.green / 255,
-      color.blue / 255,
-      color.alpha
-    ) );
   }
 
   public override getName(): string {
@@ -82,78 +66,6 @@ export default class RenderColor extends RenderProgram {
 
   protected override getExtraDebugString(): string {
     return `${this.color.x}, ${this.color.y}, ${this.color.z}, ${this.color.w}`;
-  }
-
-  public static premultipliedSRGBToLinearPremultipliedSRGB( color: Vector4 ): Vector4 {
-    // TODO: performance improvements? We'll be killing the GC with all these Vector4s
-    return RenderColor.premultiply( RenderColor.sRGBToLinear( RenderColor.unpremultiply( color ) ) );
-  }
-
-  // TODO: can we combine these methods of sRGB conversion without losing performance?
-  // TODO: TODO: TODO: NOTE IN THIS FUNCTION it goes to sRGB255
-  public static linearPremultipliedSRGBToSRGB255( color: Vector4 ): Vector4 {
-    const accumulation = color;
-    const a = accumulation.w;
-
-    if ( a > 0 ) {
-      // unpremultiply
-      const x = accumulation.x / a;
-      const y = accumulation.y / a;
-      const z = accumulation.z / a;
-
-      // linear to sRGB
-      const r = x <= 0.00313066844250063 ? x * 12.92 : 1.055 * Math.pow( x, 1 / 2.4 ) - 0.055;
-      const g = y <= 0.00313066844250063 ? y * 12.92 : 1.055 * Math.pow( y, 1 / 2.4 ) - 0.055;
-      const b = z <= 0.00313066844250063 ? z * 12.92 : 1.055 * Math.pow( z, 1 / 2.4 ) - 0.055;
-
-      return scratchCombinedVector.setXYZW(
-        r * 255,
-        g * 255,
-        b * 255,
-        a * 255
-      );
-    }
-    else {
-      return scratchCombinedVector.setXYZW( 0, 0, 0, 0 );
-    }
-  }
-
-  // TODO: remove Color (Scenery) dependency)
-  public static premultipliedSRGBFromColor( color: Color ): RenderColor {
-    return new RenderColor( RenderColor.premultiply( RenderColor.colorToSRGB( color ) ) );
-  }
-
-  // TODO: remove Color (Scenery) dependency)
-  public static premultipliedOklabFromColor( color: Color ): RenderColor {
-    return new RenderColor( RenderColor.premultiply( RenderColor.linearToOklab( RenderColor.sRGBToLinear( RenderColor.colorToSRGB( color ) ) ) ) );
-  }
-
-  // TODO: remove Color (Scenery) dependency)
-  public static premultipliedDisplayP3FromColor( color: Color ): RenderColor {
-    return new RenderColor( RenderColor.premultiply( RenderColor.linearDisplayP3ToDisplayP3( RenderColor.linearToLinearDisplayP3( RenderColor.displayP3ToLinearDisplayP3( RenderColor.colorToSRGB( color ) ) ) ) ) );
-  }
-
-  // TODO: remove Color (Scenery) dependency)
-  public static colorToSRGB( color: Color ): Vector4 {
-    return new Vector4(
-      color.red / 255,
-      color.green / 255,
-      color.blue / 255,
-      color.alpha
-    );
-  }
-
-  // TODO: remove Color (Scenery) dependency)
-  public static premultipliedSRGBToColor( premultiplied: Vector4 ): Color {
-    const sRGB = RenderColor.unpremultiply( premultiplied );
-
-    // TODO: remove Color (Scenery) dependency)
-    return new Color(
-      sRGB.x * 255,
-      sRGB.y * 255,
-      sRGB.z * 255,
-      sRGB.w
-    );
   }
 
   public static sRGBToLinear( sRGB: Vector4 ): Vector4 {
