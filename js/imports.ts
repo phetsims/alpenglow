@@ -117,6 +117,9 @@ export { default as wgsl_gamut_map_premul_sRGB } from '../wgsl/color/gamut_map_p
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_gamut_map_premul_displayP3 } from '../wgsl/color/gamut_map_premul_displayP3.js';
 
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_matthes_drakopoulos_clip } from '../wgsl/clip/matthes_drakopoulos_clip.js';
+
 export { default as DualSnippet } from './webgpu/DualSnippet.js';
 export type { DualSnippetSource } from './webgpu/DualSnippet.js';
 
