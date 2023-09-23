@@ -32,7 +32,7 @@ fn matthes_drakopoulos_clip(
     var x1 = p1.x;
     var y1 = p1.y;
 
-    // TODO: consider NOT computing these if we don't need them? We probably won't use both?
+#ifdef matthes_drakopoulos_extract_slope
     let ma = ( p1.y - p0.y ) / ( p1.x - p0.x );
     let mb = ( p1.x - p0.x ) / ( p1.y - p0.y );
 
@@ -71,6 +71,43 @@ fn matthes_drakopoulos_clip(
       y1 = maxY;
       x1 = mb * ( maxY - p0.y ) + p0.x;
     }
+#else
+    // Unrolled (duplicated essentially)
+    if ( x0 < minX ) {
+      x0 = minX;
+      y0 = ( p1.y - p0.y ) * ( minX - p0.x ) / ( p1.x - p0.x ) + p0.y;
+    }
+    else if ( x0 > maxX ) {
+      x0 = maxX;
+      y0 = ( p1.y - p0.y ) * ( maxX - p0.x ) / ( p1.x - p0.x ) + p0.y;
+    }
+    if ( y0 < minY ) {
+      y0 = minY;
+      x0 = ( p1.x - p0.x ) * ( minY - p0.y ) / ( p1.y - p0.y ) + p0.x;
+    }
+    else if ( y0 > maxY ) {
+      y0 = maxY;
+      x0 = ( p1.x - p0.x ) * ( maxY - p0.y ) / ( p1.y - p0.y ) + p0.x;
+    }
+
+    // Second unrolled form
+    if ( x1 < minX ) {
+      x1 = minX;
+      y1 = ( p1.y - p0.y ) * ( minX - p0.x ) / ( p1.x - p0.x ) + p0.y;
+    }
+    else if ( x1 > maxX ) {
+      x1 = maxX;
+      y1 = ( p1.y - p0.y ) * ( maxX - p0.x ) / ( p1.x - p0.x ) + p0.y;
+    }
+    if ( y1 < minY ) {
+      y1 = minY;
+      x1 = ( p1.x - p0.x ) * ( minY - p0.y ) / ( p1.y - p0.y ) + p0.x;
+    }
+    else if ( y1 > maxY ) {
+      y1 = maxY;
+      x1 = ( p1.x - p0.x ) * ( maxY - p0.y ) / ( p1.y - p0.y ) + p0.x;
+    }
+#endif
 
     if ( !( x0 < minX && x1 < minX ) && !( x0 > maxX && x1 > maxX ) ) {
       return MD_ClipResult( vec2( x0, y0 ), vec2( x1, y1 ), true );

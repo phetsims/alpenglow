@@ -1366,7 +1366,7 @@ const matthesDrakopoulosTest = ( name: string, extractSlope: boolean ) => {
         output[ out + 4u ] = select( 0u, 1u, clipped );
       `,
       [ DualSnippet.fromSource( wgsl_matthes_drakopoulos_clip, {
-        extract_slope: extractSlope
+        matthes_drakopoulos_extract_slope: extractSlope
       } ) ],
       dispatchSize,
       new Float32Array( inputEdges.flatMap( entry => [
