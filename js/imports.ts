@@ -91,6 +91,9 @@ export { default as wgsl_intersect_line_segments } from '../wgsl/math/intersect_
 export { default as wgsl_cbrt } from '../wgsl/math/cbrt.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_shoelace } from '../wgsl/integrals/shoelace.js';
+
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_LinearEdge } from '../wgsl/cag/LinearEdge.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
