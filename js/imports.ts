@@ -91,6 +91,9 @@ export { default as wgsl_intersect_line_segments } from '../wgsl/math/intersect_
 export { default as wgsl_cbrt } from '../wgsl/math/cbrt.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_LinearEdge } from '../wgsl/cag/LinearEdge.js';
+
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_sRGB_to_linear_sRGB } from '../wgsl/color/sRGB_to_linear_sRGB.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_linear_sRGB_to_sRGB } from '../wgsl/color/linear_sRGB_to_sRGB.js';
@@ -119,6 +122,8 @@ export { default as wgsl_gamut_map_premul_displayP3 } from '../wgsl/color/gamut_
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_matthes_drakopoulos_clip } from '../wgsl/clip/matthes_drakopoulos_clip.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_bounds_clip_edge } from '../wgsl/clip/bounds_clip_edge.js';
 
 export { default as DualSnippet } from './webgpu/DualSnippet.js';
 export type { DualSnippetSource } from './webgpu/DualSnippet.js';
