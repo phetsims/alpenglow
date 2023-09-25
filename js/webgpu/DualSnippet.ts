@@ -10,7 +10,7 @@
 
 import { alpenglow } from '../imports.js';
 
-export type DualSnippetSource = ( includesMap: Record<string, boolean> ) => {
+export type DualSnippetSource = ( includesMap: Record<string, unknown> ) => {
   before: string;
   after: string;
   imports: DualSnippetSource[];
@@ -34,16 +34,16 @@ export default class DualSnippet {
 
   public static fromSource(
     source: DualSnippetSource,
-    includesMap: Record<string, boolean> = {},
+    options: Record<string, unknown> = {},
     sourceToSnippetMap: Map<DualSnippetSource, DualSnippet> = new Map<DualSnippetSource, DualSnippet>()
   ): DualSnippet {
     if ( sourceToSnippetMap.has( source ) ) {
       return sourceToSnippetMap.get( source )!;
     }
 
-    const resolvedSource = source( includesMap );
+    const resolvedSource = source( options );
 
-    const dependencies = resolvedSource.imports.map( importSource => DualSnippet.fromSource( importSource, includesMap, sourceToSnippetMap ) );
+    const dependencies = resolvedSource.imports.map( importSource => DualSnippet.fromSource( importSource, options, sourceToSnippetMap ) );
 
     const snippet = new DualSnippet( resolvedSource.before, resolvedSource.after, dependencies );
     sourceToSnippetMap.set( source, snippet );

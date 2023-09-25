@@ -6,6 +6,8 @@
 
 #import ../cag/LinearEdge
 
+#option preferredStorageFormat
+
 struct Config {
   num_edges: u32
 }
@@ -13,7 +15,7 @@ struct Config {
 @group(0) @binding(0)
 var<uniform> config: Config;
 @group(0) @binding(1)
-var output: texture_storage_2d<${deviceContext.preferredStorageFormat}, write>;
+var output: texture_storage_2d<${preferredStorageFormat}, write>;
 @group(0) @binding(2)
 var<storage> vertices: array<f32>;
 
