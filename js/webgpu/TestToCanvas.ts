@@ -53,7 +53,7 @@ export default class TestToCanvas {
     const shader = new ComputeShader( 'shader', snippet.toString(), [
       Binding.UNIFORM_BUFFER,
       deviceContext.preferredStorageFormat === 'bgra8unorm' ? Binding.TEXTURE_OUTPUT_BGRA8UNORM : Binding.TEXTURE_OUTPUT_RGBA8UNORM,
-      Binding.STORAGE_BUFFER
+      Binding.READ_ONLY_STORAGE_BUFFER
     ], device );
     const blitShader = new BlitShader( device, deviceContext.preferredCanvasFormat );
 

@@ -5,6 +5,7 @@
  */
 
 #import ../cag/LinearEdge
+#import ../clip/bounds_double_area_edge
 
 #option preferredStorageFormat
 
@@ -27,8 +28,18 @@ fn main(
     @builtin(local_invocation_id) local_id: vec3u,
     @builtin(workgroup_id) wg_id: vec3u,
 ) {
-  let p = vec2f( global_id.xy );
-  // textureStore( output, global_id.xy, vec4( select( 0.0, 1.0, distance( p, vec2( 256.0, 256.0 ) ) < 100.0 ), 0.0, 0.0, 1.0 ) );
-  // textureStore( output, global_id.xy, vec4( select( 0.0, 1.0, config.num_edges > 2 ), 0.0, 0.0, 1.0 ) );
-  textureStore( output, global_id.xy, vec4( select( 0.0, 1.0, p.x < 5.0 ), 0.0, 0.0, 1.0 ) );
+  let minPoint = vec2f( global_id.xy );
+  let maxPoint = minPoint + 1.0;
+  let center = 0.5 * ( minPoint + maxPoint );
+
+  var double_area = 0f;
+  for ( var i: u32 = 0; i < config.num_edges; i++ ) {
+    let edge = LinearEdge( vec2( vertices[ i * 4 + 0 ], vertices[ i * 4 + 1 ] ), vec2( vertices[ i * 4 + 2 ], vertices[ i * 4 + 3 ] ) );
+    double_area += bounds_double_area_edge( edge, minPoint.x, minPoint.y, maxPoint.x, maxPoint.y, center.x, center.y );
+  }
+
+  let area = 0.5 * double_area;
+  let value = 1f - clamp( area, 0f, 1f );
+
+  textureStore( output, global_id.xy, vec4( value, value, value, 1.0 ) );
 }
