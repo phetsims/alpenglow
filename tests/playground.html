@@ -365,15 +365,15 @@ an UI and Display made for visual testing and debugging.
       };
 
       const beforeFilter = Date.now();
-      const filterCount = getCount( bounds, items, phet.scenery.BoundsIntersectionFilter.filterIntersect );
+      const filterCount = getCount( bounds, items, phet.alpenglow.BoundsIntersectionFilter.filterIntersect );
       const afterFilter = Date.now();
 
       const beforeSweep = Date.now();
-      const sweepCount = getCount( bounds, items, phet.scenery.BoundsIntersectionFilter.sweepLineIntersect );
+      const sweepCount = getCount( bounds, items, phet.alpenglow.BoundsIntersectionFilter.sweepLineIntersect );
       const afterSweep = Date.now();
 
       const beforeQuadratic = Date.now();
-      const quadraticCount = getCount( bounds, items, phet.scenery.BoundsIntersectionFilter.quadraticIntersect );
+      const quadraticCount = getCount( bounds, items, phet.alpenglow.BoundsIntersectionFilter.quadraticIntersect );
       const afterQuadratic = Date.now();
 
       console.log( 'filter', filterCount, afterFilter - beforeFilter );
@@ -620,7 +620,7 @@ an UI and Display made for visual testing and debugging.
           polygons.push( [] );
         }
 
-        phet.scenery.GridClipping.gridClipIterate( polygon[ 0 ], polygon[ 1 ], 0, 0, width, height, stepX, stepY, stepWidth, stepHeight, ( cellX, cellY, startX, startY, endX, endY ) => {
+        phet.alpenglow.GridClipping.gridClipIterate( polygon[ 0 ], polygon[ 1 ], 0, 0, width, height, stepX, stepY, stepWidth, stepHeight, ( cellX, cellY, startX, startY, endX, endY ) => {
           const polygon = polygons[ cellY * stepWidth + cellX ];
           if ( !polygon.length ) {
             polygon.push( phet.dot.v2( startX, startY ) );
@@ -762,7 +762,7 @@ an UI and Display made for visual testing and debugging.
 
   window.badGridClipTest = function() {
     setTimeout( async () => {
-      const face = phet.scenery.PolygonalFace.deserialize( {"polygons":[[{"x":111.55555555555556,"y":448},{"x":120.00000000000003,"y":448},{"x":120.00000000000003,"y":457.50000000000006},{"x":123,"y":460.875}]]} );
+      const face = phet.alpenglow.PolygonalFace.deserialize( {"polygons":[[{"x":111.55555555555556,"y":448},{"x":120.00000000000003,"y":448},{"x":120.00000000000003,"y":457.50000000000006},{"x":123,"y":460.875}]]} );
       const minX = 107;
       const minY = 448;
       const maxX = 123;
@@ -821,7 +821,7 @@ an UI and Display made for visual testing and debugging.
 
       const showLineBetween = ( polygonIndex, index ) => {
         // debugger;
-        phet.scenery.GridClipping.gridClipIterate(
+        phet.alpenglow.GridClipping.gridClipIterate(
           face.polygons[ polygonIndex ][ index ], face.polygons[ polygonIndex ][ ( index + 1 ) % face.polygons[ polygonIndex ].length ],
           minX, minY, maxX, maxY,
           1, 1, width, height,
@@ -872,7 +872,7 @@ an UI and Display made for visual testing and debugging.
 
   window.badGridSingleTest = function() {
     setTimeout( async () => {
-      phet.scenery.GridClipping.gridClipIterate(
+      phet.alpenglow.GridClipping.gridClipIterate(
         phet.dot.v2( 13, 120 ),
         phet.dot.v2( 0, 120 ),
         0, 106, 13, 121,
@@ -903,14 +903,14 @@ an UI and Display made for visual testing and debugging.
         const simplifiers = [];
         for ( let i = 0; i < stepWidth * stepHeight; i++ ) {
           // TODO: should we be checking this in general?
-          simplifiers.push( new phet.scenery.ClipSimplifier( true ) );
+          simplifiers.push( new phet.alpenglow.ClipSimplifier( true ) );
         }
 
         for ( let i = 0; i < polygon.length; i++ ) {
           const startPoint = polygon[ i ];
           const endPoint = polygon[ ( i + 1 ) % polygon.length ];
 
-          phet.scenery.GridClipping.gridClipIterate( startPoint, endPoint, 0, 0, width, height, stepX, stepY, stepWidth, stepHeight, ( cellX, cellY, startX, startY, endX, endY ) => {
+          phet.alpenglow.GridClipping.gridClipIterate( startPoint, endPoint, 0, 0, width, height, stepX, stepY, stepWidth, stepHeight, ( cellX, cellY, startX, startY, endX, endY ) => {
             simplifiers[ cellY * stepWidth + cellX ].add( startX, startY );
           } );
         }
@@ -997,7 +997,7 @@ an UI and Display made for visual testing and debugging.
       // const outputSize = 768 / 4;
       const scale = 15;
 
-      const program = phet.scenery.RenderProgram.deserialize( serialized ).transformed( phet.dot.Matrix3.scaling( scale ) );
+      const program = phet.alpenglow.RenderProgram.deserialize( serialized ).transformed( phet.dot.Matrix3.scaling( scale ) );
       const styleCanvas = canvas => {
         canvas.style.width = `${displaySize}px`;
         canvas.style.height = `${displaySize}px`;
@@ -1287,7 +1287,7 @@ an UI and Display made for visual testing and debugging.
       ) ) ), 0.8 );
       const bBlendColorSpace = phet.alpenglow.RenderColorSpace.premultipliedOklab;
       // const bBlendColorSpace = phet.alpenglow.RenderColorSpace.premultipliedDisplayP3;
-      // const b = phet.scenery.RenderPathBoolean.fromInside( pathB, new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ).colorConverted( phet.alpenglow.RenderColorSpace.displayP3, clientColorSpace ) );
+      // const b = phet.alpenglow.RenderPathBoolean.fromInside( pathB, new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ).colorConverted( phet.alpenglow.RenderColorSpace.displayP3, clientColorSpace ) );
       const b = phet.alpenglow.RenderColorSpaceConversion.convert( phet.alpenglow.RenderPathBoolean.fromInside( pathB, new phet.alpenglow.RenderRadialGradient(
         phet.dot.Matrix3.IDENTITY,
         new phet.dot.Vector2( 10, 10 ),
@@ -1919,7 +1919,7 @@ an UI and Display made for visual testing and debugging.
           const x = bounds.minX + bounds.width * ( j / width );
           const y = bounds.minY + bounds.height * ( i / height );
 
-          const value = phet.scenery.PolygonMitchellNetravali.evaluate( polygon, phet.dot.v2( x, y ) );
+          const value = phet.alpenglow.PolygonMitchellNetravali.evaluate( polygon, phet.dot.v2( x, y ) );
           const floor = 50;
 
           const r = value * ( 255 - floor ) + floor;
@@ -1946,7 +1946,7 @@ an UI and Display made for visual testing and debugging.
       const examplePoint = phet.dot.v2( 4.5, 5.5 );
       const exampleBounds = new phet.dot.Bounds2( examplePoint.x, examplePoint.y, examplePoint.x + 1, examplePoint.y + 1 );
 
-      const exampleClip = phet.scenery.BoundsClipping.boundsClipPolygon(
+      const exampleClip = phet.alpenglow.BoundsClipping.boundsClipPolygon(
         polygon,
         exampleBounds.minX, exampleBounds.minY, exampleBounds.maxX, exampleBounds.maxY, exampleBounds.centerX, exampleBounds.centerY
       );
@@ -2004,7 +2004,7 @@ an UI and Display made for visual testing and debugging.
           const x = bounds.minX + bounds.width * ( j / width ) + 0.5;
           const y = bounds.minY + bounds.height * ( i / height ) + 0.5;
 
-          const value = phet.scenery.PolygonMitchellNetravali.evaluate( polygon, phet.dot.v2( x, y ) );
+          const value = phet.alpenglow.PolygonMitchellNetravali.evaluate( polygon, phet.dot.v2( x, y ) );
 
           const paddedValue = 0.9 * value + 0.05;
 
@@ -2065,7 +2065,7 @@ an UI and Display made for visual testing and debugging.
           const x = bounds.minX + bounds.width * ( j / width ) + 0.5;
           const y = bounds.minY + bounds.height * ( i / height ) + 0.5;
 
-          const value = phet.scenery.PolygonMitchellNetravali.evaluate( polygon, phet.dot.v2( x, y ) );
+          const value = phet.alpenglow.PolygonMitchellNetravali.evaluate( polygon, phet.dot.v2( x, y ) );
 
 
           // const p = phet.dot.v2( x, y );
@@ -2123,11 +2123,11 @@ an UI and Display made for visual testing and debugging.
       const left = [];
       const right = [];
 
-      // phet.scenery.BinaryClipping.binaryXClipPolygon( polygon, 0.25, left, right );
-      // phet.scenery.BinaryClipping.binaryYClipPolygon( polygon, 0.25, left, right );
+      // phet.alpenglow.BinaryClipping.binaryXClipPolygon( polygon, 0.25, left, right );
+      // phet.alpenglow.BinaryClipping.binaryYClipPolygon( polygon, 0.25, left, right );
 
-      // phet.scenery.BinaryClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 0.5, 0.5 ), 0.5, left, right );
-      phet.scenery.BinaryClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 1, 1 ), 1, left, right );
+      // phet.alpenglow.BinaryClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 0.5, 0.5 ), 0.5, left, right );
+      phet.alpenglow.BinaryClipping.binaryLineClipPolygon( polygon, phet.dot.v2( 1, 1 ), 1, left, right );
 
       scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
         stroke: 'green',
@@ -2178,7 +2178,7 @@ an UI and Display made for visual testing and debugging.
       //   new phet.dot.Vector2( 0, 0.5 )
       // ];
 
-      const edges = phet.scenery.LinearEdge.fromPolygon( polygon );
+      const edges = phet.alpenglow.LinearEdge.fromPolygon( polygon );
 
       let left = [];
       let right = [];
@@ -2189,13 +2189,13 @@ an UI and Display made for visual testing and debugging.
       const maxAngle = Math.PI / 4;
       // const center = phet.dot.v2( 0.25, 0.25 );
 
-      phet.scenery.CircularClipping.binaryCircularClipEdges( edges, center, radius, maxAngle, left, right );
+      phet.alpenglow.CircularClipping.binaryCircularClipEdges( edges, center, radius, maxAngle, left, right );
 
-      left = phet.scenery.LinearEdge.withOppositesRemoved( left );
-      right = phet.scenery.LinearEdge.withOppositesRemoved( right );
+      left = phet.alpenglow.LinearEdge.withOppositesRemoved( left );
+      right = phet.alpenglow.LinearEdge.withOppositesRemoved( right );
 
-      const leftPolygons = phet.scenery.LinearEdge.toPolygons( left );
-      const rightPolygons = phet.scenery.LinearEdge.toPolygons( right );
+      const leftPolygons = phet.alpenglow.LinearEdge.toPolygons( left );
+      const rightPolygons = phet.alpenglow.LinearEdge.toPolygons( right );
 
       // console.log( left.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' ) );
       // console.log( right.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' ) );
@@ -2232,12 +2232,12 @@ an UI and Display made for visual testing and debugging.
       //   } ) );
       // } );
 
-      scaledNode.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( leftPolygons ), {
+      scaledNode.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( leftPolygons ), {
         fill: 'rgba(255,0,0,0.5)',
         lineWidth: 1 / 300,
       } ) );
 
-      scaledNode.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( rightPolygons ), {
+      scaledNode.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( rightPolygons ), {
         fill: 'rgba(0,0,255,0.5)',
         lineWidth: 1 / 300,
       } ) );
@@ -2278,7 +2278,7 @@ an UI and Display made for visual testing and debugging.
       const maxAngle = Math.PI / 4;
       // const center = phet.dot.v2( 0.25, 0.25 );
 
-      phet.scenery.CircularClipping.binaryCircularClipPolygon( polygons, center, radius, maxAngle, leftPolygons, rightPolygons );
+      phet.alpenglow.CircularClipping.binaryCircularClipPolygon( polygons, center, radius, maxAngle, leftPolygons, rightPolygons );
 
       // console.log( left.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' ) );
       // console.log( right.map( e => `${e.startPoint.x},${e.startPoint.y} => ${e.endPoint.x},${e.endPoint.y}` ).join( '\n' ) );
@@ -2315,12 +2315,12 @@ an UI and Display made for visual testing and debugging.
       //   } ) );
       // } );
 
-      scaledNode.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( leftPolygons ), {
+      scaledNode.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( leftPolygons ), {
         fill: 'rgba(255,0,0,0.5)',
         lineWidth: 1 / 300,
       } ) );
 
-      scaledNode.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( rightPolygons ), {
+      scaledNode.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( rightPolygons ), {
         fill: 'rgba(0,0,255,0.5)',
         lineWidth: 1 / 300,
       } ) );
@@ -2358,7 +2358,7 @@ an UI and Display made for visual testing and debugging.
 
       for ( let x = -0.205; x < 1.205; x += 0.025 ) {
         for ( let y = -0.205; y < 1.205; y += 0.025 ) {
-          const included = phet.scenery.LinearEdge.getWindingNumberPolygon( polygon, phet.dot.v2( x, y ) ) !== 0;
+          const included = phet.alpenglow.LinearEdge.getWindingNumberPolygon( polygon, phet.dot.v2( x, y ) ) !== 0;
 
           scaledNode.addChild( new phet.scenery.Circle( 0.003, {
             fill: included ? 'green' : 'red',
@@ -2392,7 +2392,7 @@ an UI and Display made for visual testing and debugging.
       // const normal = phet.dot.v2( 1, 0 );
       // const normal = phet.dot.v2( 0, 1 );
 
-      const polygons = phet.scenery.StripeClipping.binaryStripeClipPolygon( polygon, normal, values );
+      const polygons = phet.alpenglow.StripeClipping.binaryStripeClipPolygon( polygon, normal, values );
 
       console.log( polygons );
 
@@ -2401,7 +2401,7 @@ an UI and Display made for visual testing and debugging.
         const p0 = polygon[ i ];
         const p1 = polygon[ ( i + 1 ) % polygon.length ];
 
-        phet.scenery.StripeClipping.binaryStripeClipEdge( p0, p1, normal, values, 0.1111, clippedEdgeCollection );
+        phet.alpenglow.StripeClipping.binaryStripeClipEdge( p0, p1, normal, values, 0.1111, clippedEdgeCollection );
       }
 
       console.log( clippedEdgeCollection );
@@ -2410,7 +2410,7 @@ an UI and Display made for visual testing and debugging.
         const polygon = polygons[ i ];
         const clippedEdges = clippedEdgeCollection[ i ];
 
-        const polygonArea = phet.scenery.LinearEdge.getPolygonArea( polygon );
+        const polygonArea = phet.alpenglow.LinearEdge.getPolygonArea( polygon );
         const clippedEdgeArea = _.sum( clippedEdges.map( clippedEdge => clippedEdge.getLineIntegralArea() ));
         const zero = _.sum( clippedEdges.map( clippedEdge => clippedEdge.getLineIntegralZero() ) );
 
@@ -2529,7 +2529,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       scene.addChild( container );
 
       const addBounds = bounds => {
-        const outPolygon = phet.scenery.BoundsClipping.boundsClipPolygon(
+        const outPolygon = phet.alpenglow.BoundsClipping.boundsClipPolygon(
           inPolygon,
           bounds.minX, bounds.minY, bounds.maxX, bounds.maxY, bounds.centerX, bounds.centerY
         );
@@ -2614,24 +2614,24 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
 
       const polygonsB = shapeToPolygons( new phet.kite.Shape( 'M 320.00000000000000000000 400.00000000000000000000 C 244.15000000000000568434 400.00000000000000000000 182.75000000000000000000 341.29000000000002046363 177.09999999999999431566 266.88999999999998635758 L 72.20000000000000284217 185.81999999999999317879 C 58.41000000000000369482 203.12000000000000454747 45.71999999999999886313 221.40999999999999658939 35.48000000000000397904 241.40999999999999658939 A 32.35000000000000142109 32.35000000000000142109 0 0 0 35.48000000000000397904 270.60000000000002273737 C 89.70999999999999374722 376.41000000000002501110 197.06999999999999317879 448.00000000000000000000 320.00000000000000000000 448.00000000000000000000 C 346.91000000000002501110 448.00000000000000000000 372.87000000000000454747 444.00000000000000000000 397.88999999999998635758 437.54000000000002046363 L 346.00000000000000000000 397.38999999999998635758 A 144.12999999999999545253 144.12999999999999545253 0 0 1 319.99999999999994315658 400.00000000000000000000 Z M 633.81999999999993633537 458.10000000000002273737 L 523.26999999999998181011 372.66000000000002501110 A 331.25000000000000000000 331.25000000000000000000 0 0 0 604.51999999999998181011 270.59000000000003183231 A 32.35000000000000142109 32.35000000000000142109 0 0 0 604.51999999999998181011 241.40000000000003410605 C 550.28999999999996362021 135.59000000000000341061 442.93000000000000682121 64.00000000000000000000 320.00000000000000000000 64.00000000000000000000 A 308.14999999999997726263 308.14999999999997726263 0 0 0 172.68000000000000682121 101.69999999999987494448 L 45.46000000000000085265 3.37000000000000010658 A 16.00000000000000000000 16.00000000000000000000 0 0 0 23.00000000000000710543 6.17999999999999616307 L 3.37000000000000010658 31.44999999999999928946 A 16.00000000000000000000 16.00000000000000000000 0 0 0 6.18000000000001215028 53.89999999999999857891 L 594.53999999999996362021 508.62999999999999545253 A 16.00000000000000000000 16.00000000000000000000 0 0 0 617.00000000000000000000 505.81999999999999317879 L 636.63999999999998635758 480.55000000000001136868 A 16.00000000000000000000 16.00000000000000000000 0 0 0 633.81999999999993633537 458.10000000000007958079 Z M 450.09999999999990905053 316.10000000000002273737 L 410.79999999999989768185 285.72000000000002728484 A 94.75000000000000000000 94.75000000000000000000 0 0 0 416.00000000000000000000 256.00000000000005684342 A 94.76000000000000511591 94.76000000000000511591 0 0 0 294.68999999999982719601 163.79000000000007730705 A 47.64999999999999857891 47.64999999999999857891 0 0 1 304.00000000000000000000 192.00000000000000000000 A 46.64000000000000056843 46.64000000000000056843 0 0 1 302.46000000000003637979 201.99999999999988631316 L 228.84999999999996589395 145.11000000000001364242 A 142.31000000000000227374 142.31000000000000227374 0 0 1 319.99999999999994315658 112.00000000000000000000 A 143.91999999999998749445 143.91999999999998749445 0 0 1 464.00000000000000000000 256.00000000000005684342 C 464.00000000000000000000 277.62999999999999545253 458.70999999999997953637 297.79000000000002046363 450.10000000000002273737 316.11000000000001364242 L 450.09999999999990905053 316.10000000000002273737 Z' ) ).map( subpath => subpath.map( point => phet.dot.v2( point.x + 20, point.y + 20 ) ) );
 
-      const pathA = new phet.scenery.RenderPath( 'nonzero', polygonsA );
-      const pathB = new phet.scenery.RenderPath( 'nonzero', polygonsB );
+      const pathA = new phet.alpenglow.RenderPath( 'nonzero', polygonsA );
+      const pathB = new phet.alpenglow.RenderPath( 'nonzero', polygonsB );
 
-      const overlaps = phet.scenery.PolygonalBoolean.getOverlaps( pathA, pathB );
+      const overlaps = phet.alpenglow.PolygonalBoolean.getOverlaps( pathA, pathB );
 
-      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( overlaps.intersection ), {
+      scene.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( overlaps.intersection ), {
         fill: 'rgba(0,0,0,0.5)'
       } ) );
-      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( overlaps.aOnly ), {
+      scene.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( overlaps.aOnly ), {
         fill: 'rgba(255,0,0,0.5)'
       } ) );
-      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( overlaps.bOnly ), {
+      scene.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( overlaps.bOnly ), {
         fill: 'rgba(0,255,0,0.5)'
       } ) );
-      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( polygonsA ), {
+      scene.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( polygonsA ), {
         stroke: 'red'
       } ) );
-      scene.addChild( new phet.scenery.Path( phet.scenery.LinearEdge.polygonsToShape( polygonsB ), {
+      scene.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( polygonsB ), {
         stroke: 'green'
       } ) );
       display.width = 1024;
@@ -2663,12 +2663,12 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
 
       const SHOW_OUTLINES = true;
 
-      const vectorCanvas = new phet.scenery.VectorCanvas( outputSize, outputSize, 'display-p3', phet.alpenglow.PolygonFilterType.Box );
+      const vectorCanvas = new phet.alpenglow.VectorCanvas( outputSize, outputSize, 'display-p3', phet.alpenglow.PolygonFilterType.Box );
 
       const p = ( x, y ) => phet.dot.v2( x * outputSize, y * outputSize );
       const s = s => s * outputSize;
 
-      vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', [
+      vectorCanvas.fillColor( new phet.alpenglow.RenderPath( 'nonzero', [
         [
           p( 0, 0 ),
           p( 1, 0 ),
@@ -2677,7 +2677,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
         ]
       ] ), phet.dot.v4( 0.9, 0.9, 0.9, 1 ) );
 
-      vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', [
+      vectorCanvas.fillColor( new phet.alpenglow.RenderPath( 'nonzero', [
         [
           p( 0.1, 0.1 ),
           p( 0.5, 0.1 ),
@@ -2686,7 +2686,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
         ]
       ] ), phet.dot.v4( 1, 0, 0, 1 ) );
 
-      vectorCanvas.fillLinearGradient( new phet.scenery.RenderPath( 'nonzero', [
+      vectorCanvas.fillLinearGradient( new phet.alpenglow.RenderPath( 'nonzero', [
         [
           p( 0.25, 0.25 ),
           p( 0.75, 0.30 ),
@@ -2697,10 +2697,10 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
         { ratio: 0, color: phet.dot.v4( 0.75, 0.75, 0.25, 1 ) },
         { ratio: 0.5, color: phet.dot.v4( 0.25, 0.25, 0.25, 1 ) },
         { ratio: 1, color: phet.dot.v4( 0.25, 0.75, 0.5, 1 ) }
-      ], phet.scenery.RenderExtend.Repeat );
+      ], phet.alpenglow.RenderExtend.Repeat );
 
       // TODO: breaks when changing 0.8 to 0.6
-      vectorCanvas.fillRadialGradient( new phet.scenery.RenderPath( 'nonzero', [
+      vectorCanvas.fillRadialGradient( new phet.alpenglow.RenderPath( 'nonzero', [
         [
           p( 0.8, 0.8 ),
           p( 0.8, 0.95 ),
@@ -2712,10 +2712,10 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
         { ratio: 0, color: phet.dot.v4( 0.75, 0.75, 0.25, 1 ) },
         { ratio: 0.5, color: phet.dot.v4( 0.25, 0.25, 0.25, 1 ) },
         { ratio: 1, color: phet.dot.v4( 0.25, 0.75, 0.5, 1 ) }
-      ], phet.scenery.RenderExtend.Repeat );
+      ], phet.alpenglow.RenderExtend.Repeat );
 
       // TODO: changing 0.85 to 0.88 causes a failure
-      vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', [
+      vectorCanvas.fillColor( new phet.alpenglow.RenderPath( 'nonzero', [
         [
           p( 0.6, 0.2 ),
           p( 0.85, 0.2 ),
@@ -2736,7 +2736,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
           } ) );
 
           const polygons = shapeToPolygons( strokedShape );
-          vectorCanvas.fillColor( new phet.scenery.RenderPath( 'nonzero', polygons ), phet.dot.v4( 0, 0, 0, 1 ) );
+          vectorCanvas.fillColor( new phet.alpenglow.RenderPath( 'nonzero', polygons ), phet.dot.v4( 0, 0, 0, 1 ) );
         } );
       }
 
@@ -2762,46 +2762,46 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
     setTimeout( async function() {
 
       // const program = new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) );
-      // const program = new phet.scenery.RenderBarycentricBlend(
+      // const program = new phet.alpenglow.RenderBarycentricBlend(
       //   phet.dot.v2( 0, 0 ),
       //   phet.dot.v2( 1, 1 ),
       //   phet.dot.v2( 0, 1 ),
-      //   phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
+      //   phet.alpenglow.RenderBarycentricBlendAccuracy.Accurate,
       //   new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
       //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
       //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) )
       // );
-      // const program = new phet.scenery.RenderLinearBlend(
+      // const program = new phet.alpenglow.RenderLinearBlend(
       //   phet.dot.v2( 1, 0 ),
       //   0.25,
-      //   phet.scenery.RenderLinearBlendAccuracy.Accurate,
+      //   phet.alpenglow.RenderLinearBlendAccuracy.Accurate,
       //   new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
       //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) )
       // );
-      // const program = new phet.scenery.RenderLinearBlend(
+      // const program = new phet.alpenglow.RenderLinearBlend(
       //   phet.dot.v2( 1, 0 ),
       //   0.25,
-      //   phet.scenery.RenderLinearBlendAccuracy.Accurate,
-      //   new phet.scenery.RenderBarycentricBlend(
+      //   phet.alpenglow.RenderLinearBlendAccuracy.Accurate,
+      //   new phet.alpenglow.RenderBarycentricBlend(
       //     phet.dot.v2( 0, 0 ),
       //     phet.dot.v2( 1, 1 ),
       //     phet.dot.v2( 0, 1 ),
-      //     phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
+      //     phet.alpenglow.RenderBarycentricBlendAccuracy.Accurate,
       //     new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 0 ) ),
       //     new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 0 ) ),
       //     new phet.alpenglow.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
       //   ),
-      //   new phet.scenery.RenderBarycentricBlend(
+      //   new phet.alpenglow.RenderBarycentricBlend(
       //     phet.dot.v2( 0, 0 ),
       //     phet.dot.v2( 1, 1 ),
       //     phet.dot.v2( 0, 1 ),
-      //     phet.scenery.RenderBarycentricBlendAccuracy.Accurate,
+      //     phet.alpenglow.RenderBarycentricBlendAccuracy.Accurate,
       //     new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 0 ) ),
       //     new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 0, 1 ) ),
       //     new phet.alpenglow.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
       //   )
       // );
-      const program = new phet.scenery.RenderStack( [
+      const program = new phet.alpenglow.RenderStack( [
         new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) ),
         new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
         new phet.alpenglow.RenderColor( phet.dot.v4( 0.5, 0, 0, 1 ) ),
@@ -2810,11 +2810,11 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       const instructions = [];
       program.writeInstructions( instructions );
 
-      const executor = new phet.scenery.RenderExecutor();
+      const executor = new phet.alpenglow.RenderExecutor();
       executor.loadInstructions( instructions );
       console.log( executor.instructions );
       const result = phet.dot.v4( 0, 0, 0, 0 );
-      executor.execute( new phet.scenery.RenderEvaluationContext().set(
+      executor.execute( new phet.alpenglow.RenderEvaluationContext().set(
         null, 1, phet.dot.v2( 0.5, 0.5 ), 0, 0, 1, 1
       ), result );
 
