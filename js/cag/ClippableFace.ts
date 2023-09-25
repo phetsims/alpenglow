@@ -187,12 +187,12 @@ type ClippableFace = {
   toEdgedFace(): EdgedFace;
 
   /**
-   * Converts the face to a edged-clipped face (inspecting the edges)
+   * Converts the face to an edged-clipped face (inspecting the edges)
    */
   toEdgedClippedFace( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace;
 
   /**
-   * Converts the face to a edged-clipped face (without inspecting the edges)
+   * Converts the face to an edged-clipped face (without inspecting the edges)
    */
   toEdgedClippedFaceWithoutCheck( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace;
 
