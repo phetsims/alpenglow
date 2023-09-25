@@ -47,6 +47,13 @@ export default class DeviceContext {
     } );
   }
 
+  public createBuffer( size: number ): GPUBuffer {
+    return this.device.createBuffer( {
+      size: Math.max( size, 16 ), // Min of 16 bytes used
+      usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE
+    } );
+  }
+
   public getCanvasContext( canvas: HTMLCanvasElement ): GPUCanvasContext {
     const context = canvas.getContext( 'webgpu' )!;
 

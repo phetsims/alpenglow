@@ -265,5 +265,7 @@ export { default as DeviceContext } from './webgpu/DeviceContext.js';
 export { default as Binding } from './webgpu/Binding.js';
 export { default as ComputeShader } from './webgpu/ComputeShader.js';
 export { default as BlitShader } from './webgpu/BlitShader.js';
+export { default as ByteEncoder } from './webgpu/ByteEncoder.js';
+export type { F32, U32, U8 } from './webgpu/ByteEncoder.js';
 export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
 

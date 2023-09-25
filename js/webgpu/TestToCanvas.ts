@@ -10,6 +10,8 @@ import { alpenglow, Binding, BlitShader, ComputeShader, DeviceContext } from '..
 import Vector3 from '../../../dot/js/Vector3.js';
 
 export default class TestToCanvas {
+
+  // phet.alpenglow.TestToCanvas.render().then( c => document.body.appendChild( c ) )
   public static async render(): Promise<HTMLCanvasElement> {
     const device = ( await DeviceContext.getDevice() )!;
     assert && assert( device );
