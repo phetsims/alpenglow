@@ -8,6 +8,7 @@
 
 import { alpenglow, Binding, BlitShader, ComputeShader, DeviceContext, DualSnippet, PolygonalFace, wgsl_test_to_canvas } from '../imports.js';
 import Vector3 from '../../../dot/js/Vector3.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 
 export default class TestToCanvas {
 
@@ -30,6 +31,30 @@ export default class TestToCanvas {
     const outTexture = context.getCurrentTexture();
 
     const pathEdges = TestToCanvas.getTestPath().toEdgedFace().edges;
+    const pointsWithMatrix = ( matrix: Matrix3 ): number[] => {
+      return pathEdges.flatMap( edge => {
+        // NOTE: reversed here, due to our test path!!!
+        const start = matrix.timesVector2( edge.endPoint );
+        const end = matrix.timesVector2( edge.startPoint );
+
+        return [ start.x, start.y, end.x, end.y ];
+      } );
+    };
+    const pathPoints = [
+      ...pointsWithMatrix( Matrix3.scaling( 1.5 ) ),
+      ...pointsWithMatrix( Matrix3.translation( 150, 0 ).timesMatrix( Matrix3.scaling( 0.2 ) ) ),
+      ...pointsWithMatrix( Matrix3.translation( 300, 0 ).timesMatrix( Matrix3.scaling( 0.2 ) ) ),
+      ...pointsWithMatrix( Matrix3.translation( 450, 0 ).timesMatrix( Matrix3.scaling( 0.2 ) ) ),
+      ...pointsWithMatrix( Matrix3.translation( 600, 0 ).timesMatrix( Matrix3.scaling( 0.2 ) ) ),
+      ...pointsWithMatrix( Matrix3.translation( 750, 0 ).timesMatrix( Matrix3.scaling( 0.2 ) ) ),
+      ...pointsWithMatrix( Matrix3.translation( 900, 0 ).timesMatrix( Matrix3.scaling( 0.2 ) ) ),
+      ..._.range( 0, 10 ).flatMap( i => {
+        return _.range( 0, 4 ).flatMap( j => {
+          return pointsWithMatrix( Matrix3.translation( 100 + 40 * i, 800 + 40 * j ).timesMatrix( Matrix3.scaling( 0.05 ) ) );
+        } );
+      } )
+    ];
+    console.log( `edge count: ${pathPoints.length / 4}` );
 
     const configBuffer = device.createBuffer( {
       label: 'config buffer',
@@ -37,19 +62,11 @@ export default class TestToCanvas {
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
     } );
     device.queue.writeBuffer( configBuffer, 0, new Uint32Array( [
-      pathEdges.length
+      pathPoints.length / 4
     ] ).buffer );
 
-    const dataBuffer = deviceContext.createBuffer( 4 * 4 * pathEdges.length );
-    const scale = 1.5;
-    device.queue.writeBuffer( dataBuffer, 0, new Float32Array( pathEdges.flatMap( edge => {
-      return [
-        scale * edge.endPoint.x,
-        scale * edge.endPoint.y,
-        scale * edge.startPoint.x,
-        scale * edge.startPoint.y
-      ];
-    } ) ).buffer );
+    const dataBuffer = deviceContext.createBuffer( 4 * pathPoints.length );
+    device.queue.writeBuffer( dataBuffer, 0, new Float32Array( pathPoints ).buffer );
 
     const snippet = DualSnippet.fromSource( wgsl_test_to_canvas, {
       preferredStorageFormat: deviceContext.preferredStorageFormat
@@ -114,14 +131,15 @@ export default class TestToCanvas {
     const commandBuffer = encoder.finish();
     device.queue.submit( [ commandBuffer ] );
 
-    // // Conditionally listen to when the submitted work is done
-    // if ( onCompleteActions.length ) {
-    //   device.queue.onSubmittedWorkDone().then( () => {
-    //     onCompleteActions.forEach( action => action() );
-    //   } ).catch( err => {
-    //     throw err;
-    //   } );
-    // }
+    const startTime = Date.now();
+
+    device.queue.onSubmittedWorkDone().then( () => {
+      const endTime = Date.now();
+
+      console.log( endTime - startTime );
+    } ).catch( err => {
+      throw err;
+    } );
 
     configBuffer.destroy();
     fineOutputTexture && fineOutputTexture.destroy();
