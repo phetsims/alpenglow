@@ -47,6 +47,7 @@ export default class DeviceContext {
     } );
   }
 
+  // in bytes
   public createBuffer( size: number ): GPUBuffer {
     return this.device.createBuffer( {
       size: Math.max( size, 16 ), // Min of 16 bytes used

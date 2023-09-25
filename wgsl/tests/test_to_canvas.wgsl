@@ -6,6 +6,7 @@
 
 #import ../cag/LinearEdge
 #import ../clip/bounds_double_area_edge
+#import ../color/linear_sRGB_to_sRGB
 
 #option preferredStorageFormat
 
@@ -41,5 +42,5 @@ fn main(
   let area = 0.5 * double_area;
   let value = 1f - clamp( area, 0f, 1f );
 
-  textureStore( output, global_id.xy, vec4( value, value, value, 1.0 ) );
+  textureStore( output, global_id.xy, vec4( linear_sRGB_to_sRGB( vec3( value ) ), 1.0 ) );
 }
