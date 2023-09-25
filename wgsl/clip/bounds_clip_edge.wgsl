@@ -8,6 +8,7 @@
 #import ./matthes_drakopoulos_clip
 
 struct bounds_clip_edge_Result {
+  // TODO: for memory, we really should have this be array<vec2f,4>, since we're duplicating the start/end points
   edges: array<LinearEdge,3>,
   count: u32
 }

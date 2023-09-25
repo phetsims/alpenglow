@@ -128,9 +128,6 @@ export { default as wgsl_matthes_drakopoulos_clip } from '../wgsl/clip/matthes_d
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_bounds_clip_edge } from '../wgsl/clip/bounds_clip_edge.js';
 
-export { default as DualSnippet } from './webgpu/DualSnippet.js';
-export type { DualSnippetSource } from './webgpu/DualSnippet.js';
-
 export { default as PolygonFilterType, getPolygonFilterWidth, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand, getPolygonFilterGridBounds } from './render-program/PolygonFilterType.js';
 export { default as Mesh } from './render-program/Mesh.js';
 export { default as RenderBlendType } from './render-program/RenderBlendType.js';
@@ -248,8 +245,6 @@ export type { BinaryClipCallback, PolygonCompleteCallback, BinaryPolygonComplete
 
 export { default as FaceConversion } from './cag/FaceConversion.js';
 
-export { default as Snippet } from './webgpu/Snippet.js';
-
 export type { default as RasterColorConverter } from './raster/RasterColorConverter.js';
 export { default as RasterPremultipliedConverter } from './raster/RasterPremultipliedConverter.js';
 export { default as CombinedRaster } from './raster/CombinedRaster.js';
@@ -262,3 +257,13 @@ export { default as Rasterize } from './raster/Rasterize.js';
 export type { RasterizationOptions } from './raster/Rasterize.js';
 export { default as VectorCanvas } from './raster/VectorCanvas.js';
 export { default as RasterLog, RasterTileLog } from './raster/RasterLog.js';
+
+export { default as Snippet } from './webgpu/Snippet.js';
+export { default as DualSnippet } from './webgpu/DualSnippet.js';
+export type { DualSnippetSource } from './webgpu/DualSnippet.js';
+export { default as DeviceContext } from './webgpu/DeviceContext.js';
+export { default as Binding } from './webgpu/Binding.js';
+export { default as ComputeShader } from './webgpu/ComputeShader.js';
+export { default as BlitShader } from './webgpu/BlitShader.js';
+export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
+
