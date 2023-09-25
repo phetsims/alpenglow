@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../LinearEdge
+#import ../cag/LinearEdge
 
 fn shoelace( edge: LinearEdge ) -> f32 {
   return 0.5 * ( edge.endPoint.x + edge.startPoint.x ) * ( edge.endPoint.y - edge.startPoint.y );
