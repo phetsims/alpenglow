@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding } from '../imports.js';
-import Vector3 from '../../../dot/js/Vector3.js';
+import { alpenglow, Binding, DualSnippet, DualSnippetSource } from '../imports.js';
 
 export default class ComputeShader {
 
@@ -57,27 +56,26 @@ export default class ComputeShader {
 
   public dispatch(
     encoder: GPUCommandEncoder,
-    dispatchSize: Vector3,
-    resources: ( GPUBuffer | GPUTextureView )[]
+    resources: ( GPUBuffer | GPUTextureView )[],
+    dispatchX = 1,
+    dispatchY = 1,
+    dispatchZ = 1
   ): void {
     const computePass = encoder.beginComputePass( {
       label: `${this.name} compute pass`
     } );
     computePass.setPipeline( this.pipeline );
     computePass.setBindGroup( 0, this.getBindGroup( resources ) );
-    computePass.dispatchWorkgroups( dispatchSize.x, dispatchSize.y, dispatchSize.z );
+    computePass.dispatchWorkgroups( dispatchX, dispatchY, dispatchZ );
     computePass.end();
   }
 
   public dispatchIndirect(
     encoder: GPUCommandEncoder,
-    dispatchSize: Vector3,
     resources: ( GPUBuffer | GPUTextureView )[],
     indirectBuffer: GPUBuffer,
     indirectOffset: number
   ): void {
-    assert && assert( resources.includes( indirectBuffer ) );
-
     const computePass = encoder.beginComputePass( {
       label: `${this.name} indirect compute pass`
     } );
@@ -85,6 +83,20 @@ export default class ComputeShader {
     computePass.setBindGroup( 0, this.getBindGroup( resources ) );
     computePass.dispatchWorkgroupsIndirect( indirectBuffer, indirectOffset );
     computePass.end();
+  }
+
+  public static fromSource(
+    device: GPUDevice,
+    name: string,
+    source: DualSnippetSource,
+    bindings: Binding[],
+    options: Record<string, unknown> = {}
+  ): ComputeShader {
+    const snippet = DualSnippet.fromSource( source, options );
+    return new ComputeShader( name, snippet.toString(), [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], device );
   }
 }
 

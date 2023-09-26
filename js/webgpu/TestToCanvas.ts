@@ -7,7 +7,6 @@
  */
 
 import { alpenglow, Binding, BlitShader, ComputeShader, DeviceContext, DualSnippet, PolygonalFace, wgsl_test_to_canvas } from '../imports.js';
-import Vector3 from '../../../dot/js/Vector3.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 
 export default class TestToCanvas {
@@ -118,9 +117,9 @@ export default class TestToCanvas {
     assert && assert( Number.isInteger( canvas.height / 16 ) );
 
     // Have the fine-rasterization shader use the preferred format as output (for now)
-    shader.dispatch( encoder, new Vector3( canvas.width / 16, canvas.height / 16, 1 ), [
+    shader.dispatch( encoder, [
       configBuffer, fineOutputTextureView, dataBuffer
-    ] );
+    ], canvas.width / 16, canvas.height / 16 );
 
     if ( !canOutputToCanvas ) {
       assert && assert( fineOutputTexture, 'If we cannot output to the Canvas directly, we will have created a texture' );

@@ -6,9 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ComputeShader, DeviceContext, DualSnippet, wgsl_reduce_simple_single } from '../imports.js';
+import { Binding, ComputeShader, DeviceContext, wgsl_reduce_simple_single } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
-import Vector3 from '../../../dot/js/Vector3.js';
 
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
@@ -50,11 +49,12 @@ asyncTestWithDevice( 'reduce_simple_single', async device => {
 
   const context = new DeviceContext( device );
 
-  const snippet = DualSnippet.fromSource( wgsl_reduce_simple_single, {} );
-  const shader = new ComputeShader( 'reduce_simple_single', snippet.toString(), [
-    Binding.READ_ONLY_STORAGE_BUFFER,
-    Binding.STORAGE_BUFFER
-  ], device );
+  const shader = ComputeShader.fromSource(
+    device, 'reduce_simple_single', wgsl_reduce_simple_single, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {}
+  );
 
   const inputBuffer = context.createBuffer( 4 * 256 );
   device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
@@ -62,11 +62,9 @@ asyncTestWithDevice( 'reduce_simple_single', async device => {
   const outputBuffer = context.createBuffer( 4 );
   const resultBuffer = context.createMapReadableBuffer( 4 );
 
-  const encoder = device.createCommandEncoder( {
-    label: 'the encoder'
-  } );
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
 
-  shader.dispatch( encoder, new Vector3( 1, 1, 1 ), [
+  shader.dispatch( encoder, [
     inputBuffer, outputBuffer
   ] );
 
@@ -75,13 +73,7 @@ asyncTestWithDevice( 'reduce_simple_single', async device => {
   const commandBuffer = encoder.finish();
   device.queue.submit( [ commandBuffer ] );
 
-  await resultBuffer.mapAsync( GPUMapMode.READ );
-  const resultArrayBuffer = resultBuffer.getMappedRange();
-
-  const outputArray = new Float32Array( 1 );
-  outputArray.set( new Float32Array( resultArrayBuffer ) );
-
-  resultBuffer.unmap();
+  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
 
   inputBuffer.destroy();
   outputBuffer.destroy();

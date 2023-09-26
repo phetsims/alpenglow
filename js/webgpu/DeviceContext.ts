@@ -108,6 +108,54 @@ export default class DeviceContext {
   public dispose(): void {
     this.device.destroy();
   }
+
+  public static async getMappedFloatArray( buffer: GPUBuffer ): Promise<Float32Array> {
+    await buffer.mapAsync( GPUMapMode.READ );
+    const resultArrayBuffer = buffer.getMappedRange();
+
+    const outputArray = new Float32Array( resultArrayBuffer.byteLength / 4 );
+    outputArray.set( new Float32Array( resultArrayBuffer ) );
+
+    buffer.unmap();
+
+    return outputArray;
+  }
+
+  public static async getMappedUintArray( buffer: GPUBuffer ): Promise<Uint32Array> {
+    await buffer.mapAsync( GPUMapMode.READ );
+    const resultArrayBuffer = buffer.getMappedRange();
+
+    const outputArray = new Uint32Array( resultArrayBuffer.byteLength / 4 );
+    outputArray.set( new Uint32Array( resultArrayBuffer ) );
+
+    buffer.unmap();
+
+    return outputArray;
+  }
+
+  public static async getMappedIntArray( buffer: GPUBuffer ): Promise<Int32Array> {
+    await buffer.mapAsync( GPUMapMode.READ );
+    const resultArrayBuffer = buffer.getMappedRange();
+
+    const outputArray = new Int32Array( resultArrayBuffer.byteLength / 4 );
+    outputArray.set( new Int32Array( resultArrayBuffer ) );
+
+    buffer.unmap();
+
+    return outputArray;
+  }
+
+  public static async getMappedByteArray( buffer: GPUBuffer ): Promise<Uint8Array> {
+    await buffer.mapAsync( GPUMapMode.READ );
+    const resultArrayBuffer = buffer.getMappedRange();
+
+    const outputArray = new Uint8Array( resultArrayBuffer.byteLength );
+    outputArray.set( new Uint8Array( resultArrayBuffer ) );
+
+    buffer.unmap();
+
+    return outputArray;
+  }
 }
 
 alpenglow.register( 'DeviceContext', DeviceContext );
