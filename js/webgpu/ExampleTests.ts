@@ -45,7 +45,9 @@ const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice ) => Promi
 };
 
 asyncTestWithDevice( 'reduce_simple_single', async device => {
-  const numbers = _.range( 0, 256 ).map( () => random.nextDouble() );
+  const workgroupSize = 256;
+
+  const numbers = _.range( 0, workgroupSize ).map( () => random.nextDouble() );
 
   const context = new DeviceContext( device );
 
@@ -53,10 +55,12 @@ asyncTestWithDevice( 'reduce_simple_single', async device => {
     device, 'reduce_simple_single', wgsl_reduce_simple_single, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
-    ], {}
+    ], {
+      workgroupSize: workgroupSize
+    }
   );
 
-  const inputBuffer = context.createBuffer( 4 * 256 );
+  const inputBuffer = context.createBuffer( 4 * workgroupSize );
   device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
 
   const outputBuffer = context.createBuffer( 4 );
