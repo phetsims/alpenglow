@@ -13,6 +13,7 @@ import './cag/ClippableFaceTests.js';
 import './cag/PolygonalBooleanTests.js';
 import './clip/PolygonClippingTests.js';
 import './webgpu/SnippetTests.js';
+import './webgpu/ExampleTests.js';
 
 // Since our tests are loaded asynchronously, we must direct QUnit to begin the tests
 qunitStart();

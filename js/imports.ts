@@ -135,6 +135,9 @@ export { default as wgsl_bounds_clip_edge } from '../wgsl/clip/bounds_clip_edge.
 export { default as wgsl_bounds_double_area_edge } from '../wgsl/clip/bounds_double_area_edge.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_reduce_simple_single } from '../wgsl/examples/reduce_simple_single.js';
+
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
 
 export { default as PolygonFilterType, getPolygonFilterWidth, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand, getPolygonFilterGridBounds } from './render-program/PolygonFilterType.js';

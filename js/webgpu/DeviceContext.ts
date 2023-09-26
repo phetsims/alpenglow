@@ -55,6 +55,14 @@ export default class DeviceContext {
     } );
   }
 
+  // in bytes
+  public createMapReadableBuffer( size: number ): GPUBuffer {
+    return this.device.createBuffer( {
+      size: size,
+      usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST
+    } );
+  }
+
   public getCanvasContext( canvas: HTMLCanvasElement ): GPUCanvasContext {
     const context = canvas.getContext( 'webgpu' )!;
 
