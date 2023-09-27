@@ -136,6 +136,8 @@ export { default as wgsl_bounds_double_area_edge } from '../wgsl/clip/bounds_dou
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_reduce_simple_single } from '../wgsl/examples/reduce_simple_single.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_scan_simple_single } from '../wgsl/examples/scan_simple_single.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';

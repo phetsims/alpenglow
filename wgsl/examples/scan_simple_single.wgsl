@@ -36,16 +36,15 @@ fn main(
   scratch[ local_id.x ] = value;
   for ( var i = 0u; i < LOG_WORKGROUP_SIZE; i += 1u ) {
     workgroupBarrier();
-    if ( local_id.x + ( 1u << i ) < WORKGROUP_SIZE ) {
-      let otherValue = scratch[ local_id.x + ( 1u << i ) ];
-      value = combine( value, otherValue );
+    if ( local_id.x >= 1u << i ) {
+      let otherValue = scratch[ local_id.x - ( 1u << i ) ];
+      value = combine( otherValue, value );
     }
 
     // TODO: why is this barrier necessary? (for uniform flow only?)
     workgroupBarrier();
     scratch[ local_id.x ] = value;
   }
-  if ( local_id.x == 0u ) {
-    output[ 0u ] = value;
-  }
+
+  output[ local_id.x ] = scratch[ local_id.x ];
 }
