@@ -41,8 +41,6 @@ fn main(
       value = combine( otherValue, value );
     }
 
-    // TODO: why is this barrier necessary? (for uniform flow only?)
-    workgroupBarrier();
     scratch[ local_id.x ] = value;
   }
 
