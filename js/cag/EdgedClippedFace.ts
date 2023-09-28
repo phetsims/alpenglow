@@ -924,7 +924,7 @@ export class EdgedClippedFaceAccumulator implements ClippableFaceAccumulator<Edg
 
   // Will reset it to the initial state also
   public finalizeFace(): EdgedClippedFace | null {
-    if ( this.edges.length === 0 ) {
+    if ( this.edges.length === 0 && this.minXCount === 0 && this.minYCount === 0 && this.maxXCount === 0 && this.maxYCount === 0 ) {
       return null;
     }
 
