@@ -101,7 +101,7 @@ export default class EdgedClippedFace implements ClippableFace {
   }
 
   /**
-   * Converts the face to a edged-clipped face (inspecting the edges)
+   * Converts the face to a edged-clipped face (scanning the edges, to convert bounds-side edges to counts)
    */
   public toEdgedClippedFace( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
     if ( this.minX === minX && this.minY === minY && this.maxX === maxX && this.maxY === maxY ) {
@@ -113,7 +113,7 @@ export default class EdgedClippedFace implements ClippableFace {
   }
 
   /**
-   * Converts the face to a edged-clipped face (without inspecting the edges)
+   * Converts the face to a edged-clipped face (without scanning the edges to see if they are bounds-side)
    */
   public toEdgedClippedFaceWithoutCheck( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
     if ( this.minX === minX && this.minY === minY && this.maxX === maxX && this.maxY === maxY ) {
