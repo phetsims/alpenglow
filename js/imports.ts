@@ -272,6 +272,14 @@ export type { RasterizationOptions } from './raster/Rasterize.js';
 export { default as VectorCanvas } from './raster/VectorCanvas.js';
 export { default as RasterLog, RasterTileLog } from './raster/RasterLog.js';
 
+export { default as ParallelContext } from './parallel/ParallelContext.js';
+export type { BaseWorkgroupValues } from './parallel/ParallelContext.js';
+export { default as ParallelKernel } from './parallel/ParallelKernel.js';
+export { default as ParallelWorkgroup } from './parallel/ParallelWorkgroup.js';
+export { default as ParallelExecutor } from './parallel/ParallelExecutor.js';
+export { default as ParallelStorageArray } from './parallel/ParallelStorageArray.js';
+export { default as ParallelWorkgroupArray } from './parallel/ParallelWorkgroupArray.js';
+
 export { default as Snippet } from './webgpu/Snippet.js';
 export { default as DualSnippet } from './webgpu/DualSnippet.js';
 export type { DualSnippetSource } from './webgpu/DualSnippet.js';

@@ -201,7 +201,7 @@ const expectInOut = async (
   const actualOutputUInt32Array = new Uint32Array( actualOutputArrayBuffer );
 
   if ( [ ...expectedOutputUInt32Array ].every( ( v, i ) => v === actualOutputUInt32Array[ i ] ) ) {
-    console.log( `[PASS] ${message}` );
+    // console.log( `[PASS] ${message}` );
     return true;
   }
   else {
