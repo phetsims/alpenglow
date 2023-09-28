@@ -251,19 +251,81 @@ type ClippableFace = {
 
 export default ClippableFace;
 
-// A type for building up a face from edges and new-polygon markers
+/**
+ * This is a type meant for building a ClippableFace (of a specific type) by adding edges, and (optionally) marking
+ * where we have finished one polygon, and are now going to add edges for another polygon.
+ *
+ * When you are done adding edges, use finalizeFace() to get the resulting ClippableFace. If there is no data that gives
+ * a non-zero area face, it will return null. This will also reset the internal state, so it can be used to create a
+ * fresh new face.
+ */
 export type ClippableFaceAccumulator<FaceType extends ClippableFace = ClippableFace> = {
-  addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void;
+  /**
+   * Adds an edge to the face.
+   *
+   * NOTE: It has raw numbers AND an optional Vector2 form. This is to support minimizing garbage collection, so that
+   * if we already have a Vector2 that we should use, we'll use it. Otherwise the actual number values will be used.
+   * (IF passing both, they should be precisely equal!).
+   */
+  addEdge(
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    startPoint: Vector2 | null,
+    endPoint: Vector2 | null
+  ): void;
+
+  /**
+   * Marks a point where previous edges belonged to other polygons, and addEdges after this call will belong to a new
+   * polygon.
+   *
+   * This is important for polygonal data, where the start/end points will need to match up, EXCEPT for when we
+   * transition to a new polygon ("subpath").
+   */
   markNewPolygon(): void;
 
+  /**
+   * A performance marker, such that if this is false, the user can provide arbitrary data to endX/endY/endPoint and
+   * it won't matter. This is primarily for polygonal data, where we don't want to require computing the end-data
+   * since it will only use the start point of each edge.
+   */
   usesEndPoint: boolean;
 
+  /**
+   * We'll want to mark the bounds of a face, if it's coming from particular types of clipping data.
+   * This is important for proper construction of an EdgedClippedFace.
+   */
   setAccumulationBounds( minX: number, minY: number, maxX: number, maxY: number ): void;
 
-  // Will reset it to the initial state also
+  /**
+   * Should return a ClippableFace of the given type (IF it is not just a trivial/degenerate non-zero case).
+   *
+   * Resets the state of the accumulator so that it is ready to receive data for a new ClippableFace. So it will
+   * expect a pattern of:
+   *
+   * accumulator.addEdge( ... );
+   * accumulator.addEdge( ... );
+   * accumulator.addEdge( ... );
+   * accumulator.markNewPolygon();
+   * accumulator.addEdge( ... );
+   * accumulator.addEdge( ... );
+   * accumulator.addEdge( ... );
+   * accumulator.markNewPolygon();
+   * const face1 = accumulator.finalizeFace();
+   *
+   * accumulator.addEdge( ... );
+   * accumulator.addEdge( ... );
+   * accumulator.addEdge( ... );
+   * accumulator.markNewPolygon();
+   * const face2 = accumulator.finalizeFace();
+   */
   finalizeFace(): FaceType | null;
 
-  // Will reset without creating a face
+  /**
+   * Resets the state of the accumulator so it's ready to receive data for a new face. This should be used if we want to
+   * abandon the already-provided data.
+   */
   reset(): void;
 };
 
