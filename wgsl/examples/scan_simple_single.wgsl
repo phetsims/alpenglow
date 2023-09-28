@@ -36,11 +36,13 @@ fn main(
   scratch[ local_id.x ] = value;
   for ( var i = 0u; i < LOG_WORKGROUP_SIZE; i += 1u ) {
     workgroupBarrier();
+
     if ( local_id.x >= 1u << i ) {
       let otherValue = scratch[ local_id.x - ( 1u << i ) ];
       value = combine( otherValue, value );
     }
 
+    workgroupBarrier();
     scratch[ local_id.x ] = value;
   }
 
