@@ -203,12 +203,23 @@ type ClippableFace = {
   toEdgedClippedFaceWithoutCheck( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace;
 
   /**
-   * Returns a singleton accumulator for this type of face.
+   * Returns a singleton accumulator for this type of face. This will always return the same instance, and should ONLY
+   * be used if there will be no reentrant or co-occurring usage of this accumulator (i.e. only use it when you can
+   * guarantee nothing else will be clipped at the same time). If two tasks try to use this at the same time, it will
+   * likely break.
+   *
+   * This is a method that can be called on an unknown-type face, to reproduce the same type of face. This is
+   * important, since we can't feed unsorted edge data directly to a PolygonalFace's accumulator, and in general this
+   * is the safest way to get an accumulator for a face.
    */
   getScratchAccumulator(): ClippableFaceAccumulator;
 
   /**
-   * Returns a new accumulator for this type of face.
+   * Returns a new accumulator for this type of face. This should be used when concurrent clipping will need to happen.
+   *
+   * This is a method that can be called on an unknown-type face, to reproduce the same type of face. This is
+   * important, since we can't feed unsorted edge data directly to a PolygonalFace's accumulator, and in general this
+   * is the safest way to get an accumulator for a face.
    */
   getAccumulator(): ClippableFaceAccumulator;
 
