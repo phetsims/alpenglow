@@ -547,16 +547,13 @@ export default class RationalFace {
           if ( !startingEdge.processed && ( !isFaceCompatible( startingEdge.face! ) || !isFaceCompatible( startingEdge.reversed.face! ) ) ) {
             // Start an edge trace!
 
-            // We'll use the simplifier to remove duplicate or walked-back points.
-            // TODO: check to see if removing arbitrary collinear points helps us a lot here. It might be good, but
-            // TODO: we don't want to introduce a lot of error. Probably is additional cost
-
             // Add the first edge
             let currentEdge = startingEdge;
-            currentEdge.addTransformedToAccumulator( accumulator, fromIntegerMatrix );
-            currentEdge.processed = true;
 
             do {
+              currentEdge.addTransformedToAccumulator( accumulator, fromIntegerMatrix );
+              currentEdge.processed = true;
+
               // Walk edges
               let nextEdge = currentEdge.nextEdge!;
               assert && assert( nextEdge.face === currentEdge.face );
@@ -571,8 +568,6 @@ export default class RationalFace {
 
               // Add subsequent edges
               currentEdge = nextEdge;
-              currentEdge.addTransformedToAccumulator( accumulator, fromIntegerMatrix );
-              currentEdge.processed = true;
             } while ( currentEdge !== startingEdge );
 
             accumulator.markNewPolygon();

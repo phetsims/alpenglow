@@ -598,6 +598,9 @@ export class PolygonalFaceAccumulator implements ClippableFaceAccumulator<Polygo
   public addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void {
     assert && assert( startX !== endX || startY !== endY, 'Points should not be identical' );
 
+    // We'll use the simplifier to remove duplicate or walked-back points.
+    // TODO: check to see if removing arbitrary collinear points helps us a lot here. It might be good, but
+    // TODO: we don't want to introduce a lot of error. Probably is additional cost
     startPoint ? this.simplifier.addPoint( startPoint ) : this.simplifier.add( startX, startY );
   }
 

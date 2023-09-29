@@ -885,6 +885,17 @@ export class EdgedClippedFaceAccumulator implements ClippableFaceAccumulator<Edg
   public readonly usesEndPoint = true;
 
   public addEdge( startX: number, startY: number, endX: number, endY: number, startPoint: Vector2 | null, endPoint: Vector2 | null ): void {
+    if ( assertSlow ) {
+      const start = startPoint || new Vector2( startX, startY );
+      const end = endPoint || new Vector2( endX, endY );
+
+      assertSlow( start.x >= this.minX - 1e-8 && start.x <= this.maxX + 1e-8 &&
+              start.y >= this.minY - 1e-8 && start.y <= this.maxY + 1e-8 &&
+              end.x >= this.minX - 1e-8 && end.x <= this.maxX + 1e-8 &&
+              end.y >= this.minY - 1e-8 && end.y <= this.maxY + 1e-8
+      );
+    }
+
     if (
       // If all points are on a corner
       ( startX === this.minX || startX === this.maxX ) &&
