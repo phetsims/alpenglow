@@ -955,9 +955,15 @@ export class EdgedClippedFaceAccumulator implements ClippableFaceAccumulator<Edg
       return null;
     }
 
-    const edges = this.edges;
+    const result = new EdgedClippedFace( this.edges, this.minX, this.minY, this.maxX, this.maxY, this.minXCount, this.minYCount, this.maxXCount, this.maxYCount );
+
     this.edges = [];
-    return new EdgedClippedFace( edges, this.minX, this.minY, this.maxX, this.maxY, this.minXCount, this.minYCount, this.maxXCount, this.maxYCount );
+    this.minXCount = 0;
+    this.minYCount = 0;
+    this.maxXCount = 0;
+    this.maxYCount = 0;
+
+    return result;
   }
 
   public finalizeEnsureFace( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
