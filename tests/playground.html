@@ -881,6 +881,8 @@ an UI and Display made for visual testing and debugging.
         // executionMethod: 'instructions',
       };
 
+      const INCLUDE_3D = true;
+
       const APPLY_OPACITY = false;
 
       const SHOW_INTEGER_EDGES = false;
@@ -1405,7 +1407,10 @@ an UI and Display made for visual testing and debugging.
       };
 
       const bc = new phet.alpenglow.RenderBlendCompose( 3, 0, b, c );
-      const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp, depth, boxDepth ] ).transformed(
+      const program = normalBlendArray( [
+        back, d, e, f, bc, a, bary, baryPersp,
+        ...( INCLUDE_3D ? [ depth, boxDepth ] : [] )
+      ] ).transformed(
       // const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp ] ).transformed(
       // const program = normalBlendArray( [ boxDepth ] ).transformed(
       // const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp, depth ] ).transformed(

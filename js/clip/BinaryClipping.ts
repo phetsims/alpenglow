@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, ClipSimplifier, LinearEdge } from '../imports.js';
+import { alpenglow, ClipSimplifier, EdgedClippedFace, LinearEdge } from '../imports.js';
 
 const minSimplifier = new ClipSimplifier();
 const maxSimplifier = new ClipSimplifier();
@@ -367,6 +367,123 @@ export default class BinaryClipping {
 
     minPolygon.push( ...minSimplifier.finalize() );
     maxPolygon.push( ...maxSimplifier.finalize() );
+  }
+
+  public static binaryXClipEdgedClipped(
+    face: EdgedClippedFace,
+    x: number
+  ): { minFace: EdgedClippedFace; maxFace: EdgedClippedFace } {
+
+    const minEdges: LinearEdge[] = [];
+    const maxEdges: LinearEdge[] = [];
+    let minCount = 0;
+    let maxCount = 0;
+
+    const centerY = 0.5 * ( face.minY + face.maxY );
+
+    const edges = face.edges;
+    for ( let i = 0; i < edges.length; i++ ) {
+      const edge = edges[ i ];
+      const startPoint = edge.startPoint;
+      const endPoint = edge.endPoint;
+
+      // TODO: with fastmath, will these be equivalent?
+      const startCmp = Math.sign( startPoint.x - x );
+      const endCmp = Math.sign( endPoint.x - x );
+      const startYLess = startPoint.y < centerY;
+      const endYLess = endPoint.y < centerY;
+
+      // both values less than the split
+      if ( startCmp === -1 && endCmp === -1 ) {
+        minEdges.push( edge );
+
+        if ( startYLess !== endYLess ) {
+          maxCount += startYLess ? 1 : -1;
+        }
+      }
+      // both values greater than the split
+      else if ( startCmp === 1 && endCmp === 1 ) {
+        maxEdges.push( edge );
+
+        if ( startYLess !== endYLess ) {
+          minCount += startYLess ? 1 : -1;
+        }
+      }
+      // both values equal to the split
+      else if ( startCmp === 0 && endCmp === 0 ) {
+        // vertical/horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
+        minEdges.push( edge );
+        maxEdges.push( edge );
+      }
+      else {
+        // There is a single crossing of our x (possibly on a start or end point)
+        const y = startPoint.y + ( endPoint.y - startPoint.y ) * ( x - startPoint.x ) / ( endPoint.x - startPoint.x );
+        const intersection = new Vector2( x, y );
+
+        const startLess = startCmp === -1;
+        const startGreater = startCmp === 1;
+        const endLess = endCmp === -1;
+        const endGreater = endCmp === 1;
+
+        const minResultStartPoint = startLess ? startPoint : intersection;
+        const minResultEndPoint = endLess ? endPoint : intersection;
+        const maxResultStartPoint = startGreater ? startPoint : intersection;
+        const maxResultEndPoint = endGreater ? endPoint : intersection;
+
+        const startCornerY = startYLess ? face.minY : face.maxY;
+        const endCornerY = endYLess ? face.minY : face.maxY;
+
+        // min-start corner
+        if ( startGreater && minResultStartPoint.y !== startCornerY ) {
+          minEdges.push( new LinearEdge( new Vector2( x, startCornerY ), minResultStartPoint ) );
+        }
+
+        // main min section
+        if ( !minResultStartPoint.equals( minResultEndPoint ) ) {
+          minEdges.push( new LinearEdge( minResultStartPoint, minResultEndPoint ) );
+        }
+
+        // min-end corner
+        if ( endGreater && minResultEndPoint.y !== endCornerY ) {
+          minEdges.push( new LinearEdge( minResultEndPoint, new Vector2( x, endCornerY ) ) );
+        }
+
+        // max-start corner
+        if ( startLess && maxResultStartPoint.y !== startCornerY ) {
+          maxEdges.push( new LinearEdge( new Vector2( x, startCornerY ), maxResultStartPoint ) );
+        }
+
+        // main max section
+        if ( !maxResultStartPoint.equals( maxResultEndPoint ) ) {
+          maxEdges.push( new LinearEdge( maxResultStartPoint, maxResultEndPoint ) );
+        }
+
+        // max-end corner
+        if ( endLess && maxResultEndPoint.y !== endCornerY ) {
+          maxEdges.push( new LinearEdge( maxResultEndPoint, new Vector2( x, endCornerY ) ) );
+        }
+      }
+    }
+
+    const minFace = new EdgedClippedFace(
+      minEdges,
+      face.minX, face.minY, x, face.maxY,
+      face.minXCount, face.minYCount, face.maxXCount + minCount, face.maxYCount
+    );
+    const maxFace = new EdgedClippedFace(
+      maxEdges,
+      x, face.minY, face.maxX, face.maxY,
+      face.minXCount + maxCount, face.minYCount, face.maxXCount, face.maxYCount
+    );
+
+    if ( assertSlow ) {
+      assertSlow( Math.abs( face.getArea() - minFace.getArea() - maxFace.getArea() ) < 1e-4 );
+    }
+
+    return {
+      minFace: minFace,
+      maxFace: maxFace
+    };
   }
 }
 

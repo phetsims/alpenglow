@@ -496,7 +496,8 @@ export default class LinearEdge {
 
   public static validateStartEndMatches( edges: LinearEdge[] ): void {
     if ( assertSlow ) {
-      assertSlow( Math.abs( _.sum( edges.map( e => e.getLineIntegralZero() ) ) ) < 1e-5, 'Ensure we are effectively closed' );
+      const zero = _.sum( edges.map( e => e.getLineIntegralZero() ) );
+      assertSlow( Math.abs( zero ) < 1e-5, `Ensure we are effectively closed: ${zero}` );
 
       // Ensure that each point's 'starts' and 'ends' matches precisely
       type Entry = { point: Vector2; startCount: number; endCount: number };
