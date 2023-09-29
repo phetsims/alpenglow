@@ -488,27 +488,7 @@ export default class EdgedClippedFace implements ClippableFace {
    * The fakeCornerX is used to determine the "fake" corner that is used for unsorted-edge clipping.
    */
   public getBinaryYClip( y: number, fakeCornerX: number ): { minFace: EdgedClippedFace; maxFace: EdgedClippedFace } {
-    const minEdges: LinearEdge[] = [];
-    const maxEdges: LinearEdge[] = [];
-
-    for ( let i = 0; i < this.edges.length; i++ ) {
-      const edge = this.edges[ i ];
-
-      BinaryClipping.binaryYClipEdge( edge.startPoint, edge.endPoint, y, fakeCornerX, minEdges, maxEdges );
-    }
-
-    this.forEachImplicitEdge( ( startPoint, endPoint ) => {
-      BinaryClipping.binaryYClipEdge( startPoint, endPoint, y, fakeCornerX, minEdges, maxEdges );
-    } );
-
-    assert && assert( minEdges.every( e => e.startPoint.y <= y && e.endPoint.y <= y ) );
-    assert && assert( maxEdges.every( e => e.startPoint.y >= y && e.endPoint.y >= y ) );
-
-    // TODO: a more optimized form here! The clipping could output counts instead of us having to check here
-    return {
-      minFace: EdgedClippedFace.fromEdges( minEdges, this.minX, this.minY, this.maxX, y ),
-      maxFace: EdgedClippedFace.fromEdges( maxEdges, this.minX, y, this.maxX, this.maxY )
-    };
+    return BinaryClipping.binaryYClipEdgedClipped( this, y );
   }
 
   /**

@@ -485,6 +485,123 @@ export default class BinaryClipping {
       maxFace: maxFace
     };
   }
+
+  public static binaryYClipEdgedClipped(
+    face: EdgedClippedFace,
+    y: number
+  ): { minFace: EdgedClippedFace; maxFace: EdgedClippedFace } {
+
+    const minEdges: LinearEdge[] = [];
+    const maxEdges: LinearEdge[] = [];
+    let minCount = 0;
+    let maxCount = 0;
+
+    const centerX = 0.5 * ( face.minX + face.maxX );
+
+    const edges = face.edges;
+    for ( let i = 0; i < edges.length; i++ ) {
+      const edge = edges[ i ];
+      const startPoint = edge.startPoint;
+      const endPoint = edge.endPoint;
+
+      // TODO: with fastmath, will these be equivalent?
+      const startCmp = Math.sign( startPoint.y - y );
+      const endCmp = Math.sign( endPoint.y - y );
+      const startXLess = startPoint.x < centerX;
+      const endXLess = endPoint.x < centerX;
+
+      // both values less than the split
+      if ( startCmp === -1 && endCmp === -1 ) {
+        minEdges.push( edge );
+
+        if ( startXLess !== endXLess ) {
+          maxCount += startXLess ? 1 : -1;
+        }
+      }
+      // both values greater than the split
+      else if ( startCmp === 1 && endCmp === 1 ) {
+        maxEdges.push( edge );
+
+        if ( startXLess !== endXLess ) {
+          minCount += startXLess ? 1 : -1;
+        }
+      }
+      // both values equal to the split
+      else if ( startCmp === 0 && endCmp === 0 ) {
+        // vertical/horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
+        minEdges.push( edge );
+        maxEdges.push( edge );
+      }
+      else {
+        // There is a single crossing of our y (possibly on a start or end point)
+        const x = startPoint.x + ( endPoint.x - startPoint.x ) * ( y - startPoint.y ) / ( endPoint.y - startPoint.y );
+        const intersection = new Vector2( x, y );
+
+        const startLess = startCmp === -1;
+        const startGreater = startCmp === 1;
+        const endLess = endCmp === -1;
+        const endGreater = endCmp === 1;
+
+        const minResultStartPoint = startLess ? startPoint : intersection;
+        const minResultEndPoint = endLess ? endPoint : intersection;
+        const maxResultStartPoint = startGreater ? startPoint : intersection;
+        const maxResultEndPoint = endGreater ? endPoint : intersection;
+
+        const startCornerX = startXLess ? face.minX : face.maxX;
+        const endCornerX = endXLess ? face.minX : face.maxX;
+
+        // min-start corner
+        if ( startGreater && minResultStartPoint.x !== startCornerX ) {
+          minEdges.push( new LinearEdge( new Vector2( startCornerX, y ), minResultStartPoint ) );
+        }
+
+        // main min section
+        if ( !minResultStartPoint.equals( minResultEndPoint ) ) {
+          minEdges.push( new LinearEdge( minResultStartPoint, minResultEndPoint ) );
+        }
+
+        // min-end corner
+        if ( endGreater && minResultEndPoint.x !== endCornerX ) {
+          minEdges.push( new LinearEdge( minResultEndPoint, new Vector2( endCornerX, y ) ) );
+        }
+
+        // max-start corner
+        if ( startLess && maxResultStartPoint.x !== startCornerX ) {
+          maxEdges.push( new LinearEdge( new Vector2( startCornerX, y ), maxResultStartPoint ) );
+        }
+
+        // main max section
+        if ( !maxResultStartPoint.equals( maxResultEndPoint ) ) {
+          maxEdges.push( new LinearEdge( maxResultStartPoint, maxResultEndPoint ) );
+        }
+
+        // max-end corner
+        if ( endLess && maxResultEndPoint.x !== endCornerX ) {
+          maxEdges.push( new LinearEdge( maxResultEndPoint, new Vector2( endCornerX, y ) ) );
+        }
+      }
+    }
+
+    const minFace = new EdgedClippedFace(
+      minEdges,
+      face.minX, face.minY, face.maxX, y,
+      face.minXCount, face.minYCount, face.maxXCount, face.maxYCount + minCount
+    );
+    const maxFace = new EdgedClippedFace(
+      maxEdges,
+      face.minX, y, face.maxX, face.maxY,
+      face.minXCount, face.minYCount + maxCount, face.maxXCount, face.maxYCount
+    );
+
+    if ( assertSlow ) {
+      assertSlow( Math.abs( face.getArea() - minFace.getArea() - maxFace.getArea() ) < 1e-4 );
+    }
+
+    return {
+      minFace: minFace,
+      maxFace: maxFace
+    };
+  }
 }
 
 alpenglow.register( 'BinaryClipping', BinaryClipping );
