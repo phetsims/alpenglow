@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelRasterInitialClip, ParallelStorageArray, RasterChunk, RasterChunkReduceData, RasterEdge, RasterEdgeClip } from '../../imports.js';
+import { alpenglow, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelStorageArray, RasterChunk, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRaster {
@@ -104,6 +104,10 @@ export default class ParallelRaster {
     const chunkReduces0 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE );
 
     await ParallelRasterInitialClip.dispatch( inputChunks, inputEdges, inputEdges.data.length, edgeClips0, chunkReduces0 );
+
+    const clippedChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterClippedChunk.INDETERMINATE ), RasterClippedChunk.INDETERMINATE );
+
+    await ParallelRasterInitialChunk.dispatch( inputChunks, inputChunks.data.length, clippedChunks );
 
     // TODO: the rest of the processing
   }

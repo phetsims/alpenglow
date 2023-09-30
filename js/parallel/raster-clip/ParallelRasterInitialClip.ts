@@ -188,7 +188,7 @@ export default class ParallelRasterInitialClip {
       }
     }, () => ( {} ), [ chunks, edges, edgeClips, chunkReduces ], workgroupSize );
 
-    await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( edges.data.length / workgroupSize ) ) );
+    await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdges / workgroupSize ) ) );
   }
 }
 

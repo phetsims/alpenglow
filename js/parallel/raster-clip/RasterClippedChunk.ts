@@ -1,20 +1,23 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Contains path data within a bounds, for a particular RenderProgram
+ * TODO: doc
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 import { alpenglow } from '../../imports.js';
 
-export default class RasterChunk {
+export default class RasterClippedChunk {
   public constructor(
     public readonly rasterProgramIndex: number,
     public readonly needsCentroid: boolean,
     public readonly needsFace: boolean,
+
     public readonly edgesOffset: number,
     public readonly numEdges: number,
+
+    public readonly area: number,
 
     // (Float?) bounds
     public readonly minX: number,
@@ -29,9 +32,9 @@ export default class RasterChunk {
     public readonly maxYCount: number
   ) {}
 
-  public static readonly INDETERMINATE = new RasterChunk(
-    NaN, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
+  public static readonly INDETERMINATE = new RasterClippedChunk(
+    NaN, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
   );
 }
 
-alpenglow.register( 'RasterChunk', RasterChunk );
+alpenglow.register( 'RasterClippedChunk', RasterClippedChunk );

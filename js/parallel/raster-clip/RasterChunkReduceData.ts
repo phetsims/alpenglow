@@ -15,7 +15,7 @@ export default class RasterChunkReduceData {
 
     // TODO: centroid?
 
-    // FLOAT(?) bounds - TODO can we use u16 equivalent perhaps?
+    // FLOAT(?) bounds
     // TODO: test without this, see how differently we branch?
     public readonly minX: number,
     public readonly minY: number,
