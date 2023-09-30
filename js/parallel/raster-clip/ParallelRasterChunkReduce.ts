@@ -34,14 +34,11 @@ export default class ParallelRasterChunkReduce {
     const kernel = new ParallelKernel<WorkgroupValues>( async context => {
       await context.start();
 
-      const workgroupFirstEdgeIndex = context.workgroupId.x * workgroupSize;
-      const workgroupLastEdgeIndex = Math.min( workgroupFirstEdgeIndex + workgroupSize - 1, numReduces - 1 );
-
       const reduceIndex = context.globalId.x;
       const exists = reduceIndex < numReduces;
 
       // TODO: fix this to work with blocks as primitives
-      const reduceBlock = await inputChunkReduces.get( context, context.localId.x );
+      const reduceBlock = await inputChunkReduces.get( context, reduceIndex );
       let leftMinReduce = reduceBlock.leftMin;
       let leftMaxReduce = reduceBlock.leftMax;
       let rightMinReduce = reduceBlock.rightMin;
@@ -51,7 +48,7 @@ export default class ParallelRasterChunkReduce {
       const chunkIndex = reduceBlock.leftMin.chunkIndex;
 
       // We'll workgroupBarrier at least once below, before this is relevant
-      if ( exists && reduceIndex === workgroupFirstEdgeIndex ) {
+      if ( exists && context.localId.x === 0 ) {
         await context.workgroupValues.firstChunkIndex.set( context, 0, chunkIndex );
       }
 
@@ -115,11 +112,16 @@ export default class ParallelRasterChunkReduce {
       await context.workgroupBarrier(); // for the atomic
 
       if ( exists && context.localId.x === 0 ) {
+        const lastLocalEdgeIndexInWorkgroup = Math.min(
+          numReduces - 1 - context.workgroupId.x * workgroupSize,
+          workgroupSize - 1
+        );
+
         await outputChunkReduces.set( context, context.workgroupId.x, new RasterChunkReduceBlock(
           await context.workgroupValues.leftMinReduces.get( context, context.workgroupValues.atomicMaxFirstReduceIndex ),
           await context.workgroupValues.leftMaxReduces.get( context, context.workgroupValues.atomicMaxFirstReduceIndex ),
-          await context.workgroupValues.rightMinReduces.get( context, workgroupLastEdgeIndex ),
-          await context.workgroupValues.rightMaxReduces.get( context, workgroupLastEdgeIndex )
+          await context.workgroupValues.rightMinReduces.get( context, lastLocalEdgeIndexInWorkgroup ),
+          await context.workgroupValues.rightMaxReduces.get( context, lastLocalEdgeIndexInWorkgroup )
         ) );
       }
     }, () => ( {

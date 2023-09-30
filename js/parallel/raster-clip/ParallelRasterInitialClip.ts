@@ -36,9 +36,6 @@ export default class ParallelRasterInitialClip {
     const kernel = new ParallelKernel<WorkgroupValues>( async context => {
       await context.start();
 
-      const workgroupFirstEdgeIndex = context.workgroupId.x * workgroupSize;
-      const workgroupLastEdgeIndex = Math.min( workgroupFirstEdgeIndex + workgroupSize - 1, numEdges - 1 );
-
       const edgeIndex = context.globalId.x;
       const exists = edgeIndex < numEdges;
 
@@ -46,7 +43,7 @@ export default class ParallelRasterInitialClip {
       const chunk = await chunks.get( context, edge.chunkIndex );
 
       // We'll workgroupBarrier at least once below, before this is relevant
-      if ( exists && edgeIndex === workgroupFirstEdgeIndex ) {
+      if ( exists && context.localId.x === 0 ) {
         await context.workgroupValues.firstChunkIndex.set( context, 0, edge.chunkIndex );
       }
 
@@ -254,11 +251,17 @@ export default class ParallelRasterInitialClip {
       await context.workgroupBarrier(); // for the atomic
 
       if ( exists && context.localId.x === 0 ) {
+        const lastLocalEdgeIndexInWorkgroup = Math.min(
+          numEdges - 1 - context.workgroupId.x * workgroupSize,
+          workgroupSize - 1
+        );
+
+        console.log( context.workgroupId.x, firstChunkIndex, context.workgroupValues.atomicMaxFirstChunkIndex, lastLocalEdgeIndexInWorkgroup );
         await chunkReduces.set( context, context.workgroupId.x, new RasterChunkReduceBlock(
           await context.workgroupValues.minReduces.get( context, context.workgroupValues.atomicMaxFirstChunkIndex ),
           await context.workgroupValues.maxReduces.get( context, context.workgroupValues.atomicMaxFirstChunkIndex ),
-          await context.workgroupValues.minReduces.get( context, workgroupLastEdgeIndex ),
-          await context.workgroupValues.maxReduces.get( context, workgroupLastEdgeIndex )
+          await context.workgroupValues.minReduces.get( context, lastLocalEdgeIndexInWorkgroup ),
+          await context.workgroupValues.maxReduces.get( context, lastLocalEdgeIndexInWorkgroup )
         ) );
       }
     }, () => ( {
