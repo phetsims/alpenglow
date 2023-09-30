@@ -13,12 +13,13 @@ export default class RasterEdge {
   public constructor(
     public readonly chunkIndex: number,
     public readonly isFirstEdge: boolean,
+    public readonly isLastEdge: boolean,
     public readonly startPoint: Vector2,
     public readonly endPoint: Vector2
   ) {}
 
   public static readonly INDETERMINATE = new RasterEdge(
-    NaN, false, new Vector2( NaN, NaN ), new Vector2( NaN, NaN )
+    NaN, false, false, new Vector2( NaN, NaN ), new Vector2( NaN, NaN )
   );
 }
 

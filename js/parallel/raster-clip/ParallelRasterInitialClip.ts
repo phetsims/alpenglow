@@ -151,13 +151,12 @@ export default class ParallelRasterInitialClip {
           ) : maxResultEndPoint;
         }
 
-        const minClip = new RasterEdgeClip( minPoints[ 0 ], minPoints[ 1 ], minPoints[ 2 ], minPoints[ 3 ], edge.isFirstEdge );
-        const maxClip = new RasterEdgeClip( maxPoints[ 0 ], maxPoints[ 1 ], maxPoints[ 2 ], maxPoints[ 3 ], edge.isFirstEdge );
+        const minClip = new RasterEdgeClip( minPoints[ 0 ], minPoints[ 1 ], minPoints[ 2 ], minPoints[ 3 ], edge.isFirstEdge, edge.isLastEdge );
+        const maxClip = new RasterEdgeClip( maxPoints[ 0 ], maxPoints[ 1 ], maxPoints[ 2 ], maxPoints[ 3 ], edge.isFirstEdge, edge.isLastEdge );
 
         const minArea = minClip.getArea();
         const maxArea = maxClip.getArea();
 
-        // TODO: ensure that the base counts are included in the reduce!
         const minReduce = isXSplit ? new RasterChunkReduceData(
           minChunkIndex,
           minArea,

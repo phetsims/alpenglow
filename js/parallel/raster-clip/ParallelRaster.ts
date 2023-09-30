@@ -36,11 +36,13 @@ export default class ParallelRaster {
       new RasterEdge(
         0,
         true,
+        false,
         new Vector2( 10, 0 ),
         new Vector2( 10, 6 )
       ),
       new RasterEdge(
         0,
+        false,
         false,
         new Vector2( 10, 6 ),
         new Vector2( 0, 10 )
@@ -48,11 +50,13 @@ export default class ParallelRaster {
       new RasterEdge(
         0,
         false,
+        false,
         new Vector2( 1, 1 ),
         new Vector2( 3, 6 )
       ),
       new RasterEdge(
         0,
+        false,
         false,
         new Vector2( 3, 6 ),
         new Vector2( 4, 2 )
@@ -60,17 +64,20 @@ export default class ParallelRaster {
       new RasterEdge(
         0,
         false,
+        true,
         new Vector2( 4, 2 ),
         new Vector2( 1, 1 )
       ),
       new RasterEdge(
         1,
         true,
+        false,
         new Vector2( 20, 0 ),
         new Vector2( 20, 2 )
       ),
       new RasterEdge(
         1,
+        false,
         false,
         new Vector2( 20, 2 ),
         new Vector2( 10, 6 )
@@ -78,6 +85,7 @@ export default class ParallelRaster {
       new RasterEdge(
         1,
         false,
+        true,
         new Vector2( 10, 6 ),
         new Vector2( 10, 0 )
       )
