@@ -11,7 +11,7 @@
 
 import { alpenglow, BaseWorkgroupValues, ParallelContext, ParallelStorageArray } from '../imports.js';
 
-export default class ParallelKernel<WorkgroupValues extends BaseWorkgroupValues> {
+export default class ParallelKernel<WorkgroupValues extends BaseWorkgroupValues = Record<string, never>> {
   public constructor(
     public readonly execute: ( context: ParallelContext<WorkgroupValues> ) => Promise<void>,
     public readonly createWorkgroupValues: () => WorkgroupValues,

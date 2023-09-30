@@ -37,15 +37,15 @@ export default class ParallelStorageArray<T> {
     context: ParallelContext<WorkgroupValues>,
     index: number
   ): Promise<T> {
-    // Ensure that we're the only ones who have written to this
-    assert && assert( this.writeLocalIDs[ index ].every( id => id.local.equals( context.localId ) && id.workgroup.equals( context.workgroupId ) ) );
-
     let value: T;
 
-    if ( index < 0 || index >= this.data.length ) {
+    if ( index < 0 || index >= this.data.length || !isFinite( index ) ) {
       value = this.indeterminateValue;
     }
     else {
+      // Ensure that we're the only ones who have written to this
+      assert && assert( this.writeLocalIDs[ index ].every( id => id.local.equals( context.localId ) && id.workgroup.equals( context.workgroupId ) ) );
+
       value = this.data[ index ];
     }
 

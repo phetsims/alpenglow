@@ -280,6 +280,13 @@ export { default as ParallelExecutor } from './parallel/ParallelExecutor.js';
 export { default as ParallelStorageArray } from './parallel/ParallelStorageArray.js';
 export { default as ParallelWorkgroupArray } from './parallel/ParallelWorkgroupArray.js';
 
+export { default as RasterChunk } from './parallel/raster-clip/RasterChunk.js';
+export { default as RasterChunkReduceData } from './parallel/raster-clip/RasterChunkReduceData.js';
+export { default as RasterEdge } from './parallel/raster-clip/RasterEdge.js';
+export { default as RasterEdgeClip } from './parallel/raster-clip/RasterEdgeClip.js';
+export { default as ParallelRasterInitialClip } from './parallel/raster-clip/ParallelRasterInitialClip.js';
+export { default as ParallelRaster } from './parallel/raster-clip/ParallelRaster.js';
+
 export { default as Snippet } from './webgpu/Snippet.js';
 export { default as DualSnippet } from './webgpu/DualSnippet.js';
 export type { DualSnippetSource } from './webgpu/DualSnippet.js';
