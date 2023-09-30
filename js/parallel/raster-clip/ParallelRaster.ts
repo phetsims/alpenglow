@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelRasterChunkReduce, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelStorageArray, RasterChunk, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
+import { alpenglow, ParallelRasterChunkReduce, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRaster {
@@ -128,7 +128,7 @@ export default class ParallelRaster {
     console.log( clippedChunks.data.slice( 0, numInputChunks * 2 ).map( toIndexedString ).join( '\n' ) );
 
     const edgeClips0 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterEdgeClip.INDETERMINATE ), RasterEdgeClip.INDETERMINATE );
-    const chunkReduces0 = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE );
+    const chunkReduces0 = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterChunkReduceBlock.INDETERMINATE ), RasterChunkReduceBlock.INDETERMINATE );
     const debugFullChunkReduces = new ParallelStorageArray( _.range( 0, 4096 ).map( () => ( { min: RasterChunkReduceData.INDETERMINATE, max: RasterChunkReduceData.INDETERMINATE } ) ), { min: RasterChunkReduceData.INDETERMINATE, max: RasterChunkReduceData.INDETERMINATE } );
     await ParallelRasterInitialClip.dispatch( workgroupSize, inputChunks, inputEdges, clippedChunks, numInputEdges, edgeClips0, chunkReduces0, debugFullChunkReduces );
 
@@ -142,19 +142,34 @@ export default class ParallelRaster {
     ] ).join( '\n' ) );
 
     console.log( 'chunkReduces0' );
-    console.log( chunkReduces0.data.slice( 0, 4 * Math.ceil( numInputEdges / workgroupSize ) ).map( toIndexedString ).join( '\n' ) );
+    console.log( chunkReduces0.data.slice( 0, Math.ceil( numInputEdges / workgroupSize ) ).flatMap( ( n, i ) => [
+      `${i} leftMin: ${n.leftMin.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} leftMax: ${n.leftMax.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} rightMin: ${n.rightMin.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} rightMax: ${n.rightMax.toString()}`
+    ] ).join( '\n' ) );
 
-    const chunkReduces1 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE );
+    const chunkReduces1 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunkReduceBlock.INDETERMINATE ), RasterChunkReduceBlock.INDETERMINATE );
     await ParallelRasterChunkReduce.dispatch( workgroupSize, clippedChunks, chunkReduces0, Math.ceil( numInputEdges / workgroupSize ), chunkReduces1 );
 
     console.log( 'chunkReduces1' );
-    console.log( chunkReduces1.data.slice( 0, 4 * Math.ceil( numInputEdges / ( workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
+    console.log( chunkReduces1.data.slice( 0, Math.ceil( numInputEdges / ( workgroupSize * workgroupSize ) ) ).flatMap( ( n, i ) => [
+      `${i} leftMin: ${n.leftMin.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} leftMax: ${n.leftMax.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} rightMin: ${n.rightMin.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} rightMax: ${n.rightMax.toString()}`
+    ] ).join( '\n' ) );
 
-    const chunkReduces2 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE );
+    const chunkReduces2 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunkReduceBlock.INDETERMINATE ), RasterChunkReduceBlock.INDETERMINATE );
     await ParallelRasterChunkReduce.dispatch( workgroupSize, clippedChunks, chunkReduces1, Math.ceil( numInputEdges / ( workgroupSize * workgroupSize ) ), chunkReduces2 );
 
     console.log( 'chunkReduces2' );
-    console.log( chunkReduces2.data.slice( 0, 4 * Math.ceil( numInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
+    console.log( chunkReduces2.data.slice( 0, Math.ceil( numInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ) ).flatMap( ( n, i ) => [
+      `${i} leftMin: ${n.leftMin.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} leftMax: ${n.leftMax.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} rightMin: ${n.rightMin.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} rightMax: ${n.rightMax.toString()}`
+    ] ).join( '\n' ) );
 
     console.log( 'clippedChunks (with reduce)' );
     console.log( clippedChunks.data.slice( 0, numInputChunks * 2 ).map( chunk => chunk.toString() ).join( '\n' ) );

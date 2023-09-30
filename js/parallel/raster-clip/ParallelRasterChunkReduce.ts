@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunkReduceData, RasterClippedChunk } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk } from '../../imports.js';
 
 export default class ParallelRasterChunkReduce {
   public static async dispatch(
@@ -14,11 +14,11 @@ export default class ParallelRasterChunkReduce {
 
     // input
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
-    inputChunkReduces: ParallelStorageArray<RasterChunkReduceData>,
+    inputChunkReduces: ParallelStorageArray<RasterChunkReduceBlock>,
     numReduces: number,
 
     // output
-    outputChunkReduces: ParallelStorageArray<RasterChunkReduceData>
+    outputChunkReduces: ParallelStorageArray<RasterChunkReduceBlock>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
 
@@ -40,19 +40,22 @@ export default class ParallelRasterChunkReduce {
       const reduceIndex = context.globalId.x;
       const exists = reduceIndex < numReduces;
 
-      let leftMinReduce = await inputChunkReduces.get( context, 4 * context.workgroupId.x );
-      let leftMaxReduce = await inputChunkReduces.get( context, 4 * context.workgroupId.x + 1 );
-      let rightMinReduce = await inputChunkReduces.get( context, 4 * context.workgroupId.x + 2 );
-      let rightMaxReduce = await inputChunkReduces.get( context, 4 * context.workgroupId.x + 3 );
+      // TODO: fix this to work with blocks as primitives
+      const reduceBlock = await inputChunkReduces.get( context, context.localId.x );
+      let leftMinReduce = reduceBlock.leftMin;
+      let leftMaxReduce = reduceBlock.leftMax;
+      let rightMinReduce = reduceBlock.rightMin;
+      let rightMaxReduce = reduceBlock.rightMax;
 
       // Get the "left" index
-      const chunkIndex = leftMinReduce.chunkIndex;
+      const chunkIndex = reduceBlock.leftMin.chunkIndex;
 
       // We'll workgroupBarrier at least once below, before this is relevant
       if ( exists && reduceIndex === workgroupFirstEdgeIndex ) {
         await context.workgroupValues.firstChunkIndex.set( context, 0, chunkIndex );
       }
 
+      // TODO: fix this to work with blocks as primitives
       await context.workgroupValues.leftMinReduces.set( context, context.localId.x, exists ? leftMinReduce : RasterChunkReduceData.OUT_OF_RANGE );
       await context.workgroupValues.leftMaxReduces.set( context, context.localId.x, exists ? leftMaxReduce : RasterChunkReduceData.OUT_OF_RANGE );
       await context.workgroupValues.rightMinReduces.set( context, context.localId.x, exists ? rightMinReduce : RasterChunkReduceData.OUT_OF_RANGE );
@@ -111,13 +114,13 @@ export default class ParallelRasterChunkReduce {
 
       await context.workgroupBarrier(); // for the atomic
 
-      if ( exists && context.localId.x === context.workgroupValues.atomicMaxFirstReduceIndex ) {
-        await outputChunkReduces.set( context, 4 * context.workgroupId.x, leftMinReduce );
-        await outputChunkReduces.set( context, 4 * context.workgroupId.x + 1, leftMaxReduce );
-      }
-      if ( exists && context.localId.x === workgroupLastEdgeIndex ) {
-        await outputChunkReduces.set( context, 4 * context.workgroupId.x + 2, rightMinReduce );
-        await outputChunkReduces.set( context, 4 * context.workgroupId.x + 3, rightMaxReduce );
+      if ( exists && context.localId.x === 0 ) {
+        await outputChunkReduces.set( context, context.workgroupId.x, new RasterChunkReduceBlock(
+          await context.workgroupValues.leftMinReduces.get( context, context.workgroupValues.atomicMaxFirstReduceIndex ),
+          await context.workgroupValues.leftMaxReduces.get( context, context.workgroupValues.atomicMaxFirstReduceIndex ),
+          await context.workgroupValues.rightMinReduces.get( context, workgroupLastEdgeIndex ),
+          await context.workgroupValues.rightMaxReduces.get( context, workgroupLastEdgeIndex )
+        ) );
       }
     }, () => ( {
       leftMinReduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE ),
