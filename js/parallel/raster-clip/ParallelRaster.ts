@@ -49,12 +49,12 @@ export default class ParallelRaster {
         0,
         false,
         new Vector2( 1, 1 ),
-        new Vector2( 7, 6 )
+        new Vector2( 3, 6 )
       ),
       new RasterEdge(
         0,
         false,
-        new Vector2( 7, 6 ),
+        new Vector2( 3, 6 ),
         new Vector2( 4, 2 )
       ),
       new RasterEdge(

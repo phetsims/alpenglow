@@ -79,7 +79,7 @@ export default class ParallelRasterInitialClip {
           minPoints[ 0 ].set( edge.startPoint );
           minPoints[ 1 ].set( edge.endPoint );
           minPoints[ 2 ].set( edge.endPoint );
-          minPoints[ 3 ].set( edge.startPoint );
+          minPoints[ 3 ].set( edge.endPoint );
 
           if ( startSecondaryLess !== endSecondaryLess ) {
             maxCount += startSecondaryLess ? 1 : -1;
@@ -90,7 +90,7 @@ export default class ParallelRasterInitialClip {
           maxPoints[ 0 ].set( edge.startPoint );
           maxPoints[ 1 ].set( edge.endPoint );
           maxPoints[ 2 ].set( edge.endPoint );
-          maxPoints[ 3 ].set( edge.startPoint );
+          maxPoints[ 3 ].set( edge.endPoint );
 
           if ( startSecondaryLess !== endSecondaryLess ) {
             minCount += startSecondaryLess ? 1 : -1;
@@ -102,12 +102,12 @@ export default class ParallelRasterInitialClip {
           minPoints[ 0 ].set( edge.startPoint );
           minPoints[ 1 ].set( edge.endPoint );
           minPoints[ 2 ].set( edge.endPoint );
-          minPoints[ 3 ].set( edge.startPoint );
+          minPoints[ 3 ].set( edge.endPoint );
 
           maxPoints[ 0 ].set( edge.startPoint );
           maxPoints[ 1 ].set( edge.endPoint );
           maxPoints[ 2 ].set( edge.endPoint );
-          maxPoints[ 3 ].set( edge.startPoint );
+          maxPoints[ 3 ].set( edge.endPoint );
         }
         else {
           // There is a single crossing of our x (possibly on a start or end point)
@@ -156,28 +156,29 @@ export default class ParallelRasterInitialClip {
         const minArea = minClip.getArea();
         const maxArea = maxClip.getArea();
 
+        // TODO: ensure that the base counts are included in the reduce!
         const minReduce = isXSplit ? new RasterChunkReduceData(
           minChunkIndex,
           minArea,
           chunk.minX, chunk.minY, split, chunk.maxY,
-          chunk.minXCount, chunk.minYCount, chunk.maxXCount + minCount, chunk.maxYCount
+          0, 0, minCount, 0
         ) : new RasterChunkReduceData(
           minChunkIndex,
           minArea,
           chunk.minX, chunk.minY, chunk.maxX, split,
-          chunk.minXCount, chunk.minYCount, chunk.maxXCount, chunk.maxYCount + minCount
+          0, 0, 0, minCount
         );
 
         const maxReduce = isXSplit ? new RasterChunkReduceData(
           maxChunkIndex,
           maxArea,
           split, chunk.minY, chunk.maxX, chunk.maxY,
-          chunk.minXCount + maxCount, chunk.minYCount, chunk.maxXCount, chunk.maxYCount
+          maxCount, 0, 0, 0
         ) : new RasterChunkReduceData(
           maxChunkIndex,
           maxArea,
           chunk.minX, split, chunk.maxX, chunk.maxY,
-          chunk.minXCount, chunk.minYCount + maxCount, chunk.maxXCount, chunk.maxYCount
+          0, maxCount, 0, 0
         );
 
         await edgeClips.set( context, minEdgeIndex, minClip );
