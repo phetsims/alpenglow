@@ -15,6 +15,8 @@ export default class RasterEdgeClip {
     public readonly point1: Vector2,
     public readonly point2: Vector2,
     public readonly point3: Vector2,
+
+    // TODO: check when these are actually used
     public readonly isFirstEdge: boolean,
     public readonly isLastEdge: boolean
   ) {}

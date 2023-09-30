@@ -13,6 +13,10 @@ export default class RasterChunkReduceData {
     public readonly chunkIndex: number,
     public readonly area: number,
 
+    // TODO: check which ones of these aren't used
+    public readonly isFirstEdge: boolean,
+    public readonly isLastEdge: boolean,
+
     // TODO: centroid?
 
     // FLOAT(?) bounds
@@ -85,6 +89,8 @@ export default class RasterChunkReduceData {
       return new RasterChunkReduceData(
         a.chunkIndex,
         a.area + b.area,
+        a.isFirstEdge,
+        b.isLastEdge,
         Math.min( a.minX, b.minX ),
         Math.min( a.minY, b.minY ),
         Math.max( a.maxX, b.maxX ),
@@ -98,7 +104,11 @@ export default class RasterChunkReduceData {
   }
 
   public static readonly INDETERMINATE = new RasterChunkReduceData(
-    NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
+    NaN, NaN, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
+  );
+
+  public static readonly OUT_OF_RANGE = new RasterChunkReduceData(
+    -1, NaN, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
   );
 }
 
