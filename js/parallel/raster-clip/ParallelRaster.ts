@@ -100,14 +100,12 @@ export default class ParallelRaster {
 
     // TODO: add the shipped output
   ): Promise<void> {
+    const clippedChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterClippedChunk.INDETERMINATE ), RasterClippedChunk.INDETERMINATE );
+    await ParallelRasterInitialChunk.dispatch( inputChunks, inputChunks.data.length, clippedChunks );
+
     const edgeClips0 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterEdgeClip.INDETERMINATE ), RasterEdgeClip.INDETERMINATE );
     const chunkReduces0 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE );
-
-    await ParallelRasterInitialClip.dispatch( inputChunks, inputEdges, inputEdges.data.length, edgeClips0, chunkReduces0 );
-
-    const clippedChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterClippedChunk.INDETERMINATE ), RasterClippedChunk.INDETERMINATE );
-
-    await ParallelRasterInitialChunk.dispatch( inputChunks, inputChunks.data.length, clippedChunks );
+    await ParallelRasterInitialClip.dispatch( inputChunks, inputEdges, clippedChunks, inputEdges.data.length, edgeClips0, chunkReduces0 );
 
     // TODO: the rest of the processing
   }

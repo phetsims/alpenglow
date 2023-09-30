@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, RasterChunk, RasterChunkReduceData, RasterEdge, RasterEdgeClip } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, RasterChunk, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRasterInitialClip {
@@ -14,6 +14,7 @@ export default class ParallelRasterInitialClip {
     // input
     chunks: ParallelStorageArray<RasterChunk>,
     edges: ParallelStorageArray<RasterEdge>,
+    clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     numEdges: number,
 
     // output
@@ -186,7 +187,7 @@ export default class ParallelRasterInitialClip {
         await chunkReduces.set( context, minEdgeIndex, minReduce );
         await chunkReduces.set( context, maxEdgeIndex, maxReduce );
       }
-    }, () => ( {} ), [ chunks, edges, edgeClips, chunkReduces ], workgroupSize );
+    }, () => ( {} ), [ chunks, edges, clippedChunks, edgeClips, chunkReduces ], workgroupSize );
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdges / workgroupSize ) ) );
   }
