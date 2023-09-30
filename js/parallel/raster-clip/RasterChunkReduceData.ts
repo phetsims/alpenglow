@@ -33,6 +33,24 @@ export default class RasterChunkReduceData {
     public readonly maxYCount: number
   ) {}
 
+  public isValid(): boolean {
+    return !isNaN( this.chunkIndex ) && this.chunkIndex !== -1;
+  }
+
+  public toString(): string {
+    if ( isNaN( this.chunkIndex ) ) {
+      return 'RasterChunkReduceData[INDETERMINATE]';
+    }
+    if ( this.chunkIndex === -1 ) {
+      return 'RasterChunkReduceData[OUT_OF_RANGE]';
+    }
+    const firstLast = this.isFirstEdge ? ( this.isLastEdge ? ' BOTH' : ' FIRST' ) : ( this.isLastEdge ? ' LAST' : '' );
+    const counts = `counts:${this.minXCount},${this.minYCount},${this.maxXCount},${this.maxYCount}`;
+    const area = `area:${this.area}`;
+    const bounds = `bounds:x[${this.minX},${this.maxX}],y[${this.minY},${this.maxY}]`;
+    return `RasterChunkReduceData[chunk:${this.chunkIndex} ${counts} ${bounds} ${area}${firstLast}]`;
+  }
+
   public apply( clippedChunk: RasterClippedChunk ): RasterClippedChunk {
 
     const minXCount = clippedChunk.minXCount + this.minXCount;

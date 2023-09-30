@@ -18,6 +18,14 @@ export default class RasterEdge {
     public readonly endPoint: Vector2
   ) {}
 
+  public toString(): string {
+    if ( isNaN( this.chunkIndex ) ) {
+      return 'RasterEdge[INDETERMINATE]';
+    }
+    const firstLast = this.isFirstEdge ? ( this.isLastEdge ? ' BOTH' : ' FIRST' ) : ( this.isLastEdge ? ' LAST' : '' );
+    return `RasterEdge[chunk:${this.chunkIndex} ${this.startPoint.x},${this.startPoint.y} => ${this.endPoint.x},${this.endPoint.y}${firstLast}]`;
+  }
+
   public static readonly INDETERMINATE = new RasterEdge(
     NaN, false, false, new Vector2( NaN, NaN ), new Vector2( NaN, NaN )
   );

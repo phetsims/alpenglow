@@ -29,6 +29,16 @@ export default class RasterChunk {
     public readonly maxYCount: number
   ) {}
 
+  public toString(): string {
+    if ( isNaN( this.rasterProgramIndex ) ) {
+      return 'RasterChunk[INDETERMINATE]';
+    }
+    const counts = `counts:${this.minXCount},${this.minYCount},${this.maxXCount},${this.maxYCount}`;
+    const bounds = `bounds:x[${this.minX},${this.maxX}],y[${this.minY},${this.maxY}]`;
+    const needs = ( this.needsCentroid ? ' needsCentroid' : '' ) + ( this.needsFace ? ' needsFace' : '' );
+    return `RasterChunk[prog:${this.rasterProgramIndex} ${counts} ${bounds} numEdges:${this.numEdges} edgesOffset:${this.edgesOffset}${needs}]`;
+  }
+
   public static readonly INDETERMINATE = new RasterChunk(
     NaN, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
   );

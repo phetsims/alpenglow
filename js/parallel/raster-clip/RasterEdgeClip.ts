@@ -35,6 +35,15 @@ export default class RasterEdgeClip {
     );
   }
 
+  public toString(): string {
+    if ( isNaN( this.point0.x ) ) {
+      return 'RasterEdgeClip[INDETERMINATE]';
+    }
+    const firstLast = this.isFirstEdge ? ( this.isLastEdge ? ' BOTH' : ' FIRST' ) : ( this.isLastEdge ? ' LAST' : '' );
+    const coords = `${this.point0.x},${this.point0.y} => ${this.point1.x},${this.point1.y} => ${this.point2.x},${this.point2.y} => ${this.point3.x},${this.point3.y}`;
+    return `RasterEdgeClip[${coords}${firstLast}]`;
+  }
+
   public static readonly INDETERMINATE = new RasterEdgeClip(
     new Vector2( NaN, NaN ),
     new Vector2( NaN, NaN ),

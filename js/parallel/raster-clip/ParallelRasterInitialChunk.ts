@@ -10,6 +10,8 @@ import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, Rast
 
 export default class ParallelRasterInitialChunk {
   public static async dispatch(
+    workgroupSize: number,
+
     // input
     chunks: ParallelStorageArray<RasterChunk>,
     numChunks: number,
@@ -17,8 +19,6 @@ export default class ParallelRasterInitialChunk {
     // output
     clippedChunks: ParallelStorageArray<RasterClippedChunk>
   ): Promise<void> {
-    const workgroupSize = 256;
-
     const kernel = new ParallelKernel( async context => {
       await context.start();
 

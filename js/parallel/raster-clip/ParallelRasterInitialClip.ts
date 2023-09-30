@@ -11,6 +11,8 @@ import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRasterInitialClip {
   public static async dispatch(
+    workgroupSize: number,
+
     // input
     chunks: ParallelStorageArray<RasterChunk>,
     edges: ParallelStorageArray<RasterEdge>,
@@ -19,9 +21,9 @@ export default class ParallelRasterInitialClip {
 
     // output
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
-    chunkReduces: ParallelStorageArray<RasterChunkReduceData>
+    chunkReduces: ParallelStorageArray<RasterChunkReduceData>,
+    debugFullChunkReduces: ParallelStorageArray<RasterChunkReduceData>
   ): Promise<void> {
-    const workgroupSize = 256;
     const logWorkgroupSize = Math.log2( workgroupSize );
 
     type WorkgroupValues = {
@@ -35,7 +37,7 @@ export default class ParallelRasterInitialClip {
       await context.start();
 
       const workgroupFirstEdgeIndex = context.workgroupId.x * workgroupSize;
-      const workgroupLastEdgeIndex = Math.min( workgroupFirstEdgeIndex + workgroupSize, numEdges - 1 );
+      const workgroupLastEdgeIndex = Math.min( workgroupFirstEdgeIndex + workgroupSize - 1, numEdges - 1 );
 
       const edgeIndex = context.globalId.x;
       const exists = edgeIndex < numEdges;
@@ -213,10 +215,14 @@ export default class ParallelRasterInitialClip {
       await context.workgroupValues.minReduces.set( context, context.localId.x, minReduce );
       await context.workgroupValues.maxReduces.set( context, context.localId.x, maxReduce );
 
+      await debugFullChunkReduces.set( context, 2 * context.globalId.x, minReduce );
+      await debugFullChunkReduces.set( context, 2 * context.globalId.x + 1, maxReduce );
+
       for ( let i = 0; i < logWorkgroupSize; i++ ) {
         await context.workgroupBarrier();
         const delta = 1 << i;
         if ( context.localId.x >= delta ) {
+          // TODO: the two if statements are effectively evaluating the same thing (at least assert!)
           const otherMinReduce = await context.workgroupValues.minReduces.get( context, context.localId.x - delta );
           minReduce = RasterChunkReduceData.combine( otherMinReduce, minReduce );
           if ( minReduce.chunkIndex === otherMinReduce.chunkIndex && minReduce.isFirstEdge && minReduce.isLastEdge ) {
@@ -260,7 +266,7 @@ export default class ParallelRasterInitialClip {
       maxReduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE ),
       firstChunkIndex: new ParallelWorkgroupArray( [ 0 ], NaN ),
       atomicMaxFirstChunkIndex: 0
-    } ), [ chunks, edges, clippedChunks, edgeClips, chunkReduces ], workgroupSize );
+    } ), [ chunks, edges, clippedChunks, edgeClips, chunkReduces, debugFullChunkReduces ], workgroupSize );
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdges / workgroupSize ) ) );
   }

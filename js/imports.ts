@@ -287,6 +287,7 @@ export { default as RasterEdgeClip } from './parallel/raster-clip/RasterEdgeClip
 export { default as RasterClippedChunk } from './parallel/raster-clip/RasterClippedChunk.js';
 export { default as ParallelRasterInitialChunk } from './parallel/raster-clip/ParallelRasterInitialChunk.js';
 export { default as ParallelRasterInitialClip } from './parallel/raster-clip/ParallelRasterInitialClip.js';
+export { default as ParallelRasterChunkReduce } from './parallel/raster-clip/ParallelRasterChunkReduce.js';
 export { default as ParallelRaster } from './parallel/raster-clip/ParallelRaster.js';
 
 export { default as Snippet } from './webgpu/Snippet.js';
