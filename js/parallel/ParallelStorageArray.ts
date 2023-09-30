@@ -39,7 +39,7 @@ export default class ParallelStorageArray<T> {
   ): Promise<T> {
     let value: T;
 
-    if ( index < 0 || index >= this.data.length || !isFinite( index ) ) {
+    if ( !isFinite( index ) || index < 0 || index >= this.data.length ) {
       value = this.indeterminateValue;
     }
     else {
@@ -59,12 +59,14 @@ export default class ParallelStorageArray<T> {
     index: number,
     value: T
   ): Promise<void> {
-    // Ensure that we're the only ones who have written to this
-    assert && assert( this.writeLocalIDs[ index ].every( id => id.local.equals( context.localId ) && id.workgroup.equals( context.workgroupId ) ) );
+    if ( isFinite( index ) && index >= 0 && index < this.data.length ) {
+      // Ensure that we're the only ones who have written to this
+      assert && assert( this.writeLocalIDs[ index ].every( id => id.local.equals( context.localId ) && id.workgroup.equals( context.workgroupId ) ) );
 
-    this.writeLocalIDs[ index ].push( { local: context.localId, workgroup: context.workgroupId } );
+      this.writeLocalIDs[ index ].push( { local: context.localId, workgroup: context.workgroupId } );
 
-    this.data[ index ] = value;
+      this.data[ index ] = value;
+    }
 
     await context.afterSet();
   }

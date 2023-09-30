@@ -37,7 +37,7 @@ export default class ParallelWorkgroupArray<T> {
   ): Promise<T> {
     let value: T;
 
-    if ( index < 0 || index >= this.data.length || !isFinite( index ) ) {
+    if ( !isFinite( index ) || index < 0 || index >= this.data.length ) {
       value = this.indeterminateValue;
     }
     else {
@@ -57,12 +57,14 @@ export default class ParallelWorkgroupArray<T> {
     index: number,
     value: T
   ): Promise<void> {
-    // Ensure that we're the only ones who have written to this
-    assert && assert( this.writeLocalIDs[ index ].every( id => id.equals( context.localId ) ) );
+    if ( isFinite( index ) && index >= 0 && index < this.data.length ) {
+      // Ensure that we're the only ones who have written to this
+      assert && assert( this.writeLocalIDs[ index ].every( id => id.equals( context.localId ) ) );
 
-    this.writeLocalIDs[ index ].push( context.localId );
+      this.writeLocalIDs[ index ].push( context.localId );
 
-    this.data[ index ] = value;
+      this.data[ index ] = value;
+    }
 
     await context.afterSet();
   }

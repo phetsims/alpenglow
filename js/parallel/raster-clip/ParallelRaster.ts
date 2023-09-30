@@ -103,7 +103,7 @@ export default class ParallelRaster {
     const edgeClips0 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterEdgeClip.INDETERMINATE ), RasterEdgeClip.INDETERMINATE );
     const chunkReduces0 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE );
 
-    await ParallelRasterInitialClip.dispatch( inputChunks, inputEdges, edgeClips0, chunkReduces0 );
+    await ParallelRasterInitialClip.dispatch( inputChunks, inputEdges, inputEdges.data.length, edgeClips0, chunkReduces0 );
 
     // TODO: the rest of the processing
   }
