@@ -22,7 +22,7 @@ export default class ParallelRasterInitialClip {
     // output
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
     chunkReduces: ParallelStorageArray<RasterChunkReduceData>,
-    debugFullChunkReduces: ParallelStorageArray<RasterChunkReduceData>
+    debugFullChunkReduces: ParallelStorageArray<{ min: RasterChunkReduceData; max: RasterChunkReduceData }>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
 
@@ -215,8 +215,7 @@ export default class ParallelRasterInitialClip {
       await context.workgroupValues.minReduces.set( context, context.localId.x, minReduce );
       await context.workgroupValues.maxReduces.set( context, context.localId.x, maxReduce );
 
-      await debugFullChunkReduces.set( context, 2 * context.globalId.x, minReduce );
-      await debugFullChunkReduces.set( context, 2 * context.globalId.x + 1, maxReduce );
+      await debugFullChunkReduces.set( context, context.globalId.x, { min: minReduce, max: maxReduce } );
 
       for ( let i = 0; i < logWorkgroupSize; i++ ) {
         await context.workgroupBarrier();

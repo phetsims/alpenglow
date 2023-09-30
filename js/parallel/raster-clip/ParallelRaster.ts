@@ -129,14 +129,17 @@ export default class ParallelRaster {
 
     const edgeClips0 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterEdgeClip.INDETERMINATE ), RasterEdgeClip.INDETERMINATE );
     const chunkReduces0 = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE );
-    const debugFullChunkReduces = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE );
+    const debugFullChunkReduces = new ParallelStorageArray( _.range( 0, 4096 ).map( () => ( { min: RasterChunkReduceData.INDETERMINATE, max: RasterChunkReduceData.INDETERMINATE } ) ), { min: RasterChunkReduceData.INDETERMINATE, max: RasterChunkReduceData.INDETERMINATE } );
     await ParallelRasterInitialClip.dispatch( workgroupSize, inputChunks, inputEdges, clippedChunks, numInputEdges, edgeClips0, chunkReduces0, debugFullChunkReduces );
 
     console.log( 'edgeClips0' );
     console.log( edgeClips0.data.slice( 0, numInputEdges * 2 ).map( toIndexedString ).join( '\n' ) );
 
     console.log( 'debugFullChunkReduces' );
-    console.log( debugFullChunkReduces.data.slice( 0, numInputEdges * 2 ).map( toIndexedString ).join( '\n' ) );
+    console.log( debugFullChunkReduces.data.slice( 0, numInputEdges ).flatMap( ( n, i ) => [
+      `${i} min: ${n.min.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} max: ${n.max.toString()}`
+    ] ).join( '\n' ) );
 
     console.log( 'chunkReduces0' );
     console.log( chunkReduces0.data.slice( 0, 4 * Math.ceil( numInputEdges / workgroupSize ) ).map( toIndexedString ).join( '\n' ) );
