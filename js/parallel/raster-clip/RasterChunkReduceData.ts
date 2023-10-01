@@ -83,16 +83,25 @@ export default class RasterChunkReduceData {
                  ? clippedChunk.maxY - Math.floor( clippedChunk.maxY - this.maxY )
                  : clippedChunk.maxY;
 
+    // Include both area from the clipped-edge counts AND from the actual edges themselves
+    const area = countArea + this.area;
+
+    const width = maxX - minX;
+    const height = maxY - minY;
+
+    const isDiscarded = area <= 1e-8;
+    const isFullArea = area >= width * height - 1e-8;
+    const isComplete = isDiscarded || isFullArea || ( width <= 1 + 1e-8 && height <= 1 + 1e-8 );
+
     return new RasterClippedChunk(
       clippedChunk.rasterProgramIndex,
       clippedChunk.needsCentroid,
       clippedChunk.needsFace,
 
-      clippedChunk.edgesOffset,
-      clippedChunk.numEdges,
-
-      // Include both area from the clipped-edge counts AND from the actual edges themselves
-      countArea + this.area,
+      !isComplete,
+      isComplete && !isDiscarded,
+      isFullArea,
+      area,
 
       minX, minY, maxX, maxY,
       minXCount, minYCount, maxXCount, maxYCount

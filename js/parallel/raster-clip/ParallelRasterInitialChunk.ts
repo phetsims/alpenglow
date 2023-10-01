@@ -43,9 +43,10 @@ export default class ParallelRasterInitialChunk {
           chunk.needsCentroid,
           chunk.needsFace,
 
-          // TODO: how do we fill in this data?
-          0,
-          0,
+          // Filled in and modified later (past this point)
+          false,
+          false,
+          false,
           0,
 
           chunk.minX,
@@ -64,9 +65,10 @@ export default class ParallelRasterInitialChunk {
           chunk.needsCentroid,
           chunk.needsFace,
 
-          // TODO: how do we fill in this data?
-          0,
-          0,
+          // Filled in and modified later (past this point)
+          false,
+          false,
+          false,
           0,
 
           isXSplit ? split : chunk.minX,
