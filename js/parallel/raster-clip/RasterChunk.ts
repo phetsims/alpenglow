@@ -29,6 +29,18 @@ export default class RasterChunk {
     public readonly maxYCount: number
   ) {}
 
+  public withEdgeInfo( startIndex: number, endIndex: number ): RasterChunk {
+    return new RasterChunk(
+      this.rasterProgramIndex,
+      this.needsCentroid,
+      this.needsFace,
+      startIndex,
+      endIndex - startIndex,
+      this.minX, this.minY, this.maxX, this.maxY,
+      this.minXCount, this.minYCount, this.maxXCount, this.maxYCount
+    );
+  }
+
   public toString(): string {
     if ( isNaN( this.rasterProgramIndex ) ) {
       return 'RasterChunk[INDETERMINATE]';

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterChunkIndexPatch, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData, ParallelRasterEdgeIndexPatch } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRaster {
@@ -363,7 +363,33 @@ export default class ParallelRaster {
     // we go to 2x chunks, each has min/max
     console.log( chunkIndices.data.slice( 0, numInputChunks * 2 * 2 ).map( toIndexedString ).join( '\n' ) );
 
-    // TODO: the rest of the processing
+    await ParallelRasterChunkIndexPatch.dispatch(
+      workgroupSize,
+      chunkIndexMap, chunkIndices, reducibleChunks, completeChunks, clippedChunks,
+      numInputChunks * 2
+    );
+
+    console.log( `reducibleChunks ${reducibleChunkCount}` );
+    console.log( reducibleChunks.data.slice( 0, reducibleChunkCount ).map( toIndexedString ).join( '\n' ) );
+
+    console.log( `completeChunks ${completeChunkCount}` );
+    console.log( completeChunks.data.slice( 0, completeChunkCount ).map( toIndexedString ).join( '\n' ) );
+
+    await ParallelRasterEdgeIndexPatch.dispatch(
+      workgroupSize,
+      chunkIndexMap, chunkIndices, reducibleEdges, reducibleEdgeCount
+    );
+
+    console.log( `reducibleEdges ${reducibleEdgeCount}` );
+    console.log( reducibleEdges.data.slice( 0, reducibleEdgeCount ).map( toIndexedString ).join( '\n' ) );
+
+    await ParallelRasterEdgeIndexPatch.dispatch(
+      workgroupSize,
+      chunkIndexMap, chunkIndices, completeEdges, completeEdgeCount
+    );
+
+    console.log( `completeEdges ${completeEdgeCount}` );
+    console.log( completeEdges.data.slice( 0, completeEdgeCount ).map( toIndexedString ).join( '\n' ) );
   }
 }
 
