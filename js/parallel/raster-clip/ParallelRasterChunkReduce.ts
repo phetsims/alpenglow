@@ -12,12 +12,14 @@ export default class ParallelRasterChunkReduce {
   public static async dispatch(
     workgroupSize: number,
 
-    // input
-    clippedChunks: ParallelStorageArray<RasterClippedChunk>, // NOTE: read-write
+    // read
     inputChunkReduces: ParallelStorageArray<RasterChunkReduceBlock>,
     numReduces: number,
 
-    // output
+    // read-write
+    clippedChunks: ParallelStorageArray<RasterClippedChunk>,
+
+    // write
     outputChunkReduces: ParallelStorageArray<RasterChunkReduceBlock>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );

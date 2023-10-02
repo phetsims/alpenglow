@@ -12,11 +12,11 @@ export default class ParallelRasterInitialChunk {
   public static async dispatch(
     workgroupSize: number,
 
-    // input
+    // read
     chunks: ParallelStorageArray<RasterChunk>,
     numChunks: number,
 
-    // output
+    // write
     clippedChunks: ParallelStorageArray<RasterClippedChunk>
   ): Promise<void> {
     const kernel = new ParallelKernel( async context => {

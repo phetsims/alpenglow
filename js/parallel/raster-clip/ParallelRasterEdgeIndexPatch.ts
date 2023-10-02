@@ -12,11 +12,13 @@ export default class ParallelRasterEdgeIndexPatch {
   public static async dispatch(
     workgroupSize: number,
 
-    // input
+    // read
     chunkIndexMap: ParallelStorageArray<number>,
     chunkIndices: ParallelStorageArray<number>,
-    edges: ParallelStorageArray<RasterEdge>, // mutated
-    numEdges: number
+    numEdges: number,
+
+    // read-write
+    edges: ParallelStorageArray<RasterEdge>
   ): Promise<void> {
     const kernel = new ParallelKernel( async context => {
       await context.start();

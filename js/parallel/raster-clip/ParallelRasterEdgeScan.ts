@@ -15,16 +15,15 @@ export default class ParallelRasterEdgeScan {
   public static async dispatch(
     workgroupSize: number,
 
-    // input
+    // read
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
     edgeReduces0: ParallelStorageArray<RasterSplitReduceData>,
     edgeReduces1: ParallelStorageArray<RasterSplitReduceData>,
     edgeReduces2: ParallelStorageArray<RasterSplitReduceData>,
     numEdges: number,
-    numChunks: number,
 
-    // output
+    // write
     reducibleEdges: ParallelStorageArray<RasterEdge>,
     completeEdges: ParallelStorageArray<RasterCompleteEdge>,
     chunkIndices: ParallelStorageArray<number>

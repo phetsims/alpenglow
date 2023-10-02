@@ -12,11 +12,13 @@ export default class ParallelRasterEdgeReduce {
   public static async dispatch(
     workgroupSize: number,
 
-    // input
-    inputEdgeReduces: ParallelStorageArray<RasterSplitReduceData>, // will mutate, into scanned form
+    // read
     numReduces: number,
 
-    // output
+    // read-write
+    inputEdgeReduces: ParallelStorageArray<RasterSplitReduceData>, // will into scanned form
+
+    // write
     outputEdgeReduces: ParallelStorageArray<RasterSplitReduceData>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );

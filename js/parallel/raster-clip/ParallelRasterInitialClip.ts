@@ -13,13 +13,15 @@ export default class ParallelRasterInitialClip {
   public static async dispatch(
     workgroupSize: number,
 
-    // input
+    // read
     chunks: ParallelStorageArray<RasterChunk>,
     edges: ParallelStorageArray<RasterEdge>,
-    clippedChunks: ParallelStorageArray<RasterClippedChunk>, // NOTE: read-write
     numEdges: number,
 
-    // output
+    // read-write
+    clippedChunks: ParallelStorageArray<RasterClippedChunk>,
+
+    // write
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
     chunkReduces: ParallelStorageArray<RasterChunkReduceBlock>,
     debugFullChunkReduces: ParallelStorageArray<{ min: RasterChunkReduceData; max: RasterChunkReduceData }>

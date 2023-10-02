@@ -12,11 +12,11 @@ export default class ParallelRasterInitialSplitReduce {
   public static async dispatch(
     workgroupSize: number,
 
-    // input
+    // read
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     numClippedChunks: number,
 
-    // output
+    // write
     debugFullSplitReduces: ParallelStorageArray<RasterSplitReduceData>,
     splitReduces: ParallelStorageArray<RasterSplitReduceData>
   ): Promise<void> {

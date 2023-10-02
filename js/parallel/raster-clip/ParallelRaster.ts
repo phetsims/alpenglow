@@ -257,8 +257,9 @@ export default class ParallelRaster {
     console.log( 'ParallelRasterInitialClip dispatch' );
     await ParallelRasterInitialClip.dispatch(
       workgroupSize,
-      inputChunks, inputEdges, clippedChunks,
+      inputChunks, inputEdges,
       numInputEdges,
+      clippedChunks,
       edgeClips, chunkReduces0, debugFullChunkReduces
     );
 
@@ -284,8 +285,9 @@ export default class ParallelRaster {
     console.log( 'ParallelRasterChunkReduce dispatch' );
     await ParallelRasterChunkReduce.dispatch(
       workgroupSize,
-      clippedChunks, chunkReduces0,
+      chunkReduces0,
       Math.ceil( numInputEdges / workgroupSize ),
+      clippedChunks,
       chunkReduces1
     );
 
@@ -302,8 +304,9 @@ export default class ParallelRaster {
     console.log( 'ParallelRasterChunkReduce dispatch' );
     await ParallelRasterChunkReduce.dispatch(
       workgroupSize,
-      clippedChunks, chunkReduces1,
+      chunkReduces1,
       Math.ceil( numInputEdges / ( workgroupSize * workgroupSize ) ),
+      clippedChunks,
       chunkReduces2
     );
 
@@ -344,8 +347,8 @@ export default class ParallelRaster {
     console.log( 'ParallelRasterEdgeReduce dispatch' );
     await ParallelRasterEdgeReduce.dispatch(
       workgroupSize,
-      splitReduces0,
       Math.ceil( numClippedChunks / workgroupSize ),
+      splitReduces0,
       splitReduces1
     );
 
@@ -360,8 +363,8 @@ export default class ParallelRaster {
     console.log( 'ParallelRasterEdgeReduce dispatch' );
     await ParallelRasterEdgeReduce.dispatch(
       workgroupSize,
-      splitReduces1,
       Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize ) ),
+      splitReduces1,
       splitReduces2
     );
 
@@ -423,8 +426,8 @@ export default class ParallelRaster {
     console.log( 'ParallelRasterEdgeReduce dispatch' );
     await ParallelRasterEdgeReduce.dispatch(
       workgroupSize,
-      edgeReduces0,
       Math.ceil( numEdgeClips / workgroupSize ),
+      edgeReduces0,
       edgeReduces1
     );
 
@@ -439,8 +442,8 @@ export default class ParallelRaster {
     console.log( 'ParallelRasterEdgeReduce dispatch' );
     await ParallelRasterEdgeReduce.dispatch(
       workgroupSize,
-      edgeReduces1,
       Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize ) ),
+      edgeReduces1,
       edgeReduces2
     );
 
@@ -463,7 +466,7 @@ export default class ParallelRaster {
     await ParallelRasterEdgeScan.dispatch(
       workgroupSize,
       clippedChunks, edgeClips, edgeReduces0, edgeReduces1, edgeReduces2,
-      numInputEdges, numInputChunks,
+      numInputEdges,
       reducibleEdges, completeEdges, chunkIndices
     );
 
@@ -480,8 +483,9 @@ export default class ParallelRaster {
     console.log( 'ParallelRasterChunkIndexPatch dispatch' );
     await ParallelRasterChunkIndexPatch.dispatch(
       workgroupSize,
-      chunkIndexMap, chunkIndices, reducibleChunks, completeChunks, clippedChunks,
-      numClippedChunks
+      chunkIndexMap, chunkIndices, clippedChunks,
+      numClippedChunks,
+      reducibleChunks, completeChunks
     );
 
     console.log( `reducibleChunks ${reducibleChunkCount}` );
@@ -493,7 +497,9 @@ export default class ParallelRaster {
     console.log( 'ParallelRasterEdgeIndexPatch dispatch' );
     await ParallelRasterEdgeIndexPatch.dispatch(
       workgroupSize,
-      chunkIndexMap, chunkIndices, reducibleEdges, reducibleEdgeCount
+      chunkIndexMap, chunkIndices,
+      reducibleEdgeCount,
+      reducibleEdges
     );
 
     console.log( `reducibleEdges ${reducibleEdgeCount}` );

@@ -12,14 +12,17 @@ export default class ParallelRasterChunkIndexPatch {
   public static async dispatch(
     workgroupSize: number,
 
-    // input
     // TODO: look into ways to reduce the number of inputs, we're hitting a lot of memory
+
+    // read
     chunkIndexMap: ParallelStorageArray<number>,
     chunkIndices: ParallelStorageArray<number>,
-    reducibleChunks: ParallelStorageArray<RasterChunk>, // mutated
-    completeChunks: ParallelStorageArray<RasterCompleteChunk>, // mutated
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
-    numClippedChunks: number
+    numClippedChunks: number,
+
+    // read-write
+    reducibleChunks: ParallelStorageArray<RasterChunk>, // mutated
+    completeChunks: ParallelStorageArray<RasterCompleteChunk> // mutated
   ): Promise<void> {
     const kernel = new ParallelKernel( async context => {
       await context.start();

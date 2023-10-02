@@ -12,12 +12,12 @@ export default class ParallelRasterInitialEdgeReduce {
   public static async dispatch(
     workgroupSize: number,
 
-    // input
+    // read
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
     numEdgeClips: number,
 
-    // output
+    // write
     debugFullEdgeReduces: ParallelStorageArray<RasterSplitReduceData>,
     edgeReduces: ParallelStorageArray<RasterSplitReduceData>
   ): Promise<void> {

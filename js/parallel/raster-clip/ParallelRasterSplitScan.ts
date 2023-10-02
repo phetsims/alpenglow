@@ -12,14 +12,14 @@ export default class ParallelRasterSplitScan {
   public static async dispatch(
     workgroupSize: number,
 
-    // input
+    // read
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     splitReduces0: ParallelStorageArray<RasterSplitReduceData>,
     splitReduces1: ParallelStorageArray<RasterSplitReduceData>,
     splitReduces2: ParallelStorageArray<RasterSplitReduceData>,
     numClippedChunks: number,
 
-    // output
+    // write
     reducibleChunks: ParallelStorageArray<RasterChunk>,
     completeChunks: ParallelStorageArray<RasterCompleteChunk>,
     chunkIndexMap: ParallelStorageArray<number>
