@@ -81,6 +81,8 @@ export default class ParallelRasterInitialClip {
       ];
       let minCount = 0;
       let maxCount = 0;
+      let minSet = false;
+      let maxSet = false;
 
       const centerSecondary = 0.5 * ( isXSplit ? chunk.minY + chunk.maxY : chunk.minX + chunk.maxX );
       const startPoint = edge.startPoint;
@@ -99,6 +101,7 @@ export default class ParallelRasterInitialClip {
         minPoints[ 1 ].set( edge.endPoint );
         minPoints[ 2 ].set( edge.endPoint );
         minPoints[ 3 ].set( edge.endPoint );
+        minSet = true;
 
         if ( startSecondaryLess !== endSecondaryLess ) {
           maxCount += startSecondaryLess ? 1 : -1;
@@ -110,6 +113,7 @@ export default class ParallelRasterInitialClip {
         maxPoints[ 1 ].set( edge.endPoint );
         maxPoints[ 2 ].set( edge.endPoint );
         maxPoints[ 3 ].set( edge.endPoint );
+        maxSet = true;
 
         if ( startSecondaryLess !== endSecondaryLess ) {
           minCount += startSecondaryLess ? 1 : -1;
@@ -122,11 +126,13 @@ export default class ParallelRasterInitialClip {
         minPoints[ 1 ].set( edge.endPoint );
         minPoints[ 2 ].set( edge.endPoint );
         minPoints[ 3 ].set( edge.endPoint );
+        minSet = true;
 
         maxPoints[ 0 ].set( edge.startPoint );
         maxPoints[ 1 ].set( edge.endPoint );
         maxPoints[ 2 ].set( edge.endPoint );
         maxPoints[ 3 ].set( edge.endPoint );
+        maxSet = true;
       }
       else {
         // There is a single crossing of our x (possibly on a start or end point)
@@ -158,6 +164,7 @@ export default class ParallelRasterInitialClip {
         minPoints[ 3 ] = endGreater ? (
           isXSplit ? new Vector2( split, endCornerSecondary ) : new Vector2( endCornerSecondary, split )
         ) : minResultEndPoint;
+        minSet = true;
 
         maxPoints[ 0 ] = startLess ? (
           isXSplit ? new Vector2( split, startCornerSecondary ) : new Vector2( startCornerSecondary, split )
@@ -167,7 +174,11 @@ export default class ParallelRasterInitialClip {
         maxPoints[ 3 ] = endLess ? (
           isXSplit ? new Vector2( split, endCornerSecondary ) : new Vector2( endCornerSecondary, split )
         ) : maxResultEndPoint;
+        maxSet = true;
       }
+
+      const veryPositiveNumber = 1e10;
+      const veryNegativeNumber = -1e10;
 
       const minClip = new RasterEdgeClip( minChunkIndex, minPoints[ 0 ], minPoints[ 1 ], minPoints[ 2 ], minPoints[ 3 ], edge.isFirstEdge, edge.isLastEdge );
       const maxClip = new RasterEdgeClip( maxChunkIndex, maxPoints[ 0 ], maxPoints[ 1 ], maxPoints[ 2 ], maxPoints[ 3 ], edge.isFirstEdge, edge.isLastEdge );
@@ -175,17 +186,53 @@ export default class ParallelRasterInitialClip {
       const minArea = minClip.getArea();
       const maxArea = maxClip.getArea();
 
+      let minBoundsMinX = minSet ? Math.min( minPoints[ 0 ].x, minPoints[ 1 ].x, minPoints[ 2 ].x, minPoints[ 3 ].x ) : veryPositiveNumber;
+      let minBoundsMinY = minSet ? Math.min( minPoints[ 0 ].y, minPoints[ 1 ].y, minPoints[ 2 ].y, minPoints[ 3 ].y ) : veryPositiveNumber;
+      let minBoundsMaxX = minSet ? Math.max( minPoints[ 0 ].x, minPoints[ 1 ].x, minPoints[ 2 ].x, minPoints[ 3 ].x ) : veryNegativeNumber;
+      let minBoundsMaxY = minSet ? Math.max( minPoints[ 0 ].y, minPoints[ 1 ].y, minPoints[ 2 ].y, minPoints[ 3 ].y ) : veryNegativeNumber;
+
+      if ( minCount !== 0 ) {
+        if ( isXSplit ) {
+          minBoundsMaxX = Math.max( minBoundsMaxX, split );
+          minBoundsMinY = Math.min( minBoundsMinY, chunk.minY );
+          minBoundsMaxY = Math.max( minBoundsMaxY, chunk.maxY );
+        }
+        else {
+          minBoundsMaxY = Math.max( minBoundsMaxY, split );
+          minBoundsMinX = Math.min( minBoundsMinX, chunk.minX );
+          minBoundsMaxX = Math.max( minBoundsMaxX, chunk.maxX );
+        }
+      }
+
+      let maxBoundsMinX = maxSet ? Math.min( maxPoints[ 0 ].x, maxPoints[ 1 ].x, maxPoints[ 2 ].x, maxPoints[ 3 ].x ) : veryPositiveNumber;
+      let maxBoundsMinY = maxSet ? Math.min( maxPoints[ 0 ].y, maxPoints[ 1 ].y, maxPoints[ 2 ].y, maxPoints[ 3 ].y ) : veryPositiveNumber;
+      let maxBoundsMaxX = maxSet ? Math.max( maxPoints[ 0 ].x, maxPoints[ 1 ].x, maxPoints[ 2 ].x, maxPoints[ 3 ].x ) : veryNegativeNumber;
+      let maxBoundsMaxY = maxSet ? Math.max( maxPoints[ 0 ].y, maxPoints[ 1 ].y, maxPoints[ 2 ].y, maxPoints[ 3 ].y ) : veryNegativeNumber;
+
+      if ( maxCount !== 0 ) {
+        if ( isXSplit ) {
+          maxBoundsMinX = Math.min( maxBoundsMinX, split );
+          maxBoundsMinY = Math.min( maxBoundsMinY, chunk.minY );
+          maxBoundsMaxY = Math.max( maxBoundsMaxY, chunk.maxY );
+        }
+        else {
+          maxBoundsMinY = Math.min( maxBoundsMinY, split );
+          maxBoundsMinX = Math.min( maxBoundsMinX, chunk.minX );
+          maxBoundsMaxX = Math.max( maxBoundsMaxX, chunk.maxX );
+        }
+      }
+
       let minReduce = isXSplit ? new RasterChunkReduceData(
         minChunkIndex,
         minArea,
         edge.isFirstEdge, edge.isLastEdge,
-        chunk.minX, chunk.minY, split, chunk.maxY,
+        minBoundsMinX, minBoundsMinY, minBoundsMaxX, minBoundsMaxY,
         0, 0, minCount, 0
       ) : new RasterChunkReduceData(
         minChunkIndex,
         minArea,
         edge.isFirstEdge, edge.isLastEdge,
-        chunk.minX, chunk.minY, chunk.maxX, split,
+        minBoundsMinX, minBoundsMinY, minBoundsMaxX, minBoundsMaxY,
         0, 0, 0, minCount
       );
 
@@ -193,13 +240,13 @@ export default class ParallelRasterInitialClip {
         maxChunkIndex,
         maxArea,
         edge.isFirstEdge, edge.isLastEdge,
-        split, chunk.minY, chunk.maxX, chunk.maxY,
+        maxBoundsMinX, maxBoundsMinY, maxBoundsMaxX, maxBoundsMaxY,
         maxCount, 0, 0, 0
       ) : new RasterChunkReduceData(
         maxChunkIndex,
         maxArea,
         edge.isFirstEdge, edge.isLastEdge,
-        chunk.minX, split, chunk.maxX, chunk.maxY,
+        maxBoundsMinX, maxBoundsMinY, maxBoundsMaxX, maxBoundsMaxY,
         0, maxCount, 0, 0
       );
 

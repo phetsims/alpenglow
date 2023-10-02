@@ -148,7 +148,7 @@ export default class ParallelRaster {
       ),
       new RasterEdge(
         4,
-        false,
+        true,
         false,
         new Vector2( 10, 9 ),
         new Vector2( 11, 9 )
@@ -184,11 +184,13 @@ export default class ParallelRaster {
       new RasterEdge(
         4,
         false,
-        false,
+        true,
         new Vector2( 19, 10 ),
         new Vector2( 19, 9 )
       )
     ], RasterEdge.INDETERMINATE );
+
+    // TODO: scan this to see if we've got first/last edges correct, counts correct, etc.
 
     const outputChunks = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunk.INDETERMINATE ), RasterChunk.INDETERMINATE );
     const outputEdges = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterEdge.INDETERMINATE ), RasterEdge.INDETERMINATE );
