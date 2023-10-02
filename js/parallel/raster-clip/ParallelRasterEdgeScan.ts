@@ -21,7 +21,7 @@ export default class ParallelRasterEdgeScan {
     edgeReduces0: ParallelStorageArray<RasterSplitReduceData>,
     edgeReduces1: ParallelStorageArray<RasterSplitReduceData>,
     edgeReduces2: ParallelStorageArray<RasterSplitReduceData>,
-    numEdges: number,
+    numEdgeClips: number,
 
     // write
     reducibleEdges: ParallelStorageArray<RasterEdge>,
@@ -39,7 +39,7 @@ export default class ParallelRasterEdgeScan {
       await context.start();
 
       const edgeIndex = context.globalId.x;
-      const exists = edgeIndex < numEdges * 2; // we have 2 clips for each edge
+      const exists = edgeIndex < numEdgeClips;
       // TODO: numEdges => numClippedEdges, it will be better for computations
 
       // TODO: better way to scan? Does this lead to inefficient memory?
@@ -175,7 +175,7 @@ export default class ParallelRasterEdgeScan {
       baseIndices: new ParallelWorkgroupArray( [ 0, 0 ], 0 )
     } ), [ clippedChunks, edgeClips, edgeReduces0, edgeReduces1, edgeReduces2, reducibleEdges, completeEdges, chunkIndices ], workgroupSize );
 
-    await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdges * 2 / workgroupSize ) ) );
+    await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdgeClips / workgroupSize ) ) );
   }
 }
 

@@ -466,7 +466,7 @@ export default class ParallelRaster {
     await ParallelRasterEdgeScan.dispatch(
       workgroupSize,
       clippedChunks, edgeClips, edgeReduces0, edgeReduces1, edgeReduces2,
-      numInputEdges,
+      numEdgeClips,
       reducibleEdges, completeEdges, chunkIndices
     );
 
