@@ -56,8 +56,6 @@ export default class ParallelRasterEdgeScan {
         const baseReducible = reduce2.numReducible + reduce1.numReducible + reduce0.numReducible;
         const baseComplete = reduce2.numComplete + reduce1.numComplete + reduce0.numComplete;
 
-        console.log( context.workgroupId.x, index0, index1, index2, reduce0, reduce1, reduce2, baseReducible, baseComplete );
-
         await context.workgroupValues.baseIndices.set( context, 0, baseReducible );
         await context.workgroupValues.baseIndices.set( context, 1, baseComplete );
 
@@ -108,11 +106,11 @@ export default class ParallelRasterEdgeScan {
           index++;
         }
 
-        const hasReducedVertices = clippedChunk.isReducible;
+        const hasReducibleVertices = clippedChunk.isReducible;
         const hasCompleteVertices = clippedChunk.isExportingCompleteEdges();
         let baseIndex = 0; // filled in later
 
-        if ( hasReducedVertices ) {
+        if ( hasReducibleVertices ) {
           // Convert to exclusive prefix sum TODO better way
           baseIndex = baseReducible + value.numReducible - initialValue.numReducible;
 
@@ -167,7 +165,8 @@ export default class ParallelRasterEdgeScan {
         }
 
         // chunk indices
-        if ( hasReducedVertices || hasCompleteVertices ) {
+        // TODO: ... can we just output the end of each, and when we distribute the chunks, we can just use the previous one?
+        if ( hasReducibleVertices || hasCompleteVertices ) {
           if ( edgeClip.isFirstEdge ) {
             await chunkIndices.set( context, 2 * edgeClip.chunkIndex, baseIndex );
           }

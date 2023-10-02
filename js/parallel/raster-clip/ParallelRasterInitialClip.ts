@@ -47,8 +47,11 @@ export default class ParallelRasterInitialClip {
         await context.workgroupValues.firstChunkIndex.set( context, 0, edge.chunkIndex );
       }
 
-      const minEdgeIndex = edgeIndex;
-      const maxEdgeIndex = numEdges + edgeIndex;
+      // We want to map [offset, offset + num] edgeIndices to [2*offset, 2*offset + num] (min) and [2*offset + num, 2*offset + 2*num] (max)
+      // So we add `offset` to min, and `offset + num` to max
+
+      const minEdgeIndex = chunk.edgesOffset + edgeIndex;
+      const maxEdgeIndex = chunk.edgesOffset + chunk.numEdges + edgeIndex;
       const minChunkIndex = 2 * edge.chunkIndex;
       const maxChunkIndex = 2 * edge.chunkIndex + 1;
 
