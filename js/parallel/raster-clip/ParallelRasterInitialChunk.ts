@@ -86,6 +86,37 @@ export default class ParallelRasterInitialChunk {
     }, () => ( {} ), [ chunks, clippedChunks ], workgroupSize );
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numChunks / workgroupSize ) ) );
+
+    assert && ParallelRasterInitialChunk.validate( chunks, numChunks, clippedChunks );
+  }
+
+  public static validate(
+    chunks: ParallelStorageArray<RasterChunk>,
+    numChunks: number,
+    clippedChunks: ParallelStorageArray<RasterClippedChunk>
+  ): void {
+    if ( assert ) {
+      const numClippedChunks = 2 * numChunks;
+      assert( chunks.data.length >= numChunks );
+      assert( clippedChunks.data.length >= numClippedChunks );
+
+      for ( let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++ ) {
+        const chunk = chunks.data[ chunkIndex ];
+        const minClippedChunk = clippedChunks.data[ 2 * chunkIndex ];
+        const maxClippedChunk = clippedChunks.data[ 2 * chunkIndex + 1 ];
+
+        assert( minClippedChunk.rasterProgramIndex === chunk.rasterProgramIndex );
+        assert( maxClippedChunk.rasterProgramIndex === chunk.rasterProgramIndex );
+
+        assert( minClippedChunk.needsFace === chunk.needsFace );
+        assert( maxClippedChunk.needsFace === chunk.needsFace );
+
+        assert( minClippedChunk.minXCount === chunk.minXCount );
+        assert( minClippedChunk.minYCount === chunk.minYCount );
+        assert( maxClippedChunk.maxXCount === chunk.maxXCount );
+        assert( maxClippedChunk.maxYCount === chunk.maxYCount );
+      }
+    }
   }
 }
 
