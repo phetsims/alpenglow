@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterChunkIndexPatch, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData, ParallelRasterEdgeIndexPatch } from '../../imports.js';
+import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterChunkIndexPatch, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData, ParallelRasterEdgeIndexPatch, RasterCompleteChunk } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRaster {
@@ -38,6 +38,15 @@ export default class ParallelRaster {
         1,
         9, 8, 10, 10,
         -1, 1, 0, 0
+      ),
+      new RasterChunk(
+        3,
+        true,
+        true,
+        9,
+        4,
+        7, 9, 9, 10,
+        0, 0, 0, 0
       )
     ], RasterChunk.INDETERMINATE );
 
@@ -104,6 +113,34 @@ export default class ParallelRaster {
         true,
         new Vector2( 10, 8 ),
         new Vector2( 9, 10 )
+      ),
+      new RasterEdge(
+        3,
+        true,
+        false,
+        new Vector2( 7.5, 9 ),
+        new Vector2( 9, 9 )
+      ),
+      new RasterEdge(
+        3,
+        false,
+        false,
+        new Vector2( 9, 9 ),
+        new Vector2( 9, 10 )
+      ),
+      new RasterEdge(
+        3,
+        false,
+        false,
+        new Vector2( 9, 10 ),
+        new Vector2( 7.5, 10 )
+      ),
+      new RasterEdge(
+        3,
+        false,
+        true,
+        new Vector2( 7.5, 10 ),
+        new Vector2( 7.5, 9 )
       )
     ], RasterEdge.INDETERMINATE );
 
@@ -266,7 +303,7 @@ export default class ParallelRaster {
     const completeChunkCount = splitReduces2.data[ 0 ].numComplete;
 
     const reducibleChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterChunk.INDETERMINATE ), RasterChunk.INDETERMINATE );
-    const completeChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterChunk.INDETERMINATE ), RasterChunk.INDETERMINATE );
+    const completeChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterCompleteChunk.INDETERMINATE ), RasterCompleteChunk.INDETERMINATE );
     const chunkIndexMap = new ParallelStorageArray( _.range( 0, 4096 ).map( () => NaN ), NaN );
 
     await ParallelRasterSplitScan.dispatch(

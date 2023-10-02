@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterClippedChunk, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterClippedChunk, RasterCompleteChunk, RasterSplitReduceData } from '../../imports.js';
 
 export default class ParallelRasterSplitScan {
   public static async dispatch(
@@ -21,7 +21,7 @@ export default class ParallelRasterSplitScan {
 
     // output
     reducibleChunks: ParallelStorageArray<RasterChunk>,
-    completeChunks: ParallelStorageArray<RasterChunk>,
+    completeChunks: ParallelStorageArray<RasterCompleteChunk>,
     chunkIndexMap: ParallelStorageArray<number>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
@@ -109,12 +109,14 @@ export default class ParallelRasterSplitScan {
 
           await chunkIndexMap.set( context, chunkIndex, baseIndex );
 
-          await completeChunks.set( context, baseIndex, new RasterChunk(
+          await completeChunks.set( context, baseIndex, new RasterCompleteChunk(
             clippedChunk.rasterProgramIndex,
             clippedChunk.needsCentroid,
             clippedChunk.needsFace,
             -1, // filled in later
             -1, // filled in later
+            clippedChunk.isFullArea,
+            clippedChunk.area,
             clippedChunk.minX, clippedChunk.minY, clippedChunk.maxX, clippedChunk.maxY,
             clippedChunk.minXCount, clippedChunk.minYCount, clippedChunk.maxXCount, clippedChunk.maxYCount
           ) );

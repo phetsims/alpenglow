@@ -283,6 +283,7 @@ export { default as ParallelWorkgroupArray } from './parallel/ParallelWorkgroupA
 export { default as RasterChunk } from './parallel/raster-clip/RasterChunk.js';
 export { default as RasterChunkReduceData } from './parallel/raster-clip/RasterChunkReduceData.js';
 export { default as RasterChunkReduceBlock } from './parallel/raster-clip/RasterChunkReduceBlock.js';
+export { default as RasterCompleteChunk } from './parallel/raster-clip/RasterCompleteChunk.js';
 export { default as RasterEdge } from './parallel/raster-clip/RasterEdge.js';
 export { default as RasterEdgeClip } from './parallel/raster-clip/RasterEdgeClip.js';
 export { default as RasterClippedChunk } from './parallel/raster-clip/RasterClippedChunk.js';

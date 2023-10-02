@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterClippedChunk, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterClippedChunk, RasterCompleteChunk, RasterSplitReduceData } from '../../imports.js';
 
 export default class ParallelRasterChunkIndexPatch {
   public static async dispatch(
@@ -17,7 +17,7 @@ export default class ParallelRasterChunkIndexPatch {
     chunkIndexMap: ParallelStorageArray<number>,
     chunkIndices: ParallelStorageArray<number>,
     reducibleChunks: ParallelStorageArray<RasterChunk>, // mutated
-    completeChunks: ParallelStorageArray<RasterChunk>, // mutated
+    completeChunks: ParallelStorageArray<RasterCompleteChunk>, // mutated
     clippedChunks: ParallelStorageArray<RasterClippedChunk>, // mutated
     numClippedChunks: number
   ): Promise<void> {
