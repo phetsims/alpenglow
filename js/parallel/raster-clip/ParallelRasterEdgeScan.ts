@@ -41,6 +41,7 @@ export default class ParallelRasterEdgeScan {
 
       const edgeIndex = context.globalId.x;
       const exists = edgeIndex < numEdges * 2; // we have 2 clips for each edge
+      // TODO: numEdges => numClippedEdges, it will be better for computations
 
       // TODO: better way to scan? Does this lead to inefficient memory?
       if ( context.localId.x === 0 ) {

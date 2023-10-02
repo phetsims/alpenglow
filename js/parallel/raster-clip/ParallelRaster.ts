@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRaster {
@@ -244,6 +244,31 @@ export default class ParallelRaster {
     console.log( 'splitReduces2 (reduced)' );
     console.log( splitReduces2.data.slice( 0, Math.ceil( numInputChunks * 2 / ( workgroupSize * workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
 
+    assert && assert( Math.ceil( numInputChunks * 2 / ( workgroupSize * workgroupSize * workgroupSize ) ) === 1 );
+
+    const reducibleChunkCount = splitReduces2.data[ 0 ].numReducible;
+    const completeChunkCount = splitReduces2.data[ 0 ].numComplete;
+
+    const reducibleChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterChunk.INDETERMINATE ), RasterChunk.INDETERMINATE );
+    const completeChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterChunk.INDETERMINATE ), RasterChunk.INDETERMINATE );
+    const chunkIndexMap = new ParallelStorageArray( _.range( 0, 4096 ).map( () => NaN ), NaN );
+
+    await ParallelRasterSplitScan.dispatch(
+      workgroupSize,
+      clippedChunks, splitReduces0, splitReduces1, splitReduces2,
+      numInputChunks * 2,
+      reducibleChunks, completeChunks, chunkIndexMap
+    );
+
+    console.log( `reducibleChunks ${reducibleChunkCount}` );
+    console.log( reducibleChunks.data.slice( 0, reducibleChunkCount ).map( toIndexedString ).join( '\n' ) );
+
+    console.log( `completeChunks ${completeChunkCount}` );
+    console.log( completeChunks.data.slice( 0, completeChunkCount ).map( toIndexedString ).join( '\n' ) );
+
+    console.log( 'chunkIndexMap' );
+    console.log( chunkIndexMap.data.slice( 0, numInputChunks * 2 ).map( toIndexedString ).join( '\n' ) );
+
     /*
      * "edge" reduce/scan, to distribute the edges into reducibleEdges/completeEdges
      */
@@ -296,10 +321,10 @@ export default class ParallelRaster {
     console.log( 'edgeReduces2 (reduced)' );
     console.log( edgeReduces2.data.slice( 0, Math.ceil( numInputEdges * 2 / ( workgroupSize * workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
 
-    // TODO: ensure that we are fully reduced, to one value?
+    assert && assert( Math.ceil( numInputEdges * 2 / ( workgroupSize * workgroupSize * workgroupSize ) ) === 1 );
 
-    const reducibleCount = edgeReduces2.data[ 0 ].numReducible;
-    const completeCount = edgeReduces2.data[ 0 ].numComplete;
+    const reducibleEdgeCount = edgeReduces2.data[ 0 ].numReducible;
+    const completeEdgeCount = edgeReduces2.data[ 0 ].numComplete;
 
     const reducibleEdges = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterEdge.INDETERMINATE ), RasterEdge.INDETERMINATE );
     const completeEdges = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterEdge.INDETERMINATE ), RasterEdge.INDETERMINATE );
@@ -312,11 +337,11 @@ export default class ParallelRaster {
       reducibleEdges, completeEdges, chunkIndices
     );
 
-    console.log( `reducibleEdges ${reducibleCount}` );
-    console.log( reducibleEdges.data.slice( 0, reducibleCount ).map( toIndexedString ).join( '\n' ) );
+    console.log( `reducibleEdges ${reducibleEdgeCount}` );
+    console.log( reducibleEdges.data.slice( 0, reducibleEdgeCount ).map( toIndexedString ).join( '\n' ) );
 
-    console.log( `completeEdges ${completeCount}` );
-    console.log( completeEdges.data.slice( 0, completeCount ).map( toIndexedString ).join( '\n' ) );
+    console.log( `completeEdges ${completeEdgeCount}` );
+    console.log( completeEdges.data.slice( 0, completeEdgeCount ).map( toIndexedString ).join( '\n' ) );
 
     console.log( 'chunkIndices' );
     // we go to 2x chunks, each has min/max

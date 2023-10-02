@@ -14,7 +14,7 @@ export default class RasterClippedChunk {
     public readonly needsCentroid: boolean,
     public readonly needsFace: boolean,
 
-    // TODO: name: unfinished? incomplete?
+    // Filled in by early steps
     public readonly isReducible: boolean,
     public readonly isComplete: boolean,
     public readonly isFullArea: boolean,
