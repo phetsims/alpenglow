@@ -18,7 +18,7 @@ export default class ParallelRasterChunkIndexPatch {
     chunkIndices: ParallelStorageArray<number>,
     reducibleChunks: ParallelStorageArray<RasterChunk>, // mutated
     completeChunks: ParallelStorageArray<RasterCompleteChunk>, // mutated
-    clippedChunks: ParallelStorageArray<RasterClippedChunk>, // mutated
+    clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     numClippedChunks: number
   ): Promise<void> {
     const kernel = new ParallelKernel( async context => {
