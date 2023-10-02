@@ -43,6 +43,14 @@ export default class ParallelRaster {
         4,
         7, 9, 9, 10,
         0, 0, 0, 0
+      ),
+      new RasterChunk(
+        4,
+        true,
+        13,
+        6,
+        10, 5, 20, 10,
+        0, 0, 0, 0
       )
     ], RasterChunk.INDETERMINATE );
 
@@ -137,6 +145,48 @@ export default class ParallelRaster {
         true,
         new Vector2( 7.5, 10 ),
         new Vector2( 7.5, 9 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        false,
+        new Vector2( 10, 9 ),
+        new Vector2( 11, 9 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        false,
+        new Vector2( 11, 9 ),
+        new Vector2( 10, 10 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        false,
+        new Vector2( 10, 10 ),
+        new Vector2( 10, 9 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        false,
+        new Vector2( 19, 9 ),
+        new Vector2( 20, 9 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        false,
+        new Vector2( 20, 9 ),
+        new Vector2( 19, 10 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        false,
+        new Vector2( 19, 10 ),
+        new Vector2( 19, 9 )
       )
     ], RasterEdge.INDETERMINATE );
 
