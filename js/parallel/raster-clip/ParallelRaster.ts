@@ -25,7 +25,7 @@ export default class ParallelRaster {
         1,
         false,
         false,
-        0,
+        5,
         3,
         10, 0, 20, 10,
         0, 1, 0, 0
