@@ -166,7 +166,7 @@ export default class ParallelRasterEdgeScan {
         }
 
         // chunk indices
-        // TODO: ... can we just output the end of each, and when we distribute the chunks, we can just use the previous one?
+        // NOTE: Can't just output the end of each, since we are splitting them across reducible/completed
         if ( hasReducibleVertices || hasCompleteVertices ) {
           if ( edgeClip.isFirstEdge ) {
             await chunkIndices.set( context, 2 * edgeClip.chunkIndex, baseIndex );
