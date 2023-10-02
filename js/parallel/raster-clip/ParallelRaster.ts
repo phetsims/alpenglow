@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelRasterChunkReduce, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
+import { alpenglow, ParallelRasterChunkReduce, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterEdgeReduceData } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRaster {
@@ -173,6 +173,17 @@ export default class ParallelRaster {
 
     console.log( 'clippedChunks (with reduce)' );
     console.log( clippedChunks.data.slice( 0, numInputChunks * 2 ).map( chunk => chunk.toString() ).join( '\n' ) );
+
+    const debugFullEdgeReduces = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterEdgeReduceData.INDETERMINATE ), RasterEdgeReduceData.INDETERMINATE );
+    const edgeReduces0 = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterEdgeReduceData.INDETERMINATE ), RasterEdgeReduceData.INDETERMINATE );
+
+    await ParallelRasterInitialEdgeReduce.dispatch( workgroupSize, clippedChunks, edgeClips0, numInputEdges, numInputChunks, debugFullEdgeReduces, edgeReduces0 );
+
+    console.log( 'debugFullEdgeReduces' );
+    console.log( debugFullEdgeReduces.data.slice( 0, numInputEdges * 2 ).map( toIndexedString ).join( '\n' ) );
+
+    console.log( 'edgeReduces0' );
+    console.log( edgeReduces0.data.slice( 0, Math.ceil( numInputEdges * 2 / workgroupSize ) ).map( toIndexedString ).join( '\n' ) );
 
     // TODO: the rest of the processing
   }

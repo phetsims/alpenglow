@@ -14,8 +14,9 @@ export default class RasterClippedChunk {
     public readonly needsCentroid: boolean,
     public readonly needsFace: boolean,
 
+    // TODO: name: unfinished? incomplete?
     public readonly isReducible: boolean,
-    public readonly isContributing: boolean,
+    public readonly isComplete: boolean,
     public readonly isFullArea: boolean,
     public readonly area: number,
 
@@ -41,7 +42,7 @@ export default class RasterClippedChunk {
     const needs = ( this.needsCentroid ? ' needsCentroid' : '' ) + ( this.needsFace ? ' needsFace' : '' );
     const area = `area:${this.area}`;
     const reducible = this.isReducible ? ' reducible' : '';
-    const contributing = this.isContributing ? ' contributing' : '';
+    const contributing = this.isComplete ? ' complete' : '';
     const fullArea = this.isFullArea ? ' fullArea' : '';
     return `RasterClippedChunk[prog:${this.rasterProgramIndex} ${counts} ${bounds} ${area}${reducible}${contributing}${fullArea}${needs}]`;
   }
