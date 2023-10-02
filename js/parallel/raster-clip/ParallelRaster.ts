@@ -9,9 +9,12 @@
 import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterChunkIndexPatch, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData, ParallelRasterEdgeIndexPatch, RasterCompleteChunk, RasterCompleteEdge } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
+// TODO: change back to 256 once we are done testing
+const WORKGROUP_SIZE = 4;
+
 export default class ParallelRaster {
   public static async test(): Promise<void> {
-    const inputChunks = new ParallelStorageArray( [
+    const rawInputChunks = [
       new RasterChunk(
         0,
         false,
@@ -52,9 +55,9 @@ export default class ParallelRaster {
         10, 5, 20, 10,
         0, 0, 0, 0
       )
-    ], RasterChunk.INDETERMINATE );
+    ];
 
-    const inputEdges = new ParallelStorageArray( [
+    const rawInputEdges = [
       new RasterEdge(
         0,
         true,
@@ -188,15 +191,17 @@ export default class ParallelRaster {
         new Vector2( 19, 10 ),
         new Vector2( 19, 9 )
       )
-    ], RasterEdge.INDETERMINATE );
+    ];
 
-    // TODO: scan this to see if we've got first/last edges correct, counts correct, etc.
+    const numInputChunks = rawInputChunks.length;
+    const numInputEdges = rawInputEdges.length;
 
-    const outputChunks = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunk.INDETERMINATE ), RasterChunk.INDETERMINATE );
-    const outputEdges = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterEdge.INDETERMINATE ), RasterEdge.INDETERMINATE );
+    const inputChunks = new ParallelStorageArray( rawInputChunks, RasterChunk.INDETERMINATE );
+    const inputEdges = new ParallelStorageArray( rawInputEdges, RasterEdge.INDETERMINATE );
 
-    // TODO: change back to 256 once we are done testing
-    await ParallelRaster.process( 4, inputChunks.data.length, inputEdges.data.length, inputChunks, inputEdges, outputChunks, outputEdges );
+    assert && RasterChunk.validate( inputChunks, inputEdges, numInputChunks, numInputEdges );
+
+    await ParallelRaster.process( WORKGROUP_SIZE, numInputChunks, numInputEdges, inputChunks, inputEdges );
   }
 
   public static async process(
@@ -206,14 +211,20 @@ export default class ParallelRaster {
 
     // input
     inputChunks: ParallelStorageArray<RasterChunk>,
-    inputEdges: ParallelStorageArray<RasterEdge>,
+    inputEdges: ParallelStorageArray<RasterEdge>
+  ): Promise<{
+    reducibleChunks: ParallelStorageArray<RasterChunk>;
+    reducibleEdges: ParallelStorageArray<RasterEdge>;
+    numReducibleChunks: number;
+    numReducibleEdges: number;
 
-    // output
-    outputChunks: ParallelStorageArray<RasterChunk>,
-    outputEdges: ParallelStorageArray<RasterEdge>
+    completeChunks: ParallelStorageArray<RasterCompleteChunk>;
+    completeEdges: ParallelStorageArray<RasterCompleteEdge>;
+    numCompleteChunks: number;
+    numCompleteEdges: number;
+  }> {
+    assert && RasterChunk.validate( inputChunks, inputEdges, numInputChunks, numInputEdges );
 
-    // TODO: add the shipped output
-  ): Promise<void> {
     const toIndexedString = ( n: { toString(): string }, i: number ) => `${i} ${n.toString()}`;
 
     console.log( `numInputChunks: ${numInputChunks}` );
@@ -470,6 +481,18 @@ export default class ParallelRaster {
 
     console.log( `completeEdges ${completeEdgeCount}` );
     console.log( completeEdges.data.slice( 0, completeEdgeCount ).map( toIndexedString ).join( '\n' ) );
+
+    return {
+      reducibleChunks: reducibleChunks,
+      reducibleEdges: reducibleEdges,
+      numReducibleChunks: reducibleChunkCount,
+      numReducibleEdges: reducibleEdgeCount,
+
+      completeChunks: completeChunks,
+      completeEdges: completeEdges,
+      numCompleteChunks: completeChunkCount,
+      numCompleteEdges: completeEdgeCount
+    };
   }
 }
 
