@@ -13,7 +13,7 @@ export default class ParallelRasterEdgeReduce {
     workgroupSize: number,
 
     // input
-    inputEdgeReduces: ParallelStorageArray<RasterEdgeReduceData>,
+    inputEdgeReduces: ParallelStorageArray<RasterEdgeReduceData>, // will mutate, into scanned form
     numReduces: number,
 
     // output
@@ -25,13 +25,15 @@ export default class ParallelRasterEdgeReduce {
       reduces: ParallelWorkgroupArray<RasterEdgeReduceData>;
     };
 
+    // TODO: use atomic read+add+write for the output for high performance here?
+
     const kernel = new ParallelKernel<WorkgroupValues>( async context => {
       await context.start();
 
       const edgeIndex = context.globalId.x;
       const exists = edgeIndex < numReduces;
 
-      let value = exists ? ( await inputEdgeReduces.get( context, context.globalId.x ) ) : new RasterEdgeReduceData( 0, 0 );
+      let value = exists ? ( await inputEdgeReduces.get( context, context.globalId.x ) ) : RasterEdgeReduceData.IDENTITY;
 
       await context.workgroupValues.reduces.set( context, context.localId.x, value );
 
@@ -46,6 +48,8 @@ export default class ParallelRasterEdgeReduce {
         await context.workgroupBarrier();
         await context.workgroupValues.reduces.set( context, context.localId.x, value );
       }
+
+      await inputEdgeReduces.set( context, context.globalId.x, value );
 
       if ( context.localId.x === workgroupSize - 1 ) {
         await outputEdgeReduces.set( context, context.workgroupId.x, value );

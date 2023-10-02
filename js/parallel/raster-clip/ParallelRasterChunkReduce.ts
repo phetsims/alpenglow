@@ -13,7 +13,7 @@ export default class ParallelRasterChunkReduce {
     workgroupSize: number,
 
     // input
-    clippedChunks: ParallelStorageArray<RasterClippedChunk>,
+    clippedChunks: ParallelStorageArray<RasterClippedChunk>, // NOTE: read-write
     inputChunkReduces: ParallelStorageArray<RasterChunkReduceBlock>,
     numReduces: number,
 

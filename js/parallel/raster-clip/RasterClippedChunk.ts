@@ -33,6 +33,10 @@ export default class RasterClippedChunk {
     public readonly maxYCount: number
   ) {}
 
+  public isExportingCompleteEdges(): boolean {
+    return this.isComplete && !this.isFullArea && ( this.needsCentroid || this.needsFace );
+  }
+
   public toString(): string {
     if ( isNaN( this.rasterProgramIndex ) ) {
       return 'RasterClippedChunk[INDETERMINATE]';

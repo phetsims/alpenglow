@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../../imports.js';
+import { alpenglow, RasterClippedChunk, RasterEdgeClip } from '../../imports.js';
 
 export default class RasterEdgeReduceData {
   public constructor(
@@ -28,8 +28,22 @@ export default class RasterEdgeReduceData {
     );
   }
 
+  public static from( edgeClip: RasterEdgeClip, clippedChunk: RasterClippedChunk, exists: boolean ): RasterEdgeReduceData {
+    const isReducible = clippedChunk.isReducible;
+    const count = exists ? edgeClip.getCount() : 0;
+
+    return new RasterEdgeReduceData(
+      isReducible ? count : 0,
+      clippedChunk.isExportingCompleteEdges() ? count : 0
+    );
+  }
+
   public static readonly INDETERMINATE = new RasterEdgeReduceData(
     NaN, NaN
+  );
+
+  public static readonly IDENTITY = new RasterEdgeReduceData(
+    0, 0
   );
 }
 

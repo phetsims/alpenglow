@@ -16,7 +16,7 @@ export default class ParallelRasterInitialClip {
     // input
     chunks: ParallelStorageArray<RasterChunk>,
     edges: ParallelStorageArray<RasterEdge>,
-    clippedChunks: ParallelStorageArray<RasterClippedChunk>,
+    clippedChunks: ParallelStorageArray<RasterClippedChunk>, // NOTE: read-write
     numEdges: number,
 
     // output
