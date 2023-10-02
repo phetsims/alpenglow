@@ -107,7 +107,7 @@ export default class ParallelRasterSplitScan {
           // Convert to exclusive prefix sum TODO better way
           baseIndex = baseComplete + value.numComplete - initialValue.numComplete;
 
-          await chunkIndexMap.set( context, baseIndex, chunkIndex );
+          await chunkIndexMap.set( context, chunkIndex, baseIndex );
 
           await completeChunks.set( context, baseIndex, new RasterChunk(
             clippedChunk.rasterProgramIndex,
