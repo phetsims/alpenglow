@@ -215,6 +215,16 @@ export default class ParallelRasterInitialClip {
       await context.workgroupValues.minReduces.set( context, context.localId.x, minReduce );
       await context.workgroupValues.maxReduces.set( context, context.localId.x, maxReduce );
 
+      // If our input is both first/last, we need to handle it before combinations
+      if ( minReduce.isFirstEdge && minReduce.isLastEdge ) {
+        const minClippedChunk = await clippedChunks.get( context, minReduce.chunkIndex );
+        await clippedChunks.set( context, minReduce.chunkIndex, minReduce.apply( minClippedChunk ) );
+      }
+      if ( maxReduce.isFirstEdge && maxReduce.isLastEdge ) {
+        const maxClippedChunk = await clippedChunks.get( context, maxReduce.chunkIndex );
+        await clippedChunks.set( context, maxReduce.chunkIndex, maxReduce.apply( maxClippedChunk ) );
+      }
+
       await debugFullChunkReduces.set( context, context.globalId.x, { min: minReduce, max: maxReduce } );
 
       // TODO: separate out code to work with RasterChunkReduceBlock?
@@ -259,7 +269,7 @@ export default class ParallelRasterInitialClip {
           workgroupSize - 1
         );
 
-        console.log( context.workgroupId.x, firstChunkIndex, context.workgroupValues.atomicMaxFirstChunkIndex, lastLocalEdgeIndexInWorkgroup );
+        // console.log( context.workgroupId.x, firstChunkIndex, context.workgroupValues.atomicMaxFirstChunkIndex, lastLocalEdgeIndexInWorkgroup );
         await chunkReduces.set( context, context.workgroupId.x, new RasterChunkReduceBlock(
           await context.workgroupValues.minReduces.get( context, context.workgroupValues.atomicMaxFirstChunkIndex ),
           await context.workgroupValues.maxReduces.get( context, context.workgroupValues.atomicMaxFirstChunkIndex ),
