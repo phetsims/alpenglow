@@ -347,6 +347,54 @@ export default class ParallelRasterInitialClip {
     } ), [ chunks, edges, clippedChunks, edgeClips, chunkReduces, debugFullChunkReduces ], workgroupSize );
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdges / workgroupSize ) ) );
+
+    assert && ParallelRasterInitialClip.validate( chunks, edges, numEdges, clippedChunks, edgeClips, chunkReduces );
+  }
+
+  public static validate(
+    chunks: ParallelStorageArray<RasterChunk>,
+    edges: ParallelStorageArray<RasterEdge>,
+    numEdges: number,
+
+    clippedChunks: ParallelStorageArray<RasterClippedChunk>,
+
+    edgeClips: ParallelStorageArray<RasterEdgeClip>,
+    chunkReduces: ParallelStorageArray<RasterChunkReduceBlock>
+  ): void {
+    if ( assert ) {
+      const numEdgeClips = numEdges * 2;
+      assert( edgeClips.data.length >= numEdgeClips );
+
+      for ( let edgeClipIndex = 0; edgeClipIndex < numEdgeClips; edgeClipIndex++ ) {
+        const edgeClip = edgeClips.data[ edgeClipIndex ];
+        assert( isFinite( edgeClip.chunkIndex ) );
+
+        // TODO: rename chunkIndex to clippedChunkIndex?
+        const clippedChunk = clippedChunks.data[ edgeClip.chunkIndex ];
+        assert( clippedChunk && isFinite( clippedChunk.rasterProgramIndex ) );
+
+        const inputChunkIndex = edgeClip.chunkIndex >> 1;
+        const chunk = chunks.data[ inputChunkIndex ];
+        assert( chunk && isFinite( chunk.rasterProgramIndex ) );
+
+        // We have grouped the edgeClips together like so
+        assert( edgeClip.isFirstEdge === ( ( edgeClipIndex === 2 * chunk.edgesOffset ) || ( edgeClipIndex === 2 * chunk.edgesOffset + chunk.numEdges ) ) );
+
+        // TODO: validate against the original edge
+
+        // const chunkMinEdgeIndex = chunk.edgesOffset + edgeClipIndex;
+        // const chunkMaxEdgeIndex = chunk.edgesOffset + chunk.numEdges + edgeClipIndex;
+
+        // const isMin = edgeClipIndex === chunkMinEdgeIndex;
+        // const isMax = edgeClipIndex === chunkMaxEdgeIndex;
+        //
+        // // Use xor instead?
+        // assert( ( isMin || isMax ) && !( isMin && isMax ) );
+        //
+        // //
+        // // // TODO: find the original edge?
+      }
+    }
   }
 }
 
