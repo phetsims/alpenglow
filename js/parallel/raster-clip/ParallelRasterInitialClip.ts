@@ -379,24 +379,23 @@ export default class ParallelRasterInitialClip {
         const chunk = chunks.data[ inputChunkIndex ];
         assert( chunk && isFinite( chunk.rasterProgramIndex ) );
 
-        // We have grouped the edgeClips together like so
-        assert( edgeClip.isFirstEdge === ( ( edgeClipIndex === 2 * chunk.edgesOffset ) || ( edgeClipIndex === 2 * chunk.edgesOffset + chunk.numEdges ) ) );
+        // Check the grouping of edgeClips
+        const isMin = edgeClipIndex < 2 * chunk.edgesOffset + chunk.numEdges;
+        const sectionOffset = isMin ? 2 * chunk.edgesOffset : 2 * chunk.edgesOffset + chunk.numEdges;
+        const localIndex = edgeClipIndex - sectionOffset;
 
-        // TODO: validate against the original edge
+        assert( edgeClip.isFirstEdge === ( localIndex === 0 ) );
+        assert( edgeClip.isLastEdge === ( localIndex === chunk.numEdges - 1 ) );
+
+        const originalEdgeIndex = localIndex + chunk.edgesOffset;
+        const edge = edges.data[ originalEdgeIndex ];
+
+        assert( edge && isFinite( edge.chunkIndex ) );
+        assert( edge.chunkIndex === inputChunkIndex );
+
+        // TODO: COULD check clipping
 
         // TODO: check chunkReduces!!!
-
-        // const chunkMinEdgeIndex = chunk.edgesOffset + edgeClipIndex;
-        // const chunkMaxEdgeIndex = chunk.edgesOffset + chunk.numEdges + edgeClipIndex;
-
-        // const isMin = edgeClipIndex === chunkMinEdgeIndex;
-        // const isMax = edgeClipIndex === chunkMaxEdgeIndex;
-        //
-        // // Use xor instead?
-        // assert( ( isMin || isMax ) && !( isMin && isMax ) );
-        //
-        // //
-        // // // TODO: find the original edge?
       }
     }
   }
