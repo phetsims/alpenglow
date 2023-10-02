@@ -87,10 +87,11 @@ export default class ParallelRasterInitialChunk {
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numChunks / workgroupSize ) ) );
 
-    assert && ParallelRasterInitialChunk.validate( chunks, numChunks, clippedChunks );
+    assert && ParallelRasterInitialChunk.validate( workgroupSize, chunks, numChunks, clippedChunks );
   }
 
   public static validate(
+    workgroupSize: number,
     chunks: ParallelStorageArray<RasterChunk>,
     numChunks: number,
     clippedChunks: ParallelStorageArray<RasterClippedChunk>

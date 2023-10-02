@@ -348,10 +348,12 @@ export default class ParallelRasterInitialClip {
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdges / workgroupSize ) ) );
 
-    assert && ParallelRasterInitialClip.validate( chunks, edges, numEdges, clippedChunks, edgeClips, chunkReduces );
+    assert && ParallelRasterInitialClip.validate( workgroupSize, chunks, edges, numEdges, clippedChunks, edgeClips, chunkReduces );
   }
 
   public static validate(
+    workgroupSize: number,
+
     chunks: ParallelStorageArray<RasterChunk>,
     edges: ParallelStorageArray<RasterEdge>,
     numEdges: number,
@@ -381,6 +383,8 @@ export default class ParallelRasterInitialClip {
         assert( edgeClip.isFirstEdge === ( ( edgeClipIndex === 2 * chunk.edgesOffset ) || ( edgeClipIndex === 2 * chunk.edgesOffset + chunk.numEdges ) ) );
 
         // TODO: validate against the original edge
+
+        // TODO: check chunkReduces!!!
 
         // const chunkMinEdgeIndex = chunk.edgesOffset + edgeClipIndex;
         // const chunkMaxEdgeIndex = chunk.edgesOffset + chunk.numEdges + edgeClipIndex;
