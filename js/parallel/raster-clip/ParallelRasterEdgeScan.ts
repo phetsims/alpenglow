@@ -118,19 +118,19 @@ export default class ParallelRasterEdgeScan {
           if ( index > 0 ) {
             await reducibleEdges.set( context, baseIndex, new RasterEdge(
               edgeClip.chunkIndex,
-              edgeClip.isFirstEdge, edgeClip.isLastEdge && index === 1,
+              false, false, // will get filled in later
               edgeStarts[ 0 ], edgeEnds[ 0 ]
             ) );
             if ( index > 1 ) {
               await reducibleEdges.set( context, baseIndex + 1, new RasterEdge(
                 edgeClip.chunkIndex,
-                false, edgeClip.isLastEdge && index === 2,
+                false, false, // will get filled in later
                 edgeStarts[ 1 ], edgeEnds[ 1 ]
               ) );
               if ( index > 2 ) {
                 await reducibleEdges.set( context, baseIndex + 2, new RasterEdge(
                   edgeClip.chunkIndex,
-                  false, edgeClip.isLastEdge,
+                  false, false, // will get filled in later
                   edgeStarts[ 2 ], edgeEnds[ 2 ]
                 ) );
               }
@@ -145,19 +145,19 @@ export default class ParallelRasterEdgeScan {
           if ( index > 0 ) {
             await completeEdges.set( context, baseIndex, new RasterEdge(
               edgeClip.chunkIndex,
-              edgeClip.isFirstEdge, edgeClip.isLastEdge && index === 1,
+              false, false, // will get filled in later
               edgeStarts[ 0 ], edgeEnds[ 0 ]
             ) );
             if ( index > 1 ) {
               await completeEdges.set( context, baseIndex + 1, new RasterEdge(
                 edgeClip.chunkIndex,
-                false, edgeClip.isLastEdge && index === 2,
+                false, false, // will get filled in later
                 edgeStarts[ 1 ], edgeEnds[ 1 ]
               ) );
               if ( index > 2 ) {
                 await completeEdges.set( context, baseIndex + 2, new RasterEdge(
                   edgeClip.chunkIndex,
-                  false, edgeClip.isLastEdge,
+                  false, false, // will get filled in later
                   edgeStarts[ 2 ], edgeEnds[ 2 ]
                 ) );
               }
