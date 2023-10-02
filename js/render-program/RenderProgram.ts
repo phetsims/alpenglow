@@ -116,6 +116,10 @@ export default abstract class RenderProgram {
     }
   }
 
+  // REVIEW: Documentation here would be helpful. I see that this is getting overridden, but when are we getting
+  // a RenderProgram and when are we getting null? What does the difference of that return value tell us?
+  // Is this what is actually doing the simplification based on the type of RenderProgram we are?
+  // Is null essentially saying that this RenderProgram cannot be simplified?
   protected getSimplified( children: RenderProgram[] ): RenderProgram | null {
     return null;
   }
