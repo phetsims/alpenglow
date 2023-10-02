@@ -78,7 +78,8 @@ export default class ParallelRasterChunkReduce {
           const middleMinReduce = RasterChunkReduceData.combine( otherRightMinReduce, leftMinReduce );
           leftMinReduce = otherLeftMinReduce.chunkIndex === leftMinReduce.chunkIndex ? RasterChunkReduceData.combine( otherLeftMinReduce, leftMinReduce ) : otherLeftMinReduce;
           rightMinReduce = RasterChunkReduceData.combine( otherRightMinReduce, rightMinReduce );
-          if ( middleMinReduce.chunkIndex === otherRightMinReduce.chunkIndex && middleMinReduce.isFirstEdge && middleMinReduce.isLastEdge ) {
+          if ( exists && middleMinReduce.chunkIndex === otherRightMinReduce.chunkIndex && middleMinReduce.isFirstEdge && middleMinReduce.isLastEdge ) {
+            console.log( `minUpdate ${middleMinReduce.chunkIndex}` );
             const minClippedChunk = await clippedChunks.get( context, middleMinReduce.chunkIndex );
             await clippedChunks.set( context, middleMinReduce.chunkIndex, middleMinReduce.apply( minClippedChunk ) );
           }
@@ -88,7 +89,8 @@ export default class ParallelRasterChunkReduce {
           const middleMaxReduce = RasterChunkReduceData.combine( otherRightMaxReduce, leftMaxReduce );
           leftMaxReduce = otherLeftMaxReduce.chunkIndex === leftMaxReduce.chunkIndex ? RasterChunkReduceData.combine( otherLeftMaxReduce, leftMaxReduce ) : otherLeftMaxReduce;
           rightMaxReduce = RasterChunkReduceData.combine( otherRightMaxReduce, rightMaxReduce );
-          if ( middleMaxReduce.chunkIndex === otherRightMaxReduce.chunkIndex && middleMaxReduce.isFirstEdge && middleMaxReduce.isLastEdge ) {
+          if ( exists && middleMaxReduce.chunkIndex === otherRightMaxReduce.chunkIndex && middleMaxReduce.isFirstEdge && middleMaxReduce.isLastEdge ) {
+            console.log( `maxUpdate ${middleMaxReduce.chunkIndex}` );
             const maxClippedChunk = await clippedChunks.get( context, middleMaxReduce.chunkIndex );
             await clippedChunks.set( context, middleMaxReduce.chunkIndex, middleMaxReduce.apply( maxClippedChunk ) );
           }
