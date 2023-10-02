@@ -111,8 +111,6 @@ export default class ParallelRasterSplitScan {
 
           await completeChunks.set( context, baseIndex, new RasterCompleteChunk(
             clippedChunk.rasterProgramIndex,
-            clippedChunk.needsCentroid,
-            clippedChunk.needsFace,
             -1, // filled in later
             -1, // filled in later
             clippedChunk.isFullArea,
