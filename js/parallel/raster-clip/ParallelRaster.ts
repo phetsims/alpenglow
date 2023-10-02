@@ -237,6 +237,8 @@ export default class ParallelRaster {
     console.log( `numInputEdges: ${numInputEdges}` );
     console.log( inputEdges.data.slice( 0, numInputEdges ).map( toIndexedString ).join( '\n' ) );
 
+    // TODO: compute the sizes based on the inputs.
+    // TODO: THEN, compute the sizes based on our "expected max size input"
     const clippedChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterClippedChunk.INDETERMINATE ), RasterClippedChunk.INDETERMINATE );
 
     console.log( 'ParallelRasterInitialChunk dispatch' );
