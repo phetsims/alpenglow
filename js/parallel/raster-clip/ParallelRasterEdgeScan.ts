@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterEdgeReduceData } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 const nanVector = new Vector2( NaN, NaN );
@@ -18,9 +18,9 @@ export default class ParallelRasterEdgeScan {
     // input
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
-    edgeReduces0: ParallelStorageArray<RasterEdgeReduceData>,
-    edgeReduces1: ParallelStorageArray<RasterEdgeReduceData>,
-    edgeReduces2: ParallelStorageArray<RasterEdgeReduceData>,
+    edgeReduces0: ParallelStorageArray<RasterSplitReduceData>,
+    edgeReduces1: ParallelStorageArray<RasterSplitReduceData>,
+    edgeReduces2: ParallelStorageArray<RasterSplitReduceData>,
     numEdges: number,
     numChunks: number,
 
@@ -32,7 +32,7 @@ export default class ParallelRasterEdgeScan {
     const logWorkgroupSize = Math.log2( workgroupSize );
 
     type WorkgroupValues = {
-      reduces: ParallelWorkgroupArray<RasterEdgeReduceData>;
+      reduces: ParallelWorkgroupArray<RasterSplitReduceData>;
       baseIndices: ParallelWorkgroupArray<number>; // [ reducible, complete ], implement with two workgroup values
     };
 
@@ -49,9 +49,9 @@ export default class ParallelRasterEdgeScan {
         const index2 = Math.floor( index1 / workgroupSize );
 
         // Convert to an exclusive scan with the different indices
-        const reduce0 = index0 > 0 ? ( await edgeReduces0.get( context, index0 - 1 ) ) : RasterEdgeReduceData.IDENTITY;
-        const reduce1 = index1 > 0 ? ( await edgeReduces1.get( context, index1 - 1 ) ) : RasterEdgeReduceData.IDENTITY;
-        const reduce2 = index2 > 0 ? ( await edgeReduces2.get( context, index2 - 1 ) ) : RasterEdgeReduceData.IDENTITY;
+        const reduce0 = index0 > 0 ? ( await edgeReduces0.get( context, index0 - 1 ) ) : RasterSplitReduceData.IDENTITY;
+        const reduce1 = index1 > 0 ? ( await edgeReduces1.get( context, index1 - 1 ) ) : RasterSplitReduceData.IDENTITY;
+        const reduce2 = index2 > 0 ? ( await edgeReduces2.get( context, index2 - 1 ) ) : RasterSplitReduceData.IDENTITY;
 
         const baseReducible = reduce2.numReducible + reduce1.numReducible + reduce0.numReducible;
         const baseComplete = reduce2.numComplete + reduce1.numComplete + reduce0.numComplete;
@@ -65,7 +65,7 @@ export default class ParallelRasterEdgeScan {
       const edgeClip = await edgeClips.get( context, context.globalId.x );
       const clippedChunk = await clippedChunks.get( context, edgeClip.chunkIndex );
 
-      const initialValue = RasterEdgeReduceData.from( edgeClip, clippedChunk, exists );
+      const initialValue = RasterSplitReduceData.from( edgeClip, clippedChunk, exists );
       let value = initialValue;
 
       await context.workgroupValues.reduces.set( context, context.localId.x, value );
@@ -75,7 +75,7 @@ export default class ParallelRasterEdgeScan {
         const delta = 1 << i;
         if ( context.localId.x >= delta ) {
           const other = await context.workgroupValues.reduces.get( context, context.localId.x - delta );
-          value = RasterEdgeReduceData.combine( other, value );
+          value = RasterSplitReduceData.combine( other, value );
         }
 
         await context.workgroupBarrier();
@@ -177,7 +177,7 @@ export default class ParallelRasterEdgeScan {
         }
       }
     }, () => ( {
-      reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterEdgeReduceData.INDETERMINATE ), RasterEdgeReduceData.INDETERMINATE ),
+      reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE ),
       baseIndices: new ParallelWorkgroupArray( [ 0, 0 ], 0 )
     } ), [ clippedChunks, edgeClips, edgeReduces0, edgeReduces1, edgeReduces2, reducibleEdges, completeEdges, chunkIndices ], workgroupSize );
 

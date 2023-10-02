@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterClippedChunk, RasterEdgeClip, RasterEdgeReduceData } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterClippedChunk, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
 
 export default class ParallelRasterInitialEdgeReduce {
   public static async dispatch(
@@ -19,13 +19,13 @@ export default class ParallelRasterInitialEdgeReduce {
     numChunks: number,
 
     // output
-    debugFullEdgeReduces: ParallelStorageArray<RasterEdgeReduceData>,
-    edgeReduces: ParallelStorageArray<RasterEdgeReduceData>
+    debugFullEdgeReduces: ParallelStorageArray<RasterSplitReduceData>,
+    edgeReduces: ParallelStorageArray<RasterSplitReduceData>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
 
     type WorkgroupValues = {
-      reduces: ParallelWorkgroupArray<RasterEdgeReduceData>;
+      reduces: ParallelWorkgroupArray<RasterSplitReduceData>;
     };
 
     const kernel = new ParallelKernel<WorkgroupValues>( async context => {
@@ -37,7 +37,7 @@ export default class ParallelRasterInitialEdgeReduce {
       const edgeClip = await edgeClips.get( context, context.globalId.x );
       const clippedChunk = await clippedChunks.get( context, edgeClip.chunkIndex );
 
-      let value = RasterEdgeReduceData.from( edgeClip, clippedChunk, exists );
+      let value = RasterSplitReduceData.from( edgeClip, clippedChunk, exists );
 
       await context.workgroupValues.reduces.set( context, context.localId.x, value );
 
@@ -48,7 +48,7 @@ export default class ParallelRasterInitialEdgeReduce {
         const delta = 1 << i;
         if ( context.localId.x >= delta ) {
           const other = await context.workgroupValues.reduces.get( context, context.localId.x - delta );
-          value = RasterEdgeReduceData.combine( other, value );
+          value = RasterSplitReduceData.combine( other, value );
         }
 
         await context.workgroupBarrier();
@@ -59,7 +59,7 @@ export default class ParallelRasterInitialEdgeReduce {
         await edgeReduces.set( context, context.workgroupId.x, value );
       }
     }, () => ( {
-      reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterEdgeReduceData.INDETERMINATE ), RasterEdgeReduceData.INDETERMINATE )
+      reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE )
     } ), [ clippedChunks, edgeClips, debugFullEdgeReduces, edgeReduces ], workgroupSize );
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdges * 2 / workgroupSize ) ) );

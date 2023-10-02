@@ -6,23 +6,23 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterEdgeReduceData } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterSplitReduceData } from '../../imports.js';
 
 export default class ParallelRasterEdgeReduce {
   public static async dispatch(
     workgroupSize: number,
 
     // input
-    inputEdgeReduces: ParallelStorageArray<RasterEdgeReduceData>, // will mutate, into scanned form
+    inputEdgeReduces: ParallelStorageArray<RasterSplitReduceData>, // will mutate, into scanned form
     numReduces: number,
 
     // output
-    outputEdgeReduces: ParallelStorageArray<RasterEdgeReduceData>
+    outputEdgeReduces: ParallelStorageArray<RasterSplitReduceData>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
 
     type WorkgroupValues = {
-      reduces: ParallelWorkgroupArray<RasterEdgeReduceData>;
+      reduces: ParallelWorkgroupArray<RasterSplitReduceData>;
     };
 
     // TODO: use atomic read+add+write for the output for high performance here?
@@ -33,7 +33,7 @@ export default class ParallelRasterEdgeReduce {
       const edgeIndex = context.globalId.x;
       const exists = edgeIndex < numReduces;
 
-      let value = exists ? ( await inputEdgeReduces.get( context, context.globalId.x ) ) : RasterEdgeReduceData.IDENTITY;
+      let value = exists ? ( await inputEdgeReduces.get( context, context.globalId.x ) ) : RasterSplitReduceData.IDENTITY;
 
       await context.workgroupValues.reduces.set( context, context.localId.x, value );
 
@@ -42,7 +42,7 @@ export default class ParallelRasterEdgeReduce {
         const delta = 1 << i;
         if ( context.localId.x >= delta ) {
           const other = await context.workgroupValues.reduces.get( context, context.localId.x - delta );
-          value = RasterEdgeReduceData.combine( other, value );
+          value = RasterSplitReduceData.combine( other, value );
         }
 
         await context.workgroupBarrier();
@@ -55,7 +55,7 @@ export default class ParallelRasterEdgeReduce {
         await outputEdgeReduces.set( context, context.workgroupId.x, value );
       }
     }, () => ( {
-      reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterEdgeReduceData.INDETERMINATE ), RasterEdgeReduceData.INDETERMINATE )
+      reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE )
     } ), [ inputEdgeReduces, outputEdgeReduces ], workgroupSize );
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numReduces / workgroupSize ) ) );

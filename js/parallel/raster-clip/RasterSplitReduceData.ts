@@ -8,7 +8,7 @@
 
 import { alpenglow, RasterClippedChunk, RasterEdgeClip } from '../../imports.js';
 
-export default class RasterEdgeReduceData {
+export default class RasterSplitReduceData {
   public constructor(
     public readonly numReducible: number,
     public readonly numComplete: number
@@ -16,35 +16,35 @@ export default class RasterEdgeReduceData {
 
   public toString(): string {
     if ( isNaN( this.numReducible ) ) {
-      return 'RasterEdgeReduceData[INDETERMINATE]';
+      return 'RasterSplitReduceData[INDETERMINATE]';
     }
-    return `RasterEdgeReduceData[reduce:${this.numReducible} complete:${this.numComplete}]`;
+    return `RasterSplitReduceData[reduce:${this.numReducible} complete:${this.numComplete}]`;
   }
 
-  public static combine( a: RasterEdgeReduceData, b: RasterEdgeReduceData ): RasterEdgeReduceData {
-    return new RasterEdgeReduceData(
+  public static combine( a: RasterSplitReduceData, b: RasterSplitReduceData ): RasterSplitReduceData {
+    return new RasterSplitReduceData(
       a.numReducible + b.numReducible,
       a.numComplete + b.numComplete
     );
   }
 
-  public static from( edgeClip: RasterEdgeClip, clippedChunk: RasterClippedChunk, exists: boolean ): RasterEdgeReduceData {
+  public static from( edgeClip: RasterEdgeClip, clippedChunk: RasterClippedChunk, exists: boolean ): RasterSplitReduceData {
     const isReducible = clippedChunk.isReducible;
     const count = exists ? edgeClip.getCount() : 0;
 
-    return new RasterEdgeReduceData(
+    return new RasterSplitReduceData(
       isReducible ? count : 0,
       clippedChunk.isExportingCompleteEdges() ? count : 0
     );
   }
 
-  public static readonly INDETERMINATE = new RasterEdgeReduceData(
+  public static readonly INDETERMINATE = new RasterSplitReduceData(
     NaN, NaN
   );
 
-  public static readonly IDENTITY = new RasterEdgeReduceData(
+  public static readonly IDENTITY = new RasterSplitReduceData(
     0, 0
   );
 }
 
-alpenglow.register( 'RasterEdgeReduceData', RasterEdgeReduceData );
+alpenglow.register( 'RasterSplitReduceData', RasterSplitReduceData );
