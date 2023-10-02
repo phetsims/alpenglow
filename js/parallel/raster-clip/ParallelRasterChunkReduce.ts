@@ -39,10 +39,10 @@ export default class ParallelRasterChunkReduce {
 
       // TODO: fix this to work with blocks as primitives
       const reduceBlock = await inputChunkReduces.get( context, reduceIndex );
-      let leftMinReduce = reduceBlock.leftMin;
-      let leftMaxReduce = reduceBlock.leftMax;
-      let rightMinReduce = reduceBlock.rightMin;
-      let rightMaxReduce = reduceBlock.rightMax;
+      let leftMinReduce = exists ? reduceBlock.leftMin : RasterChunkReduceData.OUT_OF_RANGE;
+      let leftMaxReduce = exists ? reduceBlock.leftMax : RasterChunkReduceData.OUT_OF_RANGE;
+      let rightMinReduce = exists ? reduceBlock.rightMin : RasterChunkReduceData.OUT_OF_RANGE;
+      let rightMaxReduce = exists ? reduceBlock.rightMax : RasterChunkReduceData.OUT_OF_RANGE;
 
       // Get the "left" index
       const chunkIndex = reduceBlock.leftMin.chunkIndex;
@@ -53,20 +53,19 @@ export default class ParallelRasterChunkReduce {
       }
 
       // TODO: fix this to work with blocks as primitives
-      await context.workgroupValues.leftMinReduces.set( context, context.localId.x, exists ? leftMinReduce : RasterChunkReduceData.OUT_OF_RANGE );
-      await context.workgroupValues.leftMaxReduces.set( context, context.localId.x, exists ? leftMaxReduce : RasterChunkReduceData.OUT_OF_RANGE );
-      await context.workgroupValues.rightMinReduces.set( context, context.localId.x, exists ? rightMinReduce : RasterChunkReduceData.OUT_OF_RANGE );
-      await context.workgroupValues.rightMaxReduces.set( context, context.localId.x, exists ? rightMaxReduce : RasterChunkReduceData.OUT_OF_RANGE );
+      // TODO: THEY SHOULD have the same chunks, right?!?
+      // TODO: blocks as primitives!!!!
+      await context.workgroupValues.leftMinReduces.set( context, context.localId.x, leftMinReduce );
+      await context.workgroupValues.leftMaxReduces.set( context, context.localId.x, leftMaxReduce );
+      await context.workgroupValues.rightMinReduces.set( context, context.localId.x, rightMinReduce );
+      await context.workgroupValues.rightMaxReduces.set( context, context.localId.x, rightMaxReduce );
 
-      // TODO: Think about the cases! We have three somewhat independent things when merging
-      // TODO: 1 the left/right of the "other" (left)
-      // TODO: 2 the left/right of "ours" (right)
-      // TODO: 3. the right/left in the middle
-      // TODO: we'll want to STORE... the left-left and right-right (BUT... the combined versions)?
-      // TODO: think about combinations, work out all of the cases
-      // TODO: think about internal behavior desired, AND external behavior
-      // TODO: when do we apply? (don't double-apply!)
-      // TODO: Don't double-apply!
+      // TODO: collapse once block is primitive
+      // We need to not double-apply. So we'll only apply when merging into this specific index, since it will
+      // (a) be the first combination with the joint "both" result, and (b) it's the simplest to filter for.
+      // Note: -5 is different than the "out of range" RasterChunkReduceData value
+      const appliableMinChunkIndex = exists && leftMinReduce.isLastEdge && !leftMinReduce.isFirstEdge ? leftMinReduce.chunkIndex : -5;
+      const appliableMaxChunkIndex = exists && leftMaxReduce.isLastEdge && !leftMaxReduce.isFirstEdge ? leftMaxReduce.chunkIndex : -5;
 
       for ( let i = 0; i < logWorkgroupSize; i++ ) {
         await context.workgroupBarrier();
@@ -75,22 +74,32 @@ export default class ParallelRasterChunkReduce {
           // TODO: the two if statements are effectively evaluating the same thing (at least assert!)
           const otherLeftMinReduce = await context.workgroupValues.leftMinReduces.get( context, context.localId.x - delta );
           const otherRightMinReduce = await context.workgroupValues.rightMinReduces.get( context, context.localId.x - delta );
-          const middleMinReduce = RasterChunkReduceData.combine( otherRightMinReduce, leftMinReduce );
+          const oldLeftMinReduce = leftMinReduce;
           leftMinReduce = otherLeftMinReduce.chunkIndex === leftMinReduce.chunkIndex ? RasterChunkReduceData.combine( otherLeftMinReduce, leftMinReduce ) : otherLeftMinReduce;
           rightMinReduce = RasterChunkReduceData.combine( otherRightMinReduce, rightMinReduce );
-          if ( exists && middleMinReduce.chunkIndex === otherRightMinReduce.chunkIndex && middleMinReduce.isFirstEdge && middleMinReduce.isLastEdge ) {
-            console.log( `minUpdate ${middleMinReduce.chunkIndex}` );
+
+          if ( appliableMinChunkIndex === otherRightMinReduce.chunkIndex && otherRightMinReduce.isFirstEdge ) {
+            const middleMinReduce = RasterChunkReduceData.combine( otherRightMinReduce, oldLeftMinReduce );
+            assert && assert( appliableMinChunkIndex === middleMinReduce.chunkIndex );
+            assert && assert( middleMinReduce.isFirstEdge && middleMinReduce.isLastEdge );
+
+            // console.log( `minUpdate ${middleMinReduce.chunkIndex}` );
             const minClippedChunk = await clippedChunks.get( context, middleMinReduce.chunkIndex );
             await clippedChunks.set( context, middleMinReduce.chunkIndex, middleMinReduce.apply( minClippedChunk ) );
           }
 
           const otherLeftMaxReduce = await context.workgroupValues.leftMaxReduces.get( context, context.localId.x - delta );
           const otherRightMaxReduce = await context.workgroupValues.rightMaxReduces.get( context, context.localId.x - delta );
-          const middleMaxReduce = RasterChunkReduceData.combine( otherRightMaxReduce, leftMaxReduce );
+          const oldLeftMaxReduce = leftMaxReduce;
           leftMaxReduce = otherLeftMaxReduce.chunkIndex === leftMaxReduce.chunkIndex ? RasterChunkReduceData.combine( otherLeftMaxReduce, leftMaxReduce ) : otherLeftMaxReduce;
           rightMaxReduce = RasterChunkReduceData.combine( otherRightMaxReduce, rightMaxReduce );
-          if ( exists && middleMaxReduce.chunkIndex === otherRightMaxReduce.chunkIndex && middleMaxReduce.isFirstEdge && middleMaxReduce.isLastEdge ) {
-            console.log( `maxUpdate ${middleMaxReduce.chunkIndex}` );
+
+          if ( appliableMaxChunkIndex === otherRightMaxReduce.chunkIndex && otherRightMaxReduce.isFirstEdge ) {
+            const middleMaxReduce = RasterChunkReduceData.combine( otherRightMaxReduce, oldLeftMaxReduce );
+            assert && assert( appliableMaxChunkIndex === middleMaxReduce.chunkIndex );
+            assert && assert( middleMaxReduce.isFirstEdge && middleMaxReduce.isLastEdge );
+
+            // console.log( `maxUpdate ${middleMaxReduce.chunkIndex}` );
             const maxClippedChunk = await clippedChunks.get( context, middleMaxReduce.chunkIndex );
             await clippedChunks.set( context, middleMaxReduce.chunkIndex, middleMaxReduce.apply( maxClippedChunk ) );
           }

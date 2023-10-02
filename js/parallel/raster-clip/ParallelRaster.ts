@@ -170,8 +170,8 @@ export default class ParallelRaster {
     console.log( 'chunkReduces0' );
     console.log( chunkReduces0.data.slice( 0, Math.ceil( numInputEdges / workgroupSize ) ).flatMap( ( n, i ) => [
       `${i} leftMin: ${n.leftMin.toString()}`,
-      `${i.toString().replace( /./g, ' ' )} leftMax: ${n.leftMax.toString()}`,
       `${i.toString().replace( /./g, ' ' )} rightMin: ${n.rightMin.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} leftMax: ${n.leftMax.toString()}`,
       `${i.toString().replace( /./g, ' ' )} rightMax: ${n.rightMax.toString()}`
     ] ).join( '\n' ) );
 
@@ -186,8 +186,8 @@ export default class ParallelRaster {
     console.log( 'chunkReduces1' );
     console.log( chunkReduces1.data.slice( 0, Math.ceil( numInputEdges / ( workgroupSize * workgroupSize ) ) ).flatMap( ( n, i ) => [
       `${i} leftMin: ${n.leftMin.toString()}`,
-      `${i.toString().replace( /./g, ' ' )} leftMax: ${n.leftMax.toString()}`,
       `${i.toString().replace( /./g, ' ' )} rightMin: ${n.rightMin.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} leftMax: ${n.leftMax.toString()}`,
       `${i.toString().replace( /./g, ' ' )} rightMax: ${n.rightMax.toString()}`
     ] ).join( '\n' ) );
 
@@ -202,8 +202,8 @@ export default class ParallelRaster {
     console.log( 'chunkReduces2' );
     console.log( chunkReduces2.data.slice( 0, Math.ceil( numInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ) ).flatMap( ( n, i ) => [
       `${i} leftMin: ${n.leftMin.toString()}`,
-      `${i.toString().replace( /./g, ' ' )} leftMax: ${n.leftMax.toString()}`,
       `${i.toString().replace( /./g, ' ' )} rightMin: ${n.rightMin.toString()}`,
+      `${i.toString().replace( /./g, ' ' )} leftMax: ${n.leftMax.toString()}`,
       `${i.toString().replace( /./g, ' ' )} rightMax: ${n.rightMax.toString()}`
     ] ).join( '\n' ) );
 

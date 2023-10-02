@@ -90,7 +90,7 @@ export default class ParallelRasterSplitScan {
           // Convert to exclusive prefix sum TODO better way
           baseIndex = baseReducible + value.numReducible - initialValue.numReducible;
 
-          await chunkIndexMap.set( context, baseIndex, chunkIndex );
+          await chunkIndexMap.set( context, chunkIndex, baseIndex );
 
           await reducibleChunks.set( context, baseIndex, new RasterChunk(
             clippedChunk.rasterProgramIndex,
