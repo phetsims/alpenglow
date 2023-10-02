@@ -45,7 +45,10 @@ export default class ParallelRasterChunkIndexPatch {
 
         if ( isComplete ) {
           const chunk = await completeChunks.get( context, outputChunkIndex );
-          await completeChunks.set( context, outputChunkIndex, chunk.withEdgeInfo( startIndex, endIndex ) );
+          await completeChunks.set( context, outputChunkIndex, chunk.withEdgeInfo(
+            clippedChunk.needsFace ? startIndex : 0,
+            clippedChunk.needsFace ? endIndex : 0
+          ) );
         }
       }
     }, () => ( {

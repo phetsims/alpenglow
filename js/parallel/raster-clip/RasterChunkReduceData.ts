@@ -95,7 +95,6 @@ export default class RasterChunkReduceData {
 
     return new RasterClippedChunk(
       clippedChunk.rasterProgramIndex,
-      clippedChunk.needsCentroid,
       clippedChunk.needsFace,
 
       !isComplete,

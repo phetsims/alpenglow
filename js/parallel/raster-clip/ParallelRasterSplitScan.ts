@@ -94,7 +94,6 @@ export default class ParallelRasterSplitScan {
 
           await reducibleChunks.set( context, baseIndex, new RasterChunk(
             clippedChunk.rasterProgramIndex,
-            clippedChunk.needsCentroid,
             clippedChunk.needsFace,
             -1, // filled in later
             -1, // filled in later

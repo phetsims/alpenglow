@@ -11,7 +11,6 @@ import { alpenglow } from '../../imports.js';
 export default class RasterClippedChunk {
   public constructor(
     public readonly rasterProgramIndex: number,
-    public readonly needsCentroid: boolean,
     public readonly needsFace: boolean,
 
     // Filled in by early steps
@@ -34,7 +33,7 @@ export default class RasterClippedChunk {
   ) {}
 
   public isExportingCompleteEdges(): boolean {
-    return this.isComplete && !this.isFullArea && ( this.needsCentroid || this.needsFace );
+    return this.isComplete && !this.isFullArea && this.needsFace;
   }
 
   public toString(): string {
@@ -43,7 +42,7 @@ export default class RasterClippedChunk {
     }
     const counts = `counts:${this.minXCount},${this.minYCount},${this.maxXCount},${this.maxYCount}`;
     const bounds = `bounds:x[${this.minX},${this.maxX}],y[${this.minY},${this.maxY}]`;
-    const needs = ( this.needsCentroid ? ' needsCentroid' : '' ) + ( this.needsFace ? ' needsFace' : '' );
+    const needs = this.needsFace ? ' needsFace' : '';
     const area = `area:${this.area}`;
     const reducible = this.isReducible ? ' reducible' : '';
     const contributing = this.isComplete ? ' complete' : '';
@@ -52,7 +51,7 @@ export default class RasterClippedChunk {
   }
 
   public static readonly INDETERMINATE = new RasterClippedChunk(
-    NaN, false, false, false, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
+    NaN, false, false, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
   );
 }
 

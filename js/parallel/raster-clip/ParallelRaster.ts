@@ -15,7 +15,6 @@ export default class ParallelRaster {
       new RasterChunk(
         0,
         false,
-        false,
         0,
         5,
         0, 0, 10, 10,
@@ -23,7 +22,6 @@ export default class ParallelRaster {
       ),
       new RasterChunk(
         1,
-        false,
         false,
         5,
         3,
@@ -33,7 +31,6 @@ export default class ParallelRaster {
       new RasterChunk(
         2,
         true,
-        true,
         8,
         1,
         9, 8, 10, 10,
@@ -41,7 +38,6 @@ export default class ParallelRaster {
       ),
       new RasterChunk(
         3,
-        true,
         true,
         9,
         4,
