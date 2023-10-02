@@ -51,6 +51,21 @@ export default class RasterChunkReduceData {
     return `RasterChunkReduceData[chunk:${this.chunkIndex} ${counts} ${bounds} ${area}${firstLast}]`;
   }
 
+  public equals( other: RasterChunkReduceData ): boolean {
+    return this.chunkIndex === other.chunkIndex &&
+           Math.abs( this.area - other.area ) < 1e-6 &&
+           this.isFirstEdge === other.isFirstEdge &&
+           this.isLastEdge === other.isLastEdge &&
+           this.minX === other.minX &&
+           this.minY === other.minY &&
+           this.maxX === other.maxX &&
+           this.maxY === other.maxY &&
+           this.minXCount === other.minXCount &&
+           this.minYCount === other.minYCount &&
+           this.maxXCount === other.maxXCount &&
+           this.maxYCount === other.maxYCount;
+  }
+
   public apply( clippedChunk: RasterClippedChunk ): RasterClippedChunk {
 
     const minXCount = clippedChunk.minXCount + this.minXCount;

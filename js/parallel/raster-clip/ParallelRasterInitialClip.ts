@@ -348,7 +348,7 @@ export default class ParallelRasterInitialClip {
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdges / workgroupSize ) ) );
 
-    assert && ParallelRasterInitialClip.validate( workgroupSize, chunks, edges, numEdges, clippedChunks, edgeClips, chunkReduces );
+    assert && ParallelRasterInitialClip.validate( workgroupSize, chunks, edges, numEdges, clippedChunks, edgeClips, chunkReduces, debugFullChunkReduces );
   }
 
   public static validate(
@@ -361,7 +361,8 @@ export default class ParallelRasterInitialClip {
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
 
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
-    chunkReduces: ParallelStorageArray<RasterChunkReduceBlock>
+    chunkReduces: ParallelStorageArray<RasterChunkReduceBlock>,
+    debugFullChunkReduces: ParallelStorageArray<{ min: RasterChunkReduceData; max: RasterChunkReduceData }>
   ): void {
     if ( assert ) {
       const numEdgeClips = numEdges * 2;
@@ -394,8 +395,55 @@ export default class ParallelRasterInitialClip {
         assert( edge.chunkIndex === inputChunkIndex );
 
         // TODO: COULD check clipping
+      }
 
-        // TODO: check chunkReduces!!!
+      for ( let i = 0; i < Math.ceil( numEdges / workgroupSize ); i++ ) {
+        const inputPairs = debugFullChunkReduces.data.slice( i * workgroupSize, ( i + 1 ) * workgroupSize );
+        for ( let j = 0; j < workgroupSize; j++ ) {
+          const inputBlock = inputPairs[ j ];
+          const minReduce = inputBlock.min;
+          const maxReduce = inputBlock.max;
+
+          assert( isFinite( minReduce.chunkIndex ) );
+          assert( isFinite( maxReduce.chunkIndex ) );
+
+          assert(
+            ( minReduce.chunkIndex === maxReduce.chunkIndex - 1 ) ||
+            ( minReduce.chunkIndex === -1 && maxReduce.chunkIndex === -1 )
+          );
+        }
+
+        const outputBlock = chunkReduces.data[ i ];
+
+        let leftMinReduce = RasterChunkReduceData.OUT_OF_RANGE;
+        let leftMaxReduce = RasterChunkReduceData.OUT_OF_RANGE;
+        let rightMinReduce = RasterChunkReduceData.OUT_OF_RANGE;
+        let rightMaxReduce = RasterChunkReduceData.OUT_OF_RANGE;
+
+        for ( let j = 0; j < workgroupSize; j++ ) {
+          const inputBlock = inputPairs[ j ];
+          const minReduce = inputBlock.min;
+          const maxReduce = inputBlock.max;
+
+          if ( minReduce.chunkIndex >= 0 ) {
+            rightMinReduce = RasterChunkReduceData.combine( rightMinReduce, minReduce );
+          }
+          if ( maxReduce.chunkIndex >= 0 ) {
+            rightMaxReduce = RasterChunkReduceData.combine( rightMaxReduce, maxReduce );
+          }
+
+          if ( minReduce.chunkIndex === inputPairs[ 0 ].min.chunkIndex ) {
+            leftMinReduce = j === 0 ? minReduce : RasterChunkReduceData.combine( leftMinReduce, minReduce );
+          }
+          if ( maxReduce.chunkIndex === inputPairs[ 0 ].max.chunkIndex ) {
+            leftMaxReduce = j === 0 ? maxReduce : RasterChunkReduceData.combine( leftMaxReduce, maxReduce );
+          }
+        }
+
+        assert( outputBlock.leftMin.equals( leftMinReduce ) );
+        assert( outputBlock.leftMax.equals( leftMaxReduce ) );
+        assert( outputBlock.rightMin.equals( rightMinReduce ) );
+        assert( outputBlock.rightMax.equals( rightMaxReduce ) );
       }
     }
   }
