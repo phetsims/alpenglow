@@ -293,6 +293,7 @@ export { default as ParallelRasterChunkReduce } from './parallel/raster-clip/Par
 export { default as ParallelRasterInitialEdgeReduce } from './parallel/raster-clip/ParallelRasterInitialEdgeReduce.js';
 export { default as ParallelRasterEdgeReduce } from './parallel/raster-clip/ParallelRasterEdgeReduce.js';
 export { default as ParallelRasterEdgeScan } from './parallel/raster-clip/ParallelRasterEdgeScan.js';
+export { default as ParallelRasterInitialSplitReduce } from './parallel/raster-clip/ParallelRasterInitialSplitReduce.js';
 export { default as ParallelRaster } from './parallel/raster-clip/ParallelRaster.js';
 
 export { default as Snippet } from './webgpu/Snippet.js';

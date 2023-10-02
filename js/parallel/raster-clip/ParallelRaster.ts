@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRaster {
@@ -194,6 +194,60 @@ export default class ParallelRaster {
     console.log( 'clippedChunks (with reduce)' );
     console.log( clippedChunks.data.slice( 0, numInputChunks * 2 ).map( chunk => chunk.toString() ).join( '\n' ) );
 
+    /*
+     * "split" reduce/scan, to distribute the chunks into reducibleChunks/completeChunks
+     */
+
+    const debugFullSplitReduces = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+    const splitReduces0 = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+
+    await ParallelRasterInitialSplitReduce.dispatch(
+      workgroupSize,
+      clippedChunks,
+      numInputChunks * 2,
+      debugFullSplitReduces, splitReduces0
+    );
+
+    console.log( 'debugFullSplitReduces' );
+    console.log( debugFullSplitReduces.data.slice( 0, numInputChunks * 2 ).map( toIndexedString ).join( '\n' ) );
+
+    console.log( 'splitReduces0 (reduced)' );
+    console.log( splitReduces0.data.slice( 0, Math.ceil( numInputChunks * 2 / workgroupSize ) ).map( toIndexedString ).join( '\n' ) );
+
+    const splitReduces1 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+
+    await ParallelRasterEdgeReduce.dispatch(
+      workgroupSize,
+      splitReduces0,
+      Math.ceil( numInputChunks * 2 / workgroupSize ),
+      splitReduces1
+    );
+
+    console.log( 'splitReduces0 (scanned)' );
+    console.log( splitReduces0.data.slice( 0, Math.ceil( numInputChunks * 2 / workgroupSize ) ).map( toIndexedString ).join( '\n' ) );
+
+    console.log( 'splitReduces1 (reduced)' );
+    console.log( splitReduces1.data.slice( 0, Math.ceil( numInputChunks * 2 / ( workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
+
+    const splitReduces2 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+
+    await ParallelRasterEdgeReduce.dispatch(
+      workgroupSize,
+      splitReduces1,
+      Math.ceil( numInputChunks * 2 / ( workgroupSize * workgroupSize ) ),
+      splitReduces2
+    );
+
+    console.log( 'splitReduces1 (scanned)' );
+    console.log( splitReduces1.data.slice( 0, Math.ceil( numInputChunks * 2 / ( workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
+
+    console.log( 'splitReduces2 (reduced)' );
+    console.log( splitReduces2.data.slice( 0, Math.ceil( numInputChunks * 2 / ( workgroupSize * workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
+
+    /*
+     * "edge" reduce/scan, to distribute the edges into reducibleEdges/completeEdges
+     */
+
     const debugFullEdgeReduces = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
     const edgeReduces0 = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
 
@@ -207,7 +261,7 @@ export default class ParallelRaster {
     console.log( 'debugFullEdgeReduces' );
     console.log( debugFullEdgeReduces.data.slice( 0, numInputEdges * 2 ).map( toIndexedString ).join( '\n' ) );
 
-    console.log( 'edgeReduces0' );
+    console.log( 'edgeReduces0 (reduced)' );
     console.log( edgeReduces0.data.slice( 0, Math.ceil( numInputEdges * 2 / workgroupSize ) ).map( toIndexedString ).join( '\n' ) );
 
     const edgeReduces1 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
@@ -219,10 +273,10 @@ export default class ParallelRaster {
       edgeReduces1
     );
 
-    console.log( 'edgeReduces0' );
+    console.log( 'edgeReduces0 (scanned)' );
     console.log( edgeReduces0.data.slice( 0, Math.ceil( numInputEdges * 2 / workgroupSize ) ).map( toIndexedString ).join( '\n' ) );
 
-    console.log( 'edgeReduces1' );
+    console.log( 'edgeReduces1 (reduced)' );
     console.log( edgeReduces1.data.slice( 0, Math.ceil( numInputEdges * 2 / ( workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
 
     const edgeReduces2 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
@@ -236,13 +290,13 @@ export default class ParallelRaster {
       edgeReduces2
     );
 
-    console.log( 'edgeReduces1' );
+    console.log( 'edgeReduces1 (scanned)' );
     console.log( edgeReduces1.data.slice( 0, Math.ceil( numInputEdges * 2 / ( workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
 
-    console.log( 'edgeReduces2' );
+    console.log( 'edgeReduces2 (reduced)' );
     console.log( edgeReduces2.data.slice( 0, Math.ceil( numInputEdges * 2 / ( workgroupSize * workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
 
-    // TODO: ensure tha we are fully reduced, to one value?
+    // TODO: ensure that we are fully reduced, to one value?
 
     const reducibleCount = edgeReduces2.data[ 0 ].numReducible;
     const completeCount = edgeReduces2.data[ 0 ].numComplete;
