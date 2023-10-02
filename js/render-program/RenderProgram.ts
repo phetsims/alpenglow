@@ -120,6 +120,10 @@ export default abstract class RenderProgram {
   // a RenderProgram and when are we getting null? What does the difference of that return value tell us?
   // Is this what is actually doing the simplification based on the type of RenderProgram we are?
   // Is null essentially saying that this RenderProgram cannot be simplified?
+
+  // REVIEW: why do we need to pass in children here? Can't the subclass just call on it's own children instance?
+  // this feels like we could introduce errors down the line where children are passed in that have nothing to do with
+  // the actual RenderProgram...
   protected getSimplified( children: RenderProgram[] ): RenderProgram | null {
     return null;
   }
