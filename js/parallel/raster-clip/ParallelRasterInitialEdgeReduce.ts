@@ -15,8 +15,7 @@ export default class ParallelRasterInitialEdgeReduce {
     // input
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
-    numEdges: number,
-    numChunks: number,
+    numEdgeClips: number,
 
     // output
     debugFullEdgeReduces: ParallelStorageArray<RasterSplitReduceData>,
@@ -32,7 +31,7 @@ export default class ParallelRasterInitialEdgeReduce {
       await context.start();
 
       const edgeIndex = context.globalId.x;
-      const exists = edgeIndex < numEdges * 2; // we have 2 clips for each edge
+      const exists = edgeIndex < numEdgeClips; // we have 2 clips for each edge
 
       const edgeClip = await edgeClips.get( context, context.globalId.x );
       const clippedChunk = await clippedChunks.get( context, edgeClip.chunkIndex );
@@ -62,7 +61,7 @@ export default class ParallelRasterInitialEdgeReduce {
       reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE )
     } ), [ clippedChunks, edgeClips, debugFullEdgeReduces, edgeReduces ], workgroupSize );
 
-    await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdges * 2 / workgroupSize ) ) );
+    await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdgeClips / workgroupSize ) ) );
   }
 }
 
