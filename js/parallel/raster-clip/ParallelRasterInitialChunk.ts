@@ -46,7 +46,7 @@ export default class ParallelRasterInitialChunk {
           false,
           false,
           false,
-          0,
+          -1,
 
           chunk.minX,
           chunk.minY,
@@ -67,7 +67,7 @@ export default class ParallelRasterInitialChunk {
           false,
           false,
           false,
-          0,
+          -1,
 
           isXSplit ? split : chunk.minX,
           isXSplit ? chunk.minY : split,
