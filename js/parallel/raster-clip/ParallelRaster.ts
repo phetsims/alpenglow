@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelRasterChunkReduce, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterEdgeReduceData } from '../../imports.js';
+import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterEdgeReduceData } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRaster {
@@ -95,7 +95,7 @@ export default class ParallelRaster {
     const outputEdges = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterEdge.INDETERMINATE ), RasterEdge.INDETERMINATE );
 
     // TODO: change back to 256 once we are done testing
-    await ParallelRaster.process( 2, inputChunks.data.length, inputEdges.data.length, inputChunks, inputEdges, outputChunks, outputEdges );
+    await ParallelRaster.process( 4, inputChunks.data.length, inputEdges.data.length, inputChunks, inputEdges, outputChunks, outputEdges );
   }
 
   public static async process(
@@ -184,6 +184,20 @@ export default class ParallelRaster {
 
     console.log( 'edgeReduces0' );
     console.log( edgeReduces0.data.slice( 0, Math.ceil( numInputEdges * 2 / workgroupSize ) ).map( toIndexedString ).join( '\n' ) );
+
+    const edgeReduces1 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterEdgeReduceData.INDETERMINATE ), RasterEdgeReduceData.INDETERMINATE );
+
+    await ParallelRasterEdgeReduce.dispatch( workgroupSize, edgeReduces0, Math.ceil( numInputEdges * 2 / workgroupSize ), edgeReduces1 );
+
+    console.log( 'edgeReduces1' );
+    console.log( edgeReduces1.data.slice( 0, Math.ceil( numInputEdges * 2 / ( workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
+
+    const edgeReduces2 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterEdgeReduceData.INDETERMINATE ), RasterEdgeReduceData.INDETERMINATE );
+
+    await ParallelRasterEdgeReduce.dispatch( workgroupSize, edgeReduces1, Math.ceil( numInputEdges * 2 / ( workgroupSize * workgroupSize ) ), edgeReduces2 );
+
+    console.log( 'edgeReduces2' );
+    console.log( edgeReduces2.data.slice( 0, Math.ceil( numInputEdges * 2 / ( workgroupSize * workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
 
     // TODO: the rest of the processing
   }
