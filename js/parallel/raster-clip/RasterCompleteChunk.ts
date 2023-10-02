@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../../imports.js';
+import { alpenglow, ParallelStorageArray, RasterCompleteEdge } from '../../imports.js';
 
 export default class RasterCompleteChunk {
   public constructor(
@@ -59,6 +59,75 @@ export default class RasterCompleteChunk {
   public static readonly INDETERMINATE = new RasterCompleteChunk(
     NaN, NaN, NaN, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
   );
+
+  public static validate(
+    chunks: ParallelStorageArray<RasterCompleteChunk>,
+    edges: ParallelStorageArray<RasterCompleteEdge>,
+    numChunks: number,
+    numEdges: number
+  ): void {
+    if ( assert ) {
+      assert( isFinite( numChunks ) && numChunks >= 0 );
+      assert( isFinite( numEdges ) && numEdges >= 0 );
+      assert( numChunks <= chunks.data.length );
+      assert( numEdges <= edges.data.length );
+
+      const usedIndices = new Set<number>();
+
+      for ( let i = 0; i < numChunks; i++ ) {
+        const chunk = chunks.data[ i ];
+
+        assert( isFinite( chunk.rasterProgramIndex ) );
+        assert( chunk.minX <= chunk.maxX );
+        assert( chunk.minY <= chunk.maxY );
+        assert( isFinite( chunk.area ) );
+        assert( chunk.area > 0 );
+
+        if ( chunk.isFullArea ) {
+          assert( chunk.numEdges === 0 );
+          assert( chunk.minXCount !== 0 );
+          assert( chunk.minYCount !== 0 );
+          assert( chunk.maxXCount !== 0 );
+          assert( chunk.maxYCount !== 0 );
+        }
+        else {
+          assert(
+            chunk.numEdges > 0 ||
+            chunk.minXCount !== 0 ||
+            chunk.minYCount !== 0 ||
+            chunk.maxXCount !== 0 ||
+            chunk.maxYCount !== 0
+          );
+        }
+
+        assert( isFinite( chunk.minXCount ) );
+        assert( isFinite( chunk.minYCount ) );
+        assert( isFinite( chunk.maxXCount ) );
+        assert( isFinite( chunk.maxYCount ) );
+
+        assert( Math.abs( chunk.minXCount ) <= 1, 'Hypothesis' );
+        assert( Math.abs( chunk.minYCount ) <= 1, 'Hypothesis' );
+        assert( Math.abs( chunk.maxXCount ) <= 1, 'Hypothesis' );
+        assert( Math.abs( chunk.maxYCount ) <= 1, 'Hypothesis' );
+
+        if ( chunk.numEdges ) {
+          assert( chunk.edgesOffset >= 0 );
+          assert( chunk.edgesOffset + chunk.numEdges <= numEdges );
+
+          for ( let j = 0; j < chunk.numEdges; j++ ) {
+            const index = chunk.edgesOffset + j;
+            const edge = edges.data[ index ];
+
+            assert( !usedIndices.has( index ) );
+            usedIndices.add( index );
+
+            assert( edge.startPoint.isFinite() );
+            assert( edge.endPoint.isFinite() );
+          }
+        }
+      }
+    }
+  }
 }
 
 alpenglow.register( 'RasterCompleteChunk', RasterCompleteChunk );

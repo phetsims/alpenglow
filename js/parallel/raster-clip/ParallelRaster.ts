@@ -482,6 +482,9 @@ export default class ParallelRaster {
     console.log( `completeEdges ${completeEdgeCount}` );
     console.log( completeEdges.data.slice( 0, completeEdgeCount ).map( toIndexedString ).join( '\n' ) );
 
+    assert && RasterChunk.validate( reducibleChunks, reducibleEdges, reducibleChunkCount, reducibleEdgeCount );
+    assert && RasterCompleteChunk.validate( completeChunks, completeEdges, completeChunkCount, completeEdgeCount );
+
     return {
       reducibleChunks: reducibleChunks,
       reducibleEdges: reducibleEdges,
