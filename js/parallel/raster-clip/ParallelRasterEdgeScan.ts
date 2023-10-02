@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterClippedChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 const nanVector = new Vector2( NaN, NaN );
@@ -26,7 +26,7 @@ export default class ParallelRasterEdgeScan {
 
     // output
     reducibleEdges: ParallelStorageArray<RasterEdge>,
-    completeEdges: ParallelStorageArray<RasterEdge>,
+    completeEdges: ParallelStorageArray<RasterCompleteEdge>,
     chunkIndices: ParallelStorageArray<number>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
@@ -143,21 +143,15 @@ export default class ParallelRasterEdgeScan {
           baseIndex = baseComplete + value.numComplete - initialValue.numComplete;
 
           if ( index > 0 ) {
-            await completeEdges.set( context, baseIndex, new RasterEdge(
-              edgeClip.chunkIndex,
-              false, false, // will get filled in later
+            await completeEdges.set( context, baseIndex, new RasterCompleteEdge(
               edgeStarts[ 0 ], edgeEnds[ 0 ]
             ) );
             if ( index > 1 ) {
-              await completeEdges.set( context, baseIndex + 1, new RasterEdge(
-                edgeClip.chunkIndex,
-                false, false, // will get filled in later
+              await completeEdges.set( context, baseIndex + 1, new RasterCompleteEdge(
                 edgeStarts[ 1 ], edgeEnds[ 1 ]
               ) );
               if ( index > 2 ) {
-                await completeEdges.set( context, baseIndex + 2, new RasterEdge(
-                  edgeClip.chunkIndex,
-                  false, false, // will get filled in later
+                await completeEdges.set( context, baseIndex + 2, new RasterCompleteEdge(
                   edgeStarts[ 2 ], edgeEnds[ 2 ]
                 ) );
               }

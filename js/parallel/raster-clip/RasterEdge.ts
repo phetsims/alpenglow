@@ -3,8 +3,6 @@
 /**
  * Represents an edge from a RasterChunk
  *
- * TODO: consider RasterCompleteEdge, which could potentially skip the chunkIndex/isFirstEdge/isLastEdge
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
