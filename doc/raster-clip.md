@@ -1,6 +1,11 @@
 
 ```mermaid
 flowchart TD
+    
+    classDef outputClass stroke:#a00
+    classDef inputClass stroke:#0a0
+    classDef hideClass fill:transparent, stroke:transparent
+    
     inputChunks["inputChunks"]:::inputClass
     inputEdges["inputEdges"]:::inputClass
     
@@ -8,6 +13,7 @@ flowchart TD
         inputChunks
         inputEdges
     end
+    class inputs hideClass
 
     inputChunks --> InitialChunk([InitialChunk])
     InitialChunk --> clippedChunks0
@@ -25,63 +31,101 @@ flowchart TD
     end
 
     inputChunks & inputEdges & clippedChunks0 --> InitialClip([InitialClip])
-    InitialClip --> reduces0 & clippedChunks1 & edgeClips
+    InitialClip --> clippedChunks1 & reduces0 & edgeClips
 
-    reduces0 & clippedChunks1 --> ChunkReduce1([ChunkReduce]) --> reduces1 & clippedChunks2
+    clippedChunks1 & reduces0 --> ChunkReduce1([ChunkReduce]) --> reduces1 & clippedChunks2
     
-    reduces1 & clippedChunks2 --> ChunkReduce2([ChunkReduce]) --> reduces2 & clippedChunks3
+    clippedChunks2 & reduces1 --> ChunkReduce2([ChunkReduce]) --> reduces2 & clippedChunks3
 
     clippedChunks3 & edgeClips --> InitialEdgeReduce([InitialEdgeReduce]) --> edgeReduces0reduce
 
-    edgeReduces0reduce --> EdgeReduce1([EdgeReduce]) --> edgeReduces1reduce & edgeReduces0scan
+    edgeReduces0reduce --> EdgeReduce1 --> edgeReduces0scan & edgeReduces1reduce
 
-    edgeReduces1reduce --> EdgeReduce2([EdgeReduce]) --> edgeReduces2reduce & edgeReduces1scan
+    edgeReduces1reduce --> EdgeReduce2 --> edgeReduces1scan & edgeReduces2reduce
 
-    edgeReduces2reduce["edgeReduces2 (reduced)"] --> reducibleEdgeCount:::outputClass & completeEdgeCount:::outputClass
+    subgraph edgeCounts [" "]
+        reducibleEdgeCount:::outputClass
+        completeEdgeCount:::outputClass
+    end
+    class edgeCounts hideClass
 
-    clippedChunks3 & edgeReduces2reduce & edgeReduces1scan & edgeReduces0scan & edgeClips --> EdgeScan([EdgeScan])
-    EdgeScan --> reducibleEdges0 & completeEdges:::outputClass & chunkIndices
+    edgeReduces2reduce --> reducibleEdgeCount & completeEdgeCount
 
-    reducibleEdges0 & reducibleEdgeCount & chunkIndices --> EdgeIndexPatch([EdgeIndexPatch]) --> reducibleEdges1:::outputClass
+    clippedChunks3 & edgeReduces0scan & edgeReduces1scan & edgeReduces2reduce & edgeClips --> EdgeScan([EdgeScan])
+    EdgeScan --> reducibleEdges0
+    EdgeScan --> completeEdges
+    EdgeScan --> chunkIndices
 
-    clippedChunks3 --> InitialSplitReduce([InitialSplitReduce]) --> splitReduces0reduce
-    splitReduces0reduce --> EdgeReduceX([EdgeReduce]) --> splitReduces0scan & splitReduces1reduce
-    splitReduces1reduce --> EdgeReduceY([EdgeReduce]) --> splitReduces1scan & splitReduces2
+    chunkIndices & reducibleEdgeCount & reducibleEdges0 --> EdgeIndexPatch([EdgeIndexPatch]) --> reducibleEdges1
 
-    splitReduces2 --> reducibleChunkCount:::outputClass & completeChunkCount:::outputClass
+    clippedChunks3 --> InitialSplitReduce --> splitReduces0reduce
+    splitReduces0reduce --> EdgeReduceX --> splitReduces0scan & splitReduces1reduce
+    splitReduces1reduce --> EdgeReduceY --> splitReduces1scan & splitReduces2
 
-    clippedChunks3 & splitReduces0scan & splitReduces1scan & splitReduces2 --> SplitScan([SplitScan])
-    SplitScan --> reducibleChunks0 & completeChunks0 & chunkIndexMap
+    subgraph splits [" "]
+        InitialSplitReduce([InitialSplitReduce])
+    
+        subgraph splitReduces0 [" "]
+            splitReduces0reduce["splitReduces0 (reduced)"]
+            splitReduces0scan["splitReduces0 (scanned)"]
+        end
+    
+        subgraph splitReduces1 [" "]
+            splitReduces1reduce["splitReduces1 (reduced)"]
+            splitReduces1scan["splitReduces1 (scanned)"]
+        end
+        
+        splitReduces2
+        
+        EdgeReduceX([EdgeReduce])
+        EdgeReduceY([EdgeReduce])
+    end
+    class splits hideClass
+    
+    subgraph chunkCounts [" "]
+        reducibleChunkCount:::outputClass
+        completeChunkCount:::outputClass
+    end
+    class chunkCounts hideClass
 
-    clippedChunks3 & reducibleChunks0 & completeChunks0 & chunkIndexMap & chunkIndices --> ChunkIndexPatch([ChunkIndexPatch])
+    splitReduces2 --> reducibleChunkCount & completeChunkCount
+
+    splitReduces0scan & splitReduces1scan & splitReduces2 & clippedChunks3 --> SplitScan([SplitScan])
+    SplitScan --> reducibleChunks0
+    SplitScan --> completeChunks0
+    SplitScan --> chunkIndexMap
+
+    reducibleChunks0 & completeChunks0 & chunkIndexMap & chunkIndices & clippedChunks3 --> ChunkIndexPatch([ChunkIndexPatch])
     ChunkIndexPatch --> reducibleChunks1:::outputClass & completeChunks1:::outputClass
 
-
-
-    subgraph edgeReduces0 [" "]
-        edgeReduces0reduce["edgeReduces0 (reduced)"]
-        edgeReduces0scan["edgeReduces0 (scanned)"]
-    end
-
-    subgraph edgeReduces1 [" "]
-        edgeReduces1reduce["edgeReduces1 (reduced)"]
-        edgeReduces1scan["edgeReduces1 (scanned)"]
-    end
+    subgraph edges [" "]
+        subgraph edgeReduces0 [" "]
+            edgeReduces0reduce["edgeReduces0 (reduced)"]
+            edgeReduces0scan["edgeReduces0 (scanned)"]
+        end
+        
+        EdgeReduce1([EdgeReduce])
     
-    subgraph splitReduces0 [" "]
-        splitReduces0reduce["splitReduces0 (reduced)"]
-        splitReduces0scan["splitReduces0 (scanned)"]
+        subgraph edgeReduces1 [" "]
+            edgeReduces1reduce["edgeReduces1 (reduced)"]
+            edgeReduces1scan["edgeReduces1 (scanned)"]
+        end
+        
+        EdgeReduce2([EdgeReduce])
+        
+        edgeReduces2reduce["edgeReduces2 (reduced)"]
     end
-
-    subgraph splitReduces1 [" "]
-        splitReduces1reduce["splitReduces1 (reduced)"]
-        splitReduces1scan["splitReduces1 (scanned)"]
-    end
+    class edges hideClass
     
-    subgraph reducibleEdges [" "]
-        reducibleEdges0["reducibleEdges (unmapped)"]
-        reducibleEdges1["reducibleEdges"]
+    subgraph outputEdges [" "]
+        subgraph reducibleEdges [" "]
+            reducibleEdges0["reducibleEdges (unmapped)"]
+            reducibleEdges1["reducibleEdges"]:::outputClass
+        end
+        
+        completeEdges:::outputClass
     end
+    class outputEdges hideClass
 
     subgraph reducibleChunks [" "]
         reducibleChunks0["reducibleChunks (no indices)"]
@@ -103,10 +147,5 @@ flowchart TD
 %%        reducibleChunks1
 %%        completeChunks1
 %%    end
-
-    classDef outputClass stroke:#a00
-    classDef inputClass stroke:#0a0
-    
-    style inputs fill:transparent,stroke:transparent
-    style outputs fill:transparent,stroke:transparent
+%%    style outputs fill:transparent,stroke:transparent
 ```
