@@ -54,6 +54,14 @@ export default class ParallelRaster {
         6,
         10, 5, 20, 10,
         0, 0, 0, 0
+      ),
+      new RasterChunk(
+        5,
+        true,
+        19,
+        1,
+        19, 4, 20, 5,
+        -1, 1, 0, 0
       )
     ];
 
@@ -190,6 +198,13 @@ export default class ParallelRaster {
         true,
         new Vector2( 19, 10 ),
         new Vector2( 19, 9 )
+      ),
+      new RasterEdge(
+        5,
+        true,
+        true,
+        new Vector2( 20, 4 ),
+        new Vector2( 19, 5 )
       )
     ];
 
