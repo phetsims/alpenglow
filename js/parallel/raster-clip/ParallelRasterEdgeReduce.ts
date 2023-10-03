@@ -51,9 +51,13 @@ export default class ParallelRasterEdgeReduce {
         await context.workgroupValues.reduces.set( context, context.localId.x, value );
       }
 
-      await inputEdgeReduces.set( context, context.globalId.x, value );
+      const isLastInWorkgroup = context.localId.x === workgroupSize - 1;
 
-      if ( context.localId.x === workgroupSize - 1 ) {
+      // Set us up for "exclusive" scan
+      // TODO: a better way of getting an exclusive scan...?
+      await inputEdgeReduces.set( context, context.globalId.x, isLastInWorkgroup ? RasterSplitReduceData.IDENTITY : value );
+
+      if ( isLastInWorkgroup ) {
         await outputEdgeReduces.set( context, context.workgroupId.x, value );
       }
     }, () => ( {

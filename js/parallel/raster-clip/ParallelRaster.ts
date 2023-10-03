@@ -321,7 +321,7 @@ export default class ParallelRaster {
     ] ).join( '\n' ) );
 
     console.log( 'clippedChunks (with reduce)' );
-    console.log( clippedChunks.data.slice( 0, numClippedChunks ).map( chunk => chunk.toString() ).join( '\n' ) );
+    console.log( clippedChunks.data.slice( 0, numClippedChunks ).map( toIndexedString ).join( '\n' ) );
 
     /*
      * "split" reduce/scan, to distribute the chunks into reducibleChunks/completeChunks
@@ -463,13 +463,14 @@ export default class ParallelRaster {
     const reducibleEdges = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterEdge.INDETERMINATE ), RasterEdge.INDETERMINATE );
     const completeEdges = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterCompleteEdge.INDETERMINATE ), RasterCompleteEdge.INDETERMINATE );
     const chunkIndices = new ParallelStorageArray( _.range( 0, 4096 ).map( () => NaN ), NaN );
+    const debugEdgeScan = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
 
     console.log( 'ParallelRasterEdgeScan dispatch' );
     await ParallelRasterEdgeScan.dispatch(
       workgroupSize,
       clippedChunks, edgeClips, edgeReduces0, edgeReduces1, edgeReduces2,
       numEdgeClips,
-      reducibleEdges, completeEdges, chunkIndices
+      reducibleEdges, completeEdges, chunkIndices, debugEdgeScan
     );
 
     console.log( `reducibleEdges ${reducibleEdgeCount}` );
@@ -481,6 +482,9 @@ export default class ParallelRaster {
     console.log( 'chunkIndices' );
     // each has a min/max!
     console.log( chunkIndices.data.slice( 0, numClippedChunks * 2 ).map( toIndexedString ).join( '\n' ) );
+
+    console.log( 'debugEdgeScan' );
+    console.log( debugEdgeScan.data.slice( 0, numEdgeClips ).map( toIndexedString ).join( '\n' ) );
 
     console.log( 'ParallelRasterChunkIndexPatch dispatch' );
     await ParallelRasterChunkIndexPatch.dispatch(

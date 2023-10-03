@@ -26,7 +26,8 @@ export default class ParallelRasterEdgeScan {
     // write
     reducibleEdges: ParallelStorageArray<RasterEdge>,
     completeEdges: ParallelStorageArray<RasterCompleteEdge>,
-    chunkIndices: ParallelStorageArray<number>
+    chunkIndices: ParallelStorageArray<number>,
+    debugEdgeScan: ParallelStorageArray<RasterSplitReduceData>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
 
@@ -85,6 +86,11 @@ export default class ParallelRasterEdgeScan {
       if ( exists ) {
         const baseReducible = await context.workgroupValues.baseIndices.get( context, 0 );
         const baseComplete = await context.workgroupValues.baseIndices.get( context, 1 );
+
+        await debugEdgeScan.set( context, context.globalId.x, new RasterSplitReduceData(
+          baseReducible + value.numReducible - initialValue.numReducible,
+          baseComplete + value.numComplete - initialValue.numComplete
+        ) );
 
         const edgeStarts = [ nanVector, nanVector, nanVector ];
         const edgeEnds = [ nanVector, nanVector, nanVector ];
@@ -173,7 +179,7 @@ export default class ParallelRasterEdgeScan {
     }, () => ( {
       reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE ),
       baseIndices: new ParallelWorkgroupArray( [ 0, 0 ], 0 )
-    } ), [ clippedChunks, edgeClips, edgeReduces0, edgeReduces1, edgeReduces2, reducibleEdges, completeEdges, chunkIndices ], workgroupSize );
+    } ), [ clippedChunks, edgeClips, edgeReduces0, edgeReduces1, edgeReduces2, reducibleEdges, completeEdges, chunkIndices, debugEdgeScan ], workgroupSize );
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdgeClips / workgroupSize ) ) );
   }
