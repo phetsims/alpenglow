@@ -62,6 +62,30 @@ export default class ParallelRaster {
         1,
         19, 4, 20, 5,
         -1, 1, 0, 0
+      ),
+      new RasterChunk(
+        6,
+        false,
+        20,
+        0,
+        0, 0, 1, 1,
+        -1, 1, 1, -1
+      ),
+      new RasterChunk(
+        7,
+        false,
+        20,
+        0,
+        0, 0, 10, 10,
+        -1, 1, 1, -1
+      ),
+      new RasterChunk(
+        8,
+        false,
+        20,
+        0,
+        0, 0, 10, 10,
+        0, 0, 0, 0
       )
     ];
 

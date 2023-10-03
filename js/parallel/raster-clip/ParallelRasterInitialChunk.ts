@@ -33,52 +33,80 @@ export default class ParallelRasterInitialChunk {
         const xDiff = chunk.maxX - chunk.minX;
         const yDiff = chunk.maxY - chunk.minY;
 
-        const isXSplit = xDiff > yDiff;
+        const hasEdges = chunk.numEdges > 0;
+        let minChunk: RasterClippedChunk;
+        let maxChunk: RasterClippedChunk;
 
-        // NOTE: This is set up so that if we have a half-pixel offset e.g. with a bilinear filter, it will work)
-        const split = isXSplit ? chunk.minX + Math.floor( 0.5 * xDiff ) : chunk.minY + Math.floor( 0.5 * yDiff );
+        if ( hasEdges ) {
+          const isXSplit = xDiff > yDiff;
 
-        const minChunk = new RasterClippedChunk(
-          chunk.rasterProgramIndex,
-          chunk.needsFace,
+          // NOTE: This is set up so that if we have a half-pixel offset e.g. with a bilinear filter, it will work)
+          const split = isXSplit ? chunk.minX + Math.floor( 0.5 * xDiff ) : chunk.minY + Math.floor( 0.5 * yDiff );
 
-          // Filled in and modified later (past this point)
-          false,
-          false,
-          false,
-          -1,
+          minChunk = new RasterClippedChunk(
+            chunk.rasterProgramIndex,
+            chunk.needsFace,
 
-          chunk.minX,
-          chunk.minY,
-          isXSplit ? split : chunk.maxX,
-          isXSplit ? chunk.maxY : split,
+            // Filled in and modified later (past this point)
+            false,
+            false,
+            false,
+            -1,
 
-          chunk.minXCount,
-          chunk.minYCount,
-          chunk.maxXCount,
-          chunk.maxYCount
-        );
+            chunk.minX,
+            chunk.minY,
+            isXSplit ? split : chunk.maxX,
+            isXSplit ? chunk.maxY : split,
 
-        const maxChunk = new RasterClippedChunk(
-          chunk.rasterProgramIndex,
-          chunk.needsFace,
+            chunk.minXCount,
+            chunk.minYCount,
+            chunk.maxXCount,
+            chunk.maxYCount
+          );
 
-          // Filled in and modified later (past this point)
-          false,
-          false,
-          false,
-          -1,
+          maxChunk = new RasterClippedChunk(
+            chunk.rasterProgramIndex,
+            chunk.needsFace,
 
-          isXSplit ? split : chunk.minX,
-          isXSplit ? chunk.minY : split,
-          chunk.maxX,
-          chunk.maxY,
+            // Filled in and modified later (past this point)
+            false,
+            false,
+            false,
+            -1,
 
-          chunk.minXCount,
-          chunk.minYCount,
-          chunk.maxXCount,
-          chunk.maxYCount
-        );
+            isXSplit ? split : chunk.minX,
+            isXSplit ? chunk.minY : split,
+            chunk.maxX,
+            chunk.maxY,
+
+            chunk.minXCount,
+            chunk.minYCount,
+            chunk.maxXCount,
+            chunk.maxYCount
+          );
+        }
+        else {
+          const hasArea = chunk.minXCount < 0 && chunk.minYCount > 0 && chunk.maxXCount > 0 && chunk.maxYCount;
+          if ( hasArea ) {
+            minChunk = new RasterClippedChunk(
+              chunk.rasterProgramIndex,
+              chunk.needsFace,
+
+              false,
+              true,
+              true,
+              xDiff * yDiff,
+
+              chunk.minX, chunk.minY, chunk.maxX, chunk.maxY,
+              -1, 1, 1, -1
+            );
+          }
+          else {
+            minChunk = RasterClippedChunk.DISCARDABLE;
+          }
+
+          maxChunk = RasterClippedChunk.DISCARDABLE;
+        }
 
         await clippedChunks.set( context, minChunkIndex, minChunk );
         await clippedChunks.set( context, maxChunkIndex, maxChunk );
@@ -106,16 +134,18 @@ export default class ParallelRasterInitialChunk {
         const minClippedChunk = clippedChunks.data[ 2 * chunkIndex ];
         const maxClippedChunk = clippedChunks.data[ 2 * chunkIndex + 1 ];
 
-        assert( minClippedChunk.rasterProgramIndex === chunk.rasterProgramIndex );
-        assert( maxClippedChunk.rasterProgramIndex === chunk.rasterProgramIndex );
+        if ( chunk.numEdges > 0 ) {
+          assert( minClippedChunk.rasterProgramIndex === chunk.rasterProgramIndex );
+          assert( maxClippedChunk.rasterProgramIndex === chunk.rasterProgramIndex );
 
-        assert( minClippedChunk.needsFace === chunk.needsFace );
-        assert( maxClippedChunk.needsFace === chunk.needsFace );
+          assert( minClippedChunk.needsFace === chunk.needsFace );
+          assert( maxClippedChunk.needsFace === chunk.needsFace );
 
-        assert( minClippedChunk.minXCount === chunk.minXCount );
-        assert( minClippedChunk.minYCount === chunk.minYCount );
-        assert( maxClippedChunk.maxXCount === chunk.maxXCount );
-        assert( maxClippedChunk.maxYCount === chunk.maxYCount );
+          assert( minClippedChunk.minXCount === chunk.minXCount );
+          assert( minClippedChunk.minYCount === chunk.minYCount );
+          assert( maxClippedChunk.maxXCount === chunk.maxXCount );
+          assert( maxClippedChunk.maxYCount === chunk.maxYCount );
+        }
       }
     }
   }

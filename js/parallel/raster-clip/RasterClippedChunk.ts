@@ -53,6 +53,10 @@ export default class RasterClippedChunk {
   public static readonly INDETERMINATE = new RasterClippedChunk(
     NaN, false, false, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
   );
+
+  public static readonly DISCARDABLE = new RasterClippedChunk(
+    -1, false, false, false, false, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  );
 }
 
 alpenglow.register( 'RasterClippedChunk', RasterClippedChunk );
