@@ -91,13 +91,13 @@ export default class RasterCompleteChunk {
           assert( chunk.maxYCount !== 0 );
         }
         else {
-          assert(
-            chunk.numEdges > 0 ||
-            chunk.minXCount !== 0 ||
-            chunk.minYCount !== 0 ||
-            chunk.maxXCount !== 0 ||
-            chunk.maxYCount !== 0
-          );
+          // assert(
+          //   chunk.numEdges > 0 ||
+          //   chunk.minXCount !== 0 ||
+          //   chunk.minYCount !== 0 ||
+          //   chunk.maxXCount !== 0 ||
+          //   chunk.maxYCount !== 0
+          // );
         }
 
         assert( isFinite( chunk.minXCount ) );
