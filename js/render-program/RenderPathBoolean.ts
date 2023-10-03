@@ -62,7 +62,7 @@ export default class RenderPathBoolean extends RenderProgram {
            new RenderPathBoolean( this.path, this.inside, program );
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const inside = children[ 0 ];
     const outside = children[ 1 ];
 

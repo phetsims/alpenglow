@@ -54,7 +54,7 @@ export default class RenderPhong extends RenderProgram {
     return this.alpha === other.alpha;
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const ambientColorProgram = children[ 0 ];
     const diffuseColorProgram = children[ 1 ];
     const specularColorProgram = children[ 2 ];

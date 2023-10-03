@@ -83,7 +83,7 @@ export default class RenderBarycentricBlend extends RenderProgram {
            this.accuracy === other.accuracy;
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const a = children[ 0 ];
     const b = children[ 1 ];
     const c = children[ 2 ];

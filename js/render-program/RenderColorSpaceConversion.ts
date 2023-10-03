@@ -48,7 +48,7 @@ export default abstract class RenderColorSpaceConversion extends RenderProgram {
     return renderProgram.simplified();
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const program = children[ 0 ];
 
     if ( program.isFullyTransparent ) {

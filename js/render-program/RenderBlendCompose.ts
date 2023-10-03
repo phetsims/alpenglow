@@ -93,7 +93,7 @@ export default class RenderBlendCompose extends RenderProgram {
            this.blendType === other.blendType;
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
 
     // TODO: We can actually "simplify" RenderPathBooleans past this for a few non-over cases.
     // TODO: For our path-boolean replacement, we'll want to shift RenderPathBooleans from a child to a parent when

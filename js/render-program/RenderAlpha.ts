@@ -34,7 +34,7 @@ export default class RenderAlpha extends RenderProgram {
     return this.alpha === other.alpha;
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const program = children[ 0 ];
 
     if ( program.isFullyTransparent || this.alpha === 0 ) {

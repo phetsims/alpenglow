@@ -97,7 +97,7 @@ export default class RenderLinearGradient extends RenderProgram {
       _.every( this.stops, ( stop, i ) => stop.ratio === other.stops[ i ].ratio );
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const simplifiedColorStops = this.stops.map( ( stop, i ) => stop.withProgram( children[ i ] ) );
 
     // TODO: compaction of triplicate stops

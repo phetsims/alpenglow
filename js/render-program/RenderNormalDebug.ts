@@ -33,7 +33,7 @@ export default class RenderNormalDebug extends RenderProgram {
     return true;
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const normalProgram = children[ 0 ];
 
     if ( normalProgram.isFullyTransparent ) {

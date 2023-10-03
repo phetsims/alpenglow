@@ -29,7 +29,7 @@ export default class RenderNormalize extends RenderProgram {
     return new RenderNormalize( children[ 0 ] );
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const program = children[ 0 ];
 
     if ( program.isFullyTransparent ) {

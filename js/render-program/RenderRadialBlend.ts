@@ -84,7 +84,7 @@ export default class RenderRadialBlend extends RenderProgram {
            this.accuracy === other.accuracy;
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const zero = children[ 0 ];
     const one = children[ 1 ];
 

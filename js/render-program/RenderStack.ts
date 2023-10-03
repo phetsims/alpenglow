@@ -33,7 +33,7 @@ export default class RenderStack extends RenderProgram {
     return new RenderStack( children );
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     children = children.filter( child => !child.isFullyTransparent );
 
     // If there is an opaque child, nothing below it matters (drop everything before it)

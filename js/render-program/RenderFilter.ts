@@ -69,7 +69,7 @@ export default class RenderFilter extends RenderProgram {
            this.colorTranslation.equals( other.colorTranslation );
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const program = children[ 0 ];
 
     // TODO: concatenated filters! Matrix multiplication

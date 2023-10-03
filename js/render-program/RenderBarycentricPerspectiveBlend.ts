@@ -90,7 +90,7 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
   }
 
   // TODO: extract code for the barycentric blends? duplicated
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     const a = children[ 0 ];
     const b = children[ 1 ];
     const c = children[ 2 ];

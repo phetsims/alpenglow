@@ -47,7 +47,7 @@ export default class RenderDepthSort extends RenderProgram {
     return new RenderDepthSort( this.items.map( item => item.transformed( transform ) ) );
   }
 
-  public override getSimplified( children: RenderProgram[] ): RenderProgram | null {
+  protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
     let hadFullyTransparent = false;
     for ( let i = 0; i < children.length; i++ ) {
       const child = children[ i ];
