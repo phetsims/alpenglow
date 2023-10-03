@@ -1,12 +1,12 @@
 
 ```mermaid
 flowchart TD
-    inputChunks
-    inputEdges
+    inputChunks["inputChunks"]:::inputClass
+    inputEdges["inputEdges"]:::inputClass
     
     subgraph inputs [" "]
-        inputChunks["inputChunks"]
-        inputEdges["inputEdges"]
+        inputChunks
+        inputEdges
     end
 
     inputChunks --> InitialChunk([InitialChunk])
@@ -37,24 +37,24 @@ flowchart TD
 
     edgeReduces1reduce --> EdgeReduce2([EdgeReduce]) --> edgeReduces2reduce & edgeReduces1scan
 
-    edgeReduces2reduce["edgeReduces2 (reduced)"] --> reducibleEdgeCount & completeEdgeCount
+    edgeReduces2reduce["edgeReduces2 (reduced)"] --> reducibleEdgeCount:::outputClass & completeEdgeCount:::outputClass
 
     edgeClips & clippedChunks3 & edgeReduces2reduce & edgeReduces1scan & edgeReduces0scan --> EdgeScan([EdgeScan])
-    EdgeScan --> reducibleEdges0 & completeEdges & chunkIndices
+    EdgeScan --> reducibleEdges0 & completeEdges:::outputClass & chunkIndices
 
-    reducibleEdges0 & reducibleEdgeCount & chunkIndices --> EdgeIndexPatch([EdgeIndexPatch]) --> reducibleEdges1
+    reducibleEdges0 & reducibleEdgeCount & chunkIndices --> EdgeIndexPatch([EdgeIndexPatch]) --> reducibleEdges1:::outputClass
 
     clippedChunks3 --> InitialSplitReduce([InitialSplitReduce]) --> splitReduces0reduce
     splitReduces0reduce --> EdgeReduceX([EdgeReduce]) --> splitReduces0scan & splitReduces1reduce
     splitReduces1reduce --> EdgeReduceY([EdgeReduce]) --> splitReduces1scan & splitReduces2
 
-    splitReduces2 --> reducibleChunkCount & completeChunkCount
+    splitReduces2 --> reducibleChunkCount:::outputClass & completeChunkCount:::outputClass
 
     clippedChunks3 & splitReduces0scan & splitReduces1scan & splitReduces2 --> SplitScan([SplitScan])
     SplitScan --> reducibleChunks0 & completeChunks0 & chunkIndexMap
 
     clippedChunks3 & reducibleChunks0 & completeChunks0 & chunkIndexMap & chunkIndices --> ChunkIndexPatch([ChunkIndexPatch])
-    ChunkIndexPatch --> reducibleChunks1 & completeChunks1
+    ChunkIndexPatch --> reducibleChunks1:::outputClass & completeChunks1:::outputClass
 
 
 
@@ -104,17 +104,8 @@ flowchart TD
         completeChunks1
     end
 
-    
-    style reducibleEdgeCount fill:#faa,stroke:#a00
-    style completeEdgeCount fill:#faa,stroke:#a00
-    style reducibleChunkCount fill:#faa,stroke:#a00
-    style completeChunkCount fill:#faa,stroke:#a00
-    style reducibleEdges1 fill:#faa,stroke:#a00
-    style completeEdges fill:#faa,stroke:#a00
-    style reducibleChunks1 fill:#faa,stroke:#a00
-    style completeChunks1 fill:#faa,stroke:#a00
-    style inputChunks fill:#afa,stroke:#0a0
-    style inputEdges fill:#afa,stroke:#0a0
+    classDef outputClass stroke:#a00
+    classDef inputClass stroke:#0a0
     
     style inputs fill:transparent,stroke:transparent
     style outputs fill:transparent,stroke:transparent
