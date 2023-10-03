@@ -25,13 +25,13 @@ flowchart TD
     end
 
     inputChunks & inputEdges & clippedChunks0 --> InitialClip([InitialClip])
-    InitialClip --> edgeClips & reduces0 & clippedChunks1
+    InitialClip --> reduces0 & clippedChunks1 & edgeClips
 
     reduces0 & clippedChunks1 --> ChunkReduce1([ChunkReduce]) --> reduces1 & clippedChunks2
     
     reduces1 & clippedChunks2 --> ChunkReduce2([ChunkReduce]) --> reduces2 & clippedChunks3
 
-    edgeClips & clippedChunks3 --> InitialEdgeReduce([InitialEdgeReduce]) --> edgeReduces0reduce
+    clippedChunks3 & edgeClips --> InitialEdgeReduce([InitialEdgeReduce]) --> edgeReduces0reduce
 
     edgeReduces0reduce --> EdgeReduce1([EdgeReduce]) --> edgeReduces1reduce & edgeReduces0scan
 
@@ -39,7 +39,7 @@ flowchart TD
 
     edgeReduces2reduce["edgeReduces2 (reduced)"] --> reducibleEdgeCount:::outputClass & completeEdgeCount:::outputClass
 
-    edgeClips & clippedChunks3 & edgeReduces2reduce & edgeReduces1scan & edgeReduces0scan --> EdgeScan([EdgeScan])
+    clippedChunks3 & edgeReduces2reduce & edgeReduces1scan & edgeReduces0scan & edgeClips --> EdgeScan([EdgeScan])
     EdgeScan --> reducibleEdges0 & completeEdges:::outputClass & chunkIndices
 
     reducibleEdges0 & reducibleEdgeCount & chunkIndices --> EdgeIndexPatch([EdgeIndexPatch]) --> reducibleEdges1:::outputClass
@@ -93,16 +93,16 @@ flowchart TD
         completeChunks1["completeChunks"]
     end
     
-    subgraph outputs [" "]
-        reducibleEdgeCount
-        completeEdgeCount
-        reducibleChunkCount
-        completeChunkCount
-        reducibleEdges1
-        completeEdges
-        reducibleChunks1
-        completeChunks1
-    end
+%%    subgraph outputs [" "]
+%%        reducibleEdgeCount
+%%        completeEdgeCount
+%%        reducibleChunkCount
+%%        completeChunkCount
+%%        reducibleEdges1
+%%        completeEdges
+%%        reducibleChunks1
+%%        completeChunks1
+%%    end
 
     classDef outputClass stroke:#a00
     classDef inputClass stroke:#0a0
