@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterChunkIndexPatch, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData, ParallelRasterEdgeIndexPatch, RasterCompleteChunk, RasterCompleteEdge } from '../../imports.js';
+import { alpenglow, ParallelRasterChunkReduce, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterChunkIndexPatch, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterSplitReduceData, ParallelRasterEdgeIndexPatch, RasterCompleteChunk, RasterCompleteEdge, ByteEncoder } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 // TODO: change back to 256 once we are done testing
@@ -246,6 +246,11 @@ export default class ParallelRaster {
 
     const toIndexedString = ( n: { toString(): string }, i: number ) => `${i} ${n.toString()}`;
 
+    const createStorage = <T>( length: number, indeterminateValue: T ) => new ParallelStorageArray(
+      _.range( 0, ByteEncoder.alignUp( length, workgroupSize ) ).map( () => indeterminateValue ),
+      indeterminateValue
+    );
+
     console.log( `numInputChunks: ${numInputChunks}` );
     console.log( inputChunks.data.slice( 0, numInputChunks ).map( toIndexedString ).join( '\n' ) );
 
@@ -254,7 +259,7 @@ export default class ParallelRaster {
 
     // TODO: compute the sizes based on the inputs.
     // TODO: THEN, compute the sizes based on our "expected max size input"
-    const clippedChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterClippedChunk.INDETERMINATE ), RasterClippedChunk.INDETERMINATE );
+    const clippedChunks = createStorage( numClippedChunks, RasterClippedChunk.INDETERMINATE );
 
     console.log( 'ParallelRasterInitialChunk dispatch' );
     await ParallelRasterInitialChunk.dispatch(
@@ -267,9 +272,9 @@ export default class ParallelRaster {
     console.log( 'clippedChunks (without reduce)' );
     console.log( clippedChunks.data.slice( 0, numClippedChunks ).map( toIndexedString ).join( '\n' ) );
 
-    const edgeClips = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterEdgeClip.INDETERMINATE ), RasterEdgeClip.INDETERMINATE );
-    const chunkReduces0 = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterChunkReduceBlock.INDETERMINATE ), RasterChunkReduceBlock.INDETERMINATE );
-    const debugFullChunkReduces = new ParallelStorageArray( _.range( 0, 4096 ).map( () => ( { min: RasterChunkReduceData.INDETERMINATE, max: RasterChunkReduceData.INDETERMINATE } ) ), { min: RasterChunkReduceData.INDETERMINATE, max: RasterChunkReduceData.INDETERMINATE } );
+    const edgeClips = createStorage( numEdgeClips, RasterEdgeClip.INDETERMINATE );
+    const chunkReduces0 = createStorage( Math.ceil( numInputEdges / workgroupSize ), RasterChunkReduceBlock.INDETERMINATE );
+    const debugFullChunkReduces = createStorage( numInputEdges, { min: RasterChunkReduceData.INDETERMINATE, max: RasterChunkReduceData.INDETERMINATE } );
 
     console.log( 'ParallelRasterInitialClip dispatch' );
     await ParallelRasterInitialClip.dispatch(
@@ -297,7 +302,7 @@ export default class ParallelRaster {
       `${i.toString().replace( /./g, ' ' )} rightMax: ${n.rightMax.toString()}`
     ] ).join( '\n' ) );
 
-    const chunkReduces1 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunkReduceBlock.INDETERMINATE ), RasterChunkReduceBlock.INDETERMINATE );
+    const chunkReduces1 = createStorage( Math.ceil( numInputEdges / ( workgroupSize * workgroupSize ) ), RasterChunkReduceBlock.INDETERMINATE );
 
     console.log( 'ParallelRasterChunkReduce dispatch' );
     await ParallelRasterChunkReduce.dispatch(
@@ -316,7 +321,7 @@ export default class ParallelRaster {
       `${i.toString().replace( /./g, ' ' )} rightMax: ${n.rightMax.toString()}`
     ] ).join( '\n' ) );
 
-    const chunkReduces2 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterChunkReduceBlock.INDETERMINATE ), RasterChunkReduceBlock.INDETERMINATE );
+    const chunkReduces2 = createStorage( Math.ceil( numInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ), RasterChunkReduceBlock.INDETERMINATE );
 
     console.log( 'ParallelRasterChunkReduce dispatch' );
     await ParallelRasterChunkReduce.dispatch(
@@ -342,8 +347,8 @@ export default class ParallelRaster {
      * "split" reduce/scan, to distribute the chunks into reducibleChunks/completeChunks
      */
 
-    const debugFullSplitReduces = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
-    const splitReduces0 = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+    const debugFullSplitReduces = createStorage( numClippedChunks, RasterSplitReduceData.INDETERMINATE );
+    const splitReduces0 = createStorage( Math.ceil( numClippedChunks / workgroupSize ), RasterSplitReduceData.INDETERMINATE );
 
     console.log( 'ParallelRasterInitialSplitReduce dispatch' );
     await ParallelRasterInitialSplitReduce.dispatch(
@@ -359,7 +364,7 @@ export default class ParallelRaster {
     console.log( 'splitReduces0 (reduced)' );
     console.log( splitReduces0.data.slice( 0, Math.ceil( numClippedChunks / workgroupSize ) ).map( toIndexedString ).join( '\n' ) );
 
-    const splitReduces1 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+    const splitReduces1 = createStorage( Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize ) ), RasterSplitReduceData.INDETERMINATE );
 
     console.log( 'ParallelRasterEdgeReduce dispatch' );
     await ParallelRasterEdgeReduce.dispatch(
@@ -375,7 +380,7 @@ export default class ParallelRaster {
     console.log( 'splitReduces1 (reduced)' );
     console.log( splitReduces1.data.slice( 0, Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
 
-    const splitReduces2 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+    const splitReduces2 = createStorage( Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize * workgroupSize ) ), RasterSplitReduceData.INDETERMINATE );
 
     console.log( 'ParallelRasterEdgeReduce dispatch' );
     await ParallelRasterEdgeReduce.dispatch(
@@ -396,9 +401,9 @@ export default class ParallelRaster {
     const reducibleChunkCount = splitReduces2.data[ 0 ].numReducible;
     const completeChunkCount = splitReduces2.data[ 0 ].numComplete;
 
-    const reducibleChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterChunk.INDETERMINATE ), RasterChunk.INDETERMINATE );
-    const completeChunks = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterCompleteChunk.INDETERMINATE ), RasterCompleteChunk.INDETERMINATE );
-    const chunkIndexMap = new ParallelStorageArray( _.range( 0, 4096 ).map( () => NaN ), NaN );
+    const reducibleChunks = createStorage( reducibleChunkCount, RasterChunk.INDETERMINATE );
+    const completeChunks = createStorage( completeChunkCount, RasterCompleteChunk.INDETERMINATE );
+    const chunkIndexMap = createStorage( numClippedChunks, NaN );
 
     console.log( 'ParallelRasterSplitScan dispatch' );
     await ParallelRasterSplitScan.dispatch(
@@ -421,8 +426,8 @@ export default class ParallelRaster {
      * "edge" reduce/scan, to distribute the edges into reducibleEdges/completeEdges
      */
 
-    const debugFullEdgeReduces = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
-    const edgeReduces0 = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+    const debugFullEdgeReduces = createStorage( numEdgeClips, RasterSplitReduceData.INDETERMINATE );
+    const edgeReduces0 = createStorage( Math.ceil( numEdgeClips / workgroupSize ), RasterSplitReduceData.INDETERMINATE );
 
     console.log( 'ParallelRasterInitialEdgeReduce dispatch' );
     await ParallelRasterInitialEdgeReduce.dispatch(
@@ -438,7 +443,7 @@ export default class ParallelRaster {
     console.log( 'edgeReduces0 (reduced)' );
     console.log( edgeReduces0.data.slice( 0, Math.ceil( numEdgeClips / workgroupSize ) ).map( toIndexedString ).join( '\n' ) );
 
-    const edgeReduces1 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+    const edgeReduces1 = createStorage( Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize ) ), RasterSplitReduceData.INDETERMINATE );
 
     console.log( 'ParallelRasterEdgeReduce dispatch' );
     await ParallelRasterEdgeReduce.dispatch(
@@ -454,7 +459,7 @@ export default class ParallelRaster {
     console.log( 'edgeReduces1 (reduced)' );
     console.log( edgeReduces1.data.slice( 0, Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize ) ) ).map( toIndexedString ).join( '\n' ) );
 
-    const edgeReduces2 = new ParallelStorageArray( _.range( 0, 1024 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+    const edgeReduces2 = createStorage( Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize * workgroupSize ) ), RasterSplitReduceData.INDETERMINATE );
 
     console.log( 'ParallelRasterEdgeReduce dispatch' );
     await ParallelRasterEdgeReduce.dispatch(
@@ -475,10 +480,10 @@ export default class ParallelRaster {
     const reducibleEdgeCount = edgeReduces2.data[ 0 ].numReducible;
     const completeEdgeCount = edgeReduces2.data[ 0 ].numComplete;
 
-    const reducibleEdges = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterEdge.INDETERMINATE ), RasterEdge.INDETERMINATE );
-    const completeEdges = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterCompleteEdge.INDETERMINATE ), RasterCompleteEdge.INDETERMINATE );
-    const chunkIndices = new ParallelStorageArray( _.range( 0, 4096 ).map( () => NaN ), NaN );
-    const debugEdgeScan = new ParallelStorageArray( _.range( 0, 4096 ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE );
+    const reducibleEdges = createStorage( reducibleEdgeCount, RasterEdge.INDETERMINATE );
+    const completeEdges = createStorage( completeEdgeCount, RasterCompleteEdge.INDETERMINATE );
+    const chunkIndices = createStorage( numClippedChunks * 2, NaN );
+    const debugEdgeScan = createStorage( numEdgeClips, RasterSplitReduceData.INDETERMINATE );
 
     console.log( 'ParallelRasterEdgeScan dispatch' );
     await ParallelRasterEdgeScan.dispatch(
