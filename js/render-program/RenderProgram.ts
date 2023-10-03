@@ -116,14 +116,15 @@ export default abstract class RenderProgram {
     }
   }
 
-  // REVIEW: Documentation here would be helpful. I see that this is getting overridden, but when are we getting
-  // a RenderProgram and when are we getting null? What does the difference of that return value tell us?
-  // Is this what is actually doing the simplification based on the type of RenderProgram we are?
-  // Is null essentially saying that this RenderProgram cannot be simplified?
-
-  // REVIEW: why do we need to pass in children here? Can't the subclass just call on it's own children instance?
-  // this feels like we could introduce errors down the line where children are passed in that have nothing to do with
-  // the actual RenderProgram...
+  /**
+   * This is an internal method for RenderPrograms to implement their simplification. It will get called by
+   * simplified() with pre-simplified children.
+   *
+   * null should be returned when there is no simplification possible. The simplification engine will be able to use
+   * this information to reduce the number of RenderPrograms created during simplification. (For instance, if
+   * none of the children were actually simplified, it will be able to mark THIS RenderProgram as being
+   * "fully simplified", and further calls to simplified() can short-circuit.
+   */
   protected getSimplified( children: RenderProgram[] ): RenderProgram | null {
     return null;
   }
