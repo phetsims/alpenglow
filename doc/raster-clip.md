@@ -94,7 +94,7 @@ flowchart TD
     SplitScan --> chunkIndexMap["chunkIndexMap<br>number[]<br>f[clippedChunkIndex]=outputChunkIndex"]
 
     reducibleChunks0 & completeChunks0 & chunkIndexMap & chunkIndices & clippedChunks3 --> ChunkIndexPatch([ChunkIndexPatch])
-    ChunkIndexPatch --> reducibleChunks1:::outputClass & completeChunks1:::outputClass
+    ChunkIndexPatch --> reducibleChunks1 & completeChunks1
 
     subgraph edges [" "]
         subgraph edgeReduces0 [" "]
@@ -126,8 +126,8 @@ flowchart TD
     class outputEdges hideClass
 
     subgraph reducibleChunks [" "]
-        reducibleChunks0["reducibleChunks (no indices)<br>RasterChunk[]"]
-        reducibleChunks1["reducibleChunks<br>RasterChunk[]"]
+        reducibleChunks0["reducibleChunks (no indices)<br>RasterChunk[]"]:::outputClass
+        reducibleChunks1["reducibleChunks<br>RasterChunk[]"]:::outputClass
     end
 
     subgraph completeChunks [" "]
