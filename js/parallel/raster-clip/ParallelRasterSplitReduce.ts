@@ -1,14 +1,16 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Takes the input reductions and computes the inclusive prefix sum (scan) into it, in a form that can be used for
+ * computing the exclusive prefix sum (zeros the last element). Outputs the reduction of the entire input into the
+ * output reduces.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterSplitReduceData } from '../../imports.js';
 
-export default class ParallelRasterEdgeReduce {
+export default class ParallelRasterSplitReduce {
   public static async dispatch(
     workgroupSize: number,
 
@@ -16,10 +18,10 @@ export default class ParallelRasterEdgeReduce {
     numReduces: number,
 
     // read-write
-    inputEdgeReduces: ParallelStorageArray<RasterSplitReduceData>, // will into scanned form
+    inputReduces: ParallelStorageArray<RasterSplitReduceData>, // will process into scanned form
 
     // write
-    outputEdgeReduces: ParallelStorageArray<RasterSplitReduceData>
+    outputReduces: ParallelStorageArray<RasterSplitReduceData>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
 
@@ -35,7 +37,7 @@ export default class ParallelRasterEdgeReduce {
       const edgeIndex = context.globalId.x;
       const exists = edgeIndex < numReduces;
 
-      let value = exists ? ( await inputEdgeReduces.get( context, context.globalId.x ) ) : RasterSplitReduceData.IDENTITY;
+      let value = exists ? ( await inputReduces.get( context, context.globalId.x ) ) : RasterSplitReduceData.IDENTITY;
 
       await context.workgroupValues.reduces.set( context, context.localId.x, value );
 
@@ -53,19 +55,19 @@ export default class ParallelRasterEdgeReduce {
 
       const isLastInWorkgroup = context.localId.x === workgroupSize - 1;
 
-      // Set us up for "exclusive" scan
-      // TODO: a better way of getting an exclusive scan...?
-      await inputEdgeReduces.set( context, context.globalId.x, isLastInWorkgroup ? RasterSplitReduceData.IDENTITY : value );
-
       if ( isLastInWorkgroup ) {
-        await outputEdgeReduces.set( context, context.workgroupId.x, value );
+        await outputReduces.set( context, context.workgroupId.x, value );
       }
+
+      // Set us up for "exclusive" scan, by zero-ing out the last entry
+      await inputReduces.set( context, context.globalId.x, isLastInWorkgroup ? RasterSplitReduceData.IDENTITY : value );
+
     }, () => ( {
       reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE )
-    } ), [ inputEdgeReduces, outputEdgeReduces ], workgroupSize );
+    } ), [ inputReduces, outputReduces ], workgroupSize );
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numReduces / workgroupSize ) ) );
   }
 }
 
-alpenglow.register( 'ParallelRasterEdgeReduce', ParallelRasterEdgeReduce );
+alpenglow.register( 'ParallelRasterSplitReduce', ParallelRasterSplitReduce );

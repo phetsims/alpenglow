@@ -33,9 +33,9 @@ flowchart TD
 
     clippedChunks3 & edgeClips --> InitialEdgeReduce([InitialEdgeReduce]) --> edgeReduces0reduce
 
-    edgeReduces0reduce --> EdgeReduce1 --> edgeReduces0scan & edgeReduces1reduce
+    edgeReduces0reduce --> SplitReduce1 --> edgeReduces0scan & edgeReduces1reduce
 
-    edgeReduces1reduce --> EdgeReduce2 --> edgeReduces1scan & edgeReduces2reduce
+    edgeReduces1reduce --> SplitReduce2 --> edgeReduces1scan & edgeReduces2reduce
 
     reduces0["reduces0<br>RasterChunkReduceQuad[]"]
     reduces1["reduces1<br>RasterChunkReduceQuad[]"]
@@ -57,8 +57,8 @@ flowchart TD
     chunkIndexMap & chunkIndices & reducibleEdgeCount & reducibleEdges0 --> EdgeIndexPatch([EdgeIndexPatch]) --> reducibleEdges1
 
     clippedChunks3 --> InitialSplitReduce --> splitReduces0reduce
-    splitReduces0reduce --> EdgeReduceX --> splitReduces0scan & splitReduces1reduce
-    splitReduces1reduce --> EdgeReduceY --> splitReduces1scan & splitReduces2
+    splitReduces0reduce --> SplitReduceX --> splitReduces0scan & splitReduces1reduce
+    splitReduces1reduce --> SplitReduceY --> splitReduces1scan & splitReduces2
 
     subgraph splits [" "]
         InitialSplitReduce([InitialSplitReduce])
@@ -75,8 +75,8 @@ flowchart TD
         
         splitReduces2["splitReduces2<br>RasterSplitReduceData[]"]
         
-        EdgeReduceX([EdgeReduce])
-        EdgeReduceY([EdgeReduce])
+        SplitReduceX([SplitReduce])
+        SplitReduceY([SplitReduce])
     end
     class splits hideClass
     
@@ -102,14 +102,14 @@ flowchart TD
             edgeReduces0scan["edgeReduces0 (scanned)<br>RasterSplitReduceData[]"]
         end
         
-        EdgeReduce1([EdgeReduce])
+        SplitReduce1([SplitReduce])
     
         subgraph edgeReduces1 [" "]
             edgeReduces1reduce["edgeReduces1 (reduced)<br>RasterSplitReduceData[]"]
             edgeReduces1scan["edgeReduces1 (scanned)<br>RasterSplitReduceData[]"]
         end
         
-        EdgeReduce2([EdgeReduce])
+        SplitReduce2([SplitReduce])
         
         edgeReduces2reduce["edgeReduces2 (reduced)<br>RasterSplitReduceData[]"]
     end

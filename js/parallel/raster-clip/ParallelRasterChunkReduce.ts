@@ -4,7 +4,7 @@
  * We continue the segmented reduction started in ParallelRasterInitialClip, also applying things to RasterClippedChunks,
  * however we need to track the "left" and "right" values separately.
  *
- * TODO: better docs on why we need the "left" and "right"
+ * See docs on RasterChunkReduceQuad for the need for "left"/"right"
  *
  * NOTE: The reduction is also completed in ParallelRasterInitialClip, so if changing this file, please check there too
  *

@@ -295,7 +295,7 @@ export { default as ParallelRasterInitialChunk } from './parallel/raster-clip/Pa
 export { default as ParallelRasterInitialClip } from './parallel/raster-clip/ParallelRasterInitialClip.js';
 export { default as ParallelRasterChunkReduce } from './parallel/raster-clip/ParallelRasterChunkReduce.js';
 export { default as ParallelRasterInitialEdgeReduce } from './parallel/raster-clip/ParallelRasterInitialEdgeReduce.js';
-export { default as ParallelRasterEdgeReduce } from './parallel/raster-clip/ParallelRasterEdgeReduce.js';
+export { default as ParallelRasterSplitReduce } from './parallel/raster-clip/ParallelRasterSplitReduce.js';
 export { default as ParallelRasterEdgeScan } from './parallel/raster-clip/ParallelRasterEdgeScan.js';
 export { default as ParallelRasterInitialSplitReduce } from './parallel/raster-clip/ParallelRasterInitialSplitReduce.js';
 export { default as ParallelRasterSplitScan } from './parallel/raster-clip/ParallelRasterSplitScan.js';

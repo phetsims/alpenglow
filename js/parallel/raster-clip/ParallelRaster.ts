@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas } from '../../imports.js';
+import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterSplitReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas } from '../../imports.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
@@ -484,8 +484,8 @@ export default class ParallelRaster {
 
     const splitReduces1 = createStorage( Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize ) ), RasterSplitReduceData.INDETERMINATE );
 
-    LOG && console.log( 'ParallelRasterEdgeReduce dispatch' );
-    await ParallelRasterEdgeReduce.dispatch(
+    LOG && console.log( 'ParallelRasterSplitReduce dispatch' );
+    await ParallelRasterSplitReduce.dispatch(
       workgroupSize,
       Math.ceil( numClippedChunks / workgroupSize ),
       splitReduces0,
@@ -500,8 +500,8 @@ export default class ParallelRaster {
 
     const splitReduces2 = createStorage( Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize * workgroupSize ) ), RasterSplitReduceData.INDETERMINATE );
 
-    LOG && console.log( 'ParallelRasterEdgeReduce dispatch' );
-    await ParallelRasterEdgeReduce.dispatch(
+    LOG && console.log( 'ParallelRasterSplitReduce dispatch' );
+    await ParallelRasterSplitReduce.dispatch(
       workgroupSize,
       Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize ) ),
       splitReduces1,
@@ -563,8 +563,8 @@ export default class ParallelRaster {
 
     const edgeReduces1 = createStorage( Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize ) ), RasterSplitReduceData.INDETERMINATE );
 
-    LOG && console.log( 'ParallelRasterEdgeReduce dispatch' );
-    await ParallelRasterEdgeReduce.dispatch(
+    LOG && console.log( 'ParallelRasterSplitReduce dispatch' );
+    await ParallelRasterSplitReduce.dispatch(
       workgroupSize,
       Math.ceil( numEdgeClips / workgroupSize ),
       edgeReduces0,
@@ -579,8 +579,8 @@ export default class ParallelRaster {
 
     const edgeReduces2 = createStorage( Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize * workgroupSize ) ), RasterSplitReduceData.INDETERMINATE );
 
-    LOG && console.log( 'ParallelRasterEdgeReduce dispatch' );
-    await ParallelRasterEdgeReduce.dispatch(
+    LOG && console.log( 'ParallelRasterSplitReduce dispatch' );
+    await ParallelRasterSplitReduce.dispatch(
       workgroupSize,
       Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize ) ),
       edgeReduces1,
