@@ -15,8 +15,8 @@ export default class RasterChunkReducePair {
   ) {
     assert && assert( min.isFirstEdge === max.isFirstEdge );
     assert && assert( min.isLastEdge === max.isLastEdge );
-    assert && assert( isFinite( min.chunkIndex ) && min.chunkIndex > 0 ? (
-      min.chunkIndex + 1 === max.chunkIndex
+    assert && assert( isFinite( min.clippedChunkIndex ) && min.clippedChunkIndex > 0 ? (
+      min.clippedChunkIndex + 1 === max.clippedChunkIndex
     ) : true );
   }
 

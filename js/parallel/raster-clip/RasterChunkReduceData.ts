@@ -10,7 +10,7 @@ import { alpenglow, RasterClippedChunk } from '../../imports.js';
 
 export default class RasterChunkReduceData {
   public constructor(
-    public readonly chunkIndex: number,
+    public readonly clippedChunkIndex: number,
     public readonly area: number,
 
     // TODO: check which ones of these aren't used
@@ -34,25 +34,25 @@ export default class RasterChunkReduceData {
   ) {}
 
   public isValid(): boolean {
-    return !isNaN( this.chunkIndex ) && this.chunkIndex !== -1;
+    return !isNaN( this.clippedChunkIndex ) && this.clippedChunkIndex !== -1;
   }
 
   public toString(): string {
-    if ( isNaN( this.chunkIndex ) ) {
+    if ( isNaN( this.clippedChunkIndex ) ) {
       return 'RasterChunkReduceData[INDETERMINATE]';
     }
-    if ( this.chunkIndex === -1 ) {
+    if ( this.clippedChunkIndex === -1 ) {
       return 'RasterChunkReduceData[OUT_OF_RANGE]';
     }
     const firstLast = this.isFirstEdge ? ( this.isLastEdge ? ' BOTH' : ' FIRST' ) : ( this.isLastEdge ? ' LAST' : '' );
     const counts = `counts:${this.minXCount},${this.minYCount},${this.maxXCount},${this.maxYCount}`;
     const area = `area:${this.area}`;
     const bounds = `bounds:x[${this.minX},${this.maxX}],y[${this.minY},${this.maxY}]`;
-    return `RasterChunkReduceData[chunk:${this.chunkIndex} ${counts} ${bounds} ${area}${firstLast}]`;
+    return `RasterChunkReduceData[clippedChunk:${this.clippedChunkIndex} ${counts} ${bounds} ${area}${firstLast}]`;
   }
 
   public equals( other: RasterChunkReduceData ): boolean {
-    return this.chunkIndex === other.chunkIndex &&
+    return this.clippedChunkIndex === other.clippedChunkIndex &&
            Math.abs( this.area - other.area ) < 1e-6 &&
            this.isFirstEdge === other.isFirstEdge &&
            this.isLastEdge === other.isLastEdge &&
@@ -123,12 +123,12 @@ export default class RasterChunkReduceData {
   }
 
   public static combine( a: RasterChunkReduceData, b: RasterChunkReduceData ): RasterChunkReduceData {
-    if ( a.chunkIndex !== b.chunkIndex ) {
+    if ( a.clippedChunkIndex !== b.clippedChunkIndex ) {
       return b;
     }
     else {
       return new RasterChunkReduceData(
-        a.chunkIndex,
+        a.clippedChunkIndex,
         a.area + b.area,
         a.isFirstEdge,
         b.isLastEdge,

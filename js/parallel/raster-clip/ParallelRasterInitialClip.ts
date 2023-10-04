@@ -62,8 +62,8 @@ export default class ParallelRasterInitialClip {
       // So we add `offset` to min, and `offset + num` to max
       const minEdgeIndex = chunk.edgesOffset + edgeIndex;
       const maxEdgeIndex = chunk.edgesOffset + chunk.numEdges + edgeIndex;
-      const minChunkIndex = 2 * edge.chunkIndex;
-      const maxChunkIndex = 2 * edge.chunkIndex + 1;
+      const minClippedChunkIndex = 2 * edge.chunkIndex;
+      const maxClippedChunkIndex = 2 * edge.chunkIndex + 1;
 
       /*************************************************************************
        * CLIPPING
@@ -190,8 +190,8 @@ export default class ParallelRasterInitialClip {
       const veryPositiveNumber = 1e10;
       const veryNegativeNumber = -1e10;
 
-      const minClip = new RasterEdgeClip( minChunkIndex, minPoint0, minPoint1, minPoint2, minPoint3, edge.isFirstEdge, edge.isLastEdge );
-      const maxClip = new RasterEdgeClip( maxChunkIndex, maxPoint0, maxPoint1, maxPoint2, maxPoint3, edge.isFirstEdge, edge.isLastEdge );
+      const minClip = new RasterEdgeClip( minClippedChunkIndex, minPoint0, minPoint1, minPoint2, minPoint3, edge.isFirstEdge, edge.isLastEdge );
+      const maxClip = new RasterEdgeClip( maxClippedChunkIndex, maxPoint0, maxPoint1, maxPoint2, maxPoint3, edge.isFirstEdge, edge.isLastEdge );
 
       const minArea = minClip.getArea();
       const maxArea = maxClip.getArea();
@@ -239,10 +239,10 @@ export default class ParallelRasterInitialClip {
       let value: RasterChunkReducePair;
 
       const applyValue = async () => {
-        const minClippedChunk = await clippedChunks.get( context, value.min.chunkIndex );
-        const maxClippedChunk = await clippedChunks.get( context, value.max.chunkIndex );
-        await clippedChunks.set( context, value.min.chunkIndex, value.min.apply( minClippedChunk ) );
-        await clippedChunks.set( context, value.max.chunkIndex, value.max.apply( maxClippedChunk ) );
+        const minClippedChunk = await clippedChunks.get( context, value.min.clippedChunkIndex );
+        const maxClippedChunk = await clippedChunks.get( context, value.max.clippedChunkIndex );
+        await clippedChunks.set( context, value.min.clippedChunkIndex, value.min.apply( minClippedChunk ) );
+        await clippedChunks.set( context, value.max.clippedChunkIndex, value.max.apply( maxClippedChunk ) );
       };
 
       if ( exists ) {
@@ -251,26 +251,26 @@ export default class ParallelRasterInitialClip {
 
         value = new RasterChunkReducePair(
           isXSplit ? new RasterChunkReduceData(
-            minChunkIndex,
+            minClippedChunkIndex,
             minArea,
             edge.isFirstEdge, edge.isLastEdge,
             minBoundsMinX, minBoundsMinY, minBoundsMaxX, minBoundsMaxY,
             0, 0, minCount, 0
           ) : new RasterChunkReduceData(
-            minChunkIndex,
+            minClippedChunkIndex,
             minArea,
             edge.isFirstEdge, edge.isLastEdge,
             minBoundsMinX, minBoundsMinY, minBoundsMaxX, minBoundsMaxY,
             0, 0, 0, minCount
           ),
           isXSplit ? new RasterChunkReduceData(
-            maxChunkIndex,
+            maxClippedChunkIndex,
             maxArea,
             edge.isFirstEdge, edge.isLastEdge,
             maxBoundsMinX, maxBoundsMinY, maxBoundsMaxX, maxBoundsMaxY,
             maxCount, 0, 0, 0
           ) : new RasterChunkReduceData(
-            maxChunkIndex,
+            maxClippedChunkIndex,
             maxArea,
             edge.isFirstEdge, edge.isLastEdge,
             maxBoundsMinX, maxBoundsMinY, maxBoundsMaxX, maxBoundsMaxY,
@@ -292,7 +292,7 @@ export default class ParallelRasterInitialClip {
       // We need to not double-apply. So we'll only apply when merging into this specific index, since it will
       // (a) be the first combination with the joint "both" result, and (b) it's the simplest to filter for.
       // Note: -5 is different than the "out of range" RasterChunkReduceData value
-      const applicableMinChunkIndex = exists && value.isLastEdge() && !value.isFirstEdge() ? value.min.chunkIndex : -5;
+      const applicableMinChunkIndex = exists && value.isLastEdge() && !value.isFirstEdge() ? value.min.clippedChunkIndex : -5;
 
       await debugFullChunkReduces.set( context, context.globalId.x, value );
 
@@ -308,9 +308,9 @@ export default class ParallelRasterInitialClip {
           // |     applicableMaxChunkIndex === otherMaxReduce.chunkIndex && maxReduce.isFirstEdge
           // We effectively only need to check and store one of these, since the min/max indices will be essentially
           // just offset by one
-          if ( applicableMinChunkIndex === otherValue.min.chunkIndex && value.isFirstEdge() ) {
-            assert && assert( value.min.chunkIndex === otherValue.min.chunkIndex );
-            assert && assert( value.max.chunkIndex === otherValue.max.chunkIndex );
+          if ( applicableMinChunkIndex === otherValue.min.clippedChunkIndex && value.isFirstEdge() ) {
+            assert && assert( value.min.clippedChunkIndex === otherValue.min.clippedChunkIndex );
+            assert && assert( value.max.clippedChunkIndex === otherValue.max.clippedChunkIndex );
             assert && assert( value.isLastEdge() );
 
             // NOTE: We don't need a workgroup barrier here with the two, since (a) we're not executing this for the
@@ -380,13 +380,12 @@ export default class ParallelRasterInitialClip {
 
       for ( let edgeClipIndex = 0; edgeClipIndex < numEdgeClips; edgeClipIndex++ ) {
         const edgeClip = edgeClips.data[ edgeClipIndex ];
-        assert( isFinite( edgeClip.chunkIndex ) );
+        assert( isFinite( edgeClip.clippedChunkIndex ) );
 
-        // TODO: rename chunkIndex to clippedChunkIndex?
-        const clippedChunk = clippedChunks.data[ edgeClip.chunkIndex ];
+        const clippedChunk = clippedChunks.data[ edgeClip.clippedChunkIndex ];
         assert( clippedChunk && isFinite( clippedChunk.rasterProgramIndex ) );
 
-        const inputChunkIndex = edgeClip.chunkIndex >> 1;
+        const inputChunkIndex = edgeClip.clippedChunkIndex >> 1;
         const chunk = chunks.data[ inputChunkIndex ];
         assert( chunk && isFinite( chunk.rasterProgramIndex ) );
 
@@ -414,12 +413,12 @@ export default class ParallelRasterInitialClip {
           const minReduce = inputBlock.min;
           const maxReduce = inputBlock.max;
 
-          assert( isFinite( minReduce.chunkIndex ) );
-          assert( isFinite( maxReduce.chunkIndex ) );
+          assert( isFinite( minReduce.clippedChunkIndex ) );
+          assert( isFinite( maxReduce.clippedChunkIndex ) );
 
           assert(
-            ( minReduce.chunkIndex === maxReduce.chunkIndex - 1 ) ||
-            ( minReduce.chunkIndex === -1 && maxReduce.chunkIndex === -1 )
+            ( minReduce.clippedChunkIndex === maxReduce.clippedChunkIndex - 1 ) ||
+            ( minReduce.clippedChunkIndex === -1 && maxReduce.clippedChunkIndex === -1 )
           );
         }
 
@@ -435,17 +434,17 @@ export default class ParallelRasterInitialClip {
           const minReduce = inputBlock.min;
           const maxReduce = inputBlock.max;
 
-          if ( minReduce.chunkIndex >= 0 ) {
+          if ( minReduce.clippedChunkIndex >= 0 ) {
             rightMinReduce = RasterChunkReduceData.combine( rightMinReduce, minReduce );
           }
-          if ( maxReduce.chunkIndex >= 0 ) {
+          if ( maxReduce.clippedChunkIndex >= 0 ) {
             rightMaxReduce = RasterChunkReduceData.combine( rightMaxReduce, maxReduce );
           }
 
-          if ( minReduce.chunkIndex === inputPairs[ 0 ].min.chunkIndex ) {
+          if ( minReduce.clippedChunkIndex === inputPairs[ 0 ].min.clippedChunkIndex ) {
             leftMinReduce = j === 0 ? minReduce : RasterChunkReduceData.combine( leftMinReduce, minReduce );
           }
-          if ( maxReduce.chunkIndex === inputPairs[ 0 ].max.chunkIndex ) {
+          if ( maxReduce.clippedChunkIndex === inputPairs[ 0 ].max.clippedChunkIndex ) {
             leftMaxReduce = j === 0 ? maxReduce : RasterChunkReduceData.combine( leftMaxReduce, maxReduce );
           }
         }

@@ -34,7 +34,7 @@ export default class ParallelRasterInitialEdgeReduce {
       const exists = edgeIndex < numEdgeClips;
 
       const edgeClip = await edgeClips.get( context, context.globalId.x );
-      const clippedChunk = await clippedChunks.get( context, edgeClip.chunkIndex );
+      const clippedChunk = await clippedChunks.get( context, edgeClip.clippedChunkIndex );
 
       let value = RasterSplitReduceData.from( edgeClip, clippedChunk, exists );
 

@@ -64,7 +64,7 @@ export default class ParallelRasterEdgeScan {
       }
 
       const edgeClip = await edgeClips.get( context, context.globalId.x );
-      const clippedChunk = await clippedChunks.get( context, edgeClip.chunkIndex );
+      const clippedChunk = await clippedChunks.get( context, edgeClip.clippedChunkIndex );
 
       const initialValue = RasterSplitReduceData.from( edgeClip, clippedChunk, exists );
       let value = initialValue;
@@ -122,19 +122,19 @@ export default class ParallelRasterEdgeScan {
 
           if ( index > 0 ) {
             await reducibleEdges.set( context, baseIndex, new RasterEdge(
-              edgeClip.chunkIndex,
+              edgeClip.clippedChunkIndex,
               false, false, // will get filled in later
               edgeStarts[ 0 ], edgeEnds[ 0 ]
             ) );
             if ( index > 1 ) {
               await reducibleEdges.set( context, baseIndex + 1, new RasterEdge(
-                edgeClip.chunkIndex,
+                edgeClip.clippedChunkIndex,
                 false, false, // will get filled in later
                 edgeStarts[ 1 ], edgeEnds[ 1 ]
               ) );
               if ( index > 2 ) {
                 await reducibleEdges.set( context, baseIndex + 2, new RasterEdge(
-                  edgeClip.chunkIndex,
+                  edgeClip.clippedChunkIndex,
                   false, false, // will get filled in later
                   edgeStarts[ 2 ], edgeEnds[ 2 ]
                 ) );
@@ -168,11 +168,11 @@ export default class ParallelRasterEdgeScan {
         // NOTE: Can't just output the end of each, since we are splitting them across reducible/completed
         if ( hasReducibleVertices || hasCompleteVertices ) {
           if ( edgeClip.isFirstEdge ) {
-            await chunkIndices.set( context, 2 * edgeClip.chunkIndex, baseIndex );
+            await chunkIndices.set( context, 2 * edgeClip.clippedChunkIndex, baseIndex );
           }
 
           if ( edgeClip.isLastEdge ) {
-            await chunkIndices.set( context, 2 * edgeClip.chunkIndex + 1, baseIndex + index );
+            await chunkIndices.set( context, 2 * edgeClip.clippedChunkIndex + 1, baseIndex + index );
           }
         }
       }

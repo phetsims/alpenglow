@@ -11,7 +11,7 @@ import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class RasterEdgeClip {
   public constructor(
-    public readonly chunkIndex: number,
+    public readonly clippedChunkIndex: number,
 
     public readonly point0: Vector2,
     public readonly point1: Vector2,
@@ -38,12 +38,12 @@ export default class RasterEdgeClip {
   }
 
   public toString(): string {
-    if ( isNaN( this.chunkIndex ) ) {
+    if ( isNaN( this.clippedChunkIndex ) ) {
       return 'RasterEdgeClip[INDETERMINATE]';
     }
     const firstLast = this.isFirstEdge ? ( this.isLastEdge ? ' BOTH' : ' FIRST' ) : ( this.isLastEdge ? ' LAST' : '' );
     const coords = `${this.point0.x},${this.point0.y} => ${this.point1.x},${this.point1.y} => ${this.point2.x},${this.point2.y} => ${this.point3.x},${this.point3.y}`;
-    return `RasterEdgeClip[chunk:${this.chunkIndex} ${coords}${firstLast}]`;
+    return `RasterEdgeClip[clippedChunk:${this.clippedChunkIndex} ${coords}${firstLast}]`;
   }
 
   public static readonly INDETERMINATE = new RasterEdgeClip(
