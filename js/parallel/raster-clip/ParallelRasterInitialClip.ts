@@ -83,8 +83,8 @@ export default class ParallelRasterInitialClip {
       ];
       let minCount = 0;
       let maxCount = 0;
-      let minSet = false;
-      let maxSet = false;
+      let minSet = true;
+      let maxSet = true;
 
       const centerSecondary = 0.5 * ( isXSplit ? chunk.minY + chunk.maxY : chunk.minX + chunk.maxX );
       const startPoint = edge.startPoint;
@@ -96,45 +96,44 @@ export default class ParallelRasterInitialClip {
       const startSecondaryLess = ( isXSplit ? startPoint.y : startPoint.x ) < centerSecondary;
       const endSecondaryLess = ( isXSplit ? endPoint.y : endPoint.x ) < centerSecondary;
 
-      // TODO: simplify out the startPrimaryCmp === endPrimaryCmp, since we have fewer cases, half the stuff
-      // both values less than the split
-      if ( startPrimaryCmp === -1 && endPrimaryCmp === -1 ) {
-        minPoints[ 0 ].set( edge.startPoint );
-        minPoints[ 1 ].set( edge.endPoint );
-        minPoints[ 2 ].set( edge.endPoint );
-        minPoints[ 3 ].set( edge.endPoint );
-        minSet = true;
+      if ( startPrimaryCmp === endPrimaryCmp ) {
+        // both values less than the split
+        if ( startPrimaryCmp === -1 ) {
+          minPoints[ 0 ].set( edge.startPoint );
+          minPoints[ 1 ].set( edge.endPoint );
+          minPoints[ 2 ].set( edge.endPoint );
+          minPoints[ 3 ].set( edge.endPoint );
+          maxSet = false;
 
-        if ( startSecondaryLess !== endSecondaryLess ) {
-          maxCount += startSecondaryLess ? 1 : -1;
+          if ( startSecondaryLess !== endSecondaryLess ) {
+            maxCount += startSecondaryLess ? 1 : -1;
+          }
         }
-      }
-      // both values greater than the split
-      else if ( startPrimaryCmp === 1 && endPrimaryCmp === 1 ) {
-        maxPoints[ 0 ].set( edge.startPoint );
-        maxPoints[ 1 ].set( edge.endPoint );
-        maxPoints[ 2 ].set( edge.endPoint );
-        maxPoints[ 3 ].set( edge.endPoint );
-        maxSet = true;
+        // both values greater than the split
+        else if ( startPrimaryCmp === 1 ) {
+          maxPoints[ 0 ].set( edge.startPoint );
+          maxPoints[ 1 ].set( edge.endPoint );
+          maxPoints[ 2 ].set( edge.endPoint );
+          maxPoints[ 3 ].set( edge.endPoint );
+          minSet = false;
 
-        if ( startSecondaryLess !== endSecondaryLess ) {
-          minCount += startSecondaryLess ? 1 : -1;
+          if ( startSecondaryLess !== endSecondaryLess ) {
+            minCount += startSecondaryLess ? 1 : -1;
+          }
         }
-      }
-      // both values equal to the split
-      else if ( startPrimaryCmp === 0 && endPrimaryCmp === 0 ) {
-        // vertical/horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
-        minPoints[ 0 ].set( edge.startPoint );
-        minPoints[ 1 ].set( edge.endPoint );
-        minPoints[ 2 ].set( edge.endPoint );
-        minPoints[ 3 ].set( edge.endPoint );
-        minSet = true;
+        // both values equal to the split
+        else if ( startPrimaryCmp === 0 ) {
+          // vertical/horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
+          minPoints[ 0 ].set( edge.startPoint );
+          minPoints[ 1 ].set( edge.endPoint );
+          minPoints[ 2 ].set( edge.endPoint );
+          minPoints[ 3 ].set( edge.endPoint );
 
-        maxPoints[ 0 ].set( edge.startPoint );
-        maxPoints[ 1 ].set( edge.endPoint );
-        maxPoints[ 2 ].set( edge.endPoint );
-        maxPoints[ 3 ].set( edge.endPoint );
-        maxSet = true;
+          maxPoints[ 0 ].set( edge.startPoint );
+          maxPoints[ 1 ].set( edge.endPoint );
+          maxPoints[ 2 ].set( edge.endPoint );
+          maxPoints[ 3 ].set( edge.endPoint );
+        }
       }
       else {
         // There is a single crossing of our x (possibly on a start or end point)
@@ -166,7 +165,6 @@ export default class ParallelRasterInitialClip {
         minPoints[ 3 ] = endGreater ? (
           isXSplit ? new Vector2( split, endCornerSecondary ) : new Vector2( endCornerSecondary, split )
         ) : minResultEndPoint;
-        minSet = true;
 
         maxPoints[ 0 ] = startLess ? (
           isXSplit ? new Vector2( split, startCornerSecondary ) : new Vector2( startCornerSecondary, split )
@@ -176,7 +174,6 @@ export default class ParallelRasterInitialClip {
         maxPoints[ 3 ] = endLess ? (
           isXSplit ? new Vector2( split, endCornerSecondary ) : new Vector2( endCornerSecondary, split )
         ) : maxResultEndPoint;
-        maxSet = true;
       }
 
       const veryPositiveNumber = 1e10;
