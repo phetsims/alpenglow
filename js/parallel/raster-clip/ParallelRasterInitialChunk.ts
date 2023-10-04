@@ -1,7 +1,9 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Creates the two RasterClippedChunk (min/max) for each RasterChunk.
+ *
+ * NOTE: These only fill in certain values, and leave a lot blank to be filled in by the upcoming reduce.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -27,8 +29,8 @@ export default class ParallelRasterInitialChunk {
 
         const chunk = await chunks.get( context, chunkIndex );
 
-        const minChunkIndex = 2 * chunkIndex;
-        const maxChunkIndex = 2 * chunkIndex + 1;
+        const minClippedChunkIndex = 2 * chunkIndex;
+        const maxClippedChunkIndex = 2 * chunkIndex + 1;
 
         const xDiff = chunk.maxX - chunk.minX;
         const yDiff = chunk.maxY - chunk.minY;
@@ -41,6 +43,7 @@ export default class ParallelRasterInitialChunk {
           const isXSplit = xDiff > yDiff;
 
           // NOTE: This is set up so that if we have a half-pixel offset e.g. with a bilinear filter, it will work)
+          // NOTE: Duplicated in ParallelRasterInitialClip and ParallelRasterInitialChunk
           const split = isXSplit ? chunk.minX + Math.floor( 0.5 * xDiff ) : chunk.minY + Math.floor( 0.5 * yDiff );
 
           minChunk = new RasterClippedChunk(
@@ -53,6 +56,8 @@ export default class ParallelRasterInitialChunk {
             false,
             -1,
 
+            // Main bounds of the chunk. NOTE: if enabled, the content will get bounds-checked and possibly these
+            // bounds will be reduced.
             chunk.minX,
             chunk.minY,
             isXSplit ? split : chunk.maxX,
@@ -74,6 +79,8 @@ export default class ParallelRasterInitialChunk {
             false,
             -1,
 
+            // Main bounds of the chunk. NOTE: if enabled, the content will get bounds-checked and possibly these
+            // bounds will be reduced.
             isXSplit ? split : chunk.minX,
             isXSplit ? chunk.minY : split,
             chunk.maxX,
@@ -85,9 +92,14 @@ export default class ParallelRasterInitialChunk {
             chunk.maxYCount
           );
         }
+        // If our chunk has NO edges, either we get discarded OR we have full area.
+        // NOTE: This is assuming no negative or doubled area, or other fun facts, since our clipping process should
+        // output things satisfying these constraints.
         else {
           const hasArea = chunk.minXCount < 0 && chunk.minYCount > 0 && chunk.maxXCount > 0 && chunk.maxYCount;
+
           if ( hasArea ) {
+            // Output a simple "contains everything" chunk in the min section
             minChunk = new RasterClippedChunk(
               chunk.rasterProgramIndex,
               chunk.needsFace,
@@ -105,11 +117,13 @@ export default class ParallelRasterInitialChunk {
             minChunk = RasterClippedChunk.DISCARDABLE;
           }
 
+          // We don't want to split the chunk and cause unneeded work, so we just dump everything in the "min" and
+          // put data in the "max" that will be discarded
           maxChunk = RasterClippedChunk.DISCARDABLE;
         }
 
-        await clippedChunks.set( context, minChunkIndex, minChunk );
-        await clippedChunks.set( context, maxChunkIndex, maxChunk );
+        await clippedChunks.set( context, minClippedChunkIndex, minChunk );
+        await clippedChunks.set( context, maxClippedChunkIndex, maxChunk );
       }
     }, () => ( {} ), [ chunks, clippedChunks ], workgroupSize );
 

@@ -24,7 +24,7 @@ export default class ParallelRasterInitialClip {
     numEdges: number,
 
     // read-write
-    clippedChunks: ParallelStorageArray<RasterClippedChunk>,
+    clippedChunks: ParallelStorageArray<RasterClippedChunk>, // Our reduce will "apply" to this, writing associated data
 
     // write
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
@@ -75,6 +75,7 @@ export default class ParallelRasterInitialClip {
       const isXSplit = xDiff > yDiff;
 
       // NOTE: This is set up so that if we have a half-pixel offset e.g. with a bilinear filter, it will work)
+      // NOTE: Duplicated in ParallelRasterInitialClip and ParallelRasterInitialChunk
       const split = isXSplit ? chunk.minX + Math.floor( 0.5 * xDiff ) : chunk.minY + Math.floor( 0.5 * yDiff );
 
       // NOTE: We're combining both the x-clip and y-clip into concurrent code, so we don't get divergence between
