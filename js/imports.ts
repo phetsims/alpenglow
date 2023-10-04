@@ -279,6 +279,7 @@ export { default as ParallelWorkgroup } from './parallel/ParallelWorkgroup.js';
 export { default as ParallelExecutor } from './parallel/ParallelExecutor.js';
 export { default as ParallelStorageArray } from './parallel/ParallelStorageArray.js';
 export { default as ParallelWorkgroupArray } from './parallel/ParallelWorkgroupArray.js';
+export { default as ParallelUtils } from './parallel/ParallelUtils.js';
 
 export { default as RasterChunk } from './parallel/raster-clip/RasterChunk.js';
 export { default as RasterChunkReduceData } from './parallel/raster-clip/RasterChunkReduceData.js';

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterClippedChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelUtils, ParallelWorkgroupArray, RasterClippedChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 const nanVector = new Vector2( NaN, NaN );
@@ -41,18 +41,13 @@ export default class ParallelRasterEdgeScan {
 
       const edgeIndex = context.globalId.x;
       const exists = edgeIndex < numEdgeClips;
-      // TODO: numEdges => numClippedEdges, it will be better for computations
-
-      // TODO: better way to scan? Does this lead to inefficient memory?
       if ( context.localId.x === 0 ) {
-        const index0 = Math.floor( edgeIndex / workgroupSize );
-        const index1 = Math.floor( index0 / workgroupSize );
-        const index2 = Math.floor( index1 / workgroupSize );
+        const indices = ParallelUtils.getInclusiveToExclusiveScanIndices( edgeIndex, workgroupSize );
 
         // Convert to an exclusive scan with the different indices
-        const reduce0 = index0 > 0 ? ( await edgeReduces0.get( context, index0 - 1 ) ) : RasterSplitReduceData.IDENTITY;
-        const reduce1 = index1 > 0 ? ( await edgeReduces1.get( context, index1 - 1 ) ) : RasterSplitReduceData.IDENTITY;
-        const reduce2 = index2 > 0 ? ( await edgeReduces2.get( context, index2 - 1 ) ) : RasterSplitReduceData.IDENTITY;
+        const reduce0 = indices.x >= 0 ? ( await edgeReduces0.get( context, indices.x ) ) : RasterSplitReduceData.IDENTITY;
+        const reduce1 = indices.y >= 0 ? ( await edgeReduces1.get( context, indices.y ) ) : RasterSplitReduceData.IDENTITY;
+        const reduce2 = indices.z >= 0 ? ( await edgeReduces2.get( context, indices.z ) ) : RasterSplitReduceData.IDENTITY;
 
         const baseReducible = reduce2.numReducible + reduce1.numReducible + reduce0.numReducible;
         const baseComplete = reduce2.numComplete + reduce1.numComplete + reduce0.numComplete;
