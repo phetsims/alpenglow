@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpaceConversion, RenderLinearDisplayP3ToLinearSRGB, RenderProgram, alpenglow, RenderInstruction, RenderExecutionStack, RenderEvaluationContext, RenderExecutor } from '../imports.js';
+import { RenderColor, RenderColorSpaceConversion, RenderLinearDisplayP3ToLinearSRGB, RenderProgram, alpenglow, RenderInstruction, RenderExecutionStack, RenderEvaluationContext, RenderExecutor, ByteEncoder, RenderInstructionLocation } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderLinearSRGBToLinearDisplayP3 extends RenderColorSpaceConversion {
@@ -54,6 +54,10 @@ export class RenderInstructionLinearSRGBToLinearDisplayP3 extends RenderInstruct
       matrix.m20() * scratchVector.x + matrix.m21() * scratchVector.y + matrix.m22() * scratchVector.z,
       scratchVector.w
     );
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU8( RenderInstruction.LinearSRGBToLinearDisplayP3Code );
   }
 
   public static readonly INSTANCE = new RenderInstructionLinearSRGBToLinearDisplayP3();

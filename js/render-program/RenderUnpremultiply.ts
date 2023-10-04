@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpaceConversion, RenderPremultiply, RenderProgram, alpenglow, RenderInstruction, RenderExecutionStack, RenderEvaluationContext, RenderExecutor } from '../imports.js';
+import { RenderColor, RenderColorSpaceConversion, RenderPremultiply, RenderProgram, alpenglow, RenderInstruction, RenderExecutionStack, RenderEvaluationContext, RenderExecutor, ByteEncoder, RenderInstructionLocation } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderUnpremultiply extends RenderColorSpaceConversion {
@@ -57,6 +57,10 @@ export class RenderInstructionUnpremultiply extends RenderInstruction {
         alpha
       );
     }
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU8( RenderInstruction.UnpremultiplyCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionUnpremultiply();

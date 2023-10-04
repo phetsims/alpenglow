@@ -11,6 +11,7 @@ import { alpenglow } from '../imports.js';
 export type F32 = number;
 export type U32 = number;
 export type U8 = number;
+export type U16 = number;
 
 const scratchForBytes = new Uint8Array( 4 );
 
@@ -105,6 +106,13 @@ export default class ByteEncoder {
     this.ensureSpaceFor( 1 );
     this._u8Array[ this._byteLength ] = u8;
     this._byteLength += 1;
+  }
+
+  public pushU16( u8: U8 ): void {
+    this.ensureSpaceFor( 2 );
+    this._u8Array[ this._byteLength ] = u8 & 0xff;
+    this._u8Array[ this._byteLength + 1 ] = u8 >> 8;
+    this._byteLength += 2;
   }
 
   public get byteLength(): number {

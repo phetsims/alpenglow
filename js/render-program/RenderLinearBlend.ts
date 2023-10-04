@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, alpenglow, SerializedRenderProgram, RenderRadialBlendLogic } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, alpenglow, SerializedRenderProgram, RenderRadialBlendLogic, ByteEncoder } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -220,6 +220,42 @@ export class RenderInstructionComputeBlendRatio extends RenderInstruction {
       executor.call( this.oneLocation );
     }
   }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    const zeroOffset = getOffset( this.zeroLocation );
+    const oneOffset = getOffset( this.oneLocation );
+    const blendOffset = getOffset( this.blendLocation );
+
+    assert && assert( isFinite( zeroOffset ) && zeroOffset >= 0 && zeroOffset < 2 << 16 );
+    assert && assert( isFinite( oneOffset ) && oneOffset >= 0 && oneOffset < 2 << 16 );
+    assert && assert( isFinite( blendOffset ) && blendOffset >= 0 && blendOffset < 2 << 16 );
+
+    if ( this.logic instanceof RenderLinearBlendLogic ) {
+      encoder.pushU8( RenderInstruction.ComputeLinearBlendRatioCode );
+      encoder.pushU16( zeroOffset );
+      encoder.pushU16( oneOffset );
+      encoder.pushU16( blendOffset );
+      encoder.pushF32( this.logic.scaledNormal.x );
+      encoder.pushF32( this.logic.scaledNormal.y );
+      encoder.pushF32( this.logic.offset );
+      encoder.pushU8( this.logic.accuracy );
+    }
+    else {
+      encoder.pushU8( RenderInstruction.ComputeRadialBlendRatioCode );
+      encoder.pushU16( zeroOffset );
+      encoder.pushU16( oneOffset );
+      encoder.pushU16( blendOffset );
+      encoder.pushF32( this.logic.inverseTransform.m00() );
+      encoder.pushF32( this.logic.inverseTransform.m01() );
+      encoder.pushF32( this.logic.inverseTransform.m02() );
+      encoder.pushF32( this.logic.inverseTransform.m10() );
+      encoder.pushF32( this.logic.inverseTransform.m11() );
+      encoder.pushF32( this.logic.inverseTransform.m12() );
+      encoder.pushF32( this.logic.radius0 );
+      encoder.pushF32( this.logic.radius1 );
+      encoder.pushU8( this.logic.accuracy );
+    }
+  }
 }
 
 const scratchZero = new Vector4( 0, 0, 0, 0 );
@@ -250,6 +286,10 @@ export class RenderInstructionLinearBlend extends RenderInstruction {
         zeroColor.w * minusT + oneColor.w * t
       );
     }
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU8( RenderInstruction.LinearBlendCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionLinearBlend();

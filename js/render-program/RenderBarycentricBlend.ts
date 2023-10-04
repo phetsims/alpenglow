@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderProgram, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderProgram, alpenglow, SerializedRenderProgram, ByteEncoder, RenderInstructionLocation } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -220,6 +220,18 @@ export class RenderInstructionBarycentricBlend extends RenderInstruction {
 
     this.logic.apply( scratchResult, context, aColor, bColor, cColor );
     stack.push( scratchResult );
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU8( RenderInstruction.BarycentricBlendCode );
+    encoder.pushF32( this.logic.det );
+    encoder.pushF32( this.logic.diffA.x );
+    encoder.pushF32( this.logic.diffA.y );
+    encoder.pushF32( this.logic.diffB.x );
+    encoder.pushF32( this.logic.diffB.y );
+    encoder.pushF32( this.logic.pointC.x );
+    encoder.pushF32( this.logic.pointC.y );
+    encoder.pushU8( this.logic.accuracy );
   }
 }
 

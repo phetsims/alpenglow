@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpaceConversion, RenderOklabToLinearSRGB, RenderProgram, alpenglow, RenderInstruction, RenderExecutionStack, RenderEvaluationContext, RenderExecutor } from '../imports.js';
+import { RenderColor, RenderColorSpaceConversion, RenderOklabToLinearSRGB, RenderProgram, alpenglow, RenderInstruction, RenderExecutionStack, RenderEvaluationContext, RenderExecutor, ByteEncoder, RenderInstructionLocation } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderLinearSRGBToOklab extends RenderColorSpaceConversion {
@@ -60,6 +60,10 @@ export class RenderInstructionLinearSRGBToOklab extends RenderInstruction {
       0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_,
       scratchVector.w
     );
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU8( RenderInstruction.LinearSRGBToOklabCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionLinearSRGBToOklab();

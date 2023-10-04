@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderProgram, RenderStack, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor } from '../imports.js';
+import { RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderProgram, RenderStack, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, ByteEncoder, RenderInstructionLocation } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 
@@ -553,6 +553,13 @@ export class RenderInstructionBlendCompose extends RenderInstruction {
     const result = RenderBlendCompose.blendCompose( aColor, bColor, this.logic.composeType, this.logic.blendType );
 
     stack.push( result );
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU8( RenderInstruction.BlendComposeCode );
+    encoder.pushU8(
+      this.logic.composeType | ( this.logic.blendType << 3 )
+    );
   }
 }
 

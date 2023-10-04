@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, alpenglow, SerializedRenderProgram, ByteEncoder } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderStack extends RenderProgram {
@@ -198,6 +198,21 @@ export class RenderInstructionOpaqueJump extends RenderInstruction {
       executor.jump( this.location );
     }
   }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    const offset = getOffset( this.location );
+    assert && assert( isFinite( offset ) && offset >= 0, 'Using unsigned for now' );
+    assert && assert( offset < 2 << 16, 'Would need an extreme jump to encode' );
+
+    if ( offset <= 255 ) {
+      encoder.pushU8( RenderInstruction.OpaqueShortJumpCode );
+      encoder.pushU8( offset );
+    }
+    else {
+      encoder.pushU8( RenderInstruction.OpaqueLongJumpCode );
+      encoder.pushU16( offset );
+    }
+  }
 }
 
 // Background on the top of the stack
@@ -219,6 +234,10 @@ export class RenderInstructionStackBlend extends RenderInstruction {
       backgroundAlpha * background.z + foreground.z,
       backgroundAlpha * background.w + foreground.w
     );
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU8( RenderInstruction.StackBlendCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionStackBlend();
