@@ -8,28 +8,20 @@ flowchart TD
     classDef inputClass stroke:#0a0, font-size:40px
     classDef hideClass fill:transparent, stroke:transparent
     
-    inputChunks["inputChunks"]:::inputClass
-    inputEdges["inputEdges"]:::inputClass
-    
     subgraph inputs [" "]
-        inputChunks
-        inputEdges
+        inputChunks["inputChunks<br>RasterChunk[]"]:::inputClass
+        inputEdges["inputEdges<br>RasterEdge[]"]:::inputClass
     end
     class inputs hideClass
 
     inputChunks --> InitialChunk([InitialChunk])
     InitialChunk --> clippedChunks0
-    
-    clippedChunks0["clippedChunks (no area data)"]
-    clippedChunks1["clippedChunks (partial data)"]
-    clippedChunks2["clippedChunks (partial data)"]
-    clippedChunks3["clippedChunks (FULL data)"]
 
     subgraph clippedChunks [" "]
-        clippedChunks0
-        clippedChunks1
-        clippedChunks2
-        clippedChunks3
+        clippedChunks0["clippedChunks (no area data)<br>RasterClippedChunk[]"]
+        clippedChunks1["clippedChunks (partial data)<br>RasterClippedChunk[]"]
+        clippedChunks2["clippedChunks (partial data)<br>RasterClippedChunk[]"]
+        clippedChunks3["clippedChunks (FULL data)<br>RasterClippedChunk[]"]
     end
 
     inputChunks & inputEdges & clippedChunks0 --> InitialClip([InitialClip])
@@ -45,9 +37,13 @@ flowchart TD
 
     edgeReduces1reduce --> EdgeReduce2 --> edgeReduces1scan & edgeReduces2reduce
 
+    reduces0["reduces0<br>RasterChunkReduceQuad[]"]
+    reduces1["reduces1<br>RasterChunkReduceQuad[]"]
+    reduces2["reduces2<br>RasterChunkReduceQuad[]"]
+
     subgraph edgeCounts [" "]
-        reducibleEdgeCount:::outputClass
-        completeEdgeCount:::outputClass
+        reducibleEdgeCount["reducibleEdgeCount<br>number"]:::outputClass
+        completeEdgeCount["completeEdgeCount<br>number"]:::outputClass
     end
     class edgeCounts hideClass
 
@@ -56,7 +52,7 @@ flowchart TD
     clippedChunks3 & edgeReduces0scan & edgeReduces1scan & edgeReduces2reduce & edgeClips --> EdgeScan([EdgeScan])
     EdgeScan --> reducibleEdges0
     EdgeScan --> completeEdges
-    EdgeScan --> chunkIndices
+    EdgeScan --> chunkIndices["chunkIndices<br>number[]<br>Maps clippedChunk index<br>to output chunk index"]
 
     chunkIndices & reducibleEdgeCount & reducibleEdges0 --> EdgeIndexPatch([EdgeIndexPatch]) --> reducibleEdges1
 
@@ -68,16 +64,16 @@ flowchart TD
         InitialSplitReduce([InitialSplitReduce])
     
         subgraph splitReduces0 [" "]
-            splitReduces0reduce["splitReduces0 (reduced)"]
-            splitReduces0scan["splitReduces0 (scanned)"]
+            splitReduces0reduce["splitReduces0 (reduced)<br>RasterSplitReduceData[]"]
+            splitReduces0scan["splitReduces0 (scanned)<br>RasterSplitReduceData[]"]
         end
     
         subgraph splitReduces1 [" "]
-            splitReduces1reduce["splitReduces1 (reduced)"]
-            splitReduces1scan["splitReduces1 (scanned)"]
+            splitReduces1reduce["splitReduces1 (reduced)<br>RasterSplitReduceData[]"]
+            splitReduces1scan["splitReduces1 (scanned)<br>RasterSplitReduceData[]"]
         end
         
-        splitReduces2
+        splitReduces2["splitReduces2<br>RasterSplitReduceData"]
         
         EdgeReduceX([EdgeReduce])
         EdgeReduceY([EdgeReduce])
@@ -85,58 +81,58 @@ flowchart TD
     class splits hideClass
     
     subgraph chunkCounts [" "]
-        reducibleChunkCount:::outputClass
-        completeChunkCount:::outputClass
+        reducibleChunkCount["reducibleChunkCount<br>number"]:::outputClass
+        completeChunkCount["completeChunkCount<br>number"]:::outputClass
     end
     class chunkCounts hideClass
 
     splitReduces2 --> reducibleChunkCount & completeChunkCount
 
-    splitReduces0scan & splitReduces1scan & splitReduces2 & clippedChunks3 --> SplitScan([SplitScan])
+    splitReduces2 & splitReduces1scan & splitReduces0scan & clippedChunks3 --> SplitScan([SplitScan])
     SplitScan --> reducibleChunks0
     SplitScan --> completeChunks0
-    SplitScan --> chunkIndexMap
+    SplitScan --> chunkIndexMap["chunkIndexMap<br>number[]<br>Stores edge start/end indices"]
 
     reducibleChunks0 & completeChunks0 & chunkIndexMap & chunkIndices & clippedChunks3 --> ChunkIndexPatch([ChunkIndexPatch])
     ChunkIndexPatch --> reducibleChunks1:::outputClass & completeChunks1:::outputClass
 
     subgraph edges [" "]
         subgraph edgeReduces0 [" "]
-            edgeReduces0reduce["edgeReduces0 (reduced)"]
-            edgeReduces0scan["edgeReduces0 (scanned)"]
+            edgeReduces0reduce["edgeReduces0 (reduced)<br>RasterSplitReduceData[]"]
+            edgeReduces0scan["edgeReduces0 (scanned)<br>RasterSplitReduceData[]"]
         end
         
         EdgeReduce1([EdgeReduce])
     
         subgraph edgeReduces1 [" "]
-            edgeReduces1reduce["edgeReduces1 (reduced)"]
-            edgeReduces1scan["edgeReduces1 (scanned)"]
+            edgeReduces1reduce["edgeReduces1 (reduced)<br>RasterSplitReduceData[]"]
+            edgeReduces1scan["edgeReduces1 (scanned)<br>RasterSplitReduceData[]"]
         end
         
         EdgeReduce2([EdgeReduce])
         
-        edgeReduces2reduce["edgeReduces2 (reduced)"]
+        edgeReduces2reduce["edgeReduces2 (reduced)<br>RasterSplitReduceData[]"]
     end
     class edges hideClass
     
     subgraph outputEdges [" "]
         subgraph reducibleEdges [" "]
-            reducibleEdges0["reducibleEdges (unmapped)"]
-            reducibleEdges1["reducibleEdges"]:::outputClass
+            reducibleEdges0["reducibleEdges (unmapped)<br>RasterEdge[]"]
+            reducibleEdges1["reducibleEdges<br>RasterEdge[]"]:::outputClass
         end
         
-        completeEdges:::outputClass
+        completeEdges["completeEdges<br>RasterCompleteEdge[]"]:::outputClass
     end
     class outputEdges hideClass
 
     subgraph reducibleChunks [" "]
-        reducibleChunks0["reducibleChunks (no indices)"]
-        reducibleChunks1["reducibleChunks"]
+        reducibleChunks0["reducibleChunks (no indices)<br>RasterChunk[]"]
+        reducibleChunks1["reducibleChunks<br>RasterChunk[]"]
     end
 
     subgraph completeChunks [" "]
-        completeChunks0["completeChunks (no indices)"]
-        completeChunks1["completeChunks"]
+        completeChunks0["completeChunks (no indices)<br>RasterCompleteChunk[]"]
+        completeChunks1["completeChunks<br>RasterCompleteChunk[]"]
     end
     
 %%    subgraph outputs [" "]
