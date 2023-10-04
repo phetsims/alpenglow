@@ -14,6 +14,7 @@ import Vector2 from '../../../../dot/js/Vector2.js';
 const WORKGROUP_SIZE = 64;
 const LOG = false;
 const USE_DEMO = true;
+const ONLY_FIRST_ITERATION = false;
 
 export default class ParallelRaster {
 
@@ -309,6 +310,10 @@ export default class ParallelRaster {
       numEdges = result.numReducibleEdges;
       chunks = result.reducibleChunks;
       edges = result.reducibleEdges;
+
+      if ( ONLY_FIRST_ITERATION ) {
+        break;
+      }
     }
 
     const raster = new CombinedRaster( 256, 256, {

@@ -798,9 +798,16 @@ an UI and Display made for visual testing and debugging.
 
   window.parallelTest = function() {
     setTimeout( async function() {
+      const start = Date.now();
+
       await phet.alpenglow.ParallelRaster.test();
 
-      console.log( 'finished test' );
+      const end = Date.now();
+
+      // 64x workgroup 9305 with debugger, 35504 without
+      // 256x workgroup 11517 with debugger, 45999 without
+      // test 256x 346 with debugger, 4154 without
+      console.log( `finished test ${end - start}` );
     } );
   };
 
