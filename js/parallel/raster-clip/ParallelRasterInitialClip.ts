@@ -1,7 +1,12 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * We do the following:
+ *
+ * 1. Binary clip each RasterEdge into two RasterEdgeClips (one for each side of the split)
+ * 2. Take these, do a segmented parallel reduction, and
+ * 3. During reduction, store associated data to the RasterClippedChunks (precisely when we have reduced all of the
+ *    edges for a particular chunk)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -30,7 +35,12 @@ export default class ParallelRasterInitialClip {
 
     type WorkgroupValues = {
       reduces: ParallelWorkgroupArray<RasterChunkReducePair>;
+
+      // Stores the first chunk index for the workgroup. We'll use this to compute the atomicMaxFirstChunkIndex
       firstChunkIndex: ParallelWorkgroupArray<number>; // NOT an array, just using that for atomics. one element, u32
+
+      // The maximum (localId.x) that has the same chunkIndex as localId.x===0.
+      // We'll need this to compute this so we can deliver the "left" values for future reduction.
       atomicMaxFirstChunkIndex: number;
     };
 
@@ -55,6 +65,10 @@ export default class ParallelRasterInitialClip {
       const minChunkIndex = 2 * edge.chunkIndex;
       const maxChunkIndex = 2 * edge.chunkIndex + 1;
 
+      /*************************************************************************
+       * CLIPPING
+       *************************************************************************/
+
       const xDiff = chunk.maxX - chunk.minX;
       const yDiff = chunk.maxY - chunk.minY;
 
@@ -63,6 +77,8 @@ export default class ParallelRasterInitialClip {
       // NOTE: This is set up so that if we have a half-pixel offset e.g. with a bilinear filter, it will work)
       const split = isXSplit ? chunk.minX + Math.floor( 0.5 * xDiff ) : chunk.minY + Math.floor( 0.5 * yDiff );
 
+      // NOTE: We're combining both the x-clip and y-clip into concurrent code, so we don't get divergence between
+      // invocations/threads.
       // if isXSplit, then x is primary, y is secondary
       // if !isXSplit, then y is primary, x is secondary
 
@@ -216,6 +232,10 @@ export default class ParallelRasterInitialClip {
         }
       }
 
+      /*************************************************************************
+       * REDUCE AND APPLY
+       *************************************************************************/
+
       let value: RasterChunkReducePair;
 
       const applyValue = async () => {
@@ -272,7 +292,7 @@ export default class ParallelRasterInitialClip {
       // We need to not double-apply. So we'll only apply when merging into this specific index, since it will
       // (a) be the first combination with the joint "both" result, and (b) it's the simplest to filter for.
       // Note: -5 is different than the "out of range" RasterChunkReduceData value
-      const appliableMinChunkIndex = exists && value.isLastEdge() && !value.isFirstEdge() ? value.min.chunkIndex : -5;
+      const applicableMinChunkIndex = exists && value.isLastEdge() && !value.isFirstEdge() ? value.min.chunkIndex : -5;
 
       await debugFullChunkReduces.set( context, context.globalId.x, value );
 
@@ -285,10 +305,10 @@ export default class ParallelRasterInitialClip {
           value = RasterChunkReducePair.combine( otherValue, value );
 
           // NOTE: The similar "max" condition would be identical. It would be
-          // |     appliableMaxChunkIndex === otherMaxReduce.chunkIndex && maxReduce.isFirstEdge
+          // |     applicableMaxChunkIndex === otherMaxReduce.chunkIndex && maxReduce.isFirstEdge
           // We effectively only need to check and store one of these, since the min/max indices will be essentially
           // just offset by one
-          if ( appliableMinChunkIndex === otherValue.min.chunkIndex && value.isFirstEdge() ) {
+          if ( applicableMinChunkIndex === otherValue.min.chunkIndex && value.isFirstEdge() ) {
             assert && assert( value.min.chunkIndex === otherValue.min.chunkIndex );
             assert && assert( value.max.chunkIndex === otherValue.max.chunkIndex );
             assert && assert( value.isLastEdge() );
@@ -303,6 +323,7 @@ export default class ParallelRasterInitialClip {
         await context.workgroupValues.reduces.set( context, context.localId.x, value );
       }
 
+      // Atomically compute the max(localId.x) that has the same chunkIndex as localId.x===0.
       const firstChunkIndex = await context.workgroupValues.firstChunkIndex.get( context, 0 );
       if ( exists && edge.chunkIndex === firstChunkIndex ) {
         context.workgroupValues.atomicMaxFirstChunkIndex = Math.max(
@@ -310,9 +331,9 @@ export default class ParallelRasterInitialClip {
           context.localId.x
         );
       }
-
       await context.workgroupBarrier(); // for the atomic
 
+      // Store our reduction result
       if ( exists && context.localId.x === 0 ) {
         const lastLocalEdgeIndexInWorkgroup = Math.min(
           numEdges - 1 - context.workgroupId.x * workgroupSize,
@@ -383,7 +404,7 @@ export default class ParallelRasterInitialClip {
         assert( edge && isFinite( edge.chunkIndex ) );
         assert( edge.chunkIndex === inputChunkIndex );
 
-        // TODO: COULD check clipping
+        // NOTE: COULD check clipping
       }
 
       for ( let i = 0; i < Math.ceil( numEdges / workgroupSize ); i++ ) {
