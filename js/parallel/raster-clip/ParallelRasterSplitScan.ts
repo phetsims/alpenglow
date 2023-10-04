@@ -106,15 +106,38 @@ export default class ParallelRasterSplitScan {
 
           await chunkIndexMap.set( context, chunkIndex, baseIndex );
 
-          await completeChunks.set( context, baseIndex, new RasterCompleteChunk(
-            clippedChunk.rasterProgramIndex,
-            -1, // filled in later
-            -1, // filled in later
-            clippedChunk.isFullArea,
-            clippedChunk.area,
-            clippedChunk.minX, clippedChunk.minY, clippedChunk.maxX, clippedChunk.maxY,
-            clippedChunk.minXCount, clippedChunk.minYCount, clippedChunk.maxXCount, clippedChunk.maxYCount
-          ) );
+          if ( clippedChunk.needsCompleteOutputSplit() ) {
+            // TODO: note that count should be the same as... the area? (but we might have had edges?)
+            const count = clippedChunk.outputSplitCount();
+            const width = clippedChunk.maxX - clippedChunk.minX;
+            // const height = clippedChunk.maxY - clippedChunk.minY;
+
+            for ( let i = 0; i < count; i++ ) {
+              const x = clippedChunk.minX + ( i % width );
+              const y = clippedChunk.minY + Math.floor( i / width );
+
+              await completeChunks.set( context, baseIndex + i, new RasterCompleteChunk(
+                clippedChunk.rasterProgramIndex,
+                0,
+                0,
+                clippedChunk.isFullArea,
+                1,
+                x, y, x + 1, y + 1,
+                -1, 1, 1, -1
+              ) );
+            }
+          }
+          else {
+            await completeChunks.set( context, baseIndex, new RasterCompleteChunk(
+              clippedChunk.rasterProgramIndex,
+              -1, // filled in later
+              -1, // filled in later
+              clippedChunk.isFullArea,
+              clippedChunk.area,
+              clippedChunk.minX, clippedChunk.minY, clippedChunk.maxX, clippedChunk.maxY,
+              clippedChunk.minXCount, clippedChunk.minYCount, clippedChunk.maxXCount, clippedChunk.maxYCount
+            ) );
+          }
         }
       }
     }, () => ( {

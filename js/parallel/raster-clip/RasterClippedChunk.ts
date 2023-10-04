@@ -33,10 +33,22 @@ export default class RasterClippedChunk {
     public readonly maxYCount: number
   ) {}
 
+  public needsCompleteOutputSplit(): boolean {
+    return this.isComplete && this.isFullArea && !this.isConstant;
+  }
+
+  public outputSplitCount(): number {
+    assert && assert( this.needsCompleteOutputSplit() );
+
+    return ( this.maxX - this.minX ) * ( this.maxY - this.minY );
+  }
+
   public getSplitReduceData(): RasterSplitReduceData {
     return new RasterSplitReduceData(
       this.isReducible ? 1 : 0,
-      this.isComplete ? 1 : 0
+      this.isComplete ? (
+        this.needsCompleteOutputSplit() ? this.outputSplitCount() : 1
+      ) : 0
     );
   }
 

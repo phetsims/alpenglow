@@ -8,262 +8,274 @@
 
 import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas } from '../../imports.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
 
 // TODO: move to 256 after testing (64 helps us test more cases here)
 const WORKGROUP_SIZE = 64;
 const LOG = false;
+const USE_DEMO = true;
 
 export default class ParallelRaster {
+
+  public static getTestRawInputChunks(): RasterChunk[] {
+    return [
+      new RasterChunk(
+        0,
+        false,
+        true,
+        0,
+        5,
+        0, 0, 10, 10,
+        -1, 1, 0, 0
+      ),
+      new RasterChunk(
+        1,
+        false,
+        false,
+        5,
+        3,
+        10, 0, 20, 10,
+        0, 1, 0, 0
+      ),
+      new RasterChunk(
+        2,
+        true,
+        false,
+        8,
+        1,
+        9, 8, 10, 10,
+        -1, 1, 0, 0
+      ),
+      new RasterChunk(
+        3,
+        true,
+        false,
+        9,
+        4,
+        7, 9, 9, 10,
+        0, 0, 0, 0
+      ),
+      new RasterChunk(
+        4,
+        true,
+        false,
+        13,
+        6,
+        10, 5, 20, 10,
+        0, 0, 0, 0
+      ),
+      new RasterChunk(
+        5,
+        true,
+        false,
+        19,
+        1,
+        19, 3, 20, 4,
+        -1, 1, 0, 0
+      ),
+      new RasterChunk(
+        6,
+        false,
+        false,
+        20,
+        0,
+        11, 8, 12, 9,
+        -1, 1, 1, -1
+      ),
+      new RasterChunk(
+        7,
+        false,
+        false,
+        20,
+        0,
+        12, 6, 18, 10,
+        -1, 1, 1, -1
+      ),
+      new RasterChunk(
+        8,
+        false,
+        false,
+        20,
+        0,
+        0, 0, 10, 10,
+        0, 0, 0, 0
+      )
+    ];
+  }
+
+  public static getTestRawInputEdges(): RasterEdge[] {
+    return [
+      new RasterEdge(
+        0,
+        true,
+        false,
+        new Vector2( 10, 0 ),
+        new Vector2( 10, 6 )
+      ),
+      new RasterEdge(
+        0,
+        false,
+        false,
+        new Vector2( 10, 6 ),
+        new Vector2( 0, 10 )
+      ),
+      new RasterEdge(
+        0,
+        false,
+        false,
+        new Vector2( 1, 1 ),
+        new Vector2( 3, 6 )
+      ),
+      new RasterEdge(
+        0,
+        false,
+        false,
+        new Vector2( 3, 6 ),
+        new Vector2( 4, 2 )
+      ),
+      new RasterEdge(
+        0,
+        false,
+        true,
+        new Vector2( 4, 2 ),
+        new Vector2( 1, 1 )
+      ),
+      new RasterEdge(
+        1,
+        true,
+        false,
+        new Vector2( 20, 0 ),
+        new Vector2( 20, 2 )
+      ),
+      new RasterEdge(
+        1,
+        false,
+        false,
+        new Vector2( 20, 2 ),
+        new Vector2( 10, 6 )
+      ),
+      new RasterEdge(
+        1,
+        false,
+        true,
+        new Vector2( 10, 6 ),
+        new Vector2( 10, 0 )
+      ),
+      new RasterEdge(
+        2,
+        true,
+        true,
+        new Vector2( 10, 8 ),
+        new Vector2( 9, 10 )
+      ),
+      new RasterEdge(
+        3,
+        true,
+        false,
+        new Vector2( 7.5, 9 ),
+        new Vector2( 9, 9 )
+      ),
+      new RasterEdge(
+        3,
+        false,
+        false,
+        new Vector2( 9, 9 ),
+        new Vector2( 9, 10 )
+      ),
+      new RasterEdge(
+        3,
+        false,
+        false,
+        new Vector2( 9, 10 ),
+        new Vector2( 7.5, 10 )
+      ),
+      new RasterEdge(
+        3,
+        false,
+        true,
+        new Vector2( 7.5, 10 ),
+        new Vector2( 7.5, 9 )
+      ),
+      new RasterEdge(
+        4,
+        true,
+        false,
+        new Vector2( 10, 9 ),
+        new Vector2( 11, 9 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        false,
+        new Vector2( 11, 9 ),
+        new Vector2( 10, 10 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        false,
+        new Vector2( 10, 10 ),
+        new Vector2( 10, 9 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        false,
+        new Vector2( 19, 9 ),
+        new Vector2( 20, 9 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        false,
+        new Vector2( 20, 9 ),
+        new Vector2( 19, 10 )
+      ),
+      new RasterEdge(
+        4,
+        false,
+        true,
+        new Vector2( 19, 10 ),
+        new Vector2( 19, 9 )
+      ),
+      new RasterEdge(
+        5,
+        true,
+        true,
+        new Vector2( 20, 4 ),
+        new Vector2( 19, 5 )
+      )
+    ];
+  }
+
   public static async test(): Promise<void> {
 
-    // const rawInputChunks = [
-    //   new RasterChunk(
-    //     0,
-    //     false,
-    //     false,
-    //     0,
-    //     5,
-    //     0, 0, 10, 10,
-    //     -1, 1, 0, 0
-    //   ),
-    //   new RasterChunk(
-    //     1,
-    //     false,
-    //     false,
-    //     5,
-    //     3,
-    //     10, 0, 20, 10,
-    //     0, 1, 0, 0
-    //   ),
-    //   new RasterChunk(
-    //     2,
-    //     true,
-    //     false,
-    //     8,
-    //     1,
-    //     9, 8, 10, 10,
-    //     -1, 1, 0, 0
-    //   ),
-    //   new RasterChunk(
-    //     3,
-    //     true,
-    //     false,
-    //     9,
-    //     4,
-    //     7, 9, 9, 10,
-    //     0, 0, 0, 0
-    //   ),
-    //   new RasterChunk(
-    //     4,
-    //     true,
-    //     false,
-    //     13,
-    //     6,
-    //     10, 5, 20, 10,
-    //     0, 0, 0, 0
-    //   ),
-    //   new RasterChunk(
-    //     5,
-    //     true,
-    //     false,
-    //     19,
-    //     1,
-    //     19, 3, 20, 4,
-    //     -1, 1, 0, 0
-    //   ),
-    //   new RasterChunk(
-    //     6,
-    //     false,
-    //     false,
-    //     20,
-    //     0,
-    //     11, 8, 12, 9,
-    //     -1, 1, 1, -1
-    //   ),
-    //   new RasterChunk(
-    //     7,
-    //     false,
-    //     false,
-    //     20,
-    //     0,
-    //     12, 6, 18, 10,
-    //     -1, 1, 1, -1
-    //   ),
-    //   new RasterChunk(
-    //     8,
-    //     false,
-    //     false,
-    //     20,
-    //     0,
-    //     0, 0, 10, 10,
-    //     0, 0, 0, 0
-    //   )
-    // ];
-    //
-    // const rawInputEdges = [
-    //   new RasterEdge(
-    //     0,
-    //     true,
-    //     false,
-    //     new Vector2( 10, 0 ),
-    //     new Vector2( 10, 6 )
-    //   ),
-    //   new RasterEdge(
-    //     0,
-    //     false,
-    //     false,
-    //     new Vector2( 10, 6 ),
-    //     new Vector2( 0, 10 )
-    //   ),
-    //   new RasterEdge(
-    //     0,
-    //     false,
-    //     false,
-    //     new Vector2( 1, 1 ),
-    //     new Vector2( 3, 6 )
-    //   ),
-    //   new RasterEdge(
-    //     0,
-    //     false,
-    //     false,
-    //     new Vector2( 3, 6 ),
-    //     new Vector2( 4, 2 )
-    //   ),
-    //   new RasterEdge(
-    //     0,
-    //     false,
-    //     true,
-    //     new Vector2( 4, 2 ),
-    //     new Vector2( 1, 1 )
-    //   ),
-    //   new RasterEdge(
-    //     1,
-    //     true,
-    //     false,
-    //     new Vector2( 20, 0 ),
-    //     new Vector2( 20, 2 )
-    //   ),
-    //   new RasterEdge(
-    //     1,
-    //     false,
-    //     false,
-    //     new Vector2( 20, 2 ),
-    //     new Vector2( 10, 6 )
-    //   ),
-    //   new RasterEdge(
-    //     1,
-    //     false,
-    //     true,
-    //     new Vector2( 10, 6 ),
-    //     new Vector2( 10, 0 )
-    //   ),
-    //   new RasterEdge(
-    //     2,
-    //     true,
-    //     true,
-    //     new Vector2( 10, 8 ),
-    //     new Vector2( 9, 10 )
-    //   ),
-    //   new RasterEdge(
-    //     3,
-    //     true,
-    //     false,
-    //     new Vector2( 7.5, 9 ),
-    //     new Vector2( 9, 9 )
-    //   ),
-    //   new RasterEdge(
-    //     3,
-    //     false,
-    //     false,
-    //     new Vector2( 9, 9 ),
-    //     new Vector2( 9, 10 )
-    //   ),
-    //   new RasterEdge(
-    //     3,
-    //     false,
-    //     false,
-    //     new Vector2( 9, 10 ),
-    //     new Vector2( 7.5, 10 )
-    //   ),
-    //   new RasterEdge(
-    //     3,
-    //     false,
-    //     true,
-    //     new Vector2( 7.5, 10 ),
-    //     new Vector2( 7.5, 9 )
-    //   ),
-    //   new RasterEdge(
-    //     4,
-    //     true,
-    //     false,
-    //     new Vector2( 10, 9 ),
-    //     new Vector2( 11, 9 )
-    //   ),
-    //   new RasterEdge(
-    //     4,
-    //     false,
-    //     false,
-    //     new Vector2( 11, 9 ),
-    //     new Vector2( 10, 10 )
-    //   ),
-    //   new RasterEdge(
-    //     4,
-    //     false,
-    //     false,
-    //     new Vector2( 10, 10 ),
-    //     new Vector2( 10, 9 )
-    //   ),
-    //   new RasterEdge(
-    //     4,
-    //     false,
-    //     false,
-    //     new Vector2( 19, 9 ),
-    //     new Vector2( 20, 9 )
-    //   ),
-    //   new RasterEdge(
-    //     4,
-    //     false,
-    //     false,
-    //     new Vector2( 20, 9 ),
-    //     new Vector2( 19, 10 )
-    //   ),
-    //   new RasterEdge(
-    //     4,
-    //     false,
-    //     true,
-    //     new Vector2( 19, 10 ),
-    //     new Vector2( 19, 9 )
-    //   ),
-    //   new RasterEdge(
-    //     5,
-    //     true,
-    //     true,
-    //     new Vector2( 20, 4 ),
-    //     new Vector2( 19, 5 )
-    //   )
-    // ];
+    let rawInputChunks = ParallelRaster.getTestRawInputChunks();
+    let rawInputEdges = ParallelRaster.getTestRawInputEdges();
 
-    const rawInputEdges: RasterEdge[] = [];
-    const unprocessedEdges = TestToCanvas.getTestPath().toEdgedFace().edges;
-    unprocessedEdges.forEach( ( edge, i ) => {
-      rawInputEdges.push( new RasterEdge(
+    if ( USE_DEMO ) {
+      rawInputEdges = [];
+      const unprocessedEdges = TestToCanvas.getTestPath().toEdgedFace().edges;
+      unprocessedEdges.forEach( ( edge, i ) => {
+        rawInputEdges.push( new RasterEdge(
+          0,
+          i === 0,
+          i === unprocessedEdges.length - 1,
+          // NOTE: reversed here, due to our test path!!!
+          edge.endPoint.timesScalar( 0.35 ),
+          edge.startPoint.timesScalar( 0.35 )
+        ) );
+      } );
+      rawInputChunks = [ new RasterChunk(
         0,
-        i === 0,
-        i === unprocessedEdges.length - 1,
-        // NOTE: reversed here, due to our test path!!!
-        edge.endPoint.timesScalar( 0.35 ),
-        edge.startPoint.timesScalar( 0.35 )
-      ) );
-    } );
-    const rawInputChunks = [ new RasterChunk(
-      0,
-      false,
-      true,
-      0,
-      rawInputEdges.length,
-      0, 0, 256, 256,
-      0, 0, 0, 0
-    ) ];
+        false,
+        true,
+        0,
+        rawInputEdges.length,
+        0, 0, 256, 256,
+        0, 0, 0, 0
+      ) ];
+    }
 
     const numInputChunks = rawInputChunks.length;
     const numInputEdges = rawInputEdges.length;
@@ -306,6 +318,7 @@ export default class ParallelRaster {
     } );
 
     const color = new Vector4( 1, 0, 0, 1 );
+    LOG && console.log( `finishedChunks: ${finishedChunks.length}` );
     finishedChunks.forEach( chunk => {
       if ( chunk.isFullArea ) {
         raster.addClientFullRegion( color, chunk.minX, chunk.minY, chunk.maxX - chunk.minX, chunk.maxY - chunk.minY );
