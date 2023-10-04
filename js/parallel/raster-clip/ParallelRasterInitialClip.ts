@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterChunkReduceQuad, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRasterInitialClip {
@@ -23,7 +23,7 @@ export default class ParallelRasterInitialClip {
 
     // write
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
-    chunkReduces: ParallelStorageArray<RasterChunkReduceBlock>,
+    chunkReduces: ParallelStorageArray<RasterChunkReduceQuad>,
     debugFullChunkReduces: ParallelStorageArray<{ min: RasterChunkReduceData; max: RasterChunkReduceData }>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
@@ -279,7 +279,7 @@ export default class ParallelRasterInitialClip {
 
       await debugFullChunkReduces.set( context, context.globalId.x, { min: minReduce, max: maxReduce } );
 
-      // TODO: separate out code to work with RasterChunkReduceBlock?
+      // TODO: separate out code to work with RasterChunkReduceQuad?
       for ( let i = 0; i < logWorkgroupSize; i++ ) {
         await context.workgroupBarrier();
         const delta = 1 << i;
@@ -334,7 +334,7 @@ export default class ParallelRasterInitialClip {
         );
 
         // console.log( context.workgroupId.x, firstChunkIndex, context.workgroupValues.atomicMaxFirstChunkIndex, lastLocalEdgeIndexInWorkgroup );
-        await chunkReduces.set( context, context.workgroupId.x, new RasterChunkReduceBlock(
+        await chunkReduces.set( context, context.workgroupId.x, new RasterChunkReduceQuad(
           await context.workgroupValues.minReduces.get( context, context.workgroupValues.atomicMaxFirstChunkIndex ),
           await context.workgroupValues.maxReduces.get( context, context.workgroupValues.atomicMaxFirstChunkIndex ),
           await context.workgroupValues.minReduces.get( context, lastLocalEdgeIndexInWorkgroup ),
@@ -363,7 +363,7 @@ export default class ParallelRasterInitialClip {
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
 
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
-    chunkReduces: ParallelStorageArray<RasterChunkReduceBlock>,
+    chunkReduces: ParallelStorageArray<RasterChunkReduceQuad>,
     debugFullChunkReduces: ParallelStorageArray<{ min: RasterChunkReduceData; max: RasterChunkReduceData }>
   ): void {
     if ( assert ) {

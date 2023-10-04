@@ -6,21 +6,21 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunkReduceQuad, RasterChunkReduceData, RasterClippedChunk } from '../../imports.js';
 
 export default class ParallelRasterChunkReduce {
   public static async dispatch(
     workgroupSize: number,
 
     // read
-    inputChunkReduces: ParallelStorageArray<RasterChunkReduceBlock>,
+    inputChunkReduces: ParallelStorageArray<RasterChunkReduceQuad>,
     numReduces: number,
 
     // read-write
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
 
     // write
-    outputChunkReduces: ParallelStorageArray<RasterChunkReduceBlock>
+    outputChunkReduces: ParallelStorageArray<RasterChunkReduceQuad>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
 
@@ -130,7 +130,7 @@ export default class ParallelRasterChunkReduce {
           workgroupSize - 1
         );
 
-        await outputChunkReduces.set( context, context.workgroupId.x, new RasterChunkReduceBlock(
+        await outputChunkReduces.set( context, context.workgroupId.x, new RasterChunkReduceQuad(
           await context.workgroupValues.leftMinReduces.get( context, context.workgroupValues.atomicMaxFirstReduceIndex ),
           await context.workgroupValues.leftMaxReduces.get( context, context.workgroupValues.atomicMaxFirstReduceIndex ),
           await context.workgroupValues.rightMinReduces.get( context, lastLocalEdgeIndexInWorkgroup ),

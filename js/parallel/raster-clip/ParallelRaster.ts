@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceBlock, RasterChunkReduceData, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas } from '../../imports.js';
+import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceQuad, RasterChunkReduceData, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas } from '../../imports.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 
 // TODO: change back to 256 once we are done testing
@@ -365,7 +365,7 @@ export default class ParallelRaster {
     LOG && console.log( clippedChunks.data.slice( 0, numClippedChunks ).map( toIndexedString ).join( '\n' ) );
 
     const edgeClips = createStorage( numEdgeClips, RasterEdgeClip.INDETERMINATE );
-    const chunkReduces0 = createStorage( Math.ceil( numInputEdges / workgroupSize ), RasterChunkReduceBlock.INDETERMINATE );
+    const chunkReduces0 = createStorage( Math.ceil( numInputEdges / workgroupSize ), RasterChunkReduceQuad.INDETERMINATE );
     const debugFullChunkReduces = createStorage( numInputEdges, { min: RasterChunkReduceData.INDETERMINATE, max: RasterChunkReduceData.INDETERMINATE } );
 
     LOG && console.log( 'ParallelRasterInitialClip dispatch' );
@@ -394,7 +394,7 @@ export default class ParallelRaster {
       `${i.toString().replace( /./g, ' ' )} rightMax: ${n.rightMax.toString()}`
     ] ).join( '\n' ) );
 
-    const chunkReduces1 = createStorage( Math.ceil( numInputEdges / ( workgroupSize * workgroupSize ) ), RasterChunkReduceBlock.INDETERMINATE );
+    const chunkReduces1 = createStorage( Math.ceil( numInputEdges / ( workgroupSize * workgroupSize ) ), RasterChunkReduceQuad.INDETERMINATE );
 
     LOG && console.log( 'ParallelRasterChunkReduce dispatch' );
     await ParallelRasterChunkReduce.dispatch(
@@ -413,7 +413,7 @@ export default class ParallelRaster {
       `${i.toString().replace( /./g, ' ' )} rightMax: ${n.rightMax.toString()}`
     ] ).join( '\n' ) );
 
-    const chunkReduces2 = createStorage( Math.ceil( numInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ), RasterChunkReduceBlock.INDETERMINATE );
+    const chunkReduces2 = createStorage( Math.ceil( numInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ), RasterChunkReduceQuad.INDETERMINATE );
 
     LOG && console.log( 'ParallelRasterChunkReduce dispatch' );
     await ParallelRasterChunkReduce.dispatch(

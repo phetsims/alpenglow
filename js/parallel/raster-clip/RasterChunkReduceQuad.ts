@@ -8,7 +8,7 @@
 
 import { alpenglow, RasterChunkReduceData } from '../../imports.js';
 
-export default class RasterChunkReduceBlock {
+export default class RasterChunkReduceQuad {
   public constructor(
     public leftMin: RasterChunkReduceData,
     public leftMax: RasterChunkReduceData,
@@ -16,14 +16,14 @@ export default class RasterChunkReduceBlock {
     public rightMax: RasterChunkReduceData
   ) {}
 
-  public static readonly INDETERMINATE = new RasterChunkReduceBlock(
+  public static readonly INDETERMINATE = new RasterChunkReduceQuad(
     RasterChunkReduceData.INDETERMINATE,
     RasterChunkReduceData.INDETERMINATE,
     RasterChunkReduceData.INDETERMINATE,
     RasterChunkReduceData.INDETERMINATE
   );
 
-  public static readonly OUT_OF_RANGE = new RasterChunkReduceBlock(
+  public static readonly OUT_OF_RANGE = new RasterChunkReduceQuad(
     RasterChunkReduceData.OUT_OF_RANGE,
     RasterChunkReduceData.OUT_OF_RANGE,
     RasterChunkReduceData.OUT_OF_RANGE,
@@ -31,4 +31,4 @@ export default class RasterChunkReduceBlock {
   );
 }
 
-alpenglow.register( 'RasterChunkReduceBlock', RasterChunkReduceBlock );
+alpenglow.register( 'RasterChunkReduceQuad', RasterChunkReduceQuad );
