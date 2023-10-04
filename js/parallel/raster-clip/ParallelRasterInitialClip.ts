@@ -8,6 +8,8 @@
  * 3. During reduction, store associated data to the RasterClippedChunks (precisely when we have reduced all of the
  *    edges for a particular chunk)
  *
+ * NOTE: The reduction is also completed in ParallelRasterChunkReduce, so if changing this file, please check there too
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

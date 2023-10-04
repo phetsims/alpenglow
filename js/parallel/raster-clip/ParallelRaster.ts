@@ -9,7 +9,8 @@
 import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas } from '../../imports.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 
-const WORKGROUP_SIZE = 256;
+// TODO: move to 256 after testing (64 helps us test more cases here)
+const WORKGROUP_SIZE = 64;
 const LOG = false;
 
 export default class ParallelRaster {
