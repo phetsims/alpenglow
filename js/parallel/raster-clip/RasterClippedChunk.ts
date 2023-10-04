@@ -12,6 +12,7 @@ export default class RasterClippedChunk {
   public constructor(
     public readonly rasterProgramIndex: number,
     public readonly needsFace: boolean,
+    public readonly isConstant: boolean,
 
     // Filled in by early steps
     public readonly isReducible: boolean,
@@ -51,11 +52,11 @@ export default class RasterClippedChunk {
   }
 
   public static readonly INDETERMINATE = new RasterClippedChunk(
-    NaN, false, false, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
+    NaN, false, false, false, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
   );
 
   public static readonly DISCARDABLE = new RasterClippedChunk(
-    -1, false, false, false, false, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    -1, false, false, false, false, false, 0, 0, 0, 0, 0, 0, 0, 0, 0
   );
 }
 

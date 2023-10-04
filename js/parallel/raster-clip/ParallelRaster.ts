@@ -20,6 +20,7 @@ export default class ParallelRaster {
     //   new RasterChunk(
     //     0,
     //     false,
+    //     false,
     //     0,
     //     5,
     //     0, 0, 10, 10,
@@ -27,6 +28,7 @@ export default class ParallelRaster {
     //   ),
     //   new RasterChunk(
     //     1,
+    //     false,
     //     false,
     //     5,
     //     3,
@@ -36,6 +38,7 @@ export default class ParallelRaster {
     //   new RasterChunk(
     //     2,
     //     true,
+    //     false,
     //     8,
     //     1,
     //     9, 8, 10, 10,
@@ -44,6 +47,7 @@ export default class ParallelRaster {
     //   new RasterChunk(
     //     3,
     //     true,
+    //     false,
     //     9,
     //     4,
     //     7, 9, 9, 10,
@@ -52,6 +56,7 @@ export default class ParallelRaster {
     //   new RasterChunk(
     //     4,
     //     true,
+    //     false,
     //     13,
     //     6,
     //     10, 5, 20, 10,
@@ -60,6 +65,7 @@ export default class ParallelRaster {
     //   new RasterChunk(
     //     5,
     //     true,
+    //     false,
     //     19,
     //     1,
     //     19, 3, 20, 4,
@@ -67,6 +73,7 @@ export default class ParallelRaster {
     //   ),
     //   new RasterChunk(
     //     6,
+    //     false,
     //     false,
     //     20,
     //     0,
@@ -76,6 +83,7 @@ export default class ParallelRaster {
     //   new RasterChunk(
     //     7,
     //     false,
+    //     false,
     //     20,
     //     0,
     //     12, 6, 18, 10,
@@ -83,6 +91,7 @@ export default class ParallelRaster {
     //   ),
     //   new RasterChunk(
     //     8,
+    //     false,
     //     false,
     //     20,
     //     0,
@@ -249,6 +258,7 @@ export default class ParallelRaster {
     const rawInputChunks = [ new RasterChunk(
       0,
       false,
+      true,
       0,
       rawInputEdges.length,
       0, 0, 256, 256,

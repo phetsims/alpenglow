@@ -49,6 +49,7 @@ export default class ParallelRasterInitialChunk {
           minChunk = new RasterClippedChunk(
             chunk.rasterProgramIndex,
             chunk.needsFace,
+            chunk.isConstant,
 
             // Filled in and modified later (past this point)
             false,
@@ -72,6 +73,7 @@ export default class ParallelRasterInitialChunk {
           maxChunk = new RasterClippedChunk(
             chunk.rasterProgramIndex,
             chunk.needsFace,
+            chunk.isConstant,
 
             // Filled in and modified later (past this point)
             false,
@@ -103,6 +105,7 @@ export default class ParallelRasterInitialChunk {
             minChunk = new RasterClippedChunk(
               chunk.rasterProgramIndex,
               chunk.needsFace,
+              chunk.isConstant,
 
               false,
               true,

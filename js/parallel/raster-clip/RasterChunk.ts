@@ -12,6 +12,8 @@ export default class RasterChunk {
   public constructor(
     public readonly rasterProgramIndex: number,
     public readonly needsFace: boolean,
+    public readonly isConstant: boolean,
+
     public readonly edgesOffset: number,
     public readonly numEdges: number,
 
@@ -32,6 +34,7 @@ export default class RasterChunk {
     return new RasterChunk(
       this.rasterProgramIndex,
       this.needsFace,
+      this.isConstant,
       startIndex,
       endIndex - startIndex,
       this.minX, this.minY, this.maxX, this.maxY,
@@ -50,7 +53,7 @@ export default class RasterChunk {
   }
 
   public static readonly INDETERMINATE = new RasterChunk(
-    NaN, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
+    NaN, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
   );
 
   public static validate(
