@@ -1,7 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Updates the reducible/complete chunks with proper destination edge indices (so the chunk references the range of
+ * edges it is comprised of).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -12,8 +13,6 @@ export default class ParallelRasterChunkIndexPatch {
   public static async dispatch(
     workgroupSize: number,
 
-    // TODO: look into ways to reduce the number of inputs, we're hitting a lot of memory
-
     // read
     chunkIndexMap: ParallelStorageArray<number>,
     chunkIndices: ParallelStorageArray<number>,
@@ -21,32 +20,28 @@ export default class ParallelRasterChunkIndexPatch {
     numClippedChunks: number,
 
     // read-write
-    reducibleChunks: ParallelStorageArray<RasterChunk>, // mutated
-    completeChunks: ParallelStorageArray<RasterCompleteChunk> // mutated
+    reducibleChunks: ParallelStorageArray<RasterChunk>,
+    completeChunks: ParallelStorageArray<RasterCompleteChunk>
   ): Promise<void> {
     const kernel = new ParallelKernel( async context => {
       await context.start();
 
-      const chunkIndex = context.globalId.x;
-      const exists = chunkIndex < numClippedChunks;
+      const clippedChunkIndex = context.globalId.x;
+      const exists = clippedChunkIndex < numClippedChunks;
 
       if ( exists ) {
-        // TODO: clippedChunkIndex name
-        const clippedChunk = await clippedChunks.get( context, chunkIndex );
-        const isReducible = clippedChunk.isReducible;
-        const isComplete = clippedChunk.isComplete;
+        const clippedChunk = await clippedChunks.get( context, clippedChunkIndex );
+        const outputChunkIndex = await chunkIndexMap.get( context, clippedChunkIndex );
 
-        const outputChunkIndex = await chunkIndexMap.get( context, chunkIndex );
+        const startIndex = await chunkIndices.get( context, 2 * clippedChunkIndex );
+        const endIndex = await chunkIndices.get( context, 2 * clippedChunkIndex + 1 );
 
-        const startIndex = await chunkIndices.get( context, 2 * chunkIndex );
-        const endIndex = await chunkIndices.get( context, 2 * chunkIndex + 1 );
-
-        if ( isReducible ) {
+        if ( clippedChunk.isReducible ) {
           const chunk = await reducibleChunks.get( context, outputChunkIndex );
           await reducibleChunks.set( context, outputChunkIndex, chunk.withEdgeInfo( startIndex, endIndex ) );
         }
 
-        if ( isComplete ) {
+        if ( clippedChunk.isComplete ) {
           const chunk = await completeChunks.get( context, outputChunkIndex );
           await completeChunks.set( context, outputChunkIndex, chunk.withEdgeInfo(
             clippedChunk.needsFace ? startIndex : 0,

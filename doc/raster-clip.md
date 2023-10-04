@@ -54,7 +54,7 @@ flowchart TD
     EdgeScan --> completeEdges
     EdgeScan --> chunkIndices["chunkIndices<br>number[]<br>Stores edge start/end indices<br>f[2*clippedChunkIndex]=edgeStartIndex<br>f[2*clippedChunkIndex+1]=edgeEndIndex"]
 
-    chunkIndices & reducibleEdgeCount & reducibleEdges0 --> EdgeIndexPatch([EdgeIndexPatch]) --> reducibleEdges1
+    chunkIndexMap & chunkIndices & reducibleEdgeCount & reducibleEdges0 --> EdgeIndexPatch([EdgeIndexPatch]) --> reducibleEdges1
 
     clippedChunks3 --> InitialSplitReduce --> splitReduces0reduce
     splitReduces0reduce --> EdgeReduceX --> splitReduces0scan & splitReduces1reduce

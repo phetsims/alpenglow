@@ -1,7 +1,11 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Updates the edges with the correct chunk indices (clippedChunk => outputChunk) and first/last flags.
+ *
+ * NOTE: It was possible to attempt to set first/last flags earlier (when we wrote the edges), but it would require
+ * more traversal for edges that were fully clipped at the start/end (so they didn't contribute at all). We would
+ * instead have to find the first/last "non-degenerate" EdgeClip, so it's just easier to do it here.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -23,13 +27,11 @@ export default class ParallelRasterEdgeIndexPatch {
     const kernel = new ParallelKernel( async context => {
       await context.start();
 
-      // TODO: code share with edge scan?
       const edgeIndex = context.globalId.x;
       const exists = edgeIndex < numEdges;
 
       if ( exists ) {
         const edge = await edges.get( context, edgeIndex );
-        // TODO: use name clippedChunkIndex through more code
         const clippedChunkIndex = edge.chunkIndex;
 
         const outputChunkIndex = await chunkIndexMap.get( context, clippedChunkIndex );
