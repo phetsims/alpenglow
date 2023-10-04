@@ -3,6 +3,8 @@
 /**
  * Represents an edge from a RasterChunk
  *
+ * Used for the raster-clip input, and the output for reducible edges (that will be fed back in)
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

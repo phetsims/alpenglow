@@ -3,6 +3,8 @@
 /**
  * Contains path data within a bounds, for a particular RenderProgram
  *
+ * Used for the raster-clip input, and the output for reducible chunks (that will be fed back in)
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

@@ -3,6 +3,8 @@
 /**
  * Represents an edge from a RasterCompleteEdgeChunk
  *
+ * Output edge for the raster-clip algorithm
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

@@ -1,7 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Calculates the initial splits (reducible/complete counts) for each clipped chunk, and applies the first level of
+ * reduction.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

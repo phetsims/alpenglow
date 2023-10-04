@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Contains path data within a bounds, for a particular RenderProgram
+ * Output chunk for the raster-clip algorithm
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
