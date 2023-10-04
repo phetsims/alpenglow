@@ -2,8 +2,10 @@
 ```mermaid
 flowchart TD
     
-    classDef outputClass stroke:#a00
-    classDef inputClass stroke:#0a0
+    classDef default font-size:40px
+    
+    classDef outputClass stroke:#a00, font-size:40px
+    classDef inputClass stroke:#0a0, font-size:40px
     classDef hideClass fill:transparent, stroke:transparent
     
     inputChunks["inputChunks"]:::inputClass
