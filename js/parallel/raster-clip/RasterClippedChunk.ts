@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * A clipped part of a RasterChunk, which will get filled with data during reduction.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -20,13 +20,13 @@ export default class RasterClippedChunk {
     public readonly isFullArea: boolean,
     public readonly area: number,
 
-    // (Float?) bounds
+    // Floating point (typically integral or offset by 0.5) bounds.
     public readonly minX: number,
     public readonly minY: number,
     public readonly maxX: number,
     public readonly maxY: number,
 
-    // EdgedClipped counts
+    // EdgedClipped counts. See EdgedClippedFace for details.
     public readonly minXCount: number,
     public readonly minYCount: number,
     public readonly maxXCount: number,

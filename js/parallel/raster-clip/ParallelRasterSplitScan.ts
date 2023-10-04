@@ -84,7 +84,7 @@ export default class ParallelRasterSplitScan {
         let baseIndex = 0; // filled in later
 
         if ( clippedChunk.isReducible ) {
-          // Convert to exclusive prefix sum TODO better way
+          // Convert to exclusive prefix sum
           baseIndex = baseReducible + value.numReducible - initialValue.numReducible;
 
           await chunkIndexMap.set( context, chunkIndex, baseIndex );
@@ -101,7 +101,7 @@ export default class ParallelRasterSplitScan {
         }
 
         if ( clippedChunk.isComplete ) {
-          // Convert to exclusive prefix sum TODO better way
+          // Convert to exclusive prefix sum
           baseIndex = baseComplete + value.numComplete - initialValue.numComplete;
 
           await chunkIndexMap.set( context, chunkIndex, baseIndex );

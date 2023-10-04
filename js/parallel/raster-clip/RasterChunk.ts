@@ -19,13 +19,13 @@ export default class RasterChunk {
     public readonly edgesOffset: number,
     public readonly numEdges: number,
 
-    // (Float?) bounds
+    // Floating point (typically integral or offset by 0.5) bounds.
     public readonly minX: number,
     public readonly minY: number,
     public readonly maxX: number,
     public readonly maxY: number,
 
-    // EdgedClipped counts
+    // EdgedClipped counts. See EdgedClippedFace for details.
     public readonly minXCount: number,
     public readonly minYCount: number,
     public readonly maxXCount: number,

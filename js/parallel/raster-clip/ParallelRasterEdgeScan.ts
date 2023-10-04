@@ -117,7 +117,7 @@ export default class ParallelRasterEdgeScan {
         let baseIndex = 0; // filled in later
 
         if ( hasReducibleVertices ) {
-          // Convert to exclusive prefix sum TODO better way
+          // Convert to exclusive prefix sum
           baseIndex = baseReducible + value.numReducible - initialValue.numReducible;
 
           if ( index > 0 ) {
@@ -144,7 +144,7 @@ export default class ParallelRasterEdgeScan {
         }
 
         if ( hasCompleteVertices ) {
-          // Convert to exclusive prefix sum TODO better way
+          // Convert to exclusive prefix sum
           baseIndex = baseComplete + value.numComplete - initialValue.numComplete;
 
           if ( index > 0 ) {
