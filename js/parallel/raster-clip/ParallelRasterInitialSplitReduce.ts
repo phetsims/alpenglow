@@ -34,10 +34,7 @@ export default class ParallelRasterInitialSplitReduce {
 
       const clippedChunk = await clippedChunks.get( context, chunkIndex );
 
-      let value = new RasterSplitReduceData(
-        exists && clippedChunk.isReducible ? 1 : 0,
-        exists && clippedChunk.isComplete ? 1 : 0
-      );
+      let value = exists ? clippedChunk.getSplitReduceData() : RasterSplitReduceData.IDENTITY;
 
       await context.workgroupValues.reduces.set( context, context.localId.x, value );
 

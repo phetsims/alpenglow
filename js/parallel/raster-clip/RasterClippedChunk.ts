@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../../imports.js';
+import { alpenglow, RasterSplitReduceData } from '../../imports.js';
 
 export default class RasterClippedChunk {
   public constructor(
@@ -32,6 +32,13 @@ export default class RasterClippedChunk {
     public readonly maxXCount: number,
     public readonly maxYCount: number
   ) {}
+
+  public getSplitReduceData(): RasterSplitReduceData {
+    return new RasterSplitReduceData(
+      this.isReducible ? 1 : 0,
+      this.isComplete ? 1 : 0
+    );
+  }
 
   public isExportingCompleteEdges(): boolean {
     return this.isComplete && !this.isFullArea && this.needsFace;
