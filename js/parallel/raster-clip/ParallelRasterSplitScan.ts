@@ -106,10 +106,9 @@ export default class ParallelRasterSplitScan {
           await chunkIndexMap.set( context, chunkIndex, baseIndex );
 
           if ( clippedChunk.needsCompleteOutputSplit() ) {
-            // TODO: note that count should be the same as... the area? (but we might have had edges?)
+            // NOTE that count should be the same as... the area?
             const count = clippedChunk.outputSplitCount();
             const width = clippedChunk.maxX - clippedChunk.minX;
-            // const height = clippedChunk.maxY - clippedChunk.minY;
 
             for ( let i = 0; i < count; i++ ) {
               const x = clippedChunk.minX + ( i % width );

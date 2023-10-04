@@ -1,7 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO doc
+ * (Partial) data for a single clipped chunk, which is reduced and then when complete (isFirstEdge && isLastEdge) is
+ * applied to the clipped chunk.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -13,20 +14,16 @@ export default class RasterChunkReduceData {
     public readonly clippedChunkIndex: number,
     public readonly area: number,
 
-    // TODO: check which ones of these aren't used
     public readonly isFirstEdge: boolean,
     public readonly isLastEdge: boolean,
 
-    // TODO: centroid?
-
-    // FLOAT(?) bounds
-    // TODO: test without this, see how differently we branch?
+    // Floating point (typically integral or offset by 0.5) bounds.
     public readonly minX: number,
     public readonly minY: number,
     public readonly maxX: number,
     public readonly maxY: number,
 
-    // EdgedClipped counts
+    // EdgedClipped counts. See EdgedClippedFace for details.
     public readonly minXCount: number,
     public readonly minYCount: number,
     public readonly maxXCount: number,
@@ -80,7 +77,7 @@ export default class RasterChunkReduceData {
     // ALSO: there is a doubling and non-doubling that cancel out here (1/2 from shoelace, 2* due to x+x).
     const countArea = ( clippedChunk.maxY - clippedChunk.minY ) * ( minXCount * clippedChunk.minX + maxXCount * clippedChunk.maxX );
 
-    // TODO: is this bounds restriction helpful? Correct?
+    // TODO: test with/without the bounds computation (potentially have conditional compilation)
     // NOTE: Our clipped edge counts will affect our bounds, so we have lots of conditionals here.
     // If they are NOT affected by the clipped edge counts, we can see if we can shrink the bounds.
     // We're anticipating potential fractional values here, so we difference with the floors.

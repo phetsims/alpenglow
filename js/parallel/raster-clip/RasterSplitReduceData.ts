@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * A pair of counts (reducible/complete).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

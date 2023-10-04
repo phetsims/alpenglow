@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Computes the reducible/complete edge counts for each EdgeClip, and applies the first level of reduction.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
