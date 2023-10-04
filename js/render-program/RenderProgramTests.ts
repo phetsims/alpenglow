@@ -18,7 +18,7 @@ QUnit.test( 'simplified alpha', assert => {
   const alpha1 = new RenderAlpha( color, 0.5 );
   const alpha2 = new RenderAlpha( alpha1, 0.8 );
 
-  assert.equal( alpha2.simplified(), null );
+  assert.ok( alpha2.simplified().isSimplified );
 
   const simplifiedProgram = alpha1.simplified();
   assert.equal( simplifiedProgram?.getName(), 'RenderColor' );
