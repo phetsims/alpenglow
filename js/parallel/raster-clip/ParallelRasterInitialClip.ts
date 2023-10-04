@@ -276,7 +276,6 @@ export default class ParallelRasterInitialClip {
       // (a) be the first combination with the joint "both" result, and (b) it's the simplest to filter for.
       // Note: -5 is different than the "out of range" RasterChunkReduceData value
       const appliableMinChunkIndex = exists && minReduce.isLastEdge && !minReduce.isFirstEdge ? minReduce.chunkIndex : -5;
-      const appliableMaxChunkIndex = exists && maxReduce.isLastEdge && !maxReduce.isFirstEdge ? maxReduce.chunkIndex : -5;
 
       await debugFullChunkReduces.set( context, context.globalId.x, { min: minReduce, max: maxReduce } );
 
@@ -287,22 +286,28 @@ export default class ParallelRasterInitialClip {
         if ( context.localId.x >= delta ) {
           // TODO: the two if statements are effectively evaluating the same thing (at least assert!)
           const otherMinReduce = await context.workgroupValues.minReduces.get( context, context.localId.x - delta );
+          const otherMaxReduce = await context.workgroupValues.maxReduces.get( context, context.localId.x - delta );
+
           minReduce = RasterChunkReduceData.combine( otherMinReduce, minReduce );
+          maxReduce = RasterChunkReduceData.combine( otherMaxReduce, maxReduce );
+
+          // NOTE: The similar "max" condition would be identical. It would be
+          // |     appliableMaxChunkIndex === otherMaxReduce.chunkIndex && maxReduce.isFirstEdge
+          // We effectively only need to check and store one of these, since the min/max indices will be essentially
+          // just offset by one
           if ( appliableMinChunkIndex === otherMinReduce.chunkIndex && minReduce.isFirstEdge ) {
             assert && assert( minReduce.chunkIndex === otherMinReduce.chunkIndex );
-            assert && assert( minReduce.isLastEdge );
-
-            const minClippedChunk = await clippedChunks.get( context, minReduce.chunkIndex );
-            await clippedChunks.set( context, minReduce.chunkIndex, minReduce.apply( minClippedChunk ) );
-          }
-
-          const otherMaxReduce = await context.workgroupValues.maxReduces.get( context, context.localId.x - delta );
-          maxReduce = RasterChunkReduceData.combine( otherMaxReduce, maxReduce );
-          if ( appliableMaxChunkIndex === otherMaxReduce.chunkIndex && maxReduce.isFirstEdge ) {
             assert && assert( maxReduce.chunkIndex === otherMaxReduce.chunkIndex );
+            assert && assert( minReduce.isLastEdge );
             assert && assert( maxReduce.isLastEdge );
 
+            // NOTE: We don't need a workgroup barrier here with the two, since (a) we're not executing this for the
+            // same indices ever, and (b) we only do it once.
+
+            const minClippedChunk = await clippedChunks.get( context, minReduce.chunkIndex );
             const maxClippedChunk = await clippedChunks.get( context, maxReduce.chunkIndex );
+
+            await clippedChunks.set( context, minReduce.chunkIndex, minReduce.apply( minClippedChunk ) );
             await clippedChunks.set( context, maxReduce.chunkIndex, maxReduce.apply( maxClippedChunk ) );
           }
         }
