@@ -202,16 +202,11 @@ export class RenderInstructionOpaqueJump extends RenderInstruction {
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
     const offset = getOffset( this.location );
     assert && assert( isFinite( offset ) && offset >= 0, 'Using unsigned for now' );
-    assert && assert( offset < 2 << 16, 'Would need an extreme jump to encode' );
 
-    if ( offset <= 255 ) {
-      encoder.pushU8( RenderInstruction.OpaqueShortJumpCode );
-      encoder.pushU8( offset );
-    }
-    else {
-      encoder.pushU8( RenderInstruction.OpaqueLongJumpCode );
-      encoder.pushU16( offset );
-    }
+    encoder.pushU32(
+      RenderInstruction.OpaqueJumpCode |
+      offset << 8
+    );
   }
 }
 
@@ -237,7 +232,7 @@ export class RenderInstructionStackBlend extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU8( RenderInstruction.StackBlendCode );
+    encoder.pushU32( RenderInstruction.StackBlendCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionStackBlend();

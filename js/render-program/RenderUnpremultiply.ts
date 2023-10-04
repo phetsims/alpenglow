@@ -60,7 +60,7 @@ export class RenderInstructionUnpremultiply extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU8( RenderInstruction.UnpremultiplyCode );
+    encoder.pushU32( RenderInstruction.UnpremultiplyCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionUnpremultiply();

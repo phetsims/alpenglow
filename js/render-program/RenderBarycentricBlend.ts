@@ -223,7 +223,7 @@ export class RenderInstructionBarycentricBlend extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU8( RenderInstruction.BarycentricBlendCode );
+    encoder.pushU32( RenderInstruction.BarycentricBlendCode | ( this.logic.accuracy << 8 ) );
     encoder.pushF32( this.logic.det );
     encoder.pushF32( this.logic.diffA.x );
     encoder.pushF32( this.logic.diffA.y );
@@ -231,7 +231,6 @@ export class RenderInstructionBarycentricBlend extends RenderInstruction {
     encoder.pushF32( this.logic.diffB.y );
     encoder.pushF32( this.logic.pointC.x );
     encoder.pushF32( this.logic.pointC.y );
-    encoder.pushU8( this.logic.accuracy );
   }
 }
 

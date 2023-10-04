@@ -59,7 +59,7 @@ export class RenderInstructionLinearSRGBToSRGB extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU8( RenderInstruction.LinearSRGBToSRGBCode );
+    encoder.pushU32( RenderInstruction.LinearSRGBToSRGBCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionLinearSRGBToSRGB();

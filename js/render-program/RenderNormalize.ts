@@ -105,7 +105,7 @@ export class RenderInstructionNormalize extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU8( RenderInstruction.NormalizeCode );
+    encoder.pushU32( RenderInstruction.NormalizeCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionNormalize();

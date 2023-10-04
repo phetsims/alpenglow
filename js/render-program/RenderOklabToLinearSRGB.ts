@@ -60,7 +60,7 @@ export class RenderInstructionOklabToLinearSRGB extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU8( RenderInstruction.OklabToLinearSRGBCode );
+    encoder.pushU32( RenderInstruction.OklabToLinearSRGBCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionOklabToLinearSRGB();

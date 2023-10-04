@@ -231,20 +231,25 @@ export class RenderInstructionComputeBlendRatio extends RenderInstruction {
     assert && assert( isFinite( blendOffset ) && blendOffset >= 0 && blendOffset < 2 << 16 );
 
     if ( this.logic instanceof RenderLinearBlendLogic ) {
-      encoder.pushU8( RenderInstruction.ComputeLinearBlendRatioCode );
-      encoder.pushU16( zeroOffset );
-      encoder.pushU16( oneOffset );
-      encoder.pushU16( blendOffset );
+      encoder.pushU32(
+        RenderInstruction.ComputeLinearBlendRatioCode |
+        ( this.logic.accuracy << 8 )
+      );
+      encoder.pushU32( zeroOffset );
+      encoder.pushU32( oneOffset );
+      encoder.pushU32( blendOffset );
       encoder.pushF32( this.logic.scaledNormal.x );
       encoder.pushF32( this.logic.scaledNormal.y );
       encoder.pushF32( this.logic.offset );
-      encoder.pushU8( this.logic.accuracy );
     }
     else {
-      encoder.pushU8( RenderInstruction.ComputeRadialBlendRatioCode );
-      encoder.pushU16( zeroOffset );
-      encoder.pushU16( oneOffset );
-      encoder.pushU16( blendOffset );
+      encoder.pushU32(
+        RenderInstruction.ComputeRadialBlendRatioCode |
+        ( this.logic.accuracy << 8 )
+      );
+      encoder.pushU32( zeroOffset );
+      encoder.pushU32( oneOffset );
+      encoder.pushU32( blendOffset );
       encoder.pushF32( this.logic.inverseTransform.m00() );
       encoder.pushF32( this.logic.inverseTransform.m01() );
       encoder.pushF32( this.logic.inverseTransform.m02() );
@@ -253,7 +258,6 @@ export class RenderInstructionComputeBlendRatio extends RenderInstruction {
       encoder.pushF32( this.logic.inverseTransform.m12() );
       encoder.pushF32( this.logic.radius0 );
       encoder.pushF32( this.logic.radius1 );
-      encoder.pushU8( this.logic.accuracy );
     }
   }
 }
@@ -289,7 +293,7 @@ export class RenderInstructionLinearBlend extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU8( RenderInstruction.LinearBlendCode );
+    encoder.pushU32( RenderInstruction.LinearBlendCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionLinearBlend();

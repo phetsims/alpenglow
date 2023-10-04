@@ -51,7 +51,7 @@ export class RenderInstructionPremultiply extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU8( RenderInstruction.PremultiplyCode );
+    encoder.pushU32( RenderInstruction.PremultiplyCode );
   }
 
   public static readonly INSTANCE = new RenderInstructionPremultiply();

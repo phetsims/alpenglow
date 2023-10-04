@@ -556,9 +556,9 @@ export class RenderInstructionBlendCompose extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU8( RenderInstruction.BlendComposeCode );
-    encoder.pushU8(
-      this.logic.composeType | ( this.logic.blendType << 3 )
+    encoder.pushU32(
+      RenderInstruction.BlendComposeCode |
+      ( this.logic.composeType << 8 ) | ( this.logic.blendType << 11 )
     );
   }
 }

@@ -57,7 +57,7 @@ export class RenderInstructionLinearSRGBToLinearDisplayP3 extends RenderInstruct
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU8( RenderInstruction.LinearSRGBToLinearDisplayP3Code );
+    encoder.pushU32( RenderInstruction.LinearSRGBToLinearDisplayP3Code );
   }
 
   public static readonly INSTANCE = new RenderInstructionLinearSRGBToLinearDisplayP3();

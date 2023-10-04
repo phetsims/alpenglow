@@ -108,13 +108,6 @@ export default class ByteEncoder {
     this._byteLength += 1;
   }
 
-  public pushU16( u8: U8 ): void {
-    this.ensureSpaceFor( 2 );
-    this._u8Array[ this._byteLength ] = u8 & 0xff;
-    this._u8Array[ this._byteLength + 1 ] = u8 >> 8;
-    this._byteLength += 2;
-  }
-
   public get byteLength(): number {
     return this._byteLength;
   }
