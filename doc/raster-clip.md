@@ -52,7 +52,7 @@ flowchart TD
     clippedChunks3 & edgeReduces0scan & edgeReduces1scan & edgeReduces2reduce & edgeClips --> EdgeScan([EdgeScan])
     EdgeScan --> reducibleEdges0
     EdgeScan --> completeEdges
-    EdgeScan --> chunkIndices["chunkIndices<br>number[]<br>Maps clippedChunk index<br>to output chunk index"]
+    EdgeScan --> chunkIndices["chunkIndices<br>number[]<br>Stores edge start/end indices<br>f[2*clippedChunkIndex]=edgeStartIndex<br>f[2*clippedChunkIndex+1]=edgeEndIndex"]
 
     chunkIndices & reducibleEdgeCount & reducibleEdges0 --> EdgeIndexPatch([EdgeIndexPatch]) --> reducibleEdges1
 
@@ -73,7 +73,7 @@ flowchart TD
             splitReduces1scan["splitReduces1 (scanned)<br>RasterSplitReduceData[]"]
         end
         
-        splitReduces2["splitReduces2<br>RasterSplitReduceData"]
+        splitReduces2["splitReduces2<br>RasterSplitReduceData[]"]
         
         EdgeReduceX([EdgeReduce])
         EdgeReduceY([EdgeReduce])
@@ -91,7 +91,7 @@ flowchart TD
     splitReduces2 & splitReduces1scan & splitReduces0scan & clippedChunks3 --> SplitScan([SplitScan])
     SplitScan --> reducibleChunks0
     SplitScan --> completeChunks0
-    SplitScan --> chunkIndexMap["chunkIndexMap<br>number[]<br>Stores edge start/end indices"]
+    SplitScan --> chunkIndexMap["chunkIndexMap<br>number[]<br>f[clippedChunkIndex]=outputChunkIndex"]
 
     reducibleChunks0 & completeChunks0 & chunkIndexMap & chunkIndices & clippedChunks3 --> ChunkIndexPatch([ChunkIndexPatch])
     ChunkIndexPatch --> reducibleChunks1:::outputClass & completeChunks1:::outputClass
