@@ -50,7 +50,6 @@ export default class ParallelRasterInitialClip {
 
       // We want to map [offset, offset + num] edgeIndices to [2*offset, 2*offset + num] (min) and [2*offset + num, 2*offset + 2*num] (max)
       // So we add `offset` to min, and `offset + num` to max
-
       const minEdgeIndex = chunk.edgesOffset + edgeIndex;
       const maxEdgeIndex = chunk.edgesOffset + chunk.numEdges + edgeIndex;
       const minChunkIndex = 2 * edge.chunkIndex;
@@ -67,19 +66,16 @@ export default class ParallelRasterInitialClip {
       // if isXSplit, then x is primary, y is secondary
       // if !isXSplit, then y is primary, x is secondary
 
-      // TODO: potentially a better way where we don't require so many things for area calculation? Store the count?
-      const minPoints = [
-        new Vector2( 0, 0 ),
-        new Vector2( 0, 0 ),
-        new Vector2( 0, 0 ),
-        new Vector2( 0, 0 )
-      ];
-      const maxPoints = [
-        new Vector2( 0, 0 ),
-        new Vector2( 0, 0 ),
-        new Vector2( 0, 0 ),
-        new Vector2( 0, 0 )
-      ];
+      const minPoint0 = new Vector2( 0, 0 );
+      const minPoint1 = new Vector2( 0, 0 );
+      const minPoint2 = new Vector2( 0, 0 );
+      const minPoint3 = new Vector2( 0, 0 );
+
+      const maxPoint0 = new Vector2( 0, 0 );
+      const maxPoint1 = new Vector2( 0, 0 );
+      const maxPoint2 = new Vector2( 0, 0 );
+      const maxPoint3 = new Vector2( 0, 0 );
+
       let minCount = 0;
       let maxCount = 0;
       let minSet = true;
@@ -98,10 +94,10 @@ export default class ParallelRasterInitialClip {
       if ( startPrimaryCmp === endPrimaryCmp ) {
         // both values less than the split
         if ( startPrimaryCmp === -1 ) {
-          minPoints[ 0 ].set( edge.startPoint );
-          minPoints[ 1 ].set( edge.endPoint );
-          minPoints[ 2 ].set( edge.endPoint );
-          minPoints[ 3 ].set( edge.endPoint );
+          minPoint0.set( edge.startPoint );
+          minPoint1.set( edge.endPoint );
+          minPoint2.set( edge.endPoint );
+          minPoint3.set( edge.endPoint );
           maxSet = false;
 
           if ( startSecondaryLess !== endSecondaryLess ) {
@@ -110,10 +106,10 @@ export default class ParallelRasterInitialClip {
         }
         // both values greater than the split
         else if ( startPrimaryCmp === 1 ) {
-          maxPoints[ 0 ].set( edge.startPoint );
-          maxPoints[ 1 ].set( edge.endPoint );
-          maxPoints[ 2 ].set( edge.endPoint );
-          maxPoints[ 3 ].set( edge.endPoint );
+          maxPoint0.set( edge.startPoint );
+          maxPoint1.set( edge.endPoint );
+          maxPoint2.set( edge.endPoint );
+          maxPoint3.set( edge.endPoint );
           minSet = false;
 
           if ( startSecondaryLess !== endSecondaryLess ) {
@@ -123,15 +119,15 @@ export default class ParallelRasterInitialClip {
         // both values equal to the split
         else if ( startPrimaryCmp === 0 ) {
           // vertical/horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
-          minPoints[ 0 ].set( edge.startPoint );
-          minPoints[ 1 ].set( edge.endPoint );
-          minPoints[ 2 ].set( edge.endPoint );
-          minPoints[ 3 ].set( edge.endPoint );
+          minPoint0.set( edge.startPoint );
+          minPoint1.set( edge.endPoint );
+          minPoint2.set( edge.endPoint );
+          minPoint3.set( edge.endPoint );
 
-          maxPoints[ 0 ].set( edge.startPoint );
-          maxPoints[ 1 ].set( edge.endPoint );
-          maxPoints[ 2 ].set( edge.endPoint );
-          maxPoints[ 3 ].set( edge.endPoint );
+          maxPoint0.set( edge.startPoint );
+          maxPoint1.set( edge.endPoint );
+          maxPoint2.set( edge.endPoint );
+          maxPoint3.set( edge.endPoint );
         }
       }
       else {
@@ -156,38 +152,38 @@ export default class ParallelRasterInitialClip {
         const startCornerSecondary = startSecondaryLess ? minSecondary : maxSecondary;
         const endCornerSecondary = endSecondaryLess ? minSecondary : maxSecondary;
 
-        minPoints[ 0 ] = startGreater ? (
+        minPoint0.set( startGreater ? (
           isXSplit ? new Vector2( split, startCornerSecondary ) : new Vector2( startCornerSecondary, split )
-        ) : minResultStartPoint;
-        minPoints[ 1 ] = minResultStartPoint;
-        minPoints[ 2 ] = minResultEndPoint;
-        minPoints[ 3 ] = endGreater ? (
+        ) : minResultStartPoint );
+        minPoint1.set( minResultStartPoint );
+        minPoint2.set( minResultEndPoint );
+        minPoint3.set( endGreater ? (
           isXSplit ? new Vector2( split, endCornerSecondary ) : new Vector2( endCornerSecondary, split )
-        ) : minResultEndPoint;
+        ) : minResultEndPoint );
 
-        maxPoints[ 0 ] = startLess ? (
+        maxPoint0.set( startLess ? (
           isXSplit ? new Vector2( split, startCornerSecondary ) : new Vector2( startCornerSecondary, split )
-        ) : maxResultStartPoint;
-        maxPoints[ 1 ] = maxResultStartPoint;
-        maxPoints[ 2 ] = maxResultEndPoint;
-        maxPoints[ 3 ] = endLess ? (
+        ) : maxResultStartPoint );
+        maxPoint1.set( maxResultStartPoint );
+        maxPoint2.set( maxResultEndPoint );
+        maxPoint3.set( endLess ? (
           isXSplit ? new Vector2( split, endCornerSecondary ) : new Vector2( endCornerSecondary, split )
-        ) : maxResultEndPoint;
+        ) : maxResultEndPoint );
       }
 
       const veryPositiveNumber = 1e10;
       const veryNegativeNumber = -1e10;
 
-      const minClip = new RasterEdgeClip( minChunkIndex, minPoints[ 0 ], minPoints[ 1 ], minPoints[ 2 ], minPoints[ 3 ], edge.isFirstEdge, edge.isLastEdge );
-      const maxClip = new RasterEdgeClip( maxChunkIndex, maxPoints[ 0 ], maxPoints[ 1 ], maxPoints[ 2 ], maxPoints[ 3 ], edge.isFirstEdge, edge.isLastEdge );
+      const minClip = new RasterEdgeClip( minChunkIndex, minPoint0, minPoint1, minPoint2, minPoint3, edge.isFirstEdge, edge.isLastEdge );
+      const maxClip = new RasterEdgeClip( maxChunkIndex, maxPoint0, maxPoint1, maxPoint2, maxPoint3, edge.isFirstEdge, edge.isLastEdge );
 
       const minArea = minClip.getArea();
       const maxArea = maxClip.getArea();
 
-      let minBoundsMinX = minSet ? Math.min( minPoints[ 0 ].x, minPoints[ 1 ].x, minPoints[ 2 ].x, minPoints[ 3 ].x ) : veryPositiveNumber;
-      let minBoundsMinY = minSet ? Math.min( minPoints[ 0 ].y, minPoints[ 1 ].y, minPoints[ 2 ].y, minPoints[ 3 ].y ) : veryPositiveNumber;
-      let minBoundsMaxX = minSet ? Math.max( minPoints[ 0 ].x, minPoints[ 1 ].x, minPoints[ 2 ].x, minPoints[ 3 ].x ) : veryNegativeNumber;
-      let minBoundsMaxY = minSet ? Math.max( minPoints[ 0 ].y, minPoints[ 1 ].y, minPoints[ 2 ].y, minPoints[ 3 ].y ) : veryNegativeNumber;
+      let minBoundsMinX = minSet ? Math.min( minPoint0.x, minPoint1.x, minPoint2.x, minPoint3.x ) : veryPositiveNumber;
+      let minBoundsMinY = minSet ? Math.min( minPoint0.y, minPoint1.y, minPoint2.y, minPoint3.y ) : veryPositiveNumber;
+      let minBoundsMaxX = minSet ? Math.max( minPoint0.x, minPoint1.x, minPoint2.x, minPoint3.x ) : veryNegativeNumber;
+      let minBoundsMaxY = minSet ? Math.max( minPoint0.y, minPoint1.y, minPoint2.y, minPoint3.y ) : veryNegativeNumber;
 
       if ( minCount !== 0 ) {
         if ( isXSplit ) {
@@ -202,10 +198,10 @@ export default class ParallelRasterInitialClip {
         }
       }
 
-      let maxBoundsMinX = maxSet ? Math.min( maxPoints[ 0 ].x, maxPoints[ 1 ].x, maxPoints[ 2 ].x, maxPoints[ 3 ].x ) : veryPositiveNumber;
-      let maxBoundsMinY = maxSet ? Math.min( maxPoints[ 0 ].y, maxPoints[ 1 ].y, maxPoints[ 2 ].y, maxPoints[ 3 ].y ) : veryPositiveNumber;
-      let maxBoundsMaxX = maxSet ? Math.max( maxPoints[ 0 ].x, maxPoints[ 1 ].x, maxPoints[ 2 ].x, maxPoints[ 3 ].x ) : veryNegativeNumber;
-      let maxBoundsMaxY = maxSet ? Math.max( maxPoints[ 0 ].y, maxPoints[ 1 ].y, maxPoints[ 2 ].y, maxPoints[ 3 ].y ) : veryNegativeNumber;
+      let maxBoundsMinX = maxSet ? Math.min( maxPoint0.x, maxPoint1.x, maxPoint2.x, maxPoint3.x ) : veryPositiveNumber;
+      let maxBoundsMinY = maxSet ? Math.min( maxPoint0.y, maxPoint1.y, maxPoint2.y, maxPoint3.y ) : veryPositiveNumber;
+      let maxBoundsMaxX = maxSet ? Math.max( maxPoint0.x, maxPoint1.x, maxPoint2.x, maxPoint3.x ) : veryNegativeNumber;
+      let maxBoundsMaxY = maxSet ? Math.max( maxPoint0.y, maxPoint1.y, maxPoint2.y, maxPoint3.y ) : veryNegativeNumber;
 
       if ( maxCount !== 0 ) {
         if ( isXSplit ) {
@@ -269,7 +265,6 @@ export default class ParallelRasterInitialClip {
 
       await context.workgroupValues.reduces.set( context, context.localId.x, value );
 
-      // TODO: we really have duplicated chunk indices (they should be the same), factor these out
       // We need to not double-apply. So we'll only apply when merging into this specific index, since it will
       // (a) be the first combination with the joint "both" result, and (b) it's the simplest to filter for.
       // Note: -5 is different than the "out of range" RasterChunkReduceData value
@@ -277,12 +272,10 @@ export default class ParallelRasterInitialClip {
 
       await debugFullChunkReduces.set( context, context.globalId.x, value );
 
-      // TODO: separate out code to work with RasterChunkReduceQuad?
       for ( let i = 0; i < logWorkgroupSize; i++ ) {
         await context.workgroupBarrier();
         const delta = 1 << i;
         if ( context.localId.x >= delta ) {
-          // TODO: the two if statements are effectively evaluating the same thing (at least assert!)
           const otherValue = await context.workgroupValues.reduces.get( context, context.localId.x - delta );
 
           value = RasterChunkReducePair.combine( otherValue, value );
