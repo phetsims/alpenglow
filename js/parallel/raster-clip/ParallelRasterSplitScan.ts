@@ -1,7 +1,10 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Distributes the relevant data from the clipped chunks to the reducible and complete chunks, and generates the
+ * chunkIndexMap.
+ *
+ * NOTE: Has similar code to ParallelRasterEdgeScan
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -34,11 +37,9 @@ export default class ParallelRasterSplitScan {
     const kernel = new ParallelKernel<WorkgroupValues>( async context => {
       await context.start();
 
-      // TODO: code share with edge scan?
       const chunkIndex = context.globalId.x;
       const exists = chunkIndex < numClippedChunks;
 
-      // TODO: better way to scan? Does this lead to inefficient memory?
       if ( context.localId.x === 0 ) {
         const indices = ParallelUtils.getInclusiveToExclusiveScanIndices( chunkIndex, workgroupSize );
 

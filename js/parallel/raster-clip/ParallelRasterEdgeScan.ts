@@ -1,7 +1,10 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Distributes the relevant data from the RasterEdgeClips into the reducible (RasterEdge) and complete
+ * (RasterCompleteEdge) locations, and generates the needed chunkIndices array as a byproduct.
+ *
+ * NOTE: Has similar code to ParallelRasterSplitScan
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
