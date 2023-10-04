@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReduceQuad, RasterChunkReduceData, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas } from '../../imports.js';
+import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas } from '../../imports.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 
 // TODO: change back to 256 once we are done testing
@@ -366,7 +366,7 @@ export default class ParallelRaster {
 
     const edgeClips = createStorage( numEdgeClips, RasterEdgeClip.INDETERMINATE );
     const chunkReduces0 = createStorage( Math.ceil( numInputEdges / workgroupSize ), RasterChunkReduceQuad.INDETERMINATE );
-    const debugFullChunkReduces = createStorage( numInputEdges, { min: RasterChunkReduceData.INDETERMINATE, max: RasterChunkReduceData.INDETERMINATE } );
+    const debugFullChunkReduces = createStorage( numInputEdges, RasterChunkReducePair.INDETERMINATE );
 
     LOG && console.log( 'ParallelRasterInitialClip dispatch' );
     await ParallelRasterInitialClip.dispatch(

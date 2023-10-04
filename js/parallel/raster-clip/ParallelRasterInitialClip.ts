@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterChunkReduceQuad, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterChunkReduceQuad, RasterChunkReduceData, RasterClippedChunk, RasterEdge, RasterEdgeClip, RasterChunkReducePair } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class ParallelRasterInitialClip {
@@ -24,13 +24,12 @@ export default class ParallelRasterInitialClip {
     // write
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
     chunkReduces: ParallelStorageArray<RasterChunkReduceQuad>,
-    debugFullChunkReduces: ParallelStorageArray<{ min: RasterChunkReduceData; max: RasterChunkReduceData }>
+    debugFullChunkReduces: ParallelStorageArray<RasterChunkReducePair>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
 
     type WorkgroupValues = {
-      minReduces: ParallelWorkgroupArray<RasterChunkReduceData>;
-      maxReduces: ParallelWorkgroupArray<RasterChunkReduceData>;
+      reduces: ParallelWorkgroupArray<RasterChunkReducePair>;
       firstChunkIndex: ParallelWorkgroupArray<number>; // NOT an array, just using that for atomics. one element, u32
       atomicMaxFirstChunkIndex: number;
     };
@@ -221,63 +220,62 @@ export default class ParallelRasterInitialClip {
         }
       }
 
-      let minReduce = isXSplit ? new RasterChunkReduceData(
-        minChunkIndex,
-        minArea,
-        edge.isFirstEdge, edge.isLastEdge,
-        minBoundsMinX, minBoundsMinY, minBoundsMaxX, minBoundsMaxY,
-        0, 0, minCount, 0
-      ) : new RasterChunkReduceData(
-        minChunkIndex,
-        minArea,
-        edge.isFirstEdge, edge.isLastEdge,
-        minBoundsMinX, minBoundsMinY, minBoundsMaxX, minBoundsMaxY,
-        0, 0, 0, minCount
-      );
-
-      let maxReduce = isXSplit ? new RasterChunkReduceData(
-        maxChunkIndex,
-        maxArea,
-        edge.isFirstEdge, edge.isLastEdge,
-        maxBoundsMinX, maxBoundsMinY, maxBoundsMaxX, maxBoundsMaxY,
-        maxCount, 0, 0, 0
-      ) : new RasterChunkReduceData(
-        maxChunkIndex,
-        maxArea,
-        edge.isFirstEdge, edge.isLastEdge,
-        maxBoundsMinX, maxBoundsMinY, maxBoundsMaxX, maxBoundsMaxY,
-        0, maxCount, 0, 0
-      );
+      let value: RasterChunkReducePair;
 
       if ( exists ) {
         await edgeClips.set( context, minEdgeIndex, minClip );
         await edgeClips.set( context, maxEdgeIndex, maxClip );
+
+        value = new RasterChunkReducePair(
+          isXSplit ? new RasterChunkReduceData(
+            minChunkIndex,
+            minArea,
+            edge.isFirstEdge, edge.isLastEdge,
+            minBoundsMinX, minBoundsMinY, minBoundsMaxX, minBoundsMaxY,
+            0, 0, minCount, 0
+          ) : new RasterChunkReduceData(
+            minChunkIndex,
+            minArea,
+            edge.isFirstEdge, edge.isLastEdge,
+            minBoundsMinX, minBoundsMinY, minBoundsMaxX, minBoundsMaxY,
+            0, 0, 0, minCount
+          ),
+          isXSplit ? new RasterChunkReduceData(
+            maxChunkIndex,
+            maxArea,
+            edge.isFirstEdge, edge.isLastEdge,
+            maxBoundsMinX, maxBoundsMinY, maxBoundsMaxX, maxBoundsMaxY,
+            maxCount, 0, 0, 0
+          ) : new RasterChunkReduceData(
+            maxChunkIndex,
+            maxArea,
+            edge.isFirstEdge, edge.isLastEdge,
+            maxBoundsMinX, maxBoundsMinY, maxBoundsMaxX, maxBoundsMaxY,
+            0, maxCount, 0, 0
+          )
+        );
+
+        // If our input is both first/last, we need to handle it before combinations
+        if ( value.isFirstEdge() && value.isLastEdge() ) {
+          const minClippedChunk = await clippedChunks.get( context, value.min.chunkIndex );
+          const maxClippedChunk = await clippedChunks.get( context, value.max.chunkIndex );
+          await clippedChunks.set( context, value.min.chunkIndex, value.min.apply( minClippedChunk ) );
+          await clippedChunks.set( context, value.max.chunkIndex, value.max.apply( maxClippedChunk ) );
+        }
       }
       else {
-        minReduce = RasterChunkReduceData.OUT_OF_RANGE;
-        maxReduce = RasterChunkReduceData.OUT_OF_RANGE;
+        value = RasterChunkReducePair.OUT_OF_RANGE;
       }
 
-      await context.workgroupValues.minReduces.set( context, context.localId.x, minReduce );
-      await context.workgroupValues.maxReduces.set( context, context.localId.x, maxReduce );
-
-      // If our input is both first/last, we need to handle it before combinations
-      if ( minReduce.isFirstEdge && minReduce.isLastEdge ) {
-        const minClippedChunk = await clippedChunks.get( context, minReduce.chunkIndex );
-        await clippedChunks.set( context, minReduce.chunkIndex, minReduce.apply( minClippedChunk ) );
-      }
-      if ( maxReduce.isFirstEdge && maxReduce.isLastEdge ) {
-        const maxClippedChunk = await clippedChunks.get( context, maxReduce.chunkIndex );
-        await clippedChunks.set( context, maxReduce.chunkIndex, maxReduce.apply( maxClippedChunk ) );
-      }
+      await context.workgroupValues.reduces.set( context, context.localId.x, value );
 
       // TODO: we really have duplicated chunk indices (they should be the same), factor these out
       // We need to not double-apply. So we'll only apply when merging into this specific index, since it will
       // (a) be the first combination with the joint "both" result, and (b) it's the simplest to filter for.
       // Note: -5 is different than the "out of range" RasterChunkReduceData value
-      const appliableMinChunkIndex = exists && minReduce.isLastEdge && !minReduce.isFirstEdge ? minReduce.chunkIndex : -5;
+      const appliableMinChunkIndex = exists && value.isLastEdge() && !value.isFirstEdge() ? value.min.chunkIndex : -5;
 
-      await debugFullChunkReduces.set( context, context.globalId.x, { min: minReduce, max: maxReduce } );
+      await debugFullChunkReduces.set( context, context.globalId.x, value );
 
       // TODO: separate out code to work with RasterChunkReduceQuad?
       for ( let i = 0; i < logWorkgroupSize; i++ ) {
@@ -285,36 +283,32 @@ export default class ParallelRasterInitialClip {
         const delta = 1 << i;
         if ( context.localId.x >= delta ) {
           // TODO: the two if statements are effectively evaluating the same thing (at least assert!)
-          const otherMinReduce = await context.workgroupValues.minReduces.get( context, context.localId.x - delta );
-          const otherMaxReduce = await context.workgroupValues.maxReduces.get( context, context.localId.x - delta );
+          const otherValue = await context.workgroupValues.reduces.get( context, context.localId.x - delta );
 
-          minReduce = RasterChunkReduceData.combine( otherMinReduce, minReduce );
-          maxReduce = RasterChunkReduceData.combine( otherMaxReduce, maxReduce );
+          value = RasterChunkReducePair.combine( otherValue, value );
 
           // NOTE: The similar "max" condition would be identical. It would be
           // |     appliableMaxChunkIndex === otherMaxReduce.chunkIndex && maxReduce.isFirstEdge
           // We effectively only need to check and store one of these, since the min/max indices will be essentially
           // just offset by one
-          if ( appliableMinChunkIndex === otherMinReduce.chunkIndex && minReduce.isFirstEdge ) {
-            assert && assert( minReduce.chunkIndex === otherMinReduce.chunkIndex );
-            assert && assert( maxReduce.chunkIndex === otherMaxReduce.chunkIndex );
-            assert && assert( minReduce.isLastEdge );
-            assert && assert( maxReduce.isLastEdge );
+          if ( appliableMinChunkIndex === otherValue.min.chunkIndex && value.isFirstEdge() ) {
+            assert && assert( value.min.chunkIndex === otherValue.min.chunkIndex );
+            assert && assert( value.max.chunkIndex === otherValue.max.chunkIndex );
+            assert && assert( value.isLastEdge() );
 
             // NOTE: We don't need a workgroup barrier here with the two, since (a) we're not executing this for the
             // same indices ever, and (b) we only do it once.
 
-            const minClippedChunk = await clippedChunks.get( context, minReduce.chunkIndex );
-            const maxClippedChunk = await clippedChunks.get( context, maxReduce.chunkIndex );
+            const minClippedChunk = await clippedChunks.get( context, value.min.chunkIndex );
+            const maxClippedChunk = await clippedChunks.get( context, value.max.chunkIndex );
 
-            await clippedChunks.set( context, minReduce.chunkIndex, minReduce.apply( minClippedChunk ) );
-            await clippedChunks.set( context, maxReduce.chunkIndex, maxReduce.apply( maxClippedChunk ) );
+            await clippedChunks.set( context, value.min.chunkIndex, value.min.apply( minClippedChunk ) );
+            await clippedChunks.set( context, value.max.chunkIndex, value.max.apply( maxClippedChunk ) );
           }
         }
 
         await context.workgroupBarrier();
-        await context.workgroupValues.minReduces.set( context, context.localId.x, minReduce );
-        await context.workgroupValues.maxReduces.set( context, context.localId.x, maxReduce );
+        await context.workgroupValues.reduces.set( context, context.localId.x, value );
       }
 
       const firstChunkIndex = await context.workgroupValues.firstChunkIndex.get( context, 0 );
@@ -333,17 +327,18 @@ export default class ParallelRasterInitialClip {
           workgroupSize - 1
         );
 
-        // console.log( context.workgroupId.x, firstChunkIndex, context.workgroupValues.atomicMaxFirstChunkIndex, lastLocalEdgeIndexInWorkgroup );
+        const leftValue = await context.workgroupValues.reduces.get( context, context.workgroupValues.atomicMaxFirstChunkIndex );
+        const rightValue = await context.workgroupValues.reduces.get( context, lastLocalEdgeIndexInWorkgroup );
+
         await chunkReduces.set( context, context.workgroupId.x, new RasterChunkReduceQuad(
-          await context.workgroupValues.minReduces.get( context, context.workgroupValues.atomicMaxFirstChunkIndex ),
-          await context.workgroupValues.maxReduces.get( context, context.workgroupValues.atomicMaxFirstChunkIndex ),
-          await context.workgroupValues.minReduces.get( context, lastLocalEdgeIndexInWorkgroup ),
-          await context.workgroupValues.maxReduces.get( context, lastLocalEdgeIndexInWorkgroup )
+          leftValue.min,
+          leftValue.max,
+          rightValue.min,
+          rightValue.max
         ) );
       }
     }, () => ( {
-      minReduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE ),
-      maxReduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterChunkReduceData.INDETERMINATE ), RasterChunkReduceData.INDETERMINATE ),
+      reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterChunkReducePair.INDETERMINATE ), RasterChunkReducePair.INDETERMINATE ),
       firstChunkIndex: new ParallelWorkgroupArray( [ 0 ], NaN ),
       atomicMaxFirstChunkIndex: 0
     } ), [ chunks, edges, clippedChunks, edgeClips, chunkReduces, debugFullChunkReduces ], workgroupSize );
