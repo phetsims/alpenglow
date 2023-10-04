@@ -218,6 +218,13 @@ export default class ParallelRasterInitialClip {
 
       let value: RasterChunkReducePair;
 
+      const applyValue = async () => {
+        const minClippedChunk = await clippedChunks.get( context, value.min.chunkIndex );
+        const maxClippedChunk = await clippedChunks.get( context, value.max.chunkIndex );
+        await clippedChunks.set( context, value.min.chunkIndex, value.min.apply( minClippedChunk ) );
+        await clippedChunks.set( context, value.max.chunkIndex, value.max.apply( maxClippedChunk ) );
+      };
+
       if ( exists ) {
         await edgeClips.set( context, minEdgeIndex, minClip );
         await edgeClips.set( context, maxEdgeIndex, maxClip );
@@ -253,10 +260,7 @@ export default class ParallelRasterInitialClip {
 
         // If our input is both first/last, we need to handle it before combinations
         if ( value.isFirstEdge() && value.isLastEdge() ) {
-          const minClippedChunk = await clippedChunks.get( context, value.min.chunkIndex );
-          const maxClippedChunk = await clippedChunks.get( context, value.max.chunkIndex );
-          await clippedChunks.set( context, value.min.chunkIndex, value.min.apply( minClippedChunk ) );
-          await clippedChunks.set( context, value.max.chunkIndex, value.max.apply( maxClippedChunk ) );
+          await applyValue();
         }
       }
       else {
@@ -291,12 +295,7 @@ export default class ParallelRasterInitialClip {
 
             // NOTE: We don't need a workgroup barrier here with the two, since (a) we're not executing this for the
             // same indices ever, and (b) we only do it once.
-
-            const minClippedChunk = await clippedChunks.get( context, value.min.chunkIndex );
-            const maxClippedChunk = await clippedChunks.get( context, value.max.chunkIndex );
-
-            await clippedChunks.set( context, value.min.chunkIndex, value.min.apply( minClippedChunk ) );
-            await clippedChunks.set( context, value.max.chunkIndex, value.max.apply( maxClippedChunk ) );
+            await applyValue();
           }
         }
 
