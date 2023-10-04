@@ -11,8 +11,8 @@ import Vector4 from '../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 
 export type CombinedRasterOptions = {
-  colorSpace: 'srgb' | 'display-p3';
-  showOutOfGamut: boolean;
+  colorSpace?: 'srgb' | 'display-p3';
+  showOutOfGamut?: boolean;
 };
 
 const DEFAULT_OPTIONS = {

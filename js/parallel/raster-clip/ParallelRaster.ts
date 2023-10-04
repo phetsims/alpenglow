@@ -311,10 +311,8 @@ export default class ParallelRaster {
       edges = result.reducibleEdges;
     }
 
-    // TODO: CombinedRaster defaults
     const raster = new CombinedRaster( 256, 256, {
-      colorSpace: 'display-p3',
-      showOutOfGamut: false
+      colorSpace: 'display-p3'
     } );
 
     const color = new Vector4( 1, 0, 0, 1 );
