@@ -1,8 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Distributes the relevant data from the clipped chunks to the reducible and complete chunks, and generates the
- * chunkIndexMap.
+ * Multiple stream compaction for chunks: distributes the relevant data from the clipped chunks to the reducible and
+ * complete chunks, and generates the chunkIndexMap.
  *
  * NOTE: Has similar code to ParallelRasterEdgeScan
  *

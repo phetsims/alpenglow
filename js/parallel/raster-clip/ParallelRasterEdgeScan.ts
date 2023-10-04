@@ -1,8 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Distributes the relevant data from the RasterEdgeClips into the reducible (RasterEdge) and complete
- * (RasterCompleteEdge) locations, and generates the needed chunkIndices array as a byproduct.
+ * Multiple stream compaction: distributes the relevant data from the RasterEdgeClips into the reducible (RasterEdge)
+ * and complete (RasterCompleteEdge) locations, and generates the needed chunkIndices array as a byproduct.
  *
  * NOTE: Has similar code to ParallelRasterSplitScan
  *
