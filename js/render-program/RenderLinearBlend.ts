@@ -226,9 +226,9 @@ export class RenderInstructionComputeBlendRatio extends RenderInstruction {
     const oneOffset = getOffset( this.oneLocation );
     const blendOffset = getOffset( this.blendLocation );
 
-    assert && assert( isFinite( zeroOffset ) && zeroOffset >= 0 && zeroOffset < 2 << 16 );
-    assert && assert( isFinite( oneOffset ) && oneOffset >= 0 && oneOffset < 2 << 16 );
-    assert && assert( isFinite( blendOffset ) && blendOffset >= 0 && blendOffset < 2 << 16 );
+    assert && assert( isFinite( zeroOffset ) && zeroOffset >= 0 );
+    assert && assert( isFinite( oneOffset ) && oneOffset >= 0 );
+    assert && assert( isFinite( blendOffset ) && blendOffset >= 0 );
 
     if ( this.logic instanceof RenderLinearBlendLogic ) {
       encoder.pushU32(
