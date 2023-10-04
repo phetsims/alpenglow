@@ -2,10 +2,10 @@
 ```mermaid
 flowchart TD
     
-    classDef default font-size:40px
+    classDef default font-size:16px
     
-    classDef outputClass stroke:#a00, font-size:40px
-    classDef inputClass stroke:#0a0, font-size:40px
+    classDef outputClass stroke:#a00, font-size:16px
+    classDef inputClass stroke:#0a0, font-size:16px
     classDef hideClass fill:transparent, stroke:transparent
     
     subgraph inputs [" "]
