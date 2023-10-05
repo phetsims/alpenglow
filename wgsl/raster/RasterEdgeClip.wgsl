@@ -31,11 +31,3 @@ fn RasterEdgeClip_getCount( edge_clip: ptr<function, RasterEdgeClip> ) -> u32 {
          select( 1u, 0u, (*edge_clip).p1x == (*edge_clip).p2x && (*edge_clip).p1y == (*edge_clip).p2y ) +
          select( 1u, 0u, (*edge_clip).p2x == (*edge_clip).p3x && (*edge_clip).p2y == (*edge_clip).p3y );
 }
-
-fn RasterEdgeClip_getArea( edge_clip: ptr<function, RasterEdgeClip> ) -> f32 {
-  return 0.5 * (
-    ( (*edge_clip).p1x + (*edge_clip).p0x ) * ( (*edge_clip).p1y - (*edge_clip).p0y ) +
-    ( (*edge_clip).p2x + (*edge_clip).p1x ) * ( (*edge_clip).p2y - (*edge_clip).p1y ) +
-    ( (*edge_clip).p3x + (*edge_clip).p2x ) * ( (*edge_clip).p3y - (*edge_clip).p2y )
-  );
-}

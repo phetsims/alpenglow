@@ -56,14 +56,6 @@ var<workgroup> max_first_chunk_index: atomic<u32>;
 
 #bindings
 
-fn applyValue( value: ptr<function,RasterChunkReducePair> ) -> void {
-  let minIndex = (*value).min.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask;
-  let maxIndex = (*value).max.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask;
-
-  apply_to_clipped_chunk( value, &clipped_chunks[ minIndex ] );
-  apply_to_clipped_chunk( value, &clipped_chunks[ maxIndex ] );
-}
-
 @compute @workgroup_size(${workgroupSize})
 fn main(
   @builtin(global_invocation_id) global_id: vec3u,
@@ -145,7 +137,7 @@ fn main(
 
   if ( startPrimaryCmp == endPrimaryCmp ) {
     // both values less than the split
-    if ( startPrimaryCmp == -1i ) {
+    if ( startPrimaryCmp == -1f ) {
       minPoint0 = startPoint;
       minPoint1 = endPoint;
       minPoint2 = endPoint;
@@ -158,7 +150,7 @@ fn main(
       }
     }
     // both values greater than the split
-    else if ( startPrimaryCmp == 1i ) {
+    else if ( startPrimaryCmp == 1f ) {
       maxPoint0 = startPoint;
       maxPoint1 = endPoint;
       maxPoint2 = endPoint;
@@ -170,7 +162,7 @@ fn main(
       }
     }
     // both values equal to the split
-    else if ( startPrimaryCmp == 0i ) {
+    else if ( startPrimaryCmp == 0f ) {
       // vertical/horizontal line ON our clip point. It is considered "inside" both, so we can just simply push it to both
       minPoint0 = startPoint;
       minPoint1 = endPoint;
@@ -196,10 +188,10 @@ fn main(
       isXSplit
     );
 
-    let startLess = startPrimaryCmp == -1i;
-    let startGreater = startPrimaryCmp == 1i;
-    let endLess = endPrimaryCmp == -1i;
-    let endGreater = endPrimaryCmp == 1i;
+    let startLess = startPrimaryCmp == -1f;
+    let startGreater = startPrimaryCmp == 1f;
+    let endLess = endPrimaryCmp == -1f;
+    let endGreater = endPrimaryCmp == 1f;
 
     let minResultStartPoint = select( intersection, startPoint, startLess );
     let minResultEndPoint = select( intersection, endPoint, endLess );
@@ -238,14 +230,14 @@ fn main(
     );
   }
 
-  let minClip = RasterEdgeClip(
+  var minClip = RasterEdgeClip(
     minClippedChunkIndex | edge_first_last,
     minPoint0.x, minPoint0.y,
     minPoint1.x, minPoint1.y,
     minPoint2.x, minPoint2.y,
     minPoint3.x, minPoint3.y
   );
-  let maxClip = RasterEdgeClip(
+  var maxClip = RasterEdgeClip(
     maxClippedChunkIndex | edge_first_last,
     maxPoint0.x, maxPoint0.y,
     maxPoint1.x, maxPoint1.y,
@@ -253,8 +245,17 @@ fn main(
     maxPoint3.x, maxPoint3.y
   );
 
-  let minArea = RasterEdgeClip_getArea( &minClip );
-  let maxArea = RasterEdgeClip_getArea( &maxClip );
+  // Inlined, because running into pointer issues
+  let minArea = 0.5 * (
+    ( minClip.p1x + minClip.p0x ) * ( minClip.p1y - minClip.p0y ) +
+    ( minClip.p2x + minClip.p1x ) * ( minClip.p2y - minClip.p1y ) +
+    ( minClip.p3x + minClip.p2x ) * ( minClip.p3y - minClip.p2y )
+  );
+  let maxArea = 0.5 * (
+    ( maxClip.p1x + maxClip.p0x ) * ( maxClip.p1y - maxClip.p0y ) +
+    ( maxClip.p2x + maxClip.p1x ) * ( maxClip.p2y - maxClip.p1y ) +
+    ( maxClip.p3x + maxClip.p2x ) * ( maxClip.p3y - maxClip.p2y )
+  );
 
   // minX, minY, maxX, maxY
   var minBounds = select(
@@ -342,7 +343,8 @@ fn main(
     // If our input is both first/last, we need to handle it before combinations
     // NOTE: min and max will both have the same first/last flags, so we only need to check one
     if ( ( value.min.bits & RasterChunkReduceData_bits_first_last_mask ) == RasterChunkReduceData_bits_first_last_mask ) {
-      applyValue( &value );
+      apply_to_clipped_chunk( value.min, value.min.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
+      apply_to_clipped_chunk( value.max, value.max.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
     }
   }
   else {
@@ -368,9 +370,9 @@ fn main(
 
     let delta = 1u << i;
     if ( local_id.x >= delta ) {
-      let otherValue = reduces[ local_id.x - delta ];
+      var otherValue = reduces[ local_id.x - delta ];
 
-      value = RasterChunkReduceData_combine( &otherValue, &value );
+      value = RasterChunkReducePair_combine( otherValue, value );
 
       // NOTE: The similar "max" condition would be identical. It would be
       // |     applicableMaxChunkIndex == otherMaxReduce.chunkIndex && maxReduce.isFirstEdge
@@ -383,7 +385,8 @@ fn main(
 
         // NOTE: We don't need a workgroup barrier here with the two, since (a) we're not executing this for the
         // same indices ever, and (b) we only do it once.
-        applyValue( &value );
+        apply_to_clipped_chunk( value.min, value.min.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
+        apply_to_clipped_chunk( value.max, value.max.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
       }
     }
 
@@ -405,7 +408,7 @@ fn main(
       ${u32( workgroupSize )} - 1u
     );
 
-    let leftValue = reduces[ max_first_chunk_index ];
+    let leftValue = reduces[ atomicLoad( &max_first_chunk_index ) ];
     let rightValue = reduces[ last_local_edge_index_in_workgroup ];
 
     chunk_reduces[ workgroup_id.x ] = RasterChunkReduceQuad(

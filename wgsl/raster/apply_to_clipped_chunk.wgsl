@@ -1,33 +1,25 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * We do the following:
- *
- * 1. Binary clip each RasterEdge into two RasterEdgeClips (one for each side of the split)
- * 2. Take these, do a segmented parallel reduction, and
- * 3. During reduction, store associated data to the RasterClippedChunks (precisely when we have reduced all of the
- *    edges for a particular chunk)
- *
- * NOTE: The reduction is also completed in ParallelRasterChunkReduce, so if changing this file, please check there too
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ./RasterChunk
-#import ./RasterEdge
 #import ./RasterClippedChunk
-#import ./RasterChunkReducePair
-#import ./RasterChunkReduceQuad
-#import ./RasterStageConfig
+#import ./RasterChunkReduceData
 
+// NOTE: requires clipped_chunks binding
 #bindings
 
-fn apply_to_clipped_chunk( value: ptr<function,RasterChunkReducePair>, clipped_chunk: ptr<storage,RasterClippedChunk> ) -> void {
+// TODO: can we do pointers?
+fn apply_to_clipped_chunk( value: RasterChunkReduceData, clipped_chunk_index: u32 ) {
 
-  let minXCount = (*clipped_chunk).minXCount + (*value).minXCount;
-  let minYCount = (*clipped_chunk).minYCount + (*value).minYCount;
-  let maxXCount = (*clipped_chunk).maxXCount + (*value).maxXCount;
-  let maxYCount = (*clipped_chunk).maxYCount + (*value).maxYCount;
+  // TODO: are the pointers here helpful, so we don't copy data?
+  let clipped_chunk = &clipped_chunks[ clipped_chunk_index ];
+
+  let minXCount = (*clipped_chunk).minXCount + value.minXCount;
+  let minYCount = (*clipped_chunk).minYCount + value.minYCount;
+  let maxXCount = (*clipped_chunk).maxXCount + value.maxXCount;
+  let maxYCount = (*clipped_chunk).maxYCount + value.maxYCount;
 
   let clippedMinX = (*clipped_chunk).minX;
   let clippedMinY = (*clipped_chunk).minY;
@@ -41,22 +33,22 @@ fn apply_to_clipped_chunk( value: ptr<function,RasterChunkReducePair>, clipped_c
   // (fractional can happen with offsets from various filters).
   let minX = select(
     clippedMinX,
-    clippedMinX + floor( (*value).minX - clippedMinX ),
+    clippedMinX + floor( value.minX - clippedMinX ),
     minXCount == 0i && minYCount == 0i && maxYCount == 0i
   );
   let minY = select(
     clippedMinY,
-    clippedMinY + floor( (*value).minY - clippedMinY ),
+    clippedMinY + floor( value.minY - clippedMinY ),
     minXCount == 0i && minYCount == 0i && maxXCount == 0i
   );
   let maxX = select(
     clippedMaxX,
-    clippedMaxX - floor( clippedMaxX - (*value).maxX ),
+    clippedMaxX - floor( clippedMaxX - value.maxX ),
     maxXCount == 0i && minYCount == 0i && maxYCount == 0i
   );
   let maxY = select(
     clippedMaxY,
-    clippedMaxY - floor( clippedMaxY - (*value).maxY ),
+    clippedMaxY - floor( clippedMaxY - value.maxY ),
     minXCount == 0i && maxXCount == 0i && maxYCount == 0i
   );
 
@@ -65,10 +57,10 @@ fn apply_to_clipped_chunk( value: ptr<function,RasterChunkReducePair>, clipped_c
   // Our minYCount/maxYCount won't contribute (since they have the same Y values, their shoelace contribution will be
   // zero.
   // ALSO: there is a doubling and non-doubling that cancel out here (1/2 from shoelace, 2* due to x+x).
-  let countArea = ( clippedMaxY - clippedMinY ) * ( minXCount * clippedMinX + maxXCount * clippedMaxX );
+  let countArea = ( clippedMaxY - clippedMinY ) * ( f32( minXCount ) * clippedMinX + f32( maxXCount ) * clippedMaxX );
 
   // Include both area from the clipped-edge counts AND from the actual edges themselves
-  let area = countArea + (*value).area;
+  let area = countArea + value.area;
 
   let width = maxX - minX;
   let height = maxY - minY;
@@ -79,7 +71,7 @@ fn apply_to_clipped_chunk( value: ptr<function,RasterChunkReducePair>, clipped_c
   let isFullArea = area >= width * height - 1.0e-4;
   let isComplete = isDiscarded || isFullArea || ( width <= 1.0 + 1.0e-5 && height <= 1 + 1.0e-5 );
 
-  *clipped_chunk = RasterClippedChunk(
+  clipped_chunks[ clipped_chunk_index ] = RasterClippedChunk(
     (*clipped_chunk).bits |
     select( 0u, RasterClippedChunk_bits_is_reducible_mask, !isComplete ) |
     select( 0u, RasterClippedChunk_bits_is_complete_mask, isComplete && !isDiscarded ) |
