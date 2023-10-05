@@ -397,6 +397,12 @@ export default class ParallelRaster {
     assert && assert( inputChunksEncoder.byteLength === RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
     device.queue.writeBuffer( inputChunksBuffer, 0, inputChunksEncoder.fullArrayBuffer );
 
+    const inputEdgesBuffer = deviceContext.createBuffer( RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
+    const inputEdgesEncoder = new ByteEncoder( RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
+    rawInputEdges.forEach( chunk => chunk.writeEncoding( inputEdgesEncoder ) );
+    assert && assert( inputEdgesEncoder.byteLength === RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
+    device.queue.writeBuffer( inputEdgesBuffer, 0, inputEdgesEncoder.fullArrayBuffer );
+
     const clippedChunksBuffer = deviceContext.createBuffer( RASTER_CLIPPED_CHUNK_BYTES * numClippedChunks );
     const debugClippedChunksBuffer = deviceContext.createMapReadableBuffer( RASTER_CLIPPED_CHUNK_BYTES * numClippedChunks );
 
@@ -440,8 +446,8 @@ export default class ParallelRaster {
     LOG && console.log( `numInputChunks: ${numInputChunks}` );
     LOG && console.log( RasterChunk.fromArrayBuffer( inputChunksEncoder.fullArrayBuffer ).map( toIndexedString ).join( '\n' ) );
 
-    // LOG && console.log( `numInputEdges: ${numInputEdges}` );
-    // LOG && console.log( inputEdges.data.slice( 0, numInputEdges ).map( toIndexedString ).join( '\n' ) );
+    LOG && console.log( `numInputEdges: ${numInputEdges}` );
+    LOG && console.log( RasterEdge.fromArrayBuffer( inputEdgesEncoder.fullArrayBuffer ).map( toIndexedString ).join( '\n' ) );
 
     const clippedChunksArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugClippedChunksBuffer );
 

@@ -139,6 +139,10 @@ export { default as wgsl_RasterChunk } from '../wgsl/raster/RasterChunk.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_RasterClippedChunk } from '../wgsl/raster/RasterClippedChunk.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_RasterEdge } from '../wgsl/raster/RasterEdge.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_RasterEdgeClip } from '../wgsl/raster/RasterEdgeClip.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_RasterStageConfig } from '../wgsl/raster/RasterStageConfig.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_raster_initial_chunk } from '../wgsl/raster/raster_initial_chunk.js';
