@@ -63,8 +63,8 @@ export default class RasterChunk {
     encoder.pushU32(
       ( this.rasterProgramIndex & 0x00ffffff ) | ( this.needsFace ? 0x40000000 : 0 ) | ( this.isConstant ? 0x80000000 : 0 )
     );
-    encoder.pushU32( this.numEdges );
     encoder.pushU32( this.edgesOffset );
+    encoder.pushU32( this.numEdges );
 
     encoder.pushF32( this.minX );
     encoder.pushF32( this.minY );
@@ -91,8 +91,8 @@ export default class RasterChunk {
       needsFace,
       isConstant,
 
-      uintBuffer[ 2 ],
       uintBuffer[ 1 ],
+      uintBuffer[ 2 ],
 
       floatBuffer[ 3 ],
       floatBuffer[ 4 ],

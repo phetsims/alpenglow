@@ -16,8 +16,8 @@ struct RasterChunk {
   // See constants above for what is stored here
   bits: u32,
 
-  numEdges: u32,
   edgesOffset: u32,
+  numEdges: u32,
 
    // Floating point (typically integral or offset by 0.5) bounds.
   minX: f32,
