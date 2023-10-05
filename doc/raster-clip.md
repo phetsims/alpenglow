@@ -37,9 +37,9 @@ flowchart TD
 
     edgeReduces1reduce --> SplitReduce2 --> edgeReduces1scan & edgeReduces2reduce
 
-    reduces0["reduces0<br>RasterChunkReduceQuad[]"]
-    reduces1["reduces1<br>RasterChunkReduceQuad[]"]
-    reduces2["reduces2<br>RasterChunkReduceQuad[]"]
+    reduces0["chunkReduces0<br>RasterChunkReduceQuad[]"]
+    reduces1["chunkReduces1<br>RasterChunkReduceQuad[]"]
+    reduces2["chunkReduces2<br>RasterChunkReduceQuad[]"]
 
     subgraph edgeCounts [" "]
         reducibleEdgeCount["reducibleEdgeCount<br>number"]:::outputClass
