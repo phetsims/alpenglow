@@ -9,11 +9,14 @@
  */
 
 const RasterEdge_bits_chunk_index_mask: u32 = 0x2fffffff;
-const RasterEdge_bits_is_first_edge_mask: u32 = 0x40000000;
+const RasterEdge_bits_is_first_edge_mask: u32 = 0x40000000; // NOTE: don't change from RasterChunkReduceData
 const RasterEdge_bits_is_last_edge_mask: u32 = 0x80000000;
+const RasterEdge_bits_first_last_mask: u32 = RasterEdge_bits_is_first_edge_mask | RasterEdge_bits_is_last_edge_mask;
 
 struct RasterEdge {
-  bits: u32,
+  bits: u32, // NOTE: should be same format as RasterEdgeClip
+
+  // TODO: consider vec2fs, see if the alignment change is worth it
   startX: f32,
   startY: f32,
   endX: f32,

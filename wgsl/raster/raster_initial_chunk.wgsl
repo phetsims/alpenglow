@@ -1,6 +1,10 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
+ * Creates the two RasterClippedChunk (min/max) for each RasterChunk.
+ *
+ * NOTE: These only fill in certain values, and leave a lot blank to be filled in by the upcoming reduce.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -23,7 +27,7 @@ var<storage, read_write> clipped_chunks: array<RasterClippedChunk>;
 fn main(
   @builtin(global_invocation_id) global_id: vec3u,
   @builtin(local_invocation_id) local_id: vec3u,
-  @builtin(workgroup_id) wg_id: vec3u
+  @builtin(workgroup_id) workgroup_id: vec3u
 ) {
   let chunk_index = global_id.x;
   if ( chunk_index < config.num_input_chunks ) {
