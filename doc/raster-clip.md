@@ -25,7 +25,7 @@ flowchart TD
     end
 
     inputChunks & inputEdges & clippedChunks0 --> InitialClip([InitialClip])
-    InitialClip --> clippedChunks1 & reduces0 & edgeClips
+    InitialClip --> clippedChunks1 & reduces0 & edgeClips["edgeClips<br>RasterEdgeClip[]"]
 
     clippedChunks1 & reduces0 --> ChunkReduce1([ChunkReduce]) --> reduces1 & clippedChunks2
     
