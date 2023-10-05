@@ -11,6 +11,11 @@ import Vector4 from '../../../../dot/js/Vector4.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 // TODO: move to 256 after testing (64 helps us test more cases here)
+// const WORKGROUP_SIZE = 64;
+// const LOG = false;
+// const USE_DEMO = true;
+// const ONLY_FIRST_ITERATION = false;
+
 const WORKGROUP_SIZE = 4;
 const LOG = true;
 const USE_DEMO = false;

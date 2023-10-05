@@ -97,7 +97,7 @@ fn main(
       if ( hasArea ) {
         // Output a simple "contains everything" chunk in the min section
         minChunk = RasterClippedChunk(
-          chunk.bits & RasterClippedChunk_bits_is_complete_mask & RasterClippedChunk_bits_is_full_area_mask,
+          chunk.bits | RasterClippedChunk_bits_is_complete_mask | RasterClippedChunk_bits_is_full_area_mask,
           xDiff * yDiff,
 
           chunk.minX, chunk.minY, chunk.maxX, chunk.maxY,
