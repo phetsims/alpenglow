@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RasterClippedChunk, RasterEdgeClip } from '../../imports.js';
+import { alpenglow, ByteEncoder, RasterClippedChunk, RasterEdgeClip } from '../../imports.js';
 
 export default class RasterSplitReduceData {
   public constructor(
@@ -19,6 +19,30 @@ export default class RasterSplitReduceData {
       return 'RasterSplitReduceData[INDETERMINATE]';
     }
     return `RasterSplitReduceData[reduce:${this.numReducible} complete:${this.numComplete}]`;
+  }
+
+  public static readonly ENCODING_BYTE_LENGTH = 4 * 2;
+
+  public writeEncoding( encoder: ByteEncoder ): void {
+    encoder.pushU32( this.numReducible );
+    encoder.pushU32( this.numComplete );
+  }
+
+  public static readEncoding( arrayBuffer: ArrayBuffer, byteOffset: number ): RasterSplitReduceData {
+    const uintBuffer = new Uint32Array( arrayBuffer, byteOffset, RasterSplitReduceData.ENCODING_BYTE_LENGTH / 4 );
+
+    return new RasterSplitReduceData(
+      uintBuffer[ 0 ],
+      uintBuffer[ 1 ]
+    );
+  }
+
+  public static fromArrayBuffer( arrayBuffer: ArrayBuffer ): RasterSplitReduceData[] {
+    assert && assert( arrayBuffer.byteLength % RasterSplitReduceData.ENCODING_BYTE_LENGTH === 0 );
+
+    return _.range( 0, arrayBuffer.byteLength / RasterSplitReduceData.ENCODING_BYTE_LENGTH ).map( i => {
+      return RasterSplitReduceData.readEncoding( arrayBuffer, i * RasterSplitReduceData.ENCODING_BYTE_LENGTH );
+    } );
   }
 
   public static combine( a: RasterSplitReduceData, b: RasterSplitReduceData ): RasterSplitReduceData {

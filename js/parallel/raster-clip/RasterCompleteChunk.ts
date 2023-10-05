@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelStorageArray, RasterCompleteEdge } from '../../imports.js';
+import { alpenglow, ByteEncoder, ParallelStorageArray, RasterCompleteEdge } from '../../imports.js';
 
 export default class RasterCompleteChunk {
   public constructor(
@@ -17,13 +17,13 @@ export default class RasterCompleteChunk {
     public readonly isFullArea: boolean,
     public readonly area: number,
 
-    // (Float?) bounds
+    // Floating point (typically integral or offset by 0.5) bounds.
     public readonly minX: number,
     public readonly minY: number,
     public readonly maxX: number,
     public readonly maxY: number,
 
-    // EdgedClipped counts
+    // EdgedClipped counts. See EdgedClippedFace for details.
     public readonly minXCount: number,
     public readonly minYCount: number,
     public readonly maxXCount: number,
@@ -54,6 +54,66 @@ export default class RasterCompleteChunk {
     const area = `area:${this.area}`;
     const isFullArea = this.isFullArea ? ' fullArea' : '';
     return `RasterCompleteChunk[prog:${this.rasterProgramIndex} ${counts} ${bounds} numEdges:${this.numEdges} edgesOffset:${this.edgesOffset} ${area}${isFullArea}]`;
+  }
+
+  public static readonly ENCODING_BYTE_LENGTH = 4 * 12;
+
+  public writeEncoding( encoder: ByteEncoder ): void {
+    assert && assert( this.rasterProgramIndex >= 0 && this.rasterProgramIndex <= 0x00ffffff );
+
+    encoder.pushU32(
+      ( this.rasterProgramIndex & 0x00ffffff ) |
+      ( this.isFullArea ? 0x20000000 : 0 )
+    );
+    encoder.pushU32( this.edgesOffset );
+    encoder.pushU32( this.numEdges );
+    encoder.pushF32( this.area );
+
+    encoder.pushF32( this.minX );
+    encoder.pushF32( this.minY );
+    encoder.pushF32( this.maxX );
+    encoder.pushF32( this.maxY );
+
+    encoder.pushI32( this.minXCount );
+    encoder.pushI32( this.minYCount );
+    encoder.pushI32( this.maxXCount );
+    encoder.pushI32( this.maxYCount );
+  }
+
+  public static readEncoding( arrayBuffer: ArrayBuffer, byteOffset: number ): RasterCompleteChunk {
+    const uintBuffer = new Uint32Array( arrayBuffer, byteOffset, RasterCompleteChunk.ENCODING_BYTE_LENGTH / 4 );
+    const intBuffer = new Int32Array( arrayBuffer, byteOffset, RasterCompleteChunk.ENCODING_BYTE_LENGTH / 4 );
+    const floatBuffer = new Float32Array( arrayBuffer, byteOffset, RasterCompleteChunk.ENCODING_BYTE_LENGTH / 4 );
+
+    const rasterProgramIndex = uintBuffer[ 0 ] & 0x00ffffff;
+    const isFullArea = ( uintBuffer[ 0 ] & 0x20000000 ) !== 0;
+
+    return new RasterCompleteChunk(
+      rasterProgramIndex,
+
+      uintBuffer[ 1 ],
+      uintBuffer[ 2 ],
+      isFullArea,
+      floatBuffer[ 3 ],
+
+      floatBuffer[ 4 ],
+      floatBuffer[ 5 ],
+      floatBuffer[ 6 ],
+      floatBuffer[ 7 ],
+
+      intBuffer[ 8 ],
+      intBuffer[ 9 ],
+      intBuffer[ 10 ],
+      intBuffer[ 11 ]
+    );
+  }
+
+  public static fromArrayBuffer( arrayBuffer: ArrayBuffer ): RasterCompleteChunk[] {
+    assert && assert( arrayBuffer.byteLength % RasterCompleteChunk.ENCODING_BYTE_LENGTH === 0 );
+
+    return _.range( 0, arrayBuffer.byteLength / RasterCompleteChunk.ENCODING_BYTE_LENGTH ).map( i => {
+      return RasterCompleteChunk.readEncoding( arrayBuffer, i * RasterCompleteChunk.ENCODING_BYTE_LENGTH );
+    } );
   }
 
   public static readonly INDETERMINATE = new RasterCompleteChunk(

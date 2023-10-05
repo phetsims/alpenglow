@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RasterChunkReduceData } from '../../imports.js';
+import { alpenglow, ByteEncoder, RasterChunkReduceData } from '../../imports.js';
 
 export default class RasterChunkReducePair {
   public constructor(
@@ -34,6 +34,28 @@ export default class RasterChunkReducePair {
       RasterChunkReduceData.combine( a.min, b.min ),
       RasterChunkReduceData.combine( a.max, b.max )
     );
+  }
+
+  public static readonly ENCODING_BYTE_LENGTH = 2 * RasterChunkReduceData.ENCODING_BYTE_LENGTH;
+
+  public writeEncoding( encoder: ByteEncoder ): void {
+    this.min.writeEncoding( encoder );
+    this.max.writeEncoding( encoder );
+  }
+
+  public static readEncoding( arrayBuffer: ArrayBuffer, byteOffset: number ): RasterChunkReducePair {
+    return new RasterChunkReducePair(
+      RasterChunkReduceData.readEncoding( arrayBuffer, byteOffset ),
+      RasterChunkReduceData.readEncoding( arrayBuffer, byteOffset + RasterChunkReduceData.ENCODING_BYTE_LENGTH )
+    );
+  }
+
+  public static fromArrayBuffer( arrayBuffer: ArrayBuffer ): RasterChunkReducePair[] {
+    assert && assert( arrayBuffer.byteLength % RasterChunkReducePair.ENCODING_BYTE_LENGTH === 0 );
+
+    return _.range( 0, arrayBuffer.byteLength / RasterChunkReducePair.ENCODING_BYTE_LENGTH ).map( i => {
+      return RasterChunkReducePair.readEncoding( arrayBuffer, i * RasterChunkReducePair.ENCODING_BYTE_LENGTH );
+    } );
   }
 
   public static readonly INDETERMINATE = new RasterChunkReducePair(

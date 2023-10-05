@@ -14,8 +14,8 @@ const RasterEdge_bits_is_last_edge_mask: u32 = 0x80000000;
 
 struct RasterEdge {
   bits: u32,
-  start_x: f32,
-  start_y: f32,
-  end_x: f32,
-  end_y: f32
+  startX: f32,
+  startY: f32,
+  endX: f32,
+  endY: f32
 }

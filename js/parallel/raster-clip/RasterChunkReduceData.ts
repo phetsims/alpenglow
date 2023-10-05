@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RasterClippedChunk } from '../../imports.js';
+import { alpenglow, ByteEncoder, RasterClippedChunk } from '../../imports.js';
 
 export default class RasterChunkReduceData {
   public constructor(
@@ -46,6 +46,64 @@ export default class RasterChunkReduceData {
     const area = `area:${this.area}`;
     const bounds = `bounds:x[${this.minX},${this.maxX}],y[${this.minY},${this.maxY}]`;
     return `RasterChunkReduceData[clippedChunk:${this.clippedChunkIndex} ${counts} ${bounds} ${area}${firstLast}]`;
+  }
+
+  public static readonly ENCODING_BYTE_LENGTH = 4 * 10;
+
+  public writeEncoding( encoder: ByteEncoder ): void {
+    assert && assert( this.clippedChunkIndex >= 0 && this.clippedChunkIndex <= 0x2fffffff );
+
+    encoder.pushU32(
+      ( this.clippedChunkIndex & 0x2fffffff ) |
+      ( this.isFirstEdge ? 0x40000000 : 0 ) |
+      ( this.isLastEdge ? 0x80000000 : 0 )
+    );
+    encoder.pushF32( this.area );
+
+    encoder.pushF32( this.minX );
+    encoder.pushF32( this.minY );
+    encoder.pushF32( this.maxX );
+    encoder.pushF32( this.maxY );
+
+    encoder.pushI32( this.minXCount );
+    encoder.pushI32( this.minYCount );
+    encoder.pushI32( this.maxXCount );
+    encoder.pushI32( this.maxYCount );
+  }
+
+  public static readEncoding( arrayBuffer: ArrayBuffer, byteOffset: number ): RasterChunkReduceData {
+    const uintBuffer = new Uint32Array( arrayBuffer, byteOffset, RasterChunkReduceData.ENCODING_BYTE_LENGTH / 4 );
+    const intBuffer = new Int32Array( arrayBuffer, byteOffset, RasterChunkReduceData.ENCODING_BYTE_LENGTH / 4 );
+    const floatBuffer = new Float32Array( arrayBuffer, byteOffset, RasterChunkReduceData.ENCODING_BYTE_LENGTH / 4 );
+
+    const clippedChunkIndex = uintBuffer[ 0 ] & 0x2fffffff;
+    const isFirstEdge = ( uintBuffer[ 0 ] & 0x40000000 ) !== 0;
+    const isLastEdge = ( uintBuffer[ 0 ] & 0x80000000 ) !== 0;
+
+    return new RasterChunkReduceData(
+      clippedChunkIndex,
+      floatBuffer[ 1 ],
+      isFirstEdge,
+      isLastEdge,
+
+      floatBuffer[ 2 ],
+      floatBuffer[ 3 ],
+      floatBuffer[ 4 ],
+      floatBuffer[ 5 ],
+
+      intBuffer[ 6 ],
+      intBuffer[ 7 ],
+      intBuffer[ 8 ],
+      intBuffer[ 9 ]
+    );
+  }
+
+  public static fromArrayBuffer( arrayBuffer: ArrayBuffer ): RasterChunkReduceData[] {
+    assert && assert( arrayBuffer.byteLength % RasterChunkReduceData.ENCODING_BYTE_LENGTH === 0 );
+
+    return _.range( 0, arrayBuffer.byteLength / RasterChunkReduceData.ENCODING_BYTE_LENGTH ).map( i => {
+      return RasterChunkReduceData.readEncoding( arrayBuffer, i * RasterChunkReduceData.ENCODING_BYTE_LENGTH );
+    } );
   }
 
   public equals( other: RasterChunkReduceData ): boolean {
