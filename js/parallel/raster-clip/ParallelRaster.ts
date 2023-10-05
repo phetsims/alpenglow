@@ -414,13 +414,16 @@ export default class ParallelRaster {
       }
     };
 
+    const DEBUG_REDUCE_BUFFERS = true;
+
     const initialChunksSnippet = DualSnippet.fromSource( wgsl_raster_initial_chunk, {
       workgroupSize: workgroupSize
     } );
     logSnippet( initialChunksSnippet, 'initial_chunks' );
 
     const initialClipSnippet = DualSnippet.fromSource( wgsl_raster_initial_clip, {
-      workgroupSize: workgroupSize
+      workgroupSize: workgroupSize,
+      debugReduceBuffers: DEBUG_REDUCE_BUFFERS
     } );
     logSnippet( initialClipSnippet, 'initial_clip' );
 
@@ -436,7 +439,8 @@ export default class ParallelRaster {
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      Binding.STORAGE_BUFFER,
+      ...( DEBUG_REDUCE_BUFFERS ? [ Binding.STORAGE_BUFFER ] : [] )
     ], device );
 
     const encoder = device.createCommandEncoder( {
@@ -462,17 +466,24 @@ export default class ParallelRaster {
     const chunkReduces0Buffer = deviceContext.createBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( numInputEdges / workgroupSize ) );
     const debugChunkReduces0ReducedBuffer = deviceContext.createMapReadableBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( numInputEdges / workgroupSize ) );
 
+    const debugChunkReduces0Buffer = deviceContext.createBuffer( RasterChunkReducePair.ENCODING_BYTE_LENGTH * numInputEdges );
+    const debugDebugChunkReduces0Buffer = deviceContext.createMapReadableBuffer( RasterChunkReducePair.ENCODING_BYTE_LENGTH * numInputEdges );
+
     initialClipShader.dispatchIndirect( encoder, [
       configBuffer,
       inputChunksBuffer,
       inputEdgesBuffer,
       clippedChunksBuffer,
       edgeClipsBuffer,
-      chunkReduces0Buffer
+      chunkReduces0Buffer,
+      ...( DEBUG_REDUCE_BUFFERS ? [ debugChunkReduces0Buffer ] : [] )
     ], configBuffer, 28 );
 
     encoder.copyBufferToBuffer( edgeClipsBuffer, 0, debugEdgeClipsBuffer, 0, debugEdgeClipsBuffer.size );
     encoder.copyBufferToBuffer( chunkReduces0Buffer, 0, debugChunkReduces0ReducedBuffer, 0, debugChunkReduces0ReducedBuffer.size );
+    if ( DEBUG_REDUCE_BUFFERS ) {
+      encoder.copyBufferToBuffer( debugChunkReduces0Buffer, 0, debugDebugChunkReduces0Buffer, 0, debugDebugChunkReduces0Buffer.size );
+    }
 
     const commandBuffer = encoder.finish();
     device.queue.submit( [ commandBuffer ] );
@@ -506,6 +517,16 @@ export default class ParallelRaster {
 
     LOG && console.log( 'edgeClips' );
     LOG && console.log( RasterEdgeClip.fromArrayBuffer( edgeClipsArrayBuffer ).map( toIndexedString ).join( '\n' ) );
+
+    if ( DEBUG_REDUCE_BUFFERS ) {
+      const debugDebugChunkReduces0ArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugDebugChunkReduces0Buffer );
+
+      LOG && console.log( 'debugFullChunkReduces' );
+      LOG && console.log( RasterChunkReducePair.fromArrayBuffer( debugDebugChunkReduces0ArrayBuffer ).flatMap( ( n, i ) => [
+        `${i} min: ${n.min.toString()}`,
+        `${i.toString().replace( /./g, ' ' )} max: ${n.max.toString()}`
+      ] ).join( '\n' ) );
+    }
 
     LOG && console.log( 'chunkReduces0' );
     LOG && console.log( RasterChunkReduceQuad.fromArrayBuffer( debugChunkReduces0ReducedArrayBuffer ).flatMap( ( n, i ) => [

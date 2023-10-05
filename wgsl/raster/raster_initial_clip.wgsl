@@ -23,6 +23,7 @@
 #import ./apply_to_clipped_chunk
 
 #option workgroupSize
+#option debugReduceBuffers
 
 const veryPositiveNumber = 1.0e10;
 const veryNegativeNumber = -1.0e10;
@@ -44,6 +45,10 @@ var<storage, read_write> clipped_chunks: array<RasterClippedChunk>; // mutated
 var<storage, read_write> edge_clips: array<RasterEdgeClip>; // written only
 @group(0) @binding(5)
 var<storage, read_write> chunk_reduces: array<RasterChunkReduceQuad>; // written only
+#ifdef debugReduceBuffers
+@group(0) @binding(6)
+var<storage, read_write> debug_reduces: array<RasterChunkReducePair>;
+#endif
 
 var<workgroup> reduces: array<RasterChunkReducePair,${workgroupSize}>;
 
@@ -259,11 +264,11 @@ fn main(
 
   // minX, minY, maxX, maxY
   var minBounds = select(
+    bounds_none,
     vec4(
       min( min( minPoint0, minPoint1 ), min( minPoint2, minPoint3 ) ),
       max( max( minPoint0, minPoint1 ), max( minPoint2, minPoint3 ) )
     ),
-    bounds_none,
     minSet
   );
 
@@ -288,11 +293,11 @@ fn main(
 
   // minX, minY, maxX, maxY
   var maxBounds = select(
+    bounds_none,
     vec4(
       min( min( maxPoint0, maxPoint1 ), min( maxPoint2, maxPoint3 ) ),
       max( max( maxPoint0, maxPoint1 ), max( maxPoint2, maxPoint3 ) )
     ),
-    bounds_none,
     maxSet
   );
 
@@ -353,6 +358,10 @@ fn main(
 
   reduces[ local_id.x ] = value;
 
+#ifdef debugReduceBuffers
+  debug_reduces[ global_id.x ] = value;
+#endif
+
   // We need to not double-apply. So we'll only apply when merging into this specific index, since it will
   // (a) be the first combination with the joint "both" result, and (b) it's the simplest to filter for.
   // Note: -5 is different than the "out of range" RasterChunkReduceData value
@@ -362,8 +371,6 @@ fn main(
     value.min.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask,
     ( value.min.bits & RasterChunkReduceData_bits_first_last_mask ) == RasterChunkReduceData_bits_is_last_edge_mask
   );
-
-  // TODO: set debug full chunk reduces here (global_id.x => value)
 
   for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i++ ) {
     workgroupBarrier();
