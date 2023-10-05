@@ -98,7 +98,7 @@ export default class ParallelRasterInitialChunk {
         // NOTE: This is assuming no negative or doubled area, or other fun facts, since our clipping process should
         // output things satisfying these constraints.
         else {
-          const hasArea = chunk.minXCount < 0 && chunk.minYCount > 0 && chunk.maxXCount > 0 && chunk.maxYCount;
+          const hasArea = chunk.minXCount < 0 && chunk.minYCount > 0 && chunk.maxXCount > 0 && chunk.maxYCount < 0;
 
           if ( hasArea ) {
             // Output a simple "contains everything" chunk in the min section

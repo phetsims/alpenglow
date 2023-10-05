@@ -135,6 +135,15 @@ export { default as wgsl_bounds_clip_edge } from '../wgsl/clip/bounds_clip_edge.
 export { default as wgsl_bounds_double_area_edge } from '../wgsl/clip/bounds_double_area_edge.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_RasterChunk } from '../wgsl/raster/RasterChunk.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_RasterClippedChunk } from '../wgsl/raster/RasterClippedChunk.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_RasterStageConfig } from '../wgsl/raster/RasterStageConfig.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_raster_initial_chunk } from '../wgsl/raster/raster_initial_chunk.js';
+
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_reduce_simple_single } from '../wgsl/examples/reduce_simple_single.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_scan_simple_single } from '../wgsl/examples/scan_simple_single.js';
@@ -311,6 +320,6 @@ export { default as Binding } from './webgpu/Binding.js';
 export { default as ComputeShader } from './webgpu/ComputeShader.js';
 export { default as BlitShader } from './webgpu/BlitShader.js';
 export { default as ByteEncoder } from './webgpu/ByteEncoder.js';
-export type { F32, U32, U8 } from './webgpu/ByteEncoder.js';
+export type { F32, U32, I32, U8 } from './webgpu/ByteEncoder.js';
 export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
 

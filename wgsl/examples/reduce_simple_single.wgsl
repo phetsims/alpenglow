@@ -28,9 +28,9 @@ var<workgroup> scratch: array<f32, WORKGROUP_SIZE>;
 
 @compute @workgroup_size(${workgroupSize})
 fn main(
-    @builtin(global_invocation_id) global_id: vec3u,
-    @builtin(local_invocation_id) local_id: vec3u,
-    @builtin(workgroup_id) wg_id: vec3u,
+  @builtin(global_invocation_id) global_id: vec3u,
+  @builtin(local_invocation_id) local_id: vec3u,
+  @builtin(workgroup_id) wg_id: vec3u
 ) {
   var value = input[ global_id.x ];
   scratch[ local_id.x ] = value;

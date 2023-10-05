@@ -156,6 +156,10 @@ export default class DeviceContext {
 
     return outputArray;
   }
+
+  public static async getMappedArrayBuffer( buffer: GPUBuffer ): Promise<ArrayBuffer> {
+    return ( await DeviceContext.getMappedByteArray( buffer ) ).buffer;
+  }
 }
 
 alpenglow.register( 'DeviceContext', DeviceContext );

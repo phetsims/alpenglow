@@ -810,6 +810,18 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.couTest = function() {
+    setTimeout( async function() {
+      const start = Date.now();
+
+      await phet.alpenglow.ParallelRaster.webgpuTest();
+
+      const end = Date.now();
+
+      console.log( `finished test ${end - start}` );
+    } );
+  };
+
   window.rasterTest = function() {
     setTimeout( async function() {
       const boundsRect = bounds => [

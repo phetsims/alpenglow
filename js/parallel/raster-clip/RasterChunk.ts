@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelStorageArray, RasterEdge } from '../../imports.js';
+import { alpenglow, ByteEncoder, ParallelStorageArray, RasterEdge } from '../../imports.js';
 
 export default class RasterChunk {
   public constructor(
@@ -16,6 +16,7 @@ export default class RasterChunk {
     public readonly needsFace: boolean,
     public readonly isConstant: boolean,
 
+    // TODO: why this parameter order? fix?
     public readonly edgesOffset: number,
     public readonly numEdges: number,
 
@@ -52,6 +53,65 @@ export default class RasterChunk {
     const bounds = `bounds:x[${this.minX},${this.maxX}],y[${this.minY},${this.maxY}]`;
     const needs = this.needsFace ? ' needsFace' : '';
     return `RasterChunk[prog:${this.rasterProgramIndex} ${counts} ${bounds} numEdges:${this.numEdges} edgesOffset:${this.edgesOffset}${needs}]`;
+  }
+
+  public static readonly ENCODING_BYTE_LENGTH = 4 * 11;
+
+  public writeEncoding( encoder: ByteEncoder ): void {
+    assert && assert( this.rasterProgramIndex >= 0 && this.rasterProgramIndex <= 0x00ffffff );
+
+    encoder.pushU32(
+      ( this.rasterProgramIndex & 0x00ffffff ) | ( this.needsFace ? 0x40000000 : 0 ) | ( this.isConstant ? 0x80000000 : 0 )
+    );
+    encoder.pushU32( this.numEdges );
+    encoder.pushU32( this.edgesOffset );
+
+    encoder.pushF32( this.minX );
+    encoder.pushF32( this.minY );
+    encoder.pushF32( this.maxX );
+    encoder.pushF32( this.maxY );
+
+    encoder.pushI32( this.minXCount );
+    encoder.pushI32( this.minYCount );
+    encoder.pushI32( this.maxXCount );
+    encoder.pushI32( this.maxYCount );
+  }
+
+  public static readEncoding( arrayBuffer: ArrayBuffer, byteOffset: number ): RasterChunk {
+    const uintBuffer = new Uint32Array( arrayBuffer, byteOffset, RasterChunk.ENCODING_BYTE_LENGTH / 4 );
+    const intBuffer = new Int32Array( arrayBuffer, byteOffset, RasterChunk.ENCODING_BYTE_LENGTH / 4 );
+    const floatBuffer = new Float32Array( arrayBuffer, byteOffset, RasterChunk.ENCODING_BYTE_LENGTH / 4 );
+
+    const rasterProgramIndex = uintBuffer[ 0 ] & 0x00ffffff;
+    const needsFace = ( uintBuffer[ 0 ] & 0x40000000 ) !== 0;
+    const isConstant = ( uintBuffer[ 0 ] & 0x80000000 ) !== 0;
+
+    return new RasterChunk(
+      rasterProgramIndex,
+      needsFace,
+      isConstant,
+
+      uintBuffer[ 2 ],
+      uintBuffer[ 1 ],
+
+      floatBuffer[ 3 ],
+      floatBuffer[ 4 ],
+      floatBuffer[ 5 ],
+      floatBuffer[ 6 ],
+
+      intBuffer[ 7 ],
+      intBuffer[ 8 ],
+      intBuffer[ 9 ],
+      intBuffer[ 10 ]
+    );
+  }
+
+  public static fromArrayBuffer( arrayBuffer: ArrayBuffer ): RasterChunk[] {
+    assert && assert( arrayBuffer.byteLength % RasterChunk.ENCODING_BYTE_LENGTH === 0 );
+
+    return _.range( 0, arrayBuffer.byteLength / RasterChunk.ENCODING_BYTE_LENGTH ).map( i => {
+      return RasterChunk.readEncoding( arrayBuffer, i * RasterChunk.ENCODING_BYTE_LENGTH );
+    } );
   }
 
   public static readonly INDETERMINATE = new RasterChunk(

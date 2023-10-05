@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow, ByteEncoder, RasterSplitReduceData } from '../../imports.js';
 
 export default class RasterClippedChunk {
   public constructor(
@@ -68,6 +68,75 @@ export default class RasterClippedChunk {
     const contributing = this.isComplete ? ' complete' : '';
     const fullArea = this.isFullArea ? ' fullArea' : '';
     return `RasterClippedChunk[prog:${this.rasterProgramIndex} ${counts} ${bounds} ${area}${reducible}${contributing}${fullArea}${needs}]`;
+  }
+
+  public static readonly ENCODING_BYTE_LENGTH = 4 * 10;
+
+  public writeEncoding( encoder: ByteEncoder ): void {
+    assert && assert( this.rasterProgramIndex >= 0 && this.rasterProgramIndex <= 0x00ffffff );
+
+    encoder.pushU32(
+      ( this.rasterProgramIndex & 0x00ffffff ) |
+      ( this.isReducible ? 0x08000000 : 0 ) |
+      ( this.isComplete ? 0x10000000 : 0 ) |
+      ( this.isFullArea ? 0x20000000 : 0 ) |
+      ( this.needsFace ? 0x40000000 : 0 ) |
+      ( this.isConstant ? 0x80000000 : 0 )
+    );
+    encoder.pushF32( this.area );
+
+    encoder.pushF32( this.minX );
+    encoder.pushF32( this.minY );
+    encoder.pushF32( this.maxX );
+    encoder.pushF32( this.maxY );
+
+    encoder.pushI32( this.minXCount );
+    encoder.pushI32( this.minYCount );
+    encoder.pushI32( this.maxXCount );
+    encoder.pushI32( this.maxYCount );
+  }
+
+  public static readEncoding( arrayBuffer: ArrayBuffer, byteOffset: number ): RasterClippedChunk {
+    const uintBuffer = new Uint32Array( arrayBuffer, byteOffset, RasterClippedChunk.ENCODING_BYTE_LENGTH / 4 );
+    const intBuffer = new Int32Array( arrayBuffer, byteOffset, RasterClippedChunk.ENCODING_BYTE_LENGTH / 4 );
+    const floatBuffer = new Float32Array( arrayBuffer, byteOffset, RasterClippedChunk.ENCODING_BYTE_LENGTH / 4 );
+
+    const rasterProgramIndex = uintBuffer[ 0 ] & 0x00ffffff;
+    const isReducible = ( uintBuffer[ 0 ] & 0x08000000 ) !== 0;
+    const isComplete = ( uintBuffer[ 0 ] & 0x10000000 ) !== 0;
+    const isFullArea = ( uintBuffer[ 0 ] & 0x20000000 ) !== 0;
+    const needsFace = ( uintBuffer[ 0 ] & 0x40000000 ) !== 0;
+    const isConstant = ( uintBuffer[ 0 ] & 0x80000000 ) !== 0;
+
+    return new RasterClippedChunk(
+      rasterProgramIndex,
+      needsFace,
+      isConstant,
+
+      isReducible,
+      isComplete,
+      isFullArea,
+
+      floatBuffer[ 1 ],
+
+      floatBuffer[ 2 ],
+      floatBuffer[ 3 ],
+      floatBuffer[ 4 ],
+      floatBuffer[ 5 ],
+
+      intBuffer[ 6 ],
+      intBuffer[ 7 ],
+      intBuffer[ 8 ],
+      intBuffer[ 9 ]
+    );
+  }
+
+  public static fromArrayBuffer( arrayBuffer: ArrayBuffer ): RasterClippedChunk[] {
+    assert && assert( arrayBuffer.byteLength % RasterClippedChunk.ENCODING_BYTE_LENGTH === 0 );
+
+    return _.range( 0, arrayBuffer.byteLength / RasterClippedChunk.ENCODING_BYTE_LENGTH ).map( i => {
+      return RasterClippedChunk.readEncoding( arrayBuffer, i * RasterClippedChunk.ENCODING_BYTE_LENGTH );
+    } );
   }
 
   public static readonly INDETERMINATE = new RasterClippedChunk(

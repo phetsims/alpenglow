@@ -6,15 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterSplitReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas } from '../../imports.js';
+import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterSplitReduce, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas, DeviceContext, DualSnippet, wgsl_raster_initial_chunk, ComputeShader, Binding } from '../../imports.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
 // TODO: move to 256 after testing (64 helps us test more cases here)
-const WORKGROUP_SIZE = 64;
-const LOG = false;
-const USE_DEMO = true;
-const ONLY_FIRST_ITERATION = false;
+const WORKGROUP_SIZE = 4;
+const LOG = true;
+const USE_DEMO = false;
+const ONLY_FIRST_ITERATION = true;
 
 export default class ParallelRaster {
 
@@ -337,6 +337,115 @@ export default class ParallelRaster {
     canvas.style.imageRendering = 'pixelated';
     canvas.style.position = 'absolute';
     document.body.appendChild( canvas );
+  }
+
+  public static async webgpuTest(): Promise<void> {
+    const device = ( await DeviceContext.getDevice() )!;
+    assert && assert( device );
+
+    // const displaySize = 512;
+
+    const rawInputChunks = ParallelRaster.getTestRawInputChunks();
+    const rawInputEdges = ParallelRaster.getTestRawInputEdges();
+
+    const numInputChunks = rawInputChunks.length;
+    const numInputEdges = rawInputEdges.length;
+    const numClippedChunks = 2 * numInputChunks;
+    const numEdgeClips = 2 * numInputEdges;
+
+    const workgroupSize = WORKGROUP_SIZE;
+    const RASTER_CLIPPED_CHUNK_BYTES = 4 * 10;
+
+    const configData = [
+      numInputChunks,
+      numInputEdges,
+
+      numClippedChunks,
+      numEdgeClips,
+
+      // initial_chunk workgroup
+      Math.ceil( numInputChunks / workgroupSize ), 1, 1
+    ];
+
+    const deviceContext = new DeviceContext( device );
+
+    // const canvas = document.createElement( 'canvas' );
+    // canvas.width = displaySize * window.devicePixelRatio;
+    // canvas.height = displaySize * window.devicePixelRatio;
+    // canvas.style.width = `${displaySize}px`;
+    // canvas.style.height = `${displaySize}px`;
+
+    // const context = deviceContext.getCanvasContext( canvas );
+    //
+    // const outTexture = context.getCurrentTexture();
+
+    const configBuffer = device.createBuffer( {
+      label: 'config buffer',
+      size: 4 * configData.length,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT
+    } );
+    device.queue.writeBuffer( configBuffer, 0, new Uint32Array( configData ).buffer );
+
+    const inputChunksBuffer = deviceContext.createBuffer( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
+    const inputChunksEncoder = new ByteEncoder( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
+    rawInputChunks.forEach( chunk => chunk.writeEncoding( inputChunksEncoder ) );
+    assert && assert( inputChunksEncoder.byteLength === RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
+    device.queue.writeBuffer( inputChunksBuffer, 0, inputChunksEncoder.fullArrayBuffer );
+
+    const clippedChunksBuffer = deviceContext.createBuffer( RASTER_CLIPPED_CHUNK_BYTES * numClippedChunks );
+    const debugClippedChunksBuffer = deviceContext.createMapReadableBuffer( RASTER_CLIPPED_CHUNK_BYTES * numClippedChunks );
+
+    const initialChunksSnippet = DualSnippet.fromSource( wgsl_raster_initial_chunk, {
+      workgroupSize: workgroupSize
+    } );
+
+    const initialChunksShader = new ComputeShader( 'initial_chunks', initialChunksSnippet.toString(), [
+      Binding.UNIFORM_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], device );
+
+    const encoder = device.createCommandEncoder( {
+      label: 'the encoder'
+    } );
+
+    initialChunksShader.dispatchIndirect( encoder, [
+      configBuffer,
+      inputChunksBuffer,
+      clippedChunksBuffer
+    ], configBuffer, 16 );
+
+    encoder.copyBufferToBuffer( clippedChunksBuffer, 0, debugClippedChunksBuffer, 0, debugClippedChunksBuffer.size );
+
+    const commandBuffer = encoder.finish();
+    device.queue.submit( [ commandBuffer ] );
+
+    const startTime = Date.now();
+
+    device.queue.onSubmittedWorkDone().then( () => {
+      const endTime = Date.now();
+
+      console.log( endTime - startTime );
+    } ).catch( err => {
+      throw err;
+    } );
+
+    const toIndexedString = ( n: { toString(): string }, i: number ) => `${i} ${n.toString()}`;
+
+    LOG && console.log( `numInputChunks: ${numInputChunks}` );
+    LOG && console.log( RasterChunk.fromArrayBuffer( inputChunksEncoder.fullArrayBuffer ).map( toIndexedString ).join( '\n' ) );
+
+    // LOG && console.log( `numInputEdges: ${numInputEdges}` );
+    // LOG && console.log( inputEdges.data.slice( 0, numInputEdges ).map( toIndexedString ).join( '\n' ) );
+
+    const clippedChunksArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugClippedChunksBuffer );
+
+    LOG && console.log( 'clippedChunks (without reduce)' );
+    LOG && console.log( RasterClippedChunk.fromArrayBuffer( clippedChunksArrayBuffer ).map( toIndexedString ).join( '\n' ) );
+
+    configBuffer.destroy();
+    inputChunksBuffer.destroy();
+    clippedChunksBuffer.destroy();
   }
 
   public static async process(

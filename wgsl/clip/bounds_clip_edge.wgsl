@@ -42,6 +42,8 @@ fn bounds_clip_edge(
   let needsStartCorner = !clipped || !all( startPoint == clippedStartPoint );
   let needsEndCorner = !clipped || !all( endPoint == clippedEndPoint );
 
+  // TODO: see if select is slower than if/else?
+
   // TODO: see if we can check for needsStartCorner/needsEndCorner before computing these?
   let startCorner = vec2(
     select( maxX, minX, startXLess ),
