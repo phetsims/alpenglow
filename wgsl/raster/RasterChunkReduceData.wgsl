@@ -35,8 +35,8 @@ fn RasterChunkReduceData_combine(
   a: ptr<function, RasterChunkReduceData>,
   b: ptr<function, RasterChunkReduceData>
 ) -> RasterChunkReduceData {
-  let a_clipped_chunk_index = (*a).bits & RasterChunkReduceData_bits_clipped_chunk_index_mask;
-  if ( a_clipped_chunk_index != (*b).bits & RasterChunkReduceData_bits_clipped_chunk_index_mask ) {
+  let a_clipped_chunk_index = ( (*a).bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
+  if ( a_clipped_chunk_index != ( (*b).bits & RasterChunkReduceData_bits_clipped_chunk_index_mask ) ) {
     return *b;
   }
   else {

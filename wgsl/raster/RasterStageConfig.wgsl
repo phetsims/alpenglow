@@ -15,4 +15,9 @@ struct RasterStageConfig {
   initial_chunk_workgroup_x: u32, // Math.ceil( num_input_chunks / workgroupSize )
   initial_chunk_workgroup_y: u32,
   initial_chunk_workgroup_z: u32,
+
+  // 28-byte offset
+  initial_clip_workgroup_x: u32, // Math.ceil( num_input_edges / workgroupSize )
+  initial_clip_workgroup_y: u32,
+  initial_clip_workgroup_z: u32,
 }

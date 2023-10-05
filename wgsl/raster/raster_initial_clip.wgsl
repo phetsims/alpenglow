@@ -15,6 +15,7 @@
 
 #import ./RasterChunk
 #import ./RasterEdge
+#import ./RasterEdgeClip
 #import ./RasterClippedChunk
 #import ./RasterChunkReducePair
 #import ./RasterChunkReduceQuad
@@ -212,28 +213,28 @@ fn main(
 
     minPoint0 = select(
       minResultStartPoint,
-      vec2( split, startCornerSecondary ) : vec2( startCornerSecondary, split ),
-      isXSplit
+      select( vec2( startCornerSecondary, split ), vec2( split, startCornerSecondary ), isXSplit ),
+      startGreater
     );
     minPoint1 = minResultStartPoint;
     minPoint2 = minResultEndPoint;
     minPoint3 = select(
       minResultEndPoint,
-      vec2( split, endCornerSecondary ) : vec2( endCornerSecondary, split ),
-      isXSplit
+      select( vec2( endCornerSecondary, split ), vec2( split, endCornerSecondary ), isXSplit ),
+      endGreater
     );
 
     maxPoint0 = select(
       maxResultStartPoint,
-      vec2( split, startCornerSecondary ) : vec2( startCornerSecondary, split ),
-      isXSplit
+      select( vec2( startCornerSecondary, split ), vec2( split, startCornerSecondary ), isXSplit ),
+      startLess
     );
     maxPoint1 = maxResultStartPoint;
     maxPoint2 = maxResultEndPoint;
     maxPoint3 = select(
       maxResultEndPoint,
-      vec2( split, endCornerSecondary ) : vec2( endCornerSecondary, split ),
-      isXSplit
+      select( vec2( endCornerSecondary, split ), vec2( split, endCornerSecondary ), isXSplit ),
+      endLess
     );
   }
 
@@ -258,7 +259,7 @@ fn main(
   // minX, minY, maxX, maxY
   var minBounds = select(
     vec4(
-      min( min( minPoint0, minPoint1 ), min( minPoint2, minPoint3 ) )
+      min( min( minPoint0, minPoint1 ), min( minPoint2, minPoint3 ) ),
       max( max( minPoint0, minPoint1 ), max( minPoint2, minPoint3 ) )
     ),
     bounds_none,
@@ -287,7 +288,7 @@ fn main(
   // minX, minY, maxX, maxY
   var maxBounds = select(
     vec4(
-      min( min( maxPoint0, maxPoint1 ), min( maxPoint2, maxPoint3 ) )
+      min( min( maxPoint0, maxPoint1 ), min( maxPoint2, maxPoint3 ) ),
       max( max( maxPoint0, maxPoint1 ), max( maxPoint2, maxPoint3 ) )
     ),
     bounds_none,
@@ -357,7 +358,7 @@ fn main(
   let applicableMinChunkIndex = select(
     0xffffffff, // unavailable clipped chunk index, should not equal anything
     value.min.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask,
-    value.min.bits & RasterChunkReduceData_bits_first_last_mask ) == RasterChunkReduceData_bits_is_last_edge_mask
+    ( value.min.bits & RasterChunkReduceData_bits_first_last_mask ) == RasterChunkReduceData_bits_is_last_edge_mask
   );
 
   // TODO: set debug full chunk reduces here (global_id.x => value)
@@ -376,12 +377,9 @@ fn main(
       // We effectively only need to check and store one of these, since the min/max indices will be essentially
       // just offset by one
       if (
-        ( applicableMinChunkIndex == otherValue.min.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask ) &&
+        ( applicableMinChunkIndex == ( otherValue.min.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask ) ) &&
         ( value.min.bits & RasterChunkReduceData_bits_is_first_edge_mask ) != 0u
       ) {
-        assert && assert( value.min.clippedChunkIndex == otherValue.min.clippedChunkIndex );
-        assert && assert( value.max.clippedChunkIndex == otherValue.max.clippedChunkIndex );
-        assert && assert( value.isLastEdge() );
 
         // NOTE: We don't need a workgroup barrier here with the two, since (a) we're not executing this for the
         // same indices ever, and (b) we only do it once.
