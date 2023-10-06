@@ -5,6 +5,7 @@
  */
 
 #import ./RasterClippedChunk
+#import ./RasterEdgeClip
 #import ./RasterSplitReduceData
 
 // TODO: better namespacing for less verbosity
@@ -60,4 +61,23 @@ fn RasterClippedChunk_get_data( clipped_chunk: RasterClippedChunk ) -> RasterSpl
 fn RasterClippedChunk_is_exporting_complete_edges( clipped_chunk: RasterClippedChunk ) -> bool {
   // return clipped_chunk.isComplete && !clipped_chunk.isFullArea && clipped_chunk.needsFace;
   return ( clipped_chunk.bits & RasterClippedChunk_bits_exporting_complete_edges_mask ) == RasterClippedChunk_bits_exporting_complete_edges_value;
+}
+
+// TODO: method organization?!?
+fn RasterEdgeClip_get_count( edge_clip: RasterEdgeClip ) -> u32 {
+  return select( 1u, 0u, edge_clip.p0x == edge_clip.p1x && edge_clip.p0y == edge_clip.p1y ) +
+         select( 1u, 0u, edge_clip.p1x == edge_clip.p2x && edge_clip.p1y == edge_clip.p2y ) +
+         select( 1u, 0u, edge_clip.p2x == edge_clip.p3x && edge_clip.p2y == edge_clip.p3y );
+}
+
+// TODO: rename once port complete
+fn RasterSplitReduceData_from( edge_clip: RasterEdgeClip, clipped_chunk: RasterClippedChunk, exists: bool ) -> RasterSplitReduceData {
+  let is_reducible = ( clipped_chunk.bits & RasterClippedChunk_bits_is_reducible_mask ) != 0u;
+  let is_exporting_complete_edges = RasterClippedChunk_is_exporting_complete_edges( clipped_chunk );
+  let count = select( 0u, RasterEdgeClip_get_count( edge_clip ), exists );
+
+  return RasterSplitReduceData(
+    select( 0u, count, is_reducible ),
+    select( 0u, count, is_exporting_complete_edges )
+  );
 }

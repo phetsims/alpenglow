@@ -1,12 +1,12 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Calculates the initial splits (reducible/complete counts) for each clipped chunk, and applies the first level of
- * reduction.
+ * Computes the reducible/complete edge counts for each EdgeClip, and applies the first level of reduction.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./RasterEdgeClip
 #import ./RasterClippedChunk
 #import ./RasterSplitReduceData
 #import ./RasterStageConfig
@@ -19,9 +19,11 @@ var<uniform> config: RasterStageConfig;
 @group(0) @binding(1)
 var<storage, read> clipped_chunks: array<RasterClippedChunk>;
 @group(0) @binding(2)
-var<storage, read_write> split_reduces: array<RasterSplitReduceData>; // written only
-#ifdef debugReduceBuffers
+var<storage, read> edge_clips: array<RasterEdgeClip>;
 @group(0) @binding(3)
+var<storage, read_write> edge_reduces: array<RasterSplitReduceData>; // written only
+#ifdef debugReduceBuffers
+@group(0) @binding(4)
 var<storage, read_write> debug_reduces: array<RasterSplitReduceData>;
 #endif
 
@@ -35,15 +37,14 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  let chunk_index = global_id.x;
-  let exists = chunk_index < config.num_clipped_chunks;
+  let edge_index = global_id.x;
+  let exists = edge_index < config.num_edge_clips;
 
-  let clipped_chunk = clipped_chunks[ chunk_index ];
+  let edge_clip = edge_clips[ global_id.x ];
+  let clipped_chunk_index = edge_clip.bits & RasterEdgeClip_bits_clipped_chunk_index_mask;
+  let clipped_chunk = clipped_chunks[ clipped_chunk_index ];
 
-  var value = RasterSplitReduceData_identity;
-  if ( exists ) {
-    value = RasterClippedChunk_get_data( clipped_chunk );
-  }
+  var value = RasterSplitReduceData_from( edge_clip, clipped_chunk, exists );
 
   reduces[ local_id.x ] = value;
 
@@ -65,6 +66,6 @@ fn main(
   }
 
   if ( local_id.x == ${u32( workgroupSize - 1 )} ) {
-    split_reduces[ workgroup_id.x ] = value;
+    edge_reduces[ workgroup_id.x ] = value;
   }
 }
