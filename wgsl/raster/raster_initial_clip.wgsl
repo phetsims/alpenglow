@@ -348,8 +348,8 @@ fn main(
     // If our input is both first/last, we need to handle it before combinations
     // NOTE: min and max will both have the same first/last flags, so we only need to check one
     if ( ( value.min.bits & RasterChunkReduceData_bits_first_last_mask ) == RasterChunkReduceData_bits_first_last_mask ) {
-      apply_to_clipped_chunk( value.min, value.min.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
-      apply_to_clipped_chunk( value.max, value.max.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
+      apply_to_clipped_chunk( value.min );
+      apply_to_clipped_chunk( value.max );
     }
   }
   else {
@@ -392,8 +392,8 @@ fn main(
 
         // NOTE: We don't need a workgroup barrier here with the two, since (a) we're not executing this for the
         // same indices ever, and (b) we only do it once.
-        apply_to_clipped_chunk( value.min, value.min.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
-        apply_to_clipped_chunk( value.max, value.max.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
+        apply_to_clipped_chunk( value.min );
+        apply_to_clipped_chunk( value.max );
       }
     }
 

@@ -10,8 +10,9 @@
 // NOTE: requires clipped_chunks binding
 #bindings
 
-// TODO: can we do pointers?
-fn apply_to_clipped_chunk( value: RasterChunkReduceData, clipped_chunk_index: u32 ) {
+fn apply_to_clipped_chunk( value: RasterChunkReduceData ) {
+
+  let clipped_chunk_index = value.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask;
 
   // TODO: are the pointers here helpful, so we don't copy data?
   let clipped_chunk = &clipped_chunks[ clipped_chunk_index ];

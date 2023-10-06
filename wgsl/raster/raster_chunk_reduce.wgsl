@@ -95,12 +95,9 @@ fn main(
         // TODO: check to see if the discrepancy here between otherValue-right and the value in initial-clip is a bug
         ( otherValue.rightMin.bits & RasterChunkReduceData_bits_is_first_edge_mask ) != 0u
       ) {
-        let middleMinReduce = RasterChunkReduceData_combine( otherValue.rightMin, oldValue.leftMin );
-        let middleMaxReduce = RasterChunkReduceData_combine( otherValue.rightMax, oldValue.leftMax );
-
-        // TODO: refactor this, since the index is always determined by the value
-        apply_to_clipped_chunk( middleMinReduce, middleMinReduce.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
-        apply_to_clipped_chunk( middleMaxReduce, middleMaxReduce.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask );
+        // "middle" reduces
+        apply_to_clipped_chunk( RasterChunkReduceData_combine( otherValue.rightMin, oldValue.leftMin ) );
+        apply_to_clipped_chunk( RasterChunkReduceData_combine( otherValue.rightMax, oldValue.leftMax ) );
       }
     }
 
