@@ -13,6 +13,8 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
+
+// REVIEW: What does the accuracy do?
 export enum RenderBarycentricBlendAccuracy {
   Accurate = 0,
   PixelCenter = 1
