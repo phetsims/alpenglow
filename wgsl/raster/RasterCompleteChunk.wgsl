@@ -7,7 +7,10 @@
  */
 
 const RasterCompleteChunk_bits_raster_program_index_mask: u32 = 0x00ffffff;
-const RasterCompleteChunk_bits_is_full_area_mask: u32 = 0x20000000;
+const RasterCompleteChunk_bits_is_full_area_mask: u32 = 0x20000000; // SHOULD BE THE SAME AS RasterClippedChunk
+const RasterCompleteChunk_bits_full_mask: u32 =
+  RasterCompleteChunk_bits_raster_program_index_mask |
+  RasterCompleteChunk_bits_is_full_area_mask;
 
 struct RasterCompleteChunk {
   bits: u32,

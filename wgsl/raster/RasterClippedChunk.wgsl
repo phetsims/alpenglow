@@ -9,7 +9,7 @@
 const RasterClippedChunk_bits_raster_program_index_mask: u32 = 0x00ffffff;
 const RasterClippedChunk_bits_is_reducible_mask: u32 = 0x08000000; // filled in later
 const RasterClippedChunk_bits_is_complete_mask: u32 = 0x10000000; // filled in later
-const RasterClippedChunk_bits_is_full_area_mask: u32 = 0x20000000; // filled in later
+const RasterClippedChunk_bits_is_full_area_mask: u32 = 0x20000000; // filled in later SHOULD BE THE SAME AS RasterCompleteChunk
 const RasterClippedChunk_bits_needs_face_mask: u32 = 0x40000000;
 const RasterClippedChunk_bits_is_constant_mask: u32 = 0x80000000;
 

@@ -25,7 +25,9 @@ export default class ParallelRasterSplitScan {
     // write
     reducibleChunks: ParallelStorageArray<RasterChunk>,
     completeChunks: ParallelStorageArray<RasterCompleteChunk>,
-    chunkIndexMap: ParallelStorageArray<number>
+    chunkIndexMap: ParallelStorageArray<number>,
+
+    debugReduces: ParallelStorageArray<RasterSplitReduceData>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );
 
@@ -75,6 +77,8 @@ export default class ParallelRasterSplitScan {
         await context.workgroupBarrier();
         await context.workgroupValues.reduces.set( context, context.localId.x, value );
       }
+
+      await debugReduces.set( context, context.globalId.x, value );
 
       if ( exists ) {
         const baseReducible = await context.workgroupValues.baseIndices.get( context, 0 );
@@ -141,7 +145,7 @@ export default class ParallelRasterSplitScan {
     }, () => ( {
       reduces: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( () => RasterSplitReduceData.INDETERMINATE ), RasterSplitReduceData.INDETERMINATE ),
       baseIndices: new ParallelWorkgroupArray( [ 0, 0 ], 0 )
-    } ), [ clippedChunks, splitReduces0, splitReduces1, splitReduces2, reducibleChunks, completeChunks ], workgroupSize );
+    } ), [ clippedChunks, splitReduces0, splitReduces1, splitReduces2, reducibleChunks, completeChunks, debugReduces ], workgroupSize );
 
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numClippedChunks / workgroupSize ) ) );
   }

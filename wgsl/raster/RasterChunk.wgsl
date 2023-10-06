@@ -11,6 +11,10 @@
 const RasterChunk_bits_raster_program_index_mask: u32 = 0x00ffffff;
 const RasterChunk_bits_needs_face_mask: u32 = 0x40000000;
 const RasterChunk_bits_is_constant_mask: u32 = 0x80000000;
+const RasterChunk_bits_full_mask: u32 =
+  RasterChunk_bits_raster_program_index_mask |
+  RasterChunk_bits_needs_face_mask |
+  RasterChunk_bits_is_constant_mask;
 
 struct RasterChunk {
   // See constants above for what is stored here

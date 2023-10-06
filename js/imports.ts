@@ -135,6 +135,9 @@ export { default as wgsl_bounds_clip_edge } from '../wgsl/clip/bounds_clip_edge.
 export { default as wgsl_bounds_double_area_edge } from '../wgsl/clip/bounds_double_area_edge.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_inclusive_to_exclusive_scan_indices } from '../wgsl/utils/inclusive_to_exclusive_scan_indices.js';
+
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_RasterChunk } from '../wgsl/raster/RasterChunk.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_RasterClippedChunk } from '../wgsl/raster/RasterClippedChunk.js';
@@ -172,6 +175,8 @@ export { default as wgsl_raster_initial_split_reduce } from '../wgsl/raster/rast
 export { default as wgsl_raster_initial_edge_reduce } from '../wgsl/raster/raster_initial_edge_reduce.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_raster_split_reduce } from '../wgsl/raster/raster_split_reduce.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_raster_split_scan } from '../wgsl/raster/raster_split_scan.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_reduce_simple_single } from '../wgsl/examples/reduce_simple_single.js';
