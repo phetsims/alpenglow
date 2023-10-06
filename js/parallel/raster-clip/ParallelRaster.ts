@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, CombinedRaster, ComputeShader, DeviceContext, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan } from '../../imports.js';
+import { alpenglow, Binding, ByteEncoder, CombinedRaster, ComputeShader, DeviceContext, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_uniform_update } from '../../imports.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
@@ -393,9 +393,6 @@ export default class ParallelRaster {
       // edge_reduce1 workgroup
       Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize * workgroupSize ) ), 1, 1,
 
-      // edge_index_patch workgroup
-      0, 1, 1, // write dynamically, Math.ceil( numReducibleEdges / workgroupSize )
-
       numInputChunks,
       numInputEdges,
 
@@ -420,7 +417,8 @@ export default class ParallelRaster {
     const configBuffer = device.createBuffer( {
       label: 'config buffer',
       size: 4 * configData.length,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT
+      // NOTE: COPY_SRC here for debugging
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_SRC
     } );
     device.queue.writeBuffer( configBuffer, 0, new Uint32Array( configData ).buffer );
 
@@ -546,6 +544,14 @@ export default class ParallelRaster {
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize
+    } );
+
+    const uniformUpdateShader = ComputeShader.fromSource( device, 'uniform_update', wgsl_raster_uniform_update, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize
@@ -798,6 +804,16 @@ export default class ParallelRaster {
     encoder.copyBufferToBuffer( reducibleChunksBuffer, 0, debugFinalReducibleChunksBuffer, 0, debugFinalReducibleChunksBuffer.size );
     encoder.copyBufferToBuffer( completeChunksBuffer, 0, debugFinalCompleteChunksBuffer, 0, debugFinalCompleteChunksBuffer.size );
 
+    const debugConfigBuffer = deviceContext.createMapReadableBuffer( 4 * configData.length );
+
+    uniformUpdateShader.dispatch( encoder, [
+      splitReduces2Buffer,
+      edgeReduces2Buffer,
+      configBuffer
+    ], 1, 1, 1 );
+
+    encoder.copyBufferToBuffer( configBuffer, 0, debugConfigBuffer, 0, debugConfigBuffer.size );
+
     const commandBuffer = encoder.finish();
     device.queue.submit( [ commandBuffer ] );
 
@@ -837,6 +853,7 @@ export default class ParallelRaster {
     const debugChunkIndicesArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugChunkIndicesBuffer );
     const debugFinalReducibleChunksArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugFinalReducibleChunksBuffer );
     const debugFinalCompleteChunksArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugFinalCompleteChunksBuffer );
+    const debugConfigArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugConfigBuffer );
 
     const reducibleChunkCount = new Uint32Array( debugSplitReduces2ReducedArrayBuffer )[ 0 ];
     const completeChunkCount = new Uint32Array( debugSplitReduces2ReducedArrayBuffer )[ 1 ];
@@ -967,6 +984,9 @@ export default class ParallelRaster {
 
     LOG && console.log( `completeChunks ${completeChunkCount}` );
     LOG && console.log( RasterCompleteChunk.fromArrayBuffer( debugFinalCompleteChunksArrayBuffer ).slice( 0, completeChunkCount ).map( toIndexedString ).join( '\n' ) );
+
+    LOG && console.log( 'config' );
+    LOG && console.log( [ ...new Uint32Array( debugConfigArrayBuffer ) ].map( toIndexedString ).join( '\n' ) );
 
     configBuffer.destroy();
     inputChunksBuffer.destroy();

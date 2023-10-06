@@ -13,7 +13,7 @@ struct RasterStageConfig {
   initial_chunk_workgroup_y: u32,
   initial_chunk_workgroup_z: u32,
 
-  // 12-byte offset
+  // 12-byte offset (initial_clip, AND edge_index_patch AFTER the update)
   initial_clip_workgroup_x: u32, // Math.ceil( num_input_edges / workgroupSize )
   initial_clip_workgroup_y: u32,
   initial_clip_workgroup_z: u32,
@@ -57,11 +57,6 @@ struct RasterStageConfig {
   edge_reduce1_workgroup_x: u32, // Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize * workgroupSize ) )
   edge_reduce1_workgroup_y: u32,
   edge_reduce1_workgroup_z: u32,
-
-  // 120-byte offset
-  edge_index_patch_workgroup_x: u32, // Math.ceil( numReducibleEdges / workgroupSize ) -- NOTE: write dynamically
-  edge_index_patch_workgroup_y: u32,
-  edge_index_patch_workgroup_z: u32,
 
   num_input_chunks: u32,
   num_input_edges: u32,
