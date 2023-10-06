@@ -114,9 +114,8 @@ fn main(
   // Store our reduction result
   if ( exists && local_id.x == 0 ) {
     let last_local_index_in_workgroup = min(
-      // TODO: inline constant computation
       num_reduces - 1u - workgroup_id.x * ${u32( workgroupSize )},
-      ${u32( workgroupSize )} - 1u
+      ${u32( workgroupSize - 1 )}
     );
 
     let leftValue = reduces[ atomicLoad( &max_first_reduce_index ) ];
