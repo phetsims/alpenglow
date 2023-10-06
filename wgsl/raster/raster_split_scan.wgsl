@@ -9,7 +9,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-// TODO imports
 #import ./RasterSplitReduceData
 #import ./RasterClippedChunk
 #import ./RasterChunk
@@ -63,17 +62,17 @@ fn main(
     var baseReducible = 0u;
     var baseComplete = 0u;
 
-    if ( indices.x >= 0 ) {
+    if ( indices.x >= 0i ) {
       let reduce = split_reduces0[ indices.x ];
       baseReducible += reduce.numReducible;
       baseComplete += reduce.numComplete;
     }
-    if ( indices.y >= 0 ) {
+    if ( indices.y >= 0i ) {
       let reduce = split_reduces1[ indices.y ];
       baseReducible += reduce.numReducible;
       baseComplete += reduce.numComplete;
     }
-    if ( indices.z >= 0 ) {
+    if ( indices.z >= 0i ) {
       // TODO: is this... always guaranteed to be zero for our setup?
       let reduce = split_reduces2[ indices.z ];
       baseReducible += reduce.numReducible;
@@ -118,6 +117,7 @@ fn main(
 
     let is_reducible = ( clipped_chunk.bits & RasterClippedChunk_bits_is_reducible_mask ) != 0u;
     if ( is_reducible ) {
+
       // Convert to exclusive prefix sum
       baseIndex = base_reducible_value + value.numReducible - initialValue.numReducible;
 

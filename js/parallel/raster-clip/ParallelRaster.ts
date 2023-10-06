@@ -701,8 +701,10 @@ export default class ParallelRaster {
     const reducibleChunksBuffer = deviceContext.createBuffer( RasterChunk.ENCODING_BYTE_LENGTH * numClippedChunks );
     const debugReducibleChunksBuffer = deviceContext.createMapReadableBuffer( RasterChunk.ENCODING_BYTE_LENGTH * numClippedChunks );
 
-    const completeChunksBuffer = deviceContext.createBuffer( RasterCompleteChunk.ENCODING_BYTE_LENGTH * numClippedChunks );
-    const debugCompleteChunksBuffer = deviceContext.createMapReadableBuffer( RasterCompleteChunk.ENCODING_BYTE_LENGTH * numClippedChunks );
+    // TODO: figure out better output buffer size, since it's hard to bound
+    const MAX_COMPLETE_CHUNKS = 100000;
+    const completeChunksBuffer = deviceContext.createBuffer( RasterCompleteChunk.ENCODING_BYTE_LENGTH * MAX_COMPLETE_CHUNKS );
+    const debugCompleteChunksBuffer = deviceContext.createMapReadableBuffer( RasterCompleteChunk.ENCODING_BYTE_LENGTH * MAX_COMPLETE_CHUNKS );
 
     const chunkIndexMapBuffer = deviceContext.createBuffer( 4 * numClippedChunks );
     const debugChunkIndexMapBuffer = deviceContext.createMapReadableBuffer( 4 * numClippedChunks );

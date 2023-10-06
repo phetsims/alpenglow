@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-fn inclusive_to_exclusive_scan_indices( index: u32, workgroupSize: u32 ) -> vec3u {
+fn inclusive_to_exclusive_scan_indices( index: u32, workgroupSize: u32 ) -> vec3i {
   let index0 = index / workgroupSize;
   let index1 = index0 / workgroupSize;
   let index2 = index1 / workgroupSize;
 
-  return vec3( index0 - 1u, index1 - 1u, index2 - 1u );
+  return vec3( i32( index0 ) - 1i, i32( index1 ) - 1i, i32( index2 ) - 1i );
 }
