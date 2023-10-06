@@ -177,6 +177,8 @@ export { default as wgsl_raster_initial_edge_reduce } from '../wgsl/raster/raste
 export { default as wgsl_raster_split_reduce } from '../wgsl/raster/raster_split_reduce.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_raster_split_scan } from '../wgsl/raster/raster_split_scan.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_raster_edge_scan } from '../wgsl/raster/raster_edge_scan.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_reduce_simple_single } from '../wgsl/examples/reduce_simple_single.js';

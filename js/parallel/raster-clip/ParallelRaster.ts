@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, CombinedRaster, ComputeShader, DeviceContext, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas, wgsl_raster_chunk_reduce, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan } from '../../imports.js';
+import { alpenglow, Binding, ByteEncoder, CombinedRaster, ComputeShader, DeviceContext, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas, wgsl_raster_chunk_reduce, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan } from '../../imports.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 
@@ -526,6 +526,20 @@ export default class ParallelRaster {
       debugReduceBuffers: DEBUG_REDUCE_BUFFERS
     } );
 
+    const edgeScanShader = ComputeShader.fromSource( device, 'edge_scan', wgsl_raster_edge_scan, [
+      Binding.UNIFORM_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize
+    } );
+
     // TODO: pass same options into all shaders, as common options?
 
     const encoder = device.createCommandEncoder( {
@@ -731,6 +745,33 @@ export default class ParallelRaster {
       encoder.copyBufferToBuffer( debugSplitScanReducesBuffer, 0, debugDebugSplitScanReducesBuffer, 0, debugDebugSplitScanReducesBuffer.size );
     }
 
+    const reducibleEdgesBuffer = deviceContext.createBuffer( RasterEdge.ENCODING_BYTE_LENGTH * numEdgeClips );
+    const debugReducibleEdgesBuffer = deviceContext.createMapReadableBuffer( RasterEdge.ENCODING_BYTE_LENGTH * numEdgeClips );
+
+    const MAX_COMPLETE_EDGES = 100000;
+    // TODO: figure out better output buffer size, since it's hard to bound
+    const completeEdgesBuffer = deviceContext.createBuffer( RasterCompleteEdge.ENCODING_BYTE_LENGTH * MAX_COMPLETE_EDGES );
+    const debugCompleteEdgesBuffer = deviceContext.createMapReadableBuffer( RasterCompleteEdge.ENCODING_BYTE_LENGTH * MAX_COMPLETE_EDGES );
+
+    const chunkIndicesBuffer = deviceContext.createBuffer( 4 * 2 * numClippedChunks );
+    const debugChunkIndicesBuffer = deviceContext.createMapReadableBuffer( 4 * 2 * numClippedChunks );
+
+    edgeScanShader.dispatchIndirect( encoder, [
+      configBuffer,
+      clippedChunksBuffer,
+      edgeClipsBuffer,
+      edgeReduces0Buffer,
+      edgeReduces1Buffer,
+      edgeReduces2Buffer,
+      reducibleEdgesBuffer,
+      completeEdgesBuffer,
+      chunkIndicesBuffer
+    ], configBuffer, 60 );
+
+    encoder.copyBufferToBuffer( reducibleEdgesBuffer, 0, debugReducibleEdgesBuffer, 0, debugReducibleEdgesBuffer.size );
+    encoder.copyBufferToBuffer( completeEdgesBuffer, 0, debugCompleteEdgesBuffer, 0, debugCompleteEdgesBuffer.size );
+    encoder.copyBufferToBuffer( chunkIndicesBuffer, 0, debugChunkIndicesBuffer, 0, debugChunkIndicesBuffer.size );
+
     const commandBuffer = encoder.finish();
     device.queue.submit( [ commandBuffer ] );
 
@@ -765,9 +806,14 @@ export default class ParallelRaster {
     const debugReducibleChunksArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugReducibleChunksBuffer );
     const debugCompleteChunksArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugCompleteChunksBuffer );
     const debugChunkIndexMapArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugChunkIndexMapBuffer );
+    const debugReducibleEdgesArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugReducibleEdgesBuffer );
+    const debugCompleteEdgesArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugCompleteEdgesBuffer );
+    const debugChunkIndicesArrayBuffer = await DeviceContext.getMappedArrayBuffer( debugChunkIndicesBuffer );
 
     const reducibleChunkCount = new Uint32Array( debugSplitReduces2ReducedArrayBuffer )[ 0 ];
     const completeChunkCount = new Uint32Array( debugSplitReduces2ReducedArrayBuffer )[ 1 ];
+    const reducibleEdgeCount = new Uint32Array( debugEdgeReduces2ReducedArrayBuffer )[ 0 ];
+    const completeEdgeCount = new Uint32Array( debugEdgeReduces2ReducedArrayBuffer )[ 1 ];
 
     LOG && console.log( `numInputChunks: ${numInputChunks}` );
     LOG && console.log( RasterChunk.fromArrayBuffer( inputChunksEncoder.fullArrayBuffer ).map( toIndexedString ).join( '\n' ) );
@@ -877,6 +923,16 @@ export default class ParallelRaster {
 
     LOG && console.log( 'chunkIndexMap' );
     LOG && console.log( [ ...new Uint32Array( debugChunkIndexMapArrayBuffer ) ].map( toIndexedString ).join( '\n' ) );
+
+    LOG && console.log( `reducibleEdges ${reducibleEdgeCount}` );
+    LOG && console.log( RasterEdge.fromArrayBuffer( debugReducibleEdgesArrayBuffer ).slice( 0, reducibleEdgeCount ).map( toIndexedString ).join( '\n' ) );
+
+    LOG && console.log( `completeEdges ${completeEdgeCount}` );
+    LOG && console.log( RasterCompleteEdge.fromArrayBuffer( debugCompleteEdgesArrayBuffer ).slice( 0, completeEdgeCount ).map( toIndexedString ).join( '\n' ) );
+
+    LOG && console.log( 'chunkIndices' );
+    // each has a min/max!
+    LOG && console.log( [ ...new Uint32Array( debugChunkIndicesArrayBuffer ) ].map( toIndexedString ).join( '\n' ) );
 
     configBuffer.destroy();
     inputChunksBuffer.destroy();

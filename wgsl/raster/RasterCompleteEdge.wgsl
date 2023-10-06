@@ -9,6 +9,7 @@
  */
 
 struct RasterCompleteEdge {
+  // TODO: vec2fs, since it doesn't change alignment?
   startX: f32,
   startY: f32,
   endX: f32,
