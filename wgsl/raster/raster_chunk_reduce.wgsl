@@ -45,7 +45,8 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  let num_reduces = select( config.num_chunk_reduces1, config.num_chunk_reduces0, reduce_number.x == 0u );
+  // NOTE: We're taking the direct number of workgroups from the uniform from the last stage.
+  let num_reduces = select( config.chunk_reduce_0_workgroup_x, config.initial_clip_workgroup_x, reduce_number.x == 0u );
   let reduce_index = global_id.x;
   let exists = reduce_index < num_reduces;
 

@@ -375,18 +375,34 @@ export default class ParallelRaster {
       // chunk_reduce1 workgroup
       Math.ceil( numInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ), 1, 1,
 
+      // split_reduce_scan workgroup
+      Math.ceil( numClippedChunks / workgroupSize ), 1, 1,
+
+      // edge_reduce_scan workgroup
+      Math.ceil( numEdgeClips / workgroupSize ), 1, 1,
+
+      // split_reduce0 workgroup
+      Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize ) ), 1, 1,
+
+      // split_reduce1 workgroup
+      Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize * workgroupSize ) ), 1, 1,
+
+      // edge_reduce0 workgroup
+      Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize ) ), 1, 1,
+
+      // edge_reduce1 workgroup
+      Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize * workgroupSize ) ), 1, 1,
+
+      // edge_index_patch workgroup
+      0, 1, 1, // write dynamically, Math.ceil( numReducibleEdges / workgroupSize )
+
       numInputChunks,
       numInputEdges,
 
       numClippedChunks,
       numEdgeClips,
 
-      // TODO: just read from the above values?
-      // num_chunk_reduces0
-      Math.ceil( numInputEdges / workgroupSize ),
-
-      // num_chunk_reduces1
-      Math.ceil( numInputEdges / ( workgroupSize * workgroupSize ) )
+      0, 0, 0, 0
     ];
 
     const deviceContext = new DeviceContext( device );
