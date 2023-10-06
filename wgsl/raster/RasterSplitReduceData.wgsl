@@ -11,4 +11,9 @@ struct RasterSplitReduceData {
   numComplete: u32
 }
 
+// TODO: inline?
+fn RasterSplitReduceData_combine( a: RasterSplitReduceData, b: RasterSplitReduceData ) -> RasterSplitReduceData {
+  return RasterSplitReduceData( a.numReducible + b.numReducible, a.numComplete + b.numComplete );
+}
+
 const RasterSplitReduceData_identity = RasterSplitReduceData( 0u, 0u );

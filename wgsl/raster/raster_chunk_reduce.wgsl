@@ -11,7 +11,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-// TODO: see what imports we can ditch
 #import ./RasterClippedChunk
 #import ./RasterChunkReduceQuad
 #import ./RasterStageConfig

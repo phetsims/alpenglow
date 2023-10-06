@@ -159,11 +159,15 @@ export { default as wgsl_RasterStageConfig } from '../wgsl/raster/RasterStageCon
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_apply_to_clipped_chunk } from '../wgsl/raster/apply_to_clipped_chunk.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_clipped_chunk_info } from '../wgsl/raster/clipped_chunk_info.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_raster_initial_chunk } from '../wgsl/raster/raster_initial_chunk.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_raster_initial_clip } from '../wgsl/raster/raster_initial_clip.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_raster_chunk_reduce } from '../wgsl/raster/raster_chunk_reduce.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_raster_initial_split_reduce } from '../wgsl/raster/raster_initial_split_reduce.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_reduce_simple_single } from '../wgsl/examples/reduce_simple_single.js';
