@@ -170,6 +170,8 @@ export { default as wgsl_raster_chunk_reduce } from '../wgsl/raster/raster_chunk
 export { default as wgsl_raster_initial_split_reduce } from '../wgsl/raster/raster_initial_split_reduce.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_raster_initial_edge_reduce } from '../wgsl/raster/raster_initial_edge_reduce.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_raster_split_reduce } from '../wgsl/raster/raster_split_reduce.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_reduce_simple_single } from '../wgsl/examples/reduce_simple_single.js';
