@@ -402,7 +402,6 @@ fn main(
   }
 
   // Atomically compute the max(localId.x) that has the same chunkIndex as localId.x==0.
-  // TODO: can we move this above, so we don't need the extra workgroup barrier?
   if ( exists && chunk_index == first_chunk_index ) {
     atomicMax( &max_first_chunk_index, local_id.x );
   }
