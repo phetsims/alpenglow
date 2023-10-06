@@ -8,6 +8,8 @@
 
 import { alpenglow, Binding, DualSnippet, DualSnippetSource } from '../imports.js';
 
+const LOG_SHADERS = true;
+
 export default class ComputeShader {
 
   public readonly module: GPUShaderModule;
@@ -21,6 +23,11 @@ export default class ComputeShader {
     public readonly bindings: Binding[],
     public readonly device: GPUDevice
   ) {
+    if ( LOG_SHADERS ) {
+      console.groupCollapsed( name );
+      console.log( wgsl.split( '\n' ).map( ( s, i ) => `${i + 1} ${s}` ).join( '\n' ) );
+      console.groupEnd();
+    }
 
     this.module = device.createShaderModule( {
       label: name,
@@ -93,10 +100,7 @@ export default class ComputeShader {
     options: Record<string, unknown> = {}
   ): ComputeShader {
     const snippet = DualSnippet.fromSource( source, options );
-    return new ComputeShader( name, snippet.toString(), [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
-    ], device );
+    return new ComputeShader( name, snippet.toString(), bindings, device );
   }
 }
 

@@ -411,6 +411,7 @@ fn main(
   // Store our reduction result
   if ( exists && local_id.x == 0u ) {
     let last_local_edge_index_in_workgroup = min(
+      // TODO: inline constant computation
       config.num_input_edges - 1u - workgroup_id.x * ${u32( workgroupSize )},
       ${u32( workgroupSize )} - 1u
     );

@@ -28,6 +28,38 @@ struct RasterChunkReduceQuad {
   rightMax: RasterChunkReduceData
 }
 
+fn RasterChunkReduceQuad_combine(
+  a: RasterChunkReduceQuad,
+  b: RasterChunkReduceQuad
+) -> RasterChunkReduceQuad {
+  var leftMin = a.leftMin;
+  var leftMax = a.leftMax;
+
+  // We need separate logic for the "left" combine, due to the combine "taking" the right side
+  if (
+    ( a.leftMin.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask ) ==
+    ( b.leftMin.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask )
+  ) {
+    leftMin = RasterChunkReduceData_combine( a.leftMin, b.leftMin );
+  }
+  if (
+    ( a.leftMax.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask ) ==
+    ( b.leftMax.bits & RasterChunkReduceData_bits_clipped_chunk_index_mask )
+  ) {
+    leftMax = RasterChunkReduceData_combine( a.leftMax, b.leftMax );
+  }
+
+  let rightMin = RasterChunkReduceData_combine( a.rightMin, b.rightMin );
+  let rightMax = RasterChunkReduceData_combine( a.rightMax, b.rightMax );
+
+  return RasterChunkReduceQuad(
+    leftMin,
+    leftMax,
+    rightMin,
+    rightMax
+  );
+}
+
 const RasterChunkReduceQuad_out_of_range = RasterChunkReduceQuad(
   RasterChunkReduceData_out_of_range,
   RasterChunkReduceData_out_of_range,
