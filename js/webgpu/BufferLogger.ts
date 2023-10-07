@@ -23,6 +23,7 @@ export default class BufferLogger {
     for ( const callback of this.callbacksOnComplete ) {
       await callback();
     }
+    this.callbacksOnComplete.length = 0;
   }
 
   public withBuffer(

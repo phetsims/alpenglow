@@ -367,4 +367,5 @@ export type { F32, U32, I32, U8 } from './webgpu/ByteEncoder.js';
 export { default as BufferLogger } from './webgpu/BufferLogger.js';
 export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/BufferLogger.js';
 export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
+export { default as RasterClipper } from './webgpu/RasterClipper.js';
 
