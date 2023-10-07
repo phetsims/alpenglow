@@ -58,7 +58,12 @@ struct RasterStageConfig {
   edge_reduce1_workgroup_y: u32,
   edge_reduce1_workgroup_z: u32,
 
-  // 30-word offset
+  // 120-byte offset
+  accumulate_workgroup_x: u32, // Math.ceil( num_complete_chunks / workgroupSize )
+  accumulate_workgroup_y: u32,
+  accumulate_workgroup_z: u32,
+
+  // 33-word offset
   num_input_chunks: u32,
   num_input_edges: u32,
   num_clipped_chunks: u32, // 2x num_input_chunks, but here for simplicity
@@ -68,7 +73,12 @@ struct RasterStageConfig {
   num_reducible_chunks: u32,
   num_complete_chunks: u32,
   num_reducible_edges: u32,
-  num_complete_edges: u32
+  num_complete_edges: u32,
 
-  // 38 word length
+  raster_width: u32,
+  raster_height: u32,
+  raster_offset_x: u32,
+  raster_offset_y: u32
+
+  // 45 word length
 }

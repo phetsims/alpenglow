@@ -78,6 +78,9 @@ fn main(
     // edge_reduce1_workgroup
     divide_round_up( num_edge_clips, workgroup_size * workgroup_size * workgroup_size ), 1u, 1u,
 
+    // accumulate_workgroup
+    divide_round_up( num_complete_chunks, workgroup_size ), 1u, 1u,
+
     num_input_chunks,
     num_input_edges,
 
@@ -87,6 +90,11 @@ fn main(
     num_reducible_chunks,
     num_complete_chunks,
     num_reducible_edges,
-    num_complete_edges
+    num_complete_edges,
+
+    config.raster_width,
+    config.raster_height,
+    config.raster_offset_x,
+    config.raster_offset_y
   );
 }

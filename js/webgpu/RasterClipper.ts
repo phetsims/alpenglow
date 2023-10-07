@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_uniform_update } from '../imports.js';
+import { alpenglow, Binding, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_uniform_update } from '../imports.js';
 
 // TODO: move to 256 after testing (64 helps us test more cases here)
 // const WORKGROUP_SIZE = 64;
@@ -15,7 +15,7 @@ import { alpenglow, Binding, BufferLogger, ByteEncoder, ComputeShader, DeviceCon
 // const ONLY_FIRST_ITERATION = false;
 
 const WORKGROUP_SIZE = 4;
-const LOG = true;
+const LOG = false;
 // const USE_DEMO = false;
 // const ONLY_FIRST_ITERATION = true;
 const DEBUG_REDUCE_BUFFERS = false;
@@ -30,6 +30,9 @@ const MAX_CHUNKS = 2 ** MAX_EXPONENT;
 const MAX_EDGES = 2 ** MAX_EXPONENT;
 const MAX_CLIPPED_CHUNKS = 2 * MAX_CHUNKS;
 const MAX_EDGE_CLIPS = 2 * MAX_EDGES;
+
+const CONFIG_NUM_WORDS = 45;
+const CONFIG_COUNT_WORD_OFFSET = 33;
 
 // TODO: better name
 export default class RasterClipper {
@@ -54,6 +57,7 @@ export default class RasterClipper {
   private readonly chunkIndexPatchShader: ComputeShader;
   private readonly uniformUpdateShader: ComputeShader;
   private readonly edgeIndexPatchShader: ComputeShader;
+  private readonly accumulateShader: ComputeShader;
 
   public constructor( private readonly deviceContext: DeviceContext ) {
     this.device = deviceContext.device;
@@ -76,7 +80,8 @@ export default class RasterClipper {
 
     const shaderOptions = {
       workgroupSize: workgroupSize,
-      debugReduceBuffers: DEBUG_REDUCE_BUFFERS
+      debugReduceBuffers: DEBUG_REDUCE_BUFFERS,
+      integerScale: 5e8
     } as const;
 
     this.initialChunksShader = ComputeShader.fromSource( this.device, 'initial_chunks', wgsl_raster_initial_chunk, [
@@ -171,6 +176,12 @@ export default class RasterClipper {
       Binding.STORAGE_BUFFER
     ], shaderOptions );
 
+    this.accumulateShader = ComputeShader.fromSource( this.device, 'accumulate', wgsl_raster_accumulate, [
+      Binding.UNIFORM_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], shaderOptions );
   }
 
   public static async test(): Promise<void> {
@@ -181,7 +192,7 @@ export default class RasterClipper {
 
     const rasterClipper = new RasterClipper( deviceContext );
 
-// const displaySize = 512;
+    const rasterSize = 256;
 
     const rawInputChunks = ParallelRaster.getTestRawInputChunks();
     const rawInputEdges = ParallelRaster.getTestRawInputEdges();
@@ -225,13 +236,23 @@ export default class RasterClipper {
       // edge_reduce1 workgroup
       Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize * workgroupSize ) ), 1, 1,
 
+      // accumulate workgroup
+      0, 0, 0, // will be filled in later
+
       numInputChunks,
       numInputEdges,
 
       numClippedChunks,
       numEdgeClips,
 
-      0, 0, 0, 0
+      // filled in later
+      0, 0, 0, 0,
+
+      // raster width/height
+      rasterSize, rasterSize,
+
+      // raster offset x/y
+      0, 0
     ];
 
     // const canvas = document.createElement( 'canvas' );
@@ -264,12 +285,16 @@ export default class RasterClipper {
     assert && assert( inputEdgesEncoder.byteLength === RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
     device.queue.writeBuffer( inputEdgesBuffer, 0, inputEdgesEncoder.fullArrayBuffer );
 
+    const accumulationBuffer = deviceContext.createBuffer( 4 * 4 * rasterSize * rasterSize );
+
     const encoder = device.createCommandEncoder( {
       label: 'the encoder'
     } );
 
-    const numStages = 1; // TODO: 16
-    const stageOutput = rasterClipper.runNaive( encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer, numStages );
+    const numStages = 16;
+    const stageOutput = rasterClipper.runAccumulate(
+      encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, numStages
+    );
 
     const commandBuffer = encoder.finish();
     device.queue.submit( [ commandBuffer ] );
@@ -289,39 +314,31 @@ export default class RasterClipper {
     configBuffer.destroy();
     inputChunksBuffer.destroy();
     inputEdgesBuffer.destroy();
-    stageOutput.completeChunkBuffers.forEach( buffer => buffer.destroy() );
-    stageOutput.completeEdgeBuffers.forEach( buffer => buffer.destroy() );
+    accumulationBuffer.destroy();
     stageOutput.temporaryBuffers.forEach( buffer => buffer.destroy() );
   }
 
-  public runNaive(
+  public runAccumulate(
     encoder: GPUCommandEncoder,
     configBuffer: GPUBuffer,
     inputChunksBuffer: GPUBuffer,
     inputEdgesBuffer: GPUBuffer,
+    accumulationBuffer: GPUBuffer,
     numStages: number
   ): {
-    completeChunkBuffers: GPUBuffer[];
-    completeEdgeBuffers: GPUBuffer[];
     temporaryBuffers: GPUBuffer[];
   } {
 
-    const completeChunkBuffers: GPUBuffer[] = [];
-    const completeEdgeBuffers: GPUBuffer[] = [];
     const temporaryBuffers: GPUBuffer[] = [];
 
     for ( let i = 0; i < numStages; i++ ) {
-      const stageResult = this.runStage( encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer );
+      const stageResult = this.runStage( encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer );
       inputChunksBuffer = stageResult.reducibleChunksBuffer;
       inputEdgesBuffer = stageResult.reducibleEdgesBuffer;
-      completeChunkBuffers.push( stageResult.completeChunksBuffer );
-      completeEdgeBuffers.push( stageResult.completeEdgesBuffer );
       temporaryBuffers.push( inputChunksBuffer, inputEdgesBuffer, ...stageResult.temporaryBuffers );
     }
 
     return {
-      completeChunkBuffers: completeChunkBuffers,
-      completeEdgeBuffers: completeEdgeBuffers,
       temporaryBuffers: temporaryBuffers
     };
   }
@@ -331,12 +348,11 @@ export default class RasterClipper {
     encoder: GPUCommandEncoder,
     configBuffer: GPUBuffer,
     inputChunksBuffer: GPUBuffer,
-    inputEdgesBuffer: GPUBuffer
+    inputEdgesBuffer: GPUBuffer,
+    accumulationBuffer: GPUBuffer
   ): {
     reducibleChunksBuffer: GPUBuffer;
-    completeChunksBuffer: GPUBuffer;
     reducibleEdgesBuffer: GPUBuffer;
-    completeEdgesBuffer: GPUBuffer;
     temporaryBuffers: GPUBuffer[];
   } {
     const workgroupSize = WORKGROUP_SIZE;
@@ -347,10 +363,10 @@ export default class RasterClipper {
     let numUsedEdgeClips = -1;
 
     LOG && this.logger.withBuffer( encoder, configBuffer, async arrayBuffer => {
-      numUsedInputChunks = new Uint32Array( arrayBuffer )[ 30 ];
-      numUsedInputEdges = new Uint32Array( arrayBuffer )[ 31 ];
-      numUsedClippedChunks = new Uint32Array( arrayBuffer )[ 32 ];
-      numUsedEdgeClips = new Uint32Array( arrayBuffer )[ 33 ];
+      numUsedInputChunks = new Uint32Array( arrayBuffer )[ CONFIG_COUNT_WORD_OFFSET ];
+      numUsedInputEdges = new Uint32Array( arrayBuffer )[ CONFIG_COUNT_WORD_OFFSET + 1 ];
+      numUsedClippedChunks = new Uint32Array( arrayBuffer )[ CONFIG_COUNT_WORD_OFFSET + 2 ];
+      numUsedEdgeClips = new Uint32Array( arrayBuffer )[ CONFIG_COUNT_WORD_OFFSET + 3 ];
     } );
 
     LOG && this.logger.logIndexed( encoder, inputChunksBuffer, 'inputChunks', RasterChunk, () => numUsedInputChunks );
@@ -569,7 +585,7 @@ export default class RasterClipper {
       configBuffer
     ], 1, 1, 1 );
 
-    LOG && this.logger.logIndexed( encoder, configBuffer, 'config', BufferLogger.RasterU32, () => 38 );
+    LOG && this.logger.logIndexed( encoder, configBuffer, 'config', BufferLogger.RasterU32, () => CONFIG_NUM_WORDS );
 
     this.edgeIndexPatchShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -581,11 +597,16 @@ export default class RasterClipper {
     LOG && this.logger.logIndexed( encoder, reducibleEdgesBuffer, 'reducibleEdges', RasterEdge, () => reducibleEdgeCount );
     // LOG && this.logger.logIndexed( encoder, completeEdgesBuffer, 'completeEdges', RasterCompleteEdge, () => completeEdgeCount );
 
+    this.accumulateShader.dispatchIndirect( encoder, [
+      configBuffer,
+      reducibleChunksBuffer,
+      reducibleEdgesBuffer,
+      accumulationBuffer
+    ], configBuffer, 120 );
+
     return {
       reducibleChunksBuffer: reducibleChunksBuffer,
-      completeChunksBuffer: completeChunksBuffer,
       reducibleEdgesBuffer: reducibleEdgesBuffer,
-      completeEdgesBuffer: completeEdgesBuffer,
       temporaryBuffers: [
         clippedChunksBuffer,
         edgeClipsBuffer,
@@ -603,7 +624,9 @@ export default class RasterClipper {
         edgeReduces2Buffer,
         chunkIndexMapBuffer,
         debugSplitScanReducesBuffer,
-        chunkIndicesBuffer
+        chunkIndicesBuffer,
+        completeChunksBuffer,
+        completeEdgesBuffer
       ]
     };
   }
