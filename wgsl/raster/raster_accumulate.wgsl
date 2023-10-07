@@ -56,14 +56,15 @@ fn main(
     return;
   }
 
-#ifdef debugAccumulation
-  debug_accumulation[ global_id.x ] = 4i;
-#endif
-
   // sanity check TODO remove? This is to prevent crazy loops
   if ( minX < maxX - 0xffffi || minY < maxY - 0xffffi ) {
     return;
   }
+
+#ifdef debugAccumulation
+  // TODO: remove?
+  debug_accumulation[ global_id.x ] = 6i;
+#endif
 
   // NOTE: remember area might be larger for a multi-pixel constant area
   let pixel_area = select( area, 1.0f, is_full_area );

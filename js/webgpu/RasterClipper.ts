@@ -15,11 +15,11 @@ import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShade
 // const ONLY_FIRST_ITERATION = false;
 
 const WORKGROUP_SIZE = 8;
-const LOG = true;
+const LOG = false;
 // const USE_DEMO = false;
 // const ONLY_FIRST_ITERATION = true;
 const DEBUG_REDUCE_BUFFERS = false;
-const DEBUG_ACCUMULATION = true;
+const DEBUG_ACCUMULATION = false;
 
 
 // TODO: figure out better output buffer size, since it's hard to bound
@@ -660,14 +660,16 @@ export default class RasterClipper {
 
     this.accumulateShader.dispatchIndirect( encoder, [
       configBuffer,
-      reducibleChunksBuffer,
-      reducibleEdgesBuffer,
+      completeChunksBuffer,
+      completeEdgesBuffer,
       accumulationBuffer,
       ...( DEBUG_ACCUMULATION ? [ debugAccumulationBuffer ] : [] )
     ], configBuffer, 120 );
 
     // LOG && this.logger.logIndexed( encoder, accumulationBuffer, 'accumulation', BufferLogger.RasterF32, () => 4 * rasterSize * rasterSize );
-    LOG && this.logger.logIndexed( encoder, debugAccumulationBuffer, 'debugAccumulation', BufferLogger.RasterI32, () => completeChunkCount );
+    if ( DEBUG_ACCUMULATION ) {
+      LOG && this.logger.logIndexed( encoder, debugAccumulationBuffer, 'debugAccumulation', BufferLogger.RasterI32, () => completeChunkCount );
+    }
 
     return {
       reducibleChunksBuffer: reducibleChunksBuffer,
