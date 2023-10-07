@@ -20,6 +20,7 @@ const WORKGROUP_SIZE = 4;
 const LOG = true;
 const USE_DEMO = false;
 const ONLY_FIRST_ITERATION = true;
+const COLLAPSE_LOGS = false;
 
 export default class ParallelRaster {
 
@@ -380,6 +381,9 @@ export default class ParallelRaster {
     type FromArrayBufferable = { fromArrayBuffer: ( arrayBuffer: ArrayBuffer ) => { toString(): string }[] };
     type FromMultiArrayBufferable = { fromArrayBuffer: ( arrayBuffer: ArrayBuffer ) => { toStrings(): string[] }[] };
 
+    const startGroup = ( COLLAPSE_LOGS ? console.groupCollapsed : console.group ).bind( console );
+    const endGroup = () => console.groupEnd();
+
     const logIndexed = (
       encoder: GPUCommandEncoder,
       buffer: GPUBuffer,
@@ -388,14 +392,13 @@ export default class ParallelRaster {
       lengthCallback: ( () => number ) | null = null
     ) => {
       withBuffer( encoder, buffer, async arrayBuffer => {
-        // TODO: a way to NOT collapse?
         let elements = type.fromArrayBuffer( arrayBuffer );
         const length = lengthCallback ? lengthCallback() : elements.length;
         elements = elements.slice( 0, length );
 
-        console.groupCollapsed( `[buffer] ${name} (${length})` );
+        startGroup( `[buffer] ${name} (${length})` );
         console.log( elements.map( toIndexedString ).join( '\n' ) );
-        console.groupEnd();
+        endGroup();
       } );
     };
 
@@ -406,9 +409,9 @@ export default class ParallelRaster {
       type: FromMultiArrayBufferable
     ) => {
       withBuffer( encoder, buffer, async arrayBuffer => {
-        console.groupCollapsed( `[buffer] ${name}` );
+        startGroup( `[buffer] ${name}` );
         console.log( type.fromArrayBuffer( arrayBuffer ).map( toMultiIndexedString ).join( '\n' ) );
-        console.groupEnd();
+        endGroup();
       } );
     };
 
@@ -418,9 +421,9 @@ export default class ParallelRaster {
       type: FromArrayBufferable
     ) => {
       callbacksOnComplete.push( async () => {
-        console.groupCollapsed( `[buffer] ${name}` );
+        startGroup( `[buffer] ${name}` );
         console.log( type.fromArrayBuffer( arrayBuffer ).map( toIndexedString ).join( '\n' ) );
-        console.groupEnd();
+        endGroup();
       } );
     };
 
@@ -534,13 +537,16 @@ export default class ParallelRaster {
 
     const DEBUG_REDUCE_BUFFERS = false;
 
+    const shaderOptions = {
+      workgroupSize: workgroupSize,
+      debugReduceBuffers: DEBUG_REDUCE_BUFFERS
+    } as const;
+
     const initialChunksShader = ComputeShader.fromSource( device, 'initial_chunks', wgsl_raster_initial_chunk, [
       Binding.UNIFORM_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
-    ], {
-      workgroupSize: workgroupSize
-    } );
+    ], shaderOptions );
 
     const initialClipShader = ComputeShader.fromSource( device, 'initial_clip', wgsl_raster_initial_clip, [
       Binding.UNIFORM_BUFFER,
@@ -550,10 +556,7 @@ export default class ParallelRaster {
       Binding.STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
       ...( DEBUG_REDUCE_BUFFERS ? [ Binding.STORAGE_BUFFER ] : [] )
-    ], {
-      workgroupSize: workgroupSize,
-      debugReduceBuffers: DEBUG_REDUCE_BUFFERS
-    } );
+    ], shaderOptions );
 
     const chunkReduceShader = ComputeShader.fromSource( device, 'chunk_reduce', wgsl_raster_chunk_reduce, [
       Binding.UNIFORM_BUFFER,
@@ -561,19 +564,14 @@ export default class ParallelRaster {
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
-    ], {
-      workgroupSize: workgroupSize
-    } );
+    ], shaderOptions );
 
     const initialSplitReduceShader = ComputeShader.fromSource( device, 'initial_split_reduce', wgsl_raster_initial_split_reduce, [
       Binding.UNIFORM_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
       ...( DEBUG_REDUCE_BUFFERS ? [ Binding.STORAGE_BUFFER ] : [] )
-    ], {
-      workgroupSize: workgroupSize,
-      debugReduceBuffers: DEBUG_REDUCE_BUFFERS
-    } );
+    ], shaderOptions );
 
     const initialEdgeReduceShader = ComputeShader.fromSource( device, 'initial_edge_reduce', wgsl_raster_initial_edge_reduce, [
       Binding.UNIFORM_BUFFER,
@@ -581,19 +579,14 @@ export default class ParallelRaster {
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
       ...( DEBUG_REDUCE_BUFFERS ? [ Binding.STORAGE_BUFFER ] : [] )
-    ], {
-      workgroupSize: workgroupSize,
-      debugReduceBuffers: DEBUG_REDUCE_BUFFERS
-    } );
+    ], shaderOptions );
 
     const splitReduceShader = ComputeShader.fromSource( device, 'split_reduce', wgsl_raster_split_reduce, [
       Binding.UNIFORM_BUFFER,
       Binding.UNIFORM_BUFFER,
       Binding.STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
-    ], {
-      workgroupSize: workgroupSize
-    } );
+    ], shaderOptions );
 
     const splitScanShader = ComputeShader.fromSource( device, 'split_scan', wgsl_raster_split_scan, [
       Binding.UNIFORM_BUFFER,
@@ -605,10 +598,7 @@ export default class ParallelRaster {
       Binding.STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
       ...( DEBUG_REDUCE_BUFFERS ? [ Binding.STORAGE_BUFFER ] : [] )
-    ], {
-      workgroupSize: workgroupSize,
-      debugReduceBuffers: DEBUG_REDUCE_BUFFERS
-    } );
+    ], shaderOptions );
 
     const edgeScanShader = ComputeShader.fromSource( device, 'edge_scan', wgsl_raster_edge_scan, [
       Binding.UNIFORM_BUFFER,
@@ -620,9 +610,7 @@ export default class ParallelRaster {
       Binding.STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
-    ], {
-      workgroupSize: workgroupSize
-    } );
+    ], shaderOptions );
 
     const chunkIndexPatchShader = ComputeShader.fromSource( device, 'chunk_index_patch', wgsl_raster_chunk_index_patch, [
       Binding.UNIFORM_BUFFER,
@@ -631,28 +619,20 @@ export default class ParallelRaster {
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
-    ], {
-      workgroupSize: workgroupSize
-    } );
+    ], shaderOptions );
 
     const uniformUpdateShader = ComputeShader.fromSource( device, 'uniform_update', wgsl_raster_uniform_update, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
-    ], {
-      workgroupSize: workgroupSize
-    } );
+    ], shaderOptions );
 
     const edgeIndexPatchShader = ComputeShader.fromSource( device, 'edge_index_patch', wgsl_raster_edge_index_patch, [
       Binding.UNIFORM_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
-    ], {
-      workgroupSize: workgroupSize
-    } );
-
-    // TODO: pass same options into all shaders, as common options?
+    ], shaderOptions );
 
     const encoder = device.createCommandEncoder( {
       label: 'the encoder'
