@@ -15,10 +15,11 @@ import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShade
 // const ONLY_FIRST_ITERATION = false;
 
 const WORKGROUP_SIZE = 8;
-const LOG = false;
+const LOG = true;
 // const USE_DEMO = false;
 // const ONLY_FIRST_ITERATION = true;
 const DEBUG_REDUCE_BUFFERS = false;
+const DEBUG_ACCUMULATION = true;
 
 
 // TODO: figure out better output buffer size, since it's hard to bound
@@ -84,6 +85,7 @@ export default class RasterClipper {
     const shaderOptions = {
       workgroupSize: workgroupSize,
       debugReduceBuffers: DEBUG_REDUCE_BUFFERS,
+      debugAccumulation: DEBUG_ACCUMULATION,
       integerScale: 5e6,
       preferredStorageFormat: deviceContext.preferredStorageFormat
     } as const;
@@ -184,7 +186,8 @@ export default class RasterClipper {
       Binding.UNIFORM_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      Binding.STORAGE_BUFFER,
+      ...( DEBUG_ACCUMULATION ? [ Binding.STORAGE_BUFFER ] : [] )
     ], shaderOptions );
 
     this.toTextureShader = ComputeShader.fromSource( this.device, 'to_texture', wgsl_raster_to_texture, [
@@ -653,12 +656,18 @@ export default class RasterClipper {
     LOG && this.logger.logIndexed( encoder, reducibleEdgesBuffer, 'reducibleEdges', RasterEdge, () => reducibleEdgeCount );
     // LOG && this.logger.logIndexed( encoder, completeEdgesBuffer, 'completeEdges', RasterCompleteEdge, () => completeEdgeCount );
 
+    const debugAccumulationBuffer = this.deviceContext.createBuffer( 4 * MAX_COMPLETE_CHUNKS );
+
     this.accumulateShader.dispatchIndirect( encoder, [
       configBuffer,
       reducibleChunksBuffer,
       reducibleEdgesBuffer,
-      accumulationBuffer
+      accumulationBuffer,
+      ...( DEBUG_ACCUMULATION ? [ debugAccumulationBuffer ] : [] )
     ], configBuffer, 120 );
+
+    // LOG && this.logger.logIndexed( encoder, accumulationBuffer, 'accumulation', BufferLogger.RasterF32, () => 4 * rasterSize * rasterSize );
+    LOG && this.logger.logIndexed( encoder, debugAccumulationBuffer, 'debugAccumulation', BufferLogger.RasterI32, () => completeChunkCount );
 
     return {
       reducibleChunksBuffer: reducibleChunksBuffer,

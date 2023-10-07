@@ -21,6 +21,10 @@ var<storage, read> complete_chunks: array<RasterCompleteChunk>;
 var<storage, read> complete_edges: array<RasterCompleteEdge>;
 @group(0) @binding(3)
 var<storage, read_write> accumulation: array<atomic<i32>>;
+#ifdef debugAccumulation
+@group(0) @binding(4)
+var<storage, read_write> debug_accumulation: array<i32>;
+#endif
 
 #bindings
 
@@ -51,6 +55,10 @@ fn main(
   if ( minX >= maxX || minY >= maxY ) {
     return;
   }
+
+#ifdef debugAccumulation
+  debug_accumulation[ global_id.x ] = 4i;
+#endif
 
   // sanity check TODO remove? This is to prevent crazy loops
   if ( minX < maxX - 0xffffi || minY < maxY - 0xffffi ) {

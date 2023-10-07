@@ -105,6 +105,18 @@ export default class BufferLogger {
     }
   };
 
+  public static readonly RasterI32 = {
+    fromArrayBuffer( arrayBuffer: ArrayBuffer ): number[] {
+      return [ ...new Int32Array( arrayBuffer ) ];
+    }
+  };
+
+  public static readonly RasterF32 = {
+    fromArrayBuffer( arrayBuffer: ArrayBuffer ): number[] {
+      return [ ...new Float32Array( arrayBuffer ) ];
+    }
+  };
+
   public static toIndexedString( n: { toString(): string }, i: number ): string {
     return `${i} ${n.toString()}`;
   }
