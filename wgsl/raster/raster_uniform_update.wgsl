@@ -24,7 +24,7 @@ fn divide_round_up( a: u32, b: u32 ) -> u32 {
   return ( a + b - 1u ) / b;
 }
 
-@compute @workgroup_size(${workgroupSize})
+@compute @workgroup_size(1)
 fn main(
   @builtin(global_invocation_id) global_id: vec3u,
   @builtin(local_invocation_id) local_id: vec3u,
