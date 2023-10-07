@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
+import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
 
 // TODO: move to 256 after testing (64 helps us test more cases here)
 // const WORKGROUP_SIZE = 64;
@@ -14,9 +14,9 @@ import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShade
 // const USE_DEMO = true;
 // const ONLY_FIRST_ITERATION = false;
 
-const WORKGROUP_SIZE = 8;
+const WORKGROUP_SIZE = 64;
 const LOG = false;
-// const USE_DEMO = false;
+const USE_DEMO = true;
 // const ONLY_FIRST_ITERATION = true;
 const DEBUG_REDUCE_BUFFERS = false;
 const DEBUG_ACCUMULATION = false;
@@ -251,8 +251,32 @@ export default class RasterClipper {
       } );
     }
 
-    const rawInputChunks = ParallelRaster.getTestRawInputChunks();
-    const rawInputEdges = ParallelRaster.getTestRawInputEdges();
+    let rawInputChunks = ParallelRaster.getTestRawInputChunks();
+    let rawInputEdges = ParallelRaster.getTestRawInputEdges();
+
+    if ( USE_DEMO ) {
+      rawInputEdges = [];
+      const unprocessedEdges = TestToCanvas.getTestPath().toEdgedFace().edges;
+      unprocessedEdges.forEach( ( edge, i ) => {
+        rawInputEdges.push( new RasterEdge(
+          0,
+          i === 0,
+          i === unprocessedEdges.length - 1,
+          // NOTE: reversed here, due to our test path!!!
+          edge.endPoint.timesScalar( 0.35 ),
+          edge.startPoint.timesScalar( 0.35 )
+        ) );
+      } );
+      rawInputChunks = [ new RasterChunk(
+        0,
+        false,
+        true,
+        0,
+        rawInputEdges.length,
+        0, 0, 256, 256,
+        0, 0, 0, 0
+      ) ];
+    }
 
     const numInputChunks = rawInputChunks.length;
     const numInputEdges = rawInputEdges.length;
