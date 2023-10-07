@@ -187,6 +187,8 @@ export { default as wgsl_raster_uniform_update } from '../wgsl/raster/raster_uni
 export { default as wgsl_raster_edge_index_patch } from '../wgsl/raster/raster_edge_index_patch.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_raster_accumulate } from '../wgsl/raster/raster_accumulate.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_raster_to_texture } from '../wgsl/raster/raster_to_texture.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_reduce_simple_single } from '../wgsl/examples/reduce_simple_single.js';

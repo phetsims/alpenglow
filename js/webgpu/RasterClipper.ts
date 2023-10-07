@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_uniform_update } from '../imports.js';
+import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
 
 // TODO: move to 256 after testing (64 helps us test more cases here)
 // const WORKGROUP_SIZE = 64;
@@ -58,6 +58,9 @@ export default class RasterClipper {
   private readonly uniformUpdateShader: ComputeShader;
   private readonly edgeIndexPatchShader: ComputeShader;
   private readonly accumulateShader: ComputeShader;
+  private readonly toTextureShader: ComputeShader;
+
+  private readonly blitShader: BlitShader;
 
   public constructor( private readonly deviceContext: DeviceContext ) {
     this.device = deviceContext.device;
@@ -81,7 +84,8 @@ export default class RasterClipper {
     const shaderOptions = {
       workgroupSize: workgroupSize,
       debugReduceBuffers: DEBUG_REDUCE_BUFFERS,
-      integerScale: 5e8
+      integerScale: 5e8,
+      preferredStorageFormat: deviceContext.preferredStorageFormat
     } as const;
 
     this.initialChunksShader = ComputeShader.fromSource( this.device, 'initial_chunks', wgsl_raster_initial_chunk, [
@@ -182,6 +186,14 @@ export default class RasterClipper {
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], shaderOptions );
+
+    this.toTextureShader = ComputeShader.fromSource( this.device, 'to_texture', wgsl_raster_to_texture, [
+      Binding.UNIFORM_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      deviceContext.preferredStorageFormat === 'bgra8unorm' ? Binding.TEXTURE_OUTPUT_BGRA8UNORM : Binding.TEXTURE_OUTPUT_RGBA8UNORM
+    ], shaderOptions );
+
+    this.blitShader = new BlitShader( this.device, deviceContext.preferredCanvasFormat );
   }
 
   public static async test(): Promise<void> {
@@ -193,6 +205,48 @@ export default class RasterClipper {
     const rasterClipper = new RasterClipper( deviceContext );
 
     const rasterSize = 256;
+
+    const canvas = document.createElement( 'canvas' );
+    canvas.width = rasterSize;
+    canvas.height = rasterSize;
+    canvas.style.width = `${rasterSize / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
+    canvas.style.height = `${rasterSize / window.devicePixelRatio}px`;
+    document.body.appendChild( canvas );
+
+    const context = deviceContext.getCanvasContext( canvas );
+
+    const outTexture = context.getCurrentTexture();
+
+    const canvasTextureFormat = outTexture.format;
+    if ( canvasTextureFormat !== 'bgra8unorm' && canvasTextureFormat !== 'rgba8unorm' ) {
+      throw new Error( 'unsupported format' );
+    }
+
+    const canOutputToCanvas = canvasTextureFormat === deviceContext.preferredStorageFormat;
+    let fineOutputTextureView: GPUTextureView;
+    let fineOutputTexture: GPUTexture | null = null;
+    const outTextureView = outTexture.createView();
+
+    if ( canOutputToCanvas ) {
+      fineOutputTextureView = outTextureView;
+    }
+    else {
+      fineOutputTexture = device.createTexture( {
+        label: 'fineOutputTexture',
+        size: {
+          width: outTexture.width,
+          height: outTexture.height,
+          depthOrArrayLayers: 1
+        },
+        format: deviceContext.preferredStorageFormat,
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING // see TargetTexture
+      } );
+      fineOutputTextureView = fineOutputTexture.createView( {
+        label: 'fineOutputTextureView',
+        format: deviceContext.preferredStorageFormat,
+        dimension: '2d'
+      } );
+    }
 
     const rawInputChunks = ParallelRaster.getTestRawInputChunks();
     const rawInputEdges = ParallelRaster.getTestRawInputEdges();
@@ -255,16 +309,6 @@ export default class RasterClipper {
       0, 0
     ];
 
-    // const canvas = document.createElement( 'canvas' );
-    // canvas.width = displaySize * window.devicePixelRatio;
-    // canvas.height = displaySize * window.devicePixelRatio;
-    // canvas.style.width = `${displaySize}px`;
-    // canvas.style.height = `${displaySize}px`;
-
-    // const context = deviceContext.getCanvasContext( canvas );
-    //
-    // const outTexture = context.getCurrentTexture();
-
     const configBuffer = device.createBuffer( {
       label: 'config buffer',
       size: 4 * configData.length,
@@ -296,6 +340,17 @@ export default class RasterClipper {
       encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, numStages
     );
 
+    // Have the fine-rasterization shader use the preferred format as output (for now)
+    rasterClipper.toTextureShader.dispatch( encoder, [
+      configBuffer, accumulationBuffer, fineOutputTextureView
+    ], canvas.width / 16, canvas.height / 16 );
+
+    if ( !canOutputToCanvas ) {
+      assert && assert( fineOutputTexture, 'If we cannot output to the Canvas directly, we will have created a texture' );
+
+      rasterClipper.blitShader.dispatch( encoder, outTextureView, fineOutputTextureView );
+    }
+
     const commandBuffer = encoder.finish();
     device.queue.submit( [ commandBuffer ] );
 
@@ -315,6 +370,7 @@ export default class RasterClipper {
     inputChunksBuffer.destroy();
     inputEdgesBuffer.destroy();
     accumulationBuffer.destroy();
+    fineOutputTexture && fineOutputTexture.destroy();
     stageOutput.temporaryBuffers.forEach( buffer => buffer.destroy() );
   }
 
