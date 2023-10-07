@@ -801,10 +801,31 @@ export default class ParallelRaster {
     } );
 
     configBuffer.destroy();
-    inputChunksBuffer.destroy();
+    zeroBuffer.destroy();
+    oneBuffer.destroy();
+    twoBuffer.destroy();
+    threeBuffer.destroy();
     clippedChunksBuffer.destroy();
-
-    // TODO: FIX UP destroy() of buffers!!!
+    edgeClipsBuffer.destroy();
+    chunkReduces0Buffer.destroy();
+    debugChunkReduces0Buffer.destroy();
+    chunkReduces1Buffer.destroy();
+    chunkReduces2Buffer.destroy();
+    splitReduces0Buffer.destroy();
+    debugInitialSplitReduceBuffer.destroy();
+    edgeReduces0Buffer.destroy();
+    debugInitialEdgeReduceBuffer.destroy();
+    splitReduces1Buffer.destroy();
+    splitReduces2Buffer.destroy();
+    edgeReduces1Buffer.destroy();
+    edgeReduces2Buffer.destroy();
+    reducibleChunksBuffer.destroy();
+    completeChunksBuffer.destroy();
+    chunkIndexMapBuffer.destroy();
+    debugSplitScanReducesBuffer.destroy();
+    reducibleEdgesBuffer.destroy();
+    completeEdgesBuffer.destroy();
+    chunkIndicesBuffer.destroy();
   }
 
   public static async process(
