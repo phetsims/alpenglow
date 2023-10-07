@@ -365,12 +365,6 @@ export default class ParallelRaster {
     const workgroupSize = WORKGROUP_SIZE;
     const RASTER_CLIPPED_CHUNK_BYTES = 4 * 10;
 
-    // TODO: figure out better output buffer size, since it's hard to bound
-    const MAX_COMPLETE_CHUNKS = 100000;
-
-    // TODO: figure out better output buffer size, since it's hard to bound
-    const MAX_COMPLETE_EDGES = 100000;
-
     const configData = [
 
       // initial_chunk workgroup
@@ -553,14 +547,36 @@ export default class ParallelRaster {
       Binding.STORAGE_BUFFER
     ], shaderOptions );
 
+    // TODO: figure out better output buffer size, since it's hard to bound
+    const MAX_EXPONENT = 19;
+    const MAX_COMPLETE_CHUNKS = 2 ** MAX_EXPONENT;
+    const MAX_COMPLETE_EDGES = 2 ** MAX_EXPONENT;
+
+    const MAX_CHUNKS = 2 ** MAX_EXPONENT;
+    const MAX_EDGES = 2 ** MAX_EXPONENT;
+    const MAX_CLIPPED_CHUNKS = 2 * MAX_CHUNKS;
+    const MAX_EDGE_CLIPS = 2 * MAX_EDGES;
+
     const encoder = device.createCommandEncoder( {
       label: 'the encoder'
     } );
 
-    LOG && logger.logIndexedImmediate( inputChunksEncoder.fullArrayBuffer, 'inputChunks', RasterChunk );
-    LOG && logger.logIndexedImmediate( inputEdgesEncoder.fullArrayBuffer, 'inputEdges', RasterEdge );
+    let numUsedInputChunks = -1;
+    let numUsedInputEdges = -1;
+    let numUsedClippedChunks = -1;
+    let numUsedEdgeClips = -1;
 
-    const clippedChunksBuffer = deviceContext.createBuffer( RASTER_CLIPPED_CHUNK_BYTES * numClippedChunks );
+    LOG && logger.withBuffer( encoder, configBuffer, async arrayBuffer => {
+      numUsedInputChunks = new Uint32Array( arrayBuffer )[ 30 ];
+      numUsedInputEdges = new Uint32Array( arrayBuffer )[ 31 ];
+      numUsedClippedChunks = new Uint32Array( arrayBuffer )[ 32 ];
+      numUsedEdgeClips = new Uint32Array( arrayBuffer )[ 33 ];
+    } );
+
+    LOG && logger.logIndexedImmediate( inputChunksEncoder.fullArrayBuffer, 'inputChunks', RasterChunk, () => numUsedInputChunks );
+    LOG && logger.logIndexedImmediate( inputEdgesEncoder.fullArrayBuffer, 'inputEdges', RasterEdge, () => numUsedInputEdges );
+
+    const clippedChunksBuffer = deviceContext.createBuffer( RASTER_CLIPPED_CHUNK_BYTES * MAX_CLIPPED_CHUNKS );
 
     initialChunksShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -568,11 +584,11 @@ export default class ParallelRaster {
       clippedChunksBuffer
     ], configBuffer, 0 );
 
-    LOG && logger.logIndexed( encoder, clippedChunksBuffer, 'clippedChunks (initial)', RasterClippedChunk );
+    LOG && logger.logIndexed( encoder, clippedChunksBuffer, 'clippedChunks (initial)', RasterClippedChunk, () => numUsedClippedChunks );
 
-    const edgeClipsBuffer = deviceContext.createBuffer( RasterEdgeClip.ENCODING_BYTE_LENGTH * numEdgeClips );
-    const chunkReduces0Buffer = deviceContext.createBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( numInputEdges / workgroupSize ) );
-    const debugChunkReduces0Buffer = deviceContext.createBuffer( RasterChunkReducePair.ENCODING_BYTE_LENGTH * numInputEdges );
+    const edgeClipsBuffer = deviceContext.createBuffer( RasterEdgeClip.ENCODING_BYTE_LENGTH * MAX_EDGE_CLIPS );
+    const chunkReduces0Buffer = deviceContext.createBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGES / workgroupSize ) );
+    const debugChunkReduces0Buffer = deviceContext.createBuffer( RasterChunkReducePair.ENCODING_BYTE_LENGTH * MAX_EDGES );
 
     initialClipShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -584,13 +600,13 @@ export default class ParallelRaster {
       ...( DEBUG_REDUCE_BUFFERS ? [ debugChunkReduces0Buffer ] : [] )
     ], configBuffer, 12 );
 
-    LOG && logger.logIndexed( encoder, edgeClipsBuffer, 'edgeClips', RasterEdgeClip );
-    LOG && logger.logIndexedMultiline( encoder, chunkReduces0Buffer, 'chunkReduces0', RasterChunkReduceQuad );
+    LOG && logger.logIndexed( encoder, edgeClipsBuffer, 'edgeClips', RasterEdgeClip, () => numUsedEdgeClips );
+    LOG && logger.logIndexedMultiline( encoder, chunkReduces0Buffer, 'chunkReduces0', RasterChunkReduceQuad, () => Math.ceil( numUsedInputEdges / workgroupSize ) );
     if ( DEBUG_REDUCE_BUFFERS ) {
-      LOG && logger.logIndexedMultiline( encoder, debugChunkReduces0Buffer, 'debugFullChunkReduces', RasterChunkReducePair );
+      LOG && logger.logIndexedMultiline( encoder, debugChunkReduces0Buffer, 'debugFullChunkReduces', RasterChunkReducePair, () => numUsedInputEdges );
     }
 
-    const chunkReduces1Buffer = deviceContext.createBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( numInputEdges / ( workgroupSize * workgroupSize ) ) );
+    const chunkReduces1Buffer = deviceContext.createBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGES / ( workgroupSize * workgroupSize ) ) );
 
     chunkReduceShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -600,10 +616,10 @@ export default class ParallelRaster {
       chunkReduces1Buffer
     ], configBuffer, 24 );
 
-    LOG && logger.logIndexedMultiline( encoder, chunkReduces1Buffer, 'chunkReduces1', RasterChunkReduceQuad );
+    LOG && logger.logIndexedMultiline( encoder, chunkReduces1Buffer, 'chunkReduces1', RasterChunkReduceQuad, () => Math.ceil( numUsedInputEdges / ( workgroupSize * workgroupSize ) ) );
 
     // TODO: don't even have these buffers! We probably need a second shader for that, no?
-    const chunkReduces2Buffer = deviceContext.createBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( numInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ) );
+    const chunkReduces2Buffer = deviceContext.createBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGES / ( workgroupSize * workgroupSize * workgroupSize ) ) );
 
     chunkReduceShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -613,11 +629,11 @@ export default class ParallelRaster {
       chunkReduces2Buffer
     ], configBuffer, 36 );
 
-    LOG && logger.logIndexedMultiline( encoder, chunkReduces2Buffer, 'chunkReduces2', RasterChunkReduceQuad );
-    LOG && logger.logIndexed( encoder, clippedChunksBuffer, 'clippedChunks (reduced)', RasterClippedChunk );
+    LOG && logger.logIndexedMultiline( encoder, chunkReduces2Buffer, 'chunkReduces2', RasterChunkReduceQuad, () => Math.ceil( numUsedInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ) );
+    LOG && logger.logIndexed( encoder, clippedChunksBuffer, 'clippedChunks (reduced)', RasterClippedChunk, () => numUsedClippedChunks );
 
-    const splitReduces0Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( numClippedChunks / workgroupSize ) );
-    const debugInitialSplitReduceBuffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * numClippedChunks );
+    const splitReduces0Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_CLIPPED_CHUNKS / workgroupSize ) );
+    const debugInitialSplitReduceBuffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS );
 
     initialSplitReduceShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -626,8 +642,8 @@ export default class ParallelRaster {
       ...( DEBUG_REDUCE_BUFFERS ? [ debugInitialSplitReduceBuffer ] : [] )
     ], configBuffer, 48 );
 
-    const edgeReduces0Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( numEdgeClips / workgroupSize ) );
-    const debugInitialEdgeReduceBuffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * numEdgeClips );
+    const edgeReduces0Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGE_CLIPS / workgroupSize ) );
+    const debugInitialEdgeReduceBuffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * MAX_EDGE_CLIPS );
 
     initialEdgeReduceShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -637,12 +653,12 @@ export default class ParallelRaster {
       ...( DEBUG_REDUCE_BUFFERS ? [ debugInitialEdgeReduceBuffer ] : [] )
     ], configBuffer, 60 );
 
-    const splitReduces1Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize ) ) );
+    const splitReduces1Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_CLIPPED_CHUNKS / ( workgroupSize * workgroupSize ) ) );
 
     if ( DEBUG_REDUCE_BUFFERS ) {
-      LOG && logger.logIndexed( encoder, debugInitialSplitReduceBuffer, 'debugInitialSplitReduce', RasterSplitReduceData );
+      LOG && logger.logIndexed( encoder, debugInitialSplitReduceBuffer, 'debugInitialSplitReduce', RasterSplitReduceData, () => numUsedClippedChunks );
     }
-    LOG && logger.logIndexed( encoder, splitReduces0Buffer, 'splitReduces0', RasterSplitReduceData );
+    LOG && logger.logIndexed( encoder, splitReduces0Buffer, 'splitReduces0', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / workgroupSize ) );
 
     splitReduceShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -651,10 +667,10 @@ export default class ParallelRaster {
       splitReduces1Buffer
     ], configBuffer, 72 );
 
-    LOG && logger.logIndexed( encoder, splitReduces0Buffer, 'splitReduces0 (scanned)', RasterSplitReduceData );
-    LOG && logger.logIndexed( encoder, splitReduces1Buffer, 'splitReduces1', RasterSplitReduceData );
+    LOG && logger.logIndexed( encoder, splitReduces0Buffer, 'splitReduces0 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / workgroupSize ) );
+    LOG && logger.logIndexed( encoder, splitReduces1Buffer, 'splitReduces1', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / ( workgroupSize * workgroupSize ) ) );
 
-    const splitReduces2Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( numClippedChunks / ( workgroupSize * workgroupSize * workgroupSize ) ) );
+    const splitReduces2Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_CLIPPED_CHUNKS / ( workgroupSize * workgroupSize * workgroupSize ) ) );
 
     splitReduceShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -663,8 +679,8 @@ export default class ParallelRaster {
       splitReduces2Buffer
     ], configBuffer, 84 );
 
-    LOG && logger.logIndexed( encoder, splitReduces1Buffer, 'splitReduces1 (scanned)', RasterSplitReduceData );
-    LOG && logger.logIndexed( encoder, splitReduces2Buffer, 'splitReduces2', RasterSplitReduceData );
+    LOG && logger.logIndexed( encoder, splitReduces1Buffer, 'splitReduces1 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / ( workgroupSize * workgroupSize ) ) );
+    LOG && logger.logIndexed( encoder, splitReduces2Buffer, 'splitReduces2', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / ( workgroupSize * workgroupSize * workgroupSize ) ) );
 
     let reducibleChunkCount = -1;
     let completeChunkCount = -1;
@@ -674,12 +690,12 @@ export default class ParallelRaster {
       completeChunkCount = new Uint32Array( arrayBuffer )[ 1 ];
     } );
 
-    const edgeReduces1Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize ) ) );
+    const edgeReduces1Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGE_CLIPS / ( workgroupSize * workgroupSize ) ) );
 
     if ( DEBUG_REDUCE_BUFFERS ) {
-      LOG && logger.logIndexed( encoder, debugInitialEdgeReduceBuffer, 'debugInitialEdgeReduce', RasterSplitReduceData );
+      LOG && logger.logIndexed( encoder, debugInitialEdgeReduceBuffer, 'debugInitialEdgeReduce', RasterSplitReduceData, () => numUsedEdgeClips );
     }
-    LOG && logger.logIndexed( encoder, edgeReduces0Buffer, 'edgeReduces0', RasterSplitReduceData );
+    LOG && logger.logIndexed( encoder, edgeReduces0Buffer, 'edgeReduces0', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / workgroupSize ) );
 
     splitReduceShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -688,10 +704,10 @@ export default class ParallelRaster {
       edgeReduces1Buffer
     ], configBuffer, 96 );
 
-    LOG && logger.logIndexed( encoder, edgeReduces0Buffer, 'edgeReduces0 (scanned)', RasterSplitReduceData );
-    LOG && logger.logIndexed( encoder, edgeReduces1Buffer, 'edgeReduces1', RasterSplitReduceData );
+    LOG && logger.logIndexed( encoder, edgeReduces0Buffer, 'edgeReduces0 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / workgroupSize ) );
+    LOG && logger.logIndexed( encoder, edgeReduces1Buffer, 'edgeReduces1', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / ( workgroupSize * workgroupSize ) ) );
 
-    const edgeReduces2Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( numEdgeClips / ( workgroupSize * workgroupSize * workgroupSize ) ) );
+    const edgeReduces2Buffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGE_CLIPS / ( workgroupSize * workgroupSize * workgroupSize ) ) );
 
     splitReduceShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -700,8 +716,8 @@ export default class ParallelRaster {
       edgeReduces2Buffer
     ], configBuffer, 108 );
 
-    LOG && logger.logIndexed( encoder, edgeReduces1Buffer, 'edgeReduces1 (scanned)', RasterSplitReduceData );
-    LOG && logger.logIndexed( encoder, edgeReduces2Buffer, 'edgeReduces2', RasterSplitReduceData );
+    LOG && logger.logIndexed( encoder, edgeReduces1Buffer, 'edgeReduces1 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / ( workgroupSize * workgroupSize ) ) );
+    LOG && logger.logIndexed( encoder, edgeReduces2Buffer, 'edgeReduces2', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / ( workgroupSize * workgroupSize * workgroupSize ) ) );
 
     let reducibleEdgeCount = -1;
     let completeEdgeCount = -1;
@@ -711,10 +727,10 @@ export default class ParallelRaster {
       completeEdgeCount = new Uint32Array( arrayBuffer )[ 1 ];
     } );
 
-    const reducibleChunksBuffer = deviceContext.createBuffer( RasterChunk.ENCODING_BYTE_LENGTH * numClippedChunks );
+    const reducibleChunksBuffer = deviceContext.createBuffer( RasterChunk.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS );
     const completeChunksBuffer = deviceContext.createBuffer( RasterCompleteChunk.ENCODING_BYTE_LENGTH * MAX_COMPLETE_CHUNKS );
-    const chunkIndexMapBuffer = deviceContext.createBuffer( 4 * numClippedChunks );
-    const debugSplitScanReducesBuffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * numClippedChunks );
+    const chunkIndexMapBuffer = deviceContext.createBuffer( 4 * MAX_CLIPPED_CHUNKS );
+    const debugSplitScanReducesBuffer = deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS );
 
     splitScanShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -729,15 +745,15 @@ export default class ParallelRaster {
     ], configBuffer, 48 );
 
     if ( DEBUG_REDUCE_BUFFERS ) {
-      LOG && logger.logIndexed( encoder, debugSplitScanReducesBuffer, 'debugSplitScanReduces', RasterSplitReduceData );
+      LOG && logger.logIndexed( encoder, debugSplitScanReducesBuffer, 'debugSplitScanReduces', RasterSplitReduceData, () => numUsedClippedChunks );
     }
     LOG && logger.logIndexed( encoder, reducibleChunksBuffer, 'reducibleChunks (no indices)', RasterChunk, () => reducibleChunkCount );
     LOG && logger.logIndexed( encoder, completeChunksBuffer, 'completeChunks (no indices)', RasterCompleteChunk, () => completeChunkCount );
-    LOG && logger.logIndexed( encoder, chunkIndexMapBuffer, 'chunkIndexMap', BufferLogger.RasterU32 );
+    LOG && logger.logIndexed( encoder, chunkIndexMapBuffer, 'chunkIndexMap', BufferLogger.RasterU32, () => numUsedClippedChunks );
 
-    const reducibleEdgesBuffer = deviceContext.createBuffer( RasterEdge.ENCODING_BYTE_LENGTH * numEdgeClips );
+    const reducibleEdgesBuffer = deviceContext.createBuffer( RasterEdge.ENCODING_BYTE_LENGTH * MAX_EDGE_CLIPS );
     const completeEdgesBuffer = deviceContext.createBuffer( RasterCompleteEdge.ENCODING_BYTE_LENGTH * MAX_COMPLETE_EDGES );
-    const chunkIndicesBuffer = deviceContext.createBuffer( 4 * 2 * numClippedChunks );
+    const chunkIndicesBuffer = deviceContext.createBuffer( 4 * 2 * MAX_CLIPPED_CHUNKS );
 
     edgeScanShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -753,7 +769,7 @@ export default class ParallelRaster {
 
     LOG && logger.logIndexed( encoder, reducibleEdgesBuffer, 'reducibleEdges (unmapped chunks)', RasterEdge, () => reducibleEdgeCount );
     LOG && logger.logIndexed( encoder, completeEdgesBuffer, 'completeEdges', RasterCompleteEdge, () => completeEdgeCount );
-    LOG && logger.logIndexed( encoder, chunkIndicesBuffer, 'chunkIndices', BufferLogger.RasterU32 );
+    LOG && logger.logIndexed( encoder, chunkIndicesBuffer, 'chunkIndices', BufferLogger.RasterU32, () => 2 * numUsedClippedChunks );
 
     chunkIndexPatchShader.dispatchIndirect( encoder, [
       configBuffer,
@@ -773,7 +789,7 @@ export default class ParallelRaster {
       configBuffer
     ], 1, 1, 1 );
 
-    LOG && logger.logIndexed( encoder, configBuffer, 'config', BufferLogger.RasterU32 );
+    LOG && logger.logIndexed( encoder, configBuffer, 'config', BufferLogger.RasterU32, () => 38 );
 
     edgeIndexPatchShader.dispatchIndirect( encoder, [
       configBuffer,

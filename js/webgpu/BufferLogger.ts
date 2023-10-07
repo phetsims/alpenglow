@@ -66,11 +66,17 @@ export default class BufferLogger {
     encoder: GPUCommandEncoder,
     buffer: GPUBuffer,
     name: string,
-    type: FromMultiArrayBufferable
+    type: FromMultiArrayBufferable,
+    lengthCallback: ( () => number ) | null = null
   ): void {
     this.withBuffer( encoder, buffer, async arrayBuffer => {
-      BufferLogger.startGroup( `[buffer] ${name}` );
-      console.log( type.fromArrayBuffer( arrayBuffer ).map( BufferLogger.toMultiIndexedString ).join( '\n' ) );
+      // TODO refactor this bit out
+      let elements = type.fromArrayBuffer( arrayBuffer );
+      const length = lengthCallback ? lengthCallback() : elements.length;
+      elements = elements.slice( 0, length );
+
+      BufferLogger.startGroup( `[buffer] ${name} (${length})` );
+      console.log( elements.map( BufferLogger.toMultiIndexedString ).join( '\n' ) );
       BufferLogger.endGroup();
     } );
   }
@@ -78,11 +84,16 @@ export default class BufferLogger {
   public logIndexedImmediate(
     arrayBuffer: ArrayBuffer,
     name: string,
-    type: FromArrayBufferable
+    type: FromArrayBufferable,
+    lengthCallback: ( () => number ) | null = null
   ): void {
     this.callbacksOnComplete.push( async () => {
-      BufferLogger.startGroup( `[buffer] ${name}` );
-      console.log( type.fromArrayBuffer( arrayBuffer ).map( BufferLogger.toIndexedString ).join( '\n' ) );
+      let elements = type.fromArrayBuffer( arrayBuffer );
+      const length = lengthCallback ? lengthCallback() : elements.length;
+      elements = elements.slice( 0, length );
+
+      BufferLogger.startGroup( `[buffer] ${name} (${length})` );
+      console.log( elements.map( BufferLogger.toIndexedString ).join( '\n' ) );
       BufferLogger.endGroup();
     } );
   }
