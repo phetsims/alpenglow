@@ -14,7 +14,7 @@ import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShade
 // const USE_DEMO = true;
 // const ONLY_FIRST_ITERATION = false;
 
-const WORKGROUP_SIZE = 4;
+const WORKGROUP_SIZE = 8;
 const LOG = false;
 // const USE_DEMO = false;
 // const ONLY_FIRST_ITERATION = true;
@@ -84,7 +84,7 @@ export default class RasterClipper {
     const shaderOptions = {
       workgroupSize: workgroupSize,
       debugReduceBuffers: DEBUG_REDUCE_BUFFERS,
-      integerScale: 5e8,
+      integerScale: 5e6,
       preferredStorageFormat: deviceContext.preferredStorageFormat
     } as const;
 

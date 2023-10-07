@@ -40,7 +40,8 @@ fn main(
   let float_value = vec4<f32>( accumulation_value ) * vec4( ${f32( 1 / integerScale )} );
 
   // TODO: gamut map!
-  let mapped_value = clamp( float_value, vec4( 0f ), vec4( 1f ) );
+//  let mapped_value = clamp( float_value, vec4( 0f ), vec4( 1f ) );
+  let mapped_value = vec4( select( 0f, 1f, accumulation_value.a != 0i ), 0f, 0f, 1f );
 
   textureStore( output, global_id.xy, vec4( linear_sRGB_to_sRGB( mapped_value.rgb ), mapped_value.a ) );
 }

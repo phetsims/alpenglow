@@ -43,27 +43,30 @@ fn main(
   let area = chunk.area;
 
   // TODO: handle 0.5 offsets for filters!!!!
-  let x = i32( round( chunk.minX + f32( config.raster_offset_x ) ) );
-  let y = i32( round( chunk.minY + f32( config.raster_offset_y ) ) );
-  let width = i32( round( chunk.maxX - chunk.minX ) );
-  let height = i32( round( chunk.maxY - chunk.minY ) );
+  let minX = clamp( i32( round( chunk.minX + f32( config.raster_offset_x ) ) ), 0i, i32( config.raster_width ) );
+  let minY = clamp( i32( round( chunk.minY + f32( config.raster_offset_y ) ) ), 0i, i32( config.raster_height ) );
+  let maxX = clamp( i32( round( chunk.maxX + f32( config.raster_offset_x ) ) ), 0i, i32( config.raster_width ) );
+  let maxY = clamp( i32( round( chunk.maxY + f32( config.raster_offset_y ) ) ), 0i, i32( config.raster_height ) );
 
-  // TODO!!
+  if ( minX >= maxX || minY >= maxY ) {
+    return;
+  }
+
+  // sanity check TODO remove? This is to prevent crazy loops
+  if ( minX < maxX - 0xffffi || minY < maxY - 0xffffi ) {
+    return;
+  }
+
   // NOTE: remember area might be larger for a multi-pixel constant area
-  let color = vec4f( 1.0f, 0.0f, 0.0f, 1.0f );
-  let integer_color = vec4<i32>( round( color * ${f32( integerScale )} * select( area, 1.0f, is_full_area ) ) );
+  let pixel_area = select( area, 1.0f, is_full_area );
 
-  // TODO: optimize!!
-  for ( var py = y; py < y + height; py++ ) {
-    if ( py < 0i || py >= i32( config.raster_height ) ) {
-      continue;
-    }
-    for ( var px = x; px < x + width; px++ ) {
-      if ( px < 0i || px >= i32( config.raster_width ) ) {
-        continue;
-      }
+  let color = vec4f( 1.0f, 0.0f, 0.0f, 1.0f ); // TODO: RenderProgram
 
-      let pixel_index = 4u * ( config.raster_width * u32( py ) + u32( px ) );
+  let integer_color = vec4<i32>( round( color * ${f32( integerScale )} * pixel_area ) );
+
+  for ( var y = minY; y < maxY; y += 1i ) {
+    for ( var x = minX; x < maxX; x += 1i ) {
+      let pixel_index = 4u * ( config.raster_width * u32( y ) + u32( x ) );
 
       atomicAdd( &accumulation[ pixel_index ], integer_color.r );
       atomicAdd( &accumulation[ pixel_index + 1u ], integer_color.g );

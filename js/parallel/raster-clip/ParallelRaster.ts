@@ -16,7 +16,7 @@ import Vector2 from '../../../../dot/js/Vector2.js';
 // const USE_DEMO = true;
 // const ONLY_FIRST_ITERATION = false;
 
-const WORKGROUP_SIZE = 4;
+const WORKGROUP_SIZE = 8;
 const LOG = true;
 const USE_DEMO = false;
 const ONLY_FIRST_ITERATION = true;
