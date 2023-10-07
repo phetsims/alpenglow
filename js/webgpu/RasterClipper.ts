@@ -268,7 +268,8 @@ export default class RasterClipper {
       label: 'the encoder'
     } );
 
-    const stageOutput = rasterClipper.runStage( encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer );
+    const numStages = 1; // TODO: 16
+    const stageOutput = rasterClipper.runNaive( encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer, numStages );
 
     const commandBuffer = encoder.finish();
     device.queue.submit( [ commandBuffer ] );
@@ -288,22 +289,44 @@ export default class RasterClipper {
     configBuffer.destroy();
     inputChunksBuffer.destroy();
     inputEdgesBuffer.destroy();
-    stageOutput.reducibleChunksBuffer.destroy();
-    stageOutput.completeChunksBuffer.destroy();
-    stageOutput.reducibleEdgesBuffer.destroy();
-    stageOutput.completeEdgesBuffer.destroy();
+    stageOutput.completeChunkBuffers.forEach( buffer => buffer.destroy() );
+    stageOutput.completeEdgeBuffers.forEach( buffer => buffer.destroy() );
     stageOutput.temporaryBuffers.forEach( buffer => buffer.destroy() );
   }
 
-  // public run(
-  //   encoder: GPUCommandEncoder,
-  //   numStages: number
-  // ): {
-  //
-  // } {
-  //   throw new Error( 'TODO' );
-  // }
+  public runNaive(
+    encoder: GPUCommandEncoder,
+    configBuffer: GPUBuffer,
+    inputChunksBuffer: GPUBuffer,
+    inputEdgesBuffer: GPUBuffer,
+    numStages: number
+  ): {
+    completeChunkBuffers: GPUBuffer[];
+    completeEdgeBuffers: GPUBuffer[];
+    temporaryBuffers: GPUBuffer[];
+  } {
 
+    const completeChunkBuffers: GPUBuffer[] = [];
+    const completeEdgeBuffers: GPUBuffer[] = [];
+    const temporaryBuffers: GPUBuffer[] = [];
+
+    for ( let i = 0; i < numStages; i++ ) {
+      const stageResult = this.runStage( encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer );
+      inputChunksBuffer = stageResult.reducibleChunksBuffer;
+      inputEdgesBuffer = stageResult.reducibleEdgesBuffer;
+      completeChunkBuffers.push( stageResult.completeChunksBuffer );
+      completeEdgeBuffers.push( stageResult.completeEdgesBuffer );
+      temporaryBuffers.push( inputChunksBuffer, inputEdgesBuffer, ...stageResult.temporaryBuffers );
+    }
+
+    return {
+      completeChunkBuffers: completeChunkBuffers,
+      completeEdgeBuffers: completeEdgeBuffers,
+      temporaryBuffers: temporaryBuffers
+    };
+  }
+
+  // TODO: actually, can we just reuse the other buffers so we're not executing things all over the place?
   public runStage(
     encoder: GPUCommandEncoder,
     configBuffer: GPUBuffer,
