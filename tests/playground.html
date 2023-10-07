@@ -97,6 +97,10 @@ an UI and Display made for visual testing and debugging.
 </div>
 
 <script type="module">
+  /* eslint-disable bad-sim-text */
+
+  /*eslint-disable*/ // TODO: fix lint https://github.com/phetsims/chipper/issues/1405
+
   import '../../chipper/dist/js/scenery/js/main.js'; // eslint-disable-line bad-sim-text
   import '../../chipper/dist/js/alpenglow/js/main.js'; // eslint-disable-line bad-sim-text
   import '../../chipper/dist/js/phet-core/js/main.js';
@@ -157,7 +161,7 @@ an UI and Display made for visual testing and debugging.
 
       const getCount = ( bounds, items, method ) => {
         let count = 0;
-        let set = new Set();
+        const set = new Set();
         method( bounds, items, ( a, b ) => {
           const key1 = a.id + ',' + b.id;
           const key2 = b.id + ',' + a.id;
@@ -192,15 +196,15 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
-  window.centroidTest = function() {
-    setTimeout( async function() {
+  window.centroidTest = () => {
+    setTimeout( async () => {
 
       const triEvaluate = ( f, p0, p1, p2 ) =>
         f( p0.x, p0.y, p1.x, p1.y ) +
         f( p1.x, p1.y, p2.x, p2.y ) +
         f( p2.x, p2.y, p0.x, p0.y );
 
-      const areaFunc = ( f ) => {
+      const areaFunc = f => {
         return ( p0, p1, p2 ) => {
           return 0.5 * triEvaluate( f, p0, p1, p2 );
         };
@@ -212,7 +216,7 @@ an UI and Display made for visual testing and debugging.
             triEvaluate( xf, p0, p1, p2 ),
             triEvaluate( yf, p0, p1, p2 )
           ).timesScalar( 1 / ( area * 6 ) );
-        }
+        };
       };
 
       const getArea = ( p0, p1, p2 ) => 0.5 * ( p0.x * ( p1.y - p2.y ) + p1.x * ( p2.y - p0.y ) + p2.x * ( p0.y - p1.y ) );
@@ -325,7 +329,10 @@ an UI and Display made for visual testing and debugging.
       if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
         display.width = width;
         display.height = height;
-        scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), { fill: 'black', renderer: type } ) );
+        scene.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
+          fill: 'black',
+          renderer: type
+        } ) );
         display.backgroundColor = 'white';
         display.updateDisplay();
       }
@@ -529,7 +536,7 @@ an UI and Display made for visual testing and debugging.
 
       const polygon = [
         phet.dot.v2( 12, 56 ),
-        phet.dot.v2( 29, 17 ),
+        phet.dot.v2( 29, 17 )
       ];
       scene.children = [ twoPointsToNode( polygon ) ];
 
@@ -540,7 +547,15 @@ an UI and Display made for visual testing and debugging.
 
   window.badGridClipTest = function() {
     setTimeout( async () => {
-      const face = phet.alpenglow.PolygonalFace.deserialize( {"polygons":[[{"x":111.55555555555556,"y":448},{"x":120.00000000000003,"y":448},{"x":120.00000000000003,"y":457.50000000000006},{"x":123,"y":460.875}]]} );
+      const face = phet.alpenglow.PolygonalFace.deserialize( {
+        polygons: [ [ {
+          x: 111.55555555555556,
+          y: 448
+        }, { x: 120.00000000000003, y: 448 }, { x: 120.00000000000003, y: 457.50000000000006 }, {
+          x: 123,
+          y: 460.875
+        } ] ]
+      } );
       const minX = 107;
       const minY = 448;
       const maxX = 123;
@@ -870,7 +885,7 @@ an UI and Display made for visual testing and debugging.
       // const linearGradientAccuracy = phet.alpenglow.RenderLinearGradientAccuracy.UnsplitPixelCenter;
 
       const rasterizeOptions = {
-        tileSize: 256,
+        tileSize: 256
 
         // polygonFiltering: phet.alpenglow.PolygonFilterType.Box,
         // polygonFiltering: phet.alpenglow.PolygonFilterType.Bilinear,
@@ -969,7 +984,7 @@ an UI and Display made for visual testing and debugging.
           new phet.dot.Vector2( 0, 40 )
         ],
         phet.kite.Shape.circle( 48, 16, 5 ).subpaths[ 0 ].segments[ 0 ].toPiecewiseLinearSegments( piecewiseOptions ).map( segment => segment.start ),
-        phet.kite.Shape.circle( 57, 5, 4 ).subpaths[ 0 ].segments[ 0 ].toPiecewiseLinearSegments( piecewiseOptions ).map( segment => segment.start ),
+        phet.kite.Shape.circle( 57, 5, 4 ).subpaths[ 0 ].segments[ 0 ].toPiecewiseLinearSegments( piecewiseOptions ).map( segment => segment.start )
       ] );
       const pathE = new phet.alpenglow.RenderPath( 'nonzero', [
         boundsRect( new phet.dot.Bounds2( 40, 40, 60, 60 ) ),
@@ -984,7 +999,7 @@ an UI and Display made for visual testing and debugging.
         ],
         boundsRect( new phet.dot.Bounds2( 30, 40, 35, 50 ) ),
         boundsRect( new phet.dot.Bounds2( 5, 50, 10, 60 ) ),
-        boundsRect( new phet.dot.Bounds2( 50, 5, 50, 10 ) ),
+        boundsRect( new phet.dot.Bounds2( 50, 5, 50, 10 ) )
       ] );
       const pathF = new phet.alpenglow.RenderPath( 'nonzero', [
         boundsRect( new phet.dot.Bounds2( 50, 50, 55, 55 ) ),
@@ -996,7 +1011,7 @@ an UI and Display made for visual testing and debugging.
           new phet.dot.Vector2( 28, 50 ),
           new phet.dot.Vector2( 20, 45 ),
           new phet.dot.Vector2( 12, 50 ),
-          new phet.dot.Vector2( 20, 55 ),
+          new phet.dot.Vector2( 20, 55 )
         ],
         [
           new phet.dot.Vector2( 30, 50 ),
@@ -1019,7 +1034,7 @@ an UI and Display made for visual testing and debugging.
           new phet.dot.Vector2( 10, 40 )
         ],
         boundsRect( new phet.dot.Bounds2( 30, 50, 35, 60 ) ),
-        boundsRect( new phet.dot.Bounds2( 5, 40, 10, 50 ) ),
+        boundsRect( new phet.dot.Bounds2( 5, 40, 10, 50 ) )
       ] );
 
       const testImageable = {
@@ -1032,7 +1047,7 @@ an UI and Display made for visual testing and debugging.
             testImageData.data[ baseIndex ] / 255,
             testImageData.data[ baseIndex + 1 ] / 255,
             testImageData.data[ baseIndex + 2 ] / 255,
-            testImageData.data[ baseIndex + 3 ] / 255,
+            testImageData.data[ baseIndex + 3 ] / 255
           );
         }
       };
@@ -1136,11 +1151,11 @@ an UI and Display made for visual testing and debugging.
         [
           new phet.alpenglow.RenderGradientStop( 0, toPremulOklab( 255, 255, 255, 1 ) ),
           new phet.alpenglow.RenderGradientStop( 0.1, toPremulOklab( 255, 255, 255, 1 ) ),
-          new phet.alpenglow.RenderGradientStop( 0.1, toPremulOklab( 255,57,2, 1 ) ),
-          new phet.alpenglow.RenderGradientStop( 0.3, toPremulOklab( 255,128,7, 1 ) ),
-          new phet.alpenglow.RenderGradientStop( 0.5, toPremulOklab( 255,180,4, 1 ) ),
-          new phet.alpenglow.RenderGradientStop( 0.7, toPremulOklab( 5,186,221, 1 ) ),
-          new phet.alpenglow.RenderGradientStop( 0.9, toPremulOklab( 43,72,113, 1 ) ),
+          new phet.alpenglow.RenderGradientStop( 0.1, toPremulOklab( 255, 57, 2, 1 ) ),
+          new phet.alpenglow.RenderGradientStop( 0.3, toPremulOklab( 255, 128, 7, 1 ) ),
+          new phet.alpenglow.RenderGradientStop( 0.5, toPremulOklab( 255, 180, 4, 1 ) ),
+          new phet.alpenglow.RenderGradientStop( 0.7, toPremulOklab( 5, 186, 221, 1 ) ),
+          new phet.alpenglow.RenderGradientStop( 0.9, toPremulOklab( 43, 72, 113, 1 ) ),
           new phet.alpenglow.RenderGradientStop( 0.9, toPremulOklab( 0, 0, 0, 1 ) ),
           new phet.alpenglow.RenderGradientStop( 1, toPremulOklab( 0, 0, 0, 1 ) )
         ],
@@ -1264,7 +1279,7 @@ an UI and Display made for visual testing and debugging.
                 phet.alpenglow.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
                 new phet.alpenglow.RenderColor( p0.toVector4() ),
                 new phet.alpenglow.RenderColor( p1.toVector4() ),
-                new phet.alpenglow.RenderColor( p2.toVector4() ),
+                new phet.alpenglow.RenderColor( p2.toVector4() )
               ) );
 
               // const normalProgram = new phet.alpenglow.RenderColor( p0.toVector4().plus( p1.toVector4() ).plus( p2.toVector4() ).timesScalar( 1 / 3 ) );
@@ -1370,14 +1385,14 @@ an UI and Display made for visual testing and debugging.
             phet.alpenglow.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
             new phet.alpenglow.RenderColor( transformedVertices[ 0 ].toVector4Zero() ),
             new phet.alpenglow.RenderColor( transformedVertices[ 1 ].toVector4Zero() ),
-            new phet.alpenglow.RenderColor( transformedVertices[ 2 ].toVector4Zero() ),
+            new phet.alpenglow.RenderColor( transformedVertices[ 2 ].toVector4Zero() )
           );
           const normalProgram = new phet.alpenglow.RenderNormalize( new phet.alpenglow.RenderBarycentricPerspectiveBlend(
             projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
             phet.alpenglow.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
             new phet.alpenglow.RenderColor( normals[ 0 ].toVector4Zero() ),
             new phet.alpenglow.RenderColor( normals[ 1 ].toVector4Zero() ),
-            new phet.alpenglow.RenderColor( normals[ 2 ].toVector4Zero() ),
+            new phet.alpenglow.RenderColor( normals[ 2 ].toVector4Zero() )
           ) );
 
           // const positionProgram = new phet.alpenglow.RenderColor( transformedVertices[ 0 ].plus( transformedVertices[ 1 ] ).plus( transformedVertices[ 2 ] ).timesScalar( 1 / 3 ).toVector4() );
@@ -1411,7 +1426,7 @@ an UI and Display made for visual testing and debugging.
         } ).filter( _.identity );
       };
       const boxDepth = new phet.alpenglow.RenderDepthSort( [
-        ...createTriangularMesh( phet.alpenglow.Mesh.loadOBJ( teapotOBJ )[ 0 ], phet.dot.Matrix4.translation( 0, 0, 150 ) ),
+        ...createTriangularMesh( phet.alpenglow.Mesh.loadOBJ( teapotOBJ )[ 0 ], phet.dot.Matrix4.translation( 0, 0, 150 ) )
         // ...createTriangularMesh( phet.alpenglow.Mesh.loadOBJ( teapotOBJ )[ 0 ], phet.dot.Matrix4.translation( 0, -10, 150 ) ),
         // ...createTriangularMesh( phet.alpenglow.Mesh.loadOBJ( teapotOBJ )[ 0 ], phet.dot.Matrix4.translation( 0, 10, 150 ) ),
         // ...createBox( phet.dot.v3( 3, 2, dl ), phet.dot.v3( 1, 1, 5 ) ),
@@ -1437,10 +1452,10 @@ an UI and Display made for visual testing and debugging.
         back, d, e, f, bc, a, bary, baryPersp,
         ...( INCLUDE_3D ? [ depth, boxDepth ] : [] )
       ] ).transformed(
-      // const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp ] ).transformed(
-      // const program = normalBlendArray( [ boxDepth ] ).transformed(
-      // const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp, depth ] ).transformed(
-      // const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
+        // const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp ] ).transformed(
+        // const program = normalBlendArray( [ boxDepth ] ).transformed(
+        // const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp, depth ] ).transformed(
+        // const program = normalBlendArray( [ back, e, f, bc, a ] ).transformed(
         phet.dot.Matrix3.scaling( outputSize / 64 )
       );
 
@@ -1493,7 +1508,11 @@ an UI and Display made for visual testing and debugging.
           tileLog.integerEdges.forEach( integerEdge => {
             const p0 = fromIntegerPoint( tileLog, phet.dot.v2( integerEdge.x0, integerEdge.y0 ) );
             const p1 = fromIntegerPoint( tileLog, phet.dot.v2( integerEdge.x1, integerEdge.y1 ) );
-            offsetNode.addChild( new phet.scenery.Line( p0, p1, { stroke: 'black', lineCap: 'round', lineJoin: 'round' } ) );
+            offsetNode.addChild( new phet.scenery.Line( p0, p1, {
+              stroke: 'black',
+              lineCap: 'round',
+              lineJoin: 'round'
+            } ) );
           } );
         } );
       }
@@ -1892,7 +1911,6 @@ an UI and Display made for visual testing and debugging.
           // const value = sum / 1000;
 
 
-
           const paddedValue = 0.95 - 0.9 * value;
 
           const color = phet.alpenglow.RenderFromNode.premultipliedSRGBToColor( phet.dot.v4( paddedValue, paddedValue, paddedValue, 1 ) );
@@ -2012,14 +2030,14 @@ an UI and Display made for visual testing and debugging.
 
       const scaledNode = new phet.scenery.Node( {
         x: 100,
-        y: 400,
+        y: 400
       } );
       scaledNode.setScaleMagnitude( 300, -300 )
       scene.addChild( scaledNode );
 
       scaledNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
         stroke: 'green',
-        lineWidth: 1 / 300,
+        lineWidth: 1 / 300
       } ) );
 
       // scaledNode.addChild( new phet.scenery.Circle( radius, {
@@ -2044,12 +2062,12 @@ an UI and Display made for visual testing and debugging.
 
       scaledNode.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( leftPolygons ), {
         fill: 'rgba(255,0,0,0.5)',
-        lineWidth: 1 / 300,
+        lineWidth: 1 / 300
       } ) );
 
       scaledNode.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( rightPolygons ), {
         fill: 'rgba(0,0,255,0.5)',
-        lineWidth: 1 / 300,
+        lineWidth: 1 / 300
       } ) );
 
       display.width = 1024;
@@ -2095,20 +2113,20 @@ an UI and Display made for visual testing and debugging.
 
       const scaledNode = new phet.scenery.Node( {
         x: 100,
-        y: 400,
+        y: 400
       } );
       scaledNode.setScaleMagnitude( 300, -300 )
       scene.addChild( scaledNode );
 
       scaledNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
         stroke: 'green',
-        lineWidth: 1 / 300,
+        lineWidth: 1 / 300
       } ) );
 
       scaledNode.addChild( new phet.scenery.Circle( radius, {
         translation: center,
         stroke: 'rgba(0,0,0,0.5)',
-        lineWidth: 1 / 600,
+        lineWidth: 1 / 600
       } ) );
 
       // left.forEach( edge => {
@@ -2127,12 +2145,12 @@ an UI and Display made for visual testing and debugging.
 
       scaledNode.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( leftPolygons ), {
         fill: 'rgba(255,0,0,0.5)',
-        lineWidth: 1 / 300,
+        lineWidth: 1 / 300
       } ) );
 
       scaledNode.addChild( new phet.scenery.Path( phet.alpenglow.LinearEdge.polygonsToShape( rightPolygons ), {
         fill: 'rgba(0,0,255,0.5)',
-        lineWidth: 1 / 300,
+        lineWidth: 1 / 300
       } ) );
 
       display.width = 1024;
@@ -2156,14 +2174,14 @@ an UI and Display made for visual testing and debugging.
 
       const scaledNode = new phet.scenery.Node( {
         x: 100,
-        y: 400,
+        y: 400
       } );
       scaledNode.setScaleMagnitude( 300, -300 )
       scene.addChild( scaledNode );
 
       scaledNode.addChild( new phet.scenery.Path( phet.kite.Shape.polygon( polygon ), {
         stroke: 'green',
-        lineWidth: 1 / 300,
+        lineWidth: 1 / 300
       } ) );
 
       for ( let x = -0.205; x < 1.205; x += 0.025 ) {
@@ -2221,7 +2239,7 @@ an UI and Display made for visual testing and debugging.
         const clippedEdges = clippedEdgeCollection[ i ];
 
         const polygonArea = phet.alpenglow.LinearEdge.getPolygonArea( polygon );
-        const clippedEdgeArea = _.sum( clippedEdges.map( clippedEdge => clippedEdge.getLineIntegralArea() ));
+        const clippedEdgeArea = _.sum( clippedEdges.map( clippedEdge => clippedEdge.getLineIntegralArea() ) );
         const zero = _.sum( clippedEdges.map( clippedEdge => clippedEdge.getLineIntegralZero() ) );
 
         console.log( polygonArea, clippedEdgeArea, zero );
@@ -2518,7 +2536,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
           p( 0.95, 0.95 ),
           p( 0.95, 0.8 )
         ]
-      // ] ), phet.dot.Matrix3.IDENTITY, p( 0.5, 0.5 ), s( 0 ), p( 0.5, 0.5 ), s( 0.1 ), [
+        // ] ), phet.dot.Matrix3.IDENTITY, p( 0.5, 0.5 ), s( 0 ), p( 0.5, 0.5 ), s( 0.1 ), [
       ] ), phet.dot.Matrix3.IDENTITY, p( 0.8, 0.8 ), s( 0 ), p( 0.8, 0.8 ), s( 0.1 ), [
         { ratio: 0, color: phet.dot.v4( 0.75, 0.75, 0.25, 1 ) },
         { ratio: 0.5, color: phet.dot.v4( 0.25, 0.25, 0.25, 1 ) },
@@ -2615,7 +2633,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       const program = new phet.alpenglow.RenderStack( [
         new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) ),
         new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
-        new phet.alpenglow.RenderColor( phet.dot.v4( 0.5, 0, 0, 1 ) ),
+        new phet.alpenglow.RenderColor( phet.dot.v4( 0.5, 0, 0, 1 ) )
       ] );
 
       const instructions = [];
@@ -2677,10 +2695,10 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
     //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.1, 200 ), 100, 0, Math.PI * 2, false );
     //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
     //   const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.01, 200 ), 100, 0, Math.PI * 2, false );
-      const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
-      const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.005, 200 ), 100, 0, Math.PI * 2, false );
-            // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
-            // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.001, 200 ), 100, 0, Math.PI * 2, false );
+    const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.005, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
+    // const segmentB = new phet.kite.Arc( new phet.dot.Vector2( 200.001, 200 ), 100, 0, Math.PI * 2, false );
 
     // can't identify
     //   const segmentA = new phet.kite.Arc( new phet.dot.Vector2( 200, 200 ), 100, 0, Math.PI * 2, false );
@@ -2869,10 +2887,6 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
     // point
 
 
-
-
-
-
     // if we pick alpha randomly = y, then, solve roots (and repeat), we have:
     // (x00 + P)(x01 + Q) = 0
     // (x10 + R)(x11 + S) = 0
@@ -2984,7 +2998,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
         const color = [
           'rgb(255,0,0)',
           'rgb(0,255,0)',
-          'rgb(0,0,255)',
+          'rgb(0,0,255)'
         ][ i ];
 
         intersectionCollection.forEach( vectorOrRay => {
@@ -3157,7 +3171,17 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
 
   window.badCircularClipTest = function() {
     setTimeout( async () => {
-      const face = phet.scenery.EdgedFace.deserialize( {"edges":[{"startPoint":{"x":10,"y":10},"endPoint":{"x":20,"y":6.666666666666666},"containsFakeCorner":false},{"startPoint":{"x":20,"y":6.666666666666666},"endPoint":{"x":20,"y":20},"containsFakeCorner":false},{"startPoint":{"x":20,"y":20},"endPoint":{"x":10,"y":10},"containsFakeCorner":false}]} );
+      const face = phet.scenery.EdgedFace.deserialize( {
+        'edges': [ {
+          'startPoint': { x: 10, y: 10 },
+          'endPoint': { x: 20, y: 6.666666666666666 },
+          'containsFakeCorner': false
+        }, {
+          'startPoint': { x: 20, y: 6.666666666666666 },
+          'endPoint': { x: 20, y: 20 },
+          'containsFakeCorner': false
+        }, { 'startPoint': { x: 20, y: 20 }, 'endPoint': { x: 10, y: 10 }, 'containsFakeCorner': false } ]
+      } );
 
       face.getBinaryCircularClip( phet.dot.Vector2.ZERO, 15, 0.04908738521234052 );
     } );
@@ -3165,7 +3189,29 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
 
   window.badCircularClipTest2 = function() {
     setTimeout( async () => {
-      const face = phet.scenery.EdgedFace.deserialize( {"edges":[{"startPoint":{"x":5,"y":5},"endPoint":{"x":20,"y":5},"containsFakeCorner":false},{"startPoint":{"x":20,"y":5},"endPoint":{"x":20,"y":6.666666666666666},"containsFakeCorner":false},{"startPoint":{"x":20,"y":6.666666666666666},"endPoint":{"x":10,"y":10},"containsFakeCorner":false},{"startPoint":{"x":10,"y":10},"endPoint":{"x":20,"y":20},"containsFakeCorner":false},{"startPoint":{"x":20,"y":20},"endPoint":{"x":5,"y":15},"containsFakeCorner":false},{"startPoint":{"x":5,"y":15},"endPoint":{"x":5,"y":5},"containsFakeCorner":false}]} );
+      const face = phet.scenery.EdgedFace.deserialize( {
+        'edges': [ {
+          'startPoint': { x: 5, y: 5 },
+          'endPoint': { x: 20, y: 5 },
+          'containsFakeCorner': false
+        }, {
+          'startPoint': { x: 20, y: 5 },
+          'endPoint': { x: 20, y: 6.666666666666666 },
+          'containsFakeCorner': false
+        }, {
+          'startPoint': { x: 20, y: 6.666666666666666 },
+          'endPoint': { x: 10, y: 10 },
+          'containsFakeCorner': false
+        }, {
+          'startPoint': { x: 10, y: 10 },
+          'endPoint': { x: 20, y: 20 },
+          'containsFakeCorner': false
+        }, {
+          'startPoint': { x: 20, y: 20 },
+          'endPoint': { x: 5, y: 15 },
+          'containsFakeCorner': false
+        }, { 'startPoint': { x: 5, y: 15 }, 'endPoint': { x: 5, y: 5 }, 'containsFakeCorner': false } ]
+      } );
 
       face.getBinaryCircularClip( phet.dot.v2( 10, 10 ), 1.6664999999999999, 0.04908738521234052 );
     } );
@@ -3173,136 +3219,138 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
 
   window.badCircularClipTest3 = function() {
     setTimeout( async () => {
-      const face = phet.scenery.PolygonalFace.deserialize( {"polygons":[[
-        {"x":-20.774853515625,"y":1.0205566406249993},
-        {"x":-20.8,"y":0.00004882812499928946},
-        {"x":-20.774853515625,"y":-1.0207031250000007},
-        {"x":-20.69990234375,"y":-2.0387695312500007},
-        {"x":-20.57490234375,"y":-3.0519531250000007},
-        {"x":-20.400341796875,"y":-4.057812500000001},
-        {"x":-20.176708984375,"y":-5.053906250000001},
-        {"x":-19.904248046875,"y":-6.038037109375001},
-        {"x":-19.5841796875,"y":-7.007275390625001},
-        {"x":-19.216748046875,"y":-7.959912109375001},
-        {"x":-18.8029296875,"y":-8.89326171875},
-        {"x":-18.3439453125,"y":-9.805126953125},
-        {"x":-17.840771484375,"y":-10.693310546875},
-        {"x":-17.29462890625,"y":-11.555859375},
-        {"x":-16.70673828125,"y":-12.390576171875},
-        {"x":-16.078564453125,"y":-13.195263671875},
-        {"x":-15.41181640625,"y":-13.96845703125},
-        {"x":-14.70771484375,"y":-14.70771484375},
-        {"x":-13.96845703125,"y":-15.41181640625},
-        {"x":-13.195263671875,"y":-16.078564453125},
-        {"x":-12.390576171875,"y":-16.70673828125},
-        {"x":-11.555859375,"y":-17.29462890625},
-        {"x":-10.693310546875,"y":-17.840771484375},
-        {"x":-9.805126953125,"y":-18.3439453125},
-        {"x":-8.89326171875,"y":-18.8029296875},
-        {"x":-7.959912109375001,"y":-19.216748046875},
-        {"x":-7.007275390625001,"y":-19.5841796875},
-        {"x":-6.038037109375001,"y":-19.904248046875},
-        {"x":-5.053906250000001,"y":-20.176708984375},
-        {"x":-4.057812500000001,"y":-20.400341796875},
-        {"x":-3.0519531250000007,"y":-20.57490234375},
-        {"x":-2.0387695312500007,"y":-20.69990234375},
-        {"x":-1.0207031250000007,"y":-20.774853515625},
-        {"x":0.00004882812499928946,"y":-20.8},
-        {"x":1.0205566406249993,"y":-20.774853515625},
-        {"x":2.0388671874999993,"y":-20.69990234375},
-        {"x":3.0520507812499993,"y":-20.57490234375},
-        {"x":4.057910156249999,"y":-20.400341796875},
-        {"x":5.054003906249999,"y":-20.176708984375},
-        {"x":6.037890624999999,"y":-19.904248046875},
-        {"x":7.007373046874999,"y":-19.5841796875},
-        {"x":7.959765624999999,"y":-19.216748046875},
-        {"x":8.893115234375,"y":-18.8029296875},
-        {"x":9.80498046875,"y":-18.3439453125},
-        {"x":10.693408203125,"y":-17.840771484375},
-        {"x":11.55595703125,"y":-17.29462890625},
-        {"x":12.3904296875,"y":-16.70673828125},
-        {"x":13.195361328125,"y":-16.078564453125},
-        {"x":13.968310546875,"y":-15.41181640625},
-        {"x":14.7078125,"y":-14.70771484375},
-        {"x":15.411669921875,"y":-13.96845703125},
-        {"x":16.078662109375,"y":-13.195263671875},
-        {"x":16.7068359375,"y":-12.390576171875},
-        {"x":17.294482421875,"y":-11.555859375},
-        {"x":17.840869140625,"y":-10.693310546875},
-        {"x":18.34404296875,"y":-9.805126953125},
-        {"x":18.80302734375,"y":-8.89326171875},
-        {"x":19.2166015625,"y":-7.959912109375001},
-        {"x":19.584033203125,"y":-7.007275390625001},
-        {"x":19.904345703125,"y":-6.038037109375001},
-        {"x":20.1765625,"y":-5.053906250000001},
-        {"x":20.400439453125,"y":-4.057812500000001},
-        {"x":20.574755859375,"y":-3.0519531250000007},
-        {"x":20.699755859375,"y":-2.0387695312500007},
-        {"x":20.774951171875,"y":-1.0207031250000007},
-        {"x":20.80009765625,"y":0.00004882812499928946},
-        {"x":20.774951171875,"y":1.0205566406249993},
-        {"x":20.699755859375,"y":2.0388671874999993},
-        {"x":20.574755859375,"y":3.0520507812499993},
-        {"x":20.400439453125,"y":4.057910156249999},
-        {"x":20.1765625,"y":5.054003906249999},
-        {"x":19.904345703125,"y":6.037890624999999},
-        {"x":19.584033203125,"y":7.007373046874999},
-        {"x":19.2166015625,"y":7.959765624999999},
-        {"x":18.80302734375,"y":8.893115234375},
-        {"x":18.34404296875,"y":9.80498046875},
-        {"x":17.840869140625,"y":10.693408203125},
-        {"x":17.294482421875,"y":11.55595703125},
-        {"x":16.7068359375,"y":12.3904296875},
-        {"x":16.078662109375,"y":13.195361328125},
-        {"x":15.411669921875,"y":13.968310546875},
-        {"x":14.7078125,"y":14.7078125},
-        {"x":13.968310546875,"y":15.411669921875},
-        {"x":13.195361328125,"y":16.078662109375},
-        {"x":12.3904296875,"y":16.7068359375},
-        {"x":11.55595703125,"y":17.294482421875},
-        {"x":10.693408203125,"y":17.840869140625},
-        {"x":9.80498046875,"y":18.34404296875},
-        {"x":8.893115234375,"y":18.80302734375},
-        {"x":7.959765624999999,"y":19.2166015625},
-        {"x":7.007373046874999,"y":19.584033203125},
-        {"x":6.037890624999999,"y":19.904345703125},
-        {"x":5.054003906249999,"y":20.1765625},
-        {"x":4.057910156249999,"y":20.400439453125},
-        {"x":3.0520507812499993,"y":20.574755859375},
-        {"x":2.0388671874999993,"y":20.699755859375},
-        {"x":1.0205566406249993,"y":20.774951171875},
-        {"x":0.00004882812499928946,"y":20.80009765625},
-        {"x":-1.0207031250000007,"y":20.774951171875},
-        {"x":-2.0387695312500007,"y":20.699755859375},
-        {"x":-3.0519531250000007,"y":20.574755859375},
-        {"x":-4.057812500000001,"y":20.400439453125},
-        {"x":-5.053906250000001,"y":20.1765625},
-        {"x":-6.038037109375001,"y":19.904345703125},
-        {"x":-7.007275390625001,"y":19.584033203125},
-        {"x":-7.959912109375001,"y":19.2166015625},
-        {"x":-8.89326171875,"y":18.80302734375},
-        {"x":-9.805126953125,"y":18.34404296875},
-        {"x":-10.693310546875,"y":17.840869140625},
-        {"x":-11.555859375,"y":17.294482421875},
-        {"x":-12.390576171875,"y":16.7068359375},
-        {"x":-13.195263671875,"y":16.078662109375},
-        {"x":-13.96845703125,"y":15.411669921875},
-        {"x":-14.70771484375,"y":14.7078125},
-        {"x":-15.41181640625,"y":13.968310546875},
-        {"x":-16.078564453125,"y":13.195361328125},
-        {"x":-16.70673828125,"y":12.3904296875},
-        {"x":-17.29462890625,"y":11.55595703125},
-        {"x":-17.840771484375,"y":10.693408203125},
-        {"x":-18.3439453125,"y":9.80498046875},
-        {"x":-18.8029296875,"y":8.893115234375},
-        {"x":-19.216748046875,"y":7.959765624999999},
-        {"x":-19.5841796875,"y":7.007373046874999},
-        {"x":-19.904248046875,"y":6.037890624999999},
-        {"x":-20.176708984375,"y":5.054003906249999},
-        {"x":-20.400341796875,"y":4.057910156249999},
-        {"x":-20.57490234375,"y":3.0520507812499993},
-        {"x":-20.69990234375,"y":2.0388671874999993}
-        ]]} );
+      const face = phet.scenery.PolygonalFace.deserialize( {
+        polygons: [ [
+          { x: -20.774853515625, y: 1.0205566406249993 },
+          { x: -20.8, y: 0.00004882812499928946 },
+          { x: -20.774853515625, y: -1.0207031250000007 },
+          { x: -20.69990234375, y: -2.0387695312500007 },
+          { x: -20.57490234375, y: -3.0519531250000007 },
+          { x: -20.400341796875, y: -4.057812500000001 },
+          { x: -20.176708984375, y: -5.053906250000001 },
+          { x: -19.904248046875, y: -6.038037109375001 },
+          { x: -19.5841796875, y: -7.007275390625001 },
+          { x: -19.216748046875, y: -7.959912109375001 },
+          { x: -18.8029296875, y: -8.89326171875 },
+          { x: -18.3439453125, y: -9.805126953125 },
+          { x: -17.840771484375, y: -10.693310546875 },
+          { x: -17.29462890625, y: -11.555859375 },
+          { x: -16.70673828125, y: -12.390576171875 },
+          { x: -16.078564453125, y: -13.195263671875 },
+          { x: -15.41181640625, y: -13.96845703125 },
+          { x: -14.70771484375, y: -14.70771484375 },
+          { x: -13.96845703125, y: -15.41181640625 },
+          { x: -13.195263671875, y: -16.078564453125 },
+          { x: -12.390576171875, y: -16.70673828125 },
+          { x: -11.555859375, y: -17.29462890625 },
+          { x: -10.693310546875, y: -17.840771484375 },
+          { x: -9.805126953125, y: -18.3439453125 },
+          { x: -8.89326171875, y: -18.8029296875 },
+          { x: -7.959912109375001, y: -19.216748046875 },
+          { x: -7.007275390625001, y: -19.5841796875 },
+          { x: -6.038037109375001, y: -19.904248046875 },
+          { x: -5.053906250000001, y: -20.176708984375 },
+          { x: -4.057812500000001, y: -20.400341796875 },
+          { x: -3.0519531250000007, y: -20.57490234375 },
+          { x: -2.0387695312500007, y: -20.69990234375 },
+          { x: -1.0207031250000007, y: -20.774853515625 },
+          { x: 0.00004882812499928946, y: -20.8 },
+          { x: 1.0205566406249993, y: -20.774853515625 },
+          { x: 2.0388671874999993, y: -20.69990234375 },
+          { x: 3.0520507812499993, y: -20.57490234375 },
+          { x: 4.057910156249999, y: -20.400341796875 },
+          { x: 5.054003906249999, y: -20.176708984375 },
+          { x: 6.037890624999999, y: -19.904248046875 },
+          { x: 7.007373046874999, y: -19.5841796875 },
+          { x: 7.959765624999999, y: -19.216748046875 },
+          { x: 8.893115234375, y: -18.8029296875 },
+          { x: 9.80498046875, y: -18.3439453125 },
+          { x: 10.693408203125, y: -17.840771484375 },
+          { x: 11.55595703125, y: -17.29462890625 },
+          { x: 12.3904296875, y: -16.70673828125 },
+          { x: 13.195361328125, y: -16.078564453125 },
+          { x: 13.968310546875, y: -15.41181640625 },
+          { x: 14.7078125, y: -14.70771484375 },
+          { x: 15.411669921875, y: -13.96845703125 },
+          { x: 16.078662109375, y: -13.195263671875 },
+          { x: 16.7068359375, y: -12.390576171875 },
+          { x: 17.294482421875, y: -11.555859375 },
+          { x: 17.840869140625, y: -10.693310546875 },
+          { x: 18.34404296875, y: -9.805126953125 },
+          { x: 18.80302734375, y: -8.89326171875 },
+          { x: 19.2166015625, y: -7.959912109375001 },
+          { x: 19.584033203125, y: -7.007275390625001 },
+          { x: 19.904345703125, y: -6.038037109375001 },
+          { x: 20.1765625, y: -5.053906250000001 },
+          { x: 20.400439453125, y: -4.057812500000001 },
+          { x: 20.574755859375, y: -3.0519531250000007 },
+          { x: 20.699755859375, y: -2.0387695312500007 },
+          { x: 20.774951171875, y: -1.0207031250000007 },
+          { x: 20.80009765625, y: 0.00004882812499928946 },
+          { x: 20.774951171875, y: 1.0205566406249993 },
+          { x: 20.699755859375, y: 2.0388671874999993 },
+          { x: 20.574755859375, y: 3.0520507812499993 },
+          { x: 20.400439453125, y: 4.057910156249999 },
+          { x: 20.1765625, y: 5.054003906249999 },
+          { x: 19.904345703125, y: 6.037890624999999 },
+          { x: 19.584033203125, y: 7.007373046874999 },
+          { x: 19.2166015625, y: 7.959765624999999 },
+          { x: 18.80302734375, y: 8.893115234375 },
+          { x: 18.34404296875, y: 9.80498046875 },
+          { x: 17.840869140625, y: 10.693408203125 },
+          { x: 17.294482421875, y: 11.55595703125 },
+          { x: 16.7068359375, y: 12.3904296875 },
+          { x: 16.078662109375, y: 13.195361328125 },
+          { x: 15.411669921875, y: 13.968310546875 },
+          { x: 14.7078125, y: 14.7078125 },
+          { x: 13.968310546875, y: 15.411669921875 },
+          { x: 13.195361328125, y: 16.078662109375 },
+          { x: 12.3904296875, y: 16.7068359375 },
+          { x: 11.55595703125, y: 17.294482421875 },
+          { x: 10.693408203125, y: 17.840869140625 },
+          { x: 9.80498046875, y: 18.34404296875 },
+          { x: 8.893115234375, y: 18.80302734375 },
+          { x: 7.959765624999999, y: 19.2166015625 },
+          { x: 7.007373046874999, y: 19.584033203125 },
+          { x: 6.037890624999999, y: 19.904345703125 },
+          { x: 5.054003906249999, y: 20.1765625 },
+          { x: 4.057910156249999, y: 20.400439453125 },
+          { x: 3.0520507812499993, y: 20.574755859375 },
+          { x: 2.0388671874999993, y: 20.699755859375 },
+          { x: 1.0205566406249993, y: 20.774951171875 },
+          { x: 0.00004882812499928946, y: 20.80009765625 },
+          { x: -1.0207031250000007, y: 20.774951171875 },
+          { x: -2.0387695312500007, y: 20.699755859375 },
+          { x: -3.0519531250000007, y: 20.574755859375 },
+          { x: -4.057812500000001, y: 20.400439453125 },
+          { x: -5.053906250000001, y: 20.1765625 },
+          { x: -6.038037109375001, y: 19.904345703125 },
+          { x: -7.007275390625001, y: 19.584033203125 },
+          { x: -7.959912109375001, y: 19.2166015625 },
+          { x: -8.89326171875, y: 18.80302734375 },
+          { x: -9.805126953125, y: 18.34404296875 },
+          { x: -10.693310546875, y: 17.840869140625 },
+          { x: -11.555859375, y: 17.294482421875 },
+          { x: -12.390576171875, y: 16.7068359375 },
+          { x: -13.195263671875, y: 16.078662109375 },
+          { x: -13.96845703125, y: 15.411669921875 },
+          { x: -14.70771484375, y: 14.7078125 },
+          { x: -15.41181640625, y: 13.968310546875 },
+          { x: -16.078564453125, y: 13.195361328125 },
+          { x: -16.70673828125, y: 12.3904296875 },
+          { x: -17.29462890625, y: 11.55595703125 },
+          { x: -17.840771484375, y: 10.693408203125 },
+          { x: -18.3439453125, y: 9.80498046875 },
+          { x: -18.8029296875, y: 8.893115234375 },
+          { x: -19.216748046875, y: 7.959765624999999 },
+          { x: -19.5841796875, y: 7.007373046874999 },
+          { x: -19.904248046875, y: 6.037890624999999 },
+          { x: -20.176708984375, y: 5.054003906249999 },
+          { x: -20.400341796875, y: 4.057910156249999 },
+          { x: -20.57490234375, y: 3.0520507812499993 },
+          { x: -20.69990234375, y: 2.0388671874999993 }
+        ] ]
+      } );
 
       face.getBinaryCircularClip( phet.dot.v2( -2.5, -2.5 ), 17, 0.04908738521234052 );
     } );
