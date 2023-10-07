@@ -39,6 +39,15 @@ export default class RasterChunkReduceQuad {
     );
   }
 
+  public toStrings(): string[] {
+    return [
+      `leftMin: ${this.leftMin.toString()}`,
+      `rightMin: ${this.rightMin.toString()}`,
+      `leftMax: ${this.leftMax.toString()}`,
+      `rightMax: ${this.rightMax.toString()}`
+    ];
+  }
+
   public static readonly ENCODING_BYTE_LENGTH = 4 * RasterChunkReduceData.ENCODING_BYTE_LENGTH;
 
   public writeEncoding( encoder: ByteEncoder ): void {

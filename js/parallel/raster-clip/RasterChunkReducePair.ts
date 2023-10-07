@@ -36,6 +36,13 @@ export default class RasterChunkReducePair {
     );
   }
 
+  public toStrings(): string[] {
+    return [
+      `min: ${this.min.toString()}`,
+      `max: ${this.max.toString()}`
+    ];
+  }
+
   public static readonly ENCODING_BYTE_LENGTH = 2 * RasterChunkReduceData.ENCODING_BYTE_LENGTH;
 
   public writeEncoding( encoder: ByteEncoder ): void {

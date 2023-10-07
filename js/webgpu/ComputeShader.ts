@@ -24,7 +24,7 @@ export default class ComputeShader {
     public readonly device: GPUDevice
   ) {
     if ( LOG_SHADERS ) {
-      console.groupCollapsed( name );
+      console.groupCollapsed( `[shader] ${name}` );
       console.log( wgsl.split( '\n' ).map( ( s, i ) => `${i + 1} ${s}` ).join( '\n' ) );
       console.groupEnd();
     }
