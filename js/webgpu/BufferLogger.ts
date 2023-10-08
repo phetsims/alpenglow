@@ -26,6 +26,10 @@ export default class BufferLogger {
     this.callbacksOnComplete.length = 0;
   }
 
+  public hasCallbacks(): boolean {
+    return this.callbacksOnComplete.length > 0;
+  }
+
   public withBuffer(
     encoder: GPUCommandEncoder,
     buffer: GPUBuffer,

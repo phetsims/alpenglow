@@ -220,40 +220,6 @@ export default class RasterClipper {
 
     const context = deviceContext.getCanvasContext( canvas );
 
-    // NOTE: This can change between different frames (swap textures and such)
-    const outTexture = context.getCurrentTexture();
-
-    const canvasTextureFormat = outTexture.format;
-    if ( canvasTextureFormat !== 'bgra8unorm' && canvasTextureFormat !== 'rgba8unorm' ) {
-      throw new Error( 'unsupported format' );
-    }
-
-    const canOutputToCanvas = canvasTextureFormat === deviceContext.preferredStorageFormat;
-    let fineOutputTextureView: GPUTextureView;
-    let fineOutputTexture: GPUTexture | null = null;
-    const outTextureView = outTexture.createView();
-
-    if ( canOutputToCanvas ) {
-      fineOutputTextureView = outTextureView;
-    }
-    else {
-      fineOutputTexture = device.createTexture( {
-        label: 'fineOutputTexture',
-        size: {
-          width: outTexture.width,
-          height: outTexture.height,
-          depthOrArrayLayers: 1
-        },
-        format: deviceContext.preferredStorageFormat,
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING // see TargetTexture
-      } );
-      fineOutputTextureView = fineOutputTexture.createView( {
-        label: 'fineOutputTextureView',
-        format: deviceContext.preferredStorageFormat,
-        dimension: '2d'
-      } );
-    }
-
     let rawInputChunks = ParallelRaster.getTestRawInputChunks();
     let rawInputEdges = ParallelRaster.getTestRawInputEdges();
 
@@ -339,69 +305,104 @@ export default class RasterClipper {
       0, 0
     ];
 
-    const configBuffer = device.createBuffer( {
-      label: 'config buffer',
-      size: 4 * configData.length,
-      // NOTE: COPY_SRC here for debugging
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_SRC
-    } );
-    device.queue.writeBuffer( configBuffer, 0, new Uint32Array( configData ).buffer );
+    ( function step() {
+      // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
+      window.requestAnimationFrame( step, canvas );
 
-    const inputChunksBuffer = deviceContext.createBuffer( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
-    const inputChunksEncoder = new ByteEncoder( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
-    rawInputChunks.forEach( chunk => chunk.writeEncoding( inputChunksEncoder ) );
-    assert && assert( inputChunksEncoder.byteLength === RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
-    device.queue.writeBuffer( inputChunksBuffer, 0, inputChunksEncoder.fullArrayBuffer );
+      const configBuffer = device.createBuffer( {
+        label: 'config buffer',
+        size: 4 * configData.length,
+        // NOTE: COPY_SRC here for debugging
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_SRC
+      } );
+      device.queue.writeBuffer( configBuffer, 0, new Uint32Array( configData ).buffer );
 
-    const inputEdgesBuffer = deviceContext.createBuffer( RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
-    const inputEdgesEncoder = new ByteEncoder( RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
-    rawInputEdges.forEach( chunk => chunk.writeEncoding( inputEdgesEncoder ) );
-    assert && assert( inputEdgesEncoder.byteLength === RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
-    device.queue.writeBuffer( inputEdgesBuffer, 0, inputEdgesEncoder.fullArrayBuffer );
+      const inputChunksBuffer = deviceContext.createBuffer( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
+      const inputChunksEncoder = new ByteEncoder( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
+      rawInputChunks.forEach( chunk => chunk.writeEncoding( inputChunksEncoder ) );
+      assert && assert( inputChunksEncoder.byteLength === RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
+      device.queue.writeBuffer( inputChunksBuffer, 0, inputChunksEncoder.fullArrayBuffer );
 
-    const accumulationBuffer = deviceContext.createBuffer( 4 * 4 * rasterSize * rasterSize );
+      const inputEdgesBuffer = deviceContext.createBuffer( RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
+      const inputEdgesEncoder = new ByteEncoder( RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
+      rawInputEdges.forEach( chunk => chunk.writeEncoding( inputEdgesEncoder ) );
+      assert && assert( inputEdgesEncoder.byteLength === RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
+      device.queue.writeBuffer( inputEdgesBuffer, 0, inputEdgesEncoder.fullArrayBuffer );
 
-    const encoder = device.createCommandEncoder( {
-      label: 'the encoder'
-    } );
+      const accumulationBuffer = deviceContext.createBuffer( 4 * 4 * rasterSize * rasterSize );
 
-    const numStages = 16;
-    const stageOutput = rasterClipper.runAccumulate(
-      encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, numStages
-    );
+      // NOTE: This can change between different frames (swap textures and such)
+      const outTexture = context.getCurrentTexture();
 
-    // Have the fine-rasterization shader use the preferred format as output (for now)
-    rasterClipper.toTextureShader.dispatch( encoder, [
-      configBuffer, accumulationBuffer, fineOutputTextureView
-    ], canvas.width / 16, canvas.height / 16 );
+      const canvasTextureFormat = outTexture.format;
+      if ( canvasTextureFormat !== 'bgra8unorm' && canvasTextureFormat !== 'rgba8unorm' ) {
+        throw new Error( 'unsupported format' );
+      }
 
-    if ( !canOutputToCanvas ) {
-      assert && assert( fineOutputTexture, 'If we cannot output to the Canvas directly, we will have created a texture' );
+      const canOutputToCanvas = canvasTextureFormat === deviceContext.preferredStorageFormat;
+      let fineOutputTextureView: GPUTextureView;
+      let fineOutputTexture: GPUTexture | null = null;
+      const outTextureView = outTexture.createView();
 
-      rasterClipper.blitShader.dispatch( encoder, outTextureView, fineOutputTextureView );
-    }
+      if ( canOutputToCanvas ) {
+        fineOutputTextureView = outTextureView;
+      }
+      else {
+        fineOutputTexture = device.createTexture( {
+          label: 'fineOutputTexture',
+          size: {
+            width: outTexture.width,
+            height: outTexture.height,
+            depthOrArrayLayers: 1
+          },
+          format: deviceContext.preferredStorageFormat,
+          usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING // see TargetTexture
+        } );
+        fineOutputTextureView = fineOutputTexture.createView( {
+          label: 'fineOutputTextureView',
+          format: deviceContext.preferredStorageFormat,
+          dimension: '2d'
+        } );
+      }
 
-    const commandBuffer = encoder.finish();
-    device.queue.submit( [ commandBuffer ] );
+      const encoder = device.createCommandEncoder( {
+        label: 'the encoder'
+      } );
 
-    const startTime = Date.now();
+      const numStages = 16;
+      const stageOutput = rasterClipper.runAccumulate(
+        encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, numStages
+      );
 
-    device.queue.onSubmittedWorkDone().then( async () => {
-      const endTime = Date.now();
+      // Have the fine-rasterization shader use the preferred format as output (for now)
+      rasterClipper.toTextureShader.dispatch( encoder, [
+        configBuffer, accumulationBuffer, fineOutputTextureView
+      ], canvas.width / 16, canvas.height / 16 );
 
-      console.log( endTime - startTime );
+      if ( !canOutputToCanvas ) {
+        assert && assert( fineOutputTexture, 'If we cannot output to the Canvas directly, we will have created a texture' );
 
-      await rasterClipper.logger.complete();
-    } ).catch( err => {
-      throw err;
-    } );
+        rasterClipper.blitShader.dispatch( encoder, outTextureView, fineOutputTextureView );
+      }
 
-    configBuffer.destroy();
-    inputChunksBuffer.destroy();
-    inputEdgesBuffer.destroy();
-    accumulationBuffer.destroy();
-    fineOutputTexture && fineOutputTexture.destroy();
-    stageOutput.temporaryBuffers.forEach( buffer => buffer.destroy() );
+      const commandBuffer = encoder.finish();
+      device.queue.submit( [ commandBuffer ] );
+
+      if ( rasterClipper.logger.hasCallbacks() ) {
+        device.queue.onSubmittedWorkDone().then( async () => {
+          await rasterClipper.logger.complete();
+        } ).catch( err => {
+          throw err;
+        } );
+      }
+
+      configBuffer.destroy();
+      inputChunksBuffer.destroy();
+      inputEdgesBuffer.destroy();
+      accumulationBuffer.destroy();
+      fineOutputTexture && fineOutputTexture.destroy();
+      stageOutput.temporaryBuffers.forEach( buffer => buffer.destroy() );
+    } )();
   }
 
   public runAccumulate(
