@@ -25,6 +25,7 @@
 #option workgroupSize
 #option debugReduceBuffers
 
+#ifdef boundsReduce
 const veryPositiveNumber = 1.0e10;
 const veryNegativeNumber = -1.0e10;
 
@@ -32,6 +33,7 @@ const bounds_none = vec4(
   vec2( veryPositiveNumber ),
   vec2( veryNegativeNumber )
 );
+#endif
 
 @group(0) @binding(0)
 var<uniform> config: RasterStageConfig;
@@ -262,6 +264,7 @@ fn main(
     ( maxClip.p3x + maxClip.p2x ) * ( maxClip.p3y - maxClip.p2y )
   );
 
+#ifdef boundsReduce
   // minX, minY, maxX, maxY
   var minBounds = select(
     bounds_none,
@@ -319,6 +322,7 @@ fn main(
       );
     }
   }
+#endif
 
   /*************************************************************************
    * REDUCE AND APPLY
@@ -334,13 +338,17 @@ fn main(
       RasterChunkReduceData(
         minClippedChunkIndex | edge_first_last,
         minArea,
+#ifdef boundsReduce
         minBounds.x, minBounds.y, minBounds.z, minBounds.w,
+#endif
         0i, 0i, select( 0i, minCount, isXSplit ), select( minCount, 0i, isXSplit )
       ),
       RasterChunkReduceData(
         maxClippedChunkIndex | edge_first_last,
         maxArea,
+#ifdef boundsReduce
         maxBounds.x, maxBounds.y, maxBounds.z, maxBounds.w,
+#endif
         select( 0i, maxCount, isXSplit ), select( maxCount, 0i, isXSplit ), 0i, 0i
       )
     );

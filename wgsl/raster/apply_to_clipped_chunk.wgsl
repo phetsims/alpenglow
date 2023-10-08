@@ -27,6 +27,7 @@ fn apply_to_clipped_chunk( value: RasterChunkReduceData ) {
   let clippedMaxX = (*clipped_chunk).maxX;
   let clippedMaxY = (*clipped_chunk).maxY;
 
+#ifdef boundsReduce
   // TODO: test with/without the bounds computation (potentially have conditional compilation)
   // NOTE: Our clipped edge counts will affect our bounds, so we have lots of conditionals here.
   // If they are NOT affected by the clipped edge counts, we can see if we can shrink the bounds.
@@ -52,6 +53,12 @@ fn apply_to_clipped_chunk( value: RasterChunkReduceData ) {
     clippedMaxY - floor( clippedMaxY - value.maxY ),
     minXCount == 0i && maxXCount == 0i && maxYCount == 0i
   );
+#else
+  let minX = clippedMinX;
+  let minY = clippedMinY;
+  let maxX = clippedMaxX;
+  let maxY = clippedMaxY;
+#endif
 
   // NOTE: This ASSUMES that we're using the specific shoelace formulation of ( p1.x + p0.x ) * ( p1.y - p0.y )
   // for the rest of our computations

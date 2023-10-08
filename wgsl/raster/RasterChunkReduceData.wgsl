@@ -18,11 +18,13 @@ struct RasterChunkReduceData {
 
   area: f32,
 
+#ifdef boundsReduce
    // Floating point (typically integral or offset by 0.5) bounds.
   minX: f32,
   minY: f32,
   maxX: f32,
   maxY: f32,
+#endif
 
   // EdgedClipped counts. See EdgedClippedFace for details.
   minXCount: i32,
@@ -45,10 +47,12 @@ fn RasterChunkReduceData_combine(
       ( a.bits & RasterChunkReduceData_bits_is_first_edge_mask ) |
       ( b.bits & RasterChunkReduceData_bits_is_last_edge_mask ),
       a.area + b.area,
+#ifdef boundsReduce
       min( a.minX, b.minX ),
       min( a.minY, b.minY ),
       max( a.maxX, b.maxX ),
       max( a.maxY, b.maxY ),
+#endif
       a.minXCount + b.minXCount,
       a.minYCount + b.minYCount,
       a.maxXCount + b.maxXCount,
@@ -60,6 +64,8 @@ fn RasterChunkReduceData_combine(
 const RasterChunkReduceData_out_of_range = RasterChunkReduceData(
   0x2fffffff,
   0.0,
+#ifdef boundsReduce
   0.0, 0.0, 0.0, 0.0,
+#endif
   0i, 0i, 0i, 0i
 );
