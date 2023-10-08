@@ -23,7 +23,7 @@ const DEBUG_ACCUMULATION = false;
 
 
 // TODO: figure out better output buffer size, since it's hard to bound
-const MAX_EXPONENT = 19;
+const MAX_EXPONENT = 12; // works for our small demo for now
 const MAX_COMPLETE_CHUNKS = 2 ** MAX_EXPONENT;
 const MAX_COMPLETE_EDGES = 2 ** MAX_EXPONENT;
 
@@ -450,6 +450,7 @@ export default class RasterClipper {
       numUsedInputEdges = new Uint32Array( arrayBuffer )[ CONFIG_COUNT_WORD_OFFSET + 1 ];
       numUsedClippedChunks = new Uint32Array( arrayBuffer )[ CONFIG_COUNT_WORD_OFFSET + 2 ];
       numUsedEdgeClips = new Uint32Array( arrayBuffer )[ CONFIG_COUNT_WORD_OFFSET + 3 ];
+      console.log( 'chunks', numUsedInputChunks, 'edges', numUsedInputEdges );
     } );
 
     LOG && this.logger.logIndexed( encoder, inputChunksBuffer, 'inputChunks', RasterChunk, () => numUsedInputChunks );
