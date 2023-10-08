@@ -220,6 +220,7 @@ export default class RasterClipper {
 
     const context = deviceContext.getCanvasContext( canvas );
 
+    // NOTE: This can change between different frames (swap textures and such)
     const outTexture = context.getCurrentTexture();
 
     const canvasTextureFormat = outTexture.format;
