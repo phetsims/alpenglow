@@ -4,6 +4,9 @@
  * RenderProgram for repeated compositing of multiple RenderPrograms in a row with normal blending and source-over
  * Porter-Duff composition.
  *
+ * RenderStack will apply normal compositing/blending to a list of RenderPrograms, where each RenderProgram in the
+ * list is drawn "on top" of all of the previous ones.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

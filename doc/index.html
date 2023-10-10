@@ -373,6 +373,7 @@
             <ul class="nav nav-list">
               <li><a href="#RenderColor">RenderColor</a></li>
               <li><a href="#RenderPathBoolean">RenderPathBoolean</a></li>
+              <li><a href="#RenderStack">RenderStack</a></li>
               <li><a href="#RenderLinearBlend">RenderLinearBlend</a></li>
               <li><a href="#RenderLinearGradient">RenderLinearGradient</a></li>
               <li><a href="#RenderRadialBlend">RenderRadialBlend</a></li>
@@ -605,6 +606,54 @@
 
     <p>
       RenderPathBoolean will display one RenderProgram "inside" the path, and another RenderProgram "outside" the path.
+    </p>
+
+    <h4 id="RenderStack">RenderStack</h4>
+
+    <div class="example">
+      <div id="RenderStack-example"></div>
+    </div>
+
+    <script type="module">
+      /* eslint-disable no-undef */
+      window.createRenderProgramSandbox( 'RenderStack-example', () => {
+        /*START*/
+        const program = new RenderStack( [
+          // A constant background color
+          new RenderColor( new Vector4( 0, 0, 0, 1 ) ),
+
+          // Red diamond
+          RenderPathBoolean.fromInside( // applies "transparent" to the "outside"
+            new RenderPath( 'nonzero', [ [
+              v2( 20, 20 ), v2( 90, 40 ), v2( 118, 118 ), v2( 50, 80 )
+            ] ] ),
+            new RenderColor( new Vector4( 1, 0, 0, 1 ) )
+          ),
+
+          // Green triangle
+          RenderPathBoolean.fromInside(
+            new RenderPath( 'nonzero', [ [
+              v2( 10, 10 ), v2( 90, 10 ), v2( 10, 90 )
+            ] ] ),
+            new RenderColor( new Vector4( 0, 1, 0, 1 ) )
+          ),
+
+          // Semi-transparent white rectangle
+          RenderPathBoolean.fromInside(
+            new RenderPath( 'nonzero', [ [
+              v2( 30, 30 ), v2( 110, 30 ), v2( 110, 80 ), v2( 30, 80 )
+            ] ] ),
+            new RenderColor( new Vector4( 0.7, 0.7, 0.7, 0.7 ) )
+          )
+        ] );
+        /*END*/
+        return program;
+      }, 128, 128 );
+    </script>
+
+    <p>
+      RenderStack will apply normal compositing/blending to a list of RenderPrograms, where each RenderProgram in the
+      list is drawn "on top" of all of the previous ones.
     </p>
 
     <h4 id="RenderLinearBlend">RenderLinearBlend</h4>
