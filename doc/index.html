@@ -151,7 +151,8 @@
       width: width,
       height: height,
       accessibility: true,
-      container: subdiv
+      container: subdiv,
+      allowCSSHacks: false
     } );
 
     display.width = width;
@@ -668,7 +669,7 @@
 
     <p>
       It can be used in a standalone way, however it is primarily meant to be used when a <code>RenderLinearGradient</code>
-      is split into each linear segment.
+      is split into each section between two gradient stops.
     </p>
 
     <div class="example">
