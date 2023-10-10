@@ -550,6 +550,10 @@
 
     <h4 id="RenderColor">RenderColor</h4>
 
+    <p>
+      RenderColor displays a single solid color everywhere, and is a basic building-block for many other RenderPrograms.
+    </p>
+
     <div class="example">
       <div id="RenderColor-example"></div>
     </div>
@@ -565,10 +569,6 @@
     </script>
 
     <p>
-      RenderColor displays a single solid color everywhere, and is a basic building-block for many other RenderPrograms.
-    </p>
-
-    <p>
       Note that the default color space is <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a>. Additionally, the
       values are by default interpreted with
       <a href="https://en.wikipedia.org/wiki/Alpha_compositing#Straight_versus_premultiplied">premultiplied alpha</a>
@@ -576,6 +576,10 @@
     </p>
 
     <h4 id="RenderPathBoolean">RenderPathBoolean</h4>
+
+    <p>
+      RenderPathBoolean will display one RenderProgram "inside" the path, and another RenderProgram "outside" the path.
+    </p>
 
     <div class="example">
       <div id="RenderPathBoolean-example"></div>
@@ -606,11 +610,12 @@
       }, 128, 128 );
     </script>
 
-    <p>
-      RenderPathBoolean will display one RenderProgram "inside" the path, and another RenderProgram "outside" the path.
-    </p>
-
     <h4 id="RenderStack">RenderStack</h4>
+
+    <p>
+      RenderStack will apply normal compositing/blending to a list of RenderPrograms, where each RenderProgram in the
+      list is drawn "on top" of all of the previous ones.
+    </p>
 
     <div class="example">
       <div id="RenderStack-example"></div>
@@ -653,12 +658,18 @@
       }, 128, 128 );
     </script>
 
+    <h4 id="RenderLinearBlend">RenderLinearBlend</h4>
+
     <p>
-      RenderStack will apply normal compositing/blending to a list of RenderPrograms, where each RenderProgram in the
-      list is drawn "on top" of all of the previous ones.
+      RenderLinearBlend will interpolate between two different RenderPrograms based on the location. It will evaluate
+      <code>clamp( dot( scaledNormal, point ) - offset, 0, 1 )</code>, and will linearly blend between the "zero"
+      program (when the value is 0) and the "one" program (when the value is 1).
     </p>
 
-    <h4 id="RenderLinearBlend">RenderLinearBlend</h4>
+    <p>
+      It can be used in a standalone way, however it is primarily meant to be used when a <code>RenderLinearGradient</code>
+      is split into each linear segment.
+    </p>
 
     <div class="example">
       <div id="RenderLinearBlend-example"></div>
@@ -684,18 +695,11 @@
       }, 128, 128 );
     </script>
 
-    <p>
-      RenderLinearBlend will interpolate between two different RenderPrograms based on the location. It will evaluate
-      <code>clamp( dot( scaledNormal, point ) - offset, 0, 1 )</code>, and will linearly blend between the "zero"
-      program (when the value is 0) and the "one" program (when the value is 1).
-    </p>
-
-    <p>
-      It can be used in a standalone way, however it is primarily meant to be used when a <code>RenderLinearGradient</code>
-      is split into each linear segment.
-    </p>
-
     <h4 id="RenderLinearGradient">RenderLinearGradient</h4>
+
+    <p>
+      RenderLinearGradient will display the typical linear gradient.
+    </p>
 
     <div class="example">
       <div id="RenderLinearGradient-example"></div>
@@ -722,11 +726,18 @@
       }, 128, 128 );
     </script>
 
+    <h4 id="RenderRadialBlend">RenderRadialBlend</h4>
+
     <p>
-      RenderLinearGradient will display the typical linear gradient.
+      RenderRadialBlend will interpolate between two different RenderPrograms based on the location. It will evaluate
+      <code>clamp( ( averageFragmentRadius - radius0 ) / ( radius1 - radius0 ), 0, 1 )</code>, and will linearly blend
+      between the "zero" program (when the value is 0) and the "one" program (when the value is 1).
     </p>
 
-    <h4 id="RenderRadialBlend">RenderRadialBlend</h4>
+    <p>
+      It can be used in a standalone way, however it is primarily meant to be used when a <code>RenderRadialGradient</code>
+      is circular, and is split into each radial-linear partition.
+    </p>
 
     <div class="example">
       <div id="RenderRadialBlend-example"></div>
@@ -753,18 +764,11 @@
       }, 128, 128 );
     </script>
 
-    <p>
-      RenderRadialBlend will interpolate between two different RenderPrograms based on the location. It will evaluate
-      <code>clamp( ( averageFragmentRadius - radius0 ) / ( radius1 - radius0 ), 0, 1 )</code>, and will linearly blend
-      between the "zero" program (when the value is 0) and the "one" program (when the value is 1).
-    </p>
-
-    <p>
-      It can be used in a standalone way, however it is primarily meant to be used when a <code>RenderRadialGradient</code>
-      is circular, and is split into each radial-linear partition.
-    </p>
-
     <h4 id="RenderRadialGradient">RenderRadialGradient</h4>
+
+    <p>
+      RenderRadialGradient will display the typical radial gradient.
+    </p>
 
     <div class="example">
       <div id="RenderRadialGradient-example"></div>
@@ -797,11 +801,13 @@
 
     <p class="TODO">We need UnsplitCentroid to get more general conic gradients working, it should NOT split in those cases</p>
 
-    <p>
-      RenderRadialGradient will display the typical radial gradient.
-    </p>
-
     <h4 id="RenderBlendCompose">RenderBlendCompose</h4>
+
+    <p>
+      RenderBlendCompose will blend/composite two RenderPrograms with a more general blending model, that takes in
+      a Porter-Duff <a href="https://en.wikipedia.org/wiki/Alpha_compositing">compositing mode</a>, in addition to a
+      <a href="https://en.wikipedia.org/wiki/Blend_modes">blend mode</a>.
+    </p>
 
     <div class="example">
       <div id="RenderBlendCompose-example"></div>
@@ -846,12 +852,6 @@
         return program;
       }, 5 * 90, 90 );
     </script>
-
-    <p>
-      RenderBlendCompose will blend/composite two RenderPrograms with a more general blending model, that takes in
-      a Porter-Duff <a href="https://en.wikipedia.org/wiki/Alpha_compositing">compositing mode</a>, in addition to a
-      <a href="https://en.wikipedia.org/wiki/Blend_modes">blend mode</a>.
-    </p>
 
     <p class="TODO">Demos of every RenderProgram type!</p>
 
