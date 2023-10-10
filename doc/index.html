@@ -94,6 +94,8 @@
 
 <script type="module">
 
+  // TODO: move to a standalone JS file!
+
   import { Color, Node, Display, Path, Rectangle } from '../../chipper/dist/js/scenery/js/imports.js';
   import { CombinedRaster, Rasterize, RenderColor, RenderStack, RenderPathBoolean, RenderPath, RenderFromNode, RenderColorSpace } from '../../chipper/dist/js/alpenglow/js/imports.js';
   import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
@@ -101,7 +103,6 @@
   import Matrix3 from '../../chipper/dist/js/dot/js/Matrix3.js';
   import Vector2 from '../../chipper/dist/js/dot/js/Vector2.js';
   import dot from '../../chipper/dist/js/dot/js/dot.js';
-
   const v2 = dot.v2;
   const v3 = dot.v3;
   const v4 = dot.v4;
@@ -119,25 +120,25 @@
     new Color( 252, 82, 127 )
   ];
 
-  const piecewiseOptions = {
+  window.piecewiseOptions = {
     minLevels: 1,
     maxLevels: 10,
     // distanceEpsilon: 0.02,
     distanceEpsilon: 0.0002,
     curveEpsilon: 0.2
   };
-  const shapeToPolygons = shape => shape.subpaths.map( subpath => {
+  window.shapeToPolygons = shape => shape.subpaths.map( subpath => {
     return subpath.toPiecewiseLinear( piecewiseOptions ).segments.map( line => {
       return line.start;
     } );
   } );
 
-  const sizeCanvas = canvas => {
+  window.sizeCanvas = canvas => {
     canvas.style.width = `${canvas.width / window.devicePixelRatio}px`;
     canvas.style.height = `${canvas.height / window.devicePixelRatio}px`;
   };
 
-  const getSceneryElement = ( node, width, height, background, renderer ) => {
+  window.getSceneryElement = ( node, width, height, background, renderer ) => {
     const subdiv = document.createElement( 'div' );
     subdiv.style.margin = '0 auto';
     const scene = new Node( { renderer: renderer } );
@@ -158,7 +159,7 @@
   };
 
   // composite Rasterize/CombinedRaster options
-  const getRasterizedElement = ( renderProgram, width, height, options ) => {
+  window.getRasterizedElement = ( renderProgram, width, height, options ) => {
     const program = renderProgram.transformed( Matrix3.scaling( window.devicePixelRatio ) );
 
     const outputWidth = width * window.devicePixelRatio;
@@ -174,70 +175,6 @@
     canvas.style.left = '0';
     canvas.style.top = '0';
     return canvas;
-  };
-
-  window.getConflation = ( type, pointCount ) => {
-    const width = 128;
-    const height = 128;
-
-    const center = v2( width / 2 + 0.15992094, height / 2 + 0.426296 );
-    const radius = width * 0.45;
-
-    const polygons = [];
-    const colors = [];
-    for ( let i = 0; i < pointCount; i++ ) {
-      const polygon = [];
-      const angle0 = i * 2 * Math.PI / pointCount;
-      const angle1 = ( i + 1 ) * 2 * Math.PI / pointCount;
-
-      const chroma = Vector2.createPolar( 0.1, angle0 );
-      colors.push( RenderColor.gamutMapSRGB( RenderColor.convert( v4( 0.5, chroma.x, chroma.y, 1 ), RenderColorSpace.oklab, RenderColorSpace.sRGB ) ) );
-
-      const p0 = v2( center.x + radius * Math.cos( angle0 ), center.y + radius * Math.sin( angle0 ) );
-      const p1 = v2( center.x + radius * Math.cos( angle1 ), center.y + radius * Math.sin( angle1 ) );
-
-      polygon.push( center );
-      polygon.push( p0 );
-      polygon.push( p1 );
-      polygons.push( polygon );
-    }
-
-    if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
-      return getSceneryElement(
-        new Node( {
-          children: [
-            new Rectangle( 0, 64, 128, 64, { fill: 'black' } ),
-            ...polygons.map( ( poly, i ) => {
-              return new Path( Shape.polygon( poly ), { fill: new Color( colors[ i ].x * 255, colors[ i ].y * 255, colors[ i ].z * 255, 1 ) } );
-            } )
-          ]
-        } ),
-        width, height, 'white', type
-      );
-    }
-    else if ( type === 'default' ) {
-      const program = new RenderStack(
-        [
-          new RenderPathBoolean(
-            new RenderPath( 'nonzero', [ [
-              v2( 0, 64 ),
-              v2( 128, 64 ),
-              v2( 128, 128 ),
-              v2( 0, 128 )
-            ] ] ),
-            RenderFromNode.colorFrom( 'black' ),
-            RenderFromNode.colorFrom( 'white' )
-          ),
-          ...polygons.map( ( polygon, i ) => new RenderPathBoolean(
-            new RenderPath( 'nonzero', [ polygon ] ),
-            new RenderColor( colors[ i ] ),
-            RenderColor.TRANSPARENT
-          ) )
-        ]
-      );
-
-      return getRasterizedElement( program, width, height );
-    }
   };
 
   setTimeout( () => {
@@ -275,6 +212,7 @@
       <li>
         <a href="#concepts">Concepts</a>
         <ul class="nav nav-list">
+          <li><a href="#antialiasing">Anti-Aliasing</a></li>
           <li><a href="#clipping">Clipping</a></li>
           <li>
             <a href="#renderProgram">RenderProgram</a>
@@ -351,23 +289,100 @@
       </div>
     </div>
 
-    <script>
-      addDiagram( 'conflation-canvas', () => window.getConflation( 'canvas', 100 ) );
-    </script>
-    <script>
-      addDiagram( 'conflation-svg', () => window.getConflation( 'svg', 100 ) );
-    </script>
-    <script>
-      addDiagram( 'conflation-default', () => window.getConflation( 'default', 100 ) );
+    <script type="module">
+      import { Color, Node, Path, Rectangle } from '../../chipper/dist/js/scenery/js/imports.js';
+      import { RenderColor, RenderStack, RenderPathBoolean, RenderPath, RenderFromNode, RenderColorSpace } from '../../chipper/dist/js/alpenglow/js/imports.js';
+      import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
+      import Vector2 from '../../chipper/dist/js/dot/js/Vector2.js';
+      import dot from '../../chipper/dist/js/dot/js/dot.js';
+      const v2 = dot.v2;
+      const v3 = dot.v3;
+      const v4 = dot.v4;
+
+      const getConflation = ( type, pointCount ) => {
+        const width = 128;
+        const height = 128;
+
+        const center = v2( width / 2 + 0.15992094, height / 2 + 0.426296 );
+        const radius = width * 0.45;
+
+        const polygons = [];
+        const colors = [];
+        for ( let i = 0; i < pointCount; i++ ) {
+          const polygon = [];
+          const angle0 = i * 2 * Math.PI / pointCount;
+          const angle1 = ( i + 1 ) * 2 * Math.PI / pointCount;
+
+          const chroma = Vector2.createPolar( 0.1, angle0 );
+          colors.push( RenderColor.gamutMapSRGB( RenderColor.convert( v4( 0.5, chroma.x, chroma.y, 1 ), RenderColorSpace.oklab, RenderColorSpace.sRGB ) ) );
+
+          const p0 = v2( center.x + radius * Math.cos( angle0 ), center.y + radius * Math.sin( angle0 ) );
+          const p1 = v2( center.x + radius * Math.cos( angle1 ), center.y + radius * Math.sin( angle1 ) );
+
+          polygon.push( center );
+          polygon.push( p0 );
+          polygon.push( p1 );
+          polygons.push( polygon );
+        }
+
+        if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+          return getSceneryElement(
+            new Node( {
+              children: [
+                new Rectangle( 0, 64, 128, 64, { fill: 'black' } ),
+                ...polygons.map( ( poly, i ) => {
+                  return new Path( Shape.polygon( poly ), { fill: new Color( colors[ i ].x * 255, colors[ i ].y * 255, colors[ i ].z * 255, 1 ) } );
+                } )
+              ]
+            } ),
+            width, height, 'white', type
+          );
+        }
+        else if ( type === 'default' ) {
+          const program = new RenderStack(
+            [
+              new RenderPathBoolean(
+                new RenderPath( 'nonzero', [ [
+                  v2( 0, 64 ),
+                  v2( 128, 64 ),
+                  v2( 128, 128 ),
+                  v2( 0, 128 )
+                ] ] ),
+                RenderFromNode.colorFrom( 'black' ),
+                RenderFromNode.colorFrom( 'white' )
+              ),
+              ...polygons.map( ( polygon, i ) => new RenderPathBoolean(
+                new RenderPath( 'nonzero', [ polygon ] ),
+                new RenderColor( colors[ i ] ),
+                RenderColor.TRANSPARENT
+              ) )
+            ]
+          );
+
+          return getRasterizedElement( program, width, height );
+        }
+      };
+
+      addDiagram( 'conflation-canvas', () => getConflation( 'canvas', 100 ) );
+      addDiagram( 'conflation-svg', () => getConflation( 'svg', 100 ) );
+      addDiagram( 'conflation-default', () => getConflation( 'default', 100 ) );
     </script>
 
     <h2 id="concepts">Concepts</h2>
 
     <p class="TODO">Documentation</p>
 
+    <h3 id="antialiasing">Anti-Aliasing</h3>
+
+    <p class="TODO">Documentation</p>
+
+    <p class="TODO">Demos of concepts, blurs, and checkerboard/siemens examples</p>
+
     <h3 id="renderProgram">RenderProgram</h3>
 
     <p class="TODO">Documentation</p>
+
+    <p class="TODO">Demos of every RenderProgram type!</p>
 
     <h4 id="renderProgram-simplification">Simplification</h4>
 
