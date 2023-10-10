@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Alpenglow</title>
+
+  <link rel="shortcut icon" type="image/x-icon" href="../../scenery/assets/logo-v1.svg">
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-responsive-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
+
+  <script>
+    window.phet = window.phet || {};
+  </script>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../chipper/js/sim-tests/pageload-connector.js"></script>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <script src="../../assert/js/assert.js"></script>
+  <script src="../../tandem/js/PhetioIDUtils.js"></script>
+  <script src="../../sherpa/lib/linebreak-1.1.0.js"></script>
+  <script src="../../sherpa/lib/flatqueue-1.2.1.js"></script>
+  <script src="../../sherpa/lib/paper-js-0.12.17.js"></script>
+  <script src="../../sherpa/lib/he-1.1.1.js"></script>
+  <script src="../../sherpa/lib/TextEncoderLite-3c9f6f0.js"></script>
+  <script src="../../sherpa/lib/base64-js-1.2.0.js"></script>
+
+  <script type="text/javascript">
+    window.assertions.enableAssert();
+    window.assertions.enableAssertSlow();
+  </script>
+
+  <!-- For the styling -->
+  <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
+
+  <link rel="stylesheet" href="../../sherpa/lib/codemirror-5.52.2.min.css">
+  <link rel="stylesheet" href="../../sherpa/lib/codemirror-5.52.2.monokai.min.css">
+
+  <script src="../../sherpa/lib/codemirror-5.52.2.min.js"></script>
+  <script src="../../sherpa/lib/codemirror-5.52.2.javascript.min.js"></script>
+
+  <script src="./teapotObj.js"></script>
+
+  <style>
+    .CodeMirror {
+      height: auto;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+<script type="module">
+  import '../../chipper/dist/js/scenery/js/main.js';
+  import '../../chipper/dist/js/alpenglow/js/main.js';
+  import '../../chipper/dist/js/phet-core/js/main.js';
+  import '../../chipper/dist/js/axon/js/main.js';
+  import '../../chipper/dist/js/dot/js/main.js';
+  import '../../chipper/dist/js/kite/js/main.js';
+  import '../../chipper/dist/js/utterance-queue/js/main.js';
+
+  phet.scenery.Utils.polyfillRequestAnimationFrame();
+</script>
+
+<!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+<!--<script src="../../phet-lib/dist/phet-lib.debug.js"></script>-->
+<!--<script src="../../phet-lib/dist/phet-lib.min.js"></script>-->
+
+<!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
+
+<div class="row-fluid">
+  <div class="span2"></div>
+  <div class="span8">
+    <div class="page-header" style="text-align: center;">
+      <h1>Alpenglow</h1>
+    </div>
+  </div>
+  <div class="span2"></div>
+</div>
+
+<div class="row-fluid">
+  <div class="span2">
+    <ul class="nav nav-list">
+      <li><a href="#overview">Overview</a></li>
+      <li>
+        <a href="#concepts">Concepts</a>
+        <ul class="nav nav-list">
+          <li><a href="#clipping">Clipping</a></li>
+          <li><a href="#renderPrograms">RenderPrograms</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#pipeline">Pipeline</a>
+        <ul class="nav nav-list">
+          <li><a href="#stage-transforms">Transforms</a></li>
+          <li><a href="#stage-subdivision">Subdivision</a></li>
+          <li><a href="#stage-bounds">Bounds</a></li>
+          <li><a href="#stage-tiling">Tiling</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+  <div class="span8">
+    <h2 id="overview">Overview</h2>
+
+    <p>
+      Alpenglow is an experimental rasterizer. It is meant to take in a scene description and efficiently output or
+      update a rasterized image.
+    </p>
+
+    <p>
+      The goal is to primarily use WebGPU for rendering, but to also support WebGL 2 as much as possible, with software
+      fallback (and for testing/development). In addition to a normal software route, there is a async/await
+      parallelized form that can execute with the same execution model that WebGPU would use (with workgroups, storage
+      buffers, etc.), that is used for validation, testing, and debugging.
+    </p>
+
+    <h2 id="concepts">Concepts</h2>
+
+    <h3 id="renderPrograms">RenderPrograms</h3>
+
+    <h3 id="clipping">Clipping</h3>
+
+    <h2 id="pipeline">Pipeline</h2>
+
+    <h3 id="stage-transforms">Transforms</h3>
+
+    <p>
+      Use a stack monoid setup to compute the nested transforms for every path. This isn't particularly required from
+      Scenery (we CAN compute them CPU-side, but it uses up a lot of CPU time). However, we can ship over paths in an
+      instanced fashion (e.g. font glyphs), and this stage would convert from the DAG to effectively a flat array of
+      paths.
+    </p>
+
+    <h3 id="stage-subdivision">Subdivision</h3>
+
+    <p>
+      We'll want to convert our paths to polygons (a piecewise linear form). This could come before or after the
+      transform step. Might need more code to do it after the transforms (logic needed to transform elliptical arcs,
+      etc., but it would be more efficient.
+    </p>
+
+    <h3 id="stage-bounds">Bounds</h3>
+
+    <p>
+      We'll want the bounds of each path for later stages.
+    </p>
+
+    <h3 id="stage-tiling">Tiling</h3>
+
+    <p>
+      We'll subdivide the rendered area into tiles, and for each path we'll either skip it, fully include it, or clip it
+      to the size of the tile.
+    </p>
+
+    <p>
+      Certain potential final rasterization steps benefit from a guaranteed maximum tile size of path (e.g. if we're
+      256x256, it would take 16 steps of binary subdivision to reach the pixel level).
+    </p>
+
+    <p>
+      Tiling is also helpful to reduce the potential amount of cases for the later intersection step.
+    </p>
+
+  </div>
+  <div class="span2"></div>
+</div>
+
+</body>
+</html>
