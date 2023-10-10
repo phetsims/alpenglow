@@ -56,6 +56,15 @@
       height: auto;
       border-radius: 5px;
     }
+
+    .TODO::before {
+      content: "TODO: ";
+      font-weight: bold;
+    }
+
+    .TODO {
+      color: red;
+    }
   </style>
 </head>
 
@@ -95,7 +104,12 @@
         <a href="#concepts">Concepts</a>
         <ul class="nav nav-list">
           <li><a href="#clipping">Clipping</a></li>
-          <li><a href="#renderPrograms">RenderPrograms</a></li>
+          <li>
+            <a href="#renderProgram">RenderProgram</a>
+            <ul class="nav nav-list">
+              <li><a href="#renderProgram-simplification">Simplification</a></li>
+              <li><a href="#renderProgram-execution">Execution</a></li>
+          </li>
         </ul>
       </li>
       <li>
@@ -111,6 +125,13 @@
           <li><a href="#stage-split">Split</a></li>
           <li><a href="#stage-edgeSort">Edge Sort</a></li>
           <li><a href="#stage-filterConnect">Filter &amp; Connect</a></li>
+          <li><a href="#stage-boundaryTrace">Boundary Trace</a></li>
+          <li><a href="#stage-faceHoles">Face Holes</a></li>
+          <li><a href="#stage-windingMaps">Winding Maps</a></li>
+          <li><a href="#stage-renderProgramSimplification">RenderProgram Simplification</a></li>
+          <li><a href="#stage-renderableFaceCreation">RenderableFace Creation</a></li>
+          <li><a href="#stage-splitPrograms">Split Programs</a></li>
+          <li><a href="#stage-rasterize">Rasterize</a></li>
         </ul>
       </li>
     </ul>
@@ -132,16 +153,49 @@
 
     <p>
       The goal is to solve the problem quickly and with high quality by using a CAG (computational area geometry)
-      approach where we can get a list of simple polygons where each input path is either fully contained or fully
-      excluded in each polygon. We can then use high-performance approaches to rasterize each polygon, while avoiding
-      multisampling and conflation artifacts.
+      approach where we can get a list of polygonal faces where each input path is either fully contained or fully
+      excluded in each face. We can then use high-performance approaches to rasterize each face independently, then
+      accumulate while avoiding multisampling and conflation artifacts. Often these faces will be of constant color,
+      which can very efficiently be displayed (we skip the per-pixel blending with the completely-occluded background
+      contents).
     </p>
 
     <h2 id="concepts">Concepts</h2>
 
-    <h3 id="renderPrograms">RenderPrograms</h3>
+    <p class="TODO">Documentation</p>
+
+    <h3 id="renderProgram">RenderProgram</h3>
+
+    <p class="TODO">Documentation</p>
+
+    <h4 id="renderProgram-simplification">Simplification</h4>
+
+    <p class="TODO">Documentation</p>
+
+    <h4 id="renderProgram-execution">Execution</h4>
+
+    <p>
+      The software tree form of RenderPrograms can be directly executed. However it's better if we turn our RenderProgram
+      into a series of instructions that can be executed in a more efficient way.
+    </p>
+
+    <p>
+      We're able to output instructions (both in software as types, and on the GPU in a binary format) that operate in
+      a simple stack-based fashion. We'll have a main stack, where vec4 values are pushed and popped. Instructions
+      primarily either push content, or pop content then push more content (processing existing values). We're able to
+      determine a bound on the stack size by analyzing the RenderProgram (normal visual blending won't cause stack
+      issues, since we're able to blend each pair of colors before computing the next color).
+    </p>
+
+    <p>
+      This is combined with a stack of instruction indices, to support function calls and return values, in addition to
+      simple branching logic. It turns out all of the primitives we need can be done with "opaque jumps" (if the top of
+      the stack is a fully-opaque value, jump to an instruction index) and function calls.
+    </p>
 
     <h3 id="clipping">Clipping</h3>
+
+    <p class="TODO">Documentation</p>
 
     <h2 id="stages">Stages</h2>
 
@@ -289,6 +343,150 @@
         counter-clockwise around the vertex. This will allow tracing of the edges in future steps.
       </li>
     </ul>
+
+    <h3 id="stage-boundaryTrace">Boundary Trace</h3>
+
+    <p>
+      We'll follow each half-edge until it loops back on itself. This will give us a boundary. It might be an
+      "inner" or "outer" boundary. We can determine which it is by looking at the total signed area of the boundary
+      (using the shoelace method). If it's positive, it's an inner boundary (is counter-clockwise), and if it's
+      negative, it's an outer boundary (is clockwise). Outer boundaries are either (a) the outside of the bounding box
+      or whatever region we have, or (b) a hole.
+    </p>
+
+    <p>
+      Since we have signed area here, we can discard all edges with boundaries with zero area.
+    </p>
+
+    <p>
+      On the GPU, we'll be able to use reduction techniques to make this efficient (like the linked list traversal).
+    </p>
+
+    <h3 id="stage-faceHoles">Face Holes</h3>
+
+    <p>
+      Each inner boundary determines a face. We need to compute which outer boundaries are holes, and for which faces.
+      Once we figure out which boundaries are holes for which faces, we can forget about whether they are inner/outer
+      and just combine all of the relevant boundaries together to represent the face.
+    </p>
+
+    <p>
+      We'll first sort faces by their signed area. Then for each outer boundary, we'll take the point on it with the
+      smallest x value (compatible with our edge sort above), and we'll scan for the smallest face that contains the
+      point. We can filter a lot, ignoring faces smaller than the hole, faces whose bounding boxes don't fully
+      (strictly) contain our hole, and we can take the smallest face that contains the point. Point-in-polygon testing
+      is done with Dan Sunday's algorithm.
+    </p>
+
+    <p class="TODO">
+      Look up what paper most of the filtering techniques are from!
+    </p>
+
+    <p>
+      As part of this, we'll determine the "unbounded" outer face (the one that effectively contains the content OUTSIDE
+      of the region we're rendering).
+    </p>
+
+    <h3 id="stage-windingMaps">Winding Maps</h3>
+
+    <p>
+      We need to compute the winding map for each face. The unbounded face contains zero winding, so we can start with
+      it and find adjacent faces (through edges). Each time we find an adjacent edge with one face that has a winding
+      map and one that doesn't, we can compute the winding map for the face that doesn't have one (based on the
+      information in the edge and in the one face).
+    </p>
+
+    <h3 id="stage-renderProgramSimplification">RenderProgram Simplification</h3>
+
+    <p>
+      Our winding map for each face, combined with the winding rule for each path, gives us a boolean map (whether
+      a path is included or not) for each face. In general these are sparse, so they will only mention the included
+      faces. We can simplify the RenderProgram for each face by simplifying it with the path inclusion information
+      (replacing each <code>RenderPathBoolean</code> with either the inside or outside RenderProgram), combined with
+      simplification.
+    </p>
+
+    <p>
+      We will precompute (possibly on the CPU) a replacement acceleration structure, since we'll have many primitives
+      that will simplify sparse path inclusion significantly. Thus if we have 1000 paths, and 3 of them are included
+      in a face, we can create a simplified version of that RenderProgram without having to do a full scan of the 1000
+      items. See <code>RenderPathReplacer</code> for more details.
+    </p>
+
+    <p class="TODO">
+      Write up RenderPathReplacer documentation.
+    </p>
+
+    <p>
+      Now, many of the faces will have constant-valued RenderPrograms, which can be rendered much more efficiently!
+      We won't have to do per-pixel blending at all in these cases.
+    </p>
+
+    <h3 id="stage-renderableFaceCreation">RenderableFace Creation</h3>
+
+    <p>
+      There now might be multiple faces that have equivalent RenderPrograms (especially those that are adjacent faces).
+      Based on performance characteristics, we may want to do one of the following:
+    </p>
+
+    <dl>
+      <dt>
+        Keep the faces separate
+      </dt>
+      <dd>
+        Straightforward, but we'll process more edges than needed.
+      </dd>
+      <dt>
+        Combine adjacent equivalent faces (just delete edges)
+      </dt>
+      <dd>
+        We can scan edges to find ones with equivalent faces on both sides. We can then discard these edges, and deliver
+        edges out in the "unsorted edge" format (ideally edge-clipped) for future stages.
+      </dd>
+      <dt>
+        Combine adjacent equivalent faces (trace edges, skip equivalent)
+      </dt>
+      <dd>
+        If we instead trace edges, and while traversing we skip over edges that have equivalent faces, we'll generate
+        polygonal data for each face. This will leave us with the best end-result, but might be more costly.
+      </dd>
+      <dt>
+        Fully combine all equivalent faces
+      </dt>
+      <dd>
+        This could be done with "unsorted edges" or traced. We'll get a full path for each RenderProgram, however
+        depending on the rasterization method used, having two far-away small items in the same face could hurt
+        performance.
+      </dd>
+    </dl>
+
+    <p class="TODO">
+      NOTE: This is better implemented by generating hashes for every simplified RenderProgram, so we can do quick
+      comparisons.
+    </p>
+
+    <p class="TODO">
+      Visuals/examples would be helpful here.
+    </p>
+
+    <h3 id="stage-splitPrograms">Split Programs</h3>
+
+    <p>
+      Certain types of RenderPrograms will cause their RenderableFace to be split into multiple RenderableFaces. For
+      example, the <code>RenderDepthSort</code> for 3d meshes will be able to find exact split lines between different
+      3d faces fully included in the RenderableFace. Additionally, for high quality output, gradients can split their
+      faces so that gradient stop transitions are properly anti-aliased.
+    </p>
+
+    <h3 id="stage-rasterize">Rasterize</h3>
+
+    <p>
+      We'll want to take the path representation for each RenderableFace, and determine the coverage of each pixel.
+    </p>
+
+    <p class="TODO">
+      Document the approaches here.
+    </p>
 
   </div>
   <div class="span2"></div>
