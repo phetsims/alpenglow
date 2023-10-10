@@ -13,8 +13,15 @@
   <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
   <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
 
+  <!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
+
   <script>
     window.phet = window.phet || {};
+
+    window.pendingDiagrams = [];
+    window.addDiagram = ( id, callback ) => {
+      pendingDiagrams.push( { id, callback } );
+    };
   </script>
 
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
@@ -32,8 +39,6 @@
   <script src="../../sherpa/lib/he-1.1.1.js"></script>
   <script src="../../sherpa/lib/TextEncoderLite-3c9f6f0.js"></script>
   <script src="../../sherpa/lib/base64-js-1.2.0.js"></script>
-
-  <!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
 
   <script type="text/javascript">
     // window.assertions.enableAssert();
@@ -65,6 +70,11 @@
     .TODO {
       color: red;
     }
+
+    .example {
+      margin: 0 auto;
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -80,6 +90,168 @@
   import '../../chipper/dist/js/utterance-queue/js/main.js';
 
   phet.scenery.Utils.polyfillRequestAnimationFrame();
+</script>
+
+<script type="module">
+
+  import { Color, Node, Display, Path, Rectangle } from '../../chipper/dist/js/scenery/js/imports.js';
+  import { CombinedRaster, Rasterize, RenderColor, RenderStack, RenderPathBoolean, RenderPath, RenderFromNode, RenderColorSpace } from '../../chipper/dist/js/alpenglow/js/imports.js';
+  import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
+  import Bounds2 from '../../chipper/dist/js/dot/js/Bounds2.js';
+  import Matrix3 from '../../chipper/dist/js/dot/js/Matrix3.js';
+  import Vector2 from '../../chipper/dist/js/dot/js/Vector2.js';
+  import dot from '../../chipper/dist/js/dot/js/dot.js';
+
+  const v2 = dot.v2;
+  const v3 = dot.v3;
+  const v4 = dot.v4;
+
+  const colors = [
+    new Color( 62, 171, 3 ),
+    new Color( 23, 180, 77 ),
+    new Color( 24, 183, 138 ),
+    new Color( 23, 178, 194 ),
+    new Color( 20, 163, 238 ),
+    new Color( 71, 136, 255 ),
+    new Color( 171, 101, 255 ),
+    new Color( 228, 72, 235 ),
+    new Color( 252, 66, 186 ),
+    new Color( 252, 82, 127 )
+  ];
+
+  const piecewiseOptions = {
+    minLevels: 1,
+    maxLevels: 10,
+    // distanceEpsilon: 0.02,
+    distanceEpsilon: 0.0002,
+    curveEpsilon: 0.2
+  };
+  const shapeToPolygons = shape => shape.subpaths.map( subpath => {
+    return subpath.toPiecewiseLinear( piecewiseOptions ).segments.map( line => {
+      return line.start;
+    } );
+  } );
+
+  const sizeCanvas = canvas => {
+    canvas.style.width = `${canvas.width / window.devicePixelRatio}px`;
+    canvas.style.height = `${canvas.height / window.devicePixelRatio}px`;
+  };
+
+  const getSceneryElement = ( node, width, height, background, renderer ) => {
+    const subdiv = document.createElement( 'div' );
+    subdiv.style.margin = '0 auto';
+    const scene = new Node( { renderer: renderer } );
+    const display = new Display( scene, {
+      width: width,
+      height: height,
+      accessibility: true,
+      container: subdiv
+    } );
+
+    display.width = width;
+    display.height = height;
+    scene.addChild( node );
+    display.backgroundColor = background;
+    display.updateDisplay();
+    scene.removeChild( node );
+    return subdiv;
+  };
+
+  // composite Rasterize/CombinedRaster options
+  const getRasterizedElement = ( renderProgram, width, height, options ) => {
+    const program = renderProgram.transformed( Matrix3.scaling( window.devicePixelRatio ) );
+
+    const outputWidth = width * window.devicePixelRatio;
+    const outputHeight = height * window.devicePixelRatio;
+
+    const raster = new CombinedRaster( outputWidth, outputHeight, options );
+    Rasterize.rasterize( program, raster, new Bounds2( 0, 0, outputWidth, outputHeight ), options );
+    const canvas = Rasterize.imageDataToCanvas( raster.toImageData() );
+    sizeCanvas( canvas );
+    canvas.style.display = 'block';
+    canvas.style.position = 'relative';
+    canvas.style.margin = '0 auto';
+    canvas.style.left = '0';
+    canvas.style.top = '0';
+    return canvas;
+  };
+
+  window.getConflation = ( type, pointCount ) => {
+    const width = 128;
+    const height = 128;
+
+    const center = v2( width / 2 + 0.15992094, height / 2 + 0.426296 );
+    const radius = width * 0.45;
+
+    const polygons = [];
+    const colors = [];
+    for ( let i = 0; i < pointCount; i++ ) {
+      const polygon = [];
+      const angle0 = i * 2 * Math.PI / pointCount;
+      const angle1 = ( i + 1 ) * 2 * Math.PI / pointCount;
+
+      const chroma = Vector2.createPolar( 0.1, angle0 );
+      colors.push( RenderColor.gamutMapSRGB( RenderColor.convert( v4( 0.5, chroma.x, chroma.y, 1 ), RenderColorSpace.oklab, RenderColorSpace.sRGB ) ) );
+
+      const p0 = v2( center.x + radius * Math.cos( angle0 ), center.y + radius * Math.sin( angle0 ) );
+      const p1 = v2( center.x + radius * Math.cos( angle1 ), center.y + radius * Math.sin( angle1 ) );
+
+      polygon.push( center );
+      polygon.push( p0 );
+      polygon.push( p1 );
+      polygons.push( polygon );
+    }
+
+    if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+      return getSceneryElement(
+        new Node( {
+          children: [
+            new Rectangle( 0, 64, 128, 64, { fill: 'black' } ),
+            ...polygons.map( ( poly, i ) => {
+              return new Path( Shape.polygon( poly ), { fill: new Color( colors[ i ].x * 255, colors[ i ].y * 255, colors[ i ].z * 255, 1 ) } );
+            } )
+          ]
+        } ),
+        width, height, 'white', type
+      );
+    }
+    else if ( type === 'default' ) {
+      const program = new RenderStack(
+        [
+          new RenderPathBoolean(
+            new RenderPath( 'nonzero', [ [
+              v2( 0, 64 ),
+              v2( 128, 64 ),
+              v2( 128, 128 ),
+              v2( 0, 128 )
+            ] ] ),
+            RenderFromNode.colorFrom( 'black' ),
+            RenderFromNode.colorFrom( 'white' )
+          ),
+          ...polygons.map( ( polygon, i ) => new RenderPathBoolean(
+            new RenderPath( 'nonzero', [ polygon ] ),
+            new RenderColor( colors[ i ] ),
+            RenderColor.TRANSPARENT
+          ) )
+        ]
+      );
+
+      return getRasterizedElement( program, width, height );
+    }
+  };
+
+  setTimeout( () => {
+    const addDiagram = ( id, callback ) => {
+      const container = document.getElementById( id );
+      if ( container ) {
+        const diagram = callback();
+        container.appendChild( diagram );
+      }
+    };
+    window.addDiagram = addDiagram;
+    window.pendingDiagrams.forEach( diagram => setTimeout( () => addDiagram( diagram.id, diagram.callback ), 0 ) );
+  }, 0 );
+
 </script>
 
 <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
@@ -140,9 +312,11 @@
     <h2 id="overview">Overview</h2>
 
     <p>
-      Alpenglow is an experimental rasterizer. It is meant to take in a scene description and efficiently output or
-      update a rasterized image.
+      Alpenglow is an experimental rasterizer. It is meant to take in a scene description and efficiently output the
+      corresponding image.
     </p>
+
+    <h3>Technology: Primarily WebGPU</h3>
 
     <p>
       The goal is to primarily use WebGPU for rendering, but to also support WebGL 2 as much as possible, with software
@@ -151,14 +325,41 @@
       buffers, etc.), that is used for validation, testing, and debugging.
     </p>
 
+    <h3>Methods: Solve the Occlusion Problem First</h3>
+
     <p>
-      The goal is to solve the problem quickly and with high quality by using a CAG (computational area geometry)
-      approach where we can get a list of polygonal faces where each input path is either fully contained or fully
+      The goal is to solve the problem quickly and with high quality by using polygonal boolean-operation
+      approaches where we can get a list of polygonal faces where each input path is either fully contained or fully
       excluded in each face. We can then use high-performance approaches to rasterize each face independently, then
       accumulate while avoiding multisampling and conflation artifacts. Often these faces will be of constant color,
       which can very efficiently be displayed (we skip the per-pixel blending with the completely-occluded background
       contents).
     </p>
+
+    <div class="row-fluid">
+      <div class="span4 example">
+        <div id="conflation-canvas"></div>
+        Conflation artifacts (Canvas)
+      </div>
+      <div class="span4 example">
+        <div id="conflation-svg"></div>
+        Conflation artifacts (SVG)
+      </div>
+      <div class="span4 example">
+        <div id="conflation-default"></div>
+        No artifacts (Alpenglow CPU)
+      </div>
+    </div>
+
+    <script>
+      addDiagram( 'conflation-canvas', () => window.getConflation( 'canvas', 100 ) );
+    </script>
+    <script>
+      addDiagram( 'conflation-svg', () => window.getConflation( 'svg', 100 ) );
+    </script>
+    <script>
+      addDiagram( 'conflation-default', () => window.getConflation( 'default', 100 ) );
+    </script>
 
     <h2 id="concepts">Concepts</h2>
 
