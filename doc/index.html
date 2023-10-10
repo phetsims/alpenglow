@@ -251,6 +251,7 @@
           const v2 = dot.v2;
           const v3 = dot.v3;
           const v4 = dot.v4;
+          const Matrix3 = dot.Matrix3;
           const Vector2 = dot.Vector2;
           const Vector3 = dot.Vector3;
           const Vector4 = dot.Vector4;
@@ -373,6 +374,9 @@
               <li><a href="#RenderColor">RenderColor</a></li>
               <li><a href="#RenderPathBoolean">RenderPathBoolean</a></li>
               <li><a href="#RenderLinearBlend">RenderLinearBlend</a></li>
+              <li><a href="#RenderLinearGradient">RenderLinearGradient</a></li>
+              <li><a href="#RenderRadialBlend">RenderRadialBlend</a></li>
+              <li><a href="#RenderRadialGradient">RenderRadialGradient</a></li>
               <li><a href="#renderProgram-simplification">Simplification</a></li>
               <li><a href="#renderProgram-execution">Execution</a></li>
             </ul>
@@ -551,7 +555,7 @@
       /* eslint-disable no-undef */
       window.createRenderProgramSandbox( 'RenderColor-example', () => {
         /*START*/
-        const program = new RenderColor( v4( 1, 0, 0, 1 ) );
+        const program = new RenderColor( new Vector4( 1, 0, 0, 1 ) );
         /*END*/
         return program;
       }, 128, 128 );
@@ -638,6 +642,112 @@
     <p>
       It can be used in a standalone way, however it is primarily meant to be used when a <code>RenderLinearGradient</code>
       is split into each linear segment.
+    </p>
+
+    <h4 id="RenderLinearGradient">RenderLinearGradient</h4>
+
+    <div class="example">
+      <div id="RenderLinearGradient-example"></div>
+    </div>
+
+    <script type="module">
+      /* eslint-disable no-undef */
+      window.createRenderProgramSandbox( 'RenderLinearGradient-example', () => {
+        /*START*/
+        const program = new RenderLinearGradient(
+          Matrix3.IDENTITY, // transform
+          new Vector2( 0, 0 ), // start
+          new Vector2( 50, 20 ), // end
+          [
+            new RenderGradientStop( 0, new RenderColor( new Vector4( 0, 0, 0, 1 ) ) ),
+            new RenderGradientStop( 0.5, new RenderColor( new Vector4( 1, 0, 0, 1 ) ) ),
+            new RenderGradientStop( 1, new RenderColor( new Vector4( 1, 1, 1, 1 ) ) )
+          ],
+          RenderExtend.Repeat, // Pad, Repeat, Reflect
+          RenderLinearGradientAccuracy.SplitAccurate
+        );
+        /*END*/
+        return program;
+      }, 128, 128 );
+    </script>
+
+    <p>
+      RenderLinearGradient will display the typical linear gradient.
+    </p>
+
+    <h4 id="RenderRadialBlend">RenderRadialBlend</h4>
+
+    <div class="example">
+      <div id="RenderRadialBlend-example"></div>
+    </div>
+
+    <script type="module">
+      /* eslint-disable no-undef */
+      window.createRenderProgramSandbox( 'RenderRadialBlend-example', () => {
+        /*START*/
+        const program = new RenderRadialBlend(
+          Matrix3.translation( 64, 64 ), // transform
+          0, // radius0,
+          64, // radius1
+          RenderRadialBlendAccuracy.Accurate,
+
+          // "zero" RenderProgram
+          new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
+
+          // "one" RenderProgram
+          new RenderColor( new Vector4( 0, 0, 1, 1 ) )
+        );
+        /*END*/
+        return program;
+      }, 128, 128 );
+    </script>
+
+    <p>
+      RenderRadialBlend will interpolate between two different RenderPrograms based on the location. It will evaluate
+      <code>clamp( ( averageFragmentRadius - radius0 ) / ( radius1 - radius0 ), 0, 1 )</code>, and will linearly blend
+      between the "zero" program (when the value is 0) and the "one" program (when the value is 1).
+    </p>
+
+    <p>
+      It can be used in a standalone way, however it is primarily meant to be used when a <code>RenderRadialGradient</code>
+      is circular, and is split into each radial-linear partition.
+    </p>
+
+    <h4 id="RenderRadialGradient">RenderRadialGradient</h4>
+
+    <div class="example">
+      <div id="RenderRadialGradient-example"></div>
+    </div>
+
+    <script type="module">
+      /* eslint-disable no-undef */
+      window.createRenderProgramSandbox( 'RenderRadialGradient-example', () => {
+        /*START*/
+        const program = new RenderRadialGradient(
+          Matrix3.IDENTITY, // transform
+          new Vector2( 0, 0 ), // start
+          0, // startRadius
+          new Vector2( 0, 0 ), // end
+          64, // endRadius
+          [
+            new RenderGradientStop( 0, new RenderColor( new Vector4( 0, 0, 0, 1 ) ) ),
+            new RenderGradientStop( 0.5, new RenderColor( new Vector4( 1, 0, 0, 1 ) ) ),
+            new RenderGradientStop( 1, new RenderColor( new Vector4( 1, 1, 1, 1 ) ) )
+          ],
+          RenderExtend.Repeat, // Pad, Repeat, Reflect
+          RenderRadialGradientAccuracy.SplitAccurate
+        );
+        /*END*/
+        return program;
+      }, 128, 128 );
+    </script>
+
+    <p class="TODO">The split "Reflect" extend type seems to be reversed from the desired behavior!</p>
+
+    <p class="TODO">We need UnsplitCentroid to get more general conic gradients working, it should NOT split in those cases</p>
+
+    <p>
+      RenderRadialGradient will display the typical radial gradient.
     </p>
 
     <p class="TODO">Demos of every RenderProgram type!</p>
