@@ -67,15 +67,15 @@ QUnit.test( 'simplified path boolean', assert => {
 
   const complexPathBoolean = new RenderPathBoolean( PATH_A, RED, GREEN );
   const simplePathBoolean = new RenderPathBoolean( PATH_A, RED, RED );
-  // const transparentPathBoolean = new RenderPathBoolean( PATH_A, TRANSPARENT, TRANSPARENT );
+  const transparentPathBoolean = new RenderPathBoolean( PATH_A, TRANSPARENT, TRANSPARENT );
   const emptyPathBoolean = new RenderPathBoolean( EMPTY_PATH, BLUE, GREEN );
 
-  assert.deepEqual( complexPathBoolean.simplified(), complexPathBoolean );
-  assert.deepEqual( simplePathBoolean.simplified(), RED );
+  assert.ok( complexPathBoolean.simplified().equals( complexPathBoolean ) );
+  assert.ok( simplePathBoolean.simplified().equals( RED ) );
 
   // TODO: Why is this failing?
-  // assert.deepEqual( transparentPathBoolean.simplified(), TRANSPARENT );
-  assert.deepEqual( emptyPathBoolean.simplified(), GREEN );
+  assert.ok( transparentPathBoolean.simplified().equals( TRANSPARENT ) );
+  assert.ok( emptyPathBoolean.simplified().equals( GREEN ) );
 } );
 //
 // QUnit.skip( 'simplified linear blend', assert => {
