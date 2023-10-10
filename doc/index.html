@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Alpenglow</title>
+  <title>Alpenglow Plan &amp; Documentation</title>
 
   <link rel="shortcut icon" type="image/x-icon" href="../../scenery/assets/logo-v1.svg">
   <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
@@ -33,9 +33,11 @@
   <script src="../../sherpa/lib/TextEncoderLite-3c9f6f0.js"></script>
   <script src="../../sherpa/lib/base64-js-1.2.0.js"></script>
 
+  <!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
+
   <script type="text/javascript">
-    window.assertions.enableAssert();
-    window.assertions.enableAssertSlow();
+    // window.assertions.enableAssert();
+    // window.assertions.enableAssertSlow();
   </script>
 
   <!-- For the styling -->
@@ -75,20 +77,18 @@
 <!--<script src="../../phet-lib/dist/phet-lib.debug.js"></script>-->
 <!--<script src="../../phet-lib/dist/phet-lib.min.js"></script>-->
 
-<!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
-
 <div class="row-fluid">
   <div class="span2"></div>
   <div class="span8">
     <div class="page-header" style="text-align: center;">
-      <h1>Alpenglow</h1>
+      <h1>Alpenglow Plan &amp; Documentation</h1>
     </div>
   </div>
   <div class="span2"></div>
 </div>
 
 <div class="row-fluid">
-  <div class="span2">
+  <div class="span2 hidden-phone">
     <ul class="nav nav-list">
       <li><a href="#overview">Overview</a></li>
       <li>
@@ -99,12 +99,15 @@
         </ul>
       </li>
       <li>
-        <a href="#pipeline">Pipeline</a>
+        <a href="#stages">Stages</a>
         <ul class="nav nav-list">
           <li><a href="#stage-transforms">Transforms</a></li>
           <li><a href="#stage-subdivision">Subdivision</a></li>
           <li><a href="#stage-bounds">Bounds</a></li>
           <li><a href="#stage-tiling">Tiling</a></li>
+          <li><a href="#stage-integerTransform">Integer Transform</a></li>
+          <li><a href="#stage-hilbertSort">Hilbert Sort</a></li>
+          <li><a href="#stage-intersection">Intersection</a></li>
         </ul>
       </li>
     </ul>
@@ -130,7 +133,7 @@
 
     <h3 id="clipping">Clipping</h3>
 
-    <h2 id="pipeline">Pipeline</h2>
+    <h2 id="stages">Stages</h2>
 
     <h3 id="stage-transforms">Transforms</h3>
 
@@ -168,7 +171,62 @@
     </p>
 
     <p>
-      Tiling is also helpful to reduce the potential amount of cases for the later intersection step.
+      Tiling is also helpful to reduce the potential amount of cases for the later intersection step, AND with our
+      integer transform, we'll be able to keep more precision for the CAG steps.
+    </p>
+
+    <h3 id="stage-integerTransform">Integer Transform</h3>
+
+    <p>
+      We'll scale up and transform our coordinate frame (for each tile) to integer coordinates, spaced out so that we're
+      keeping about 20 bits of information for each coordinate. This will allow us to use rational numbers to compute
+      the intersections between line segments (and to sort edges around each vertex) in an exact robust way, keeping our
+      numerator and denominator within 64 bits each. Since the outputs will be signed, we'll want to put the origin
+      approximately in the center of our "integer" coordinate frame.
+    </p>
+
+    <p>
+      Our data will be in the <code>IntegerEdge</code> format, which essentially just stores the start point, end point,
+      and the path ID.
+    </p>
+
+    <h3 id="stage-hilbertSort">Hilbert Sort</h3>
+
+    <p>
+      We'll sort the the edges using a higher-dimensional
+      <a href="https://en.wikipedia.org/wiki/Hilbert_curve">Hilbert space-filling curve</a>, so that edges are somewhat
+      spatially coherent (edges in a similar part of the list will likely have similar positions or sizes). This helps
+      reduce the workload on the next step (intersection), since it would have theoretical O(n^2) performance.
+      In practice, by having typical visual data AND sorting, we get a small fraction of that!
+    </p>
+
+    <p>
+      This may be unnecessary for some workloads (where the edges provided are in a spatially coherent order due to
+      the scene graph), however it's absolutely necessary for others (e.g. 3d meshes).
+    </p>
+
+    <p>
+      This is inspired by the bulk loading of R-Trees (see <a href="https://dl.acm.org/doi/abs/10.1145/1963190.2025380">Four-dimensional hilbert curves for R-trees</a>, Haverkort et al. 2008).
+    </p>
+
+    <h3 id="stage-intersection">Intersection</h3>
+
+    <p>
+      We'll need to find all of the pairwise intersections between edges. In software, this is done by computing a
+      binary tree of bounding boxes (where the Hilbert sort helps significantly). We can ignore the intersection between
+      two subtrees whose bounding boxes do not intersect. Furthermore, if there are no horizontal lines in either
+      subtree, we can allow the bounding boxes to "touch" horizontally (sharing a single line of intersection) without
+      having any substantive pairwise intersection in edges, since we only care about internal intersections (those
+      which aren't endpoint-to-endpoint).
+    </p>
+
+    <p>
+      We'll store the intersections with their rational coordinates AND parametric value of intersection (also an
+      exact rational) for each internal intersection within each of the edges.
+    </p>
+
+    <p>
+      Potentially plan to use bump allocation on the GPU, with a linked list for each edge (with atomic operations).
     </p>
 
   </div>
