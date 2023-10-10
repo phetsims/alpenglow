@@ -372,6 +372,7 @@
             <ul class="nav nav-list">
               <li><a href="#RenderColor">RenderColor</a></li>
               <li><a href="#RenderPathBoolean">RenderPathBoolean</a></li>
+              <li><a href="#RenderLinearBlend">RenderLinearBlend</a></li>
               <li><a href="#renderProgram-simplification">Simplification</a></li>
               <li><a href="#renderProgram-execution">Execution</a></li>
             </ul>
@@ -600,6 +601,43 @@
 
     <p>
       RenderPathBoolean will display one RenderProgram "inside" the path, and another RenderProgram "outside" the path.
+    </p>
+
+    <h4 id="RenderLinearBlend">RenderLinearBlend</h4>
+
+    <div class="example">
+      <div id="RenderLinearBlend-example"></div>
+    </div>
+
+    <script type="module">
+      /* eslint-disable no-undef */
+      window.createRenderProgramSandbox( 'RenderLinearBlend-example', () => {
+        /*START*/
+        const program = new RenderLinearBlend(
+          new Vector2( 1 / 128, 0 ), // scaledNormal
+          0, // offset
+          RenderLinearBlendAccuracy.Accurate,
+
+          // "zero" RenderProgram
+          new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
+
+          // "one" RenderProgram
+          new RenderColor( new Vector4( 0, 0, 1, 1 ) )
+        );
+        /*END*/
+        return program;
+      }, 128, 128 );
+    </script>
+
+    <p>
+      RenderLinearBlend will interpolate between two different RenderPrograms based on the location. It will evaluate
+      <code>clamp( dot( scaledNormal, point ) - offset, 0, 1 )</code>, and will linearly blend between the "zero"
+      program (when the value is 0) and the "one" program (when the value is 1).
+    </p>
+
+    <p>
+      It can be used in a standalone way, however it is primarily meant to be used when a <code>RenderLinearGradient</code>
+      is split into each linear segment.
     </p>
 
     <p class="TODO">Demos of every RenderProgram type!</p>

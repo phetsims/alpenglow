@@ -4,6 +4,13 @@
  * RenderProgram for a linear blend (essentially a chunk of a linear gradient with only a linear transition between
  * two things.
  *
+ * RenderLinearBlend will interpolate between two different RenderPrograms based on the location. It will evaluate
+ * `clamp( dot( scaledNormal, point ) - offset, 0, 1 )`, and will linearly blend between the "zero"
+ * program (when the value is 0) and the "one" program (when the value is 1).
+ *
+ * It can be used in a standalone way, however it is primarily meant to be used when a `RenderLinearGradient`
+ * is split into each linear segment.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

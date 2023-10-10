@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * RenderProgram for alpha (an opacity) applied to a RenderProgram
+ * RenderPathBoolean will display one RenderProgram "inside" the path, and another RenderProgram "outside" the path.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

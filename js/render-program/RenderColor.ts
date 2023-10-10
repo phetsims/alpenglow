@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * RenderProgram representing a constant color
+ * RenderColor displays a single solid color everywhere, and is a basic building-block for many other RenderPrograms.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
