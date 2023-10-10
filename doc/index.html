@@ -13,14 +13,12 @@
   <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
   <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
 
-  <!-- eslint-disable --> <!--TODO: fix lint https://github.com/phetsims/chipper/issues/1405-->
-
   <script>
     window.phet = window.phet || {};
 
     window.pendingDiagrams = [];
     window.addDiagram = ( id, callback ) => {
-      pendingDiagrams.push( { id, callback } );
+      window.pendingDiagrams.push( { id: id, callback: callback } );
     };
   </script>
 
@@ -105,29 +103,27 @@
 
   // TODO: move to a standalone JS file!
 
-  import { Color, Node, Display, Path, Rectangle } from '../../chipper/dist/js/scenery/js/imports.js';
-  import { CombinedRaster, Rasterize, RenderColor, RenderStack, RenderPathBoolean, RenderPath, RenderFromNode, RenderColorSpace } from '../../chipper/dist/js/alpenglow/js/imports.js';
-  import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
+  import { Node, Display } from '../../chipper/dist/js/scenery/js/imports.js';
+  import { CombinedRaster, Rasterize } from '../../chipper/dist/js/alpenglow/js/imports.js';
   import Bounds2 from '../../chipper/dist/js/dot/js/Bounds2.js';
   import Matrix3 from '../../chipper/dist/js/dot/js/Matrix3.js';
-  import Vector2 from '../../chipper/dist/js/dot/js/Vector2.js';
-  import dot from '../../chipper/dist/js/dot/js/dot.js';
-  const v2 = dot.v2;
-  const v3 = dot.v3;
-  const v4 = dot.v4;
-
-  const colors = [
-    new Color( 62, 171, 3 ),
-    new Color( 23, 180, 77 ),
-    new Color( 24, 183, 138 ),
-    new Color( 23, 178, 194 ),
-    new Color( 20, 163, 238 ),
-    new Color( 71, 136, 255 ),
-    new Color( 171, 101, 255 ),
-    new Color( 228, 72, 235 ),
-    new Color( 252, 66, 186 ),
-    new Color( 252, 82, 127 )
-  ];
+  // import dot from '../../chipper/dist/js/dot/js/dot.js';
+  // const v2 = dot.v2;
+  // const v3 = dot.v3;
+  // const v4 = dot.v4;
+  //
+  // const colors = [
+  //   new Color( 62, 171, 3 ),
+  //   new Color( 23, 180, 77 ),
+  //   new Color( 24, 183, 138 ),
+  //   new Color( 23, 178, 194 ),
+  //   new Color( 20, 163, 238 ),
+  //   new Color( 71, 136, 255 ),
+  //   new Color( 171, 101, 255 ),
+  //   new Color( 228, 72, 235 ),
+  //   new Color( 252, 66, 186 ),
+  //   new Color( 252, 82, 127 )
+  // ];
 
   window.piecewiseOptions = {
     minLevels: 1,
@@ -137,7 +133,7 @@
     curveEpsilon: 0.2
   };
   window.shapeToPolygons = shape => shape.subpaths.map( subpath => {
-    return subpath.toPiecewiseLinear( piecewiseOptions ).segments.map( line => {
+    return subpath.toPiecewiseLinear( window.piecewiseOptions ).segments.map( line => {
       return line.start;
     } );
   } );
@@ -177,7 +173,7 @@
     const raster = new CombinedRaster( outputWidth, outputHeight, options );
     Rasterize.rasterize( program, raster, new Bounds2( 0, 0, outputWidth, outputHeight ), options );
     const canvas = Rasterize.imageDataToCanvas( raster.toImageData() );
-    sizeCanvas( canvas );
+    window.sizeCanvas( canvas );
     canvas.style.display = 'block';
     canvas.style.position = 'relative';
     canvas.style.margin = '0 auto';
@@ -304,14 +300,14 @@
           ${codeMirror.getValue()}
           ${options.jsAfter}
         )();
-        export default value;`; // eslint-disable-line bad-sim-text
+        export default value;`;
 
         // Assumes it's in a function, differently from the sandbox
         const dataURI = `data:text/javascript;base64,${btoa( code )}`;
 
         const program = ( await import( dataURI ) ).default;
 
-        const element = getRasterizedElement( program, width, height, options );
+        const element = window.getRasterizedElement( program, width, height, options );
 
         // Clear content
         while ( displayContainerElement.firstChild ) {
@@ -378,6 +374,7 @@
               <li><a href="#RenderPathBoolean">RenderPathBoolean</a></li>
               <li><a href="#renderProgram-simplification">Simplification</a></li>
               <li><a href="#renderProgram-execution">Execution</a></li>
+            </ul>
           </li>
         </ul>
       </li>
@@ -455,7 +452,6 @@
       import Vector2 from '../../chipper/dist/js/dot/js/Vector2.js';
       import dot from '../../chipper/dist/js/dot/js/dot.js';
       const v2 = dot.v2;
-      const v3 = dot.v3;
       const v4 = dot.v4;
 
       const getConflation = ( type, pointCount ) => {
@@ -485,7 +481,7 @@
         }
 
         if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
-          return getSceneryElement(
+          return window.getSceneryElement(
             new Node( {
               children: [
                 new Rectangle( 0, 64, 128, 64, { fill: 'black' } ),
@@ -518,13 +514,16 @@
             ]
           );
 
-          return getRasterizedElement( program, width, height );
+          return window.getRasterizedElement( program, width, height );
+        }
+        else {
+          throw new Error( 'unknown type' );
         }
       };
 
-      addDiagram( 'conflation-canvas', () => getConflation( 'canvas', 100 ) );
-      addDiagram( 'conflation-svg', () => getConflation( 'svg', 100 ) );
-      addDiagram( 'conflation-default', () => getConflation( 'default', 100 ) );
+      window.addDiagram( 'conflation-canvas', () => getConflation( 'canvas', 100 ) );
+      window.addDiagram( 'conflation-svg', () => getConflation( 'svg', 100 ) );
+      window.addDiagram( 'conflation-default', () => getConflation( 'default', 100 ) );
     </script>
 
     <h2 id="concepts">Concepts</h2>
@@ -548,7 +547,8 @@
     </div>
 
     <script type="module">
-      createRenderProgramSandbox( 'RenderColor-example', () => {
+      /* eslint-disable no-undef */
+      window.createRenderProgramSandbox( 'RenderColor-example', () => {
         /*START*/
         const program = new RenderColor( v4( 1, 0, 0, 1 ) );
         /*END*/
@@ -574,7 +574,8 @@
     </div>
 
     <script type="module">
-      createRenderProgramSandbox( 'RenderPathBoolean-example', () => {
+      /* eslint-disable no-undef */
+      window.createRenderProgramSandbox( 'RenderPathBoolean-example', () => {
         /*START*/
         const program = new RenderPathBoolean(
           // The path. We have a "fill rule" of nonzero, which defines which sections
