@@ -217,6 +217,7 @@
           <li>
             <a href="#renderProgram">RenderProgram</a>
             <ul class="nav nav-list">
+              <li><a href="#RenderColor">RenderColor</a></li>
               <li><a href="#renderProgram-simplification">Simplification</a></li>
               <li><a href="#renderProgram-execution">Execution</a></li>
           </li>
@@ -381,6 +382,27 @@
     <h3 id="renderProgram">RenderProgram</h3>
 
     <p class="TODO">Documentation</p>
+
+    <h4 id="RenderColor">RenderColor</h4>
+
+    <div class="example">
+      <div id="RenderColor-example"></div>
+      RenderColor
+    </div>
+
+    <script type="module">
+      import { RenderColor } from '../../chipper/dist/js/alpenglow/js/imports.js';
+      import dot from '../../chipper/dist/js/dot/js/dot.js';
+      const v4 = dot.v4;
+
+      addDiagram( 'RenderColor-example', () => {
+        const program = new RenderColor( v4( 1, 0, 0, 1 ) );
+
+        return getRasterizedElement( program, 128, 128 );
+      } );
+    </script>
+
+    RenderColor displays a single solid color everywhere, and is a basic building-block for many other RenderPrograms.
 
     <p class="TODO">Demos of every RenderProgram type!</p>
 
