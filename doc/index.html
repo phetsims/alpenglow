@@ -54,12 +54,21 @@
   <script src="../../sherpa/lib/codemirror-5.52.2.min.js"></script>
   <script src="../../sherpa/lib/codemirror-5.52.2.javascript.min.js"></script>
 
+  <script src="../../scenery/doc/extractFunctionJS.js"></script>
+
   <script src="./teapotObj.js"></script>
 
   <style>
     .CodeMirror {
       height: auto;
       border-radius: 5px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    .errors {
+      border: 1px solid red;
     }
 
     .TODO::before {
@@ -177,6 +186,154 @@
     return canvas;
   };
 
+  window.createRenderProgramSandbox = ( id, func, width, height, providedOptions ) => {
+
+    const { js, jsBefore, jsAfter } = window.extractFunctionJS( func );
+
+    const options = phet.phetCore.merge( {
+      jsBefore: jsBefore,
+      jsAfter: jsAfter
+    }, providedOptions );
+
+    const parentElement = document.getElementById( id );
+
+    const displayContainerElement = document.createElement( 'div' );
+    parentElement.appendChild( displayContainerElement );
+
+    const codeContainerElement = document.createElement( 'div' );
+    parentElement.appendChild( codeContainerElement );
+
+    const errorsContainerElement = document.createElement( 'div' );
+    parentElement.appendChild( errorsContainerElement );
+    errorsContainerElement.classList.add( 'errors' );
+
+    const codeMirror = CodeMirror( codeContainerElement, { // eslint-disable-line no-undef
+      lineNumbers: true,
+      tabSize: 2,
+      value: js,
+      mode: 'javascript',
+      theme: 'monokai',
+      lineWrapping: true
+    } );
+
+    const isDescendant = function( parent, child ) {
+      let node = child;
+      while ( node ) {
+        if ( node === parent ) {
+          return true;
+        }
+
+        // Traverse up to the parent
+        node = node.parentNode;
+      }
+
+      // Go up until the root but couldn't find the `parent`
+      return false;
+    };
+
+    window.addEventListener( 'keydown', event => {
+      // if shift-enter is pressed
+      if ( event.keyCode === 13 && event.shiftKey && isDescendant( document.getElementById( 'code' ), document.activeElement ) ) {
+        run();
+
+        event.preventDefault();
+      }
+    } );
+
+    const run = async () => {
+
+
+      displayContainerElement.style.backgroundColor = 'transparent';
+      errorsContainerElement.style.display = 'none';
+
+      try {
+        const code = `
+        ${Math.random()};
+        let value = (${options.jsBefore}
+          const dot = phet.dot;
+          const alpenglow = phet.alpenglow;
+          const v2 = dot.v2;
+          const v3 = dot.v3;
+          const v4 = dot.v4;
+          const Vector2 = dot.Vector2;
+          const Vector3 = dot.Vector3;
+          const Vector4 = dot.Vector4;
+          const RenderBlendType = alpenglow.RenderBlendType;
+          const RenderComposeType = alpenglow.RenderComposeType;
+          const RenderExtend = alpenglow.RenderExtend;
+          const RenderProgram = alpenglow.RenderProgram;
+          const RenderPath = alpenglow.RenderPath;
+          const RenderPathBoolean = alpenglow.RenderPathBoolean;
+          const RenderColor = alpenglow.RenderColor;
+          const RenderColorSpace = alpenglow.RenderColorSpace;
+          const RenderColorSpaceConversion = alpenglow.RenderColorSpaceConversion;
+          const RenderAlpha = alpenglow.RenderAlpha;
+          const RenderNormalize = alpenglow.RenderNormalize;
+          const RenderPremultiply = alpenglow.RenderPremultiply;
+          const RenderUnpremultiply = alpenglow.RenderUnpremultiply;
+          const RenderSRGBToLinearSRGB = alpenglow.RenderSRGBToLinearSRGB;
+          const RenderLinearSRGBToSRGB = alpenglow.RenderLinearSRGBToSRGB;
+          const RenderOklabToLinearSRGB = alpenglow.RenderOklabToLinearSRGB;
+          const RenderLinearSRGBToOklab = alpenglow.RenderLinearSRGBToOklab;
+          const RenderLinearDisplayP3ToLinearSRGB = alpenglow.RenderLinearDisplayP3ToLinearSRGB;
+          const RenderLinearSRGBToLinearDisplayP3 = alpenglow.RenderLinearSRGBToLinearDisplayP3;
+          const RenderBlendCompose = alpenglow.RenderBlendCompose;
+          const RenderStack = alpenglow.RenderStack;
+          const RenderPlanar = alpenglow.RenderPlanar;
+          const RenderDepthSort = alpenglow.RenderDepthSort;
+          const RenderLight = alpenglow.RenderLight;
+          const RenderNormalDebug = alpenglow.RenderNormalDebug;
+          const RenderPhong = alpenglow.RenderPhong;
+          const RenderFilter = alpenglow.RenderFilter;
+          const RenderGradientStop = alpenglow.RenderGradientStop;
+          const RenderImage = alpenglow.RenderImage;
+          const RenderLinearBlend = alpenglow.RenderLinearBlend;
+          const RenderLinearBlendAccuracy = alpenglow.RenderLinearBlendAccuracy;
+          const RenderBarycentricBlend = alpenglow.RenderBarycentricBlend;
+          const RenderBarycentricBlendAccuracy = alpenglow.RenderBarycentricBlendAccuracy;
+          const RenderBarycentricPerspectiveBlend = alpenglow.RenderBarycentricPerspectiveBlend;
+          const RenderBarycentricPerspectiveBlendAccuracy = alpenglow.RenderBarycentricPerspectiveBlendAccuracy;
+          const RenderLinearGradient = alpenglow.RenderLinearGradient;
+          const RenderLinearGradientAccuracy = alpenglow.RenderLinearGradientAccuracy;
+          const RenderRadialBlend = alpenglow.RenderRadialBlend;
+          const RenderRadialBlendAccuracy = alpenglow.RenderRadialBlendAccuracy;
+          const RenderRadialGradient = alpenglow.RenderRadialGradient;
+          const RenderRadialGradientAccuracy = alpenglow.RenderRadialGradientAccuracy;
+          const RenderResampleType = alpenglow.RenderResampleType;
+
+          ${codeMirror.getValue()}
+          ${options.jsAfter}
+        )();
+        export default value;`; // eslint-disable-line bad-sim-text
+
+        // Assumes it's in a function, differently from the sandbox
+        const dataURI = `data:text/javascript;base64,${btoa( code )}`;
+
+        const program = ( await import( dataURI ) ).default;
+
+        const element = getRasterizedElement( program, width, height, options );
+
+        // Clear content
+        while ( displayContainerElement.firstChild ) {
+          displayContainerElement.removeChild( displayContainerElement.lastChild );
+        }
+        displayContainerElement.appendChild( element );
+        displayContainerElement.style.opacity = '100%';
+      }
+      catch( e ) {
+        console.error( e );
+        displayContainerElement.style.backgroundColor = 'rgba(255,0,0,0.2)';
+        errorsContainerElement.style.display = 'block';
+        errorsContainerElement.innerHTML = `<pre>${e}</pre>`;
+        displayContainerElement.style.opacity = '50%';
+      }
+    };
+
+    codeMirror.on( 'change', editor => run && run() );
+
+    run();
+  };
+
   setTimeout( () => {
     const addDiagram = ( id, callback ) => {
       const container = document.getElementById( id );
@@ -218,6 +375,7 @@
             <a href="#renderProgram">RenderProgram</a>
             <ul class="nav nav-list">
               <li><a href="#RenderColor">RenderColor</a></li>
+              <li><a href="#RenderPathBoolean">RenderPathBoolean</a></li>
               <li><a href="#renderProgram-simplification">Simplification</a></li>
               <li><a href="#renderProgram-execution">Execution</a></li>
           </li>
@@ -387,22 +545,61 @@
 
     <div class="example">
       <div id="RenderColor-example"></div>
-      RenderColor
     </div>
 
     <script type="module">
-      import { RenderColor } from '../../chipper/dist/js/alpenglow/js/imports.js';
-      import dot from '../../chipper/dist/js/dot/js/dot.js';
-      const v4 = dot.v4;
-
-      addDiagram( 'RenderColor-example', () => {
+      createRenderProgramSandbox( 'RenderColor-example', () => {
+        /*START*/
         const program = new RenderColor( v4( 1, 0, 0, 1 ) );
-
-        return getRasterizedElement( program, 128, 128 );
-      } );
+        /*END*/
+        return program;
+      }, 128, 128 );
     </script>
 
-    RenderColor displays a single solid color everywhere, and is a basic building-block for many other RenderPrograms.
+    <p>
+      RenderColor displays a single solid color everywhere, and is a basic building-block for many other RenderPrograms.
+    </p>
+
+    <p>
+      Note that the default color space is <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a>. Additionally, the
+      values are by default interpreted with
+      <a href="https://en.wikipedia.org/wiki/Alpha_compositing#Straight_versus_premultiplied">premultiplied alpha</a>
+      (also called associated alpha), so <code>0.5, 0, 0, 0.5</code> will represent a 50% transparent fully-red color.
+    </p>
+
+    <h4 id="RenderPathBoolean">RenderPathBoolean</h4>
+
+    <div class="example">
+      <div id="RenderPathBoolean-example"></div>
+    </div>
+
+    <script type="module">
+      createRenderProgramSandbox( 'RenderPathBoolean-example', () => {
+        /*START*/
+        const program = new RenderPathBoolean(
+          // The path. We have a "fill rule" of nonzero, which defines which sections
+          // are considered inside. See https://en.wikipedia.org/wiki/Nonzero-rule
+          new RenderPath( 'nonzero', [ [
+            v2( 20, 20 ),
+            v2( 90, 40 ),
+            v2( 118, 118 ),
+            v2( 50, 80 )
+          ] ] ),
+
+          // The "inside" RenderProgram
+          new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
+
+          // The "outside" RenderProgram
+          new RenderColor( new Vector4( 0.8, 0.8, 0.8, 1 ) )
+        );
+        /*END*/
+        return program;
+      }, 128, 128 );
+    </script>
+
+    <p>
+      RenderPathBoolean will display one RenderProgram "inside" the path, and another RenderProgram "outside" the path.
+    </p>
 
     <p class="TODO">Demos of every RenderProgram type!</p>
 
