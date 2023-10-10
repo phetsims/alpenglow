@@ -66,13 +66,16 @@ export default class RenderPathBoolean extends RenderProgram {
     const inside = children[ 0 ];
     const outside = children[ 1 ];
 
-    // TODO: a check to see if the RenderPath is effectively empty?
-
     if ( inside.isFullyTransparent && outside.isFullyTransparent ) {
       return RenderColor.TRANSPARENT;
     }
     else if ( inside.equals( outside ) ) {
       return inside;
+    }
+    else if ( this.path.isTriviallyEmpty() ) {
+      // NOTE: We're not checking to see if there is zero area, because of the performance impact. This is unlikely to
+      // significantly help performance if we check area, so it's not worth it.
+      return outside;
     }
     else {
       return null;

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { FillRule, alpenglow } from '../imports.js';
+import { alpenglow, FillRule } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
@@ -17,7 +17,11 @@ export default class RenderPath {
 
   public readonly id = globalPathId++;
 
-  public constructor( public readonly fillRule: FillRule, public readonly subpaths: Vector2[][] ) {}
+  public constructor( public readonly fillRule: FillRule, public readonly subpaths: Vector2[][] ) {
+    assert && subpaths.forEach( subpath => subpath.forEach( point => {
+      assert && assert( point.isFinite() );
+    } ) );
+  }
 
   public transformed( transform: Matrix3 ): RenderPath {
     return new RenderPath( this.fillRule, this.subpaths.map( subpath => subpath.map( point => transform.timesVector2( point ) ) ) );
@@ -35,6 +39,14 @@ export default class RenderPath {
     }
 
     return bounds;
+  }
+
+  /**
+   * Without scanning the entire path, returns whether we can guarantee that this path is empty and has zero area.
+   */
+  public isTriviallyEmpty(): boolean {
+    // TODO: if we support an inverted fill rule, this logic will need to change!
+    return this.subpaths.every( subpath => subpath.length < 3 );
   }
 
   public serialize(): SerializedRenderPath {
