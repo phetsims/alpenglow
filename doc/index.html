@@ -108,6 +108,9 @@
           <li><a href="#stage-integerTransform">Integer Transform</a></li>
           <li><a href="#stage-hilbertSort">Hilbert Sort</a></li>
           <li><a href="#stage-intersection">Intersection</a></li>
+          <li><a href="#stage-split">Split</a></li>
+          <li><a href="#stage-edgeSort">Edge Sort</a></li>
+          <li><a href="#stage-filterConnect">Filter &amp; Connect</a></li>
         </ul>
       </li>
     </ul>
@@ -125,6 +128,13 @@
       fallback (and for testing/development). In addition to a normal software route, there is a async/await
       parallelized form that can execute with the same execution model that WebGPU would use (with workgroups, storage
       buffers, etc.), that is used for validation, testing, and debugging.
+    </p>
+
+    <p>
+      The goal is to solve the problem quickly and with high quality by using a CAG (computational area geometry)
+      approach where we can get a list of simple polygons where each input path is either fully contained or fully
+      excluded in each polygon. We can then use high-performance approaches to rasterize each polygon, while avoiding
+      multisampling and conflation artifacts.
     </p>
 
     <h2 id="concepts">Concepts</h2>
@@ -209,6 +219,11 @@
       This is inspired by the bulk loading of R-Trees (see <a href="https://dl.acm.org/doi/abs/10.1145/1963190.2025380">Four-dimensional hilbert curves for R-trees</a>, Haverkort et al. 2008).
     </p>
 
+    <p>
+      Planned to use a radix sort on GPU. Software is currently using a 6-dimensional Hilbert sort
+      (centerX, centerY, minX, minY, maxX, maxY), but it's probably best to reduce that to a 4-dimensional sort.
+    </p>
+
     <h3 id="stage-intersection">Intersection</h3>
 
     <p>
@@ -226,8 +241,54 @@
     </p>
 
     <p>
+      This intersection will also detect overlapping segments, and will find the endpoints that are internal to the
+      other edge. Thus overlapping edges will thus be fully overlapping, and can be detected by future steps.
+    </p>
+
+    <p>
       Potentially plan to use bump allocation on the GPU, with a linked list for each edge (with atomic operations).
     </p>
+
+    <h3 id="stage-split">Split</h3>
+
+    <p>
+      Each integer edge will have a list of internal intersections. We'll sort those intersections by their parametric
+      value, and then we'll output a list of "rational" edges (using `RationalHalfEdge`) that make up each
+      non-intersected interval of the original edge.
+    </p>
+
+    <p>
+      We'll store the winding information for each path in this information. So if our edge in path X goes from A to B,
+      we'll create two half-edges: A -> B (winding +1) and B -> A (winding -1), both marked for path X.
+    </p>
+
+    <h3 id="stage-edgeSort">Edge Sort</h3>
+
+    <p>
+      We'll sort our rational half-edges for the next stage (first by their starting point, then by their angle, then
+      by their ID).
+    </p>
+
+    <h3 id="stage-filterConnect">Filter &amp; Connect</h3>
+
+    <p>
+      There are two goals here:
+    </p>
+
+    <ul>
+      <li>
+        Combine otherwise identical overlapping half-edges together. Before this, each directional edge has one path
+        that it's from, but now each half-edge will be from potentially multiple paths. We'll combine the winding
+        contributions into a winding map (path => winding) for these cases. (NOTE: we're currently duplicating effort
+        for the reverse edges here). We'll want to filter out duplicates (stream compaction on GPU).
+      </li>
+      <li>
+        Connecting our half-edge structure together. Each half-edge already had a link to its "opposite" edge. However
+        since we now have edges that are sorted by start THEN angle, we have effectively "ordered" all of the outgoing
+        edges around each vertex, and thus we can store our "next" and "previous" half-edges if tracing
+        counter-clockwise around the vertex. This will allow tracing of the edges in future steps.
+      </li>
+    </ul>
 
   </div>
   <div class="span2"></div>
