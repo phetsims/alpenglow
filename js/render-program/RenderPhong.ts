@@ -280,6 +280,16 @@ export class RenderInstructionPhong extends RenderInstruction {
     encoder.pushU32( this.numLights );
   }
 
+  public static override fromBinary(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstructionPhong {
+    const alpha = encoder.fullF32Array[ offset + 1 ];
+    const numLights = encoder.fullU32Array[ offset + 2 ];
+    return new RenderInstructionPhong( alpha, numLights );
+  }
+
   public override getBinaryLength(): number {
     return 3;
   }

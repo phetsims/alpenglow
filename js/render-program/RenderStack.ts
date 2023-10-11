@@ -224,6 +224,14 @@ export class RenderInstructionOpaqueJump extends RenderInstruction {
     );
   }
 
+  public static override fromBinary(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstructionOpaqueJump {
+    return new RenderInstructionOpaqueJump( getLocation( encoder.fullU32Array[ offset ] >> 8 ) );
+  }
+
   public override getBinaryLength(): number {
     return 1;
   }

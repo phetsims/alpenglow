@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderEvaluationContext, RenderExecutor, alpenglow, ByteEncoder } from '../imports.js';
+import { RenderEvaluationContext, RenderExecutor, alpenglow, ByteEncoder, RenderInstructionComputeGradientRatio } from '../imports.js';
 import RenderExecutionStack from './RenderExecutionStack.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
@@ -109,6 +109,62 @@ export default abstract class RenderInstruction {
 
   // TODO
   public static readonly ImageCode = 0x39;
+
+  public static getInstructionLength( word: number ): number {
+    const code = word & 0xff;
+
+    switch( code ) {
+      case RenderInstruction.ReturnCode:
+      case RenderInstruction.PremultiplyCode:
+      case RenderInstruction.UnpremultiplyCode:
+      case RenderInstruction.StackBlendCode:
+      case RenderInstruction.LinearBlendCode:
+      case RenderInstruction.LinearDisplayP3ToLinearSRGBCode:
+      case RenderInstruction.LinearSRGBToLinearDisplayP3Code:
+      case RenderInstruction.LinearSRGBToOklabCode:
+      case RenderInstruction.LinearSRGBToSRGBCode:
+      case RenderInstruction.OklabToLinearSRGBCode:
+      case RenderInstruction.SRGBToLinearSRGBCode:
+      case RenderInstruction.NormalizeCode:
+      case RenderInstruction.ExitCode:
+      case RenderInstruction.BlendComposeCode:
+      case RenderInstruction.OpaqueJumpCode:
+      case RenderInstruction.NormalDebugCode:
+        return 1;
+
+      case RenderInstruction.MultiplyScalarCode:
+        return 2;
+
+      case RenderInstruction.PhongCode:
+        return 3;
+
+      case RenderInstruction.PushCode:
+        return 5;
+
+      case RenderInstruction.ComputeLinearBlendRatioCode:
+        return 7;
+
+      case RenderInstruction.BarycentricBlendCode:
+        return 8;
+
+      case RenderInstruction.BarycentricBlendPerspectiveCode:
+        return 11;
+
+      case RenderInstruction.ComputeRadialBlendRatioCode:
+        return 12;
+
+      case RenderInstruction.FilterCode:
+        return 21;
+
+      case RenderInstruction.ComputeLinearGradientRatioCode:
+        return 12 + 2 * ( word >> RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS );
+      case RenderInstruction.ComputeRadialGradientRatioCode:
+        return 10 + 2 * ( word >> RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS );
+
+      default:
+        throw new Error( `Unknown/unimplemented instruction code: ${code}` );
+    }
+  }
 }
 
 const scratchVector = new Vector4( 0, 0, 0, 0 );
