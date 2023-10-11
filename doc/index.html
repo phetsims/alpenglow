@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:p="http://www.w3.org/1999/html">
 <head>
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -136,6 +136,11 @@
     return subpath.toPiecewiseLinear( window.piecewiseOptions ).segments.map( line => {
       return line.start;
     } );
+  } );
+
+  window.diagramFont = new phet.scenery.Font( {
+    size: 12,
+    family: 'Arial, sans-serif'
   } );
 
   window.sizeCanvas = canvas => {
@@ -368,6 +373,7 @@
       <li>
         <a href="#concepts">Concepts</a>
         <ul class="nav nav-list">
+          <li><a href="#polygonalFaces">Polygonal Faces</a></li>
           <li><a href="#clipping">Clipping</a></li>
           <li><a href="#antialiasing">Anti-Aliasing</a></li>
           <li>
@@ -539,9 +545,390 @@
 
     <p class="TODO">Documentation</p>
 
+    <h3 id="polygonalFaces">Polygonal Faces</h3>
+
+    <p>
+      Polygonal faces are used pervasively throughout Alpenglow. In general, our data structures are designed to support
+      <a href="https://en.wikipedia.org/wiki/Polygon_with_holes">polygons with holes</a>, and more generally, the
+      primitive is a "list of polygons". For instance, to represent the polygon in the following diagram:
+    </p>
+
+    <div class="example">
+      <div id="polygonal-face-example"></div>
+    </div>
+
+    <h4>Polygonal Form</h4>
+
+    <p>
+      It can be represented in the polygonal form as three (directed) lists of vertices (with a <a href="https://en.wikipedia.org/wiki/Nonzero-rule">nonzero winding rule</a>):
+    </p>
+
+    <p>
+      (0,&nbsp;0),
+      (10,&nbsp;0),
+      (10,&nbsp;2),
+      (2,&nbsp;10),
+      (0,&nbsp;10)
+      <br>
+      (2,&nbsp;2),
+      (2,&nbsp;7),
+      (7,&nbsp;2)
+      <br>
+      (9,&nbsp;9),
+      (6,&nbsp;9),
+      (9,&nbsp;6)
+    </p>
+
+    <p>
+      where there is a line (edge) between each consecutive pair of vertices, and the last vertex is connected to the
+      first vertex. This is compact, however the order is critical.
+    </p>
+
+    <h4>Edge Form</h4>
+
+    <p>
+      For much of Alpenglow's needs, things work better if we consider the list of edges itself (with start/end vertices):
+    </p>
+
+    <p>
+      (0,&nbsp;0)&nbsp;=>&nbsp;(10,&nbsp;0),
+      (10,&nbsp;0)&nbsp;=>&nbsp;(10,&nbsp;2),
+      (10,&nbsp;2)&nbsp;=>&nbsp;(2,&nbsp;10),
+      (2,&nbsp;10)&nbsp;=>&nbsp;(0,&nbsp;10),
+      (0,&nbsp;10)&nbsp;=>&nbsp;(0,&nbsp;0)
+
+      (2,&nbsp;2)&nbsp;=>&nbsp;(2,&nbsp;7),
+      (2,&nbsp;7)&nbsp;=>&nbsp;(7,&nbsp;2),
+      (7,&nbsp;2)&nbsp;=>&nbsp;(2,&nbsp;2)
+
+      (9,&nbsp;9)&nbsp;=>&nbsp;(6,&nbsp;9),
+      (6,&nbsp;9)&nbsp;=>&nbsp;(9,&nbsp;6),
+      (9,&nbsp;6)&nbsp;=>&nbsp;(9,&nbsp;9)
+    </p>
+
+    <p>
+      Now, for most critical operations, order doesn't matter, and each edge can be considered in isolation.
+    </p>
+
+    <h4>Degenerate Edges</h4>
+
+    <p>
+      Additionally, we can actually construct this with an equivalent single (degenerate) polygon. Since we only care
+      about the filled area, it turns out that edges that "reverse" over each other won't contribute to the filled area,
+      so we can double-back. Thus:
+    </p>
+
+    <div class="example">
+      <div id="polygonal-face-canceling"></div>
+    </div>
+
+    <p>
+      Can be constructed with an equivalent area with the following polygon:
+    </p>
+
+    <p>
+      (0,&nbsp;0),
+      (10,&nbsp;0),
+      (10,&nbsp;2),
+      (7,&nbsp;2),
+      (2,&nbsp;2),
+      (2,&nbsp;7),
+      (6,&nbsp;9),
+      (9,&nbsp;6),
+      (9,&nbsp;9),
+      (6,&nbsp;9),
+      (2,&nbsp;7),
+      (7,&nbsp;2),
+      (10,&nbsp;2),
+      (2,&nbsp;10),
+      (0,&nbsp;10)
+    </p>
+
+    <h4>Edge-Clipped Form</h4>
+
+    <p>
+      It turns out, for computational complexity of future clipping operations (see below), it is very helpful to NOT
+      directly store the edges that go along the full edge of the clipping rectangle (e.g. the 0,0 to 10,10 region in
+      the diagram). Instead, those edges will be counted. Due to the property above of degenerate edges, these counts
+      can be added together to add the contribution of these "clipped" edges.
+    </p>
+
+    <p>
+      The diagram below shows the edge orientations that get positive (+1) counts. Reversed edges will get negative (-1)
+      counts:
+    </p>
+
+    <div class="example">
+      <div id="polygonal-face-edge-clips"></div>
+    </div>
+
+    <p>
+      Thus the edge-clipped version will have the following edges and counts:
+    </p>
+
+    <div class="example">
+      <div id="polygonal-face-edge-clipped"></div>
+    </div>
+
+    <script type="module">
+      import ArrowNode from '../../chipper/dist/js/scenery-phet/js/ArrowNode.js';
+
+      const outputSize = 256;
+      const size = 10;
+      const padding = 40;
+
+      const matrix = phet.dot.Matrix3.translation( padding, padding ).timesMatrix( phet.dot.Matrix3.scaling( ( outputSize - 2 * padding ) / size ) );
+      const bounds = new phet.dot.Bounds2( 0, 0, 10, 10 );
+
+      const dottedRect = phet.scenery.Rectangle.bounds( bounds.transformed( matrix ), {
+        stroke: 'black',
+        lineWidth: 0.5,
+        lineDash: [ 2, 2 ]
+      } );
+
+      const v2 = phet.dot.v2;
+      const polygons = [
+        [
+          v2( 0, 0 ),
+          v2( 10, 0 ),
+          v2( 10, 2 ),
+          v2( 2, 10 ),
+          v2( 0, 10 )
+        ],
+        [
+          v2( 2, 2 ),
+          v2( 2, 7 ),
+          v2( 7, 2 )
+        ],
+        [
+          v2( 9, 9 ),
+          v2( 6, 9 ),
+          v2( 9, 6 )
+        ]
+      ];
+
+      const shape = phet.alpenglow.LinearEdge.polygonsToShape( polygons ).transformed( matrix );
+      const edges = phet.alpenglow.LinearEdge.fromPolygons( polygons );
+
+      const filledPath = new phet.scenery.Path( shape, {
+        fill: 'rgba(255,0,0,0.7)'
+      } );
+
+      const arrowOptions = {
+        headHeight: 6,
+        headWidth: 4,
+        tailWidth: 0.2
+      };
+
+      const arrowsNode = new phet.scenery.Node( {
+        children: edges.map( edge => {
+          const start = matrix.timesVector2( edge.startPoint );
+          const end = matrix.timesVector2( edge.endPoint );
+          return new ArrowNode( start.x, start.y, end.x, end.y, arrowOptions );
+        } )
+      } );
+
+      const edgeClippedArrowsNode = new phet.scenery.Node( {
+        children: edges.map( edge => {
+          if ( ( edge.startPoint.x === 0 && edge.startPoint.y === 0 ) || ( edge.endPoint.x === 0 && edge.endPoint.y === 0 ) ) {
+            return null;
+          }
+          const start = matrix.timesVector2( edge.startPoint );
+          const end = matrix.timesVector2( edge.endPoint );
+          return new ArrowNode( start.x, start.y, end.x, end.y, arrowOptions );
+        } ).filter( _.identity )
+      } );
+
+      const toArray = v => [ v.x, v.y ];
+      const extraArrowsNode = new phet.scenery.Node( {
+        children: [
+          new ArrowNode(
+            ...toArray( matrix.timesVector2( v2( 10, 1.93 ) ) ),
+            ...toArray( matrix.timesVector2( v2( 7, 1.93 ) ) ),
+            arrowOptions
+          ),
+          new ArrowNode(
+            ...toArray( matrix.timesVector2( v2( 7, 2.07 ) ) ),
+            ...toArray( matrix.timesVector2( v2( 10, 2.07 ) ) ),
+            arrowOptions
+          ),
+          new ArrowNode(
+            ...toArray( matrix.timesVector2( v2( 2, 7.08 ) ) ),
+            ...toArray( matrix.timesVector2( v2( 6, 9.08 ) ) ),
+            arrowOptions
+          ),
+          new ArrowNode(
+            ...toArray( matrix.timesVector2( v2( 6, 8.92 ) ) ),
+            ...toArray( matrix.timesVector2( v2( 2, 6.92 ) ) ),
+            arrowOptions
+          )
+        ]
+      } );
+
+      const edgeClipArrowsNode = new phet.scenery.Node( {
+        children: [
+          new ArrowNode(
+            ...toArray( matrix.timesVector2( v2( 0, 0 ) ) ),
+            ...toArray( matrix.timesVector2( v2( 0, 10 ) ) ),
+            phet.phetCore.merge( { fill: 'red', stroke: 'red' }, arrowOptions )
+          ),
+          new ArrowNode(
+            ...toArray( matrix.timesVector2( v2( 0, 0 ) ) ),
+            ...toArray( matrix.timesVector2( v2( 10, 0 ) ) ),
+            phet.phetCore.merge( { fill: 'red', stroke: 'red' }, arrowOptions )
+          ),
+          new ArrowNode(
+            ...toArray( matrix.timesVector2( v2( 10, 0 ) ) ),
+            ...toArray( matrix.timesVector2( v2( 10, 10 ) ) ),
+            phet.phetCore.merge( { fill: 'red', stroke: 'red' }, arrowOptions )
+          ),
+          new ArrowNode(
+            ...toArray( matrix.timesVector2( v2( 0, 10 ) ) ),
+            ...toArray( matrix.timesVector2( v2( 10, 10 ) ) ),
+            phet.phetCore.merge( { fill: 'red', stroke: 'red' }, arrowOptions )
+          )
+        ]
+      } );
+
+      const edgeClipArrowLabelsNode = new phet.scenery.Node( {
+        children: [
+          new phet.scenery.Text( 'minY', { font: window.diagramFont, centerBottom: matrix.timesVector2( v2( 5, -0.1 ) ) } ),
+          new phet.scenery.Text( 'maxY', { font: window.diagramFont, centerTop: matrix.timesVector2( v2( 5, 10.1 ) ) } ),
+          new phet.scenery.Text( 'minX', { font: window.diagramFont, rightCenter: matrix.timesVector2( v2( -0.1, 5 ) ) } ),
+          new phet.scenery.Text( 'maxX', { font: window.diagramFont, leftCenter: matrix.timesVector2( v2( 10.1, 5 ) ) } )
+        ]
+      } );
+
+      const edgeClippedArrowLabelsNode = new phet.scenery.Node( {
+        children: [
+          new phet.scenery.Text( '+1', { font: window.diagramFont, centerBottom: matrix.timesVector2( v2( 5, -0.1 ) ) } ),
+          new phet.scenery.Text( '0', { font: window.diagramFont, centerTop: matrix.timesVector2( v2( 5, 10.1 ) ) } ),
+          new phet.scenery.Text( '-1', { font: window.diagramFont, rightCenter: matrix.timesVector2( v2( -0.1, 5 ) ) } ),
+          new phet.scenery.Text( '0', { font: window.diagramFont, leftCenter: matrix.timesVector2( v2( 10.1, 5 ) ) } )
+        ]
+      } );
+
+      const coordinateLabelsNode = new phet.scenery.Node( {
+        children: [
+          new phet.scenery.Text( '(0,0)', { font: window.diagramFont, centerBottom: matrix.timesVector2( v2( 0, -0.1 ) ) } ),
+          new phet.scenery.Text( '(0,10)', { font: window.diagramFont, centerTop: matrix.timesVector2( v2( 0, 10.1 ) ) } ),
+          new phet.scenery.Text( '(10,0)', { font: window.diagramFont, centerBottom: matrix.timesVector2( v2( 10, -0.1 ) ) } ),
+          new phet.scenery.Text( '(9,9)', { font: window.diagramFont, centerTop: matrix.timesVector2( v2( 9, 9.1 ) ) } ),
+          new phet.scenery.Text( '(6,9)', { font: window.diagramFont, centerTop: matrix.timesVector2( v2( 6, 9.1 ) ) } ),
+          new phet.scenery.Text( '(9,6)', { font: window.diagramFont, centerBottom: matrix.timesVector2( v2( 9, 5.9 ) ) } ),
+          new phet.scenery.Text( '(2,10)', { font: window.diagramFont, centerTop: matrix.timesVector2( v2( 2, 10.1 ) ) } ),
+          new phet.scenery.Text( '(10,2)', { font: window.diagramFont, leftCenter: matrix.timesVector2( v2( 10.1, 2 ) ) } ),
+          new phet.scenery.Text( '(2,2)', { font: window.diagramFont, centerBottom: matrix.timesVector2( v2( 2, 1.9 ) ) } ),
+          new phet.scenery.Text( '(7,2)', { font: window.diagramFont, centerBottom: matrix.timesVector2( v2( 7, 1.9 ) ) } ),
+          new phet.scenery.Text( '(2,7)', { font: window.diagramFont, centerTop: matrix.timesVector2( v2( 2, 7.1 ) ) } )
+        ]
+      } );
+
+      const cornerCoordinateLabelsNode = new phet.scenery.Node( {
+        children: [
+          new phet.scenery.Text( '(0,0)', { font: window.diagramFont, centerBottom: matrix.timesVector2( v2( 0, -0.1 ) ) } ),
+          new phet.scenery.Text( '(0,10)', { font: window.diagramFont, centerTop: matrix.timesVector2( v2( 0, 10.1 ) ) } ),
+          new phet.scenery.Text( '(10,0)', { font: window.diagramFont, centerBottom: matrix.timesVector2( v2( 10, -0.1 ) ) } ),
+          new phet.scenery.Text( '(10,10)', { font: window.diagramFont, centerTop: matrix.timesVector2( v2( 10, 10.1 ) ) } )
+        ]
+      } );
+
+      // TODO: factor some of this code out...
+      {
+        const scene = new phet.scenery.Node( {
+          children: [
+            dottedRect,
+            filledPath,
+            arrowsNode,
+            coordinateLabelsNode
+          ]
+        } );
+        const div = document.createElement( 'div' );
+        div.style.margin = '0 auto';
+        const display = new phet.scenery.Display( scene, {
+          width: outputSize,
+          height: outputSize,
+          accessibility: true,
+          container: div,
+          allowCSSHacks: false
+        } );
+        display.updateDisplay();
+        document.getElementById( 'polygonal-face-example' ).appendChild( div );
+      }
+
+      {
+        const scene = new phet.scenery.Node( {
+          children: [
+            dottedRect,
+            filledPath,
+            arrowsNode,
+            extraArrowsNode
+          ]
+        } );
+        const div = document.createElement( 'div' );
+        div.style.margin = '0 auto';
+        const display = new phet.scenery.Display( scene, {
+          width: outputSize,
+          height: outputSize,
+          accessibility: true,
+          container: div,
+          allowCSSHacks: false
+        } );
+        display.updateDisplay();
+        document.getElementById( 'polygonal-face-canceling' ).appendChild( div );
+      }
+
+      {
+        const scene = new phet.scenery.Node( {
+          children: [
+            dottedRect,
+            edgeClipArrowsNode,
+            cornerCoordinateLabelsNode,
+            edgeClipArrowLabelsNode
+          ]
+        } );
+        const div = document.createElement( 'div' );
+        div.style.margin = '0 auto';
+        const display = new phet.scenery.Display( scene, {
+          width: outputSize,
+          height: outputSize,
+          accessibility: true,
+          container: div,
+          allowCSSHacks: false
+        } );
+        display.updateDisplay();
+        document.getElementById( 'polygonal-face-edge-clips' ).appendChild( div );
+      }
+
+      {
+        const scene = new phet.scenery.Node( {
+          children: [
+            dottedRect,
+            filledPath,
+            edgeClippedArrowsNode,
+            coordinateLabelsNode,
+            edgeClippedArrowLabelsNode
+          ]
+        } );
+        const div = document.createElement( 'div' );
+        div.style.margin = '0 auto';
+        const display = new phet.scenery.Display( scene, {
+          width: outputSize,
+          height: outputSize,
+          accessibility: true,
+          container: div,
+          allowCSSHacks: false
+        } );
+        display.updateDisplay();
+        document.getElementById( 'polygonal-face-edge-clipped' ).appendChild( div );
+      }
+    </script>
+
     <h3 id="clipping">Clipping</h3>
 
     <p class="TODO">Documentation</p>
+
+    <p class="TODO">Edge-Clipped note about preservation of counts</p>
 
     <h3 id="antialiasing">Anti-Aliasing</h3>
 
