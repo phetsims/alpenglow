@@ -54,7 +54,7 @@ export default class RenderBarycentricBlend extends RenderProgram {
       accuracy === RenderBarycentricBlendAccuracy.Accurate
     );
 
-    this.logic = logic || new RenderBarycentricBlendLogic( this.pointA, this.pointB, this.pointC, this.accuracy );
+    this.logic = logic || RenderBarycentricBlendLogic.from( this.pointA, this.pointB, this.pointC, this.accuracy );
   }
 
   public override getName(): string {
@@ -149,24 +149,32 @@ alpenglow.register( 'RenderBarycentricBlend', RenderBarycentricBlend );
 
 export class RenderBarycentricBlendLogic {
 
-  // NOTE: Only det/diffA/diffB/pointC/accuracy are used in the apply() method
-  public det: number;
-  public diffA: Vector2;
-  public diffB: Vector2;
-
   public constructor(
-    public readonly pointA: Vector2,
-    public readonly pointB: Vector2,
+    public readonly det: number,
+    public readonly diffA: Vector2,
+    public readonly diffB: Vector2,
     public readonly pointC: Vector2,
     public readonly accuracy: RenderBarycentricBlendAccuracy
   ) {
+    assert && assert( isFinite( det ) );
+    assert && assert( diffA.isFinite() );
+    assert && assert( diffB.isFinite() );
+    assert && assert( pointC.isFinite() );
+  }
+
+  public static from(
+    pointA: Vector2,
+    pointB: Vector2,
+    pointC: Vector2,
+    accuracy: RenderBarycentricBlendAccuracy
+  ): RenderBarycentricBlendLogic {
     const pA = pointA;
     const pB = pointB;
     const pC = pointC;
 
-    this.det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
-    this.diffA = new Vector2( pB.y - pC.y, pC.x - pB.x );
-    this.diffB = new Vector2( pC.y - pA.y, pA.x - pC.x );
+    const det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
+    const diffA = new Vector2( pB.y - pC.y, pC.x - pB.x );
+    const diffB = new Vector2( pC.y - pA.y, pA.x - pC.x );
 
     /*
     NOTES FOR THE FUTURE: Here were the original formulas
@@ -174,6 +182,8 @@ export class RenderBarycentricBlendLogic {
     const lambdaA = ( ( pB.y - pC.y ) * ( point.x - pC.x ) + ( pC.x - pB.x ) * ( point.y - pC.y ) ) / det;
     const lambdaB = ( ( pC.y - pA.y ) * ( point.x - pC.x ) + ( pA.x - pC.x ) * ( point.y - pC.y ) ) / det;
      */
+
+    return new RenderBarycentricBlendLogic( det, diffA, diffB, pointC, accuracy );
   }
 
   public equals( other: RenderBarycentricBlendLogic ): boolean {
@@ -248,14 +258,24 @@ export class RenderInstructionBarycentricBlend extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU32( RenderInstruction.BarycentricBlendCode | ( this.logic.accuracy << 8 ) );
-    encoder.pushF32( this.logic.det );
-    encoder.pushF32( this.logic.diffA.x );
-    encoder.pushF32( this.logic.diffA.y );
-    encoder.pushF32( this.logic.diffB.x );
-    encoder.pushF32( this.logic.diffB.y );
-    encoder.pushF32( this.logic.pointC.x );
-    encoder.pushF32( this.logic.pointC.y );
+    encoder.pushU32( RenderInstruction.BarycentricBlendCode | ( this.logic.accuracy << 8 ) ); // 0
+    encoder.pushF32( this.logic.det ); // 1
+    encoder.pushF32( this.logic.diffA.x ); // 2
+    encoder.pushF32( this.logic.diffA.y ); // 3
+    encoder.pushF32( this.logic.diffB.x ); // 4
+    encoder.pushF32( this.logic.diffB.y ); // 5
+    encoder.pushF32( this.logic.pointC.x ); // 6
+    encoder.pushF32( this.logic.pointC.y ); // 7
+  }
+
+  public static override fromBinary( encoder: ByteEncoder, offset: number, getLocation: ( offset: number ) => RenderInstructionLocation ): RenderInstructionBarycentricBlend {
+    const accuracy: RenderBarycentricBlendAccuracy = ( encoder.fullU32Array[ offset ] >> 8 ) & 0xff;
+    const det = encoder.fullF32Array[ offset + 1 ];
+    const diffA = new Vector2( encoder.fullF32Array[ offset + 2 ], encoder.fullF32Array[ offset + 3 ] );
+    const diffB = new Vector2( encoder.fullF32Array[ offset + 4 ], encoder.fullF32Array[ offset + 5 ] );
+    const pointC = new Vector2( encoder.fullF32Array[ offset + 6 ], encoder.fullF32Array[ offset + 7 ] );
+
+    return new RenderInstructionBarycentricBlend( new RenderBarycentricBlendLogic( det, diffA, diffB, pointC, accuracy ) );
   }
 
   public override getBinaryLength(): number {

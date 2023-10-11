@@ -23,7 +23,8 @@ export default abstract class RenderInstruction {
 
   public abstract writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void;
 
-  public fromBinary( encoder: ByteEncoder, offset: number, getLocation: ( offset: number ) => RenderInstructionLocation ): void {
+  public static fromBinary( encoder: ByteEncoder, offset: number, getLocation: ( offset: number ) => RenderInstructionLocation ): RenderInstruction {
+    // TODO: detect all types and set this up
     throw new Error( 'unimplemented' );
   }
 
