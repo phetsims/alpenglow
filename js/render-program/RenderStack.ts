@@ -211,6 +211,10 @@ export class RenderInstructionOpaqueJump extends RenderInstruction {
       offset << 8
     );
   }
+
+  public override getBinaryLength(): number {
+    return 1;
+  }
 }
 
 // Background on the top of the stack
@@ -236,6 +240,10 @@ export class RenderInstructionStackBlend extends RenderInstruction {
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
     encoder.pushU32( RenderInstruction.StackBlendCode );
+  }
+
+  public override getBinaryLength(): number {
+    return 1;
   }
 
   public static readonly INSTANCE = new RenderInstructionStackBlend();

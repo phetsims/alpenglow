@@ -561,6 +561,10 @@ export class RenderInstructionBlendCompose extends RenderInstruction {
       ( this.logic.composeType << 8 ) | ( this.logic.blendType << 11 )
     );
   }
+
+  public override getBinaryLength(): number {
+    return 1;
+  }
 }
 
 export type SerializedRenderBlendCompose = {

@@ -234,6 +234,10 @@ export class RenderInstructionBarycentricBlend extends RenderInstruction {
     encoder.pushF32( this.logic.pointC.x );
     encoder.pushF32( this.logic.pointC.y );
   }
+
+  public override getBinaryLength(): number {
+    return 8;
+  }
 }
 
 export type SerializedRenderBarycentricBlend = {

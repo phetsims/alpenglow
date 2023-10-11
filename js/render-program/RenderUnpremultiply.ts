@@ -63,5 +63,9 @@ export class RenderInstructionUnpremultiply extends RenderInstruction {
     encoder.pushU32( RenderInstruction.UnpremultiplyCode );
   }
 
+  public override getBinaryLength(): number {
+    return 1;
+  }
+
   public static readonly INSTANCE = new RenderInstructionUnpremultiply();
 }

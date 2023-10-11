@@ -267,6 +267,15 @@ export class RenderInstructionComputeBlendRatio extends RenderInstruction {
       encoder.pushF32( this.logic.radius1 );
     }
   }
+
+  public override getBinaryLength(): number {
+    if ( this.logic instanceof RenderLinearBlendLogic ) {
+      return 7;
+    }
+    else {
+      return 12;
+    }
+  }
 }
 
 const scratchZero = new Vector4( 0, 0, 0, 0 );
@@ -301,6 +310,10 @@ export class RenderInstructionLinearBlend extends RenderInstruction {
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
     encoder.pushU32( RenderInstruction.LinearBlendCode );
+  }
+
+  public override getBinaryLength(): number {
+    return 1;
   }
 
   public static readonly INSTANCE = new RenderInstructionLinearBlend();

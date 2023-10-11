@@ -59,5 +59,9 @@ export class RenderInstructionSRGBToLinearSRGB extends RenderInstruction {
     encoder.pushU32( RenderInstruction.SRGBToLinearSRGBCode );
   }
 
+  public override getBinaryLength(): number {
+    return 1;
+  }
+
   public static readonly INSTANCE = new RenderInstructionSRGBToLinearSRGB();
 }

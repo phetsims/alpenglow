@@ -21,6 +21,35 @@ export default abstract class RenderInstruction {
     throw new Error( 'unimplemented' );
   }
 
+  /**
+   * The number of words (u32s, 4 bytes) that this instruction takes up in the binary stream.
+   */
+  public getBinaryLength(): number {
+    throw new Error( 'unimplemented' );
+  }
+
+  public static instructionsToBinary( encoder: ByteEncoder, instructions: RenderInstruction[] ): void {
+    const lengthPrefixSum: number[] = [];
+
+    let sum = 0;
+    for ( let i = 0; i < instructions.length; i++ ) {
+      lengthPrefixSum.push( sum );
+      sum += instructions[ i ].getBinaryLength();
+    }
+
+    for ( let i = 0; i < instructions.length; i++ ) {
+      instructions[ i ].writeBinary( encoder, location => {
+        const locationIndex = instructions.indexOf( location );
+        assert && assert( locationIndex >= 0 );
+
+        const offset = lengthPrefixSum[ locationIndex ] - lengthPrefixSum[ i ];
+        assert && assert( offset >= 0, 'For now, we have code meant to handle non-negative offsets' );
+
+        return offset;
+      } );
+    }
+  }
+
   // length 1
   public static readonly ReturnCode = 0x00;
   public static readonly PremultiplyCode = 0x01;
@@ -34,6 +63,7 @@ export default abstract class RenderInstruction {
   public static readonly OklabToLinearSRGBCode = 0x09;
   public static readonly SRGBToLinearSRGBCode = 0x0a;
   public static readonly NormalizeCode = 0x0b;
+  public static readonly ExitCode = 0x0c;
   public static readonly BlendComposeCode = 0x24;
   public static readonly OpaqueJumpCode = 0x22;
 
@@ -79,6 +109,14 @@ export class RenderInstructionLocation extends RenderInstruction {
   ): void {
     // TODO: remove from instruction streams, and add an error here?
   }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    // no-op, this will be encoded in jump instructions
+  }
+
+  public override getBinaryLength(): number {
+    return 0;
+  }
 }
 
 export class RenderInstructionPush extends RenderInstruction {
@@ -103,6 +141,10 @@ export class RenderInstructionPush extends RenderInstruction {
     encoder.pushF32( this.vector.z );
     encoder.pushF32( this.vector.w );
   }
+
+  public override getBinaryLength(): number {
+    return 5;
+  }
 }
 
 export class RenderInstructionReturn extends RenderInstruction {
@@ -118,7 +160,31 @@ export class RenderInstructionReturn extends RenderInstruction {
     encoder.pushU32( RenderInstruction.ReturnCode );
   }
 
+  public override getBinaryLength(): number {
+    return 1;
+  }
+
   public static readonly INSTANCE = new RenderInstructionReturn();
+}
+
+export class RenderInstructionExit extends RenderInstruction {
+  public override execute(
+    stack: RenderExecutionStack,
+    context: RenderEvaluationContext,
+    executor: RenderExecutor
+  ): void {
+    executor.exit();
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU32( RenderInstruction.ExitCode );
+  }
+
+  public override getBinaryLength(): number {
+    return 1;
+  }
+
+  public static readonly INSTANCE = new RenderInstructionExit();
 }
 
 export class RenderInstructionMultiplyScalar extends RenderInstruction {
@@ -141,6 +207,10 @@ export class RenderInstructionMultiplyScalar extends RenderInstruction {
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
     encoder.pushU32( RenderInstruction.MultiplyScalarCode );
     encoder.pushF32( this.factor );
+  }
+
+  public override getBinaryLength(): number {
+    return 2;
   }
 }
 

@@ -63,5 +63,9 @@ export class RenderInstructionOklabToLinearSRGB extends RenderInstruction {
     encoder.pushU32( RenderInstruction.OklabToLinearSRGBCode );
   }
 
+  public override getBinaryLength(): number {
+    return 1;
+  }
+
   public static readonly INSTANCE = new RenderInstructionOklabToLinearSRGB();
 }

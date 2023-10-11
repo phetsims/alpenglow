@@ -108,6 +108,10 @@ export class RenderInstructionNormalize extends RenderInstruction {
     encoder.pushU32( RenderInstruction.NormalizeCode );
   }
 
+  public override getBinaryLength(): number {
+    return 1;
+  }
+
   public static readonly INSTANCE = new RenderInstructionNormalize();
 }
 

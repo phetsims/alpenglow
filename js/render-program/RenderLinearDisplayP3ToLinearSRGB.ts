@@ -57,5 +57,9 @@ export class RenderInstructionLinearDisplayP3ToLinearSRGB extends RenderInstruct
     encoder.pushU32( RenderInstruction.LinearDisplayP3ToLinearSRGBCode );
   }
 
+  public override getBinaryLength(): number {
+    return 1;
+  }
+
   public static readonly INSTANCE = new RenderInstructionLinearDisplayP3ToLinearSRGB();
 }
