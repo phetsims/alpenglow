@@ -82,6 +82,16 @@
       margin: 0 auto;
       text-align: center;
     }
+
+    .nav-list {
+      padding-left: 8px;
+      padding-right: 0px;
+    }
+
+    .nav-list li {
+      line-height: 10px;
+      font-size: 90%;
+    }
   </style>
 </head>
 
@@ -543,19 +553,22 @@
 
     <h2 id="concepts">Concepts</h2>
 
-    <p class="TODO">Documentation</p>
-
     <h3 id="polygonalFaces">Polygonal Faces</h3>
 
     <p>
       Polygonal faces are used pervasively throughout Alpenglow. In general, our data structures are designed to support
       <a href="https://en.wikipedia.org/wiki/Polygon_with_holes">polygons with holes</a>, and more generally, the
-      primitive is a "list of polygons". For instance, to represent the polygon in the following diagram:
+      primitive is a "list of polygons". An example is the following diagram, which can be stored in different ways:
     </p>
 
     <div class="example">
       <div id="polygonal-face-example"></div>
     </div>
+
+    <p>
+      All of the storage representations below conform to the <code>ClippableFace</code> interface in the software
+      implementation.
+    </p>
 
     <h4>Polygonal Form</h4>
 
@@ -581,7 +594,9 @@
 
     <p>
       where there is a line (edge) between each consecutive pair of vertices, and the last vertex is connected to the
-      first vertex. This is compact, however the order is critical.
+      first vertex. This is compact, however the order is critical. This can cause certain operations (e.g. circular
+      clipping, some tracing) to be slower than other methods. This is handled by <code>PolygonalFace</code> in the
+      software implementation.
     </p>
 
     <h4>Edge Form</h4>
@@ -608,6 +623,9 @@
 
     <p>
       Now, for most critical operations, order doesn't matter, and each edge can be considered in isolation.
+      We won't need to sort things during/after operations, but also certain operations might need to generate more
+      edges that get canceled out (whereas with polygonal data, we could detect it and simplify in higher-performance
+      ways). This form is handled by <code>EdgedFace</code> in the software implementation.
     </p>
 
     <h4>Degenerate Edges</h4>
@@ -615,7 +633,7 @@
     <p>
       Additionally, we can actually construct this with an equivalent single (degenerate) polygon. Since we only care
       about the filled area, it turns out that edges that "reverse" over each other won't contribute to the filled area,
-      so we can double-back. Thus:
+      so we can double-back. Thus the following diagram:
     </p>
 
     <div class="example">
@@ -623,7 +641,7 @@
     </div>
 
     <p>
-      Can be constructed with an equivalent area with the following polygon:
+      can be constructed with an equivalent area with the following polygon:
     </p>
 
     <p>
@@ -663,12 +681,30 @@
     </div>
 
     <p>
-      Thus the edge-clipped version will have the following edges and counts:
+      Thus the edge-clipped version (for the 0,0 to 10,10 bounds) will have the following edges and counts:
     </p>
 
     <div class="example">
       <div id="polygonal-face-edge-clipped"></div>
     </div>
+
+    <p>
+      (10,&nbsp;0)&nbsp;=>&nbsp;(10,&nbsp;2),
+      (10,&nbsp;2)&nbsp;=>&nbsp;(2,&nbsp;10),
+      (2,&nbsp;10)&nbsp;=>&nbsp;(0,&nbsp;10),
+
+      (2,&nbsp;2)&nbsp;=>&nbsp;(2,&nbsp;7),
+      (2,&nbsp;7)&nbsp;=>&nbsp;(7,&nbsp;2),
+      (7,&nbsp;2)&nbsp;=>&nbsp;(2,&nbsp;2)
+
+      (9,&nbsp;9)&nbsp;=>&nbsp;(6,&nbsp;9),
+      (6,&nbsp;9)&nbsp;=>&nbsp;(9,&nbsp;6),
+      (9,&nbsp;6)&nbsp;=>&nbsp;(9,&nbsp;9)
+    </p>
+
+    <p>
+      This is handled by the <code>EdgedClippedFace</code> in the software implementation.
+    </p>
 
     <script type="module">
       import ArrowNode from '../../chipper/dist/js/scenery-phet/js/ArrowNode.js';
@@ -925,6 +961,104 @@
     </script>
 
     <h3 id="clipping">Clipping</h3>
+
+    <h4>Line Clipping</h4>
+
+    The first primitive we'll need is the ability to find the part of a line segment that is within an axis-aligned
+    bounding rectangle (referred to as bounds). Alpenglow primarily uses <a href="https://aircconline.com/ijcga/V9N3/9319ijcga01.pdf">Another Simple but Faster Method for 2D Line Clipping</a> by
+    Matthes and Drakopoulos (2019).
+
+    <div class="example">
+      <div id="clipping-line-example"></div>
+    </div>
+
+    <script type="module">
+      const outputSize = 256;
+      const size = 10;
+      const padding = 70;
+
+      const matrix = phet.dot.Matrix3.translation( padding, padding ).timesMatrix( phet.dot.Matrix3.scaling( ( outputSize - 2 * padding ) / size ) );
+      const bounds = new phet.dot.Bounds2( 0, 0, 10, 10 );
+
+      const clipRect = phet.scenery.Rectangle.bounds( bounds.transformed( matrix ), {
+        stroke: 'black',
+        fill: 'white'
+      } );
+
+      const exteriorShape = new phet.kite.Shape();
+      const interiorShape = new phet.kite.Shape();
+
+      const v2 = phet.dot.v2;
+      const LinearEdge = phet.alpenglow.LinearEdge;
+      const edges = [
+        new LinearEdge( v2( -2, 7 ), v2( 7, -2 ) ),
+        new LinearEdge( v2( 3, 4 ), v2( 9, 6 ) ),
+        new LinearEdge( v2( 5, -5 ), v2( 15, 4 ) ),
+        new LinearEdge( v2( 4, 7 ), v2( 9, 12 ) ),
+        new LinearEdge( v2( 2, 10 ), v2( 1, 13 ) ),
+        new LinearEdge( v2( 0, 9 ), v2( 2, 9 ) )
+      ];
+
+      for ( let i = 0; i < edges.length; i++ ) {
+        const start = edges[ i ].startPoint.copy();
+        const end = edges[ i ].endPoint.copy();
+
+        const fullStart = start.copy();
+        const fullEnd = end.copy();
+
+        const clipped = phet.alpenglow.LineClipping.matthesDrakopoulosClip( start, end, 0, 0, 10, 10 );
+
+        if ( clipped ) {
+          if ( !start.equals( fullStart ) ) {
+            exteriorShape.moveToPoint( matrix.timesVector2( fullStart ) );
+            exteriorShape.lineToPoint( matrix.timesVector2( start ) );
+          }
+
+          if ( !start.equals( end ) ) {
+            interiorShape.moveToPoint( matrix.timesVector2( start ) );
+            interiorShape.lineToPoint( matrix.timesVector2( end ) );
+          }
+
+          if ( !end.equals( fullEnd ) ) {
+            exteriorShape.moveToPoint( matrix.timesVector2( end ) );
+            exteriorShape.lineToPoint( matrix.timesVector2( fullEnd ) );
+          }
+        }
+        else {
+          exteriorShape.moveToPoint( matrix.timesVector2( fullStart ) );
+          exteriorShape.lineToPoint( matrix.timesVector2( fullEnd ) );
+        }
+      }
+
+      const exteriorNode = new phet.scenery.Path( exteriorShape, {
+        stroke: 'black',
+        opacity: 0.2
+      } );
+      const interiorNode = new phet.scenery.Path( interiorShape, {
+        stroke: 'red'
+      } );
+
+      {
+        const scene = new phet.scenery.Node( {
+          children: [
+            clipRect,
+            exteriorNode,
+            interiorNode
+          ]
+        } );
+        const div = document.createElement( 'div' );
+        div.style.margin = '0 auto';
+        const display = new phet.scenery.Display( scene, {
+          width: outputSize,
+          height: outputSize,
+          accessibility: true,
+          container: div,
+          allowCSSHacks: false
+        } );
+        display.updateDisplay();
+        document.getElementById( 'clipping-line-example' ).appendChild( div );
+      }
+    </script>
 
     <p class="TODO">Documentation</p>
 
