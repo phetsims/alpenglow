@@ -139,6 +139,7 @@ export default class RenderLinearGradient extends RenderProgram {
                           RenderLinearBlendAccuracy.PixelCenter;
 
     const delta = end.minus( start );
+    // How does using the magnitude squared here not introduce an error? Won't the normal be smaller than expected?
     const normal = delta.timesScalar( 1 / delta.magnitudeSquared );
     const offset = normal.dot( start );
 

@@ -7,15 +7,15 @@
  *
  */
 
-import { RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderColor, RenderPath, RenderPathBoolean } from '../imports.js';
+import { RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderColor, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
 QUnit.module( 'RenderProgram' );
 
-const RED = new RenderColor( new Vector4( 255, 0, 0, 1 ) );
-const GREEN = new RenderColor( new Vector4( 0, 255, 0, 1 ) );
-const BLUE = new RenderColor( new Vector4( 0, 0, 255, 1 ) );
+const RED = new RenderColor( new Vector4( 1, 0, 0, 1 ) );
+const GREEN = new RenderColor( new Vector4( 0, 1, 0, 1 ) );
+const BLUE = new RenderColor( new Vector4( 0, 0, 1, 1 ) );
 const TRANSPARENT = new RenderColor( new Vector4( 0, 0, 0, 0 ) );
 
 // How do you know which point to start at? Or do you just pick?
@@ -63,7 +63,6 @@ QUnit.skip( 'simplified barycentric perspective blend', assert => {
 } );
 
 QUnit.test( 'simplified path boolean', assert => {
-  // I need to make a RenderPath and then define the inside and outside of the pathBoolean.
 
   const complexPathBoolean = new RenderPathBoolean( PATH_A, RED, GREEN );
   const simplePathBoolean = new RenderPathBoolean( PATH_A, RED, RED );
@@ -72,15 +71,19 @@ QUnit.test( 'simplified path boolean', assert => {
 
   assert.ok( complexPathBoolean.simplified().equals( complexPathBoolean ) );
   assert.ok( simplePathBoolean.simplified().equals( RED ) );
-
-  // TODO: Why is this failing?
   assert.ok( transparentPathBoolean.simplified().equals( TRANSPARENT ) );
   assert.ok( emptyPathBoolean.simplified().equals( GREEN ) );
 } );
-//
-// QUnit.skip( 'simplified linear blend', assert => {
-//
-// } );
+
+QUnit.test( 'simplified linear blend', assert => {
+  const complexLinearBlend = new RenderLinearBlend( new Vector2( 1, 0 ), 0, RenderLinearBlendAccuracy.Accurate, RED, GREEN );
+  const simpleLinearBlend = new RenderLinearBlend( new Vector2( 1, 0 ), 0, RenderLinearBlendAccuracy.Accurate, RED, RED );
+  const transparentLinearBlend = new RenderLinearBlend( new Vector2( 1, 0 ), 0, RenderLinearBlendAccuracy.Accurate, TRANSPARENT, TRANSPARENT );
+
+  assert.ok( complexLinearBlend.simplified().equals( complexLinearBlend ) );
+  assert.ok( simpleLinearBlend.simplified().equals( RED ) );
+  assert.ok( transparentLinearBlend.simplified().equals( TRANSPARENT ) );
+} );
 //
 // QUnit.skip( 'simplified linear gradient', assert => {
 //
