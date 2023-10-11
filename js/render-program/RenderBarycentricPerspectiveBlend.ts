@@ -153,11 +153,13 @@ alpenglow.register( 'RenderBarycentricPerspectiveBlend', RenderBarycentricPerspe
 
 export class RenderBarycentricPerspectiveBlendLogic {
 
-  // TODO: potentially on WebGPU, compute the 1/z values early (depending on whether it's worth it to store those)
-  // TODO: actually, can we just pack those into the z-spots of the vectors?
   public det: number;
   public diffA: Vector2;
   public diffB: Vector2;
+  public point2C: Vector2;
+  public zInverseA: number;
+  public zInverseB: number;
+  public zInverseC: number;
 
   public constructor(
     public readonly pointA: Vector3,
@@ -169,9 +171,17 @@ export class RenderBarycentricPerspectiveBlendLogic {
     const pB = pointB;
     const pC = pointC;
 
+    assert && assert( pointA.z !== 0 );
+    assert && assert( pointB.z !== 0 );
+    assert && assert( pointC.z !== 0 );
+
     this.det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
     this.diffA = new Vector2( pB.y - pC.y, pC.x - pB.x );
     this.diffB = new Vector2( pC.y - pA.y, pA.x - pC.x );
+    this.point2C = pC.toVector2();
+    this.zInverseA = 1 / pA.z;
+    this.zInverseB = 1 / pB.z;
+    this.zInverseC = 1 / pC.z;
 
     /*
     NOTES FOR THE FUTURE: Here were the original formulas
@@ -192,34 +202,34 @@ export class RenderBarycentricPerspectiveBlendLogic {
 
     const point = this.accuracy === RenderBarycentricPerspectiveBlendAccuracy.Centroid ? context.centroid : context.writeBoundsCentroid( scratchCentroid );
 
-    const pointA = this.pointA;
-    const pointB = this.pointB;
-    const pointC = this.pointC;
-
-    const lambdaA = ( this.diffA.x * ( point.x - pointC.x ) + this.diffA.y * ( point.y - pointC.y ) ) / this.det;
-    const lambdaB = ( this.diffB.x * ( point.x - pointC.x ) + this.diffB.y * ( point.y - pointC.y ) ) / this.det;
+    const lambdaA = ( this.diffA.x * ( point.x - this.point2C.x ) + this.diffA.y * ( point.y - this.point2C.y ) ) / this.det;
+    const lambdaB = ( this.diffB.x * ( point.x - this.point2C.x ) + this.diffB.y * ( point.y - this.point2C.y ) ) / this.det;
     const lambdaC = 1 - lambdaA - lambdaB;
 
     assert && assert( isFinite( lambdaA ), 'Lambda A must be finite' );
     assert && assert( isFinite( lambdaB ), 'Lambda B must be finite' );
     assert && assert( isFinite( lambdaC ), 'Lambda C must be finite' );
 
-    assert && assert( pointA.z !== 0 );
-    assert && assert( pointB.z !== 0 );
-    assert && assert( pointC.z !== 0 );
+    assert && assert( isFinite( this.zInverseA ) );
+    assert && assert( isFinite( this.zInverseB ) );
+    assert && assert( isFinite( this.zInverseC ) );
 
-    const z = 1 / ( lambdaA / pointA.z + lambdaB / pointB.z + lambdaC / pointC.z );
+    const z = 1 / ( lambdaA * this.zInverseA + lambdaB * this.zInverseB + lambdaC * this.zInverseC );
 
     assert && assert( aColor.isFinite(), `Color A must be finite: ${aColor}` );
     assert && assert( bColor.isFinite(), `Color B must be finite: ${bColor}` );
     assert && assert( cColor.isFinite(), `Color C must be finite: ${cColor}` );
     assert && assert( z > 0, 'z must be positive' );
 
+    const aFactor = z * lambdaA * this.zInverseA;
+    const bFactor = z * lambdaB * this.zInverseB;
+    const cFactor = z * lambdaC * this.zInverseC;
+
     output.setXYZW(
-      z * ( aColor.x * lambdaA / pointA.z + bColor.x * lambdaB / pointB.z + cColor.x * lambdaC / pointC.z ),
-      z * ( aColor.y * lambdaA / pointA.z + bColor.y * lambdaB / pointB.z + cColor.y * lambdaC / pointC.z ),
-      z * ( aColor.z * lambdaA / pointA.z + bColor.z * lambdaB / pointB.z + cColor.z * lambdaC / pointC.z ),
-      z * ( aColor.w * lambdaA / pointA.z + bColor.w * lambdaB / pointB.z + cColor.w * lambdaC / pointC.z )
+      aColor.x * aFactor + bColor.x * bFactor + cColor.x * cFactor,
+      aColor.y * aFactor + bColor.y * bFactor + cColor.y * cFactor,
+      aColor.z * aFactor + bColor.z * bFactor + cColor.z * cFactor,
+      aColor.w * aFactor + bColor.w * bFactor + cColor.w * cFactor
     );
   }
 }
