@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonMitchellNetravali, RenderEvaluationContext, RenderExtend, RenderImageable, RenderProgram, RenderResampleType, alpenglow, SerializedRenderImageable, RenderInstruction, RenderExecutionStack, RenderExecutor } from '../imports.js';
+import { ClippableFace, PolygonMitchellNetravali, RenderEvaluationContext, RenderExtend, RenderImageable, RenderProgram, RenderResampleType, alpenglow, SerializedRenderImageable, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -383,6 +383,14 @@ export class RenderImageLogic {
     this.inverseTransformWithHalfOffset = Matrix3.translation( -0.5, -0.5 ).timesMatrix( this.inverseTransform );
   }
 
+  public equals( other: RenderImageLogic ): boolean {
+    return this.transform.equalsEpsilon( other.transform, 1e-6 ) &&
+      this.image === other.image &&
+      this.extendX === other.extendX &&
+      this.extendY === other.extendY &&
+      this.resampleType === other.resampleType;
+  }
+
   public evaluate( context: RenderEvaluationContext ): Vector4 {
     // TODO: analytic box! Bilinear! Bicubic! (can we mipmap for those?)
     switch( this.resampleType ) {
@@ -524,6 +532,13 @@ export class RenderInstructionImage extends RenderInstruction {
 
   public override toString(): string {
     return 'RenderInstructionImage(TODO)';
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionImage && this.logic.equals( other.logic );
   }
 
   public override execute(

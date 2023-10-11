@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderLight, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderLight, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderPhong extends RenderProgram {
@@ -216,6 +216,13 @@ export class RenderInstructionPhong extends RenderInstruction {
 
   public override toString(): string {
     return 'RenderInstructionPhong(TODO)';
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionPhong && this.alpha === other.alpha && this.numLights === other.numLights;
   }
 
   public override execute(

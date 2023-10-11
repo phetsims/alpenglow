@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderPathBoolean, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderPathBoolean, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation } from '../imports.js';
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
@@ -136,6 +136,11 @@ export class RenderFilterLogic {
     public readonly colorMatrix: Matrix4,
     public readonly colorTranslation: Vector4
   ) {}
+
+  public equals( other: RenderFilterLogic ): boolean {
+    return this.colorMatrix.equalsEpsilon( other.colorMatrix, 1e-6 ) &&
+           this.colorTranslation.equalsEpsilon( other.colorTranslation, 1e-6 );
+  }
 }
 
 const scratchVector = new Vector4( 0, 0, 0, 0 );
@@ -149,6 +154,13 @@ export class RenderInstructionFilter extends RenderInstruction {
 
   public override toString(): string {
     return 'RenderInstructionFilter(TODO)';
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionFilter && this.logic.equals( other.logic );
   }
 
   public override execute(

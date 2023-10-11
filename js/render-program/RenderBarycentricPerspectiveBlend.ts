@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderProgram, SerializedRenderProgram } from '../imports.js';
+import { alpenglow, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, SerializedRenderProgram } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -181,6 +181,13 @@ export class RenderBarycentricPerspectiveBlendLogic {
      */
   }
 
+  public equals( other: RenderBarycentricPerspectiveBlendLogic ): boolean {
+    return this.pointA.equalsEpsilon( other.pointA, 1e-6 ) &&
+           this.pointB.equalsEpsilon( other.pointB, 1e-6 ) &&
+           this.pointC.equalsEpsilon( other.pointC, 1e-6 ) &&
+           this.accuracy === other.accuracy;
+  }
+
   public apply( output: Vector4, context: RenderEvaluationContext, aColor: Vector4, bColor: Vector4, cColor: Vector4 ): void {
 
     const point = this.accuracy === RenderBarycentricPerspectiveBlendAccuracy.Centroid ? context.centroid : context.writeBoundsCentroid( scratchCentroid );
@@ -231,6 +238,13 @@ export class RenderInstructionBarycentricPerspectiveBlend extends RenderInstruct
 
   public override toString(): string {
     return 'RenderInstructionBarycentricPerspectiveBlend(TODO)';
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionBarycentricPerspectiveBlend && this.logic.equals( other.logic );
   }
 
   public override execute(

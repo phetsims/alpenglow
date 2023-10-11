@@ -194,6 +194,13 @@ export class RenderInstructionOpaqueJump extends RenderInstruction {
     return `RenderInstructionOpaqueJump(${location})`;
   }
 
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionOpaqueJump && areLocationsEqual( this.location, other.location );
+  }
+
   public static readonly SKIP_RENDER_COLOR_JUMPS = false;
 
   public override execute(
@@ -227,6 +234,13 @@ export class RenderInstructionStackBlend extends RenderInstruction {
 
   public override toString(): string {
     return 'RenderInstructionStackBlend()';
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionStackBlend;
   }
 
   public override execute(

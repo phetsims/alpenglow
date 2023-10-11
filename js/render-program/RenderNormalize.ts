@@ -88,6 +88,13 @@ export class RenderInstructionNormalize extends RenderInstruction {
     return 'RenderInstructionNormalize()';
   }
 
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionNormalize;
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

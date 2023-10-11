@@ -256,6 +256,16 @@ export class RenderLinearGradientLogic {
     this.gradDelta = end.minus( start );
   }
 
+  public equals( other: RenderLinearGradientLogic ): boolean {
+    return this.transform.equalsEpsilon( other.transform, 1e-6 ) &&
+           this.start.equalsEpsilon( other.start, 1e-6 ) &&
+           this.end.equalsEpsilon( other.end, 1e-6 ) &&
+           this.ratios.length === other.ratios.length &&
+           this.ratios.every( ( ratio, i ) => Math.abs( ratio - other.ratios[ i ] ) < 1e-6 ) &&
+           this.extend === other.extend &&
+           this.accuracy === other.accuracy;
+  }
+
   public computeLinearValue(
     context: RenderEvaluationContext
   ): number {
@@ -292,6 +302,41 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
 
   public override toString(): string {
     return 'RenderInstructionComputeGradientRatio(TODO)';
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    if ( !( other instanceof RenderInstructionComputeGradientRatio ) ) {
+      return false;
+    }
+    if ( !areLocationsEqual( this.blendLocation, other.blendLocation ) ) {
+      return false;
+    }
+    if ( this.stopLocations.length !== other.stopLocations.length ) {
+      return false;
+    }
+    for ( let i = 0; i < this.stopLocations.length; i++ ) {
+      if ( !areLocationsEqual( this.stopLocations[ i ], other.stopLocations[ i ] ) ) {
+        return false;
+      }
+    }
+
+    // TypeScript needs these to be duplicated
+    if (
+      this.logic instanceof RenderLinearGradientLogic && other.logic instanceof RenderLinearGradientLogic
+    ) {
+      return this.logic.equals( other.logic );
+    }
+    else if (
+      this.logic instanceof RenderRadialGradientLogic && other.logic instanceof RenderRadialGradientLogic
+    ) {
+      return this.logic.equals( other.logic );
+    }
+    else {
+      return false;
+    }
   }
 
   public override execute(

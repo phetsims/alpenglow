@@ -396,6 +396,18 @@ export class RenderRadialGradientLogic {
     this.isSwapped = isSwapped;
   }
 
+  public equals( other: RenderRadialGradientLogic ): boolean {
+    return this.transform.equalsEpsilon( other.transform, 1e-6 ) &&
+           this.start.equalsEpsilon( other.start, 1e-6 ) &&
+           Math.abs( this.startRadius - other.startRadius ) < 1e-6 &&
+           this.end.equalsEpsilon( other.end, 1e-6 ) &&
+           Math.abs( this.endRadius - other.endRadius ) < 1e-6 &&
+           this.ratios.length === other.ratios.length &&
+           _.every( this.ratios, ( ratio, i ) => Math.abs( ratio - other.ratios[ i ] ) < 1e-6 ) &&
+           this.extend === other.extend &&
+           this.accuracy === other.accuracy;
+  }
+
   public computeLinearValue(
     context: RenderEvaluationContext
   ): number {

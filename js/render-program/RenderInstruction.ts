@@ -19,6 +19,8 @@ export default abstract class RenderInstruction {
 
   public abstract toString(): string;
 
+  public abstract equals( other: RenderInstruction, areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean ): boolean;
+
   public writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
     throw new Error( 'unimplemented' );
   }
@@ -111,6 +113,13 @@ export class RenderInstructionLocation extends RenderInstruction {
     return `RenderInstructionLocation(${this.id})`;
   }
 
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionLocation && areLocationsEqual( this, other );
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,
@@ -140,6 +149,13 @@ export class RenderInstructionPush extends RenderInstruction {
     return `RenderInstructionPush(${vector})`;
   }
 
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionPush && this.vector.equalsEpsilon( other.vector, 1e-6 );
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,
@@ -167,6 +183,13 @@ export class RenderInstructionReturn extends RenderInstruction {
     return 'RenderInstructionReturn()';
   }
 
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionReturn;
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,
@@ -190,6 +213,13 @@ export class RenderInstructionExit extends RenderInstruction {
 
   public override toString(): string {
     return 'RenderInstructionExit()';
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionExit;
   }
 
   public override execute(
@@ -221,6 +251,13 @@ export class RenderInstructionMultiplyScalar extends RenderInstruction {
   public override toString(): string {
     const factor = `factor:${this.factor}`;
     return `RenderInstructionMultiplyScalar(${factor})`;
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionMultiplyScalar && Math.abs( this.factor - other.factor ) < 1e-6;
   }
 
   public execute(

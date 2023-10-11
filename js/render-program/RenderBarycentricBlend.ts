@@ -176,6 +176,14 @@ export class RenderBarycentricBlendLogic {
      */
   }
 
+  public equals( other: RenderBarycentricBlendLogic ): boolean {
+    return Math.abs( this.det - other.det ) < 1e-6 &&
+           this.diffA.equalsEpsilon( other.diffA, 1e-6 ) &&
+           this.diffB.equalsEpsilon( other.diffB, 1e-6 ) &&
+           this.pointC.equalsEpsilon( other.pointC, 1e-6 ) &&
+           this.accuracy === other.accuracy;
+  }
+
   public apply( output: Vector4, context: RenderEvaluationContext, aColor: Vector4, bColor: Vector4, cColor: Vector4 ): void {
     if ( assert ) {
       if ( this.accuracy === RenderBarycentricBlendAccuracy.Accurate ) {
@@ -217,6 +225,13 @@ export class RenderInstructionBarycentricBlend extends RenderInstruction {
     const diffB = `diffB:${this.logic.diffB.x},${this.logic.diffB.y}`;
     const diffC = `pointC:${this.logic.pointC.x},${this.logic.pointC.y}`;
     return `RenderInstructionBarycentricBlend(${det} ${diffA} ${diffB} ${diffC})`;
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionBarycentricBlend && this.logic.equals( other.logic );
   }
 
   public override execute(

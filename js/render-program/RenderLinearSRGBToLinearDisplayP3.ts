@@ -44,6 +44,13 @@ export class RenderInstructionLinearSRGBToLinearDisplayP3 extends RenderInstruct
     return 'RenderInstructionLinearSRGBToLinearDisplayP3()';
   }
 
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionLinearSRGBToLinearDisplayP3;
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

@@ -180,6 +180,12 @@ export class RenderLinearBlendLogic {
     public readonly accuracy: RenderLinearBlendAccuracy
   ) {}
 
+  public equals( other: RenderLinearBlendLogic ): boolean {
+    return this.scaledNormal.equalsEpsilon( other.scaledNormal, 1e-6 ) &&
+           Math.abs( this.offset - other.offset ) < 1e-6 &&
+           this.accuracy === other.accuracy;
+  }
+
   public computeLinearValue(
     context: RenderEvaluationContext
   ): number {
@@ -217,6 +223,30 @@ export class RenderInstructionComputeBlendRatio extends RenderInstruction {
       const radius1 = `radius1:${this.logic.radius1}`;
       const accuracy = `accuracy:${this.logic.accuracy}`;
       return `RenderInstructionComputeBlendRatio(radial, ${inverseTransform} ${radius0} ${radius1} ${accuracy} ${zero} ${one} ${blend})`;
+    }
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    if ( !( other instanceof RenderInstructionComputeBlendRatio ) ) {
+      return false;
+    }
+    if (
+      !areLocationsEqual( this.zeroLocation, other.zeroLocation ) ||
+      !areLocationsEqual( this.oneLocation, other.oneLocation ) ||
+      !areLocationsEqual( this.blendLocation, other.blendLocation )
+    ) {
+      return false;
+    }
+    if ( this.logic instanceof RenderLinearBlendLogic ) {
+      return other.logic instanceof RenderLinearBlendLogic &&
+             this.logic.equals( other.logic );
+    }
+    else {
+      return other.logic instanceof RenderRadialBlendLogic &&
+             this.logic.equals( other.logic );
     }
   }
 
@@ -306,6 +336,13 @@ export class RenderInstructionLinearBlend extends RenderInstruction {
 
   public override toString(): string {
     return 'RenderInstructionLinearBlend()';
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionLinearBlend;
   }
 
   public override execute(

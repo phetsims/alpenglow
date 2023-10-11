@@ -529,6 +529,10 @@ export class RenderBlendComposeLogic {
     public readonly composeType: RenderComposeType,
     public readonly blendType: RenderBlendType
   ) {}
+
+  public equals( other: RenderBlendComposeLogic ): boolean {
+    return this.composeType === other.composeType && this.blendType === other.blendType;
+  }
 }
 
 const scratchAColor = new Vector4( 0, 0, 0, 0 );
@@ -545,6 +549,13 @@ export class RenderInstructionBlendCompose extends RenderInstruction {
     const compose = `compose:${this.logic.composeType}`;
     const blend = `blend:${this.logic.blendType}`;
     return `RenderInstructionBlendCompose(${compose} ${blend})`;
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionBlendCompose && this.logic.equals( other.logic );
   }
 
   public override execute(

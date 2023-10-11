@@ -41,6 +41,13 @@ export class RenderInstructionSRGBToLinearSRGB extends RenderInstruction {
     return 'RenderInstructionSRGBToLinearSRGB()';
   }
 
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionSRGBToLinearSRGB;
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

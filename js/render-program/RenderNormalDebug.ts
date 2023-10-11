@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderNormalDebug extends RenderProgram {
@@ -89,6 +89,13 @@ export class RenderInstructionNormalDebug extends RenderInstruction {
 
   public override toString(): string {
     return 'RenderInstructionNormalDebug(TODO)';
+  }
+
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionNormalDebug;
   }
 
   public override execute(

@@ -187,6 +187,13 @@ export class RenderRadialBlendLogic {
     this.inverseTransform = transform.inverted();
   }
 
+  public equals( other: RenderRadialBlendLogic ): boolean {
+    return this.transform.equalsEpsilon( other.transform, 1e-6 ) &&
+           Math.abs( this.radius0 - other.radius0 ) < 1e-6 &&
+           Math.abs( this.radius1 - other.radius1 ) < 1e-6 &&
+           this.accuracy === other.accuracy;
+  }
+
   public computeLinearValue(
     context: RenderEvaluationContext
   ): number {

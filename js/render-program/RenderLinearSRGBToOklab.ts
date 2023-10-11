@@ -44,6 +44,13 @@ export class RenderInstructionLinearSRGBToOklab extends RenderInstruction {
     return 'RenderInstructionLinearSRGBToOklab()';
   }
 
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionLinearSRGBToOklab;
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

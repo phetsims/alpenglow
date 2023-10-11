@@ -41,6 +41,13 @@ export class RenderInstructionPremultiply extends RenderInstruction {
     return 'RenderInstructionPremultiply()';
   }
 
+  public override equals(
+    other: RenderInstruction,
+    areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean
+  ): boolean {
+    return other instanceof RenderInstructionPremultiply;
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,
