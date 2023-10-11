@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderProgram, alpenglow, SerializedRenderProgram, RenderExecutionStack, RenderExecutor, RenderInstruction } from '../imports.js';
+import { alpenglow, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderProgram, SerializedRenderProgram } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -227,6 +227,10 @@ export class RenderInstructionBarycentricPerspectiveBlend extends RenderInstruct
     public readonly logic: RenderBarycentricPerspectiveBlendLogic
   ) {
     super();
+  }
+
+  public override toString(): string {
+    return 'RenderInstructionBarycentricPerspectiveBlend(TODO)';
   }
 
   public override execute(

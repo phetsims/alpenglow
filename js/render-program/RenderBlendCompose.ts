@@ -541,6 +541,12 @@ export class RenderInstructionBlendCompose extends RenderInstruction {
     super();
   }
 
+  public override toString(): string {
+    const compose = `compose:${this.logic.composeType}`;
+    const blend = `blend:${this.logic.blendType}`;
+    return `RenderInstructionBlendCompose(${compose} ${blend})`;
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

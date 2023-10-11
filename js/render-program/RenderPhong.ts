@@ -214,6 +214,10 @@ export class RenderInstructionPhong extends RenderInstruction {
     super();
   }
 
+  public override toString(): string {
+    return 'RenderInstructionPhong(TODO)';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

@@ -201,6 +201,25 @@ export class RenderInstructionComputeBlendRatio extends RenderInstruction {
     super();
   }
 
+  public override toString(): string {
+    const zero = `zero:${this.zeroLocation.id}`;
+    const one = `one:${this.oneLocation.id}`;
+    const blend = `blend:${this.blendLocation.id}`;
+    if ( this.logic instanceof RenderLinearBlendLogic ) {
+      const scaledNormal = `scaledNormal:${this.logic.scaledNormal.x},${this.logic.scaledNormal.y}`;
+      const offset = `offset:${this.logic.offset}`;
+      const accuracy = `accuracy:${this.logic.accuracy}`;
+      return `RenderInstructionComputeBlendRatio(linear, ${scaledNormal} ${offset} ${accuracy} ${zero} ${one} ${blend})`;
+    }
+    else {
+      const inverseTransform = `inverseTransform:${this.logic.inverseTransform.m00()},${this.logic.inverseTransform.m01()},${this.logic.inverseTransform.m02()},${this.logic.inverseTransform.m10()},${this.logic.inverseTransform.m11()},${this.logic.inverseTransform.m12()}`;
+      const radius0 = `radius0:${this.logic.radius0}`;
+      const radius1 = `radius1:${this.logic.radius1}`;
+      const accuracy = `accuracy:${this.logic.accuracy}`;
+      return `RenderInstructionComputeBlendRatio(radial, ${inverseTransform} ${radius0} ${radius1} ${accuracy} ${zero} ${one} ${blend})`;
+    }
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,
@@ -284,6 +303,11 @@ const scratchOne = new Vector4( 0, 0, 0, 0 );
 // Takes `t` value from vector.x. If t <= 0 or t >= 1, it will only return the "top" value
 // NOTE: This is used by things in radial blends too, since it is linear at that point
 export class RenderInstructionLinearBlend extends RenderInstruction {
+
+  public override toString(): string {
+    return 'RenderInstructionLinearBlend()';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

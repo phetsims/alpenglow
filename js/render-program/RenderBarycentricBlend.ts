@@ -211,6 +211,14 @@ export class RenderInstructionBarycentricBlend extends RenderInstruction {
     super();
   }
 
+  public override toString(): string {
+    const det = `det:${this.logic.det}`;
+    const diffA = `diffA:${this.logic.diffA.x},${this.logic.diffA.y}`;
+    const diffB = `diffB:${this.logic.diffB.x},${this.logic.diffB.y}`;
+    const diffC = `pointC:${this.logic.pointC.x},${this.logic.pointC.y}`;
+    return `RenderInstructionBarycentricBlend(${det} ${diffA} ${diffB} ${diffC})`;
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

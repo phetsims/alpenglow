@@ -36,6 +36,11 @@ alpenglow.register( 'RenderLinearDisplayP3ToLinearSRGB', RenderLinearDisplayP3To
 const scratchVector = new Vector4( 0, 0, 0, 0 );
 
 export class RenderInstructionLinearDisplayP3ToLinearSRGB extends RenderInstruction {
+
+  public override toString(): string {
+    return 'RenderInstructionLinearDisplayP3ToLinearSRGB()';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

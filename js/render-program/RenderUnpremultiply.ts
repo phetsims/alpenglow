@@ -39,6 +39,11 @@ alpenglow.register( 'RenderUnpremultiply', RenderUnpremultiply );
 const scratchVector = new Vector4( 0, 0, 0, 0 );
 
 export class RenderInstructionUnpremultiply extends RenderInstruction {
+
+  public override toString(): string {
+    return 'RenderInstructionUnpremultiply()';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

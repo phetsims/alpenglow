@@ -86,6 +86,11 @@ alpenglow.register( 'RenderNormalDebug', RenderNormalDebug );
 const scratchVector = new Vector4( 0, 0, 0, 0 );
 
 export class RenderInstructionNormalDebug extends RenderInstruction {
+
+  public override toString(): string {
+    return 'RenderInstructionNormalDebug(TODO)';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

@@ -147,6 +147,10 @@ export class RenderInstructionFilter extends RenderInstruction {
     super();
   }
 
+  public override toString(): string {
+    return 'RenderInstructionFilter(TODO)';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

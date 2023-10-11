@@ -83,6 +83,11 @@ alpenglow.register( 'RenderNormalize', RenderNormalize );
 const scratchVector = new Vector4( 0, 0, 0, 0 );
 
 export class RenderInstructionNormalize extends RenderInstruction {
+
+  public override toString(): string {
+    return 'RenderInstructionNormalize()';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

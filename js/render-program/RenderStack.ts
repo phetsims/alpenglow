@@ -189,6 +189,11 @@ export class RenderInstructionOpaqueJump extends RenderInstruction {
     super();
   }
 
+  public override toString(): string {
+    const location = `location:${this.location.id}`;
+    return `RenderInstructionOpaqueJump(${location})`;
+  }
+
   public static readonly SKIP_RENDER_COLOR_JUMPS = false;
 
   public override execute(
@@ -219,6 +224,11 @@ export class RenderInstructionOpaqueJump extends RenderInstruction {
 
 // Background on the top of the stack
 export class RenderInstructionStackBlend extends RenderInstruction {
+
+  public override toString(): string {
+    return 'RenderInstructionStackBlend()';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

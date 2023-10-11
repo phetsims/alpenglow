@@ -17,7 +17,13 @@ export default abstract class RenderInstruction {
     executor: RenderExecutor
   ): void;
 
+  public abstract toString(): string;
+
   public writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    throw new Error( 'unimplemented' );
+  }
+
+  public fromBinary( encoder: ByteEncoder, getLocation: ( offset: number ) => RenderInstructionLocation ): void {
     throw new Error( 'unimplemented' );
   }
 
@@ -83,7 +89,6 @@ export default abstract class RenderInstruction {
   public static readonly ComputeRadialBlendRatioCode = 0x31;
 
   // public static readonly BarycentricBlendPerspectiveCode = 0x33; TODO
-  // BarycentricBlendPerspective TODO
   // Filter TODO
   // Image TODO
   // ComputeLinearGradientRatio TODO
@@ -101,6 +106,10 @@ export class RenderInstructionLocation extends RenderInstruction {
 
   // To be filled in before execution (if in JS)
   public index = 0;
+
+  public override toString(): string {
+    return `RenderInstructionLocation(${this.id})`;
+  }
 
   public override execute(
     stack: RenderExecutionStack,
@@ -126,6 +135,11 @@ export class RenderInstructionPush extends RenderInstruction {
     super();
   }
 
+  public override toString(): string {
+    const vector = `vector:${this.vector.x},${this.vector.y},${this.vector.z},${this.vector.w}`;
+    return `RenderInstructionPush(${vector})`;
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,
@@ -148,6 +162,11 @@ export class RenderInstructionPush extends RenderInstruction {
 }
 
 export class RenderInstructionReturn extends RenderInstruction {
+
+  public override toString(): string {
+    return 'RenderInstructionReturn()';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,
@@ -168,6 +187,11 @@ export class RenderInstructionReturn extends RenderInstruction {
 }
 
 export class RenderInstructionExit extends RenderInstruction {
+
+  public override toString(): string {
+    return 'RenderInstructionExit()';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,
@@ -192,6 +216,11 @@ export class RenderInstructionMultiplyScalar extends RenderInstruction {
     public factor: number
   ) {
     super();
+  }
+
+  public override toString(): string {
+    const factor = `factor:${this.factor}`;
+    return `RenderInstructionMultiplyScalar(${factor})`;
   }
 
   public execute(

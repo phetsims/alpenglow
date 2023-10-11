@@ -290,6 +290,10 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
     super();
   }
 
+  public override toString(): string {
+    return 'RenderInstructionComputeGradientRatio(TODO)';
+  }
+
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,
