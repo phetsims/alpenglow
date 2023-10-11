@@ -174,27 +174,57 @@ export class RenderInstructionFilter extends RenderInstruction {
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU32( RenderInstruction.PhongCode );
-    encoder.pushF32( this.logic.colorMatrix.m00() );
-    encoder.pushF32( this.logic.colorMatrix.m01() );
-    encoder.pushF32( this.logic.colorMatrix.m02() );
-    encoder.pushF32( this.logic.colorMatrix.m03() );
-    encoder.pushF32( this.logic.colorMatrix.m10() );
-    encoder.pushF32( this.logic.colorMatrix.m11() );
-    encoder.pushF32( this.logic.colorMatrix.m12() );
-    encoder.pushF32( this.logic.colorMatrix.m13() );
-    encoder.pushF32( this.logic.colorMatrix.m20() );
-    encoder.pushF32( this.logic.colorMatrix.m21() );
-    encoder.pushF32( this.logic.colorMatrix.m22() );
-    encoder.pushF32( this.logic.colorMatrix.m23() );
-    encoder.pushF32( this.logic.colorMatrix.m30() );
-    encoder.pushF32( this.logic.colorMatrix.m31() );
-    encoder.pushF32( this.logic.colorMatrix.m32() );
-    encoder.pushF32( this.logic.colorMatrix.m33() );
-    encoder.pushF32( this.logic.colorTranslation.x );
-    encoder.pushF32( this.logic.colorTranslation.y );
-    encoder.pushF32( this.logic.colorTranslation.z );
-    encoder.pushF32( this.logic.colorTranslation.w );
+    encoder.pushU32( RenderInstruction.FilterCode ); // 0
+    encoder.pushF32( this.logic.colorMatrix.m00() ); // 1
+    encoder.pushF32( this.logic.colorMatrix.m01() ); // 2
+    encoder.pushF32( this.logic.colorMatrix.m02() ); // 3
+    encoder.pushF32( this.logic.colorMatrix.m03() ); // 4
+    encoder.pushF32( this.logic.colorMatrix.m10() ); // 5
+    encoder.pushF32( this.logic.colorMatrix.m11() ); // 6
+    encoder.pushF32( this.logic.colorMatrix.m12() ); // 7
+    encoder.pushF32( this.logic.colorMatrix.m13() ); // 8
+    encoder.pushF32( this.logic.colorMatrix.m20() ); // 9
+    encoder.pushF32( this.logic.colorMatrix.m21() ); // 10
+    encoder.pushF32( this.logic.colorMatrix.m22() ); // 11
+    encoder.pushF32( this.logic.colorMatrix.m23() ); // 12
+    encoder.pushF32( this.logic.colorMatrix.m30() ); // 13
+    encoder.pushF32( this.logic.colorMatrix.m31() ); // 14
+    encoder.pushF32( this.logic.colorMatrix.m32() ); // 15
+    encoder.pushF32( this.logic.colorMatrix.m33() ); // 16
+    encoder.pushF32( this.logic.colorTranslation.x ); // 17
+    encoder.pushF32( this.logic.colorTranslation.y ); // 18
+    encoder.pushF32( this.logic.colorTranslation.z ); // 19
+    encoder.pushF32( this.logic.colorTranslation.w ); // 20
+  }
+
+  public static override fromBinary(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstructionFilter {
+    return new RenderInstructionFilter( new RenderFilterLogic( new Matrix4(
+      encoder.fullF32Array[ offset + 1 ],
+      encoder.fullF32Array[ offset + 2 ],
+      encoder.fullF32Array[ offset + 3 ],
+      encoder.fullF32Array[ offset + 4 ],
+      encoder.fullF32Array[ offset + 5 ],
+      encoder.fullF32Array[ offset + 6 ],
+      encoder.fullF32Array[ offset + 7 ],
+      encoder.fullF32Array[ offset + 8 ],
+      encoder.fullF32Array[ offset + 9 ],
+      encoder.fullF32Array[ offset + 10 ],
+      encoder.fullF32Array[ offset + 11 ],
+      encoder.fullF32Array[ offset + 12 ],
+      encoder.fullF32Array[ offset + 13 ],
+      encoder.fullF32Array[ offset + 14 ],
+      encoder.fullF32Array[ offset + 15 ],
+      encoder.fullF32Array[ offset + 16 ]
+    ), new Vector4(
+      encoder.fullF32Array[ offset + 17 ],
+      encoder.fullF32Array[ offset + 18 ],
+      encoder.fullF32Array[ offset + 19 ],
+      encoder.fullF32Array[ offset + 20 ]
+    ) ) );
   }
 
   public override getBinaryLength(): number {

@@ -574,9 +574,21 @@ export class RenderInstructionBlendCompose extends RenderInstruction {
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
     encoder.pushU32(
-      RenderInstruction.BlendComposeCode |
-      ( this.logic.composeType << 8 ) | ( this.logic.blendType << 11 )
-    );
+      RenderInstruction.BlendComposeCode | // 8 bits
+      ( this.logic.composeType << 8 ) | // 3 bits
+      ( this.logic.blendType << 11 ) // 4 bits
+    ); // 0
+  }
+
+  public static override fromBinary(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstructionBlendCompose {
+    const composeType: RenderComposeType = ( encoder.fullU32Array[ offset ] >> 8 ) & 0x7;
+    const blendType: RenderBlendType = ( encoder.fullU32Array[ offset ] >> 11 ) & 0xf;
+
+    return new RenderInstructionBlendCompose( new RenderBlendComposeLogic( composeType, blendType ) );
   }
 
   public override getBinaryLength(): number {

@@ -16,6 +16,7 @@ enum RenderComposeType {
   Xor = 4,
   Plus = 5,
   PlusLighter = 6
+  // 3 bits in binary representation
 }
 
 export default RenderComposeType;

@@ -290,31 +290,80 @@ export class RenderInstructionComputeBlendRatio extends RenderInstruction {
       encoder.pushU32(
         RenderInstruction.ComputeLinearBlendRatioCode |
         ( this.logic.accuracy << 8 )
-      );
-      encoder.pushU32( zeroOffset );
-      encoder.pushU32( oneOffset );
-      encoder.pushU32( blendOffset );
-      encoder.pushF32( this.logic.scaledNormal.x );
-      encoder.pushF32( this.logic.scaledNormal.y );
-      encoder.pushF32( this.logic.offset );
+      ); // 0
+      encoder.pushU32( zeroOffset ); // 1
+      encoder.pushU32( oneOffset ); // 2
+      encoder.pushU32( blendOffset ); // 3
+      encoder.pushF32( this.logic.scaledNormal.x ); // 4
+      encoder.pushF32( this.logic.scaledNormal.y ); // 5
+      encoder.pushF32( this.logic.offset ); // 6
     }
     else {
       encoder.pushU32(
         RenderInstruction.ComputeRadialBlendRatioCode |
         ( this.logic.accuracy << 8 )
-      );
-      encoder.pushU32( zeroOffset );
-      encoder.pushU32( oneOffset );
-      encoder.pushU32( blendOffset );
-      encoder.pushF32( this.logic.inverseTransform.m00() );
-      encoder.pushF32( this.logic.inverseTransform.m01() );
-      encoder.pushF32( this.logic.inverseTransform.m02() );
-      encoder.pushF32( this.logic.inverseTransform.m10() );
-      encoder.pushF32( this.logic.inverseTransform.m11() );
-      encoder.pushF32( this.logic.inverseTransform.m12() );
-      encoder.pushF32( this.logic.radius0 );
-      encoder.pushF32( this.logic.radius1 );
+      ); // 0
+      encoder.pushU32( zeroOffset ); // 1
+      encoder.pushU32( oneOffset ); // 2
+      encoder.pushU32( blendOffset ); // 3
+      encoder.pushF32( this.logic.inverseTransform.m00() ); // 4
+      encoder.pushF32( this.logic.inverseTransform.m01() ); // 5
+      encoder.pushF32( this.logic.inverseTransform.m02() ); // 6
+      encoder.pushF32( this.logic.inverseTransform.m10() ); // 7
+      encoder.pushF32( this.logic.inverseTransform.m11() ); // 8
+      encoder.pushF32( this.logic.inverseTransform.m12() ); // 9
+      encoder.pushF32( this.logic.radius0 ); // 10
+      encoder.pushF32( this.logic.radius1 ); // 11
     }
+  }
+
+  public static override fromBinary(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstructionComputeBlendRatio {
+    const zeroLocation = getLocation( encoder.fullU32Array[ offset + 1 ] );
+    const oneLocation = getLocation( encoder.fullU32Array[ offset + 2 ] );
+    const blendLocation = getLocation( encoder.fullU32Array[ offset + 3 ] );
+
+    const first = encoder.fullU32Array[ offset ];
+    const accuracy = ( first >> 8 ) & 0xff; // TODO: precision excessive?
+
+    if ( ( first & 0xff ) === RenderInstruction.ComputeLinearBlendRatioCode ) {
+      const scaledNormal = new Vector2(
+        encoder.fullF32Array[ offset + 4 ],
+        encoder.fullF32Array[ offset + 5 ]
+      );
+      const off = encoder.fullF32Array[ offset + 6 ];
+
+      return new RenderInstructionComputeBlendRatio(
+        new RenderLinearBlendLogic( scaledNormal, off, accuracy ),
+        zeroLocation,
+        oneLocation,
+        blendLocation
+      );
+    }
+    else {
+      const inverseTransform = Matrix3.rowMajor(
+        encoder.fullF32Array[ offset + 4 ],
+        encoder.fullF32Array[ offset + 5 ],
+        encoder.fullF32Array[ offset + 6 ],
+        encoder.fullF32Array[ offset + 7 ],
+        encoder.fullF32Array[ offset + 8 ],
+        encoder.fullF32Array[ offset + 9 ],
+        0, 0, 1
+      );
+      const radius0 = encoder.fullF32Array[ offset + 10 ];
+      const radius1 = encoder.fullF32Array[ offset + 11 ];
+
+      return new RenderInstructionComputeBlendRatio(
+        new RenderRadialBlendLogic( inverseTransform, radius0, radius1, accuracy ),
+        zeroLocation,
+        oneLocation,
+        blendLocation
+      );
+    }
+
   }
 
   public override getBinaryLength(): number {

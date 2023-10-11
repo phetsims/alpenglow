@@ -268,7 +268,11 @@ export class RenderInstructionBarycentricBlend extends RenderInstruction {
     encoder.pushF32( this.logic.pointC.y ); // 7
   }
 
-  public static override fromBinary( encoder: ByteEncoder, offset: number, getLocation: ( offset: number ) => RenderInstructionLocation ): RenderInstructionBarycentricBlend {
+  public static override fromBinary(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstructionBarycentricBlend {
     const accuracy: RenderBarycentricBlendAccuracy = ( encoder.fullU32Array[ offset ] >> 8 ) & 0xff;
     const det = encoder.fullF32Array[ offset + 1 ];
     const diffA = new Vector2( encoder.fullF32Array[ offset + 2 ], encoder.fullF32Array[ offset + 3 ] );

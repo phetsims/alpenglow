@@ -23,7 +23,11 @@ export default abstract class RenderInstruction {
 
   public abstract writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void;
 
-  public static fromBinary( encoder: ByteEncoder, offset: number, getLocation: ( offset: number ) => RenderInstructionLocation ): RenderInstruction {
+  public static fromBinary(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstruction {
     // TODO: detect all types and set this up
     throw new Error( 'unimplemented' );
   }
@@ -180,6 +184,19 @@ export class RenderInstructionPush extends RenderInstruction {
     encoder.pushF32( this.vector.w );
   }
 
+  public static override fromBinary(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstructionPush {
+    return new RenderInstructionPush( new Vector4(
+      encoder.fullF32Array[ offset + 1 ],
+      encoder.fullF32Array[ offset + 2 ],
+      encoder.fullF32Array[ offset + 3 ],
+      encoder.fullF32Array[ offset + 4 ]
+    ) );
+  }
+
   public override getBinaryLength(): number {
     return 5;
   }
@@ -281,6 +298,14 @@ export class RenderInstructionMultiplyScalar extends RenderInstruction {
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
     encoder.pushU32( RenderInstruction.MultiplyScalarCode );
     encoder.pushF32( this.factor );
+  }
+
+  public static override fromBinary(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstructionMultiplyScalar {
+    return new RenderInstructionMultiplyScalar( encoder.fullF32Array[ offset + 1 ] );
   }
 
   public override getBinaryLength(): number {

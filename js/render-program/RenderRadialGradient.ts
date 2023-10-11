@@ -119,7 +119,7 @@ export default class RenderRadialGradient extends RenderProgram {
 
   public getLogic(): RenderRadialGradientLogic {
     if ( this.logic === null ) {
-      this.logic = new RenderRadialGradientLogic(
+      this.logic = RenderRadialGradientLogic.from(
         this.transform,
         this.start,
         this.startRadius,
@@ -312,22 +312,27 @@ enum RadialGradientType {
 
 export class RenderRadialGradientLogic {
 
-  public readonly conicTransform: Matrix3;
-  public readonly focalX: number;
-  public readonly radius: number;
-  public readonly kind: RadialGradientType;
-  public readonly isSwapped: boolean;
-
   public constructor(
-    public readonly transform: Matrix3,
-    public readonly start: Vector2,
-    public readonly startRadius: number,
-    public readonly end: Vector2,
-    public readonly endRadius: number,
+    public readonly conicTransform: Matrix3,
+    public readonly focalX: number,
+    public readonly radius: number,
+    public readonly kind: RadialGradientType,
+    public readonly isSwapped: boolean,
     public readonly ratios: number[], // should be sorted!!
     public readonly extend: RenderExtend,
     public readonly accuracy: RenderRadialGradientAccuracy
-  ) {
+  ) {}
+
+  public static from(
+    transform: Matrix3,
+    start: Vector2,
+    startRadius: number,
+    end: Vector2,
+    endRadius: number,
+    ratios: number[], // should be sorted!!
+    extend: RenderExtend,
+    accuracy: RenderRadialGradientAccuracy
+  ): RenderRadialGradientLogic {
     // Two-point conical gradient based on Vello, based on https://skia.org/docs/dev/design/conical/
     let p0 = start;
     let p1 = end;
@@ -391,19 +396,24 @@ export class RenderRadialGradientLogic {
       conicTransform = user_to_scaled;
     }
 
-    this.conicTransform = conicTransform;
-    this.focalX = focalX;
-    this.radius = radius;
-    this.kind = kind;
-    this.isSwapped = isSwapped;
+    return new RenderRadialGradientLogic(
+      conicTransform,
+      focalX,
+      radius,
+      kind,
+      isSwapped,
+      ratios,
+      extend,
+      accuracy
+    );
   }
 
   public equals( other: RenderRadialGradientLogic ): boolean {
-    return this.transform.equalsEpsilon( other.transform, 1e-6 ) &&
-           this.start.equalsEpsilon( other.start, 1e-6 ) &&
-           Math.abs( this.startRadius - other.startRadius ) < 1e-6 &&
-           this.end.equalsEpsilon( other.end, 1e-6 ) &&
-           Math.abs( this.endRadius - other.endRadius ) < 1e-6 &&
+    return this.conicTransform.equalsEpsilon( other.conicTransform, 1e-6 ) &&
+           Math.abs( this.focalX - other.focalX ) < 1e-6 &&
+           Math.abs( this.radius - other.radius ) < 1e-6 &&
+           this.kind === other.kind &&
+           this.isSwapped === other.isSwapped &&
            this.ratios.length === other.ratios.length &&
            _.every( this.ratios, ( ratio, i ) => Math.abs( ratio - other.ratios[ i ] ) < 1e-6 ) &&
            this.extend === other.extend &&

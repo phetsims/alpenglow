@@ -54,7 +54,7 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
       accuracy === RenderBarycentricPerspectiveBlendAccuracy.Centroid
     );
 
-    this.logic = logic || new RenderBarycentricPerspectiveBlendLogic( this.pointA, this.pointB, this.pointC, this.accuracy );
+    this.logic = logic || RenderBarycentricPerspectiveBlendLogic.from( this.pointA, this.pointB, this.pointC, this.accuracy );
   }
 
   public override getName(): string {
@@ -153,20 +153,25 @@ alpenglow.register( 'RenderBarycentricPerspectiveBlend', RenderBarycentricPerspe
 
 export class RenderBarycentricPerspectiveBlendLogic {
 
-  public det: number;
-  public diffA: Vector2;
-  public diffB: Vector2;
-  public point2C: Vector2;
-  public zInverseA: number;
-  public zInverseB: number;
-  public zInverseC: number;
-
   public constructor(
-    public readonly pointA: Vector3,
-    public readonly pointB: Vector3,
-    public readonly pointC: Vector3,
+    public readonly det: number,
+    public readonly diffA: Vector2,
+    public readonly diffB: Vector2,
+    public readonly point2C: Vector2,
+    public readonly zInverseA: number,
+    public readonly zInverseB: number,
+    public readonly zInverseC: number,
     public readonly accuracy: RenderBarycentricPerspectiveBlendAccuracy
   ) {
+
+  }
+
+  public static from(
+    pointA: Vector3,
+    pointB: Vector3,
+    pointC: Vector3,
+    accuracy: RenderBarycentricPerspectiveBlendAccuracy
+  ): RenderBarycentricPerspectiveBlendLogic {
     const pA = pointA;
     const pB = pointB;
     const pC = pointC;
@@ -175,13 +180,13 @@ export class RenderBarycentricPerspectiveBlendLogic {
     assert && assert( pointB.z !== 0 );
     assert && assert( pointC.z !== 0 );
 
-    this.det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
-    this.diffA = new Vector2( pB.y - pC.y, pC.x - pB.x );
-    this.diffB = new Vector2( pC.y - pA.y, pA.x - pC.x );
-    this.point2C = pC.toVector2();
-    this.zInverseA = 1 / pA.z;
-    this.zInverseB = 1 / pB.z;
-    this.zInverseC = 1 / pC.z;
+    const det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
+    const diffA = new Vector2( pB.y - pC.y, pC.x - pB.x );
+    const diffB = new Vector2( pC.y - pA.y, pA.x - pC.x );
+    const point2C = pC.toVector2();
+    const zInverseA = 1 / pA.z;
+    const zInverseB = 1 / pB.z;
+    const zInverseC = 1 / pC.z;
 
     /*
     NOTES FOR THE FUTURE: Here were the original formulas
@@ -189,12 +194,18 @@ export class RenderBarycentricPerspectiveBlendLogic {
     const lambdaA = ( ( pB.y - pC.y ) * ( point.x - pC.x ) + ( pC.x - pB.x ) * ( point.y - pC.y ) ) / det;
     const lambdaB = ( ( pC.y - pA.y ) * ( point.x - pC.x ) + ( pA.x - pC.x ) * ( point.y - pC.y ) ) / det;
      */
+
+    return new RenderBarycentricPerspectiveBlendLogic( det, diffA, diffB, point2C, zInverseA, zInverseB, zInverseC, accuracy );
   }
 
   public equals( other: RenderBarycentricPerspectiveBlendLogic ): boolean {
-    return this.pointA.equalsEpsilon( other.pointA, 1e-6 ) &&
-           this.pointB.equalsEpsilon( other.pointB, 1e-6 ) &&
-           this.pointC.equalsEpsilon( other.pointC, 1e-6 ) &&
+    return Math.abs( this.det - other.det ) < 1e-6 &&
+           this.diffA.equalsEpsilon( other.diffA, 1e-6 ) &&
+           this.diffB.equalsEpsilon( other.diffB, 1e-6 ) &&
+           this.point2C.equalsEpsilon( other.point2C, 1e-6 ) &&
+           Math.abs( this.zInverseA - other.zInverseA ) < 1e-6 &&
+           Math.abs( this.zInverseB - other.zInverseB ) < 1e-6 &&
+           Math.abs( this.zInverseC - other.zInverseC ) < 1e-6 &&
            this.accuracy === other.accuracy;
   }
 
@@ -276,17 +287,34 @@ export class RenderInstructionBarycentricPerspectiveBlend extends RenderInstruct
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU32( RenderInstruction.BarycentricBlendPerspectiveCode | ( this.logic.accuracy << 8 ) );
-    encoder.pushF32( this.logic.det );
-    encoder.pushF32( this.logic.diffA.x );
-    encoder.pushF32( this.logic.diffA.y );
-    encoder.pushF32( this.logic.diffB.x );
-    encoder.pushF32( this.logic.diffB.y );
-    encoder.pushF32( this.logic.point2C.x );
-    encoder.pushF32( this.logic.point2C.y );
-    encoder.pushF32( this.logic.zInverseA );
-    encoder.pushF32( this.logic.zInverseB );
-    encoder.pushF32( this.logic.zInverseC );
+    encoder.pushU32( RenderInstruction.BarycentricBlendPerspectiveCode | ( this.logic.accuracy << 8 ) ); // 0
+    encoder.pushF32( this.logic.det ); // 1
+    encoder.pushF32( this.logic.diffA.x ); // 2
+    encoder.pushF32( this.logic.diffA.y ); // 3
+    encoder.pushF32( this.logic.diffB.x ); // 4
+    encoder.pushF32( this.logic.diffB.y ); // 5
+    encoder.pushF32( this.logic.point2C.x ); // 6
+    encoder.pushF32( this.logic.point2C.y ); // 7
+    encoder.pushF32( this.logic.zInverseA ); // 8
+    encoder.pushF32( this.logic.zInverseB ); // 9
+    encoder.pushF32( this.logic.zInverseC ); // 10
+  }
+
+  public static override fromBinary(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstructionBarycentricPerspectiveBlend {
+    const accuracy: RenderBarycentricPerspectiveBlendAccuracy = ( encoder.fullU32Array[ offset ] >> 8 ) & 0xff;
+    const det = encoder.fullF32Array[ offset + 1 ];
+    const diffA = new Vector2( encoder.fullF32Array[ offset + 2 ], encoder.fullF32Array[ offset + 3 ] );
+    const diffB = new Vector2( encoder.fullF32Array[ offset + 4 ], encoder.fullF32Array[ offset + 5 ] );
+    const point2C = new Vector2( encoder.fullF32Array[ offset + 6 ], encoder.fullF32Array[ offset + 7 ] );
+    const zInverseA = encoder.fullF32Array[ offset + 8 ];
+    const zInverseB = encoder.fullF32Array[ offset + 9 ];
+    const zInverseC = encoder.fullF32Array[ offset + 10 ];
+
+    return new RenderInstructionBarycentricPerspectiveBlend( new RenderBarycentricPerspectiveBlendLogic( det, diffA, diffB, point2C, zInverseA, zInverseB, zInverseC, accuracy ) );
   }
 
   public override getBinaryLength(): number {

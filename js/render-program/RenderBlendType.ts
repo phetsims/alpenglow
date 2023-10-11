@@ -25,6 +25,7 @@ enum RenderBlendType {
   Saturation = 13,
   Color = 14,
   Luminosity = 15
+  // 4 bits in binary representation
 }
 
 export default RenderBlendType;
