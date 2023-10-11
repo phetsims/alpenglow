@@ -242,7 +242,7 @@ export type { SerializedRenderDepthSort } from './render-program/RenderDepthSort
 export { default as RenderLight } from './render-program/RenderLight.js';
 export { default as RenderNormalDebug, RenderInstructionNormalDebug } from './render-program/RenderNormalDebug.js';
 export type { SerializedRenderNormalDebug } from './render-program/RenderNormalDebug.js';
-export { default as RenderPhong } from './render-program/RenderPhong.js';
+export { default as RenderPhong, RenderInstructionPhong } from './render-program/RenderPhong.js';
 export type { SerializedRenderPhong } from './render-program/RenderPhong.js';
 export { default as RenderFilter, RenderFilterLogic, RenderInstructionFilter } from './render-program/RenderFilter.js';
 export type { SerializedRenderFilter } from './render-program/RenderFilter.js';

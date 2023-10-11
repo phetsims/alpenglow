@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderEvaluationContext, RenderExecutor, alpenglow, ByteEncoder, RenderInstructionComputeGradientRatio } from '../imports.js';
-import RenderExecutionStack from './RenderExecutionStack.js';
+import { alpenglow, ByteEncoder, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstructionBarycentricBlend, RenderInstructionBarycentricPerspectiveBlend, RenderInstructionBlendCompose, RenderInstructionComputeBlendRatio, RenderInstructionComputeGradientRatio, RenderInstructionFilter, RenderInstructionLinearBlend, RenderInstructionLinearDisplayP3ToLinearSRGB, RenderInstructionLinearSRGBToLinearDisplayP3, RenderInstructionLinearSRGBToOklab, RenderInstructionLinearSRGBToSRGB, RenderInstructionNormalDebug, RenderInstructionNormalize, RenderInstructionOklabToLinearSRGB, RenderInstructionOpaqueJump, RenderInstructionPhong, RenderInstructionPremultiply, RenderInstructionSRGBToLinearSRGB, RenderInstructionStackBlend, RenderInstructionUnpremultiply } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default abstract class RenderInstruction {
@@ -37,28 +36,6 @@ export default abstract class RenderInstruction {
    */
   public abstract getBinaryLength(): number;
 
-  public static instructionsToBinary( encoder: ByteEncoder, instructions: RenderInstruction[] ): void {
-    const lengthPrefixSum: number[] = [];
-
-    let sum = 0;
-    for ( let i = 0; i < instructions.length; i++ ) {
-      lengthPrefixSum.push( sum );
-      sum += instructions[ i ].getBinaryLength();
-    }
-
-    for ( let i = 0; i < instructions.length; i++ ) {
-      instructions[ i ].writeBinary( encoder, location => {
-        const locationIndex = instructions.indexOf( location );
-        assert && assert( locationIndex >= 0 );
-
-        const offset = lengthPrefixSum[ locationIndex ] - lengthPrefixSum[ i ];
-        assert && assert( offset >= 0, 'For now, we have code meant to handle non-negative offsets' );
-
-        return offset;
-      } );
-    }
-  }
-
   // TODO: better code ordering, prevent duplicates
   // length 1
   public static readonly ReturnCode = 0x00;
@@ -78,7 +55,6 @@ export default abstract class RenderInstruction {
   public static readonly OpaqueJumpCode = 0x22;
   public static readonly NormalDebugCode = 0x35;
 
-
   // length 2
   public static readonly MultiplyScalarCode = 0x21;
 
@@ -95,7 +71,7 @@ export default abstract class RenderInstruction {
   public static readonly BarycentricBlendCode = 0x32;
 
   // length 11
-  public static readonly BarycentricBlendPerspectiveCode = 0x33;
+  public static readonly BarycentricPerspectiveBlendCode = 0x33;
 
   // length 12
   public static readonly ComputeRadialBlendRatioCode = 0x31;
@@ -147,7 +123,7 @@ export default abstract class RenderInstruction {
       case RenderInstruction.BarycentricBlendCode:
         return 8;
 
-      case RenderInstruction.BarycentricBlendPerspectiveCode:
+      case RenderInstruction.BarycentricPerspectiveBlendCode:
         return 11;
 
       case RenderInstruction.ComputeRadialBlendRatioCode:
@@ -161,6 +137,143 @@ export default abstract class RenderInstruction {
       case RenderInstruction.ComputeRadialGradientRatioCode:
         return 10 + 2 * ( word >> RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS );
 
+      default:
+        throw new Error( `Unknown/unimplemented instruction code: ${code}` );
+    }
+  }
+
+  public static instructionsToBinary( encoder: ByteEncoder, instructions: RenderInstruction[] ): void {
+    const lengthPrefixSum: number[] = [];
+
+    let sum = 0;
+    for ( let i = 0; i < instructions.length; i++ ) {
+      lengthPrefixSum.push( sum );
+      sum += instructions[ i ].getBinaryLength();
+    }
+
+    for ( let i = 0; i < instructions.length; i++ ) {
+      instructions[ i ].writeBinary( encoder, location => {
+        const locationIndex = instructions.indexOf( location );
+        assert && assert( locationIndex >= 0 );
+
+        const offset = lengthPrefixSum[ locationIndex ] - lengthPrefixSum[ i ];
+        assert && assert( offset >= 0, 'For now, we have code meant to handle non-negative offsets' );
+
+        return offset;
+      } );
+    }
+
+    encoder.pushU32( RenderInstruction.ExitCode );
+  }
+
+  public static binaryToInstructions( encoder: ByteEncoder, offset: number ): RenderInstruction[] {
+    const instructionAddresses: number[] = [];
+
+    let address = offset;
+    while ( encoder.fullU32Array[ address ] !== RenderInstruction.ExitCode ) {
+      instructionAddresses.push( address );
+      address += RenderInstruction.getInstructionLength( encoder.fullU32Array[ address ] );
+    }
+
+    const locations: ( RenderInstructionLocation | null )[] = instructionAddresses.map( () => null );
+    locations.push( null ); // Add the exit location
+
+    const getIndexOfAddress = ( address: number ): number => {
+      const index = instructionAddresses.indexOf( address );
+      assert && assert( index >= 0 );
+      return index;
+    };
+    const getLocation = ( index: number ): RenderInstructionLocation => {
+      if ( locations[ index ] === null ) {
+        locations[ index ] = new RenderInstructionLocation();
+      }
+      return locations[ index ]!;
+    };
+    const getLocationOfAddress = ( address: number ): RenderInstructionLocation => {
+      return getLocation( getIndexOfAddress( address ) );
+    };
+
+    const instructions: RenderInstruction[] = [];
+    for ( let i = 0; i < instructionAddresses.length; i++ ) {
+      const address = instructionAddresses[ i ];
+      const instruction = RenderInstruction.fromBinary( encoder, address, addressOffset => {
+        return getLocationOfAddress( address + addressOffset );
+      } );
+
+      // Possible location instruction (takes up zero length) will go first
+      const location = locations[ i ];
+      if ( location ) {
+        instructions.push( location );
+      }
+      instructions.push( instruction );
+    }
+    // Potential ending location instruction
+    const lastLocation = locations[ instructionAddresses.length ];
+    if ( lastLocation ) {
+      instructions.push( lastLocation );
+    }
+
+    return instructions;
+  }
+
+  public static binaryToInstruction(
+    encoder: ByteEncoder,
+    offset: number,
+    getLocation: ( offset: number ) => RenderInstructionLocation
+  ): RenderInstruction {
+    const code = encoder.fullU32Array[ offset ] & 0xff;
+
+    switch( code ) {
+      case RenderInstruction.ReturnCode:
+        return RenderInstructionReturn.INSTANCE;
+      case RenderInstruction.PremultiplyCode:
+        return RenderInstructionPremultiply.INSTANCE;
+      case RenderInstruction.UnpremultiplyCode:
+        return RenderInstructionUnpremultiply.INSTANCE;
+      case RenderInstruction.StackBlendCode:
+        return RenderInstructionStackBlend.INSTANCE;
+      case RenderInstruction.LinearBlendCode:
+        return RenderInstructionLinearBlend.INSTANCE;
+      case RenderInstruction.LinearDisplayP3ToLinearSRGBCode:
+        return RenderInstructionLinearDisplayP3ToLinearSRGB.INSTANCE;
+      case RenderInstruction.LinearSRGBToLinearDisplayP3Code:
+        return RenderInstructionLinearSRGBToLinearDisplayP3.INSTANCE;
+      case RenderInstruction.LinearSRGBToOklabCode:
+        return RenderInstructionLinearSRGBToOklab.INSTANCE;
+      case RenderInstruction.LinearSRGBToSRGBCode:
+        return RenderInstructionLinearSRGBToSRGB.INSTANCE;
+      case RenderInstruction.OklabToLinearSRGBCode:
+        return RenderInstructionOklabToLinearSRGB.INSTANCE;
+      case RenderInstruction.SRGBToLinearSRGBCode:
+        return RenderInstructionSRGBToLinearSRGB.INSTANCE;
+      case RenderInstruction.NormalizeCode:
+        return RenderInstructionNormalize.INSTANCE;
+      case RenderInstruction.ExitCode:
+        return RenderInstructionExit.INSTANCE;
+      case RenderInstruction.BlendComposeCode:
+        return RenderInstructionBlendCompose.fromBinary( encoder, offset, getLocation );
+      case RenderInstruction.OpaqueJumpCode:
+        return RenderInstructionOpaqueJump.fromBinary( encoder, offset, getLocation );
+      case RenderInstruction.NormalDebugCode:
+        return RenderInstructionNormalDebug.INSTANCE;
+      case RenderInstruction.MultiplyScalarCode:
+        return RenderInstructionMultiplyScalar.fromBinary( encoder, offset, getLocation );
+      case RenderInstruction.PhongCode:
+        return RenderInstructionPhong.fromBinary( encoder, offset, getLocation );
+      case RenderInstruction.PushCode:
+        return RenderInstructionPush.fromBinary( encoder, offset, getLocation );
+      case RenderInstruction.ComputeLinearBlendRatioCode:
+      case RenderInstruction.ComputeRadialBlendRatioCode:
+        return RenderInstructionComputeBlendRatio.fromBinary( encoder, offset, getLocation );
+      case RenderInstruction.BarycentricBlendCode:
+        return RenderInstructionBarycentricBlend.fromBinary( encoder, offset, getLocation );
+      case RenderInstruction.BarycentricPerspectiveBlendCode:
+        return RenderInstructionBarycentricPerspectiveBlend.fromBinary( encoder, offset, getLocation );
+      case RenderInstruction.FilterCode:
+        return RenderInstructionFilter.fromBinary( encoder, offset, getLocation );
+      case RenderInstruction.ComputeLinearGradientRatioCode:
+      case RenderInstruction.ComputeRadialGradientRatioCode:
+        return RenderInstructionComputeGradientRatio.fromBinary( encoder, offset, getLocation );
       default:
         throw new Error( `Unknown/unimplemented instruction code: ${code}` );
     }

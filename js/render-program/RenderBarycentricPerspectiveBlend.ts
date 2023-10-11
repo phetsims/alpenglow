@@ -287,7 +287,7 @@ export class RenderInstructionBarycentricPerspectiveBlend extends RenderInstruct
   }
 
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    encoder.pushU32( RenderInstruction.BarycentricBlendPerspectiveCode | ( this.logic.accuracy << 8 ) ); // 0
+    encoder.pushU32( RenderInstruction.BarycentricPerspectiveBlendCode | ( this.logic.accuracy << 8 ) ); // 0
     encoder.pushF32( this.logic.det ); // 1
     encoder.pushF32( this.logic.diffA.x ); // 2
     encoder.pushF32( this.logic.diffA.y ); // 3
