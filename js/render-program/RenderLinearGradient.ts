@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearRange, RenderProgram, alpenglow, SerializedRenderGradientStop, RenderInstruction, RenderRadialGradientLogic, RenderInstructionLocation, RenderExecutionStack, RenderExecutor, RenderInstructionReturn, RenderInstructionLinearBlend } from '../imports.js';
+import { RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearRange, RenderProgram, alpenglow, SerializedRenderGradientStop, RenderInstruction, RenderRadialGradientLogic, RenderInstructionLocation, RenderExecutionStack, RenderExecutor, RenderInstructionReturn, RenderInstructionLinearBlend, ByteEncoder } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -16,6 +16,7 @@ export enum RenderLinearGradientAccuracy {
   SplitPixelCenter = 2,
   UnsplitCentroid = 3,
   UnsplitPixelCenter = 4
+  // Restricted to 2-bit length, if adding more, check serialization to binary
 }
 
 alpenglow.register( 'RenderLinearGradientAccuracy', RenderLinearGradientAccuracy );
@@ -241,7 +242,7 @@ export class RenderLinearGradientLogic {
 
   public readonly inverseTransform: Matrix3;
   private readonly isIdentity: boolean;
-  private readonly gradDelta: Vector2;
+  public readonly gradDelta: Vector2;
 
   public constructor(
     public readonly transform: Matrix3,
@@ -301,7 +302,26 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
   }
 
   public override toString(): string {
-    return 'RenderInstructionComputeGradientRatio(TODO)';
+    const stops = `stops:${this.stopLocations.map( stop => stop.id ).join( ',' )}`;
+    const blend = `blend:${this.blendLocation.id}`;
+    const ratios = `ratios:${this.logic.ratios.join( ',' )}`;
+    if ( this.logic instanceof RenderLinearGradientLogic ) {
+      const inverseTransform = `inverseTransform:${this.logic.inverseTransform.m00()},${this.logic.inverseTransform.m01()},${this.logic.inverseTransform.m02()},${this.logic.inverseTransform.m10()},${this.logic.inverseTransform.m11()},${this.logic.inverseTransform.m12()}`;
+      const start = `start:${this.logic.start.x},${this.logic.start.y}`;
+      const gradDelta = `gradDelta:${this.logic.gradDelta.x},${this.logic.gradDelta.y}`;
+      const extend = `extend:${this.logic.extend}`;
+      const accuracy = `accuracy:${this.logic.accuracy}`;
+      return `RenderInstructionComputeGradientRatio(linear, ${inverseTransform} ${start} ${gradDelta} ${extend} ${accuracy} ${ratios} ${stops} ${blend})`;
+    }
+    else {
+      const conicTransform = `conicTransform:${this.logic.conicTransform.m00()},${this.logic.conicTransform.m01()},${this.logic.conicTransform.m02()},${this.logic.conicTransform.m10()},${this.logic.conicTransform.m11()},${this.logic.conicTransform.m12()}`;
+      const focalX = `focalX:${this.logic.focalX}`;
+      const radius = `radius:${this.logic.radius}`;
+      const kind = `kind:${this.logic.kind}`;
+      const isSwapped = `isSwapped:${this.logic.isSwapped}`;
+      const accuracy = `accuracy:${this.logic.accuracy}`;
+      return `RenderInstructionComputeGradientRatio(radial, ${conicTransform} ${focalX} ${radius} ${kind} ${isSwapped} ${accuracy} ${ratios} ${stops} ${blend})`;
+    }
   }
 
   public override equals(
@@ -386,6 +406,78 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
       if ( hasAfter ) {
         executor.call( this.stopLocations[ i + 1 ] );
       }
+    }
+  }
+
+  public static readonly GRADIENT_BEFORE_RATIO_COUNT_BITS = 16;
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+
+    const stopOffsets = this.stopLocations.map( getOffset );
+    const blendOffset = getOffset( this.blendLocation );
+    const ratios = this.logic.ratios;
+    const ratioCount = ratios.length;
+
+    if ( this.logic instanceof RenderLinearGradientLogic ) {
+      encoder.pushU32(
+        RenderInstruction.ComputeLinearGradientRatio |
+        ( this.logic.accuracy << 8 ) | // 2-bit accuracy
+        ( this.logic.extend << 10 ) | // 2-bit
+        ( ratioCount << RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS ) // extended to match the radial case
+      ); // 0
+      assert && assert( ratioCount < 2 ** ( 32 - RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS ) );
+
+      encoder.pushF32( this.logic.inverseTransform.m00() ); // 1
+      encoder.pushF32( this.logic.inverseTransform.m01() ); // 2
+      encoder.pushF32( this.logic.inverseTransform.m02() ); // 3
+      encoder.pushF32( this.logic.inverseTransform.m10() ); // 4
+      encoder.pushF32( this.logic.inverseTransform.m11() ); // 5
+      encoder.pushF32( this.logic.inverseTransform.m12() ); // 6
+      encoder.pushF32( this.logic.start.x ); // 7
+      encoder.pushF32( this.logic.start.y ); // 8
+      encoder.pushF32( this.logic.gradDelta.x ); // 9
+      encoder.pushF32( this.logic.gradDelta.y ); // 10
+
+      encoder.pushU32( blendOffset ); // 11
+      for ( let i = 0; i < ratioCount; i++ ) {
+        encoder.pushF32( ratios[ i ] ); // 12 + 2 * i
+        encoder.pushU32( stopOffsets[ i ] ); // 13 + 2 * i
+      }
+    }
+    else {
+      encoder.pushU32(
+        RenderInstruction.ComputeRadialGradientRatio |
+        ( this.logic.accuracy << 8 ) | // 3-bit accuracy
+        ( this.logic.extend << 11 ) | // 2-bit
+        ( this.logic.kind << 13 ) | // 2-bit
+        ( this.logic.isSwapped ? 1 << 15 : 0 ) | // 1-bit
+        ( ratioCount << RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS )
+      ); // 0
+      assert && assert( ratioCount < 2 ** ( 32 - RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS ) );
+
+      encoder.pushF32( this.logic.conicTransform.m00() ); // 1
+      encoder.pushF32( this.logic.conicTransform.m01() ); // 2
+      encoder.pushF32( this.logic.conicTransform.m02() ); // 3
+      encoder.pushF32( this.logic.conicTransform.m10() ); // 4
+      encoder.pushF32( this.logic.conicTransform.m11() ); // 5
+      encoder.pushF32( this.logic.conicTransform.m12() ); // 6
+      encoder.pushF32( this.logic.focalX ); // 7
+      encoder.pushF32( this.logic.radius ); // 8
+
+      encoder.pushU32( blendOffset ); // 9
+      for ( let i = 0; i < ratioCount; i++ ) {
+        encoder.pushF32( ratios[ i ] ); // 10 + 2 * i
+        encoder.pushU32( stopOffsets[ i ] ); // 11 + 2 * i
+      }
+    }
+  }
+
+  public override getBinaryLength(): number {
+    if ( this.logic instanceof RenderLinearGradientLogic ) {
+      return 12 + 2 * this.logic.ratios.length;
+    }
+    else {
+      return 10 + 2 * this.logic.ratios.length;
     }
   }
 }

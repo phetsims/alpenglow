@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation, ByteEncoder } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderNormalDebug extends RenderProgram {
@@ -110,6 +110,14 @@ export class RenderInstructionNormalDebug extends RenderInstruction {
       scratchVector.z * 0.5 + 0.5,
       1
     );
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU32( RenderInstruction.NormalDebugCode );
+  }
+
+  public override getBinaryLength(): number {
+    return 1;
   }
 
   public static readonly INSTANCE = new RenderInstructionNormalDebug();

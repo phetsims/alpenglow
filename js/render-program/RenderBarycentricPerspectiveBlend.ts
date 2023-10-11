@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, SerializedRenderProgram } from '../imports.js';
+import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, SerializedRenderProgram } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -247,7 +247,12 @@ export class RenderInstructionBarycentricPerspectiveBlend extends RenderInstruct
   }
 
   public override toString(): string {
-    return 'RenderInstructionBarycentricPerspectiveBlend(TODO)';
+    const det = `det:${this.logic.det}`;
+    const diffA = `diffA:${this.logic.diffA.x},${this.logic.diffA.y}`;
+    const diffB = `diffB:${this.logic.diffB.x},${this.logic.diffB.y}`;
+    const pointC = `pointC:${this.logic.point2C.x},${this.logic.point2C.y}`;
+    const zValues = `zInverses:${this.logic.zInverseA},${this.logic.zInverseB},${this.logic.zInverseC}`;
+    return `RenderInstructionBarycentricPerspectiveBlend(${det} ${diffA} ${diffB} ${pointC} ${zValues})`;
   }
 
   public override equals(
@@ -268,6 +273,24 @@ export class RenderInstructionBarycentricPerspectiveBlend extends RenderInstruct
 
     this.logic.apply( scratchResult, context, aColor, bColor, cColor );
     stack.push( scratchResult );
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU32( RenderInstruction.BarycentricBlendPerspectiveCode | ( this.logic.accuracy << 8 ) );
+    encoder.pushF32( this.logic.det );
+    encoder.pushF32( this.logic.diffA.x );
+    encoder.pushF32( this.logic.diffA.y );
+    encoder.pushF32( this.logic.diffB.x );
+    encoder.pushF32( this.logic.diffB.y );
+    encoder.pushF32( this.logic.point2C.x );
+    encoder.pushF32( this.logic.point2C.y );
+    encoder.pushF32( this.logic.zInverseA );
+    encoder.pushF32( this.logic.zInverseB );
+    encoder.pushF32( this.logic.zInverseC );
+  }
+
+  public override getBinaryLength(): number {
+    return 11;
   }
 }
 

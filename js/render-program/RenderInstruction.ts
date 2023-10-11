@@ -58,6 +58,7 @@ export default abstract class RenderInstruction {
     }
   }
 
+  // TODO: better code ordering, prevent duplicates
   // length 1
   public static readonly ReturnCode = 0x00;
   public static readonly PremultiplyCode = 0x01;
@@ -74,9 +75,13 @@ export default abstract class RenderInstruction {
   public static readonly ExitCode = 0x0c;
   public static readonly BlendComposeCode = 0x24;
   public static readonly OpaqueJumpCode = 0x22;
+  public static readonly NormalDebugCode = 0x35;
 
   // length 2
   public static readonly MultiplyScalarCode = 0x21;
+
+  // length 3
+  public static readonly PhongCode = 0x34;
 
   // length 5
   public static readonly PushCode = 0x20;
@@ -87,16 +92,19 @@ export default abstract class RenderInstruction {
   // length 8
   public static readonly BarycentricBlendCode = 0x32;
 
+  // length 11
+  public static readonly BarycentricBlendPerspectiveCode = 0x33;
+
   // length 12
   public static readonly ComputeRadialBlendRatioCode = 0x31;
 
-  // public static readonly BarycentricBlendPerspectiveCode = 0x33; TODO
-  // Filter TODO
+  // length 21
+  public static readonly FilterCode = 0x36;
+
+  public static readonly ComputeLinearGradientRatio = 0x37;
+  public static readonly ComputeRadialGradientRatio = 0x38;
+
   // Image TODO
-  // ComputeLinearGradientRatio TODO
-  // ComputeRadialGradientRatio TODO
-  // NormalDebug TODO
-  // Phong TODO
 }
 
 const scratchVector = new Vector4( 0, 0, 0, 0 );

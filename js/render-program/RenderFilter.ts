@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderPathBoolean, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderPathBoolean, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation, ByteEncoder } from '../imports.js';
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
@@ -171,6 +171,34 @@ export class RenderInstructionFilter extends RenderInstruction {
     stack.readTop( scratchVector );
     RenderFilter.applyFilter( scratchVector, this.logic.colorMatrix, this.logic.colorTranslation );
     stack.writeTop( scratchVector );
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU32( RenderInstruction.PhongCode );
+    encoder.pushF32( this.logic.colorMatrix.m00() );
+    encoder.pushF32( this.logic.colorMatrix.m01() );
+    encoder.pushF32( this.logic.colorMatrix.m02() );
+    encoder.pushF32( this.logic.colorMatrix.m03() );
+    encoder.pushF32( this.logic.colorMatrix.m10() );
+    encoder.pushF32( this.logic.colorMatrix.m11() );
+    encoder.pushF32( this.logic.colorMatrix.m12() );
+    encoder.pushF32( this.logic.colorMatrix.m13() );
+    encoder.pushF32( this.logic.colorMatrix.m20() );
+    encoder.pushF32( this.logic.colorMatrix.m21() );
+    encoder.pushF32( this.logic.colorMatrix.m22() );
+    encoder.pushF32( this.logic.colorMatrix.m23() );
+    encoder.pushF32( this.logic.colorMatrix.m30() );
+    encoder.pushF32( this.logic.colorMatrix.m31() );
+    encoder.pushF32( this.logic.colorMatrix.m32() );
+    encoder.pushF32( this.logic.colorMatrix.m33() );
+    encoder.pushF32( this.logic.colorTranslation.x );
+    encoder.pushF32( this.logic.colorTranslation.y );
+    encoder.pushF32( this.logic.colorTranslation.z );
+    encoder.pushF32( this.logic.colorTranslation.w );
+  }
+
+  public override getBinaryLength(): number {
+    return 21;
   }
 }
 

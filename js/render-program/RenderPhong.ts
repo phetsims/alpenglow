@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderLight, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation } from '../imports.js';
+import { RenderColor, RenderEvaluationContext, RenderLight, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation, ByteEncoder } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderPhong extends RenderProgram {
@@ -215,7 +215,9 @@ export class RenderInstructionPhong extends RenderInstruction {
   }
 
   public override toString(): string {
-    return 'RenderInstructionPhong(TODO)';
+    const alpha = `alpha:${this.alpha}`;
+    const numLights = `numLights:${this.numLights}`;
+    return `RenderInstructionPhong(${alpha} ${numLights})`;
   }
 
   public override equals(
@@ -270,6 +272,16 @@ export class RenderInstructionPhong extends RenderInstruction {
       Math.min( 1, scratchOutputVector.z ),
       Math.min( 1, scratchOutputVector.w )
     );
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU32( RenderInstruction.PhongCode );
+    encoder.pushF32( this.alpha );
+    encoder.pushU32( this.numLights );
+  }
+
+  public override getBinaryLength(): number {
+    return 3;
   }
 }
 
