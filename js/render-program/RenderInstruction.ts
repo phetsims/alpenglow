@@ -21,20 +21,16 @@ export default abstract class RenderInstruction {
 
   public abstract equals( other: RenderInstruction, areLocationsEqual: ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => boolean ): boolean;
 
-  public writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
-    throw new Error( 'unimplemented' );
-  }
+  public abstract writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void;
 
-  public fromBinary( encoder: ByteEncoder, getLocation: ( offset: number ) => RenderInstructionLocation ): void {
+  public fromBinary( encoder: ByteEncoder, offset: number, getLocation: ( offset: number ) => RenderInstructionLocation ): void {
     throw new Error( 'unimplemented' );
   }
 
   /**
    * The number of words (u32s, 4 bytes) that this instruction takes up in the binary stream.
    */
-  public getBinaryLength(): number {
-    throw new Error( 'unimplemented' );
-  }
+  public abstract getBinaryLength(): number;
 
   public static instructionsToBinary( encoder: ByteEncoder, instructions: RenderInstruction[] ): void {
     const lengthPrefixSum: number[] = [];
@@ -77,6 +73,7 @@ export default abstract class RenderInstruction {
   public static readonly OpaqueJumpCode = 0x22;
   public static readonly NormalDebugCode = 0x35;
 
+
   // length 2
   public static readonly MultiplyScalarCode = 0x21;
 
@@ -101,10 +98,12 @@ export default abstract class RenderInstruction {
   // length 21
   public static readonly FilterCode = 0x36;
 
-  public static readonly ComputeLinearGradientRatio = 0x37;
-  public static readonly ComputeRadialGradientRatio = 0x38;
+  // variable length(!)
+  public static readonly ComputeLinearGradientRatioCode = 0x37;
+  public static readonly ComputeRadialGradientRatioCode = 0x38;
 
-  // Image TODO
+  // TODO
+  public static readonly ImageCode = 0x39;
 }
 
 const scratchVector = new Vector4( 0, 0, 0, 0 );

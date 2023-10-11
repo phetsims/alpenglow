@@ -420,7 +420,7 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
 
     if ( this.logic instanceof RenderLinearGradientLogic ) {
       encoder.pushU32(
-        RenderInstruction.ComputeLinearGradientRatio |
+        RenderInstruction.ComputeLinearGradientRatioCode |
         ( this.logic.accuracy << 8 ) | // 2-bit accuracy
         ( this.logic.extend << 10 ) | // 2-bit
         ( ratioCount << RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS ) // extended to match the radial case
@@ -446,7 +446,7 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
     }
     else {
       encoder.pushU32(
-        RenderInstruction.ComputeRadialGradientRatio |
+        RenderInstruction.ComputeRadialGradientRatioCode |
         ( this.logic.accuracy << 8 ) | // 3-bit accuracy
         ( this.logic.extend << 11 ) | // 2-bit
         ( this.logic.kind << 13 ) | // 2-bit

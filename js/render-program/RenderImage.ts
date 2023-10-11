@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonMitchellNetravali, RenderEvaluationContext, RenderExtend, RenderImageable, RenderProgram, RenderResampleType, alpenglow, SerializedRenderImageable, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation } from '../imports.js';
+import { ClippableFace, PolygonMitchellNetravali, RenderEvaluationContext, RenderExtend, RenderImageable, RenderProgram, RenderResampleType, alpenglow, SerializedRenderImageable, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation, ByteEncoder } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -547,6 +547,16 @@ export class RenderInstructionImage extends RenderInstruction {
     executor: RenderExecutor
   ): void {
     stack.push( this.logic.evaluate( context ) );
+  }
+
+  public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
+    encoder.pushU32( RenderInstruction.ImageCode );
+
+    // TODO: actual implementation, this is a stub
+  }
+
+  public override getBinaryLength(): number {
+    return 1; // TODO: not implemented yet
   }
 }
 
