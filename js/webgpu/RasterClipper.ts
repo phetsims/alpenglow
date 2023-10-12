@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderColor, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderProgram, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
+import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderProgram, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
@@ -270,9 +270,9 @@ export default class RasterClipper {
         new Vector2( 1 / 256, 0 ),
         0,
         RenderLinearBlendAccuracy.Accurate,
-        new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
-        new RenderColor( new Vector4( 0, 0, 1, 1 ) )
-      ),
+        new RenderColor( new Vector4( 1, 0, 0, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
+        new RenderColor( new Vector4( 0.5, 0, 1, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
+      ).colorConverted( RenderColorSpace.premultipliedOklab, RenderColorSpace.premultipliedLinearSRGB ),
       new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
       new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
       new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
@@ -284,7 +284,7 @@ export default class RasterClipper {
       new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
       new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
       new RenderColor( new Vector4( 0, 1, 1, 1 ) )
-    ];
+    ].map( p => p.simplified() );
 
     const numInputChunks = rawInputChunks.length;
     const numInputEdges = rawInputEdges.length;
