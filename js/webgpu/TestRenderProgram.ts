@@ -11,9 +11,12 @@ import Vector4 from '../../../dot/js/Vector4.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
 
+const shaderMap = new WeakMap<DeviceContext, ComputeShader>();
+
 export default class TestRenderProgram {
 
-  public static async evaluate(
+  public static evaluate(
+    deviceContext: DeviceContext,
     renderProgram: RenderProgram,
     edgesOffset: number,
     numEdges: number,
@@ -26,10 +29,22 @@ export default class TestRenderProgram {
     maxXCount: number,
     maxYCount: number
   ): Promise<Vector4> {
-    const device = ( await DeviceContext.getDevice() )!;
-    assert && assert( device );
+    const device = deviceContext.device;
 
-    const deviceContext = new DeviceContext( device );
+    if ( !shaderMap.has( deviceContext ) ) {
+      const shader = ComputeShader.fromSource( device, 'test_render_program', wgsl_test_render_program, [
+        Binding.UNIFORM_BUFFER,
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], merge( {
+        // TODO: good sizes? Can get values of these from a RenderProgram
+        stackSize: 8,
+        instructionStackSize: 8
+      }, RenderInstruction.CODE_NAME_CONSTANTS ) );
+      shaderMap.set( deviceContext, shader );
+    }
+    const shader = shaderMap.get( deviceContext )!;
 
     const instructions: RenderInstruction[] = [];
     renderProgram.writeInstructions( instructions );
@@ -72,17 +87,6 @@ export default class TestRenderProgram {
     ] ) ).buffer );
 
     const outputBuffer = deviceContext.createBuffer( 4 * 4 );
-
-    const shader = ComputeShader.fromSource( device, 'test_render_program', wgsl_test_render_program, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
-    ], merge( {
-      // TODO: good sizes? Can get values of these from a RenderProgram
-      stackSize: 8,
-      instructionStackSize: 8
-    }, RenderInstruction.CODE_NAME_CONSTANTS ) );
 
     return new Promise<Vector4>( ( resolve, reject ) => {
       const encoder = device.createCommandEncoder( {

@@ -45,6 +45,8 @@ export default class DeviceContext {
     } ).catch( err => {
       throw new Error( err );
     } );
+
+    // TODO: We need to listen to leaks, DeviceContext is adding a listener!!!
   }
 
   // in bytes

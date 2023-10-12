@@ -2683,7 +2683,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
   window.instructionTest = function() {
     setTimeout( async function() {
 
-      const program = new phet.alpenglow.RenderColor( phet.dot.v4( 0.125, 0.25, 0.5, 1 ) );
+      // const program = new phet.alpenglow.RenderColor( phet.dot.v4( 0.125, 0.25, 0.5, 1 ) );
       // const program = new phet.alpenglow.RenderBarycentricBlend(
       //   phet.dot.v2( 0, 0 ),
       //   phet.dot.v2( 1, 1 ),
@@ -2693,13 +2693,13 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
       //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) )
       // );
-      // const program = new phet.alpenglow.RenderLinearBlend(
-      //   phet.dot.v2( 1, 0 ),
-      //   0.25,
-      //   phet.alpenglow.RenderLinearBlendAccuracy.Accurate,
-      //   new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
-      //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) )
-      // );
+      const program = new phet.alpenglow.RenderLinearBlend(
+        phet.dot.v2( 1, 0 ),
+        0.25,
+        phet.alpenglow.RenderLinearBlendAccuracy.Accurate,
+        new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
+        new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) )
+      );
       // const program = new phet.alpenglow.RenderLinearBlend(
       //   phet.dot.v2( 1, 0 ),
       //   0.25,
@@ -2729,11 +2729,17 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       //   new phet.alpenglow.RenderColor( phet.dot.v4( 0.5, 0, 0, 1 ) )
       // ] );
 
+      const device = await phet.alpenglow.DeviceContext.getDevice();
+      assert && assert( device );
+
+      const deviceContext = new phet.alpenglow.DeviceContext( device );
+
       const context = new phet.alpenglow.RenderEvaluationContext().set(
         null, 1, phet.dot.v2( 0.5, 0.5 ), 0, 0, 1, 1
       );
 
       const value = await phet.alpenglow.TestRenderProgram.evaluate(
+        deviceContext,
         program,
         0, // edgesOffset
         0, // numEdges

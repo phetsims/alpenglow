@@ -16,6 +16,7 @@ import './parallel/ParallelTests.js';
 import './webgpu/SnippetTests.js';
 import './webgpu/ExampleTests.js';
 import './render-program/RenderProgramTests.js';
+import './webgpu/RenderProgramWebGPUTests.js';
 
 // Since our tests are loaded asynchronously, we must direct QUnit to begin the tests
 qunitStart();
