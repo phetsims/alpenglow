@@ -63,7 +63,7 @@ struct RasterStageConfig {
   accumulate_workgroup_y: u32,
   accumulate_workgroup_z: u32,
 
-  // 33-word offset
+  // 33-dword offset
   num_input_chunks: u32,
   num_input_edges: u32,
   num_clipped_chunks: u32, // 2x num_input_chunks, but here for simplicity
@@ -80,5 +80,5 @@ struct RasterStageConfig {
   raster_offset_x: u32,
   raster_offset_y: u32
 
-  // 45 word length
+  // 45 dword length
 }

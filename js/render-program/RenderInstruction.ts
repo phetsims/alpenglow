@@ -23,7 +23,7 @@ export default abstract class RenderInstruction {
   public abstract writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void;
 
   /**
-   * The number of words (u32s, 4 bytes) that this instruction takes up in the binary stream.
+   * The number of dwords (u32s, 4 bytes) that this instruction takes up in the binary stream.
    */
   public abstract getBinaryLength(): number;
 
@@ -77,10 +77,15 @@ export default abstract class RenderInstruction {
   // TODO
   public static readonly ImageCode = 0x39;
 
-  public static getInstructionLength( word: number ): number {
-    const code = word & 0xff;
+  /**
+   * Returns the length (in dwords) of the binary form of an instruction, based on the initial u32 value in the
+   * instruction stream
+   */
+  public static getInstructionLength( u32: number ): number {
+    const code = u32 & 0xff;
 
     switch( code ) {
+      // TODO: consider instead of switch, we could bit mask things like this
       case RenderInstruction.ReturnCode:
       case RenderInstruction.PremultiplyCode:
       case RenderInstruction.UnpremultiplyCode:
@@ -124,18 +129,26 @@ export default abstract class RenderInstruction {
         return 21;
 
       case RenderInstruction.ComputeLinearGradientRatioCode:
-        return 12 + 2 * ( word >> RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS );
+        return 12 + 2 * ( u32 >> RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS );
       case RenderInstruction.ComputeRadialGradientRatioCode:
-        return 10 + 2 * ( word >> RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS );
+        return 10 + 2 * ( u32 >> RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS );
 
       default:
         throw new Error( `Unknown/unimplemented instruction code: ${code}` );
     }
   }
 
+  /**
+   * Appends the binary form of the list of instructions to the encoder.
+   *
+   * NOTE: The binary form will always have an exit instruction included at the end, so multiple instruction streams
+   * can be written into the same buffer (and noted with offsets).
+   */
   public static instructionsToBinary( encoder: ByteEncoder, instructions: RenderInstruction[] ): void {
+    // Stores the number of dwords (u32s, 4 bytes) before each instruction, by index.
+    // Thus instructions[ i ] will have lengthPrefixSum[ i ] dwords before it.
+    // This is needed, so that we can compute locations/offsets for jumps in instructions.
     const lengthPrefixSum: number[] = [];
-
     let sum = 0;
     for ( let i = 0; i < instructions.length; i++ ) {
       lengthPrefixSum.push( sum );
@@ -157,9 +170,16 @@ export default abstract class RenderInstruction {
     encoder.pushU32( RenderInstruction.ExitCode );
   }
 
+  /**
+   * Reads the binary from from the encoder (at a specific dword offset), and returns the list of instructions.
+   *
+   * NOTE: No final "exit" is generated, since our executor for objects won't need it.
+   */
   public static binaryToInstructions( encoder: ByteEncoder, offset: number ): RenderInstruction[] {
-    const instructionAddresses: number[] = [];
 
+    // Compute the addresses of every instruction (based on its length), and read through all of the instructions
+    // up through the exit.
+    const instructionAddresses: number[] = [];
     let address = offset;
     while ( encoder.fullU32Array[ address ] !== RenderInstruction.ExitCode ) {
       instructionAddresses.push( address );
@@ -167,9 +187,12 @@ export default abstract class RenderInstruction {
     }
     const exitAddress = address;
 
+    // We'll lazy-load locations, since we (a) don't want to create them if they aren't needed, and (b) we only want
+    // one for each "address" (so multiple instructions could potentially point to the same location).
     const locations: ( RenderInstructionLocation | null )[] = instructionAddresses.map( () => null );
     locations.push( null ); // Add the exit location
 
+    // Given an instruction address, return its index on our list of non-location instructions
     const getIndexOfAddress = ( address: number ): number => {
       if ( address === exitAddress ) {
         return instructionAddresses.length;
@@ -178,16 +201,20 @@ export default abstract class RenderInstruction {
       assert && assert( index >= 0 );
       return index;
     };
+
     const getLocation = ( index: number ): RenderInstructionLocation => {
       if ( locations[ index ] === null ) {
         locations[ index ] = new RenderInstructionLocation();
       }
       return locations[ index ]!;
     };
+
     const getLocationOfAddress = ( address: number ): RenderInstructionLocation => {
       return getLocation( getIndexOfAddress( address ) );
     };
 
+    // We'll need to merge together our location-instructions with non-location instructions. Since jumps are only
+    // forward, we can just compute binary instructions in order.
     const instructions: RenderInstruction[] = [];
     for ( let i = 0; i < instructionAddresses.length; i++ ) {
       const address = instructionAddresses[ i ];
@@ -202,7 +229,7 @@ export default abstract class RenderInstruction {
       }
       instructions.push( instruction );
     }
-    // Potential ending location instruction
+    // Potential ending location instruction (e.g. if there is a jump to the exit at the end).
     const lastLocation = locations[ instructionAddresses.length ];
     if ( lastLocation ) {
       instructions.push( lastLocation );
@@ -211,6 +238,9 @@ export default abstract class RenderInstruction {
     return instructions;
   }
 
+  /**
+   * Extracts a single instruction from the binary format at a given (32bit dword) offset.
+   */
   public static binaryToInstruction(
     encoder: ByteEncoder,
     offset: number,
@@ -274,6 +304,12 @@ export default abstract class RenderInstruction {
     }
   }
 
+  /**
+   * Returns whether two instruction lists are equivalent (allowing for equivalent location instructions).
+   *
+   * It's possible to have one list where there are multiple location instructions in a row, so we'll need to
+   * inspect locations for these cases (since they can be equivalent to a single location instruction).
+   */
   public static instructionsEquals( a: RenderInstruction[], b: RenderInstruction[] ): boolean {
     const aFiltered = a.filter( instruction => !( instruction instanceof RenderInstructionLocation ) );
     const bFiltered = b.filter( instruction => !( instruction instanceof RenderInstructionLocation ) );
