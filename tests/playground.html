@@ -2663,10 +2663,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       const executor = new phet.alpenglow.RenderExecutor();
       executor.loadInstructions( instructions );
 
-      // console.log( 'executor-collapsed (object) instructions (no locations)' );
-      // console.log( executor.instructions.map( instruction => instruction.toString() ).join( '\n' ) );
       const result = phet.dot.v4( 0, 0, 0, 0 );
-
       executor.execute( context, result );
       console.log( 'evaluation (instructions)', result );
 
