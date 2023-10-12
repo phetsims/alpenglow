@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DeviceContext, RenderColor, RenderEvaluationContext, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalize, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
+import { DeviceContext, RenderColor, RenderEvaluationContext, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalize, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
@@ -121,6 +121,33 @@ renderProgramTest(
 renderProgramTest(
   'RenderNormalize',
   new RenderNormalize( new RenderColor( new Vector4( 0.5, 0.5, 0.5, 1 ) ) )
+);
+
+renderProgramTest(
+  'RenderStack Fully Opaque',
+  new RenderStack( [
+    new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
+    new RenderColor( new Vector4( 0, 1, 0, 1 ) ),
+    new RenderColor( new Vector4( 0, 0, 1, 1 ) )
+  ] )
+);
+
+renderProgramTest(
+  'RenderStack Partially Opaque',
+  new RenderStack( [
+    new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
+    new RenderColor( new Vector4( 0, 1, 0, 1 ) ),
+    new RenderColor( new Vector4( 0, 0, 1, 0.5 ) )
+  ] )
+);
+
+renderProgramTest(
+  'RenderStack More Partially Opaque',
+  new RenderStack( [
+    new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
+    new RenderColor( new Vector4( 0, 1, 0, 0.5 ) ),
+    new RenderColor( new Vector4( 0, 0, 1, 0.5 ) )
+  ] )
 );
 
 renderProgramTest(

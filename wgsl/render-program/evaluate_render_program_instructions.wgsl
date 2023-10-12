@@ -16,12 +16,10 @@
 
 #option ExitCode
 #option ReturnCode
-// TODO
 #option StackBlendCode
 #option LinearBlendCode
 // TODO
 #option BlendComposeCode
-// TODO
 #option OpaqueJumpCode
 #option PremultiplyCode
 #option UnpremultiplyCode
@@ -113,11 +111,11 @@ fn evaluate_render_program_instructions(
     let code = ( instruction_u32 & 0xffu );
 
     var instruction_length: u32;
-    // High 4 bits all zero => 1 length
+    // High 4 bits all zero >= 1 length
     if ( ( code >> 4u ) == 0u ) {
       instruction_length = 1u;
     }
-    // High 2 bits set => variable length
+    // High 2 bits set >= variable length
     else if ( ( code & 0xc0u ) != 0u ) {
       instruction_length = ( code & 0x1fu ) + 2u * ( instruction_u32 >> 16u );
     }
@@ -144,6 +142,15 @@ fn evaluate_render_program_instructions(
         ) );
         stack_length++;
       }
+      case ${u32( StackBlendCode )}: {
+        let background = stack[ stack_length - 1u ];
+        let foreground = stack[ stack_length - 2u ];
+
+        stack_length--;
+
+        // Assume premultiplied
+        stack[ stack_length - 1u ] = ( 1f - foreground.a ) * background + foreground;
+      }
       case ${u32( LinearBlendCode )}: {
         let zero_color = stack[ stack_length - 1u ];
         let one_color = stack[ stack_length - 2u ];
@@ -159,6 +166,13 @@ fn evaluate_render_program_instructions(
           let minus_t = 1f - t;
 
           stack[ stack_length - 1u ] = zero_color * minus_t + one_color * t;
+        }
+      }
+      case ${u32( OpaqueJumpCode )}: {
+        let offset = instruction_u32 >> 8u;
+        let color = stack[ stack_length - 1u ];
+        if ( color.a >= ${f32( 1 - 1e-5 )} ) {
+          instruction_address = start_address + offset; // jump to offset
         }
       }
       case ${u32( NormalizeCode )}: {
