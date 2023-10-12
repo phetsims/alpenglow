@@ -20,6 +20,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export enum RenderLinearBlendAccuracy {
+  // Enum used in WGSL
   Accurate = 0,
   PixelCenter = 1
 }
@@ -394,6 +395,7 @@ export class RenderInstructionLinearBlend extends RenderInstruction {
     return other instanceof RenderInstructionLinearBlend;
   }
 
+  // ( t, oneColor, zeroColor -- color )
   public override execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,

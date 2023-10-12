@@ -6,8 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DeviceContext, RenderColor, RenderEvaluationContext, RenderProgram, TestRenderProgram } from '../imports.js';
+import { DeviceContext, RenderColor, RenderEvaluationContext, RenderLinearBlend, RenderLinearBlendAccuracy, RenderProgram, TestRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 
 QUnit.module( 'TestRenderProgram' );
 
@@ -65,4 +66,15 @@ const renderProgramTest = (
 renderProgramTest(
   'Simple Color',
   new RenderColor( new Vector4( 0.125, 0.25, 0.5, 1 ) )
+);
+
+renderProgramTest(
+  'Simple Linear Blend',
+  new RenderLinearBlend(
+    new Vector2( 1, 0 ),
+    0.25,
+    RenderLinearBlendAccuracy.Accurate,
+    new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
+    new RenderColor( new Vector4( 0, 1, 0, 1 ) )
+  )
 );
