@@ -401,6 +401,15 @@
               <li><a href="#renderProgram-execution">Execution</a></li>
             </ul>
           </li>
+          <li>
+            <a href="#WGSL">WGSL</a>
+            <ul class="nav nav-list">
+              <li><a href="#WGSL-snippets">Snippets</a></li>
+              <li><a href="#WGSL-preprocessing">Preprocessing</a></li>
+              <li><a href="#WGSL-minification">Minification</a></li>
+              <li><a href="#WGSL-mangling">Mangling</a></li>
+            </ul>
+          </li>
         </ul>
       </li>
       <li>
@@ -435,6 +444,28 @@
       corresponding image.
     </p>
 
+    <p>
+      <strong>
+        Please contact the author (Jonathan Olson, jonathan.olson@colorado.edu) for any questions or comments, no matter how small!
+      </strong>
+    </p>
+
+    <p class="TODO">
+      Create section on the polygonal filters
+    </p>
+
+    <p class="TODO">
+      Include the integrals docs (need MathJax)
+    </p>
+
+    <p class="TODO">
+      Include the flowchart docs (need Mermaid)
+    </p>
+
+    <p class="TODO">
+      Add TODO levels here, so we can flag critical/important ones
+    </p>
+
     <h3>Technology: Primarily WebGPU</h3>
 
     <p>
@@ -442,6 +473,14 @@
       fallback (and for testing/development). In addition to a normal software route, there is a async/await
       parallelized form that can execute with the same execution model that WebGPU would use (with workgroups, storage
       buffers, etc.), that is used for validation, testing, and debugging.
+    </p>
+
+    <p class="TODO">
+      Document Parallel execution setup somewhere.
+    </p>
+
+    <p class="TODO">
+      Measure workgroup execution order on GPUs to see if we can schedule asymmetric (large) load workgroups first somehow.
     </p>
 
     <h3>Methods: Solve the Occlusion Problem First</h3>
@@ -1252,6 +1291,10 @@
       }, 128, 128 );
     </script>
 
+    <p class="TODO">
+      NOTE: The shear cases are broken on splits, we can't just transform the points
+    </p>
+
     <h4 id="RenderRadialBlend">RenderRadialBlend</h4>
 
     <p>
@@ -1413,6 +1456,66 @@
       This is combined with a stack of instruction indices, to support function calls and return values, in addition to
       simple branching logic. It turns out all of the primitives we need can be done with "opaque jumps" (if the top of
       the stack is a fully-opaque value, jump to an instruction index) and function calls.
+    </p>
+
+    <p class="TODO">
+      Add "stack depth" getters to RenderProgram (both the main and instruction stacks), so we know what depth is needed.
+      RenderPhong can use up a good amount of stack space (ambient/diffuse/specular/position/normal + direction/color for
+      each light), BUT we really want to minimize the memory individual invocations/threads take up during execution.
+      We can customize the stack sizes at shader creation time... maybe we can do pipeline-overloadable constants
+      instead?
+    </p>
+
+    <p class="TODO">
+      Document RenderInstruction
+    </p>
+
+    <p class="TODO">
+      Add examples of the binary format, or examples of simple things like what a gradient turns into.
+      Do it from our instructionTest() playground example
+    </p>
+
+    <p class="TODO">
+      Consider separating out the RenderInstruction items into its own subdirectory. Potentially the logic items also.
+    </p>
+
+    <p class="TODO">
+      Add error handling to detect if we blow past a stack?
+    </p>
+
+    <p class="TODO">
+      Detect if we run past a buffer, and set a flag so we can restart with a larger buffer? This will still cause a delay...
+    </p>
+
+    <p class="TODO">
+      Bake in support for context loss handling
+    </p>
+
+    <h3 id="WGSL">WGSL</h3>
+
+    <p class="TODO">
+      <a href="https://github.com/wgsl-analyzer/wgsl-analyzer">wgsl-analyzer</a> our non-minified output!
+    </p>
+
+    <h4 id="WGSL-snippets">Snippets</h4>
+
+    <p class="TODO">Note DualSnippet. Note ComputeShader</p>
+
+    <h4 id="WGSL-preprocessing">Preprocessing</h4>
+
+    <p class="TODO">NOTE #ifdef/#ifndef/#else/#endif #import #option #bindings</p>
+
+    <h4 id="WGSL-minification">Minification</h4>
+
+    <p class="TODO">Note progress on minification. TEST WITH IT ON</p>
+
+    <p class="TODO">Note chipper <code>node js/scripts/transpile.js --watch --skipMinifyWGSL</code></p>
+
+    <h4 id="WGSL-mangling">Mangling</h4>
+
+    <p class="TODO">
+      Mangling needs to run on all of the shader code at once. We've implemented mangling for the Vello setup, but we
+      need to implement it in the chipper transpiler.
     </p>
 
     <h2 id="stages">Stages</h2>
@@ -1703,7 +1806,26 @@
     </p>
 
     <p class="TODO">
+      Fix up render program indices in RasterClipper, test with multiple RenderPrograms, get the demo here.
+    </p>
+
+    <p class="TODO">
+      IMPORTANT! Our resulting edge-clipped counts should be cyclic, right? Only use 2 bits per count!!
+      They should wrap around or accumulate as long as we do arithmetic mod 4.
+      Right now we're taking up 4x i32 for this, and that's (a) excessive, (b) killing performance, and (c) reducing
+      the size of our potential workgroups.
+    </p>
+
+    <p class="TODO">
       Document the approaches here.
+    </p>
+
+    <p class="TODO">
+      Add mermaid chart here
+    </p>
+
+    <p class="TODO">
+      Show which parts finish in which stages, if we stick to that?
     </p>
 
   </div>
