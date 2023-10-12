@@ -32,7 +32,6 @@
 #option NormalizeCode
 // TODO
 #option NormalDebugCode
-// TODO
 #option MultiplyScalarCode
 // TODO
 #option PhongCode
@@ -207,6 +206,10 @@ fn evaluate_render_program_instructions(
       case ${u32( LinearSRGBToOklabCode )}: {
         let color = stack[ stack_length - 1u ];
         stack[ stack_length - 1u ] = vec4( linear_sRGB_to_oklab( color.rgb ), color.a );
+      }
+      case ${u32( MultiplyScalarCode )}: {
+        let factor = bitcast<f32>( render_program_instructions[ start_address + 1u ] );
+        stack[ stack_length - 1u ] = factor * stack[ stack_length - 1u ];
       }
       case ${u32( ComputeLinearBlendRatioCode )}: {
         let accuracy = instruction_u32 >> 8u;
