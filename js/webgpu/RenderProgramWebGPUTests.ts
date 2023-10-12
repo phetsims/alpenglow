@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderColor, RenderEvaluationContext, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalize, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
+import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalize, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
@@ -143,7 +143,7 @@ renderProgramTest(
   new RenderStack( [
     new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
     new RenderColor( new Vector4( 0, 1, 0, 1 ) ),
-    new RenderColor( new Vector4( 0, 0, 1, 0.5 ) )
+    new RenderColor( new Vector4( 0, 0, 0.5, 0.5 ) )
   ] )
 );
 
@@ -151,8 +151,8 @@ renderProgramTest(
   'RenderStack More Partially Opaque',
   new RenderStack( [
     new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
-    new RenderColor( new Vector4( 0, 1, 0, 0.5 ) ),
-    new RenderColor( new Vector4( 0, 0, 1, 0.5 ) )
+    new RenderColor( new Vector4( 0, 0.5, 0, 0.5 ) ),
+    new RenderColor( new Vector4( 0, 0, 0.5, 0.5 ) )
   ] )
 );
 
@@ -192,3 +192,56 @@ renderProgramTest(
     new RenderColor( new Vector4( 0, 0, 1, 1 ) )
   )
 );
+
+const composes = [
+  'Over',
+  'In',
+  'Out',
+  'Atop',
+  'Xor',
+  'Plus',
+  'PlusLighter'
+] as const;
+
+for ( const compose of composes ) {
+  renderProgramTest(
+    `RenderBlendCompose ${compose} Normal`,
+    new RenderBlendCompose(
+      RenderComposeType[ compose ],
+      RenderBlendType.Normal,
+      new RenderColor( new Vector4( 0.1, 0.2, 0.3, 0.4 ) ),
+      new RenderColor( new Vector4( 0.8, 0.6, 0.4, 0.9 ) )
+    )
+  );
+}
+
+const blends = [
+  'Normal',
+  'Multiply',
+  'Screen',
+  'Overlay',
+  'Darken',
+  'Lighten',
+  'ColorDodge',
+  'ColorBurn',
+  'HardLight',
+  'SoftLight',
+  'Difference',
+  'Exclusion',
+  'Hue',
+  'Saturation',
+  'Color',
+  'Luminosity'
+] as const;
+
+for ( const blend of blends ) {
+  renderProgramTest(
+    `RenderBlendCompose Over ${blend}`,
+    new RenderBlendCompose(
+      RenderComposeType.Over,
+      RenderBlendType[ blend ],
+      new RenderColor( new Vector4( 0.1, 0.2, 0.3, 0.4 ) ),
+      new RenderColor( new Vector4( 0.8, 0.6, 0.4, 0.9 ) )
+    )
+  );
+}

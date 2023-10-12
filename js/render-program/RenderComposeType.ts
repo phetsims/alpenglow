@@ -22,3 +22,13 @@ enum RenderComposeType {
 export default RenderComposeType;
 
 alpenglow.register( 'RenderComposeType', RenderComposeType );
+
+export const RENDER_COMPOSE_CONSTANTS = {
+  ComposeOver: RenderComposeType.Over,
+  ComposeIn: RenderComposeType.In,
+  ComposeOut: RenderComposeType.Out,
+  ComposeAtop: RenderComposeType.Atop,
+  ComposeXor: RenderComposeType.Xor,
+  ComposePlus: RenderComposeType.Plus,
+  ComposePlusLighter: RenderComposeType.PlusLighter
+} as const;

@@ -31,3 +31,22 @@ enum RenderBlendType {
 export default RenderBlendType;
 
 alpenglow.register( 'RenderBlendType', RenderBlendType );
+
+export const RENDER_BLEND_CONSTANTS = {
+  BlendNormal: RenderBlendType.Normal,
+  BlendMultiply: RenderBlendType.Multiply,
+  BlendScreen: RenderBlendType.Screen,
+  BlendOverlay: RenderBlendType.Overlay,
+  BlendDarken: RenderBlendType.Darken,
+  BlendLighten: RenderBlendType.Lighten,
+  BlendColorDodge: RenderBlendType.ColorDodge,
+  BlendColorBurn: RenderBlendType.ColorBurn,
+  BlendHardLight: RenderBlendType.HardLight,
+  BlendSoftLight: RenderBlendType.SoftLight,
+  BlendDifference: RenderBlendType.Difference,
+  BlendExclusion: RenderBlendType.Exclusion,
+  BlendHue: RenderBlendType.Hue,
+  BlendSaturation: RenderBlendType.Saturation,
+  BlendColor: RenderBlendType.Color,
+  BlendLuminosity: RenderBlendType.Luminosity
+} as const;

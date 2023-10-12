@@ -126,6 +126,8 @@ export { default as wgsl_gamut_map_linear_displayP3 } from '../wgsl/color/gamut_
 export { default as wgsl_gamut_map_premul_sRGB } from '../wgsl/color/gamut_map_premul_sRGB.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_gamut_map_premul_displayP3 } from '../wgsl/color/gamut_map_premul_displayP3.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_blend_compose } from '../wgsl/color/blend_compose.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_matthes_drakopoulos_clip } from '../wgsl/clip/matthes_drakopoulos_clip.js';
@@ -205,8 +207,8 @@ export { default as wgsl_test_render_program } from '../wgsl/tests/test_render_p
 
 export { default as PolygonFilterType, getPolygonFilterWidth, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand, getPolygonFilterGridBounds } from './render-program/PolygonFilterType.js';
 export { default as Mesh } from './render-program/Mesh.js';
-export { default as RenderBlendType } from './render-program/RenderBlendType.js';
-export { default as RenderComposeType } from './render-program/RenderComposeType.js';
+export { default as RenderBlendType, RENDER_BLEND_CONSTANTS } from './render-program/RenderBlendType.js';
+export { default as RenderComposeType, RENDER_COMPOSE_CONSTANTS } from './render-program/RenderComposeType.js';
 export { default as RenderExtend } from './render-program/RenderExtend.js';
 export { default as RenderProgramNeeds } from './render-program/RenderProgramNeeds.js';
 export { default as RenderEvaluationContext } from './render-program/RenderEvaluationContext.js';

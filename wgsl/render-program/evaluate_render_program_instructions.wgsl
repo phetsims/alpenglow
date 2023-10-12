@@ -13,12 +13,12 @@
 #import ../color/oklab_to_linear_sRGB
 #import ../color/linear_displayP3_to_linear_sRGB
 #import ../color/linear_sRGB_to_linear_displayP3
+#import ../color/blend_compose
 
 #option ExitCode
 #option ReturnCode
 #option StackBlendCode
 #option LinearBlendCode
-// TODO
 #option BlendComposeCode
 #option OpaqueJumpCode
 #option PremultiplyCode
@@ -204,6 +204,16 @@ fn evaluate_render_program_instructions(
       case ${u32( LinearSRGBToOklabCode )}: {
         let color = stack[ stack_length - 1u ];
         stack[ stack_length - 1u ] = vec4( linear_sRGB_to_oklab( color.rgb ), color.a );
+      }
+      case ${u32( BlendComposeCode )}: {
+        let color_a = stack[ stack_length - 1u ];
+        let color_b = stack[ stack_length - 2u ];
+        let compose_type = ( instruction_u32 >> 8u ) & 0x7u;
+        let blend_type = ( instruction_u32 >> 11u ) & 0xfu;
+
+        stack_length--;
+
+        stack[ stack_length - 1u ] = blend_compose( color_a, color_b, compose_type, blend_type );
       }
       case ${u32( MultiplyScalarCode )}: {
         let factor = bitcast<f32>( render_program_instructions[ start_address + 1u ] );
