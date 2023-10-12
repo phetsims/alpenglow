@@ -470,6 +470,11 @@
       Add TODO levels here, so we can flag critical/important ones
     </p>
 
+    <p class="TODO">
+      Create a "performance" section, to note things. Prefer Firefox for profiling CPU currently. Convert things to Rust
+      and use WGPU to get better GPU profiling? (Or if we can profile Metal using the debug tools, that could help).
+    </p>
+
     <h3>Technology: Primarily WebGPU</h3>
 
     <p>
@@ -747,6 +752,18 @@
 
     <p>
       This is handled by the <code>EdgedClippedFace</code> in the software implementation.
+    </p>
+
+    <p class="TODO">
+      Create "Bounds Pyramid" immutable data structure. It's a binary tree, leaves are edges. Each level stores the
+      bounding box. PIP-tests are VERY accelerated on this. Clipping also potentially will be (if a node is fully within
+      one side of a binary clip, we can just INCLUDE that node). Thus we'll have a linked list way of describing how
+      the nodes connect (so we can reuse parts of the source within the result). At a certain point, this will be less
+      beneficial, but high-up it might be very helpful?
+    </p>
+
+    <p class="TODO">
+      Grid clips with bounds-pyramids could be even more efficient on the CPU. Does it really help with the GPU at all?
     </p>
 
     <script type="module">
@@ -1116,6 +1133,12 @@
     <h3 id="renderProgram">RenderProgram</h3>
 
     <p class="TODO">Documentation</p>
+
+    <p class="TODO">
+      NOTE: That the CAG process is essentially just simplifying into a different RenderStack (RenderUnion, because it
+      is disjoint?) with each RenderableFace included. And our rasterizer is also just a RenderProgram transform, giving
+      us a RenderableFace broken down to the pixel level.
+    </p>
 
     <h4 id="RenderColor">RenderColor</h4>
 
@@ -1501,6 +1524,10 @@
       <a href="https://github.com/wgsl-analyzer/wgsl-analyzer">wgsl-analyzer</a> our non-minified output!
     </p>
 
+    <p class="TODO">
+      Check the WGSL/WebGPU spec for changes!
+    </p>
+
     <h4 id="WGSL-snippets">Snippets</h4>
 
     <p class="TODO">Note DualSnippet. Note ComputeShader</p>
@@ -1531,6 +1558,10 @@
       Scenery (we CAN compute them CPU-side, but it uses up a lot of CPU time). However, we can ship over paths in an
       instanced fashion (e.g. font glyphs), and this stage would convert from the DAG to effectively a flat array of
       paths.
+    </p>
+
+    <p>
+      NOTE: This will include perspective projection for 3D?
     </p>
 
     <h3 id="stage-subdivision">Subdivision</h3>
@@ -1818,6 +1849,28 @@
       They should wrap around or accumulate as long as we do arithmetic mod 4.
       Right now we're taking up 4x i32 for this, and that's (a) excessive, (b) killing performance, and (c) reducing
       the size of our potential workgroups.
+    </p>
+
+    <p class="TODO">
+      Modify our approach to grid-clip (2 levels?) - 256x256 tile can be done with two successive 16x16 grid clips.
+    </p>
+
+    <p class="TODO">
+      Is indirect dispatch killing performance?
+    </p>
+
+    <p class="TODO">
+      Is memory bandwidth (and the number of dispatches with memory reads/writes) killing performance?
+    </p>
+
+    <p class="TODO">
+      Alternative approaches, e.g. workgroup-per-initial-chunk? RenderProgram evaluation needs accurate edges
+      unfortunately, and can use them in a linear way. NOTE: Maybe we can do a more efficient approach for the constant
+      faces? (For instance, if we take the signed area of each edge, and accumulate that times the color, we do not
+      have to do any cross-workgroup computation, and it's even more parallel). That does NOT work for RenderImage,
+      or things where we really need the concept of "centroid" or face. We can't split up the centroid with that, since
+      we need the full area in the first place to compute with (so we'd have to have the input area for faces?) - that
+      is technically possible.
     </p>
 
     <p class="TODO">
