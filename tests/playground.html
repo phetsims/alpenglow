@@ -2657,8 +2657,8 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       console.log( '(object) instructions (from binary)' );
       console.log( fromBinaryInstructions.map( instruction => instruction.toString() ).join( '\n' ) );
 
-      console.log( 'instructions equal?' );
-      console.log( phet.alpenglow.RenderInstruction.instructionsEquals( instructions, fromBinaryInstructions ) );
+      const instructionsEqual = phet.alpenglow.RenderInstruction.instructionsEquals( instructions, fromBinaryInstructions );
+      console.log( 'instructions before/after binary conversion equal?', instructionsEqual );
 
       const executor = new phet.alpenglow.RenderExecutor();
       executor.loadInstructions( instructions );
@@ -2667,13 +2667,18 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       // console.log( executor.instructions.map( instruction => instruction.toString() ).join( '\n' ) );
       const result = phet.dot.v4( 0, 0, 0, 0 );
 
-      console.log( 'evaluation (instructions)' );
       executor.execute( context, result );
-      console.log( result );
+      console.log( 'evaluation (instructions)', result );
 
-      console.log( 'evaluation (RenderProgram' );
       const directResult = program.evaluate( context );
-      console.log( directResult );
+      console.log( 'evaluation (RenderProgram)', directResult );
+
+      const simplifiedProgram = program.simplified();
+
+      const simplifiedResult = simplifiedProgram.evaluate( context );
+      console.log( 'evaluation (RenderProgram simplified)', simplifiedResult );
+
+      console.log( 'evaluations equal', result.equalsEpsilon( directResult, 1e-6 ) && result.equalsEpsilon( simplifiedResult, 1e-6 ) );
     } );
   };
 
