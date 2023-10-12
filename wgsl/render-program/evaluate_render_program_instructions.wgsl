@@ -37,9 +37,7 @@
 #option PhongCode
 #option PushCode
 #option ComputeLinearBlendRatioCode
-// TODO
 #option BarycentricBlendCode
-// TODO
 #option BarycentricPerspectiveBlendCode
 // TODO
 #option ComputeRadialBlendRatioCode
@@ -252,7 +250,7 @@ fn evaluate_render_program_instructions(
           instruction_address = start_address + one_offset;
         }
       }
-      case ${u32( BarycentricBlendCode )}: {
+      case ${u32( BarycentricBlendCode )}, ${u32( BarycentricPerspectiveBlendCode )}: {
         let accuracy = instruction_u32 >> 8u;
 
         let det = bitcast<f32>( render_program_instructions[ start_address + 1u ] );
@@ -281,7 +279,21 @@ fn evaluate_render_program_instructions(
         let lambda_b = dot( diff_b, point - point_c ) / det;
         let lambda_c = 1f - lambda_a - lambda_b;
 
-        stack[ stack_length - 1u ] = color_a * lambda_a + color_b * lambda_b + color_c * lambda_c;
+        if ( code == ${u32( BarycentricBlendCode )} ) {
+          stack[ stack_length - 1u ] = color_a * lambda_a + color_b * lambda_b + color_c * lambda_c;
+        }
+        // Perspective-correction
+        else {
+          let z_inverse_a = lambda_a * bitcast<f32>( render_program_instructions[ start_address + 8u ] );
+          let z_inverse_b = lambda_b * bitcast<f32>( render_program_instructions[ start_address + 9u ] );
+          let z_inverse_c = lambda_c * bitcast<f32>( render_program_instructions[ start_address + 10u ] );
+
+          stack[ stack_length - 1u ] = (
+            color_a * z_inverse_a +
+            color_b * z_inverse_b +
+            color_c * z_inverse_c
+          ) / ( z_inverse_a + z_inverse_b + z_inverse_c );
+        }
       }
       default: {
         // TODO: a more noticeable error code?

@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderColor, RenderEvaluationContext, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalize, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
+import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderColor, RenderEvaluationContext, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalize, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import Vector3 from '../../../dot/js/Vector3.js';
 
 QUnit.module( 'TestRenderProgram' );
 
@@ -173,6 +174,19 @@ renderProgramTest(
     new Vector2( 6, -2 ),
     new Vector2( -2, 4 ),
     RenderBarycentricBlendAccuracy.Accurate,
+    new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
+    new RenderColor( new Vector4( 0, 1, 0, 1 ) ),
+    new RenderColor( new Vector4( 0, 0, 1, 1 ) )
+  )
+);
+
+renderProgramTest(
+  'RenderBarycentricPerspectiveBlend',
+  new RenderBarycentricPerspectiveBlend(
+    new Vector3( -2, -2, 4 ),
+    new Vector3( 6, -2, 5 ),
+    new Vector3( -2, 4, 6 ),
+    RenderBarycentricPerspectiveBlendAccuracy.Centroid,
     new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
     new RenderColor( new Vector4( 0, 1, 0, 1 ) ),
     new RenderColor( new Vector4( 0, 0, 1, 1 ) )
