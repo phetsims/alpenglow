@@ -6,10 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
+import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderFilter, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
+import Matrix4 from '../../../dot/js/Matrix4.js';
 
 QUnit.module( 'TestRenderProgram' );
 
@@ -266,6 +267,20 @@ renderProgramTest(
         new RenderColor( new Vector4( 0.9, 0.8, 0.7, 1 ) )
       )
     ]
+  )
+);
+
+renderProgramTest(
+  'RenderFilter',
+  new RenderFilter(
+    new RenderColor( new Vector4( 0.4, 0.5, 0.6, 0.7 ) ),
+    new Matrix4(
+      -0.4, 0.5, -0.6, -0.7,
+      1, -0.5, 0.6, 3,
+      -0.4, 0.5, -0.6, -0.7,
+      -4, -0.5, 2, 0.7
+    ),
+    new Vector4( 0.01, 0.02, 0.03, 0.04 )
   )
 );
 

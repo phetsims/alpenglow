@@ -39,7 +39,6 @@
 #option BarycentricPerspectiveBlendCode
 // TODO
 #option ComputeRadialBlendRatioCode
-// TODO
 #option FilterCode
 // TODO
 #option ComputeLinearGradientRatioCode
@@ -307,6 +306,36 @@ fn evaluate_render_program_instructions(
             color_c * z_inverse_c
           ) / ( z_inverse_a + z_inverse_b + z_inverse_c );
         }
+      }
+      case ${u32( FilterCode )}: {
+        // TODO: don't require a transpose here, just do it
+        let matrix = transpose( mat4x4(
+          bitcast<f32>( render_program_instructions[ start_address + 1u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 2u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 3u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 4u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 5u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 6u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 7u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 8u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 9u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 10u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 11u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 12u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 13u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 14u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 15u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 16u ] )
+        ) );
+
+        let translation = bitcast<vec4<f32>>( vec4(
+          render_program_instructions[ start_address + 17u ],
+          render_program_instructions[ start_address + 18u ],
+          render_program_instructions[ start_address + 19u ],
+          render_program_instructions[ start_address + 20u ]
+        ) );
+
+        stack[ stack_length - 1u ] = matrix * stack[ stack_length - 1u ] + translation;
       }
       case ${u32( PhongCode )}: {
         let alpha = bitcast<f32>( render_program_instructions[ start_address + 1u ] );
