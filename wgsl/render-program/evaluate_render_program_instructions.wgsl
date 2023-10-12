@@ -37,7 +37,6 @@
 #option ComputeLinearBlendRatioCode
 #option BarycentricBlendCode
 #option BarycentricPerspectiveBlendCode
-// TODO
 #option ComputeRadialBlendRatioCode
 #option FilterCode
 // TODO
@@ -221,19 +220,54 @@ fn evaluate_render_program_instructions(
         let factor = bitcast<f32>( render_program_instructions[ start_address + 1u ] );
         stack[ stack_length - 1u ] = factor * stack[ stack_length - 1u ];
       }
-      case ${u32( ComputeLinearBlendRatioCode )}: {
+      case ${u32( ComputeLinearBlendRatioCode )}, ${u32( ComputeRadialBlendRatioCode )}: {
+        var t: f32;
+
         let accuracy = instruction_u32 >> 8u;
         let zero_offset = render_program_instructions[ start_address + 1u ];
         let one_offset = render_program_instructions[ start_address + 2u ];
         let blend_offset = render_program_instructions[ start_address + 3u ];
-        let scaled_normal = bitcast<vec2<f32>>( vec2(
-          render_program_instructions[ start_address + 4u ],
-          render_program_instructions[ start_address + 5u ]
-        ) );
-        let offset = bitcast<f32>( render_program_instructions[ start_address + 6u ] );
+        if ( code == ${u32( ComputeLinearBlendRatioCode )} ) {
+          let scaled_normal = bitcast<vec2<f32>>( vec2(
+            render_program_instructions[ start_address + 4u ],
+            render_program_instructions[ start_address + 5u ]
+          ) );
+          let offset = bitcast<f32>( render_program_instructions[ start_address + 6u ] );
 
-        let dot_product = dot( scaled_normal, select( fake_centroid, real_centroid, accuracy == 0u ) );
-        let t = dot_product - offset;
+          let centroid = select( fake_centroid, real_centroid, accuracy == 0u );
+          let dot_product = dot( scaled_normal, centroid );
+          t = dot_product - offset;
+        }
+        else {
+          let inverse_transform = mat3x3(
+            bitcast<f32>( render_program_instructions[ start_address + 4u ] ),
+            bitcast<f32>( render_program_instructions[ start_address + 7u ] ),
+            0f,
+            bitcast<f32>( render_program_instructions[ start_address + 5u ] ),
+            bitcast<f32>( render_program_instructions[ start_address + 8u ] ),
+            0f,
+            bitcast<f32>( render_program_instructions[ start_address + 6u ] ),
+            bitcast<f32>( render_program_instructions[ start_address + 9u ] ),
+            1f
+          );
+          let radius0 = bitcast<f32>( render_program_instructions[ start_address + 10u ] );
+          let radius1 = bitcast<f32>( render_program_instructions[ start_address + 11u ] );
+
+          var average_distance: f32;
+
+          if ( accuracy == 0u ) {
+            // TODO: evaluate the integral!!!!!
+            let localPoint = inverse_transform * vec3( real_centroid, 1f );
+            average_distance = length( localPoint );
+          }
+          else {
+            let centroid = select( fake_centroid, real_centroid, accuracy == 1u );
+            let localPoint = inverse_transform * vec3( centroid, 1f );
+            average_distance = length( localPoint.xy );
+          }
+
+          t = ( average_distance - radius0 ) / ( radius1 - radius0 );
+        }
 
         stack[ stack_length ] = vec4( t, 0f, 0f, 0f );
         stack_length++;

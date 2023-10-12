@@ -6,11 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderFilter, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
+import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderFilter, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import Matrix4 from '../../../dot/js/Matrix4.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 
 QUnit.module( 'TestRenderProgram' );
 
@@ -168,6 +169,18 @@ renderProgramTest(
     new Vector2( 1, 0 ),
     0.25,
     RenderLinearBlendAccuracy.Accurate,
+    new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
+    new RenderColor( new Vector4( 0, 1, 0, 1 ) )
+  )
+);
+
+renderProgramTest(
+  'Simple (BUT CENTROID) Radial Blend',
+  new RenderRadialBlend(
+    Matrix3.scaling( 2 ),
+    0,
+    0.5,
+    RenderRadialBlendAccuracy.Centroid,
     new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
     new RenderColor( new Vector4( 0, 1, 0, 1 ) )
   )
