@@ -166,6 +166,67 @@ export default class ByteEncoder {
     this._u8Array = new Uint8Array( this._arrayBuffer );
   }
 
+  public static padLeft( input: string, padding: string, length: number ): string {
+    let result = input;
+
+    const padLength = length - input.length;
+    for ( let i = 0; i < padLength; i++ ) {
+      result = padding + result;
+    }
+
+    return result;
+  }
+
+  public static padRight( input: string, padding: string, length: number ): string {
+    let result = input;
+
+    const padLength = length - input.length;
+    for ( let i = 0; i < padLength; i++ ) {
+      result = result + padding;
+    }
+
+    return result;
+  }
+
+  public static toU32Hex( n: number ): string {
+    return ByteEncoder.padLeft( n.toString( 16 ), '.', 8 );
+  }
+
+  public static toU32Binary( n: number ): string {
+    return ByteEncoder.padLeft( n.toString( 2 ), '0', 32 );
+  }
+
+  public getDebug32String(): string {
+    const u32Array = this.u32Array;
+    const i32Array = this.i32Array;
+    const f32Array = this.f32Array;
+
+    const u32Size = Math.max( ...u32Array.map( s => ( '' + s ).length ) );
+    const i32Size = Math.max( ...i32Array.map( s => ( '' + s ).length ) );
+    const f32Size = Math.max( ...f32Array.map( s => ( '' + s ).length ) );
+    const indexSize = ( '' + ( u32Array.length - 1 ) ).length;
+    const hexIndexSize = ( '' + ( u32Array.length - 1 ).toString( 16 ) ).length;
+
+    let result = '';
+    result += `${ByteEncoder.padLeft( 'i', ' ', indexSize )} ${ByteEncoder.padLeft( 'i', ' ', hexIndexSize )} ${ByteEncoder.padLeft( 'binary', ' ', 32 )} ${ByteEncoder.padLeft( 'hex', ' ', 8 )} ${ByteEncoder.padLeft( 'i32', ' ', i32Size )} ${ByteEncoder.padLeft( 'u32', ' ', u32Size )} ${ByteEncoder.padRight( 'f32', ' ', f32Size )}\n`;
+    for ( let i = 0; i < u32Array.length; i++ ) {
+      const u32 = u32Array[ i ];
+      const i32 = i32Array[ i ];
+      const f32 = f32Array[ i ];
+
+      const index = ByteEncoder.padLeft( '' + i, ' ', indexSize );
+      const hexIndex = ByteEncoder.padLeft( '' + i.toString( 16 ), ' ', hexIndexSize );
+      const hex = ByteEncoder.toU32Hex( u32 );
+      const binary = ByteEncoder.toU32Binary( u32 );
+      const u32String = ByteEncoder.padLeft( '' + u32, ' ', u32Size );
+      const i32String = ByteEncoder.padLeft( '' + i32, ' ', i32Size );
+      const f32String = ByteEncoder.padRight( '' + f32, ' ', f32Size );
+      result += `${index} ${hexIndex} ${binary} ${hex} ${i32String} ${u32String} ${f32String}\n`;
+    }
+
+    return result;
+  }
+
   public static alignUp( len: number, alignment: number ): number {
     assert && assert( Number.isInteger( Math.log2( alignment ) ) );
 

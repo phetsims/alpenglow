@@ -2638,6 +2638,13 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       const instructions = [];
       program.writeInstructions( instructions );
 
+      console.log( instructions.map( instruction => instruction.toString() ).join( '\n' ) );
+
+      const encoder = new phet.alpenglow.ByteEncoder();
+      phet.alpenglow.RenderInstruction.instructionsToBinary( encoder, instructions );
+
+      console.log( encoder.getDebug32String() );
+
       const executor = new phet.alpenglow.RenderExecutor();
       executor.loadInstructions( instructions );
       console.log( executor.instructions );
