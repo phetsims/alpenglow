@@ -13,9 +13,9 @@ import Vector4 from '../../../dot/js/Vector4.js';
 
 export enum RenderLinearGradientAccuracy {
   SplitAccurate = 0,
-  SplitPixelCenter = 2,
-  UnsplitCentroid = 3,
-  UnsplitPixelCenter = 4
+  SplitPixelCenter = 1,
+  UnsplitCentroid = 2,
+  UnsplitPixelCenter = 3
   // Restricted to 2-bit length, if adding more, check serialization to binary
 }
 

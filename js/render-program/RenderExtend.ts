@@ -17,3 +17,9 @@ enum RenderExtend {
 export default RenderExtend;
 
 alpenglow.register( 'RenderExtend', RenderExtend );
+
+export const RENDER_EXTEND_CONSTANTS = {
+  ExtendPad: RenderExtend.Pad,
+  ExtendReflect: RenderExtend.Reflect,
+  ExtendRepeat: RenderExtend.Repeat
+} as const;

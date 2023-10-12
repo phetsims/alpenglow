@@ -303,12 +303,19 @@ const twoPointToUnitLine = ( p0: Vector2, p1: Vector2 ): Matrix3 => {
 };
 
 enum RadialGradientType {
-  Circular = 1,
-  Strip = 2,
-  FocalOnCircle = 3,
-  Cone = 4
+  Circular = 0,
+  Strip = 1,
+  FocalOnCircle = 2,
+  Cone = 3
   // 2-bits, for binary serialization
 }
+
+export const RENDER_GRADIENT_TYPE_CONSTANTS = {
+  GradientTypeCircular: RadialGradientType.Circular,
+  GradientTypeStrip: RadialGradientType.Strip,
+  GradientTypeFocalOnCircle: RadialGradientType.FocalOnCircle,
+  GradientTypeCone: RadialGradientType.Cone
+} as const;
 
 export class RenderRadialGradientLogic {
 
@@ -474,7 +481,8 @@ export class RenderRadialGradientLogic {
       if ( is_swapped ) {
         t = 1 - t;
       }
-
+console.log( t );
+console.log( is_swapped );
       return t;
     }
     else {

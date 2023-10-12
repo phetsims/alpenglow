@@ -6,12 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderFilter, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
+import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderFilter, RenderGradientStop, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearGradient, RenderLinearGradientAccuracy, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderRadialGradient, RenderRadialGradientAccuracy, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import RenderExtend from '../render-program/RenderExtend.js';
 
 QUnit.module( 'TestRenderProgram' );
 
@@ -183,6 +184,74 @@ renderProgramTest(
     RenderRadialBlendAccuracy.Centroid,
     new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
     new RenderColor( new Vector4( 0, 1, 0, 1 ) )
+  )
+);
+
+renderProgramTest(
+  'RenderLinearGradient A',
+  new RenderLinearGradient(
+    Matrix3.IDENTITY,
+    new Vector2( 0, 0 ),
+    new Vector2( 1, 0 ),
+    [
+      new RenderGradientStop( 0, new RenderColor( new Vector4( 1, 0, 0, 1 ) ) ),
+      new RenderGradientStop( 0.2, new RenderColor( new Vector4( 0, 1, 0, 1 ) ) ),
+      new RenderGradientStop( 1, new RenderColor( new Vector4( 0, 0, 1, 1 ) ) )
+    ],
+    RenderExtend.Pad,
+    RenderLinearGradientAccuracy.SplitAccurate
+  )
+);
+
+renderProgramTest(
+  'RenderLinearGradient B',
+  new RenderLinearGradient(
+    Matrix3.IDENTITY,
+    new Vector2( 0, 0 ),
+    new Vector2( 1, 0 ),
+    [
+      new RenderGradientStop( 0, new RenderColor( new Vector4( 1, 0, 0, 1 ) ) ),
+      new RenderGradientStop( 0.7, new RenderColor( new Vector4( 0, 1, 0, 1 ) ) ),
+      new RenderGradientStop( 1, new RenderColor( new Vector4( 0, 0, 1, 1 ) ) )
+    ],
+    RenderExtend.Pad,
+    RenderLinearGradientAccuracy.SplitAccurate
+  )
+);
+
+renderProgramTest(
+  'RenderRadialGradient A',
+  new RenderRadialGradient(
+    Matrix3.IDENTITY,
+    new Vector2( 0, 0 ),
+    0,
+    new Vector2( 0, 0 ),
+    1,
+    [
+      new RenderGradientStop( 0, new RenderColor( new Vector4( 1, 0, 0, 1 ) ) ),
+      new RenderGradientStop( 0.1, new RenderColor( new Vector4( 0, 1, 0, 1 ) ) ),
+      new RenderGradientStop( 1, new RenderColor( new Vector4( 0, 0, 1, 1 ) ) )
+    ],
+    RenderExtend.Pad,
+    RenderRadialGradientAccuracy.SplitAccurate
+  )
+);
+
+renderProgramTest(
+  'RenderRadialGradient B',
+  new RenderRadialGradient(
+    Matrix3.IDENTITY,
+    new Vector2( 0, 0 ),
+    0,
+    new Vector2( 0, 0 ),
+    1,
+    [
+      new RenderGradientStop( 0, new RenderColor( new Vector4( 1, 0, 0, 1 ) ) ),
+      new RenderGradientStop( 0.9, new RenderColor( new Vector4( 0, 1, 0, 1 ) ) ),
+      new RenderGradientStop( 1, new RenderColor( new Vector4( 0, 0, 1, 1 ) ) )
+    ],
+    RenderExtend.Pad,
+    RenderRadialGradientAccuracy.SplitAccurate
   )
 );
 

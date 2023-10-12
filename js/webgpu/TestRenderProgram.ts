@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, LinearEdge, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RenderInstruction, RenderProgram, wgsl_test_render_program } from '../imports.js';
+import { alpenglow, Binding, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, LinearEdge, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderInstruction, RenderProgram, wgsl_test_render_program } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -37,11 +37,11 @@ export default class TestRenderProgram {
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], merge( {
+      ], merge( merge( {
         // TODO: good sizes? Can get values of these from a RenderProgram
         stackSize: 10,
         instructionStackSize: 8
-      }, RenderInstruction.CODE_NAME_CONSTANTS, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS ) );
+      }, RenderInstruction.CODE_NAME_CONSTANTS, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS ), RENDER_GRADIENT_TYPE_CONSTANTS ) );
       shaderMap.set( deviceContext, shader );
     }
     const shader = shaderMap.get( deviceContext )!;

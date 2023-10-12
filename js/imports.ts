@@ -138,6 +138,10 @@ export { default as wgsl_bounds_double_area_edge } from '../wgsl/clip/bounds_dou
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_evaluate_render_program_instructions } from '../wgsl/render-program/evaluate_render_program_instructions.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_extend_f32 } from '../wgsl/render-program/extend_f32.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_extend_i32 } from '../wgsl/render-program/extend_i32.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_inclusive_to_exclusive_scan_indices } from '../wgsl/utils/inclusive_to_exclusive_scan_indices.js';
@@ -209,7 +213,7 @@ export { default as PolygonFilterType, getPolygonFilterWidth, getPolygonFilterEx
 export { default as Mesh } from './render-program/Mesh.js';
 export { default as RenderBlendType, RENDER_BLEND_CONSTANTS } from './render-program/RenderBlendType.js';
 export { default as RenderComposeType, RENDER_COMPOSE_CONSTANTS } from './render-program/RenderComposeType.js';
-export { default as RenderExtend } from './render-program/RenderExtend.js';
+export { default as RenderExtend, RENDER_EXTEND_CONSTANTS } from './render-program/RenderExtend.js';
 export { default as RenderProgramNeeds } from './render-program/RenderProgramNeeds.js';
 export { default as RenderEvaluationContext } from './render-program/RenderEvaluationContext.js';
 export { default as RenderExecutionStack } from './render-program/RenderExecutionStack.js';
@@ -269,7 +273,7 @@ export { default as RenderLinearGradient, RenderLinearGradientAccuracy, RenderLi
 export type { SerializedRenderLinearGradient } from './render-program/RenderLinearGradient.js';
 export { default as RenderRadialBlend, RenderRadialBlendLogic, RenderRadialBlendAccuracy } from './render-program/RenderRadialBlend.js';
 export type { SerializedRenderRadialBlend } from './render-program/RenderRadialBlend.js';
-export { default as RenderRadialGradient, RenderRadialGradientAccuracy, RenderRadialGradientLogic } from './render-program/RenderRadialGradient.js';
+export { default as RenderRadialGradient, RenderRadialGradientAccuracy, RenderRadialGradientLogic, RENDER_GRADIENT_TYPE_CONSTANTS } from './render-program/RenderRadialGradient.js';
 export type { SerializedRenderRadialGradient } from './render-program/RenderRadialGradient.js';
 export { default as RenderResampleType } from './render-program/RenderResampleType.js';
 export { isWindingIncluded } from './render-program/FillRule.js';

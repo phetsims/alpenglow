@@ -14,6 +14,8 @@
 #import ../color/linear_displayP3_to_linear_sRGB
 #import ../color/linear_sRGB_to_linear_displayP3
 #import ../color/blend_compose
+#import ./extend_f32
+#import ./extend_i32
 
 #option ExitCode
 #option ReturnCode
@@ -39,12 +41,15 @@
 #option BarycentricPerspectiveBlendCode
 #option ComputeRadialBlendRatioCode
 #option FilterCode
-// TODO
 #option ComputeLinearGradientRatioCode
-// TODO
 #option ComputeRadialGradientRatioCode
 // TODO
 #option ImageCode
+
+#option GradientTypeCircular
+#option GradientTypeStrip
+#option GradientTypeFocalOnCircle
+#option GradientTypeCone
 
 #option stackSize
 #option instructionStackSize
@@ -294,6 +299,200 @@ fn evaluate_render_program_instructions(
           instruction_stack[ instruction_stack_length ] = instruction_address;
           instruction_stack_length++;
           instruction_address = start_address + one_offset;
+        }
+      }
+      case ${u32( ComputeLinearGradientRatioCode )}, ${u32( ComputeRadialGradientRatioCode )}: {
+        let is_linear = code == ${u32( ComputeLinearGradientRatioCode )};
+
+        let accuracy = ( instruction_u32 >> 8u ) & 0x7u;
+        let extend = ( instruction_u32 >> 11u ) & 0x2u;
+        let ratio_count = instruction_u32 >> 16u;
+
+        let transform = mat3x3(
+          bitcast<f32>( render_program_instructions[ start_address + 1u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 4u ] ),
+          0f,
+          bitcast<f32>( render_program_instructions[ start_address + 2u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 5u ] ),
+          0f,
+          bitcast<f32>( render_program_instructions[ start_address + 3u ] ),
+          bitcast<f32>( render_program_instructions[ start_address + 6u ] ),
+          1f
+        );
+
+        var t: f32;
+        if ( is_linear ) {
+          let inverse_transform = transform;
+          let start = bitcast<vec2<f32>>( vec2(
+              render_program_instructions[ start_address + 7u ],
+              render_program_instructions[ start_address + 8u ]
+          ) );
+          let grad_delta = bitcast<vec2<f32>>( vec2(
+              render_program_instructions[ start_address + 9u ],
+              render_program_instructions[ start_address + 10u ]
+          ) );
+
+          let centroid = select( fake_centroid, real_centroid, accuracy == 0u || accuracy == 2u );
+
+          let local_point = ( inverse_transform * vec3( centroid, 1f ) ).xy;
+          let local_delta = local_point - start;
+
+          let raw_t = select( 0f, dot( local_delta, grad_delta ) / dot( grad_delta, grad_delta ), length( grad_delta ) > 0f, );
+
+          t = extend_f32( raw_t, extend );
+        }
+        else {
+          let kind = ( instruction_u32 >> 13u ) & 0x3u;
+          let is_swapped = ( ( instruction_u32 >> 15u ) % 0x1u ) != 0u;
+          let conic_transform = transform;
+          let focal_x = bitcast<f32>( render_program_instructions[ start_address + 7u ] );
+          let radius = bitcast<f32>( render_program_instructions[ start_address + 8u ] );
+
+          // A good chunk of the code here is borrowed from Vello (https://github.com/linebender/vello)
+          /*
+          Copyright (c) 2020 Raph Levien
+
+          Permission is hereby granted, free of charge, to any
+          person obtaining a copy of this software and associated
+          documentation files (the "Software"), to deal in the
+          Software without restriction, including without
+          limitation the rights to use, copy, modify, merge,
+          publish, distribute, sublicense, and/or sell copies of
+          the Software, and to permit persons to whom the Software
+          is furnished to do so, subject to the following
+          conditions:
+
+          The above copyright notice and this permission notice
+          shall be included in all copies or substantial portions
+          of the Software.
+
+          THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+          ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+          TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+          PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+          SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+          CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+          OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+          IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+          DEALINGS IN THE SOFTWARE.
+          */
+
+          let is_strip = kind == ${u32( GradientTypeStrip )};
+          let is_circular = kind == ${u32( GradientTypeCircular )};
+          let is_focal_on_circle = kind == ${u32( GradientTypeFocalOnCircle )};
+          let r1_recip = select( 1.f / radius, 0f, is_circular );
+          let less_scale = select( 1f, -1f, is_swapped || ( 1f - focal_x ) < 0f );
+          let t_sign = sign( 1f - focal_x );
+
+          // TODO: centroid handling for this
+          let centroid = select( fake_centroid, real_centroid, accuracy == 0u || accuracy == 1u || accuracy == 3u );
+          let point = centroid;
+
+          // Pixel-specifics
+          // TODO: optimization?
+          let local_xy = ( conic_transform * vec3( point, 1f ) ).xy;
+          let x = local_xy.x;
+          let y = local_xy.y;
+          let xx = x * x;
+          let yy = y * y;
+          var is_valid = true;
+          if ( is_strip ) {
+            let a = radius - yy;
+            t = sqrt( a ) + x;
+            is_valid = a >= 0f;
+          }
+          else if ( is_focal_on_circle ) {
+            t = ( xx + yy ) / x;
+            is_valid = t >= 0f && x != 0f;
+          }
+          else if ( radius > 1f ) {
+            t = sqrt( xx + yy ) - x * r1_recip;
+          }
+          else { // radius < 1
+            let a = xx - yy;
+            t = less_scale * sqrt( a ) - x * r1_recip;
+            is_valid = a >= 0f && t >= 0f;
+          }
+          if ( is_valid ) {
+            t = extend_f32( focal_x + t_sign * t, extend );
+            if ( is_swapped ) {
+              t = 1f - t;
+            }
+          }
+        }
+
+        let blend_offset = select( 9u, 11u, is_linear );
+        let stops_offset = blend_offset + 1u; // ratio, stopOffset pairs
+
+        let blend_address = start_address + render_program_instructions[ start_address + blend_offset ];
+
+        var i = -1i;
+        while (
+          i < i32( ratio_count ) - 1i &&
+          bitcast<f32>( render_program_instructions[ start_address + stops_offset + 2u * u32( i + 1i ) ] ) < t
+        ) {
+          oops_count++;
+          if ( oops_count > 0xfffu ) {
+            return oops_inifinite_loop_code;
+          }
+
+          i++;
+        }
+
+        // Queue these up to be in "reverse" order
+        instruction_address = blend_address; // jump to blend_location
+
+        if ( i == -1i ) {
+          stack[ stack_length ] = vec4( 0f, 0f, 0f, 0f ); // number 0, for t
+          stack[ stack_length + 1u ] = vec4( 0f, 0f, 0f, 0f ); // spacer
+          stack_length += 2;
+
+          // call stopLocations[ 0 ]
+          instruction_stack[ instruction_stack_length ] = instruction_address;
+          instruction_stack_length++;
+          instruction_address = start_address + render_program_instructions[ start_address + stops_offset + 1u ];
+        }
+        else if ( i == i32( ratio_count ) - 1i ) {
+          stack[ stack_length ] = vec4( 1f, 0f, 0f, 0f ); // number 1, for t
+          stack[ stack_length + 1u ] = vec4( 0f, 0f, 0f, 0f ); // spacer
+          stack_length += 2;
+
+          // call stopLocations[ i ]
+          instruction_stack[ instruction_stack_length ] = instruction_address;
+          instruction_stack_length++;
+          instruction_address = start_address + render_program_instructions[ start_address + stops_offset + 2u * u32( i ) + 1u ];
+        }
+        else {
+          // TODO: create stops_address to factor out these additions!
+          let ratio_before = bitcast<f32>( render_program_instructions[ start_address + stops_offset + 2u * u32( i ) ] );
+          let ratio_after = bitcast<f32>( render_program_instructions[ start_address + stops_offset + 2u * u32( i + 1i ) ] );
+
+          let ratio = ( t - ratio_before ) / ( ratio_after - ratio_before );
+
+          stack[ stack_length ] = vec4( ratio, 0f, 0f, 0f );
+          stack_length++;
+
+          let hasBefore = ratio < 1f;
+          let hasAfter = ratio > 0f;
+
+          if ( !hasBefore || !hasAfter ) {
+            stack[ stack_length ] = vec4( 0f, 0f, 0f, 0f ); // spacer TODO: can we NOT write to our spacers?
+            stack_length++;
+          }
+
+          if ( hasBefore ) {
+            // call stopLocations[ i ]
+            instruction_stack[ instruction_stack_length ] = instruction_address;
+            instruction_stack_length++;
+            instruction_address = start_address + render_program_instructions[ start_address + stops_offset + 2u * u32( i ) + 1u ];
+          }
+
+          if ( hasAfter ) {
+            // call stopLocations[ i + 1 ]
+            instruction_stack[ instruction_stack_length ] = instruction_address;
+            instruction_stack_length++;
+            instruction_address = start_address + render_program_instructions[ start_address + stops_offset + 2u * u32( i + 1i ) + 1u ];
+          }
         }
       }
       case ${u32( BarycentricBlendCode )}, ${u32( BarycentricPerspectiveBlendCode )}: {
