@@ -94,7 +94,7 @@ fn evaluate_render_program_instructions(
   // TODO: CENTROID OMG
   // TODO: CENTROID OMG
   // TODO: CENTROID OMG
-  var centroid = vec2f( 0.5f, 0.5f );
+  var real_centroid = vec2f( 0.5f, 0.5f );
   var fake_centroid = vec2f( 0.5f, 0.5f );
 
   while ( !is_done ) {
@@ -222,7 +222,7 @@ fn evaluate_render_program_instructions(
         ) );
         let offset = bitcast<f32>( render_program_instructions[ start_address + 6u ] );
 
-        let dot_product = dot( scaled_normal, select( fake_centroid, centroid, accuracy == 0u ) );
+        let dot_product = dot( scaled_normal, select( fake_centroid, real_centroid, accuracy == 0u ) );
         let t = dot_product - offset;
 
         stack[ stack_length ] = vec4( t, 0f, 0f, 0f );
@@ -251,6 +251,37 @@ fn evaluate_render_program_instructions(
           instruction_stack_length++;
           instruction_address = start_address + one_offset;
         }
+      }
+      case ${u32( BarycentricBlendCode )}: {
+        let accuracy = instruction_u32 >> 8u;
+
+        let det = bitcast<f32>( render_program_instructions[ start_address + 1u ] );
+        let diff_a = bitcast<vec2<f32>>( vec2(
+          render_program_instructions[ start_address + 2u ],
+          render_program_instructions[ start_address + 3u ]
+        ) );
+        let diff_b = bitcast<vec2<f32>>( vec2(
+          render_program_instructions[ start_address + 4u ],
+          render_program_instructions[ start_address + 5u ]
+        ) );
+        let point_c = bitcast<vec2<f32>>( vec2(
+          render_program_instructions[ start_address + 6u ],
+          render_program_instructions[ start_address + 7u ]
+        ) );
+
+        let color_a = stack[ stack_length - 1u ];
+        let color_b = stack[ stack_length - 2u ];
+        let color_c = stack[ stack_length - 3u ];
+
+        stack_length -= 2u;
+
+        let point = select( fake_centroid, real_centroid, accuracy == 0u );
+
+        let lambda_a = dot( diff_a, point - point_c ) / det;
+        let lambda_b = dot( diff_b, point - point_c ) / det;
+        let lambda_c = 1f - lambda_a - lambda_b;
+
+        stack[ stack_length - 1u ] = color_a * lambda_a + color_b * lambda_b + color_c * lambda_c;
       }
       default: {
         // TODO: a more noticeable error code?
