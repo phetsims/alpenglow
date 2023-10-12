@@ -580,7 +580,7 @@ export class RenderInstructionBlendCompose extends RenderInstruction {
     ); // 0
   }
 
-  public static override fromBinary(
+  public static fromBinary(
     encoder: ByteEncoder,
     offset: number,
     getLocation: ( offset: number ) => RenderInstructionLocation

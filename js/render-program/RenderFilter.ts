@@ -197,7 +197,7 @@ export class RenderInstructionFilter extends RenderInstruction {
     encoder.pushF32( this.logic.colorTranslation.w ); // 20
   }
 
-  public static override fromBinary(
+  public static fromBinary(
     encoder: ByteEncoder,
     offset: number,
     getLocation: ( offset: number ) => RenderInstructionLocation

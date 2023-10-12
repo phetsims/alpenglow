@@ -280,7 +280,7 @@ export class RenderInstructionPhong extends RenderInstruction {
     encoder.pushU32( this.numLights );
   }
 
-  public static override fromBinary(
+  public static fromBinary(
     encoder: ByteEncoder,
     offset: number,
     getLocation: ( offset: number ) => RenderInstructionLocation

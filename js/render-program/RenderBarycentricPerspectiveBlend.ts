@@ -300,7 +300,7 @@ export class RenderInstructionBarycentricPerspectiveBlend extends RenderInstruct
     encoder.pushF32( this.logic.zInverseC ); // 10
   }
 
-  public static override fromBinary(
+  public static fromBinary(
     encoder: ByteEncoder,
     offset: number,
     getLocation: ( offset: number ) => RenderInstructionLocation

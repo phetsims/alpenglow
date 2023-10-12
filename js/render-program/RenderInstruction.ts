@@ -22,15 +22,6 @@ export default abstract class RenderInstruction {
 
   public abstract writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void;
 
-  public static fromBinary(
-    encoder: ByteEncoder,
-    offset: number,
-    getLocation: ( offset: number ) => RenderInstructionLocation
-  ): RenderInstruction {
-    // TODO: detect all types and set this up
-    throw new Error( 'unimplemented' );
-  }
-
   /**
    * The number of words (u32s, 4 bytes) that this instruction takes up in the binary stream.
    */
@@ -174,11 +165,15 @@ export default abstract class RenderInstruction {
       instructionAddresses.push( address );
       address += RenderInstruction.getInstructionLength( encoder.fullU32Array[ address ] );
     }
+    const exitAddress = address;
 
     const locations: ( RenderInstructionLocation | null )[] = instructionAddresses.map( () => null );
     locations.push( null ); // Add the exit location
 
     const getIndexOfAddress = ( address: number ): number => {
+      if ( address === exitAddress ) {
+        return instructionAddresses.length;
+      }
       const index = instructionAddresses.indexOf( address );
       assert && assert( index >= 0 );
       return index;
@@ -196,7 +191,7 @@ export default abstract class RenderInstruction {
     const instructions: RenderInstruction[] = [];
     for ( let i = 0; i < instructionAddresses.length; i++ ) {
       const address = instructionAddresses[ i ];
-      const instruction = RenderInstruction.fromBinary( encoder, address, addressOffset => {
+      const instruction = RenderInstruction.binaryToInstruction( encoder, address, addressOffset => {
         return getLocationOfAddress( address + addressOffset );
       } );
 
@@ -353,7 +348,7 @@ export class RenderInstructionPush extends RenderInstruction {
     encoder.pushF32( this.vector.w );
   }
 
-  public static override fromBinary(
+  public static fromBinary(
     encoder: ByteEncoder,
     offset: number,
     getLocation: ( offset: number ) => RenderInstructionLocation
@@ -469,7 +464,7 @@ export class RenderInstructionMultiplyScalar extends RenderInstruction {
     encoder.pushF32( this.factor );
   }
 
-  public static override fromBinary(
+  public static fromBinary(
     encoder: ByteEncoder,
     offset: number,
     getLocation: ( offset: number ) => RenderInstructionLocation

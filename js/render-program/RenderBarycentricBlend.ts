@@ -268,7 +268,7 @@ export class RenderInstructionBarycentricBlend extends RenderInstruction {
     encoder.pushF32( this.logic.pointC.y ); // 7
   }
 
-  public static override fromBinary(
+  public static fromBinary(
     encoder: ByteEncoder,
     offset: number,
     getLocation: ( offset: number ) => RenderInstructionLocation

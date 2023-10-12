@@ -483,7 +483,7 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
     }
   }
 
-  public static override fromBinary(
+  public static fromBinary(
     encoder: ByteEncoder,
     offset: number,
     getLocation: ( offset: number ) => RenderInstructionLocation
