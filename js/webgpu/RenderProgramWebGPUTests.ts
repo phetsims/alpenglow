@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalize, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
+import { DeviceContext, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
@@ -130,6 +130,11 @@ renderProgramTest(
 );
 
 renderProgramTest(
+  'RenderNormalDebug',
+  new RenderNormalDebug( new RenderColor( new Vector4( -0.7, 0.5, -0.3, 0 ) ) )
+);
+
+renderProgramTest(
   'RenderStack Fully Opaque',
   new RenderStack( [
     new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
@@ -245,3 +250,22 @@ for ( const blend of blends ) {
     )
   );
 }
+
+renderProgramTest(
+  'RenderPhong',
+  new RenderPhong(
+    50,
+    new RenderColor( new Vector4( 0.1, 0.2, 0.3, 0.3 ) ), // ambient
+    new RenderColor( new Vector4( 0.1, 0.1, 0.1, 1 ) ), // diffuse
+    new RenderColor( new Vector4( 0.2, 0.2, 0.2, 1 ) ), // specular
+    new RenderColor( new Vector4( 0, 0, 5, 0 ) ), // position
+    new RenderColor( new Vector4( 0, 1, 0, 0 ) ), // normal
+    [
+      new RenderLight(
+        new RenderColor( new Vector4( -2.0, 3.5, -2.0, 0 ).normalized() ),
+        new RenderColor( new Vector4( 0.9, 0.8, 0.7, 1 ) )
+      )
+    ]
+  )
+);
+

@@ -30,10 +30,8 @@
 #option OklabToLinearSRGBCode
 #option LinearSRGBToOklabCode
 #option NormalizeCode
-// TODO
 #option NormalDebugCode
 #option MultiplyScalarCode
-// TODO
 #option PhongCode
 #option PushCode
 #option ComputeLinearBlendRatioCode
@@ -52,6 +50,8 @@
 
 #option stackSize
 #option instructionStackSize
+
+const oops_inifinite_loop_code = vec4f( 5f, 4f, -5f, -4f );
 
 // TODO: options for these names
 // TODO: way to do "overrideable" options, where they have a default in the shader program?
@@ -98,8 +98,7 @@ fn evaluate_render_program_instructions(
   while ( !is_done ) {
     oops_count++;
     if ( oops_count > 0xfffu ) {
-      // TODO: a more noticeable error code?
-      return vec4f( 5f, 4f, -5f, -4f );
+      return oops_inifinite_loop_code;
     }
 
     let start_address = instruction_address;
@@ -205,6 +204,10 @@ fn evaluate_render_program_instructions(
         let color = stack[ stack_length - 1u ];
         stack[ stack_length - 1u ] = vec4( linear_sRGB_to_oklab( color.rgb ), color.a );
       }
+      case ${u32( NormalDebugCode )}: {
+        let normal = stack[ stack_length - 1u ];
+        stack[ stack_length - 1u ] = vec4( normal.rgb * 0.5f + 0.5f, 1f );
+      }
       case ${u32( BlendComposeCode )}: {
         let color_a = stack[ stack_length - 1u ];
         let color_b = stack[ stack_length - 2u ];
@@ -304,6 +307,51 @@ fn evaluate_render_program_instructions(
             color_c * z_inverse_c
           ) / ( z_inverse_a + z_inverse_b + z_inverse_c );
         }
+      }
+      case ${u32( PhongCode )}: {
+        let alpha = bitcast<f32>( render_program_instructions[ start_address + 1u ] );
+        let num_lights = render_program_instructions[ start_address + 2u ];
+
+        let ambient = stack[ stack_length - 1u ];
+        let diffuse = stack[ stack_length - 2u ];
+        let specular = stack[ stack_length - 3u ];
+        let position = stack[ stack_length - 4u ];
+        let normal = stack[ stack_length - 5u ];
+        stack_length -= 4u;
+
+        var output = ambient;
+
+        // TODO: don't assume camera is at origin?
+        let view_direction = normalize( -position );
+
+        for ( var i = 0u; i < num_lights; i++ ) {
+          oops_count++;
+          if ( oops_count > 0xfffu ) {
+            return oops_inifinite_loop_code;
+          }
+
+          // TODO: really examine stack sizes, since it affects what we do here!!!
+
+          let light_direction = stack[ stack_length - 2u ];
+          let light_color = stack[ stack_length - 3u ];
+          stack_length -= 2u;
+
+          let dot_product = dot( normal, light_direction );
+          if ( dot_product > 0f ) {
+            // TODO: consider reflect()? TODO: make sure this isn't reversed (we have different sign convention, no?)
+            let reflection = 2f * dot_product * normal - light_direction;
+            let specular_amount = pow( dot( reflection, view_direction ), alpha );
+
+            output += light_color * (
+              // keep alphas?
+              diffuse * vec4( vec3( dot_product ), 1f ) +
+              specular * vec4( vec3( specular_amount ), 1f )
+            );
+          }
+        }
+
+        // clamp for now
+        stack[ stack_length - 1u ] = clamp( output, vec4( 0f ), vec4( 1f ) );
       }
       default: {
         // TODO: a more noticeable error code?

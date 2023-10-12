@@ -39,7 +39,7 @@ export default class TestRenderProgram {
         Binding.STORAGE_BUFFER
       ], merge( {
         // TODO: good sizes? Can get values of these from a RenderProgram
-        stackSize: 8,
+        stackSize: 10,
         instructionStackSize: 8
       }, RenderInstruction.CODE_NAME_CONSTANTS, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS ) );
       shaderMap.set( deviceContext, shader );

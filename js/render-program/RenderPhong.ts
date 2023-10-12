@@ -277,7 +277,7 @@ export class RenderInstructionPhong extends RenderInstruction {
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
     encoder.pushU32( RenderInstruction.PhongCode );
     encoder.pushF32( this.alpha );
-    encoder.pushU32( this.numLights );
+    encoder.pushU32( this.numLights ); // TODO: why not toss this... into the PhongCode U32?
   }
 
   public static fromBinary(
