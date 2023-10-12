@@ -9,6 +9,7 @@
 #import ./RasterStageConfig
 #import ./RasterCompleteChunk
 #import ./RasterCompleteEdge
+#import ../render-program/evaluate_render_program_instructions
 
 #option workgroupSize
 #option integerScale
@@ -16,13 +17,15 @@
 @group(0) @binding(0)
 var<uniform> config: RasterStageConfig;
 @group(0) @binding(1)
-var<storage, read> complete_chunks: array<RasterCompleteChunk>;
+var<storage, read> render_program_instructions: array<u32>;
 @group(0) @binding(2)
-var<storage, read> complete_edges: array<RasterCompleteEdge>;
+var<storage, read> complete_chunks: array<RasterCompleteChunk>;
 @group(0) @binding(3)
+var<storage, read> complete_edges: array<RasterCompleteEdge>;
+@group(0) @binding(4)
 var<storage, read_write> accumulation: array<atomic<i32>>;
 #ifdef debugAccumulation
-@group(0) @binding(4)
+@group(0) @binding(5)
 var<storage, read_write> debug_accumulation: array<i32>;
 #endif
 
@@ -69,7 +72,21 @@ fn main(
   // NOTE: remember area might be larger for a multi-pixel constant area
   let pixel_area = select( area, 1.0f, is_full_area );
 
-  let color = vec4f( 1.0f, 0.0f, 0.0f, 1.0f ); // TODO: RenderProgram
+  let color = evaluate_render_program_instructions(
+    render_program_index,
+    chunk.edgesOffset,
+    chunk.numEdges,
+    is_full_area,
+    area,
+    chunk.minX,
+    chunk.minY,
+    chunk.maxX,
+    chunk.maxY,
+    chunk.minXCount,
+    chunk.minYCount,
+    chunk.maxXCount,
+    chunk.maxYCount
+  );
 
   let integer_color = vec4<i32>( round( color * ${f32( integerScale )} * pixel_area ) );
 

@@ -6,7 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
+import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderColor, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderProgram, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import Vector4 from '../../../dot/js/Vector4.js';
 
 // TODO: move to 256 after testing (64 helps us test more cases here)
 // const WORKGROUP_SIZE = 64;
@@ -90,7 +92,21 @@ export default class RasterClipper {
       debugReduceBuffers: DEBUG_REDUCE_BUFFERS,
       debugAccumulation: DEBUG_ACCUMULATION,
       integerScale: 5e6,
-      preferredStorageFormat: deviceContext.preferredStorageFormat
+      preferredStorageFormat: deviceContext.preferredStorageFormat,
+
+      // for RenderProgram handling
+      stackSize: 10,
+      instructionStackSize: 8,
+      // eslint-disable-next-line no-object-spread-on-non-literals
+      ...RenderInstruction.CODE_NAME_CONSTANTS,
+      // eslint-disable-next-line no-object-spread-on-non-literals
+      ...RENDER_BLEND_CONSTANTS,
+      // eslint-disable-next-line no-object-spread-on-non-literals
+      ...RENDER_COMPOSE_CONSTANTS,
+      // eslint-disable-next-line no-object-spread-on-non-literals
+      ...RENDER_EXTEND_CONSTANTS,
+      // eslint-disable-next-line no-object-spread-on-non-literals
+      ...RENDER_GRADIENT_TYPE_CONSTANTS
     } as const;
 
     this.initialChunksShader = ComputeShader.fromSource( this.device, 'initial_chunks', wgsl_raster_initial_chunk, [
@@ -189,6 +205,7 @@ export default class RasterClipper {
       Binding.UNIFORM_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER,
       ...( DEBUG_ACCUMULATION ? [ Binding.STORAGE_BUFFER ] : [] )
     ], shaderOptions );
@@ -240,13 +257,34 @@ export default class RasterClipper {
       rawInputChunks = [ new RasterChunk(
         0,
         false,
-        true,
+        false,
         0,
         rawInputEdges.length,
         0, 0, 256, 256,
         0, 0, 0, 0
       ) ];
     }
+
+    const renderPrograms: RenderProgram[] = [
+      new RenderLinearBlend(
+        new Vector2( 1 / 256, 0 ),
+        0,
+        RenderLinearBlendAccuracy.Accurate,
+        new RenderColor( new Vector4( 1, 0, 0, 1 ) ),
+        new RenderColor( new Vector4( 0, 0, 1, 1 ) )
+      ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
+      new RenderColor( new Vector4( 0, 1, 1, 1 ) )
+    ];
 
     const numInputChunks = rawInputChunks.length;
     const numInputEdges = rawInputEdges.length;
@@ -323,6 +361,15 @@ export default class RasterClipper {
       } );
       device.queue.writeBuffer( configBuffer, 0, new Uint32Array( configData ).buffer );
 
+      const instructionsEncoder = new ByteEncoder();
+      renderPrograms.forEach( program => {
+        const instructions: RenderInstruction[] = [];
+        program.writeInstructions( instructions );
+        RenderInstruction.instructionsToBinary( instructionsEncoder, instructions );
+      } );
+      const instructionsBuffer = deviceContext.createBuffer( instructionsEncoder.byteLength );
+      device.queue.writeBuffer( instructionsBuffer, 0, instructionsEncoder.arrayBuffer );
+
       const inputChunksBuffer = deviceContext.createBuffer( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
       const inputChunksEncoder = new ByteEncoder( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
       rawInputChunks.forEach( chunk => chunk.writeEncoding( inputChunksEncoder ) );
@@ -377,7 +424,7 @@ export default class RasterClipper {
 
       const numStages = 16;
       const stageOutput = rasterClipper.runAccumulate(
-        encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, numStages
+        encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, numStages
       );
 
       // Have the fine-rasterization shader use the preferred format as output (for now)
@@ -414,6 +461,7 @@ export default class RasterClipper {
   public runAccumulate(
     encoder: GPUCommandEncoder,
     configBuffer: GPUBuffer,
+    instructionsBuffer: GPUBuffer,
     inputChunksBuffer: GPUBuffer,
     inputEdgesBuffer: GPUBuffer,
     accumulationBuffer: GPUBuffer,
@@ -425,7 +473,7 @@ export default class RasterClipper {
     const temporaryBuffers: GPUBuffer[] = [];
 
     for ( let i = 0; i < numStages; i++ ) {
-      const stageResult = this.runStage( encoder, configBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer );
+      const stageResult = this.runStage( encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer );
       inputChunksBuffer = stageResult.reducibleChunksBuffer;
       inputEdgesBuffer = stageResult.reducibleEdgesBuffer;
       temporaryBuffers.push( inputChunksBuffer, inputEdgesBuffer, ...stageResult.temporaryBuffers );
@@ -440,6 +488,7 @@ export default class RasterClipper {
   public runStage(
     encoder: GPUCommandEncoder,
     configBuffer: GPUBuffer,
+    instructionsBuffer: GPUBuffer,
     inputChunksBuffer: GPUBuffer,
     inputEdgesBuffer: GPUBuffer,
     accumulationBuffer: GPUBuffer
@@ -695,6 +744,7 @@ export default class RasterClipper {
 
     this.accumulateShader.dispatchIndirect( encoder, [
       configBuffer,
+      instructionsBuffer,
       completeChunksBuffer,
       completeEdgesBuffer,
       accumulationBuffer,

@@ -95,8 +95,8 @@ fn evaluate_render_program_instructions(
   // TODO: CENTROID OMG
   // TODO: CENTROID OMG
   // TODO: CENTROID OMG
-  var real_centroid = vec2f( 0.5f, 0.5f );
-  var fake_centroid = vec2f( 0.5f, 0.5f );
+  var real_centroid = 0.5f * vec2f( maxX + minX, maxY + minY );
+  var fake_centroid = 0.5f * vec2f( maxX + minX, maxY + minY );
 
   while ( !is_done ) {
     oops_count++;
