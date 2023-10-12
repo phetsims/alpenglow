@@ -21,6 +21,7 @@ const USE_DEMO = true;
 // const ONLY_FIRST_ITERATION = true;
 const DEBUG_REDUCE_BUFFERS = false;
 const DEBUG_ACCUMULATION = false;
+const ONLY_ONCE = true;
 
 
 // TODO: figure out better output buffer size, since it's hard to bound
@@ -305,7 +306,12 @@ export default class RasterClipper {
       0, 0
     ];
 
+    let count = 0;
     ( function step() {
+      if ( ONLY_ONCE && count++ > 0 ) {
+        return;
+      }
+
       // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
       window.requestAnimationFrame( step, canvas );
 
