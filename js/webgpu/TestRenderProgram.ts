@@ -37,6 +37,9 @@ export default class TestRenderProgram {
     const instructionEncoder = new ByteEncoder();
     RenderInstruction.instructionsToBinary( instructionEncoder, instructions );
 
+    console.log( instructions.map( instruction => instruction.toString() ).join( '\n' ) );
+    console.log( instructionEncoder.getDebug32String() );
+
     const configEncoder = new ByteEncoder();
     // TODO: test offsets?
     configEncoder.pushU32( 0 ); // render_program_index: u32,
@@ -76,7 +79,9 @@ export default class TestRenderProgram {
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], merge( {
-      // TODO: more options?
+      // TODO: good sizes? Can get values of these from a RenderProgram
+      stackSize: 8,
+      instructionStackSize: 8
     }, RenderInstruction.CODE_NAME_CONSTANTS ) );
 
     return new Promise<Vector4>( ( resolve, reject ) => {
