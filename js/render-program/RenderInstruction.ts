@@ -273,6 +273,47 @@ export default abstract class RenderInstruction {
         throw new Error( `Unknown/unimplemented instruction code: ${code}` );
     }
   }
+
+  public static instructionsEquals( a: RenderInstruction[], b: RenderInstruction[] ): boolean {
+    const aFiltered = a.filter( instruction => !( instruction instanceof RenderInstructionLocation ) );
+    const bFiltered = b.filter( instruction => !( instruction instanceof RenderInstructionLocation ) );
+
+    if ( aFiltered.length !== bFiltered.length ) {
+      return false;
+    }
+
+    // Count how many "non-location" instructions deep each location is, so we can compare them
+    const locationIndexMap = new Map<RenderInstructionLocation, number>();
+    const process = ( instructions: RenderInstruction[] ): void => {
+      let count = 0;
+      for ( let i = 0; i < instructions.length; i++ ) {
+        const instruction = instructions[ i ];
+        if ( instruction instanceof RenderInstructionLocation ) {
+          locationIndexMap.set( instruction, count );
+        }
+        else {
+          count++;
+        }
+      }
+    };
+    process( a );
+    process( b );
+
+    const areLocationsEqual = ( a: RenderInstructionLocation, b: RenderInstructionLocation ) => {
+      return locationIndexMap.get( a ) === locationIndexMap.get( b );
+    };
+
+    for ( let i = 0; i < aFiltered.length; i++ ) {
+      const aInstruction = aFiltered[ i ];
+      const bInstruction = bFiltered[ i ];
+
+      if ( !aInstruction.equals( bInstruction, areLocationsEqual ) ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 
 const scratchVector = new Vector4( 0, 0, 0, 0 );
