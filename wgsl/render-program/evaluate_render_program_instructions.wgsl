@@ -5,6 +5,14 @@
  */
 
 #import ../raster/RasterCompleteEdge
+#import ../color/premultiply
+#import ../color/unpremultiply
+#import ../color/sRGB_to_linear_sRGB
+#import ../color/linear_sRGB_to_sRGB
+#import ../color/linear_sRGB_to_oklab
+#import ../color/oklab_to_linear_sRGB
+#import ../color/linear_displayP3_to_linear_sRGB
+#import ../color/linear_sRGB_to_linear_displayP3
 
 #option ExitCode
 #option ReturnCode
@@ -15,23 +23,14 @@
 #option BlendComposeCode
 // TODO
 #option OpaqueJumpCode
-// TODO
 #option PremultiplyCode
-// TODO
 #option UnpremultiplyCode
-// TODO
 #option SRGBToLinearSRGBCode
-// TODO
 #option LinearSRGBToSRGBCode
-// TODO
 #option LinearDisplayP3ToLinearSRGBCode
-// TODO
 #option LinearSRGBToLinearDisplayP3Code
-// TODO
 #option OklabToLinearSRGBCode
-// TODO
 #option LinearSRGBToOklabCode
-// TODO
 #option NormalizeCode
 // TODO
 #option NormalDebugCode
@@ -161,6 +160,39 @@ fn evaluate_render_program_instructions(
 
           stack[ stack_length - 1u ] = zero_color * minus_t + one_color * t;
         }
+      }
+      case ${u32( NormalizeCode )}: {
+        stack[ stack_length - 1u ] = normalize( stack[ stack_length - 1u ] );
+      }
+      case ${u32( PremultiplyCode )}: {
+        stack[ stack_length - 1u ] = premultiply( stack[ stack_length - 1u ] );
+      }
+      case ${u32( UnpremultiplyCode )}: {
+        stack[ stack_length - 1u ] = unpremultiply( stack[ stack_length - 1u ] );
+      }
+      case ${u32( SRGBToLinearSRGBCode )}: {
+        let color = stack[ stack_length - 1u ];
+        stack[ stack_length - 1u ] = vec4( sRGB_to_linear_sRGB( color.rgb ), color.a );
+      }
+      case ${u32( LinearSRGBToSRGBCode )}: {
+        let color = stack[ stack_length - 1u ];
+        stack[ stack_length - 1u ] = vec4( linear_sRGB_to_sRGB( color.rgb ), color.a );
+      }
+      case ${u32( LinearDisplayP3ToLinearSRGBCode )}: {
+        let color = stack[ stack_length - 1u ];
+        stack[ stack_length - 1u ] = vec4( linear_displayP3_to_linear_sRGB( color.rgb ), color.a );
+      }
+      case ${u32( LinearSRGBToLinearDisplayP3Code )}: {
+        let color = stack[ stack_length - 1u ];
+        stack[ stack_length - 1u ] = vec4( linear_sRGB_to_linear_displayP3( color.rgb ), color.a );
+      }
+      case ${u32( OklabToLinearSRGBCode )}: {
+        let color = stack[ stack_length - 1u ];
+        stack[ stack_length - 1u ] = vec4( oklab_to_linear_sRGB( color.rgb ), color.a );
+      }
+      case ${u32( LinearSRGBToOklabCode )}: {
+        let color = stack[ stack_length - 1u ];
+        stack[ stack_length - 1u ] = vec4( linear_sRGB_to_oklab( color.rgb ), color.a );
       }
       case ${u32( ComputeLinearBlendRatioCode )}: {
         let accuracy = instruction_u32 >> 8u;

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { DeviceContext, RenderColor, RenderEvaluationContext, RenderLinearBlend, RenderLinearBlendAccuracy, RenderProgram, TestRenderProgram } from '../imports.js';
+import { DeviceContext, RenderColor, RenderEvaluationContext, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalize, RenderOklabToLinearSRGB, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnpremultiply, TestRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
@@ -66,6 +66,61 @@ const renderProgramTest = (
 renderProgramTest(
   'Simple Color',
   new RenderColor( new Vector4( 0.125, 0.25, 0.5, 1 ) )
+);
+
+renderProgramTest(
+  'Premultiply',
+  new RenderPremultiply( new RenderColor( new Vector4( 0.25, 0.5, 1, 0.5 ) ) )
+);
+
+renderProgramTest(
+  'Unpremultiply',
+  new RenderUnpremultiply( new RenderColor( new Vector4( 0.125, 0.25, 0.5, 0.5 ) ) )
+);
+
+renderProgramTest(
+  'Unpremultiply Zero',
+  new RenderUnpremultiply( new RenderColor( new Vector4( 0, 0, 0, 0 ) ) )
+);
+
+renderProgramTest(
+  'Unpremultiply Small',
+  new RenderUnpremultiply( new RenderColor( new Vector4( 1e-6, 1e-6, 1e-6, 1e-6 ) ) )
+);
+
+renderProgramTest(
+  'RenderSRGBToLinearSRGB',
+  new RenderSRGBToLinearSRGB( new RenderColor( new Vector4( 0.5, 0.5, 0.5, 1 ) ) )
+);
+
+renderProgramTest(
+  'RenderLinearSRGBToSRGB',
+  new RenderLinearSRGBToSRGB( new RenderColor( new Vector4( 0.5, 0.5, 0.5, 1 ) ) )
+);
+
+renderProgramTest(
+  'RenderLinearDisplayP3ToLinearSRGB',
+  new RenderLinearDisplayP3ToLinearSRGB( new RenderColor( new Vector4( 0.5, 0.5, 0.5, 1 ) ) )
+);
+
+renderProgramTest(
+  'RenderLinearSRGBToLinearDisplayP3',
+  new RenderLinearSRGBToLinearDisplayP3( new RenderColor( new Vector4( 0.5, 0.5, 0.5, 1 ) ) )
+);
+
+renderProgramTest(
+  'RenderOklabToLinearSRGB',
+  new RenderOklabToLinearSRGB( new RenderColor( new Vector4( 0.5, 0.5, 0.5, 1 ) ) )
+);
+
+renderProgramTest(
+  'RenderLinearSRGBToOklab',
+  new RenderLinearSRGBToOklab( new RenderColor( new Vector4( 0.5, 0.5, 0.5, 1 ) ) )
+);
+
+renderProgramTest(
+  'RenderNormalize',
+  new RenderNormalize( new RenderColor( new Vector4( 0.5, 0.5, 0.5, 1 ) ) )
 );
 
 renderProgramTest(
