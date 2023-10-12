@@ -64,6 +64,9 @@ export default class ByteEncoder {
   public get f32Array(): Float32Array {
     return new Float32Array( this._arrayBuffer, 0, this._byteLength / 4 );
   }
+  public get arrayBuffer(): ArrayBuffer {
+    return this._arrayBuffer.slice( 0, this._byteLength );
+  }
 
   public clear(): void {
     this._byteLength = 0;

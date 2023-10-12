@@ -2680,6 +2680,75 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
     } );
   };
 
+  window.instructionTest = function() {
+    setTimeout( async function() {
+
+      const program = new phet.alpenglow.RenderColor( phet.dot.v4( 0.8, 0.4, 0, 1 ) );
+      // const program = new phet.alpenglow.RenderBarycentricBlend(
+      //   phet.dot.v2( 0, 0 ),
+      //   phet.dot.v2( 1, 1 ),
+      //   phet.dot.v2( 0, 1 ),
+      //   phet.alpenglow.RenderBarycentricBlendAccuracy.Accurate,
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) )
+      // );
+      // const program = new phet.alpenglow.RenderLinearBlend(
+      //   phet.dot.v2( 1, 0 ),
+      //   0.25,
+      //   phet.alpenglow.RenderLinearBlendAccuracy.Accurate,
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ),
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) )
+      // );
+      // const program = new phet.alpenglow.RenderLinearBlend(
+      //   phet.dot.v2( 1, 0 ),
+      //   0.25,
+      //   phet.alpenglow.RenderLinearBlendAccuracy.Accurate,
+      //   new phet.alpenglow.RenderBarycentricBlend(
+      //     phet.dot.v2( 0, 0 ),
+      //     phet.dot.v2( 1, 1 ),
+      //     phet.dot.v2( 0, 1 ),
+      //     phet.alpenglow.RenderBarycentricBlendAccuracy.Accurate,
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 0 ) ),
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 0 ) ),
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
+      //   ),
+      //   new phet.alpenglow.RenderBarycentricBlend(
+      //     phet.dot.v2( 0, 0 ),
+      //     phet.dot.v2( 1, 1 ),
+      //     phet.dot.v2( 0, 1 ),
+      //     phet.alpenglow.RenderBarycentricBlendAccuracy.Accurate,
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 0 ) ),
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 0, 1 ) ),
+      //     new phet.alpenglow.RenderColor( phet.dot.v4( -4, -4, -4, -4 ) )
+      //   )
+      // );
+      // const program = new phet.alpenglow.RenderStack( [
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) ),
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ),
+      //   new phet.alpenglow.RenderColor( phet.dot.v4( 0.5, 0, 0, 1 ) )
+      // ] );
+
+      const context = new phet.alpenglow.RenderEvaluationContext().set(
+        null, 1, phet.dot.v2( 0.5, 0.5 ), 0, 0, 1, 1
+      );
+
+      const value = await phet.alpenglow.TestRenderProgram.evaluate(
+        program,
+        0, // edgesOffset
+        0, // numEdges
+        [], // edges
+        true, // isFullArea
+        1, // area
+        new phet.dot.Bounds2( 0, 0, 1, 1 ), // bounds
+        -1, 1, 1, -1 // counts
+      );
+
+      console.log( value, 'actual' );
+      console.log( program.evaluate( context ), 'expected' );
+    } );
+  };
+
   window.ellipseTest = function() {
     display.width = 700;
     display.height = 600;

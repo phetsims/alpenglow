@@ -135,6 +135,9 @@ export { default as wgsl_bounds_clip_edge } from '../wgsl/clip/bounds_clip_edge.
 export { default as wgsl_bounds_double_area_edge } from '../wgsl/clip/bounds_double_area_edge.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_evaluate_render_program_instructions } from '../wgsl/render-program/evaluate_render_program_instructions.js';
+
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_inclusive_to_exclusive_scan_indices } from '../wgsl/utils/inclusive_to_exclusive_scan_indices.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
@@ -197,6 +200,8 @@ export { default as wgsl_scan_simple_single } from '../wgsl/examples/scan_simple
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_test_render_program } from '../wgsl/tests/test_render_program.js';
 
 export { default as PolygonFilterType, getPolygonFilterWidth, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand, getPolygonFilterGridBounds } from './render-program/PolygonFilterType.js';
 export { default as Mesh } from './render-program/Mesh.js';
@@ -371,5 +376,6 @@ export type { F32, U32, I32, U8 } from './webgpu/ByteEncoder.js';
 export { default as BufferLogger } from './webgpu/BufferLogger.js';
 export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/BufferLogger.js';
 export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
+export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as RasterClipper } from './webgpu/RasterClipper.js';
 
