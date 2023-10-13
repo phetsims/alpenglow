@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { IntegerEdge, LineIntersector, LineSplitter, PolygonalFace, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderPath, alpenglow } from '../imports.js';
+import { IntegerEdge, LineIntersector, LineSplitter, PolygonalFace, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderPath, alpenglow, HilbertMapping } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -119,6 +119,8 @@ export default class PolygonalBoolean {
     assert && assert( Math.abs( ( scale * bounds.minY + translation.y ) + ( scale * bounds.maxY + translation.y ) ) < 1e-7 );
 
     const integerEdges = IntegerEdge.scaleToIntegerEdges( paths, toIntegerMatrix );
+
+    HilbertMapping.sortCenterMinMax( integerEdges, 1 / ( scale * Math.max( bounds.width, bounds.height ) ) );
 
     // TODO: optional hilbert space-fill sort here?
 

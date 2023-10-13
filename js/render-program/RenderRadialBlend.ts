@@ -253,8 +253,6 @@ export class RenderRadialBlendLogic {
     const t = ( averageDistance - this.radius0 ) / ( this.radius1 - this.radius0 );
     assert && assert( isFinite( t ) );
 
-    console.log( t );
-
     return t;
   }
 }
