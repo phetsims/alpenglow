@@ -93,7 +93,7 @@ export default class ParallelRasterSplitScan {
           await chunkIndexMap.set( context, chunkIndex, baseIndex );
 
           await reducibleChunks.set( context, baseIndex, new RasterChunk(
-            clippedChunk.rasterProgramIndex,
+            clippedChunk.renderProgramIndex,
             clippedChunk.needsFace,
             clippedChunk.isConstant,
             -1, // filled in later
@@ -119,7 +119,7 @@ export default class ParallelRasterSplitScan {
               const y = clippedChunk.minY + Math.floor( i / width );
 
               await completeChunks.set( context, baseIndex + i, new RasterCompleteChunk(
-                clippedChunk.rasterProgramIndex,
+                clippedChunk.renderProgramIndex,
                 0,
                 0,
                 clippedChunk.isFullArea,
@@ -131,7 +131,7 @@ export default class ParallelRasterSplitScan {
           }
           else {
             await completeChunks.set( context, baseIndex, new RasterCompleteChunk(
-              clippedChunk.rasterProgramIndex,
+              clippedChunk.renderProgramIndex,
               -1, // filled in later
               -1, // filled in later
               clippedChunk.isFullArea,

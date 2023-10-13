@@ -164,7 +164,7 @@ export default class RasterChunkReduceData {
     const isComplete = isDiscarded || isFullArea || ( width <= 1 + 1e-8 && height <= 1 + 1e-8 );
 
     return new RasterClippedChunk(
-      clippedChunk.rasterProgramIndex,
+      clippedChunk.renderProgramIndex,
       clippedChunk.needsFace,
       clippedChunk.isConstant,
 

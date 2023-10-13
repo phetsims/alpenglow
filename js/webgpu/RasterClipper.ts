@@ -6,24 +6,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, ParallelRaster, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderProgram, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
+import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, EdgedFace, LinearEdge, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-
-// TODO: move to 256 after testing (64 helps us test more cases here)
-// const WORKGROUP_SIZE = 64;
-// const LOG = false;
-// const USE_DEMO = true;
-// const ONLY_FIRST_ITERATION = false;
 
 const WORKGROUP_SIZE = 128;
 const BOUNDS_REDUCE = false;
 const LOG = false;
-const USE_DEMO = true;
-// const ONLY_FIRST_ITERATION = true;
 const DEBUG_REDUCE_BUFFERS = false;
 const DEBUG_ACCUMULATION = false;
 const ONLY_ONCE = true;
+const NUM_STAGES = 16;
 
 
 // TODO: figure out better output buffer size, since it's hard to bound
@@ -242,35 +235,14 @@ export default class RasterClipper {
 
     const context = deviceContext.getCanvasContext( canvas );
 
-    let rawInputChunks = ParallelRaster.getTestRawInputChunks();
-    let rawInputEdges = ParallelRaster.getTestRawInputEdges();
-
-    if ( USE_DEMO ) {
-      rawInputEdges = [];
-      const unprocessedEdges = TestToCanvas.getTestPath().toEdgedFace().edges;
-      unprocessedEdges.forEach( ( edge, i ) => {
-        rawInputEdges.push( new RasterEdge(
-          0,
-          i === 0,
-          i === unprocessedEdges.length - 1,
-          // NOTE: reversed here, due to our test path!!!
-          edge.endPoint.timesScalar( 0.35 ),
-          edge.startPoint.timesScalar( 0.35 )
-        ) );
-      } );
-      rawInputChunks = [ new RasterChunk(
-        // TODO: fill in this stuff based on the RenderProgram!!
-        0,
-        false,
-        false,
-        0,
-        rawInputEdges.length,
-        0, 0, 256, 256,
-        0, 0, 0, 0
-      ) ];
-    }
-
-    const renderPrograms: RenderProgram[] = [
+    const clippableFace = new EdgedFace( TestToCanvas.getTestPath().toEdgedFace().edges.map( edge => {
+      return new LinearEdge(
+        edge.endPoint.timesScalar( 0.35 ),
+        edge.startPoint.timesScalar( 0.35 )
+      );
+    } ) );
+    const renderableFace = new RenderableFace(
+      clippableFace,
       new RenderLinearBlend(
         new Vector2( 1 / 256, 0 ),
         0,
@@ -279,21 +251,82 @@ export default class RasterClipper {
         new RenderColor( new Vector4( 1, 0, 0, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
         new RenderColor( new Vector4( 0.5, 0, 1, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
       ).colorConverted( RenderColorSpace.premultipliedOklab, RenderColorSpace.premultipliedLinearSRGB ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) ),
-      new RenderColor( new Vector4( 0, 1, 1, 1 ) )
-    ].map( p => p.simplified() );
+      clippableFace.getBounds()
+    );
 
-    const numInputChunks = rawInputChunks.length;
-    const numInputEdges = rawInputEdges.length;
+    let count = 0;
+    await ( async function step() {
+      if ( ONLY_ONCE && count++ > 0 ) {
+        return;
+      }
+
+      // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
+      window.requestAnimationFrame( step, canvas );
+
+      await rasterClipper.rasterize( [ renderableFace ], context.getCurrentTexture() );
+    } )();
+  }
+
+  public rasterize(
+    renderableFaces: RenderableFace[],
+    canvasTexture: GPUTexture
+  ): Promise<void> {
+    const width = canvasTexture.width;
+    const height = canvasTexture.height;
+    const device = this.device;
+    const deviceContext = this.deviceContext;
+
+    // TODO: should we only use the length we're given?
+    const inputChunksEncoder = new ByteEncoder();
+    const instructionsEncoder = new ByteEncoder();
+    const inputEdgesEncoder = new ByteEncoder();
+
+    let numInputChunks = 0;
+    let numInputEdges = 0;
+
+    renderableFaces.forEach( renderableFace => {
+      const renderProgram = renderableFace.renderProgram;
+      const edgesOffset = numInputEdges;
+      const chunkIndex = numInputChunks;
+
+      // TODO: RENDER WITH OFFSETS!
+      const edgeClippedFace = renderableFace.face.toEdgedClippedFaceWithoutCheck( 0, 0, width, height );
+      const edges = edgeClippedFace.edges;
+
+      new RasterChunk(
+        instructionsEncoder.byteLength / 4,
+        renderProgram.needsFace || renderProgram.needsCentroid,
+        renderProgram instanceof RenderColor,
+        edgesOffset,
+        edges.length,
+        edgeClippedFace.minX,
+        edgeClippedFace.minY,
+        edgeClippedFace.maxX,
+        edgeClippedFace.maxY,
+        edgeClippedFace.minXCount,
+        edgeClippedFace.minYCount,
+        edgeClippedFace.maxXCount,
+        edgeClippedFace.maxYCount
+      ).writeEncoding( inputChunksEncoder );
+      numInputChunks++;
+
+      edges.forEach( ( edge, i ) => {
+        new RasterEdge(
+          chunkIndex,
+          i === 0,
+          i === edges.length - 1,
+          edge.startPoint,
+          edge.endPoint
+        ).writeEncoding( inputEdgesEncoder );
+        numInputEdges++;
+      } );
+
+      // TODO: use hashes in the future to deduplicate RenderProgram instances!
+      const instructions: RenderInstruction[] = [];
+      renderProgram.writeInstructions( instructions );
+      RenderInstruction.instructionsToBinary( instructionsEncoder, instructions );
+    } );
+
     const numClippedChunks = 2 * numInputChunks;
     const numEdgeClips = 2 * numInputEdges;
 
@@ -344,124 +377,103 @@ export default class RasterClipper {
       0, 0, 0, 0,
 
       // raster width/height
-      rasterSize, rasterSize,
+      width, height,
 
       // raster offset x/y
       0, 0
     ];
 
-    let count = 0;
-    ( function step() {
-      if ( ONLY_ONCE && count++ > 0 ) {
-        return;
-      }
+    const configBuffer = device.createBuffer( {
+      label: 'config buffer',
+      size: 4 * configData.length,
+      // NOTE: COPY_SRC here for debugging
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_SRC
+    } );
+    device.queue.writeBuffer( configBuffer, 0, new Uint32Array( configData ).buffer );
 
-      // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
-      window.requestAnimationFrame( step, canvas );
+    const instructionsBuffer = deviceContext.createBuffer( instructionsEncoder.byteLength );
+    device.queue.writeBuffer( instructionsBuffer, 0, instructionsEncoder.arrayBuffer );
 
-      const configBuffer = device.createBuffer( {
-        label: 'config buffer',
-        size: 4 * configData.length,
-        // NOTE: COPY_SRC here for debugging
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_SRC
+    const inputChunksBuffer = deviceContext.createBuffer( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
+    assert && assert( inputChunksEncoder.byteLength === RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
+    device.queue.writeBuffer( inputChunksBuffer, 0, inputChunksEncoder.arrayBuffer );
+    // TODO: in the future, can we allocate things so that we just provide the fullArrayBuffer directly?
+
+    const inputEdgesBuffer = deviceContext.createBuffer( RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
+    assert && assert( inputEdgesEncoder.byteLength === RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
+    device.queue.writeBuffer( inputEdgesBuffer, 0, inputEdgesEncoder.arrayBuffer );
+
+    const accumulationBuffer = deviceContext.createBuffer( 4 * 4 * width * height );
+
+    const canvasTextureFormat = canvasTexture.format;
+    if ( canvasTextureFormat !== 'bgra8unorm' && canvasTextureFormat !== 'rgba8unorm' ) {
+      throw new Error( 'unsupported format' );
+    }
+
+    const canOutputToCanvas = canvasTextureFormat === deviceContext.preferredStorageFormat;
+    let fineOutputTextureView: GPUTextureView;
+    let fineOutputTexture: GPUTexture | null = null;
+    const canvasTextureView = canvasTexture.createView();
+
+    if ( canOutputToCanvas ) {
+      fineOutputTextureView = canvasTextureView;
+    }
+    else {
+      fineOutputTexture = device.createTexture( {
+        label: 'fineOutputTexture',
+        size: {
+          width: canvasTexture.width,
+          height: canvasTexture.height,
+          depthOrArrayLayers: 1
+        },
+        format: deviceContext.preferredStorageFormat,
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING // see TargetTexture
       } );
-      device.queue.writeBuffer( configBuffer, 0, new Uint32Array( configData ).buffer );
-
-      const instructionsEncoder = new ByteEncoder();
-      renderPrograms.forEach( program => {
-        const instructions: RenderInstruction[] = [];
-        program.writeInstructions( instructions );
-        RenderInstruction.instructionsToBinary( instructionsEncoder, instructions );
+      fineOutputTextureView = fineOutputTexture.createView( {
+        label: 'fineOutputTextureView',
+        format: deviceContext.preferredStorageFormat,
+        dimension: '2d'
       } );
-      const instructionsBuffer = deviceContext.createBuffer( instructionsEncoder.byteLength );
-      device.queue.writeBuffer( instructionsBuffer, 0, instructionsEncoder.arrayBuffer );
+    }
 
-      const inputChunksBuffer = deviceContext.createBuffer( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
-      const inputChunksEncoder = new ByteEncoder( RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
-      rawInputChunks.forEach( chunk => chunk.writeEncoding( inputChunksEncoder ) );
-      assert && assert( inputChunksEncoder.byteLength === RasterChunk.ENCODING_BYTE_LENGTH * numInputChunks );
-      device.queue.writeBuffer( inputChunksBuffer, 0, inputChunksEncoder.fullArrayBuffer );
+    const encoder = device.createCommandEncoder( {
+      label: 'the encoder'
+    } );
 
-      const inputEdgesBuffer = deviceContext.createBuffer( RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
-      const inputEdgesEncoder = new ByteEncoder( RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
-      rawInputEdges.forEach( chunk => chunk.writeEncoding( inputEdgesEncoder ) );
-      assert && assert( inputEdgesEncoder.byteLength === RasterEdge.ENCODING_BYTE_LENGTH * numInputEdges );
-      device.queue.writeBuffer( inputEdgesBuffer, 0, inputEdgesEncoder.fullArrayBuffer );
+    const numStages = NUM_STAGES;
+    const stageOutput = this.runAccumulate(
+      encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, numStages
+    );
 
-      const accumulationBuffer = deviceContext.createBuffer( 4 * 4 * rasterSize * rasterSize );
+    // Have the fine-rasterization shader use the preferred format as output (for now)
+    this.toTextureShader.dispatch( encoder, [
+      configBuffer, accumulationBuffer, fineOutputTextureView
+    ], width / 16, height / 16 );
 
-      // NOTE: This can change between different frames (swap textures and such)
-      const outTexture = context.getCurrentTexture();
+    if ( !canOutputToCanvas ) {
+      assert && assert( fineOutputTexture, 'If we cannot output to the Canvas directly, we will have created a texture' );
 
-      const canvasTextureFormat = outTexture.format;
-      if ( canvasTextureFormat !== 'bgra8unorm' && canvasTextureFormat !== 'rgba8unorm' ) {
-        throw new Error( 'unsupported format' );
-      }
+      this.blitShader.dispatch( encoder, canvasTextureView, fineOutputTextureView );
+    }
 
-      const canOutputToCanvas = canvasTextureFormat === deviceContext.preferredStorageFormat;
-      let fineOutputTextureView: GPUTextureView;
-      let fineOutputTexture: GPUTexture | null = null;
-      const outTextureView = outTexture.createView();
+    const commandBuffer = encoder.finish();
+    device.queue.submit( [ commandBuffer ] );
 
-      if ( canOutputToCanvas ) {
-        fineOutputTextureView = outTextureView;
-      }
-      else {
-        fineOutputTexture = device.createTexture( {
-          label: 'fineOutputTexture',
-          size: {
-            width: outTexture.width,
-            height: outTexture.height,
-            depthOrArrayLayers: 1
-          },
-          format: deviceContext.preferredStorageFormat,
-          usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING // see TargetTexture
-        } );
-        fineOutputTextureView = fineOutputTexture.createView( {
-          label: 'fineOutputTextureView',
-          format: deviceContext.preferredStorageFormat,
-          dimension: '2d'
-        } );
-      }
+    const donePromise = device.queue.onSubmittedWorkDone().then( async () => {
+      // TODO: oh no, do we need to pool or create loggers?
+      await this.logger.complete();
+    } ).catch( err => {
+      throw err;
+    } );
 
-      const encoder = device.createCommandEncoder( {
-        label: 'the encoder'
-      } );
+    configBuffer.destroy();
+    inputChunksBuffer.destroy();
+    inputEdgesBuffer.destroy();
+    accumulationBuffer.destroy();
+    fineOutputTexture && fineOutputTexture.destroy();
+    stageOutput.temporaryBuffers.forEach( buffer => buffer.destroy() );
 
-      const numStages = 16;
-      const stageOutput = rasterClipper.runAccumulate(
-        encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, numStages
-      );
-
-      // Have the fine-rasterization shader use the preferred format as output (for now)
-      rasterClipper.toTextureShader.dispatch( encoder, [
-        configBuffer, accumulationBuffer, fineOutputTextureView
-      ], canvas.width / 16, canvas.height / 16 );
-
-      if ( !canOutputToCanvas ) {
-        assert && assert( fineOutputTexture, 'If we cannot output to the Canvas directly, we will have created a texture' );
-
-        rasterClipper.blitShader.dispatch( encoder, outTextureView, fineOutputTextureView );
-      }
-
-      const commandBuffer = encoder.finish();
-      device.queue.submit( [ commandBuffer ] );
-
-      if ( rasterClipper.logger.hasCallbacks() ) {
-        device.queue.onSubmittedWorkDone().then( async () => {
-          await rasterClipper.logger.complete();
-        } ).catch( err => {
-          throw err;
-        } );
-      }
-
-      configBuffer.destroy();
-      inputChunksBuffer.destroy();
-      inputEdgesBuffer.destroy();
-      accumulationBuffer.destroy();
-      fineOutputTexture && fineOutputTexture.destroy();
-      stageOutput.temporaryBuffers.forEach( buffer => buffer.destroy() );
-    } )();
+    return donePromise;
   }
 
   public runAccumulate(

@@ -47,7 +47,7 @@ export default class ParallelRasterInitialChunk {
           const split = isXSplit ? chunk.minX + Math.floor( 0.5 * xDiff ) : chunk.minY + Math.floor( 0.5 * yDiff );
 
           minChunk = new RasterClippedChunk(
-            chunk.rasterProgramIndex,
+            chunk.renderProgramIndex,
             chunk.needsFace,
             chunk.isConstant,
 
@@ -71,7 +71,7 @@ export default class ParallelRasterInitialChunk {
           );
 
           maxChunk = new RasterClippedChunk(
-            chunk.rasterProgramIndex,
+            chunk.renderProgramIndex,
             chunk.needsFace,
             chunk.isConstant,
 
@@ -103,7 +103,7 @@ export default class ParallelRasterInitialChunk {
           if ( hasArea ) {
             // Output a simple "contains everything" chunk in the min section
             minChunk = new RasterClippedChunk(
-              chunk.rasterProgramIndex,
+              chunk.renderProgramIndex,
               chunk.needsFace,
               chunk.isConstant,
 
@@ -152,8 +152,8 @@ export default class ParallelRasterInitialChunk {
         const maxClippedChunk = clippedChunks.data[ 2 * chunkIndex + 1 ];
 
         if ( chunk.numEdges > 0 ) {
-          assert( minClippedChunk.rasterProgramIndex === chunk.rasterProgramIndex );
-          assert( maxClippedChunk.rasterProgramIndex === chunk.rasterProgramIndex );
+          assert( minClippedChunk.renderProgramIndex === chunk.renderProgramIndex );
+          assert( maxClippedChunk.renderProgramIndex === chunk.renderProgramIndex );
 
           assert( minClippedChunk.needsFace === chunk.needsFace );
           assert( maxClippedChunk.needsFace === chunk.needsFace );

@@ -12,7 +12,7 @@ import { alpenglow, ByteEncoder, ParallelStorageArray, RasterEdge } from '../../
 
 export default class RasterChunk {
   public constructor(
-    public readonly rasterProgramIndex: number,
+    public readonly renderProgramIndex: number,
     public readonly needsFace: boolean,
     public readonly isConstant: boolean,
 
@@ -35,7 +35,7 @@ export default class RasterChunk {
 
   public withEdgeInfo( startIndex: number, endIndex: number ): RasterChunk {
     return new RasterChunk(
-      this.rasterProgramIndex,
+      this.renderProgramIndex,
       this.needsFace,
       this.isConstant,
       startIndex,
@@ -46,22 +46,22 @@ export default class RasterChunk {
   }
 
   public toString(): string {
-    if ( isNaN( this.rasterProgramIndex ) ) {
+    if ( isNaN( this.renderProgramIndex ) ) {
       return 'RasterChunk[INDETERMINATE]';
     }
     const counts = `counts:${this.minXCount},${this.minYCount},${this.maxXCount},${this.maxYCount}`;
     const bounds = `bounds:x[${this.minX},${this.maxX}],y[${this.minY},${this.maxY}]`;
     const needs = this.needsFace ? ' needsFace' : '';
-    return `RasterChunk[prog:${this.rasterProgramIndex} ${counts} ${bounds} numEdges:${this.numEdges} edgesOffset:${this.edgesOffset}${needs}]`;
+    return `RasterChunk[prog:${this.renderProgramIndex} ${counts} ${bounds} numEdges:${this.numEdges} edgesOffset:${this.edgesOffset}${needs}]`;
   }
 
   public static readonly ENCODING_BYTE_LENGTH = 4 * 11;
 
   public writeEncoding( encoder: ByteEncoder ): void {
-    assert && assert( this.rasterProgramIndex >= 0 && this.rasterProgramIndex <= 0x00ffffff );
+    assert && assert( this.renderProgramIndex >= 0 && this.renderProgramIndex <= 0x00ffffff );
 
     encoder.pushU32(
-      ( this.rasterProgramIndex & 0x00ffffff ) | ( this.needsFace ? 0x40000000 : 0 ) | ( this.isConstant ? 0x80000000 : 0 )
+      ( this.renderProgramIndex & 0x00ffffff ) | ( this.needsFace ? 0x40000000 : 0 ) | ( this.isConstant ? 0x80000000 : 0 )
     );
     encoder.pushU32( this.edgesOffset );
     encoder.pushU32( this.numEdges );
@@ -82,12 +82,12 @@ export default class RasterChunk {
     const intBuffer = new Int32Array( arrayBuffer, byteOffset, RasterChunk.ENCODING_BYTE_LENGTH / 4 );
     const floatBuffer = new Float32Array( arrayBuffer, byteOffset, RasterChunk.ENCODING_BYTE_LENGTH / 4 );
 
-    const rasterProgramIndex = uintBuffer[ 0 ] & 0x00ffffff;
+    const renderProgramIndex = uintBuffer[ 0 ] & 0x00ffffff;
     const needsFace = ( uintBuffer[ 0 ] & 0x40000000 ) !== 0;
     const isConstant = ( uintBuffer[ 0 ] & 0x80000000 ) !== 0;
 
     return new RasterChunk(
-      rasterProgramIndex,
+      renderProgramIndex,
       needsFace,
       isConstant,
 
@@ -133,7 +133,7 @@ export default class RasterChunk {
       for ( let i = 0; i < numChunks; i++ ) {
         const chunk = chunks.data[ i ];
 
-        assert( isFinite( chunk.rasterProgramIndex ) );
+        assert( isFinite( chunk.renderProgramIndex ) );
         assert( chunk.minX <= chunk.maxX );
         assert( chunk.minY <= chunk.maxY );
 

@@ -10,7 +10,7 @@ import { alpenglow, ByteEncoder, ParallelStorageArray, RasterCompleteEdge } from
 
 export default class RasterCompleteChunk {
   public constructor(
-    public readonly rasterProgramIndex: number,
+    public readonly renderProgramIndex: number,
 
     public readonly edgesOffset: number,
     public readonly numEdges: number,
@@ -32,7 +32,7 @@ export default class RasterCompleteChunk {
 
   public withEdgeInfo( startIndex: number, endIndex: number ): RasterCompleteChunk {
     return new RasterCompleteChunk(
-      this.rasterProgramIndex,
+      this.renderProgramIndex,
       this.isFullArea ? 0 : startIndex,
       this.isFullArea ? 0 : endIndex - startIndex,
       this.isFullArea,
@@ -46,23 +46,23 @@ export default class RasterCompleteChunk {
   }
 
   public toString(): string {
-    if ( isNaN( this.rasterProgramIndex ) ) {
+    if ( isNaN( this.renderProgramIndex ) ) {
       return 'RasterCompleteChunk[INDETERMINATE]';
     }
     const counts = `counts:${this.minXCount},${this.minYCount},${this.maxXCount},${this.maxYCount}`;
     const bounds = `bounds:x[${this.minX},${this.maxX}],y[${this.minY},${this.maxY}]`;
     const area = `area:${this.area}`;
     const isFullArea = this.isFullArea ? ' fullArea' : '';
-    return `RasterCompleteChunk[prog:${this.rasterProgramIndex} ${counts} ${bounds} numEdges:${this.numEdges} edgesOffset:${this.edgesOffset} ${area}${isFullArea}]`;
+    return `RasterCompleteChunk[prog:${this.renderProgramIndex} ${counts} ${bounds} numEdges:${this.numEdges} edgesOffset:${this.edgesOffset} ${area}${isFullArea}]`;
   }
 
   public static readonly ENCODING_BYTE_LENGTH = 4 * 12;
 
   public writeEncoding( encoder: ByteEncoder ): void {
-    assert && assert( this.rasterProgramIndex >= 0 && this.rasterProgramIndex <= 0x00ffffff );
+    assert && assert( this.renderProgramIndex >= 0 && this.renderProgramIndex <= 0x00ffffff );
 
     encoder.pushU32(
-      ( this.rasterProgramIndex & 0x00ffffff ) |
+      ( this.renderProgramIndex & 0x00ffffff ) |
       ( this.isFullArea ? 0x20000000 : 0 )
     );
     encoder.pushU32( this.edgesOffset );
@@ -85,11 +85,11 @@ export default class RasterCompleteChunk {
     const intBuffer = new Int32Array( arrayBuffer, byteOffset, RasterCompleteChunk.ENCODING_BYTE_LENGTH / 4 );
     const floatBuffer = new Float32Array( arrayBuffer, byteOffset, RasterCompleteChunk.ENCODING_BYTE_LENGTH / 4 );
 
-    const rasterProgramIndex = uintBuffer[ 0 ] & 0x00ffffff;
+    const renderProgramIndex = uintBuffer[ 0 ] & 0x00ffffff;
     const isFullArea = ( uintBuffer[ 0 ] & 0x20000000 ) !== 0;
 
     return new RasterCompleteChunk(
-      rasterProgramIndex,
+      renderProgramIndex,
 
       uintBuffer[ 1 ],
       uintBuffer[ 2 ],
@@ -137,7 +137,7 @@ export default class RasterCompleteChunk {
       for ( let i = 0; i < numChunks; i++ ) {
         const chunk = chunks.data[ i ];
 
-        assert( isFinite( chunk.rasterProgramIndex ) );
+        assert( isFinite( chunk.renderProgramIndex ) );
         assert( chunk.minX <= chunk.maxX );
         assert( chunk.minY <= chunk.maxY );
         assert( isFinite( chunk.area ) );

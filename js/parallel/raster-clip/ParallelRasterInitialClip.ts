@@ -386,11 +386,11 @@ export default class ParallelRasterInitialClip {
         assert( isFinite( edgeClip.clippedChunkIndex ) );
 
         const clippedChunk = clippedChunks.data[ edgeClip.clippedChunkIndex ];
-        assert( clippedChunk && isFinite( clippedChunk.rasterProgramIndex ) );
+        assert( clippedChunk && isFinite( clippedChunk.renderProgramIndex ) );
 
         const inputChunkIndex = edgeClip.clippedChunkIndex >> 1;
         const chunk = chunks.data[ inputChunkIndex ];
-        assert( chunk && isFinite( chunk.rasterProgramIndex ) );
+        assert( chunk && isFinite( chunk.renderProgramIndex ) );
 
         // Check the grouping of edgeClips
         const isMin = edgeClipIndex < 2 * chunk.edgesOffset + chunk.numEdges;

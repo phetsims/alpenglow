@@ -10,7 +10,7 @@ import { alpenglow, ByteEncoder, RasterSplitReduceData } from '../../imports.js'
 
 export default class RasterClippedChunk {
   public constructor(
-    public readonly rasterProgramIndex: number,
+    public readonly renderProgramIndex: number,
     public readonly needsFace: boolean,
     public readonly isConstant: boolean,
 
@@ -57,7 +57,7 @@ export default class RasterClippedChunk {
   }
 
   public toString(): string {
-    if ( isNaN( this.rasterProgramIndex ) ) {
+    if ( isNaN( this.renderProgramIndex ) ) {
       return 'RasterClippedChunk[INDETERMINATE]';
     }
     const counts = `counts:${this.minXCount},${this.minYCount},${this.maxXCount},${this.maxYCount}`;
@@ -67,16 +67,16 @@ export default class RasterClippedChunk {
     const reducible = this.isReducible ? ' reducible' : '';
     const contributing = this.isComplete ? ' complete' : '';
     const fullArea = this.isFullArea ? ' fullArea' : '';
-    return `RasterClippedChunk[prog:${this.rasterProgramIndex} ${counts} ${bounds} ${area}${reducible}${contributing}${fullArea}${needs}]`;
+    return `RasterClippedChunk[prog:${this.renderProgramIndex} ${counts} ${bounds} ${area}${reducible}${contributing}${fullArea}${needs}]`;
   }
 
   public static readonly ENCODING_BYTE_LENGTH = 4 * 10;
 
   public writeEncoding( encoder: ByteEncoder ): void {
-    assert && assert( this.rasterProgramIndex >= 0 && this.rasterProgramIndex <= 0x00ffffff );
+    assert && assert( this.renderProgramIndex >= 0 && this.renderProgramIndex <= 0x00ffffff );
 
     encoder.pushU32(
-      ( this.rasterProgramIndex & 0x00ffffff ) |
+      ( this.renderProgramIndex & 0x00ffffff ) |
       ( this.isReducible ? 0x08000000 : 0 ) |
       ( this.isComplete ? 0x10000000 : 0 ) |
       ( this.isFullArea ? 0x20000000 : 0 ) |
@@ -101,7 +101,7 @@ export default class RasterClippedChunk {
     const intBuffer = new Int32Array( arrayBuffer, byteOffset, RasterClippedChunk.ENCODING_BYTE_LENGTH / 4 );
     const floatBuffer = new Float32Array( arrayBuffer, byteOffset, RasterClippedChunk.ENCODING_BYTE_LENGTH / 4 );
 
-    const rasterProgramIndex = uintBuffer[ 0 ] & 0x00ffffff;
+    const renderProgramIndex = uintBuffer[ 0 ] & 0x00ffffff;
     const isReducible = ( uintBuffer[ 0 ] & 0x08000000 ) !== 0;
     const isComplete = ( uintBuffer[ 0 ] & 0x10000000 ) !== 0;
     const isFullArea = ( uintBuffer[ 0 ] & 0x20000000 ) !== 0;
@@ -109,7 +109,7 @@ export default class RasterClippedChunk {
     const isConstant = ( uintBuffer[ 0 ] & 0x80000000 ) !== 0;
 
     return new RasterClippedChunk(
-      rasterProgramIndex,
+      renderProgramIndex,
       needsFace,
       isConstant,
 
