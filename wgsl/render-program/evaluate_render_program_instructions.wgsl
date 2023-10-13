@@ -64,6 +64,62 @@ const oops_inifinite_loop_code = vec4f( 5f, 4f, -5f, -4f );
 
 // TODO: how to handle constant RenderPrograms
 
+// Returns success (didn't fail during loop)
+fn compute_centroid(
+  centroid: ptr<function, vec2f>,
+  edgesOffset: u32,
+  numEdges: u32,
+  isFullArea: bool,
+  area: f32,
+  minX: f32,
+  minY: f32,
+  maxX: f32,
+  maxY: f32,
+  minXCount: i32,
+  minYCount: i32,
+  maxXCount: i32,
+  maxYCount: i32
+) -> bool {
+  // TODO: more simplification
+
+  let bounds_centroid = 0.5f * vec2( minX + maxX, minY + maxY );
+
+  if ( isFullArea ) {
+    *centroid = bounds_centroid;
+  }
+  else {
+    // TODO: more comments about the math here
+    var centroid_partial = 6f * bounds_centroid * vec2(
+      ( minX - maxX ) * ( f32( minYCount ) * minY + f32( maxYCount ) * maxY ),
+      ( maxY - minY ) * ( f32( minXCount ) * minX + f32( maxXCount ) * maxX )
+    );
+
+    let endIndex = edgesOffset + numEdges;
+    var oops_count = 0u;
+    for ( var i = edgesOffset; i < endIndex; i++ ) {
+      oops_count++;
+      if ( oops_count > 0xfffu ) {
+        return false;
+      }
+
+      let edge = complete_edges[ i ];
+
+      let p0x = edge.startX;
+      let p0y = edge.startY;
+      let p1x = edge.endX;
+      let p1y = edge.endY;
+
+      let base = ( p0x * ( 2f * p0y + p1y ) + p1x * ( p0y + 2f * p1y ) );
+      centroid_partial += base * vec2( p0x - p1x, p1y - p0y );
+    }
+
+    *centroid = centroid_partial / ( 6f * area );
+  }
+//  *centroid = bounds_centroid;
+
+  return true;
+}
+
 fn evaluate_render_program_instructions(
   render_program_index: u32,
   edgesOffset: u32,
@@ -79,6 +135,7 @@ fn evaluate_render_program_instructions(
   maxXCount: i32,
   maxYCount: i32
 ) -> vec4f {
+//  return vec4f( select( 0f, 1f, numEdges > 0u ), 0f, 0f, 1f );
   var stack: array<vec4f,${stackSize}>;
   var instruction_stack: array<u32,${instructionStackSize}>;
 
@@ -90,13 +147,21 @@ fn evaluate_render_program_instructions(
 
   var oops_count = 0u;
 
-  // TODO: CENTROID OMG
-  // TODO: CENTROID OMG
-  // TODO: CENTROID OMG
-  // TODO: CENTROID OMG
-  // TODO: CENTROID OMG
-  var real_centroid = 0.5f * vec2f( maxX + minX, maxY + minY );
   var fake_centroid = 0.5f * vec2f( maxX + minX, maxY + minY );
+
+  // TODO: conditionally compute? perhaps lazily (hopefully not lazily?)
+  var real_centroid = fake_centroid;
+  var real_centroid_computed = false;
+
+  let centroid_success = compute_centroid(
+    &real_centroid,
+    edgesOffset, numEdges, isFullArea, area,
+    minX, minY, maxX, maxY,
+    minXCount, minYCount, maxXCount, maxYCount
+  );
+  if ( !centroid_success ) {
+    return oops_inifinite_loop_code;
+  }
 
   while ( !is_done ) {
     oops_count++;

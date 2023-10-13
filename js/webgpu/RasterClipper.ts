@@ -232,8 +232,12 @@ export default class RasterClipper {
     const canvas = document.createElement( 'canvas' );
     canvas.width = rasterSize;
     canvas.height = rasterSize;
-    canvas.style.width = `${rasterSize / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
-    canvas.style.height = `${rasterSize / window.devicePixelRatio}px`;
+    // canvas.style.width = `${rasterSize / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
+    // canvas.style.height = `${rasterSize / window.devicePixelRatio}px`;
+
+    canvas.style.imageRendering = 'pixelated';
+    canvas.style.width = `${4 * rasterSize / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
+    canvas.style.height = `${4 * rasterSize / window.devicePixelRatio}px`;
     document.body.appendChild( canvas );
 
     const context = deviceContext.getCanvasContext( canvas );
@@ -256,7 +260,7 @@ export default class RasterClipper {
       } );
       rawInputChunks = [ new RasterChunk(
         0,
-        false,
+        true,
         false,
         0,
         rawInputEdges.length,
@@ -269,7 +273,8 @@ export default class RasterClipper {
       new RenderLinearBlend(
         new Vector2( 1 / 256, 0 ),
         0,
-        RenderLinearBlendAccuracy.Accurate,
+        // RenderLinearBlendAccuracy.Accurate,
+        RenderLinearBlendAccuracy.PixelCenter,
         new RenderColor( new Vector4( 1, 0, 0, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
         new RenderColor( new Vector4( 0.5, 0, 1, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
       ).colorConverted( RenderColorSpace.premultipliedOklab, RenderColorSpace.premultipliedLinearSRGB ),
