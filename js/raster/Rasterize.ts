@@ -924,12 +924,20 @@ export default class Rasterize {
     }
   }
 
-  public static rasterize(
+  public static markStart( name: string ): void {
+    window.performance && window.performance.mark( `${name}-start` );
+  }
+
+  public static markEnd( name: string ): void {
+    window.performance && window.performance.mark( `${name}-end` );
+    window.performance && window.performance.measure( name, `${name}-start`, `${name}-end` );
+  }
+
+  public static partitionRenderableFaces(
     renderProgram: RenderProgram,
-    outputRaster: OutputRaster,
     bounds: Bounds2,
     providedOptions?: RasterizationOptions
-  ): void {
+  ): RenderableFace[] {
 
     // Coordinate frames:
     //
@@ -960,21 +968,11 @@ export default class Rasterize {
 
     const log = options.log;
 
-    const markStart = ( name: string ) => {
-      log && window.performance && window.performance.mark( `${name}-start` );
-    };
-    const markEnd = ( name: string ) => {
-      log && window.performance && window.performance.mark( `${name}-end` );
-      log && window.performance && window.performance.measure( name, `${name}-start`, `${name}-end` );
-    };
-
     const scratchAccumulator = {
       polygonal: PolygonalFace.getScratchAccumulator(),
       edged: EdgedFace.getScratchAccumulator(),
       edgedClipped: EdgedClippedFace.getScratchAccumulator()
     }[ options.renderableFaceType ];
-
-    markStart( 'rasterize' );
 
     const polygonFiltering: PolygonFilterType = options.polygonFiltering;
     const polygonFilterWindowMultiplier = options.polygonFilterWindowMultiplier;
@@ -1000,9 +998,9 @@ export default class Rasterize {
     // in the RenderProgram coordinate frame.
     const contributionBounds = getPolygonFilterGridBounds( bounds, polygonFiltering, polygonFilterWindowMultiplier );
 
-    markStart( 'path-bounds' );
+    log && Rasterize.markStart( 'path-bounds' );
     const boundedSubpaths = BoundedSubpath.fromPathSet( paths );
-    markEnd( 'path-bounds' );
+    log && Rasterize.markEnd( 'path-bounds' );
 
     // Keep us at 20 bits of precision (after rounding)
     const tileSize = options.tileSize;
@@ -1041,12 +1039,12 @@ export default class Rasterize {
         assert && assert( Math.abs( ( scale * tileBounds.minX + translation.x ) + ( scale * tileBounds.maxX + translation.x ) ) < 1e-10 );
         assert && assert( Math.abs( ( scale * tileBounds.minY + translation.y ) + ( scale * tileBounds.maxY + translation.y ) ) < 1e-10 );
 
-        markStart( 'clip-integer' );
+        log && Rasterize.markStart( 'clip-integer' );
         const integerEdges = IntegerEdge.clipScaleToIntegerEdges( boundedSubpaths, tileBounds, toIntegerMatrix );
-        markEnd( 'clip-integer' );
+        log && Rasterize.markEnd( 'clip-integer' );
         if ( tileLog ) { tileLog.integerEdges = integerEdges; }
 
-        markStart( 'integer-sort' );
+        log && Rasterize.markStart( 'integer-sort' );
         // NOTE: Can also be 'none', we'll no-op
         if ( options.edgeIntersectionSortMethod === 'center-size' ) {
           HilbertMapping.sortCenterSize( integerEdges, 1 / ( scale * maxSize ) );
@@ -1067,9 +1065,9 @@ export default class Rasterize {
           integerEdges.length = 0;
           integerEdges.push( ...shuffled );
         }
-        markEnd( 'integer-sort' );
+        log && Rasterize.markEnd( 'integer-sort' );
 
-        markStart( 'integer-intersect' );
+        log && Rasterize.markStart( 'integer-intersect' );
         if ( options.edgeIntersectionMethod === 'quadratic' ) {
           LineIntersector.edgeIntersectionQuadratic( integerEdges, tileLog );
         }
@@ -1082,19 +1080,19 @@ export default class Rasterize {
         else {
           throw new Error( `unknown edgeIntersectionMethod: ${options.edgeIntersectionMethod}` );
         }
-        markEnd( 'integer-intersect' );
+        log && Rasterize.markEnd( 'integer-intersect' );
 
-        markStart( 'integer-split' );
+        log && Rasterize.markStart( 'integer-split' );
         const rationalHalfEdges = LineSplitter.splitIntegerEdges( integerEdges );
-        markEnd( 'integer-split' );
+        log && Rasterize.markEnd( 'integer-split' );
 
-        markStart( 'edge-sort' );
+        log && Rasterize.markStart( 'edge-sort' );
         rationalHalfEdges.sort( ( a, b ) => a.compare( b ) );
-        markEnd( 'edge-sort' );
+        log && Rasterize.markEnd( 'edge-sort' );
 
-        markStart( 'filter-connect' );
+        log && Rasterize.markStart( 'filter-connect' );
         let filteredRationalHalfEdges = RationalHalfEdge.filterAndConnectHalfEdges( rationalHalfEdges );
-        markEnd( 'filter-connect' );
+        log && Rasterize.markEnd( 'filter-connect' );
         if ( tileLog ) { tileLog.filteredRationalHalfEdges = filteredRationalHalfEdges; }
 
         const innerBoundaries: RationalBoundary[] = [];
@@ -1105,17 +1103,17 @@ export default class Rasterize {
           tileLog.outerBoundaries = outerBoundaries;
           tileLog.faces = faces;
         }
-        markStart( 'trace-boundaries' );
+        log && Rasterize.markStart( 'trace-boundaries' );
         filteredRationalHalfEdges = RationalFace.traceBoundaries( filteredRationalHalfEdges, innerBoundaries, outerBoundaries, faces );
-        markEnd( 'trace-boundaries' );
+        log && Rasterize.markEnd( 'trace-boundaries' );
         if ( tileLog ) { tileLog.refilteredRationalHalfEdges = filteredRationalHalfEdges; }
 
-        markStart( 'face-holes' );
+        log && Rasterize.markStart( 'face-holes' );
         const exteriorBoundaries = RationalFace.computeFaceHolesWithOrderedWindingNumbers(
           outerBoundaries,
           faces
         );
-        markEnd( 'face-holes' );
+        log && Rasterize.markEnd( 'face-holes' );
         assert && assert( exteriorBoundaries.length === 1, 'Should only have one external boundary, due to background' );
         const exteriorBoundary = exteriorBoundaries[ 0 ];
 
@@ -1123,16 +1121,16 @@ export default class Rasterize {
         const unboundedFace = RationalFace.createUnboundedFace( exteriorBoundary );
         if ( tileLog ) { tileLog.unboundedFace = unboundedFace; }
 
-        markStart( 'winding-maps' );
+        log && Rasterize.markStart( 'winding-maps' );
         RationalFace.computeWindingMaps( filteredRationalHalfEdges, unboundedFace );
-        markEnd( 'winding-maps' );
+        log && Rasterize.markEnd( 'winding-maps' );
 
-        markStart( 'render-programs' );
+        log && Rasterize.markStart( 'render-programs' );
         const renderedFaces = Rasterize.getRenderProgrammedFaces( renderProgram, faces );
         if ( tileLog ) { tileLog.renderedFaces = renderedFaces; }
-        markEnd( 'render-programs' );
+        log && Rasterize.markEnd( 'render-programs' );
 
-        markStart( 'renderable-faces' );
+        log && Rasterize.markStart( 'renderable-faces' );
         let renderableFaces: RenderableFace[];
 
         // Set up the correct bounds in case we use edgedClipped.
@@ -1155,13 +1153,13 @@ export default class Rasterize {
           throw new Error( 'unknown renderableFaceMethod' );
         }
 
-        markEnd( 'renderable-faces' );
+        log && Rasterize.markEnd( 'renderable-faces' );
         if ( tileLog ) { tileLog.initialRenderableFaces = renderableFaces; }
 
         if ( options.splitPrograms ) {
-          markStart( 'split-programs' );
+          log && Rasterize.markStart( 'split-programs' );
           renderableFaces = renderableFaces.flatMap( face => face.split() );
-          markEnd( 'split-programs' );
+          log && Rasterize.markEnd( 'split-programs' );
         }
         if ( tileLog ) { tileLog.renderableFaces = renderableFaces; }
 
@@ -1173,10 +1171,33 @@ export default class Rasterize {
 
     if ( log ) { log.renderableFaces = combinedRenderableFaces; }
 
-    markStart( 'rasterize-accumulate' );
+    return combinedRenderableFaces;
+  }
+
+  public static rasterize(
+    renderProgram: RenderProgram,
+    outputRaster: OutputRaster,
+    bounds: Bounds2,
+    providedOptions?: RasterizationOptions
+  ): void {
+
+    const options = optionize3<RasterizationOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+
+    const log = options.log;
+
+    const renderableFaces = Rasterize.partitionRenderableFaces( renderProgram, bounds, providedOptions );
+
+    const polygonFiltering: PolygonFilterType = options.polygonFiltering;
+    const polygonFilterWindowMultiplier = options.polygonFilterWindowMultiplier;
+
+    // The potentially filter-expanded bounds of content that could potentially affect pixels within our `bounds`,
+    // in the RenderProgram coordinate frame.
+    const contributionBounds = getPolygonFilterGridBounds( bounds, polygonFiltering, polygonFilterWindowMultiplier );
+
+    log && Rasterize.markStart( 'rasterize-accumulate' );
     Rasterize.rasterizeAccumulate(
       outputRaster,
-      combinedRenderableFaces,
+      renderableFaces,
       bounds,
       contributionBounds,
       options.outputRasterOffset,
@@ -1185,9 +1206,7 @@ export default class Rasterize {
       options.executionMethod,
       log
     );
-    markEnd( 'rasterize-accumulate' );
-
-    markEnd( 'rasterize' );
+    log && Rasterize.markEnd( 'rasterize-accumulate' );
   }
 
   public static imageDataToCanvas( imageData: ImageData ): HTMLCanvasElement {

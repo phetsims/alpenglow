@@ -481,8 +481,6 @@ export class RenderRadialGradientLogic {
       if ( is_swapped ) {
         t = 1 - t;
       }
-console.log( t );
-console.log( is_swapped );
       return t;
     }
     else {

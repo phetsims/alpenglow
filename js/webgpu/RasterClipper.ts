@@ -285,7 +285,6 @@ export default class RasterClipper {
     const device = this.device;
     const deviceContext = this.deviceContext;
 
-    // TODO: should we only use the length we're given?
     const inputChunksEncoder = new ByteEncoder();
     const instructionsEncoder = new ByteEncoder();
     const inputEdgesEncoder = new ByteEncoder();
