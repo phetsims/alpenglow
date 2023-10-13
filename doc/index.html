@@ -1623,7 +1623,52 @@
       the stack is a fully-opaque value, jump to an instruction index) and function calls.
     </p>
 
-    <h5>Instructions from any RenderProgram</h5>
+    <h5>Inputs for Evaluation</h5>
+
+    <p>
+      <code>RenderEvaluationContext</code> represents the main inputs to evaluation, namely:
+    </p>
+
+    <ul>
+      <li>Bounding box of affected area (typically clipped to pixel sizes)</li>
+      <li>(optional) face data (<code>ClippableFace</code>, or other edge-clipped data on the GPU)</li>
+      <li>(optional) area</li>
+      <li>(optional) centroid</li>
+    </ul>
+
+    <h5>Direct Evaluation</h5>
+
+    <p>
+      <code>RenderProgram</code> (TS object) supports the direct evaluation by calling
+      <code>.evaluate( context: RenderEvaluationContext )</code>.
+    </p>
+
+    <h5>Instruction Evaluation</h5>
+
+    <p>
+      <code>RenderProgram</code> has a method <code>.writeInstructions( instructions: RenderInstruction[] )</code> that
+      will write out instruction objects (<code>RenderInstruction</code>) in a stream-like fashion.
+    </p>
+
+    <p>
+      These can be evaluated with <code>RenderExecutor</code> in software (load the instructions, and then it can be
+      executed many times with different contexts).
+    </p>
+
+    <h5>Binary Instruction Evaluation</h5>
+
+    <p>
+      <code>RenderInstruction</code> has a number of utilities, including the ability to convert a stream of
+      instructions into a binary format. These can then be executed on the GPU with WGSL code.
+    </p>
+
+    <p>
+      Instruction lists in the binary format are always suffixed with an exit instruction, so that we can have a
+      solid block containing multiple instruction lists. During rasterization, we need to track the index of the start
+      of a RenderProgram's instructions inside this list.
+    </p>
+
+    <h5>Instructions Demo</h5>
 
     <p>
       Edit the below code to see its form, and the object/binary instructions associated with it.
@@ -1666,15 +1711,6 @@
     </p>
 
     <p class="TODO">
-      Document RenderInstruction
-    </p>
-
-    <p class="TODO">
-      Add examples of the binary format, or examples of simple things like what a gradient turns into.
-      Do it from our instructionTest() playground example
-    </p>
-
-    <p class="TODO">
       Consider separating out the RenderInstruction items into its own subdirectory. Potentially the logic items also.
     </p>
 
@@ -1690,14 +1726,14 @@
       Document stack-based operations with stack-effect diagrams: "( before -- after )" (top of stack states).
     </p>
 
-    <p class="TODO">
-      Bake in support for context loss handling
-    </p>
-
     <h3 id="WGSL">WGSL</h3>
 
     <p class="TODO">
       <a href="https://github.com/wgsl-analyzer/wgsl-analyzer">wgsl-analyzer</a> our non-minified output!
+    </p>
+
+    <p class="TODO">
+      Bake in support for context loss handling
     </p>
 
     <p class="TODO">
