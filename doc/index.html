@@ -204,16 +204,18 @@
 
     const options = phet.phetCore.merge( {
       jsBefore: jsBefore,
-      jsAfter: jsAfter
+      jsAfter: jsAfter,
+      showInstructions: false
     }, providedOptions );
 
     const parentElement = document.getElementById( id );
 
     const displayContainerElement = document.createElement( 'div' );
-    parentElement.appendChild( displayContainerElement );
+    !options.showInstructions && parentElement.appendChild( displayContainerElement );
 
     const codeContainerElement = document.createElement( 'div' );
     parentElement.appendChild( codeContainerElement );
+    options.showInstructions && parentElement.appendChild( displayContainerElement );
 
     const errorsContainerElement = document.createElement( 'div' );
     parentElement.appendChild( errorsContainerElement );
@@ -325,7 +327,71 @@
 
         const program = ( await import( dataURI ) ).default;
 
-        const element = window.getRasterizedElement( program, width, height, options );
+        let element;
+        if ( options.showInstructions ) {
+          const container = document.createElement( 'div' );
+          element = container;
+
+          const createPre = contents => {
+            const pre = document.createElement( 'pre' );
+            pre.style.textAlign = 'left';
+            pre.style.marginTop = '10px';
+            pre.style.fontSize = '10px';
+            pre.style.lineHeight = '12px';
+            pre.textContent = contents;
+            return pre;
+          };
+
+          const createHeader = name => {
+            const h6 = document.createElement( 'h6' );
+            h6.style.textAlign = 'left';
+            h6.textContent = name;
+            return h6;
+          };
+
+          container.appendChild( createHeader( 'RenderProgram' ) );
+          container.appendChild( createPre( program.toRecursiveString() ) );
+
+          if ( !program.simplified().equals( program ) ) {
+            container.appendChild( createHeader( 'RenderProgram Simplified' ) );
+            container.appendChild( createPre( program.simplified().toRecursiveString() ) );
+          }
+
+          const instructions = [];
+          program.writeInstructions( instructions );
+
+          container.appendChild( createHeader( 'Instructions' ) );
+          container.appendChild( createPre( instructions.map( instruction => instruction.toString() ).join( '\n' ) ) );
+
+          const encoder = new phet.alpenglow.ByteEncoder();
+          phet.alpenglow.RenderInstruction.instructionsToBinary( encoder, instructions );
+
+          let debugLines = encoder.getDebug32String().trim().split( '\n' );
+
+          // Strip off the header line
+          const outputDebugLines = [ debugLines[ 0 ] ];
+          debugLines = debugLines.slice( 1 );
+
+          let instructionAddress = 0;
+          let dwords = 0;
+          for ( let i = 0; i < debugLines.length; i++ ) {
+            while ( i === dwords && instructionAddress < instructions.length ) {
+              const instruction = instructions[ instructionAddress++ ];
+              outputDebugLines.push( instruction.toString() );
+              dwords += instruction.getBinaryLength();
+            }
+            if ( i === debugLines.length - 1 ) {
+              outputDebugLines.push( 'RenderInstructionExit()' );
+            }
+            outputDebugLines.push( debugLines[ i ] );
+          }
+
+          container.appendChild( createHeader( 'Binary Instructions' ) );
+          container.appendChild( createPre( outputDebugLines.join( '\n' ) ) );
+        }
+        else {
+          element = window.getRasterizedElement( program, width, height, options );
+        }
 
         // Clear content
         while ( displayContainerElement.firstChild ) {
@@ -1556,6 +1622,40 @@
       simple branching logic. It turns out all of the primitives we need can be done with "opaque jumps" (if the top of
       the stack is a fully-opaque value, jump to an instruction index) and function calls.
     </p>
+
+    <h5>Instructions from any RenderProgram</h5>
+
+    <p>
+      Edit the below code to see its form, and the object/binary instructions associated with it.
+    </p>
+
+    <div class="example">
+      <div id="execution-instructions-example"></div>
+    </div>
+
+    <script type="module">
+      /* eslint-disable no-undef */
+      window.createRenderProgramSandbox( 'execution-instructions-example', () => {
+        /*START*/
+        const program = new RenderLinearGradient(
+          Matrix3.IDENTITY, // transform
+          new Vector2( 0, 0 ), // start
+          new Vector2( 50, 20 ), // end
+          [
+            new RenderGradientStop( 0, new RenderColor( new Vector4( 0, 0, 0, 1 ) ) ),
+            new RenderGradientStop( 0.5, new RenderColor( new Vector4( 1, 0, 0, 1 ) ) ),
+            new RenderGradientStop( 1, new RenderColor( new Vector4( 1, 1, 1, 1 ) ) )
+          ],
+          RenderExtend.Repeat, // Pad, Repeat, Reflect
+          RenderLinearGradientAccuracy.SplitAccurate
+        );
+        /*END*/
+        return program;
+      }, 128, 128, {
+        showInstructions: true
+      } );
+    </script>
+
 
     <p class="TODO">
       Add "stack depth" getters to RenderProgram (both the main and instruction stacks), so we know what depth is needed.
