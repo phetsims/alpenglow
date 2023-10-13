@@ -93,6 +93,11 @@ type ClippableFace = {
   getRounded( epsilon: number ): ClippableFace;
 
   /**
+   * Returns a version of the face with the orientation of all of the edges swapped.
+   */
+  withReversedEdges(): ClippableFace;
+
+  /**
    * Returns a copy of the face that is clipped to be within the given axis-aligned bounding box.
    *
    * TODO: consider a binary clip for this, using duality.

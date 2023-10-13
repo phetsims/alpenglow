@@ -497,6 +497,15 @@ export default class PolygonalFace implements ClippableFace {
   }
 
   /**
+   * Returns a version of the face with the orientation of all of the edges swapped.
+   */
+  public withReversedEdges(): PolygonalFace {
+    return new PolygonalFace(
+      this.polygons.map( polygon => polygon.slice().reverse() )
+    );
+  }
+
+  /**
    * Calls the callback with points for each edge in the face.
    */
   public forEachEdge( callback: ( startPoint: Vector2, endPoint: Vector2 ) => void ): void {

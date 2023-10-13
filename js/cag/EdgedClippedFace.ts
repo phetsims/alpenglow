@@ -682,7 +682,7 @@ export default class EdgedClippedFace implements ClippableFace {
   /**
    * Returns a rounded version of the face, where [-epsilon/2, epsilon/2] rounds to 0, etc.
    */
-  public getRounded( epsilon: number ): EdgedFace {
+  public getRounded( epsilon: number ): EdgedClippedFace {
     const edges = [];
 
     for ( let i = 0; i < this.edges.length; i++ ) {
@@ -726,6 +726,17 @@ export default class EdgedClippedFace implements ClippableFace {
       Utils.roundSymmetric( this.minY / epsilon ) * epsilon,
       Utils.roundSymmetric( this.maxX / epsilon ) * epsilon,
       Utils.roundSymmetric( this.maxY / epsilon ) * epsilon
+    );
+  }
+
+  /**
+   * Returns a version of the face with the orientation of all of the edges swapped.
+   */
+  public withReversedEdges(): EdgedClippedFace {
+    return new EdgedClippedFace(
+      this.edges.map( edge => new LinearEdge( edge.endPoint, edge.startPoint ) ).reverse(),
+      this.minX, this.minY, this.maxX, this.maxY,
+      -this.maxXCount, -this.maxYCount, -this.minXCount, -this.minYCount
     );
   }
 
@@ -805,26 +816,37 @@ export default class EdgedClippedFace implements ClippableFace {
     };
   }
 
-  public static deserialize( serialized: SerializedEdgedClippedFace ): EdgedFace {
-    return new EdgedFace( serialized.edges.map( edge => LinearEdge.deserialize( edge ) ) );
+  public static deserialize( serialized: SerializedEdgedClippedFace ): EdgedClippedFace {
+    return new EdgedClippedFace(
+      serialized.edges.map( edge => LinearEdge.deserialize( edge ) ),
+      serialized.minX,
+      serialized.minY,
+      serialized.maxX,
+      serialized.maxY,
+      serialized.minXCount,
+      serialized.minYCount,
+      serialized.maxXCount,
+      serialized.maxYCount
+    );
   }
 
-  public static fromBounds( bounds: Bounds2 ): EdgedFace {
-    return EdgedFace.fromBoundsValues( bounds.minX, bounds.minY, bounds.maxX, bounds.maxY );
+  public static fromBounds( bounds: Bounds2 ): EdgedClippedFace {
+    return new EdgedClippedFace(
+      [],
+      bounds.minX,
+      bounds.minY,
+      bounds.maxX,
+      bounds.maxY,
+      -1, 1, 1, -1
+    );
   }
 
-  public static fromBoundsValues( minX: number, minY: number, maxX: number, maxY: number ): EdgedFace {
-    const p0 = new Vector2( minX, minY );
-    const p1 = new Vector2( maxX, minY );
-    const p2 = new Vector2( maxX, maxY );
-    const p3 = new Vector2( minX, maxY );
-
-    return new EdgedFace( [
-      new LinearEdge( p0, p1 ),
-      new LinearEdge( p1, p2 ),
-      new LinearEdge( p2, p3 ),
-      new LinearEdge( p3, p0 )
-    ] );
+  public static fromBoundsValues( minX: number, minY: number, maxX: number, maxY: number ): EdgedClippedFace {
+    return new EdgedClippedFace(
+      [],
+      minX, minY, maxX, maxY,
+      -1, 1, 1, -1
+    );
   }
 }
 

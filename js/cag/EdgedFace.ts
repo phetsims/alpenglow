@@ -499,6 +499,15 @@ export default class EdgedFace implements ClippableFace {
   }
 
   /**
+   * Returns a version of the face with the orientation of all of the edges swapped.
+   */
+  public withReversedEdges(): EdgedFace {
+    return new EdgedFace(
+      this.edges.map( edge => new LinearEdge( edge.endPoint, edge.startPoint ) ).reverse()
+    );
+  }
+
+  /**
    * Calls the callback with points for each edge in the face.
    */
   public forEachEdge( callback: ( startPoint: Vector2, endPoint: Vector2 ) => void ): void {
