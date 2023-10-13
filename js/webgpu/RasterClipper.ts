@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
+import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, PolygonalBoolean, PolygonalFace, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
@@ -21,6 +21,7 @@ const NUM_STAGES = 16;
 
 
 // TODO: figure out better output buffer size, since it's hard to bound
+// TODO: Make this adjustable, since our shaders don't depend on it?
 const MAX_EXPONENT = 20; // works for our small demo for now
 const MAX_COMPLETE_CHUNKS = 2 ** MAX_EXPONENT;
 const MAX_COMPLETE_EDGES = 2 ** MAX_EXPONENT;
@@ -237,12 +238,12 @@ export default class RasterClipper {
     const canvas = document.createElement( 'canvas' );
     canvas.width = rasterSize;
     canvas.height = rasterSize;
-    // canvas.style.width = `${rasterSize / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
-    // canvas.style.height = `${rasterSize / window.devicePixelRatio}px`;
+    canvas.style.width = `${rasterSize / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
+    canvas.style.height = `${rasterSize / window.devicePixelRatio}px`;
 
-    canvas.style.imageRendering = 'pixelated';
-    canvas.style.width = `${4 * rasterSize / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
-    canvas.style.height = `${4 * rasterSize / window.devicePixelRatio}px`;
+    // canvas.style.imageRendering = 'pixelated';
+    // canvas.style.width = `${4 * rasterSize / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
+    // canvas.style.height = `${4 * rasterSize / window.devicePixelRatio}px`;
     document.body.appendChild( canvas );
 
     const context = deviceContext.getCanvasContext( canvas, 'srgb' );
@@ -264,14 +265,46 @@ export default class RasterClipper {
       transformedFace.getBounds()
     );
 
-    const matrix2 = Matrix3.translation( 128, 0 ).timesMatrix( Matrix3.scaling( 0.05 ) );
+    const matrix2 = Matrix3.translation( 16, 165 ).timesMatrix( Matrix3.scaling( 0.15 ) );
     const transformedFace2 = clippableFace.getTransformed( matrix2 );
     const renderableFace2 = new RenderableFace(
       transformedFace2,
       new RenderColor(
-        new Vector4( 0, 0, 0, 1 )
+        new Vector4( 1, 1, 1, 1 )
       ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedLinearSRGB ),
       transformedFace2.getBounds()
+    );
+
+    const backgroundOriginal = PolygonalFace.fromBoundsValues( 0, 0, 128, 256 );
+    const difference1 = PolygonalBoolean.difference(
+      new RenderPath( 'nonzero', backgroundOriginal.polygons ),
+      new RenderPath( 'nonzero', transformedFace.toPolygonalFace().polygons )
+    );
+    const difference = PolygonalBoolean.difference(
+      new RenderPath( 'nonzero', difference1 ),
+      new RenderPath( 'nonzero', transformedFace2.toPolygonalFace().polygons )
+    );
+    const backgroundClippableFace = new PolygonalFace( difference );
+    const background = new RenderableFace(
+      backgroundClippableFace,
+      new RenderColor(
+        new Vector4( 0, 0, 0, 1 )
+      ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedLinearSRGB ),
+      backgroundClippableFace.getBounds()
+    );
+
+    const backgroundOriginal2 = PolygonalFace.fromBoundsValues( 128, 0, 256, 256 );
+    const difference2 = PolygonalBoolean.difference(
+      new RenderPath( 'nonzero', backgroundOriginal2.polygons ),
+      new RenderPath( 'nonzero', transformedFace.toPolygonalFace().polygons )
+    );
+    const backgroundClippableFace2 = new PolygonalFace( difference2 );
+    const background2 = new RenderableFace(
+      backgroundClippableFace2,
+      new RenderColor(
+        new Vector4( 1, 1, 1, 1 )
+      ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedLinearSRGB ),
+      backgroundClippableFace2.getBounds()
     );
 
     let count = 0;
@@ -283,7 +316,7 @@ export default class RasterClipper {
       // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
       window.requestAnimationFrame( step, canvas );
 
-      await rasterClipper.rasterize( [ renderableFace, renderableFace2 ], context.getCurrentTexture() );
+      await rasterClipper.rasterize( [ renderableFace, renderableFace2, background, background2 ], context.getCurrentTexture() );
     } )();
   }
 
