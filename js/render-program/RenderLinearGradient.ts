@@ -137,10 +137,13 @@ export default class RenderLinearGradient extends RenderProgram {
     const blendAccuracy = this.accuracy === RenderLinearGradientAccuracy.SplitAccurate ?
                           RenderLinearBlendAccuracy.Accurate :
                           RenderLinearBlendAccuracy.PixelCenter;
+    const delta = this.end.minus( this.start );
 
-    const delta = end.minus( start );
-    // How does using the magnitude squared here not introduce an error? Won't the normal be smaller than expected?
-    const normal = delta.timesScalar( 1 / delta.magnitudeSquared );
+    // By squaring the magnitude we create an inverse magnitude the same way our scaled normal will as well.
+    const localScaledNormal = delta.timesScalar( 1 / delta.magnitudeSquared );
+
+    // This transform retains our inverse magnitude from above.
+    const normal = this.transform.inverted().timesTransposeVector2( localScaledNormal );
     const offset = normal.dot( start );
 
     // Should evaluate to 1 at the end
