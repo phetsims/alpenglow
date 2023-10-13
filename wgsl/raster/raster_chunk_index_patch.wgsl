@@ -63,7 +63,7 @@ fn main(
       let needs_face = ( clipped_chunk.bits & RasterClippedChunk_bits_needs_face_mask ) != 0u;
       let is_full_area = ( chunk.bits & RasterCompleteChunk_bits_is_full_area_mask ) != 0u;
       complete_chunks[ output_chunk_index ] = RasterCompleteChunk(
-        chunk.bits,
+        chunk.bits & RasterCompleteChunk_bits_full_mask,
         select( 0u, startIndex, needs_face && !is_full_area ),
         select( 0u, endIndex - startIndex, needs_face && !is_full_area ),
         chunk.area,

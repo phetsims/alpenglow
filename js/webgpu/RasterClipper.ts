@@ -259,8 +259,9 @@ export default class RasterClipper {
         ) );
       } );
       rawInputChunks = [ new RasterChunk(
+        // TODO: fill in this stuff based on the RenderProgram!!
         0,
-        true,
+        false,
         false,
         0,
         rawInputEdges.length,

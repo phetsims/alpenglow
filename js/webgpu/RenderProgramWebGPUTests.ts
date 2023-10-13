@@ -53,6 +53,7 @@ const renderProgramTest = (
         0, // numEdges
         [], // edges
         true, // isFullArea
+        false, // needsFace
         1, // area
         new phet.dot.Bounds2( 0, 0, 1, 1 ), // bounds
         -1, 1, 1, -1 // counts

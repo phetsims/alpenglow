@@ -22,6 +22,7 @@ export default class TestRenderProgram {
     numEdges: number,
     edges: LinearEdge[],
     isFullArea: boolean,
+    needsFace: boolean,
     area: number,
     bounds: Bounds2,
     minXCount: number,
@@ -61,6 +62,7 @@ export default class TestRenderProgram {
     configEncoder.pushU32( edgesOffset ); // edgesOffset: u32,
     configEncoder.pushU32( numEdges ); // numEdges: u32,
     configEncoder.pushU32( isFullArea ? 1 : 0 ); // isFullArea: u32, // 1 or 0
+    configEncoder.pushU32( needsFace ? 1 : 0 ); // needsFace: u32, // 1 or 0
     configEncoder.pushF32( area ); // area: f32,
     configEncoder.pushF32( bounds.minX ); // minX: f32,
     configEncoder.pushF32( bounds.minY ); // minY: f32,

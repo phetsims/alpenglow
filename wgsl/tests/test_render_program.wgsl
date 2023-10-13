@@ -12,6 +12,7 @@ struct Config {
   edgesOffset: u32,
   numEdges: u32,
   isFullArea: u32, // 1 or 0
+  needsFace: u32, // 1 or 0
   area: f32,
   minX: f32,
   minY: f32,
@@ -45,6 +46,7 @@ fn main(
     config.edgesOffset,
     config.numEdges,
     config.isFullArea != 0u,
+    config.needsFace != 0u,
     config.area,
     config.minX,
     config.minY,

@@ -125,6 +125,7 @@ fn evaluate_render_program_instructions(
   edgesOffset: u32,
   numEdges: u32,
   isFullArea: bool,
+  needsFace: bool,
   area: f32,
   minX: f32,
   minY: f32,
@@ -148,19 +149,18 @@ fn evaluate_render_program_instructions(
   var oops_count = 0u;
 
   var fake_centroid = 0.5f * vec2f( maxX + minX, maxY + minY );
-
-  // TODO: conditionally compute? perhaps lazily (hopefully not lazily?)
   var real_centroid = fake_centroid;
-  var real_centroid_computed = false;
-
-  let centroid_success = compute_centroid(
-    &real_centroid,
-    edgesOffset, numEdges, isFullArea, area,
-    minX, minY, maxX, maxY,
-    minXCount, minYCount, maxXCount, maxYCount
-  );
-  if ( !centroid_success ) {
-    return oops_inifinite_loop_code;
+  // Conditionally compute the real centroid (compute it FOR NOW if we have the face data)
+  if ( needsFace ) {
+    let centroid_success = compute_centroid(
+      &real_centroid,
+      edgesOffset, numEdges, isFullArea, area,
+      minX, minY, maxX, maxY,
+      minXCount, minYCount, maxXCount, maxYCount
+    );
+    if ( !centroid_success ) {
+      return oops_inifinite_loop_code;
+    }
   }
 
   while ( !is_done ) {

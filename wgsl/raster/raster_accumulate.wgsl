@@ -47,6 +47,7 @@ fn main(
 
   let render_program_index = chunk.bits & RasterCompleteChunk_bits_raster_program_index_mask;
   let is_full_area = ( chunk.bits & RasterCompleteChunk_bits_is_full_area_mask ) != 0u;
+  let needs_face = ( chunk.bits & RasterCompleteChunk_bits_needs_face_mask ) != 0u;
   let area = chunk.area;
 
   // TODO: handle 0.5 offsets for filters!!!!
@@ -77,6 +78,7 @@ fn main(
     chunk.edgesOffset,
     chunk.numEdges,
     is_full_area,
+    needs_face,
     area,
     chunk.minX,
     chunk.minY,
