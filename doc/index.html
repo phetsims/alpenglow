@@ -473,6 +473,8 @@
     <p class="TODO">
       Create a "performance" section, to note things. Prefer Firefox for profiling CPU currently. Convert things to Rust
       and use WGPU to get better GPU profiling? (Or if we can profile Metal using the debug tools, that could help).
+      Look into <a href="https://github.com/takahirox/webgpu-devtools">webgpu-devtools</a>. But for now, we can use FPS
+      tests.
     </p>
 
     <h3>Technology: Primarily WebGPU</h3>
@@ -1515,6 +1517,10 @@
     </p>
 
     <p class="TODO">
+      Document stack-based operations with stack-effect diagrams: "( before -- after )" (top of stack states).
+    </p>
+
+    <p class="TODO">
       Bake in support for context loss handling
     </p>
 
@@ -1526,6 +1532,20 @@
 
     <p class="TODO">
       Check the WGSL/WebGPU spec for changes!
+    </p>
+
+    <p class="TODO">
+      Get bindings from DualSnippet (parsed from the WGSL?) so we don't have to specify on ComputeShader creation.
+    </p>
+
+    <p class="TODO">
+      Live WGSL sandbox with compute input/output (and all our existing WGSL included?)
+    </p>
+
+    <p class="TODO">
+      Figure out casing. CamelCase is nice for types, how is snake_case treating us? The disconnect with TypeScript styles
+      is tricky. We're adding parenthesis to conditional statements when we don't have to (that the minifier is not yet
+      confident enough to detect/remove).
     </p>
 
     <h4 id="WGSL-snippets">Snippets</h4>
@@ -1874,11 +1894,20 @@
     </p>
 
     <p class="TODO">
+      For RasterClipper approach, consider pipeline-overridable constants to change the reduce behavior for the last level.
+    </p>
+
+    <p class="TODO">
+      Measure RasterClipper progression of chunk/edge counts every stage.
+    </p>
+
+    <p class="TODO">
       Document the approaches here.
     </p>
 
     <p class="TODO">
-      Add mermaid chart here
+      Add mermaid chart here. Add accumulate and to_texture steps. Add update_config/uniform step (before edge index
+      patch). Potentially put config buffer in.
     </p>
 
     <p class="TODO">
