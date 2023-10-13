@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BoundedSubpath, ClippableFace, ClippableFaceAccumulator, EdgedClippedFace, EdgedFace, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderEvaluator, RenderExecutor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds } from '../imports.js';
+import { alpenglow, BoundedSubpath, ClippableFace, ClippableFaceAccumulator, DeviceContext, EdgedClippedFace, EdgedFace, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterClipper, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderEvaluator, RenderExecutor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
@@ -1207,6 +1207,21 @@ export default class Rasterize {
       log
     );
     log && Rasterize.markEnd( 'rasterize-accumulate' );
+  }
+
+  public static async hybridRasterize(
+    renderProgram: RenderProgram,
+    deviceContext: DeviceContext,
+    canvasContext: GPUCanvasContext,
+    bounds: Bounds2,
+    providedOptions?: RasterizationOptions
+  ): Promise<void> {
+
+    const renderableFaces = Rasterize.partitionRenderableFaces( renderProgram, bounds, providedOptions );
+
+    const rasterClipper = RasterClipper.get( deviceContext );
+
+    await rasterClipper.rasterize( renderableFaces, canvasContext.getCurrentTexture() );
   }
 
   public static imageDataToCanvas( imageData: ImageData ): HTMLCanvasElement {

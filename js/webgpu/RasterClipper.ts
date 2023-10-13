@@ -21,7 +21,7 @@ const NUM_STAGES = 16;
 
 
 // TODO: figure out better output buffer size, since it's hard to bound
-const MAX_EXPONENT = 13; // works for our small demo for now
+const MAX_EXPONENT = 20; // works for our small demo for now
 const MAX_COMPLETE_CHUNKS = 2 ** MAX_EXPONENT;
 const MAX_COMPLETE_EDGES = 2 ** MAX_EXPONENT;
 
@@ -32,6 +32,8 @@ const MAX_EDGE_CLIPS = 2 * MAX_EDGES;
 
 const CONFIG_NUM_WORDS = 45;
 const CONFIG_COUNT_WORD_OFFSET = 33;
+
+const rasterClipperMap = new WeakMap<DeviceContext, RasterClipper>();
 
 // TODO: better name
 export default class RasterClipper {
@@ -60,6 +62,15 @@ export default class RasterClipper {
   private readonly toTextureShader: ComputeShader;
 
   private readonly blitShader: BlitShader;
+
+  public static get( deviceContext: DeviceContext ): RasterClipper {
+    let rasterClipper = rasterClipperMap.get( deviceContext );
+    if ( !rasterClipper ) {
+      rasterClipper = new RasterClipper( deviceContext );
+      rasterClipperMap.set( deviceContext, rasterClipper );
+    }
+    return rasterClipper;
+  }
 
   public constructor( private readonly deviceContext: DeviceContext ) {
     this.device = deviceContext.device;
@@ -234,7 +245,7 @@ export default class RasterClipper {
     canvas.style.height = `${4 * rasterSize / window.devicePixelRatio}px`;
     document.body.appendChild( canvas );
 
-    const context = deviceContext.getCanvasContext( canvas );
+    const context = deviceContext.getCanvasContext( canvas, 'srgb' );
 
     const clippableFace = TestToCanvas.getTestPath().toEdgedFace().withReversedEdges();
 

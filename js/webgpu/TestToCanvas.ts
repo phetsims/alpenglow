@@ -25,7 +25,7 @@ export default class TestToCanvas {
     canvas.style.width = `${displaySize}px`;
     canvas.style.height = `${displaySize}px`;
 
-    const context = deviceContext.getCanvasContext( canvas );
+    const context = deviceContext.getCanvasContext( canvas, 'srgb' );
 
     const outTexture = context.getCurrentTexture();
 

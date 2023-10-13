@@ -850,6 +850,8 @@ an UI and Display made for visual testing and debugging.
         return result;
       }
 
+      const WEBGPU_RASTERIZE = true;
+
       const displaySize = 768;
       const outputSize = 768 * 2;
       // const outputSize = 768 / 4;
@@ -864,6 +866,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       const clientColorSpace = colorSpace === 'srgb' ? phet.alpenglow.RenderColorSpace.premultipliedSRGB : phet.alpenglow.RenderColorSpace.premultipliedDisplayP3;
+      const gpuColorSpace = colorSpace === 'srgb' ? phet.alpenglow.RenderColorSpace.premultipliedLinearSRGB : phet.alpenglow.RenderColorSpace.premultipliedLinearDisplayP3;
 
       // const imageResampleType = phet.alpenglow.RenderResampleType.NearestNeighbor
       const imageResampleType = phet.alpenglow.RenderResampleType.Bilinear;
@@ -922,6 +925,7 @@ an UI and Display made for visual testing and debugging.
       };
 
       const INCLUDE_3D = true;
+      const INCLUDE_IMAGE = false;
 
       const APPLY_OPACITY = false;
 
@@ -1448,7 +1452,14 @@ an UI and Display made for visual testing and debugging.
 
       const bc = new phet.alpenglow.RenderBlendCompose( 3, 0, b, c );
       const program = normalBlendArray( [
-        back, d, e, f, bc, a, bary, baryPersp,
+        back,
+        d,
+        e,
+        f,
+        bc,
+        ...( INCLUDE_IMAGE ? [ a ] : [] ),
+        bary,
+        baryPersp,
         ...( INCLUDE_3D ? [ depth, boxDepth ] : [] )
       ] ).transformed(
         // const program = normalBlendArray( [ back, d, e, f, bc, a, bary, baryPersp ] ).transformed(
@@ -1470,22 +1481,35 @@ an UI and Display made for visual testing and debugging.
         canvas.style.left = '20px ';
       };
 
-      // const canvas = program.slowRasterizeToCanvas( outputSize, outputSize, 8 );
-      // styleCanvas( canvas );
-      // document.body.appendChild( canvas );
-      // console.log( canvas.toDataURL() );
-
-      // const raster = new phet.alpenglow.AccumulatedRaster( outputSize, outputSize );
-      // const raster = new phet.alpenglow.CombinedRaster( outputSize + 100, outputSize + 100 );
       const rasterLog = new phet.alpenglow.RasterLog();
       rasterizeOptions.log = rasterLog;
-      const raster = new phet.alpenglow.CombinedRaster( outputSize, outputSize, rasterOptions );
 
-      const start = Date.now();
-      phet.alpenglow.Rasterize.rasterize( program, raster, new phet.dot.Bounds2( 0, 0, outputSize, outputSize ), rasterizeOptions );
-      console.log( Date.now() - start );
+      let debugCanvas;
+      const outputBounds = new phet.dot.Bounds2( 0, 0, outputSize, outputSize );
+      if ( WEBGPU_RASTERIZE ) {
+        const device = await phet.alpenglow.DeviceContext.getDevice();
+        const deviceContext = new phet.alpenglow.DeviceContext( device );
 
-      const debugCanvas = raster.toCanvas();
+        debugCanvas = document.createElement( 'canvas' );
+        debugCanvas.width = outputSize;
+        debugCanvas.height = outputSize;
+
+        const canvasContext = deviceContext.getCanvasContext( debugCanvas, colorSpace );
+
+        const convertedProgram = program.colorConverted( clientColorSpace, gpuColorSpace ).simplified();
+
+        // TODO: GAMUT MAP!!!!
+        phet.alpenglow.Rasterize.hybridRasterize( convertedProgram, deviceContext, canvasContext, outputBounds, rasterizeOptions );
+      }
+      else {
+        const raster = new phet.alpenglow.CombinedRaster( outputSize, outputSize, rasterOptions );
+
+        const start = Date.now();
+        phet.alpenglow.Rasterize.rasterize( program, raster, outputBounds, rasterizeOptions );
+        console.log( Date.now() - start );
+
+        debugCanvas = raster.toCanvas();
+      }
       styleCanvas( debugCanvas );
       document.body.appendChild( debugCanvas );
 

@@ -65,7 +65,7 @@ export default class DeviceContext {
     } );
   }
 
-  public getCanvasContext( canvas: HTMLCanvasElement ): GPUCanvasContext {
+  public getCanvasContext( canvas: HTMLCanvasElement, colorSpace: 'srgb' | 'display-p3' ): GPUCanvasContext {
     const context = canvas.getContext( 'webgpu' )!;
 
     if ( !context ) {
@@ -75,6 +75,7 @@ export default class DeviceContext {
     context.configure( {
       device: this.device,
       format: this.preferredCanvasFormat,
+      colorSpace: colorSpace,
       usage: GPUTextureUsage.COPY_SRC |
              GPUTextureUsage.RENDER_ATTACHMENT |
              ( this.preferredCanvasFormat === this.preferredStorageFormat ? GPUTextureUsage.STORAGE_BINDING : 0 ),
