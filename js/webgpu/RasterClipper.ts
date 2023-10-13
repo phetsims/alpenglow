@@ -341,8 +341,11 @@ export default class RasterClipper {
       const edgesOffset = numInputEdges;
       const chunkIndex = numInputChunks;
 
-      // TODO: RENDER WITH OFFSETS!
-      const edgeClippedFace = renderableFace.face.toEdgedClippedFaceWithoutCheck( 0, 0, width, height );
+      // TODO: RENDER WITH OFFSETS! AND POLYGONAL FILTERING
+      const bounds = renderableFace.bounds.roundedOut();
+      const edgeClippedFace = renderableFace.face.toEdgedClippedFaceWithoutCheck(
+        bounds.minX, bounds.minY, bounds.maxX, bounds.maxY
+      );
       const edges = edgeClippedFace.edges;
 
       new RasterChunk(
