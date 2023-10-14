@@ -482,7 +482,7 @@
             <a href="#antialiasing">Anti-Aliasing</a>
             <ul class="nav nav-list">
               <li><a href="#antialiasing-integrals">Integrals</a></li>
-              <li><a href="#antialiasing-implementation">Implementation</a></li>
+              <li><a href="#antialiasing-filters">Filters</a></li>
             </ul>
           </li>
           <li>
@@ -1775,12 +1775,223 @@
       center of the edge-clipped area.
     </p>
 
-    <h4 id="antialiasing-implementation">Implementation</h4>
+    <h4 id="antialiasing-filters">Filters</h4>
     <!-- For antialiasing-->
+
+    <h5>Box Filter</h5>
+
+    <p>
+      For the box filter, we clip everything to the pixel grid, and then evaluate the integral over each "pixel" polygon
+      to determine the result.
+    </p>
+
+    <p class="TODO">Documentation with diagrams</p>
+
+    <h5>Bilinear Filter</h5>
+
+    <p class="TODO">Documentation with diagrams</p>
+
+    <h5>Mitchell-Netravali Filter</h5>
+
+    <p class="TODO">Documentation with diagrams</p>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span2"></div>
+      <div class="span4 example">
+        <div id="checkerboard-canvas"></div>
+        Canvas
+      </div>
+      <div class="span4 example">
+        <div id="checkerboard-svg"></div>
+        SVG
+      </div>
+      <div class="span2"></div>
+    </div>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span4 example">
+        <div id="checkerboard-box"></div>
+        Box Filter
+      </div>
+      <div class="span4 example">
+        <div id="checkerboard-bilinear"></div>
+        Bilinear Filter
+      </div>
+      <div class="span4 example">
+        <div id="checkerboard-mitchell-netravali"></div>
+        Mitchell-Netravali Filter
+      </div>
+    </div>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span2"></div>
+      <div class="span4 example">
+        <div id="siemens-canvas"></div>
+        Canvas
+      </div>
+      <div class="span4 example">
+        <div id="siemens-svg"></div>
+        SVG
+      </div>
+      <div class="span2"></div>
+    </div>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span4 example">
+        <div id="siemens-box"></div>
+        Box Filter
+      </div>
+      <div class="span4 example">
+        <div id="siemens-bilinear"></div>
+        Bilinear Filter
+      </div>
+      <div class="span4 example">
+        <div id="siemens-mitchell-netravali"></div>
+        Mitchell-Netravali Filter
+      </div>
+    </div>
 
     <p class="TODO">Documentation</p>
 
     <p class="TODO">Demos of concepts, blurs, and checkerboard/siemens examples</p>
+
+    <script type="module">
+      import { Node, Path } from '../../chipper/dist/js/scenery/js/imports.js';
+      import { RenderStack, RenderPathBoolean, RenderPath, RenderFromNode, PolygonFilterType, RenderDepthSort } from '../../chipper/dist/js/alpenglow/js/imports.js';
+      import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
+      import dot from '../../chipper/dist/js/dot/js/dot.js';
+      const v2 = dot.v2;
+      const v3 = dot.v3;
+      const v4 = dot.v4;
+      const Matrix3 = dot.Matrix3;
+
+      const getCheckerboard = type => {
+        const width = 128;
+        const height = width / 2;
+
+        const dl = 10;
+
+        const projectionMatrix = RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
+        const rotationMatrix = Matrix3.rotationY( 0.1 ).timesMatrix( Matrix3.rotationX( 0 ) );
+        const project = p => {
+
+          // a rotation, for testing
+          p = rotationMatrix.timesVector3( p.minus( v3( 0, 0, dl ) ) ).plus( v3( 0, 0, dl ) );
+
+          const clip = projectionMatrix.timesVector4( v4( p.x, p.y, p.z, 1 ) );
+          return v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
+        };
+
+        const polygons = [];
+
+        const matrix = Matrix3.scaling( height ).timesMatrix( Matrix3.translation( 1, 0, 0 ) );
+
+        const xSpan = 40;
+        const y = -5;
+        const zMax = 100;
+
+        for ( let x = -xSpan; x < xSpan; x++ ) {
+          for ( let z = 4; z < zMax; z++ ) {
+            if ( ( x + z ) % 2 === 0 ) {
+              continue;
+            }
+            const p0 = matrix.timesVector2( project( v3( x, y, z ) ).toVector2() );
+            const p1 = matrix.timesVector2( project( v3( x + 1, y, z ) ).toVector2() );
+            const p2 = matrix.timesVector2( project( v3( x + 1, y, z + 1 ) ).toVector2() );
+            const p3 = matrix.timesVector2( project( v3( x, y, z + 1 ) ).toVector2() );
+
+            polygons.push( [ p0, p1, p2, p3 ] );
+          }
+        }
+
+        if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+          return window.getSceneryElement(
+            new Node( {
+              renderer: type,
+              children: polygons.map( polygon => new Path( Shape.polygon( polygon ), { fill: 'black' } ) )
+            } ),
+            width, height, 'white', type
+          );
+        }
+        else {
+          const program = new RenderStack( [
+            new RenderPathBoolean(
+              new RenderPath( 'nonzero', polygons ),
+              RenderFromNode.colorFrom( 'black' ),
+              RenderFromNode.colorFrom( 'white' )
+            )
+          ] );
+
+          return window.getRasterizedElement( program, width, height, {
+            polygonFiltering: {
+              box: PolygonFilterType.Box,
+              bilinear: PolygonFilterType.Bilinear,
+              mitchellNetravali: PolygonFilterType.MitchellNetravali
+            }[ type ]
+          } );
+        }
+      };
+
+      const getSiemensStar = ( type, pointCount ) => {
+        const width = 128;
+        const height = 128;
+
+        const center = v2( width / 2 + 0.15992094, height / 2 + 0.426296 );
+        const radius = width * 0.49;
+
+        const polygon = [];
+        for ( let i = 0; i < pointCount; i++ ) {
+          const angle0 = i * 2 * Math.PI / pointCount;
+          const angle1 = ( i + 0.5 ) * 2 * Math.PI / pointCount;
+
+          const p0 = v2( center.x + radius * Math.cos( angle0 ), center.y + radius * Math.sin( angle0 ) );
+          const p1 = v2( center.x + radius * Math.cos( angle1 ), center.y + radius * Math.sin( angle1 ) );
+
+          polygon.push( center );
+          polygon.push( p0 );
+          polygon.push( p1 );
+        }
+
+        if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+          return window.getSceneryElement(
+            new Path( Shape.polygon( polygon ), { fill: 'black', renderer: type } ),
+            width, height, 'white', type
+          );
+        }
+        else if ( type === 'box' || type === 'bilinear' || type === 'mitchellNetravali' ) {
+          const filtering = {
+            box: PolygonFilterType.Box,
+            bilinear: PolygonFilterType.Bilinear,
+            mitchellNetravali: PolygonFilterType.MitchellNetravali
+          }[ type ];
+
+          const program = new RenderPathBoolean(
+            new RenderPath( 'nonzero', [ polygon ] ),
+            RenderFromNode.colorFrom( 'black' ),
+            RenderFromNode.colorFrom( 'white' )
+          );
+
+          return window.getRasterizedElement( program, width, height, {
+            polygonFiltering: filtering
+          } );
+        }
+        else {
+          throw new Error( 'unknown type' );
+        }
+      };
+
+      window.addDiagram( 'checkerboard-canvas', () => getCheckerboard( 'canvas' ) );
+      window.addDiagram( 'checkerboard-svg', () => getCheckerboard( 'svg' ) );
+      window.addDiagram( 'checkerboard-box', () => getCheckerboard( 'box' ) );
+      window.addDiagram( 'checkerboard-bilinear', () => getCheckerboard( 'bilinear' ) );
+      window.addDiagram( 'checkerboard-mitchell-netravali', () => getCheckerboard( 'mitchellNetravali' ) );
+
+      window.addDiagram( 'siemens-canvas', () => getSiemensStar( 'canvas', 200 ) );
+      window.addDiagram( 'siemens-svg', () => getSiemensStar( 'svg', 200 ) );
+      window.addDiagram( 'siemens-box', () => getSiemensStar( 'box', 200 ) );
+      window.addDiagram( 'siemens-bilinear', () => getSiemensStar( 'bilinear', 200 ) );
+      window.addDiagram( 'siemens-mitchell-netravali', () => getSiemensStar( 'mitchellNetravali', 200 ) );
+    </script>
 
     <h3 id="renderProgram">RenderProgram</h3>
 
