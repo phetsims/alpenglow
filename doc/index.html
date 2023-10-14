@@ -472,6 +472,7 @@
             <a href="#antialiasing">Anti-Aliasing</a>
             <ul class="nav nav-list">
               <li><a href="#antialiasing-integrals">Integrals</a></li>
+              <li><a href="#antialiasing-implementation">Implementation</a></li>
             </ul>
           </li>
           <li>
@@ -498,6 +499,7 @@
               <li><a href="#WGSL-mangling">Mangling</a></li>
             </ul>
           </li>
+          <li><a href="#depthSort">Depth Sort</a></li>
         </ul>
       </li>
       <li>
@@ -540,6 +542,10 @@
 
     <p class="TODO">
       Create section on the polygonal filters
+    </p>
+
+    <p class="TODO">
+      Create section on the color space handling and blending - Note the Display P3 color transform matrices.
     </p>
 
     <p class="TODO">
@@ -1285,7 +1291,8 @@
 
     <p>
       This will delve into some of the mathematics and background information behind the anti-aliasing techniques used
-      in Alpenglow.
+      in Alpenglow. Most of the anti-aliasing is based on being able to clip polygons down to pixel boundaries, and then
+      integrating the polygonal coverage over the pixel.
     </p>
 
     <h5>Green's Theorem and Polygons</h5>
@@ -1753,6 +1760,9 @@
       Where $x_{avg}=\frac{1}{2}(x_{min}+x_{max})$ and $y_{avg}=\frac{1}{2}(y_{min}+y_{max})$ are the values of the
       center of the edge-clipped area.
     </p>
+
+    <h4 id="antialiasing-implementation">Implementation</h4>
+    <!-- For antialiasing-->
 
     <p class="TODO">Documentation</p>
 
@@ -2268,6 +2278,278 @@
       Mangling needs to run on all of the shader code at once. We've implemented mangling for the Vello setup, but we
       need to implement it in the chipper transpiler.
     </p>
+
+    <h3 id="depthSort">Depth Sort</h3>
+
+    <p>
+      If we store data about what 3D plane each face is on (essentially assigning a depth to each 2d point), it's
+      possible to analytically determine the exact divisions between sections where one face is in front of the other.
+      For any given pair of planes, there is a 2d line in screen space that delineates the boundary between the two
+      areas (the "depth sort line"). We'll use this to further split our polygons into disjoint sections where we have
+      a total ordering of the planar faces (recall, Alpenglow stages will already have found us a section that is fully
+      contained within the faces).
+    </p>
+
+    <p>
+      This can be used to render 3d scenes, using sorting/splitting of the faces (instead of the normal technique of
+      using a depth buffer). We will have a fully vector-friendly description of the 3d scene, down to an arbitrary
+      precision!
+    </p>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span4 example">
+        <div id="teapot-faces"></div>
+        Faces
+      </div>
+      <div class="span4 example">
+        <div id="teapot-normals"></div>
+        Interpolated Normals
+      </div>
+      <div class="span4 example">
+        <div id="teapot-phong"></div>
+        Phong
+      </div>
+    </div>
+
+    <script type="module">
+      import { RenderColor, RenderDepthSort, RenderPathBoolean, RenderPath, RenderPlanar, Mesh, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderPhong, RenderLight, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderNormalize } from '../../chipper/dist/js/alpenglow/js/imports.js';
+      import dot from '../../chipper/dist/js/dot/js/dot.js';
+      const v3 = dot.v3;
+      const v4 = dot.v4;
+      const Matrix3 = dot.Matrix3;
+      const Matrix4 = dot.Matrix4;
+
+      const getTeapot = ( shadeType, normalType ) => {
+        const width = 200;
+        const height = 200;
+
+        const dl = 150;
+        const projectionMatrix = RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
+        const rotationMatrix = Matrix3.rotationY( 0 ).timesMatrix( Matrix3.rotationX( -0.5 ) );
+        const project = p => {
+
+          // a rotation, for testing
+          p = rotationMatrix.timesVector3( p.minus( v3( 0, 0, dl ) ) ).plus( v3( 0, 0, dl ) );
+
+          const clip = projectionMatrix.timesVector4( v4( p.x, p.y, p.z, 1 ) );
+          return v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
+        };
+
+        const createTriangularMesh = ( mesh, matrix4 ) => {
+          return mesh.faces.map( face => {
+            const vertices = face.vertexIndices.map( i => mesh.vertices[ i ] ).reverse();
+            const normals = face.normalIndices.map( i => mesh.normals[ i ] ).reverse();
+
+            const transformedVertices = vertices.map( v => matrix4.timesVector3( v ) );
+            const projectedVertices = transformedVertices.map( project );
+
+            if ( projectedVertices[ 0 ].equals( projectedVertices[ 1 ] ) || projectedVertices[ 0 ].equals( projectedVertices[ 2 ] ) || projectedVertices[ 1 ].equals( projectedVertices[ 2 ] ) ) {
+              return null;
+            }
+
+            const positionProgram = new RenderBarycentricPerspectiveBlend(
+              projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
+              RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+              new RenderColor( transformedVertices[ 0 ].toVector4Zero() ),
+              new RenderColor( transformedVertices[ 1 ].toVector4Zero() ),
+              new RenderColor( transformedVertices[ 2 ].toVector4Zero() )
+            );
+
+            let normalProgram;
+            if ( normalType === 'interpolated' ) {
+              normalProgram = new RenderNormalize( new RenderBarycentricPerspectiveBlend(
+                projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
+                RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+                new RenderColor( normals[ 0 ].toVector4Zero() ),
+                new RenderColor( normals[ 1 ].toVector4Zero() ),
+                new RenderColor( normals[ 2 ].toVector4Zero() )
+              ) );
+            }
+            else if ( normalType === 'flat' ) {
+              normalProgram = new RenderColor( normals[ 0 ].plus( normals[ 1 ] ).plus( normals[ 2 ] ).normalized().toVector4Zero() );
+            }
+
+            // const positionProgram = new RenderColor( transformedVertices[ 0 ].plus( transformedVertices[ 1 ] ).plus( transformedVertices[ 2 ] ).timesScalar( 1 / 3 ).toVector4() );
+
+            let renderProgram;
+            if ( shadeType === 'phong' ) {
+              const ambientColorProgram = new RenderColor( v4( 0, 0, 0, 1 ) );
+              const diffuseColorProgram = new RenderColor( v4( 1, 0.05, 0, 1 ) );
+              const specularColorProgram = new RenderColor( v4( 0.5, 0.5, 0.5, 1 ) );
+              renderProgram = new RenderPhong( 50, ambientColorProgram, diffuseColorProgram, specularColorProgram, positionProgram, normalProgram, [
+                new RenderLight(
+                  new RenderColor( v4( -2.0, 3.5, -2.0, 0 ).normalized() ),
+                  new RenderColor( v4( 1, 1, 1, 1 ) )
+                )
+              ] );
+            }
+            else if ( shadeType === 'normals' ) {
+              renderProgram = new RenderNormalDebug( normalProgram );
+            }
+            else if ( shadeType === 'random' ) {
+              renderProgram = new RenderColor( v4( Math.random(), Math.random(), Math.random(), 1 ) );
+            }
+
+            return new RenderPlanar(
+              RenderPathBoolean.fromInside( new RenderPath( 'nonzero', [ [
+                projectedVertices[ 0 ].toVector2(), projectedVertices[ 1 ].toVector2(), projectedVertices[ 2 ].toVector2()
+              ] ] ), renderProgram ),
+              projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ]
+            );
+          } ).filter( _.identity );
+        };
+
+        let program = new RenderDepthSort( [
+          // eslint-disable-next-line no-undef
+          ...createTriangularMesh( Mesh.loadOBJ( teapotOBJ )[ 0 ], Matrix4.translation( 0, 0, 150 ) )
+        ] ).transformed( phet.dot.Matrix3.scaling( 170 * width / 256 ) ).transformed( phet.dot.Matrix3.translation( width / 2, height / 2 ) );
+        if ( shadeType === 'phong' ) {
+          program = new RenderLinearSRGBToSRGB( program );
+        }
+
+        return window.getRasterizedElement( program, width, height );
+      };
+
+      window.addDiagram( 'teapot-faces', () => getTeapot( 'random', 'flat' ) );
+      window.addDiagram( 'teapot-normals', () => getTeapot( 'normals', 'interpolated' ) );
+      window.addDiagram( 'teapot-phong', () => getTeapot( 'phong', 'interpolated' ) );
+
+    </script>
+
+    <p>
+      Due to the total ordering of faces, we can actually <strong>trivially</strong> support multiple transparent
+      objects correctly!
+    </p>
+
+    <div class="example">
+      <div id="transparent-3d"></div>
+    </div>
+
+    <script type="module">
+      import { RenderColor, RenderDepthSort, RenderPathBoolean, RenderPath, RenderPlanar, RenderLinearSRGBToSRGB, RenderPhong, RenderLight, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderNormalize } from '../../chipper/dist/js/alpenglow/js/imports.js';
+      import dot from '../../chipper/dist/js/dot/js/dot.js';
+      const v3 = dot.v3;
+      const v4 = dot.v4;
+      const Matrix3 = dot.Matrix3;
+
+      const getTransparentSpheres = () => {
+        const width = 128;
+        const height = 128;
+
+        const dl = 60;
+        const projectionMatrix = RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
+        const rotationMatrix = Matrix3.rotationY( 0 ).timesMatrix( Matrix3.rotationX( -0.5 ) );
+        const project = p => {
+
+          // a rotation, for testing
+          p = rotationMatrix.timesVector3( p.minus( v3( 0, 0, dl ) ) ).plus( v3( 0, 0, dl ) );
+
+          const clip = projectionMatrix.timesVector4( v4( p.x, p.y, p.z, 1 ) );
+          return v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
+        };
+        const createSphere = ( center, radius, thetaDivisions, phiDivisions, alpha, diffuseColor ) => {
+          const planars = [];
+
+          for ( let i = 0; i < thetaDivisions; i++ ) {
+            const theta0 = i / thetaDivisions * 2 * Math.PI;
+            const theta1 = ( i + 1 ) / thetaDivisions * 2 * Math.PI;
+
+            for ( let j = 0; j < phiDivisions; j++ ) {
+              const phi0 = j / phiDivisions * Math.PI;
+              const phi1 = ( j + 1 ) / phiDivisions * Math.PI;
+
+              const p00 = v3(
+                Math.sin( phi0 ) * Math.cos( theta0 ),
+                Math.sin( phi0 ) * Math.sin( theta0 ),
+                Math.cos( phi0 )
+              );
+              const p01 = v3(
+                Math.sin( phi0 ) * Math.cos( theta1 ),
+                Math.sin( phi0 ) * Math.sin( theta1 ),
+                Math.cos( phi0 )
+              );
+              const p10 = v3(
+                Math.sin( phi1 ) * Math.cos( theta0 ),
+                Math.sin( phi1 ) * Math.sin( theta0 ),
+                Math.cos( phi1 )
+              );
+              const p11 = v3(
+                Math.sin( phi1 ) * Math.cos( theta1 ),
+                Math.sin( phi1 ) * Math.sin( theta1 ),
+                Math.cos( phi1 )
+              );
+
+              const tri = ( p0, p1, p2 ) => {
+
+                const point0 = center.plus( p0.timesScalar( radius ) );
+                const point1 = center.plus( p1.timesScalar( radius ) );
+                const point2 = center.plus( p2.timesScalar( radius ) );
+
+                const projected0 = project( point0 );
+                const projected1 = project( point1 );
+                const projected2 = project( point2 );
+
+                const positionProgram = new RenderBarycentricPerspectiveBlend(
+                  projected0, projected1, projected2,
+                  RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+                  new RenderColor( point0.toVector4Zero() ),
+                  new RenderColor( point1.toVector4Zero() ),
+                  new RenderColor( point2.toVector4Zero() )
+                );
+                const normalProgram = new RenderNormalize( new RenderBarycentricPerspectiveBlend(
+                  projected0, projected1, projected2,
+                  RenderBarycentricPerspectiveBlendAccuracy.Centroid,
+                  new RenderColor( p0.toVector4() ),
+                  new RenderColor( p1.toVector4() ),
+                  new RenderColor( p2.toVector4() )
+                ) );
+
+                const ambientColorProgram = new RenderColor( v4( 0, 0, 0, alpha ) );
+                const diffuseColorProgram = new RenderColor( v4( diffuseColor.x, diffuseColor.y, diffuseColor.z, 0.01 ) );
+                const specularColorProgram = new RenderColor( v4( 0.5, 0.5, 0.5, 0.01 ) );
+                const program = new RenderPhong( 50, ambientColorProgram, diffuseColorProgram, specularColorProgram, positionProgram, normalProgram, [
+                  new RenderLight(
+                    new RenderColor( v4( -2.0, 3.5, -2.0, 0 ).normalized() ),
+                    new RenderColor( v4( 1, 1, 1, 1 ) )
+                  )
+                ] );
+                // const program = new RenderNormalDebug( normalProgram );
+
+                return new RenderPlanar(
+                  RenderPathBoolean.fromInside( new RenderPath( 'nonzero', [ [
+                    projected0.toVector2(), projected1.toVector2(), projected2.toVector2()
+                  ] ] ), program ),
+                  projected0, projected1, projected2
+                );
+              };
+
+              if ( !p00.equalsEpsilon( p01, 1e-6 ) && !p00.equalsEpsilon( p10, 1e-6 ) && !p01.equalsEpsilon( p10, 1e-6 ) ) {
+                planars.push( tri( p00, p10, p01 ) );
+              }
+              if ( !p01.equalsEpsilon( p10, 1e-6 ) && !p01.equalsEpsilon( p11, 1e-6 ) && !p10.equalsEpsilon( p11, 1e-6 ) ) {
+                planars.push( tri( p01, p10, p11 ) );
+              }
+            }
+          }
+
+          return planars;
+        };
+
+        const thetas = 16;
+        const phis = 16;
+
+        const program = new RenderLinearSRGBToSRGB( new RenderDepthSort( [
+          ...createSphere( phet.dot.v3( 0, 0, dl ), 4, thetas, phis, 0.6, v3( 1, 0.05, 0 ) ),
+          ...createSphere( phet.dot.v3( 2, 2, dl ), 4, thetas, phis, 1, v3( 0, 0.05, 1 ) ),
+          ...createSphere( phet.dot.v3( 0, 4, dl ), 4, thetas, phis, 0.8, v3( 0, 1, 0.05 ) ),
+          ...createSphere( phet.dot.v3( 4, 4, dl ), 4, thetas, phis, 0.4, v3( 0.8, 0.8, 0.8 ) )
+        ] ) ).transformed( Matrix3.scaling( 4 * width ) ).transformed( Matrix3.translation( width / 2 - width / 8, height / 2 + height / 8 ) );
+
+        return window.getRasterizedElement( program, width, height );
+      };
+
+      window.addDiagram( 'transparent-3d', () => getTransparentSpheres() );
+    </script>
 
     <h2 id="stages">Stages</h2>
 
