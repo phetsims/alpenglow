@@ -317,7 +317,8 @@ export default class RenderFromNode {
         // NOTE: Apply them no matter what, we'll rely on later simplified (because filters can take transparent to NOT)
 
         // TODO: Merge in vello-scenery
-        // @ts-expect-error We will stub out better font handling in the future
+        // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+        // @ts-ignore We will stub out better font handling in the future
         result = new RenderPremultiply( new RenderFilter( new RenderUnpremultiply( result ), filter.getMatrix(), filter.getTranslation() ) );
       }
     } );
