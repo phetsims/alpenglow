@@ -18,8 +18,8 @@ const BOUNDS_REDUCE = false;
 const LOG = false;
 const DEBUG_REDUCE_BUFFERS = false;
 const DEBUG_ACCUMULATION = false;
+const REUSE_BUFFERS = true;
 const ONLY_ONCE = true;
-
 
 const CONFIG_NUM_WORDS = 46;
 const CONFIG_COUNT_WORD_OFFSET = 33;
@@ -628,18 +628,30 @@ export default class RasterClipper {
     accumulationBuffer: GPUBuffer,
     options: Required<RasterClipperOptions>
   ): () => void {
-
-    const stageBuffersList: StageBuffers[] = [];
-
-    for ( let i = 0; i < options.numStages; i++ ) {
+    if ( REUSE_BUFFERS ) {
       const stageBuffers = new StageBuffers( this.deviceContext, options.bufferExponent );
-      stageBuffersList.push( stageBuffers );
-      this.runStage( encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, stageBuffers );
-      inputChunksBuffer = stageBuffers.reducibleChunksBuffer;
-      inputEdgesBuffer = stageBuffers.reducibleEdgesBuffer;
-    }
 
-    return () => stageBuffersList.forEach( stageBuffers => stageBuffers.destroy() );
+      for ( let i = 0; i < options.numStages; i++ ) {
+        this.runStage( encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, stageBuffers );
+        inputChunksBuffer = stageBuffers.reducibleChunksBuffer;
+        inputEdgesBuffer = stageBuffers.reducibleEdgesBuffer;
+      }
+
+      return () => stageBuffers.destroy();
+    }
+    else {
+      const stageBuffersList: StageBuffers[] = [];
+
+      for ( let i = 0; i < options.numStages; i++ ) {
+        const stageBuffers = new StageBuffers( this.deviceContext, options.bufferExponent );
+        stageBuffersList.push( stageBuffers );
+        this.runStage( encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, stageBuffers );
+        inputChunksBuffer = stageBuffers.reducibleChunksBuffer;
+        inputEdgesBuffer = stageBuffers.reducibleEdgesBuffer;
+      }
+
+      return () => stageBuffersList.forEach( stageBuffers => stageBuffers.destroy() );
+    }
   }
 
   // TODO: actually, can we just reuse the other buffers so we're not executing things all over the place?

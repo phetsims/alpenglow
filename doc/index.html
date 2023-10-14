@@ -2198,6 +2198,10 @@
     </p>
 
     <p class="TODO">
+      Can we combine all of the reduces into one buffer?
+    </p>
+
+    <p class="TODO">
       Gamut mapping in WGSL seems to not be working.
     </p>
 
@@ -2223,6 +2227,10 @@
     </p>
 
     <p class="TODO">
+      See if we can change flags around our uniform config buffer?
+    </p>
+
+    <p class="TODO">
       Is memory bandwidth (and the number of dispatches with memory reads/writes) killing performance?
     </p>
 
@@ -2231,10 +2239,6 @@
       buffer? I recall seeing a source saying they handle their own memory within a large buffer, instead of multiple
       buffers? See <a href="https://developer.nvidia.com/vulkan-memory-management">info</a>. Sub-allocation
       could be really efficient? How can we make sure our reads/writes are to the same area? Examine Vello approaches.
-    </p>
-
-    <p class="TODO">
-      AT LEAST reuse the buffers for each stage?
     </p>
 
     <p class="TODO">
