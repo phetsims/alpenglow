@@ -135,6 +135,15 @@
   //   new Color( 252, 82, 127 )
   // ];
 
+  window.deviceContextPromise = phet.alpenglow.DeviceContext.getDevice().then( device => {
+    if ( device ) {
+      return new phet.alpenglow.DeviceContext( device );
+    }
+    else {
+      return null;
+    }
+  } );
+
   window.piecewiseOptions = {
     minLevels: 1,
     maxLevels: 10,
@@ -2073,6 +2082,101 @@
     </p>
 
     <h3 id="stage-rasterize">Rasterize</h3>
+
+    <div class="example" id="rasterize-initial-demo-container" style="display: none;">
+      <p style="text-align: left;">
+        Below, Alpenglow's WebGPU raster-clipping is demonstrated. The left image is the "normal" rasterization,
+        while the right image adjusts the transparency of the pixels by which stage they were rasterized in (showing
+        the binary subdivision of the rasterization, and the early-exit for parts of paths that are fully included).
+      </p>
+      <div id="rasterize-initial-demo"></div>
+    </div>
+
+    <script type="module">
+      import { TestToCanvas, RenderColorSpace, RenderStack, RenderPathBoolean, Rasterize, RenderColor, RenderLinearBlend, RenderPath, RenderLinearBlendAccuracy } from '../../chipper/dist/js/alpenglow/js/imports.js';
+
+      window.deviceContextPromise.then( async deviceContext => {
+        const outputSize = 256;
+        const rasterSize = Math.ceil( outputSize * window.devicePixelRatio );
+
+        const clippableFace = TestToCanvas.getTestPath();
+
+        const mainFace = clippableFace.getTransformed( phet.dot.Matrix3.scaling( 0.37 ) );
+        const smallerFace = clippableFace.getTransformed( phet.dot.Matrix3.translation( 16, 165 ).timesMatrix( phet.dot.Matrix3.scaling( 0.15 ) ) );
+
+        const clientSpace = RenderColorSpace.premultipliedLinearSRGB;
+
+        const program = new RenderStack( [
+          new RenderPathBoolean(
+            RenderPath.fromBounds( new phet.dot.Bounds2( 0, 0, 128, 256 ) ),
+            new RenderColor(
+              new phet.dot.Vector4( 0, 0, 0, 1 )
+            ).colorConverted( RenderColorSpace.sRGB, clientSpace ),
+            new RenderColor(
+              new phet.dot.Vector4( 1, 1, 1, 1 )
+            ).colorConverted( RenderColorSpace.sRGB, clientSpace )
+          ),
+          RenderPathBoolean.fromInside(
+            new RenderPath( 'nonzero', smallerFace.toPolygonalFace().polygons ),
+            new RenderColor(
+              new phet.dot.Vector4( 1, 1, 1, 1 )
+            ).colorConverted( RenderColorSpace.sRGB, clientSpace )
+          ),
+          RenderPathBoolean.fromInside(
+            new RenderPath( 'nonzero', mainFace.toPolygonalFace().polygons ),
+            new RenderLinearBlend(
+              new phet.dot.Vector2( 1 / 256, 0 ),
+              0,
+              RenderLinearBlendAccuracy.Accurate,
+              new RenderColor( new phet.dot.Vector4( 1, 0, 0, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
+              new RenderColor( new phet.dot.Vector4( 0.5, 0, 1, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
+            ).colorConverted( RenderColorSpace.premultipliedOklab, clientSpace )
+          )
+        ] ).transformed( phet.dot.Matrix3.scaling( rasterSize / 256 ) );
+
+        if ( deviceContext ) {
+          document.getElementById( 'rasterize-initial-demo-container' ).style.display = 'block';
+
+          const createCanvas = async numStages => {
+            const canvas = document.createElement( 'canvas' );
+            canvas.width = rasterSize;
+            canvas.height = rasterSize;
+            canvas.style.width = `${outputSize}px`;
+            canvas.style.height = `${outputSize}px`;
+            canvas.style.margin = '0 20px';
+            // canvas.style.imageRendering = 'pixelated';
+
+            const context = deviceContext.getCanvasContext( canvas, 'srgb' );
+
+            await Rasterize.hybridRasterize( program, deviceContext, context, new phet.dot.Bounds2( 0, 0, rasterSize, rasterSize ), 'srgb', {
+              rasterClipperOptions: {
+                numStages: numStages,
+                bufferExponent: 15 // We can get away with 14 on double-pixels, but...
+              }
+            } );
+
+            return canvas;
+          };
+
+          document.getElementById( 'rasterize-initial-demo' ).appendChild( await createCanvas( 16 ) );
+
+          const stageDemoContainer = document.createElement( 'div' );
+          stageDemoContainer.style.display = 'inline-block';
+          stageDemoContainer.style.position = 'relative';
+          stageDemoContainer.style.width = `${outputSize}px`;
+          stageDemoContainer.style.height = `${outputSize}px`;
+          document.getElementById( 'rasterize-initial-demo' ).appendChild( stageDemoContainer );
+          for ( let i = 16; i > 0; i-- ) {
+            const canvas = await createCanvas( i );
+            canvas.style.position = 'absolute';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.opacity = '10%';
+            stageDemoContainer.appendChild( canvas );
+          }
+        }
+      } );
+    </script>
 
     <p>
       We'll want to take the path representation for each RenderableFace, and determine the coverage of each pixel.
