@@ -57,7 +57,7 @@ export type RasterizationOptions = {
 
 const DEFAULT_OPTIONS = {
   outputRasterOffset: Vector2.ZERO,
-  tileSize: Number.POSITIVE_INFINITY,
+  tileSize: 256,
   polygonFiltering: PolygonFilterType.Box,
   polygonFilterWindowMultiplier: 1,
   edgeIntersectionSortMethod: 'center-min-max',
