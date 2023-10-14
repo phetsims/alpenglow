@@ -1696,6 +1696,64 @@
       $\iint_Px^{81-1}\,dx\,dy=\frac{1}{6642}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^{2}+x_ix_{i+1}+x_{i+1}^{2})(x_i^{6}+x_i^{3}x_{i+1}^{3}+x_{i+1}^{6})(x_i^{18}+x_i^{9}x_{i+1}^{9}+x_{i+1}^{18})(x_i^{54}+x_i^{27}x_{i+1}^{27}+x_{i+1}^{54})$
     </p>
 
+    <h5>Alpenglow Area Formulas</h5>
+
+    <p>
+      We're best served by the Shoelace formula. It is fast and has good numerical performance:
+    </p>
+
+    <p>
+      $$
+      area=
+      \frac{1}{2}
+      \sum_{i}
+      (x_i+x_{i+1})(y_{i+1}-y_i)
+      $$
+
+      For our edge-clipped polygons, we'll want to add in the contribution of the counts:
+
+      $$
+      area_{clip} = ( y_{max} - y_{min} )( count_{x_{min}} x_{min} + count_{x_{max}} x_{max} )
+      $$
+
+      NOTE that it only uses two of the counts! We can't abuse this too much, because for recursive clipping we still
+      need to store the opposite counts.
+    </p>
+
+    <h5>Alpenglow Centroid Formulas</h5>
+
+    <p>
+      As noted above, some of the more common formulas have terrible numerical performance. We're using the following
+      one, since it results in simple formulas for the normal and edge-clipped cases, AND it shares a good amount of
+      the computation between the $x$ and $y$ formulas:
+    </p>
+
+    <p>
+      $$
+      centroid =
+      \frac{1}{6\ area}
+      \sum_{i}
+      \left( x_i ( 2 y_i + y_{i+1} ) + x_{i+1} ( y_i + 2 y_{i+1} ) \right)
+      \begin{bmatrix}
+      x_i - x_{i+1} \\ y_{i+1} - y_i
+      \end{bmatrix}
+      $$
+
+      Additionally for our edge-clipped polygons, we'll want to add the contribution based on the counts:
+
+      $$
+      centroid_{clip} =
+      \frac{1}{area}
+      \begin{bmatrix}
+      x_{avg} ( x_{min} - x_{max} ) * ( count_{y_{min}} * y_{min} + count_{y_{max}} * y_{max} ) \\
+      y_{avg} ( y_{max} - y_{min} ) * ( count_{x_{min}} * x_{min} + count_{x_{max}} * x_{max} )
+      \end{bmatrix}
+      $$
+
+      Where $x_{avg}=\frac{1}{2}(x_{min}+x_{max})$ and $y_{avg}=\frac{1}{2}(y_{min}+y_{max})$ are the values of the
+      center of the edge-clipped area.
+    </p>
+
     <p class="TODO">Documentation</p>
 
     <p class="TODO">Demos of concepts, blurs, and checkerboard/siemens examples</p>

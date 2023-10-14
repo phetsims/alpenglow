@@ -109,7 +109,7 @@ fn compute_centroid(
       let p1x = edge.endX;
       let p1y = edge.endY;
 
-      let base = ( p0x * ( 2f * p0y + p1y ) + p1x * ( p0y + 2f * p1y ) );
+      let base = p0x * ( 2f * p0y + p1y ) + p1x * ( p0y + 2f * p1y );
       centroid_partial += base * vec2( p0x - p1x, p1y - p0y );
     }
 
