@@ -452,6 +452,20 @@
     window.pendingDiagrams.forEach( diagram => setTimeout( () => addDiagram( diagram.id, diagram.callback ), 0 ) );
   }, 0 );
 
+  window.createSceneryDiagram = ( scene, width, height ) => {
+    const div = document.createElement( 'div' );
+    div.style.margin = '0 auto';
+    const display = new Display( scene, {
+      width: width,
+      height: height,
+      accessibility: true,
+      container: div,
+      allowCSSHacks: false
+    } );
+    display.updateDisplay();
+    return div;
+  };
+
 </script>
 
 <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
@@ -1039,74 +1053,44 @@
       } );
 
       // TODO: factor some of this code out...
-      {
-        const scene = new phet.scenery.Node( {
+      window.addDiagram( 'polygonal-face-example', () => window.createSceneryDiagram(
+        new phet.scenery.Node( {
           children: [
             dottedRect,
             filledPath,
             arrowsNode,
             coordinateLabelsNode
           ]
-        } );
-        const div = document.createElement( 'div' );
-        div.style.margin = '0 auto';
-        const display = new phet.scenery.Display( scene, {
-          width: outputSize,
-          height: outputSize,
-          accessibility: true,
-          container: div,
-          allowCSSHacks: false
-        } );
-        display.updateDisplay();
-        document.getElementById( 'polygonal-face-example' ).appendChild( div );
-      }
+        } ),
+        outputSize, outputSize
+      ) );
 
-      {
-        const scene = new phet.scenery.Node( {
+      window.addDiagram( 'polygonal-face-canceling', () => window.createSceneryDiagram(
+        new phet.scenery.Node( {
           children: [
             dottedRect,
             filledPath,
             arrowsNode,
             extraArrowsNode
           ]
-        } );
-        const div = document.createElement( 'div' );
-        div.style.margin = '0 auto';
-        const display = new phet.scenery.Display( scene, {
-          width: outputSize,
-          height: outputSize,
-          accessibility: true,
-          container: div,
-          allowCSSHacks: false
-        } );
-        display.updateDisplay();
-        document.getElementById( 'polygonal-face-canceling' ).appendChild( div );
-      }
+        } ),
+        outputSize, outputSize
+      ) );
 
-      {
-        const scene = new phet.scenery.Node( {
+      window.addDiagram( 'polygonal-face-edge-clips', () => window.createSceneryDiagram(
+        new phet.scenery.Node( {
           children: [
             dottedRect,
             edgeClipArrowsNode,
             cornerCoordinateLabelsNode,
             edgeClipArrowLabelsNode
           ]
-        } );
-        const div = document.createElement( 'div' );
-        div.style.margin = '0 auto';
-        const display = new phet.scenery.Display( scene, {
-          width: outputSize,
-          height: outputSize,
-          accessibility: true,
-          container: div,
-          allowCSSHacks: false
-        } );
-        display.updateDisplay();
-        document.getElementById( 'polygonal-face-edge-clips' ).appendChild( div );
-      }
+        } ),
+        outputSize, outputSize
+      ) );
 
-      {
-        const scene = new phet.scenery.Node( {
+      window.addDiagram( 'polygonal-face-edge-clipped', () => window.createSceneryDiagram(
+        new phet.scenery.Node( {
           children: [
             dottedRect,
             filledPath,
@@ -1114,19 +1098,9 @@
             coordinateLabelsNode,
             edgeClippedArrowLabelsNode
           ]
-        } );
-        const div = document.createElement( 'div' );
-        div.style.margin = '0 auto';
-        const display = new phet.scenery.Display( scene, {
-          width: outputSize,
-          height: outputSize,
-          accessibility: true,
-          container: div,
-          allowCSSHacks: false
-        } );
-        display.updateDisplay();
-        document.getElementById( 'polygonal-face-edge-clipped' ).appendChild( div );
-      }
+        } ),
+        outputSize, outputSize
+      ) );
     </script>
 
     <h3 id="clipping">Clipping</h3>
@@ -1207,26 +1181,16 @@
         stroke: 'red'
       } );
 
-      {
-        const scene = new phet.scenery.Node( {
+      window.addDiagram( 'clipping-line-example', () => window.createSceneryDiagram(
+        new phet.scenery.Node( {
           children: [
             clipRect,
             exteriorNode,
             interiorNode
           ]
-        } );
-        const div = document.createElement( 'div' );
-        div.style.margin = '0 auto';
-        const display = new phet.scenery.Display( scene, {
-          width: outputSize,
-          height: outputSize,
-          accessibility: true,
-          container: div,
-          allowCSSHacks: false
-        } );
-        display.updateDisplay();
-        document.getElementById( 'clipping-line-example' ).appendChild( div );
-      }
+        } ),
+        outputSize, outputSize
+      ) );
     </script>
 
     <p class="TODO">Documentation</p>
@@ -1286,20 +1250,10 @@
 
       console.log( scene.bounds );
 
-      // TODO: factor some of this code out...
-      {
-        const div = document.createElement( 'div' );
-        div.style.margin = '0 auto';
-        const display = new phet.scenery.Display( scene, {
-          width: 340,
-          height: 300,
-          accessibility: true,
-          container: div,
-          allowCSSHacks: false
-        } );
-        display.updateDisplay();
-        document.getElementById( 'boolean-operations-example' ).appendChild( div );
-      }
+      window.addDiagram( 'boolean-operations-example', () => window.createSceneryDiagram(
+        scene,
+        340, 300
+      ) );
     </script>
 
     <h3 id="antialiasing">Anti-Aliasing</h3>
@@ -1793,28 +1747,10 @@
     </div>
 
     <script type="module">
-      // {
-      //   const scene = new phet.scenery.Node( {
-      //     children: [
-      //       dottedRect,
-      //       filledPath,
-      //       edgeClippedArrowsNode,
-      //       coordinateLabelsNode,
-      //       edgeClippedArrowLabelsNode
-      //     ]
-      //   } );
-      //   const div = document.createElement( 'div' );
-      //   div.style.margin = '0 auto';
-      //   const display = new phet.scenery.Display( scene, {
-      //     width: outputSize,
-      //     height: outputSize,
-      //     accessibility: true,
-      //     container: div,
-      //     allowCSSHacks: false
-      //   } );
-      //   display.updateDisplay();
-      //   document.getElementById( 'box-diagram' ).appendChild( div );
-      // }
+      // window.addDiagram( 'box-diagram', () => window.createSceneryDiagram(
+      //   scene,
+      //   256, 256
+      // ) );
     </script>
 
     <p class="TODO">Documentation with diagrams</p>
