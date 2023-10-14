@@ -486,6 +486,9 @@
             </ul>
           </li>
           <li>
+            <a href="#color-and-blending">Color &amp; Blending</a>
+          </li>
+          <li>
             <a href="#renderProgram">RenderProgram</a>
             <ul class="nav nav-list">
               <li><a href="#RenderColor">RenderColor</a></li>
@@ -1785,6 +1788,35 @@
       to determine the result.
     </p>
 
+    <div class="example">
+      <div id="box-diagram"></div>
+    </div>
+
+    <script type="module">
+      // {
+      //   const scene = new phet.scenery.Node( {
+      //     children: [
+      //       dottedRect,
+      //       filledPath,
+      //       edgeClippedArrowsNode,
+      //       coordinateLabelsNode,
+      //       edgeClippedArrowLabelsNode
+      //     ]
+      //   } );
+      //   const div = document.createElement( 'div' );
+      //   div.style.margin = '0 auto';
+      //   const display = new phet.scenery.Display( scene, {
+      //     width: outputSize,
+      //     height: outputSize,
+      //     accessibility: true,
+      //     container: div,
+      //     allowCSSHacks: false
+      //   } );
+      //   display.updateDisplay();
+      //   document.getElementById( 'box-diagram' ).appendChild( div );
+      // }
+    </script>
+
     <p class="TODO">Documentation with diagrams</p>
 
     <h5>Bilinear Filter</h5>
@@ -1992,6 +2024,31 @@
       window.addDiagram( 'siemens-bilinear', () => getSiemensStar( 'bilinear', 200 ) );
       window.addDiagram( 'siemens-mitchell-netravali', () => getSiemensStar( 'mitchellNetravali', 200 ) );
     </script>
+
+    <h3 id="color-and-blending">Color &amp; Blending</h3>
+
+    <p>
+      Blending of colors is important to get right for correct visual results. There are multiple color spaces where
+      blending can be done. Furthermore, anti-aliasing with correct blending will give a more accurate appearance.
+    </p>
+
+    <p>
+      For example, in the above anti-aliasing examples, on many browsers the SVG/Canvas examples will show a "darkening"
+      in areas where there is a lot of overlap. This is typically a result of blending in the sRGB color space, which
+      is NOT linear.
+    </p>
+
+    <p class="TODO">Blending with/without linear conversion</p>
+
+    <p class="TODO">Blending in different color spaces</p>
+
+    <p class="TODO">Premultiplication section</p>
+
+    <p class="TODO">sRGB and Display P3</p>
+
+    <p class="TODO">Gamut Mapping</p>
+
+    <p class="TODO">More documentation</p>
 
     <h3 id="renderProgram">RenderProgram</h3>
 
