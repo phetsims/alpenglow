@@ -5,6 +5,11 @@
  */
 
 #import ../color/linear_sRGB_to_sRGB
+#import ../color/gamut_map_linear_displayP3
+#import ../color/gamut_map_linear_sRGB
+#import ../color/linear_sRGB_to_sRGB
+#import ../color/premultiply
+#import ../color/unpremultiply
 #import ./RasterStageConfig
 
 #option preferredStorageFormat
@@ -37,10 +42,28 @@ fn main(
     accumulation[ accumulation_index + 3u ]
   );
 
-  let float_value = vec4<f32>( accumulation_value ) * vec4( ${f32( 1 / integerScale )} );
+  let linear_unmapped_color = unpremultiply( vec4<f32>( accumulation_value ) * vec4( ${f32( 1 / integerScale )} ) );
 
-  // TODO: gamut map!
-  let mapped_value = clamp( float_value, vec4( 0f ), vec4( 1f ) );
+  var output_color = vec4( 0f );
+  if ( linear_unmapped_color.a > 1e-8f ) {
+    switch ( config.raster_color_space ) {
+      case 0u: {
+        output_color = vec4(
+          linear_sRGB_to_sRGB( gamut_map_linear_sRGB( linear_unmapped_color.rgb ) ),
+          min( 1f, linear_unmapped_color.a )
+        );
+      }
+      case 1u: {
+        output_color = vec4(
+          linear_sRGB_to_sRGB( gamut_map_linear_displayP3( linear_unmapped_color.rgb ) ),
+          min( 1f, linear_unmapped_color.a )
+        );
+      }
+      default: {
+        output_color = vec4( 1f, 0.5f, 0.111111, 1f );
+      }
+    }
+  }
 
-  textureStore( output, global_id.xy, vec4( linear_sRGB_to_sRGB( mapped_value.rgb ), mapped_value.a ) );
+  textureStore( output, global_id.xy, premultiply( output_color ) );
 }

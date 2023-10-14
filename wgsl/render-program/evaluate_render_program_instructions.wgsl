@@ -136,7 +136,7 @@ fn evaluate_render_program_instructions(
   maxXCount: i32,
   maxYCount: i32
 ) -> vec4f {
-//  return vec4f( select( 0f, 1f, numEdges > 0u ), 0f, 0f, 1f );
+//  return vec4f( 0.01f, 0.01f, 0.01f, 0.01f );
   var stack: array<vec4f,${stackSize}>;
   var instruction_stack: array<u32,${instructionStackSize}>;
 

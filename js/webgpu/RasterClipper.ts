@@ -31,7 +31,7 @@ const MAX_EDGES = 2 ** MAX_EXPONENT;
 const MAX_CLIPPED_CHUNKS = 2 * MAX_CHUNKS;
 const MAX_EDGE_CLIPS = 2 * MAX_EDGES;
 
-const CONFIG_NUM_WORDS = 45;
+const CONFIG_NUM_WORDS = 46;
 const CONFIG_COUNT_WORD_OFFSET = 33;
 
 const rasterClipperMap = new WeakMap<DeviceContext, RasterClipper>();
@@ -316,13 +316,14 @@ export default class RasterClipper {
       // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
       window.requestAnimationFrame( step, canvas );
 
-      await rasterClipper.rasterize( [ renderableFace, renderableFace2, background, background2 ], context.getCurrentTexture() );
+      await rasterClipper.rasterize( [ renderableFace, renderableFace2, background, background2 ], context.getCurrentTexture(), 'srgb' );
     } )();
   }
 
   public rasterize(
     renderableFaces: RenderableFace[],
-    canvasTexture: GPUTexture
+    canvasTexture: GPUTexture,
+    colorSpace: 'srgb' | 'display-p3'
   ): Promise<void> {
     const width = canvasTexture.width;
     const height = canvasTexture.height;
@@ -435,7 +436,13 @@ export default class RasterClipper {
       width, height,
 
       // raster offset x/y
-      0, 0
+      0, 0,
+
+      // raster color space
+      {
+        srgb: 0,
+        'display-p3': 1
+      }[ colorSpace ]
     ];
 
     const configBuffer = device.createBuffer( {

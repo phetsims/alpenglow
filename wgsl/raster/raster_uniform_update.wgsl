@@ -95,6 +95,7 @@ fn main(
     config.raster_width,
     config.raster_height,
     config.raster_offset_x,
-    config.raster_offset_y
+    config.raster_offset_y,
+    config.raster_color_space
   );
 }

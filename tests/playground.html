@@ -1498,8 +1498,7 @@ an UI and Display made for visual testing and debugging.
 
         const convertedProgram = program.colorConverted( clientColorSpace, gpuColorSpace ).simplified();
 
-        // TODO: GAMUT MAP!!!!
-        phet.alpenglow.Rasterize.hybridRasterize( convertedProgram, deviceContext, canvasContext, outputBounds, rasterizeOptions );
+        phet.alpenglow.Rasterize.hybridRasterize( convertedProgram, deviceContext, canvasContext, outputBounds, colorSpace, rasterizeOptions );
       }
       else {
         const raster = new phet.alpenglow.CombinedRaster( outputSize, outputSize, rasterOptions );

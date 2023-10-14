@@ -63,7 +63,7 @@ struct RasterStageConfig {
   accumulate_workgroup_y: u32,
   accumulate_workgroup_z: u32,
 
-  // 33-dword offset
+  // 33-dword offset - update CONFIG_COUNT_WORD_OFFSET
   num_input_chunks: u32,
   num_input_edges: u32,
   num_clipped_chunks: u32, // 2x num_input_chunks, but here for simplicity
@@ -78,7 +78,8 @@ struct RasterStageConfig {
   raster_width: u32,
   raster_height: u32,
   raster_offset_x: u32,
-  raster_offset_y: u32
+  raster_offset_y: u32,
+  raster_color_space: u32 // 0 = sRGB, 1 = display-p3 (we'll need to know in order to do gamut mapping)
 
-  // 45 dword length
+  // 46 dword length - update CONFIG_NUM_WORDS
 }

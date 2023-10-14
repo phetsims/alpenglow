@@ -1214,6 +1214,7 @@ export default class Rasterize {
     deviceContext: DeviceContext,
     canvasContext: GPUCanvasContext,
     bounds: Bounds2,
+    colorSpace: 'srgb' | 'display-p3',
     providedOptions?: RasterizationOptions
   ): Promise<void> {
 
@@ -1221,7 +1222,7 @@ export default class Rasterize {
 
     const rasterClipper = RasterClipper.get( deviceContext );
 
-    await rasterClipper.rasterize( renderableFaces, canvasContext.getCurrentTexture() );
+    await rasterClipper.rasterize( renderableFaces, canvasContext.getCurrentTexture(), colorSpace );
   }
 
   public static imageDataToCanvas( imageData: ImageData ): HTMLCanvasElement {
