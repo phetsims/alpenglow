@@ -6,10 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, PolygonalBoolean, PolygonalFace, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
+import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, PolygonalBoolean, PolygonalFace, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, Rasterize, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 
 const WORKGROUP_SIZE = 128;
 const BOUNDS_REDUCE = false;
@@ -317,6 +318,76 @@ export default class RasterClipper {
       window.requestAnimationFrame( step, canvas );
 
       await rasterClipper.rasterize( [ renderableFace, renderableFace2, background, background2 ], context.getCurrentTexture(), 'srgb' );
+    } )();
+  }
+
+  public static async testWithRasterizer(): Promise<void> {
+    const device = ( await DeviceContext.getDevice() )!;
+    assert && assert( device );
+
+    const deviceContext = new DeviceContext( device );
+
+    const rasterSize = 256;
+
+    const canvas = document.createElement( 'canvas' );
+    canvas.width = rasterSize;
+    canvas.height = rasterSize;
+    canvas.style.width = `${rasterSize / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
+    canvas.style.height = `${rasterSize / window.devicePixelRatio}px`;
+
+    // canvas.style.imageRendering = 'pixelated';
+    // canvas.style.width = `${4 * rasterSize / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
+    // canvas.style.height = `${4 * rasterSize / window.devicePixelRatio}px`;
+    document.body.appendChild( canvas );
+
+    const context = deviceContext.getCanvasContext( canvas, 'srgb' );
+
+    const clippableFace = TestToCanvas.getTestPath();
+
+    const mainFace = clippableFace.getTransformed( Matrix3.scaling( 0.35 ) );
+    const smallerFace = clippableFace.getTransformed( Matrix3.translation( 16, 165 ).timesMatrix( Matrix3.scaling( 0.15 ) ) );
+
+    const clientSpace = RenderColorSpace.premultipliedLinearSRGB;
+
+    const program = new RenderStack( [
+      new RenderPathBoolean(
+        RenderPath.fromBounds( new Bounds2( 0, 0, 128, 256 ) ),
+        new RenderColor(
+          new Vector4( 0, 0, 0, 1 )
+        ).colorConverted( RenderColorSpace.sRGB, clientSpace ),
+        new RenderColor(
+          new Vector4( 1, 1, 1, 1 )
+        ).colorConverted( RenderColorSpace.sRGB, clientSpace )
+      ),
+      RenderPathBoolean.fromInside(
+        new RenderPath( 'nonzero', smallerFace.toPolygonalFace().polygons ),
+        new RenderColor(
+          new Vector4( 1, 1, 1, 1 )
+        ).colorConverted( RenderColorSpace.sRGB, clientSpace )
+      ),
+      RenderPathBoolean.fromInside(
+        new RenderPath( 'nonzero', mainFace.toPolygonalFace().polygons ),
+        new RenderLinearBlend(
+          new Vector2( 1 / 256, 0 ),
+          0,
+          // RenderLinearBlendAccuracy.Accurate,
+          RenderLinearBlendAccuracy.PixelCenter,
+          new RenderColor( new Vector4( 1, 0, 0, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
+          new RenderColor( new Vector4( 0.5, 0, 1, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
+        ).colorConverted( RenderColorSpace.premultipliedOklab, clientSpace )
+      )
+    ] );
+
+    let count = 0;
+    await ( async function step() {
+      if ( ONLY_ONCE && count++ > 0 ) {
+        return;
+      }
+
+      // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
+      window.requestAnimationFrame( step, canvas );
+
+      await Rasterize.hybridRasterize( program, deviceContext, context, new Bounds2( 0, 0, 256, 256 ), 'srgb' );
     } )();
   }
 
