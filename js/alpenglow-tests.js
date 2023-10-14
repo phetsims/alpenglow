@@ -13,6 +13,7 @@ import './cag/ClippableFaceTests.js';
 import './cag/PolygonalBooleanTests.js';
 import './clip/PolygonClippingTests.js';
 import './parallel/ParallelTests.js';
+import './raster/RasterizeTests.js';
 import './webgpu/SnippetTests.js';
 import './webgpu/ExampleTests.js';
 import './render-program/RenderProgramTests.js';
