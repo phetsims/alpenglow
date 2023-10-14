@@ -583,7 +583,7 @@ export default class RasterClipper {
       label: 'the encoder'
     } );
 
-    const stageOutput = this.runAccumulate(
+    const destroyBuffers = this.runAccumulate(
       encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, options
     );
 
@@ -613,11 +613,12 @@ export default class RasterClipper {
     inputEdgesBuffer.destroy();
     accumulationBuffer.destroy();
     fineOutputTexture && fineOutputTexture.destroy();
-    stageOutput.temporaryBuffers.forEach( buffer => buffer.destroy() );
+    destroyBuffers();
 
     return donePromise;
   }
 
+  // Returns callback to destroy buffers
   public runAccumulate(
     encoder: GPUCommandEncoder,
     configBuffer: GPUBuffer,
@@ -626,22 +627,19 @@ export default class RasterClipper {
     inputEdgesBuffer: GPUBuffer,
     accumulationBuffer: GPUBuffer,
     options: Required<RasterClipperOptions>
-  ): {
-    temporaryBuffers: GPUBuffer[];
-  } {
+  ): () => void {
 
-    const temporaryBuffers: GPUBuffer[] = [];
+    const stageBuffersList: StageBuffers[] = [];
 
     for ( let i = 0; i < options.numStages; i++ ) {
-      const stageResult = this.runStage( encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, options );
-      inputChunksBuffer = stageResult.reducibleChunksBuffer;
-      inputEdgesBuffer = stageResult.reducibleEdgesBuffer;
-      temporaryBuffers.push( inputChunksBuffer, inputEdgesBuffer, ...stageResult.temporaryBuffers );
+      const stageBuffers = new StageBuffers( this.deviceContext, options.bufferExponent );
+      stageBuffersList.push( stageBuffers );
+      this.runStage( encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, stageBuffers );
+      inputChunksBuffer = stageBuffers.reducibleChunksBuffer;
+      inputEdgesBuffer = stageBuffers.reducibleEdgesBuffer;
     }
 
-    return {
-      temporaryBuffers: temporaryBuffers
-    };
+    return () => stageBuffersList.forEach( stageBuffers => stageBuffers.destroy() );
   }
 
   // TODO: actually, can we just reuse the other buffers so we're not executing things all over the place?
@@ -652,22 +650,9 @@ export default class RasterClipper {
     inputChunksBuffer: GPUBuffer,
     inputEdgesBuffer: GPUBuffer,
     accumulationBuffer: GPUBuffer,
-    options: Required<RasterClipperOptions>
-  ): {
-    reducibleChunksBuffer: GPUBuffer;
-    reducibleEdgesBuffer: GPUBuffer;
-    temporaryBuffers: GPUBuffer[];
-  } {
+    stageBuffers: StageBuffers
+  ): void {
     const workgroupSize = WORKGROUP_SIZE;
-
-    const MAX_EXPONENT = options.bufferExponent;
-    const MAX_COMPLETE_CHUNKS = 2 ** MAX_EXPONENT;
-    const MAX_COMPLETE_EDGES = 2 ** MAX_EXPONENT;
-
-    const MAX_CHUNKS = 2 ** MAX_EXPONENT;
-    const MAX_EDGES = 2 ** MAX_EXPONENT;
-    const MAX_CLIPPED_CHUNKS = 2 * MAX_CHUNKS;
-    const MAX_EDGE_CLIPS = 2 * MAX_EDGES;
 
     let numUsedInputChunks = -1;
     let numUsedInputEdges = -1;
@@ -685,216 +670,182 @@ export default class RasterClipper {
     LOG && this.logger.logIndexed( encoder, inputChunksBuffer, 'inputChunks', RasterChunk, () => numUsedInputChunks );
     LOG && this.logger.logIndexed( encoder, inputEdgesBuffer, 'inputEdges', RasterEdge, () => numUsedInputEdges );
 
-    const clippedChunksBuffer = this.deviceContext.createBuffer( RasterClippedChunk.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS );
-
     this.initialChunksShader.dispatchIndirect( encoder, [
       configBuffer,
       inputChunksBuffer,
-      clippedChunksBuffer
+      stageBuffers.clippedChunksBuffer
     ], configBuffer, 0 );
 
-    LOG && this.logger.logIndexed( encoder, clippedChunksBuffer, 'clippedChunks (initial)', RasterClippedChunk, () => numUsedClippedChunks );
-
-    const edgeClipsBuffer = this.deviceContext.createBuffer( RasterEdgeClip.ENCODING_BYTE_LENGTH * MAX_EDGE_CLIPS );
-    const chunkReduces0Buffer = this.deviceContext.createBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGES / workgroupSize ) );
-    const debugChunkReduces0Buffer = this.deviceContext.createBuffer( RasterChunkReducePair.ENCODING_BYTE_LENGTH * MAX_EDGES );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.clippedChunksBuffer, 'clippedChunks (initial)', RasterClippedChunk, () => numUsedClippedChunks );
 
     this.initialClipShader.dispatchIndirect( encoder, [
       configBuffer,
       inputChunksBuffer,
       inputEdgesBuffer,
-      clippedChunksBuffer,
-      edgeClipsBuffer,
-      chunkReduces0Buffer,
-      ...( DEBUG_REDUCE_BUFFERS ? [ debugChunkReduces0Buffer ] : [] )
+      stageBuffers.clippedChunksBuffer,
+      stageBuffers.edgeClipsBuffer,
+      stageBuffers.chunkReduces0Buffer,
+      ...( stageBuffers.debugChunkReduces0Buffer ? [ stageBuffers.debugChunkReduces0Buffer ] : [] )
     ], configBuffer, 12 );
 
-    LOG && this.logger.logIndexed( encoder, edgeClipsBuffer, 'edgeClips', RasterEdgeClip, () => numUsedEdgeClips );
-    LOG && this.logger.logIndexedMultiline( encoder, chunkReduces0Buffer, 'chunkReduces0', RasterChunkReduceQuad, () => Math.ceil( numUsedInputEdges / workgroupSize ) );
-    if ( DEBUG_REDUCE_BUFFERS ) {
-      LOG && this.logger.logIndexedMultiline( encoder, debugChunkReduces0Buffer, 'debugFullChunkReduces', RasterChunkReducePair, () => numUsedInputEdges );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.edgeClipsBuffer, 'edgeClips', RasterEdgeClip, () => numUsedEdgeClips );
+    LOG && this.logger.logIndexedMultiline( encoder, stageBuffers.chunkReduces0Buffer, 'chunkReduces0', RasterChunkReduceQuad, () => Math.ceil( numUsedInputEdges / workgroupSize ) );
+    if ( stageBuffers.debugChunkReduces0Buffer ) {
+      LOG && this.logger.logIndexedMultiline( encoder, stageBuffers.debugChunkReduces0Buffer, 'debugFullChunkReduces', RasterChunkReducePair, () => numUsedInputEdges );
     }
-
-    const chunkReduces1Buffer = this.deviceContext.createBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGES / ( workgroupSize * workgroupSize ) ) );
 
     this.chunkReduceShader.dispatchIndirect( encoder, [
       configBuffer,
       this.zeroBuffer, // signify our "first" chunkReduce
-      chunkReduces0Buffer,
-      clippedChunksBuffer,
-      chunkReduces1Buffer
+      stageBuffers.chunkReduces0Buffer,
+      stageBuffers.clippedChunksBuffer,
+      stageBuffers.chunkReduces1Buffer
     ], configBuffer, 24 );
 
-    LOG && this.logger.logIndexedMultiline( encoder, chunkReduces1Buffer, 'chunkReduces1', RasterChunkReduceQuad, () => Math.ceil( numUsedInputEdges / ( workgroupSize * workgroupSize ) ) );
-
-    // TODO: don't even have these buffers! We probably need a second shader for that, no?
-    const chunkReduces2Buffer = this.deviceContext.createBuffer( RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGES / ( workgroupSize * workgroupSize * workgroupSize ) ) );
+    LOG && this.logger.logIndexedMultiline( encoder, stageBuffers.chunkReduces1Buffer, 'chunkReduces1', RasterChunkReduceQuad, () => Math.ceil( numUsedInputEdges / ( workgroupSize * workgroupSize ) ) );
 
     this.chunkReduceShader.dispatchIndirect( encoder, [
       configBuffer,
       this.oneBuffer, // signify our "second" chunkReduce
-      chunkReduces1Buffer,
-      clippedChunksBuffer,
-      chunkReduces2Buffer
+      stageBuffers.chunkReduces1Buffer,
+      stageBuffers.clippedChunksBuffer,
+      stageBuffers.chunkReduces2Buffer
     ], configBuffer, 36 );
 
-    LOG && this.logger.logIndexedMultiline( encoder, chunkReduces2Buffer, 'chunkReduces2', RasterChunkReduceQuad, () => Math.ceil( numUsedInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ) );
-    LOG && this.logger.logIndexed( encoder, clippedChunksBuffer, 'clippedChunks (reduced)', RasterClippedChunk, () => numUsedClippedChunks );
-
-    const splitReduces0Buffer = this.deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_CLIPPED_CHUNKS / workgroupSize ) );
-    const debugInitialSplitReduceBuffer = this.deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS );
+    LOG && this.logger.logIndexedMultiline( encoder, stageBuffers.chunkReduces2Buffer, 'chunkReduces2', RasterChunkReduceQuad, () => Math.ceil( numUsedInputEdges / ( workgroupSize * workgroupSize * workgroupSize ) ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.clippedChunksBuffer, 'clippedChunks (reduced)', RasterClippedChunk, () => numUsedClippedChunks );
 
     this.initialSplitReduceShader.dispatchIndirect( encoder, [
       configBuffer,
-      clippedChunksBuffer,
-      splitReduces0Buffer,
-      ...( DEBUG_REDUCE_BUFFERS ? [ debugInitialSplitReduceBuffer ] : [] )
+      stageBuffers.clippedChunksBuffer,
+      stageBuffers.splitReduces0Buffer,
+      ...( stageBuffers.debugInitialSplitReduceBuffer ? [ stageBuffers.debugInitialSplitReduceBuffer ] : [] )
     ], configBuffer, 48 );
-
-    const edgeReduces0Buffer = this.deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGE_CLIPS / workgroupSize ) );
-    const debugInitialEdgeReduceBuffer = this.deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * MAX_EDGE_CLIPS );
 
     this.initialEdgeReduceShader.dispatchIndirect( encoder, [
       configBuffer,
-      clippedChunksBuffer,
-      edgeClipsBuffer,
-      edgeReduces0Buffer,
-      ...( DEBUG_REDUCE_BUFFERS ? [ debugInitialEdgeReduceBuffer ] : [] )
+      stageBuffers.clippedChunksBuffer,
+      stageBuffers.edgeClipsBuffer,
+      stageBuffers.edgeReduces0Buffer,
+      ...( stageBuffers.debugInitialEdgeReduceBuffer ? [ stageBuffers.debugInitialEdgeReduceBuffer ] : [] )
     ], configBuffer, 60 );
 
-    const splitReduces1Buffer = this.deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_CLIPPED_CHUNKS / ( workgroupSize * workgroupSize ) ) );
-
-    if ( DEBUG_REDUCE_BUFFERS ) {
-      LOG && this.logger.logIndexed( encoder, debugInitialSplitReduceBuffer, 'debugInitialSplitReduce', RasterSplitReduceData, () => numUsedClippedChunks );
+    if ( stageBuffers.debugInitialSplitReduceBuffer ) {
+      LOG && this.logger.logIndexed( encoder, stageBuffers.debugInitialSplitReduceBuffer, 'debugInitialSplitReduce', RasterSplitReduceData, () => numUsedClippedChunks );
     }
-    LOG && this.logger.logIndexed( encoder, splitReduces0Buffer, 'splitReduces0', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / workgroupSize ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.splitReduces0Buffer, 'splitReduces0', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / workgroupSize ) );
 
     this.splitReduceShader.dispatchIndirect( encoder, [
       configBuffer,
       this.zeroBuffer, // signify our split0 splitReduce
-      splitReduces0Buffer,
-      splitReduces1Buffer
+      stageBuffers.splitReduces0Buffer,
+      stageBuffers.splitReduces1Buffer
     ], configBuffer, 72 );
 
-    LOG && this.logger.logIndexed( encoder, splitReduces0Buffer, 'splitReduces0 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / workgroupSize ) );
-    LOG && this.logger.logIndexed( encoder, splitReduces1Buffer, 'splitReduces1', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / ( workgroupSize * workgroupSize ) ) );
-
-    const splitReduces2Buffer = this.deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_CLIPPED_CHUNKS / ( workgroupSize * workgroupSize * workgroupSize ) ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.splitReduces0Buffer, 'splitReduces0 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / workgroupSize ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.splitReduces1Buffer, 'splitReduces1', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / ( workgroupSize * workgroupSize ) ) );
 
     this.splitReduceShader.dispatchIndirect( encoder, [
       configBuffer,
       this.oneBuffer, // signify our split1 splitReduce
-      splitReduces1Buffer,
-      splitReduces2Buffer
+      stageBuffers.splitReduces1Buffer,
+      stageBuffers.splitReduces2Buffer
     ], configBuffer, 84 );
 
-    LOG && this.logger.logIndexed( encoder, splitReduces1Buffer, 'splitReduces1 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / ( workgroupSize * workgroupSize ) ) );
-    LOG && this.logger.logIndexed( encoder, splitReduces2Buffer, 'splitReduces2', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / ( workgroupSize * workgroupSize * workgroupSize ) ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.splitReduces1Buffer, 'splitReduces1 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / ( workgroupSize * workgroupSize ) ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.splitReduces2Buffer, 'splitReduces2', RasterSplitReduceData, () => Math.ceil( numUsedClippedChunks / ( workgroupSize * workgroupSize * workgroupSize ) ) );
 
     let reducibleChunkCount = -1;
     let completeChunkCount = -1;
 
-    LOG && this.logger.withBuffer( encoder, splitReduces2Buffer, async arrayBuffer => {
+    LOG && this.logger.withBuffer( encoder, stageBuffers.splitReduces2Buffer, async arrayBuffer => {
       reducibleChunkCount = new Uint32Array( arrayBuffer )[ 0 ];
       completeChunkCount = new Uint32Array( arrayBuffer )[ 1 ];
     } );
 
-    const edgeReduces1Buffer = this.deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGE_CLIPS / ( workgroupSize * workgroupSize ) ) );
-
-    if ( DEBUG_REDUCE_BUFFERS ) {
-      LOG && this.logger.logIndexed( encoder, debugInitialEdgeReduceBuffer, 'debugInitialEdgeReduce', RasterSplitReduceData, () => numUsedEdgeClips );
+    if ( stageBuffers.debugInitialEdgeReduceBuffer ) {
+      LOG && this.logger.logIndexed( encoder, stageBuffers.debugInitialEdgeReduceBuffer, 'debugInitialEdgeReduce', RasterSplitReduceData, () => numUsedEdgeClips );
     }
-    LOG && this.logger.logIndexed( encoder, edgeReduces0Buffer, 'edgeReduces0', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / workgroupSize ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.edgeReduces0Buffer, 'edgeReduces0', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / workgroupSize ) );
 
     this.splitReduceShader.dispatchIndirect( encoder, [
       configBuffer,
       this.twoBuffer, // signify our edge0 splitReduce
-      edgeReduces0Buffer,
-      edgeReduces1Buffer
+      stageBuffers.edgeReduces0Buffer,
+      stageBuffers.edgeReduces1Buffer
     ], configBuffer, 96 );
 
-    LOG && this.logger.logIndexed( encoder, edgeReduces0Buffer, 'edgeReduces0 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / workgroupSize ) );
-    LOG && this.logger.logIndexed( encoder, edgeReduces1Buffer, 'edgeReduces1', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / ( workgroupSize * workgroupSize ) ) );
-
-    const edgeReduces2Buffer = this.deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGE_CLIPS / ( workgroupSize * workgroupSize * workgroupSize ) ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.edgeReduces0Buffer, 'edgeReduces0 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / workgroupSize ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.edgeReduces1Buffer, 'edgeReduces1', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / ( workgroupSize * workgroupSize ) ) );
 
     this.splitReduceShader.dispatchIndirect( encoder, [
       configBuffer,
       this.threeBuffer, // signify our edge1 splitReduce
-      edgeReduces1Buffer,
-      edgeReduces2Buffer
+      stageBuffers.edgeReduces1Buffer,
+      stageBuffers.edgeReduces2Buffer
     ], configBuffer, 108 );
 
-    LOG && this.logger.logIndexed( encoder, edgeReduces1Buffer, 'edgeReduces1 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / ( workgroupSize * workgroupSize ) ) );
-    LOG && this.logger.logIndexed( encoder, edgeReduces2Buffer, 'edgeReduces2', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / ( workgroupSize * workgroupSize * workgroupSize ) ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.edgeReduces1Buffer, 'edgeReduces1 (scanned)', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / ( workgroupSize * workgroupSize ) ) );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.edgeReduces2Buffer, 'edgeReduces2', RasterSplitReduceData, () => Math.ceil( numUsedEdgeClips / ( workgroupSize * workgroupSize * workgroupSize ) ) );
 
     let reducibleEdgeCount = -1;
     let completeEdgeCount = -1;
 
-    LOG && this.logger.withBuffer( encoder, edgeReduces2Buffer, async arrayBuffer => {
+    LOG && this.logger.withBuffer( encoder, stageBuffers.edgeReduces2Buffer, async arrayBuffer => {
       reducibleEdgeCount = new Uint32Array( arrayBuffer )[ 0 ];
       completeEdgeCount = new Uint32Array( arrayBuffer )[ 1 ];
     } );
 
-    const reducibleChunksBuffer = this.deviceContext.createBuffer( RasterChunk.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS );
-    const completeChunksBuffer = this.deviceContext.createBuffer( RasterCompleteChunk.ENCODING_BYTE_LENGTH * MAX_COMPLETE_CHUNKS );
-    const chunkIndexMapBuffer = this.deviceContext.createBuffer( 4 * MAX_CLIPPED_CHUNKS );
-    const debugSplitScanReducesBuffer = this.deviceContext.createBuffer( RasterSplitReduceData.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS );
-
     this.splitScanShader.dispatchIndirect( encoder, [
       configBuffer,
-      clippedChunksBuffer,
-      splitReduces0Buffer,
-      splitReduces1Buffer,
-      splitReduces2Buffer,
-      reducibleChunksBuffer,
-      completeChunksBuffer,
-      chunkIndexMapBuffer,
-      ...( DEBUG_REDUCE_BUFFERS ? [ debugSplitScanReducesBuffer ] : [] )
+      stageBuffers.clippedChunksBuffer,
+      stageBuffers.splitReduces0Buffer,
+      stageBuffers.splitReduces1Buffer,
+      stageBuffers.splitReduces2Buffer,
+      stageBuffers.reducibleChunksBuffer,
+      stageBuffers.completeChunksBuffer,
+      stageBuffers.chunkIndexMapBuffer,
+      ...( stageBuffers.debugSplitScanReducesBuffer ? [ stageBuffers.debugSplitScanReducesBuffer ] : [] )
     ], configBuffer, 48 );
 
-    if ( DEBUG_REDUCE_BUFFERS ) {
-      LOG && this.logger.logIndexed( encoder, debugSplitScanReducesBuffer, 'debugSplitScanReduces', RasterSplitReduceData, () => numUsedClippedChunks );
+    if ( stageBuffers.debugSplitScanReducesBuffer ) {
+      LOG && this.logger.logIndexed( encoder, stageBuffers.debugSplitScanReducesBuffer, 'debugSplitScanReduces', RasterSplitReduceData, () => numUsedClippedChunks );
     }
-    LOG && this.logger.logIndexed( encoder, reducibleChunksBuffer, 'reducibleChunks (no indices)', RasterChunk, () => reducibleChunkCount );
-    LOG && this.logger.logIndexed( encoder, completeChunksBuffer, 'completeChunks (no indices)', RasterCompleteChunk, () => completeChunkCount );
-    LOG && this.logger.logIndexed( encoder, chunkIndexMapBuffer, 'chunkIndexMap', BufferLogger.RasterU32, () => numUsedClippedChunks );
-
-    const reducibleEdgesBuffer = this.deviceContext.createBuffer( RasterEdge.ENCODING_BYTE_LENGTH * MAX_EDGE_CLIPS );
-    const completeEdgesBuffer = this.deviceContext.createBuffer( RasterCompleteEdge.ENCODING_BYTE_LENGTH * MAX_COMPLETE_EDGES );
-    const chunkIndicesBuffer = this.deviceContext.createBuffer( 4 * 2 * MAX_CLIPPED_CHUNKS );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.reducibleChunksBuffer, 'reducibleChunks (no indices)', RasterChunk, () => reducibleChunkCount );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.completeChunksBuffer, 'completeChunks (no indices)', RasterCompleteChunk, () => completeChunkCount );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.chunkIndexMapBuffer, 'chunkIndexMap', BufferLogger.RasterU32, () => numUsedClippedChunks );
 
     this.edgeScanShader.dispatchIndirect( encoder, [
       configBuffer,
-      clippedChunksBuffer,
-      edgeClipsBuffer,
-      edgeReduces0Buffer,
-      edgeReduces1Buffer,
-      edgeReduces2Buffer,
-      reducibleEdgesBuffer,
-      completeEdgesBuffer,
-      chunkIndicesBuffer
+      stageBuffers.clippedChunksBuffer,
+      stageBuffers.edgeClipsBuffer,
+      stageBuffers.edgeReduces0Buffer,
+      stageBuffers.edgeReduces1Buffer,
+      stageBuffers.edgeReduces2Buffer,
+      stageBuffers.reducibleEdgesBuffer,
+      stageBuffers.completeEdgesBuffer,
+      stageBuffers.chunkIndicesBuffer
     ], configBuffer, 60 );
 
-    LOG && this.logger.logIndexed( encoder, reducibleEdgesBuffer, 'reducibleEdges (unmapped chunks)', RasterEdge, () => reducibleEdgeCount );
-    LOG && this.logger.logIndexed( encoder, completeEdgesBuffer, 'completeEdges', RasterCompleteEdge, () => completeEdgeCount );
-    LOG && this.logger.logIndexed( encoder, chunkIndicesBuffer, 'chunkIndices', BufferLogger.RasterU32, () => 2 * numUsedClippedChunks );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.reducibleEdgesBuffer, 'reducibleEdges (unmapped chunks)', RasterEdge, () => reducibleEdgeCount );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.completeEdgesBuffer, 'completeEdges', RasterCompleteEdge, () => completeEdgeCount );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.chunkIndicesBuffer, 'chunkIndices', BufferLogger.RasterU32, () => 2 * numUsedClippedChunks );
 
     this.chunkIndexPatchShader.dispatchIndirect( encoder, [
       configBuffer,
-      chunkIndexMapBuffer,
-      chunkIndicesBuffer,
-      clippedChunksBuffer,
-      reducibleChunksBuffer,
-      completeChunksBuffer
+      stageBuffers.chunkIndexMapBuffer,
+      stageBuffers.chunkIndicesBuffer,
+      stageBuffers.clippedChunksBuffer,
+      stageBuffers.reducibleChunksBuffer,
+      stageBuffers.completeChunksBuffer
     ], configBuffer, 48 );
 
-    LOG && this.logger.logIndexed( encoder, reducibleChunksBuffer, 'reducibleChunks', RasterChunk, () => reducibleChunkCount );
-    LOG && this.logger.logIndexed( encoder, completeChunksBuffer, 'completeChunks', RasterCompleteChunk, () => completeChunkCount );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.reducibleChunksBuffer, 'reducibleChunks', RasterChunk, () => reducibleChunkCount );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.completeChunksBuffer, 'completeChunks', RasterCompleteChunk, () => completeChunkCount );
 
     this.uniformUpdateShader.dispatch( encoder, [
-      splitReduces2Buffer,
-      edgeReduces2Buffer,
+      stageBuffers.splitReduces2Buffer,
+      stageBuffers.edgeReduces2Buffer,
       configBuffer
     ], 1, 1, 1 );
 
@@ -902,56 +853,181 @@ export default class RasterClipper {
 
     this.edgeIndexPatchShader.dispatchIndirect( encoder, [
       configBuffer,
-      chunkIndexMapBuffer,
-      chunkIndicesBuffer,
-      reducibleEdgesBuffer
+      stageBuffers.chunkIndexMapBuffer,
+      stageBuffers.chunkIndicesBuffer,
+      stageBuffers.reducibleEdgesBuffer
     ], configBuffer, 12 );
 
-    LOG && this.logger.logIndexed( encoder, reducibleEdgesBuffer, 'reducibleEdges', RasterEdge, () => reducibleEdgeCount );
+    LOG && this.logger.logIndexed( encoder, stageBuffers.reducibleEdgesBuffer, 'reducibleEdges', RasterEdge, () => reducibleEdgeCount );
     // LOG && this.logger.logIndexed( encoder, completeEdgesBuffer, 'completeEdges', RasterCompleteEdge, () => completeEdgeCount );
-
-    const debugAccumulationBuffer = this.deviceContext.createBuffer( 4 * MAX_COMPLETE_CHUNKS );
 
     this.accumulateShader.dispatchIndirect( encoder, [
       configBuffer,
       instructionsBuffer,
-      completeChunksBuffer,
-      completeEdgesBuffer,
+      stageBuffers.completeChunksBuffer,
+      stageBuffers.completeEdgesBuffer,
       accumulationBuffer,
-      ...( DEBUG_ACCUMULATION ? [ debugAccumulationBuffer ] : [] )
+      ...( stageBuffers.debugAccumulationBuffer ? [ stageBuffers.debugAccumulationBuffer ] : [] )
     ], configBuffer, 120 );
 
     // LOG && this.logger.logIndexed( encoder, accumulationBuffer, 'accumulation', BufferLogger.RasterF32, () => 4 * rasterSize * rasterSize );
-    if ( DEBUG_ACCUMULATION ) {
-      LOG && this.logger.logIndexed( encoder, debugAccumulationBuffer, 'debugAccumulation', BufferLogger.RasterI32, () => completeChunkCount );
+    if ( stageBuffers.debugAccumulationBuffer ) {
+      LOG && this.logger.logIndexed( encoder, stageBuffers.debugAccumulationBuffer, 'debugAccumulation', BufferLogger.RasterI32, () => completeChunkCount );
     }
-
-    return {
-      reducibleChunksBuffer: reducibleChunksBuffer,
-      reducibleEdgesBuffer: reducibleEdgesBuffer,
-      temporaryBuffers: [
-        clippedChunksBuffer,
-        edgeClipsBuffer,
-        chunkReduces0Buffer,
-        debugChunkReduces0Buffer,
-        chunkReduces1Buffer,
-        chunkReduces2Buffer,
-        splitReduces0Buffer,
-        debugInitialSplitReduceBuffer,
-        edgeReduces0Buffer,
-        debugInitialEdgeReduceBuffer,
-        splitReduces1Buffer,
-        splitReduces2Buffer,
-        edgeReduces1Buffer,
-        edgeReduces2Buffer,
-        chunkIndexMapBuffer,
-        debugSplitScanReducesBuffer,
-        chunkIndicesBuffer,
-        completeChunksBuffer,
-        completeEdgesBuffer
-      ]
-    };
   }
 }
 
 alpenglow.register( 'RasterClipper', RasterClipper );
+
+class StageBuffers {
+
+  public readonly clippedChunksBuffer: GPUBuffer;
+  public readonly edgeClipsBuffer: GPUBuffer;
+  public readonly chunkReduces0Buffer: GPUBuffer;
+  public readonly debugChunkReduces0Buffer: GPUBuffer | null = null;
+  public readonly chunkReduces1Buffer: GPUBuffer;
+  public readonly chunkReduces2Buffer: GPUBuffer;
+  public readonly splitReduces0Buffer: GPUBuffer;
+  public readonly debugInitialSplitReduceBuffer: GPUBuffer | null = null;
+  public readonly edgeReduces0Buffer: GPUBuffer;
+  public readonly debugInitialEdgeReduceBuffer: GPUBuffer | null = null;
+  public readonly splitReduces1Buffer: GPUBuffer;
+  public readonly splitReduces2Buffer: GPUBuffer;
+  public readonly edgeReduces1Buffer: GPUBuffer;
+  public readonly edgeReduces2Buffer: GPUBuffer;
+  public readonly reducibleChunksBuffer: GPUBuffer;
+  public readonly completeChunksBuffer: GPUBuffer;
+  public readonly chunkIndexMapBuffer: GPUBuffer;
+  public readonly debugSplitScanReducesBuffer: GPUBuffer | null = null;
+  public readonly reducibleEdgesBuffer: GPUBuffer;
+  public readonly completeEdgesBuffer: GPUBuffer;
+  public readonly chunkIndicesBuffer: GPUBuffer;
+  public readonly debugAccumulationBuffer: GPUBuffer | null = null;
+
+  public constructor( deviceContext: DeviceContext, bufferExponent: number ) {
+    const workgroupSize = WORKGROUP_SIZE;
+
+    const MAX_EXPONENT = bufferExponent;
+    const MAX_COMPLETE_CHUNKS = 2 ** MAX_EXPONENT;
+    const MAX_COMPLETE_EDGES = 2 ** MAX_EXPONENT;
+
+    const MAX_CHUNKS = 2 ** MAX_EXPONENT;
+    const MAX_EDGES = 2 ** MAX_EXPONENT;
+    const MAX_CLIPPED_CHUNKS = 2 * MAX_CHUNKS;
+    const MAX_EDGE_CLIPS = 2 * MAX_EDGES;
+
+    this.clippedChunksBuffer = deviceContext.createBuffer(
+      RasterClippedChunk.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS
+    );
+
+    this.edgeClipsBuffer = deviceContext.createBuffer(
+      RasterEdgeClip.ENCODING_BYTE_LENGTH * MAX_EDGE_CLIPS
+    );
+    this.chunkReduces0Buffer = deviceContext.createBuffer(
+      RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGES / workgroupSize )
+    );
+    if ( DEBUG_REDUCE_BUFFERS ) {
+      this.debugChunkReduces0Buffer = deviceContext.createBuffer(
+        RasterChunkReducePair.ENCODING_BYTE_LENGTH * MAX_EDGES
+      );
+    }
+
+    this.chunkReduces1Buffer = deviceContext.createBuffer(
+      RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGES / ( workgroupSize * workgroupSize ) )
+    );
+
+    // TODO: don't even have these buffers! We probably need a second shader for that, no?
+    // TODO: Just make it tiny
+    this.chunkReduces2Buffer = deviceContext.createBuffer(
+      RasterChunkReduceQuad.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGES / ( workgroupSize * workgroupSize * workgroupSize ) )
+    );
+
+    this.splitReduces0Buffer = deviceContext.createBuffer(
+      RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_CLIPPED_CHUNKS / workgroupSize )
+    );
+    if ( DEBUG_REDUCE_BUFFERS ) {
+      this.debugInitialSplitReduceBuffer = deviceContext.createBuffer(
+        RasterSplitReduceData.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS
+      );
+    }
+
+    this.edgeReduces0Buffer = deviceContext.createBuffer(
+      RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGE_CLIPS / workgroupSize )
+    );
+    if ( DEBUG_REDUCE_BUFFERS ) {
+      this.debugInitialEdgeReduceBuffer = deviceContext.createBuffer(
+        RasterSplitReduceData.ENCODING_BYTE_LENGTH * MAX_EDGE_CLIPS
+      );
+    }
+
+    this.splitReduces1Buffer = deviceContext.createBuffer(
+      RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_CLIPPED_CHUNKS / ( workgroupSize * workgroupSize ) )
+    );
+    this.splitReduces2Buffer = deviceContext.createBuffer(
+      RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_CLIPPED_CHUNKS / ( workgroupSize * workgroupSize * workgroupSize ) )
+    );
+
+    this.edgeReduces1Buffer = deviceContext.createBuffer(
+      RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGE_CLIPS / ( workgroupSize * workgroupSize ) )
+    );
+    this.edgeReduces2Buffer = deviceContext.createBuffer(
+      RasterSplitReduceData.ENCODING_BYTE_LENGTH * Math.ceil( MAX_EDGE_CLIPS / ( workgroupSize * workgroupSize * workgroupSize ) )
+    );
+
+    this.reducibleChunksBuffer = deviceContext.createBuffer(
+      RasterChunk.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS
+    );
+    this.completeChunksBuffer = deviceContext.createBuffer(
+      RasterCompleteChunk.ENCODING_BYTE_LENGTH * MAX_COMPLETE_CHUNKS
+    );
+    this.chunkIndexMapBuffer = deviceContext.createBuffer(
+      4 * MAX_CLIPPED_CHUNKS
+    );
+    if ( DEBUG_REDUCE_BUFFERS ) {
+      this.debugSplitScanReducesBuffer = deviceContext.createBuffer(
+        RasterSplitReduceData.ENCODING_BYTE_LENGTH * MAX_CLIPPED_CHUNKS
+      );
+    }
+
+    this.reducibleEdgesBuffer = deviceContext.createBuffer(
+      RasterEdge.ENCODING_BYTE_LENGTH * MAX_EDGE_CLIPS
+    );
+    this.completeEdgesBuffer = deviceContext.createBuffer(
+      RasterCompleteEdge.ENCODING_BYTE_LENGTH * MAX_COMPLETE_EDGES
+    );
+    this.chunkIndicesBuffer = deviceContext.createBuffer(
+      4 * 2 * MAX_CLIPPED_CHUNKS
+    );
+
+    if ( DEBUG_ACCUMULATION ) {
+      this.debugAccumulationBuffer = deviceContext.createBuffer(
+        4 * MAX_COMPLETE_CHUNKS
+      );
+    }
+  }
+
+  public destroy(): void {
+    this.clippedChunksBuffer.destroy();
+    this.edgeClipsBuffer.destroy();
+    this.chunkReduces0Buffer.destroy();
+    this.debugChunkReduces0Buffer && this.debugChunkReduces0Buffer.destroy();
+    this.chunkReduces1Buffer.destroy();
+    this.chunkReduces2Buffer.destroy();
+    this.splitReduces0Buffer.destroy();
+    this.debugInitialSplitReduceBuffer && this.debugInitialSplitReduceBuffer.destroy();
+    this.edgeReduces0Buffer.destroy();
+    this.debugInitialEdgeReduceBuffer && this.debugInitialEdgeReduceBuffer.destroy();
+    this.splitReduces1Buffer.destroy();
+    this.splitReduces2Buffer.destroy();
+    this.edgeReduces1Buffer.destroy();
+    this.edgeReduces2Buffer.destroy();
+    this.reducibleChunksBuffer.destroy();
+    this.completeChunksBuffer.destroy();
+    this.chunkIndexMapBuffer.destroy();
+    this.debugSplitScanReducesBuffer && this.debugSplitScanReducesBuffer.destroy();
+    this.reducibleEdgesBuffer.destroy();
+    this.completeEdgesBuffer.destroy();
+    this.chunkIndicesBuffer.destroy();
+    this.debugAccumulationBuffer && this.debugAccumulationBuffer.destroy();
+  }
+}
