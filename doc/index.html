@@ -2085,9 +2085,9 @@
 
     <div class="example" id="rasterize-initial-demo-container" style="display: none;">
       <p style="text-align: left;">
-        Below, Alpenglow's WebGPU raster-clipping is demonstrated. The left image is the "normal" rasterization,
-        while the right image adjusts the transparency of the pixels by which stage they were rasterized in (showing
-        the binary subdivision of the rasterization, and the early-exit for parts of paths that are fully included).
+        Below, Alpenglow's WebGPU raster-clipping is demonstrated. The top image is the "normal" rasterization,
+        while the other images adjust the transparency/brightness of the pixels by which stage they were rasterized in
+        (showing the binary subdivision of the rasterization, and the early-exit for parts of paths that are fully included).
       </p>
       <div id="rasterize-initial-demo"></div>
     </div>
@@ -2160,19 +2160,38 @@
 
           document.getElementById( 'rasterize-initial-demo' ).appendChild( await createCanvas( 16 ) );
 
-          const stageDemoContainer = document.createElement( 'div' );
-          stageDemoContainer.style.display = 'inline-block';
-          stageDemoContainer.style.position = 'relative';
-          stageDemoContainer.style.width = `${outputSize}px`;
-          stageDemoContainer.style.height = `${outputSize}px`;
-          document.getElementById( 'rasterize-initial-demo' ).appendChild( stageDemoContainer );
+          document.getElementById( 'rasterize-initial-demo' ).appendChild( document.createElement( 'br' ) );
+
+          const transparencyDemoContainer = document.createElement( 'div' );
+          transparencyDemoContainer.style.margin = '10px 20px';
+          transparencyDemoContainer.style.display = 'inline-block';
+          transparencyDemoContainer.style.position = 'relative';
+          transparencyDemoContainer.style.width = `${outputSize}px`;
+          transparencyDemoContainer.style.height = `${outputSize}px`;
+          document.getElementById( 'rasterize-initial-demo' ).appendChild( transparencyDemoContainer );
           for ( let i = 16; i > 0; i-- ) {
             const canvas = await createCanvas( i );
             canvas.style.position = 'absolute';
             canvas.style.top = '0';
             canvas.style.left = '0';
             canvas.style.opacity = '10%';
-            stageDemoContainer.appendChild( canvas );
+            transparencyDemoContainer.appendChild( canvas );
+          }
+
+          const brightnessDemoContainer = document.createElement( 'div' );
+          brightnessDemoContainer.style.margin = '10px 20px';
+          brightnessDemoContainer.style.display = 'inline-block';
+          brightnessDemoContainer.style.position = 'relative';
+          brightnessDemoContainer.style.width = `${outputSize}px`;
+          brightnessDemoContainer.style.height = `${outputSize}px`;
+          document.getElementById( 'rasterize-initial-demo' ).appendChild( brightnessDemoContainer );
+          for ( let i = 16; i > 0; i-- ) {
+            const canvas = await createCanvas( i );
+            canvas.style.position = 'absolute';
+            canvas.style.top = '0';
+            canvas.style.left = '0';
+            canvas.style.filter = `contrast(0) brightness(${i * 10}%)`;
+            brightnessDemoContainer.appendChild( canvas );
           }
         }
       } );
@@ -2187,17 +2206,9 @@
     </p>
 
     <p class="TODO">
-      Add adjustable exponents for the RasterClipper, so we don't have to do the slow buffer path for tiny simple things.
-    </p>
-
-    <p class="TODO">
       THERE IS SOMETHING WRONG with RasterClipper's completed edge output. It's bugging up actual centroid computation.
       Create assertions on the "parallel" side for this to track it down.
-    </p>
-
-    <p class="TODO">
-      Fix up render program indices in RasterClipper, test with multiple RenderPrograms, get the demo here.
-      (Handle arbitrary RenderableFaces???)
+      --- This disappeared?!?
     </p>
 
     <p class="TODO">
