@@ -384,4 +384,5 @@ export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/Buf
 export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as RasterClipper } from './webgpu/RasterClipper.js';
+export type { RasterClipperOptions } from './webgpu/RasterClipper.js';
 

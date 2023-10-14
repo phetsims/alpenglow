@@ -11,6 +11,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import { optionize3 } from '../../../phet-core/js/optionize.js';
 
 const WORKGROUP_SIZE = 128;
 const BOUNDS_REDUCE = false;
@@ -18,24 +19,24 @@ const LOG = false;
 const DEBUG_REDUCE_BUFFERS = false;
 const DEBUG_ACCUMULATION = false;
 const ONLY_ONCE = true;
-const NUM_STAGES = 16;
 
-
-// TODO: figure out better output buffer size, since it's hard to bound
-// TODO: Make this adjustable, since our shaders don't depend on it?
-const MAX_EXPONENT = 20; // works for our small demo for now
-const MAX_COMPLETE_CHUNKS = 2 ** MAX_EXPONENT;
-const MAX_COMPLETE_EDGES = 2 ** MAX_EXPONENT;
-
-const MAX_CHUNKS = 2 ** MAX_EXPONENT;
-const MAX_EDGES = 2 ** MAX_EXPONENT;
-const MAX_CLIPPED_CHUNKS = 2 * MAX_CHUNKS;
-const MAX_EDGE_CLIPS = 2 * MAX_EDGES;
 
 const CONFIG_NUM_WORDS = 46;
 const CONFIG_COUNT_WORD_OFFSET = 33;
 
 const rasterClipperMap = new WeakMap<DeviceContext, RasterClipper>();
+
+export type RasterClipperOptions = {
+  colorSpace?: 'srgb' | 'display-p3';
+  numStages?: number;
+  bufferExponent?: number; // TODO doc
+};
+
+const DEFAULT_OPTIONS = {
+  colorSpace: 'srgb',
+  numStages: 16,
+  bufferExponent: 20 // TODO: better default value
+} as const;
 
 // TODO: better name
 export default class RasterClipper {
@@ -317,7 +318,9 @@ export default class RasterClipper {
       // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
       window.requestAnimationFrame( step, canvas );
 
-      await rasterClipper.rasterize( [ renderableFace, renderableFace2, background, background2 ], context.getCurrentTexture(), 'srgb' );
+      await rasterClipper.rasterize( [ renderableFace, renderableFace2, background, background2 ], context.getCurrentTexture(), {
+        colorSpace: 'srgb'
+      } );
     } )();
   }
 
@@ -327,7 +330,7 @@ export default class RasterClipper {
 
     const deviceContext = new DeviceContext( device );
 
-    const rasterSize = 256;
+    const rasterSize = 512;
 
     const canvas = document.createElement( 'canvas' );
     canvas.width = rasterSize;
@@ -344,7 +347,7 @@ export default class RasterClipper {
 
     const clippableFace = TestToCanvas.getTestPath();
 
-    const mainFace = clippableFace.getTransformed( Matrix3.scaling( 0.35 ) );
+    const mainFace = clippableFace.getTransformed( Matrix3.scaling( 0.37 ) );
     const smallerFace = clippableFace.getTransformed( Matrix3.translation( 16, 165 ).timesMatrix( Matrix3.scaling( 0.15 ) ) );
 
     const clientSpace = RenderColorSpace.premultipliedLinearSRGB;
@@ -370,13 +373,13 @@ export default class RasterClipper {
         new RenderLinearBlend(
           new Vector2( 1 / 256, 0 ),
           0,
-          // RenderLinearBlendAccuracy.Accurate,
-          RenderLinearBlendAccuracy.PixelCenter,
+          RenderLinearBlendAccuracy.Accurate,
+          // RenderLinearBlendAccuracy.PixelCenter,
           new RenderColor( new Vector4( 1, 0, 0, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
           new RenderColor( new Vector4( 0.5, 0, 1, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
         ).colorConverted( RenderColorSpace.premultipliedOklab, clientSpace )
       )
-    ] );
+    ] ).transformed( Matrix3.scaling( rasterSize / 256 ) );
 
     let count = 0;
     await ( async function step() {
@@ -387,15 +390,22 @@ export default class RasterClipper {
       // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
       window.requestAnimationFrame( step, canvas );
 
-      await Rasterize.hybridRasterize( program, deviceContext, context, new Bounds2( 0, 0, 256, 256 ), 'srgb' );
+      await Rasterize.hybridRasterize( program, deviceContext, context, new Bounds2( 0, 0, rasterSize, rasterSize ), 'srgb', {
+        rasterClipperOptions: {
+          numStages: 16,
+          bufferExponent: 14
+        }
+      } );
     } )();
   }
 
   public rasterize(
     renderableFaces: RenderableFace[],
     canvasTexture: GPUTexture,
-    colorSpace: 'srgb' | 'display-p3'
+    providedOptions: RasterClipperOptions
   ): Promise<void> {
+    const options = optionize3<RasterClipperOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+
     const width = canvasTexture.width;
     const height = canvasTexture.height;
     const device = this.device;
@@ -513,7 +523,7 @@ export default class RasterClipper {
       {
         srgb: 0,
         'display-p3': 1
-      }[ colorSpace ]
+      }[ options.colorSpace ]
     ];
 
     const configBuffer = device.createBuffer( {
@@ -573,9 +583,8 @@ export default class RasterClipper {
       label: 'the encoder'
     } );
 
-    const numStages = NUM_STAGES;
     const stageOutput = this.runAccumulate(
-      encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, numStages
+      encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, options
     );
 
     // Have the fine-rasterization shader use the preferred format as output (for now)
@@ -616,15 +625,15 @@ export default class RasterClipper {
     inputChunksBuffer: GPUBuffer,
     inputEdgesBuffer: GPUBuffer,
     accumulationBuffer: GPUBuffer,
-    numStages: number
+    options: Required<RasterClipperOptions>
   ): {
     temporaryBuffers: GPUBuffer[];
   } {
 
     const temporaryBuffers: GPUBuffer[] = [];
 
-    for ( let i = 0; i < numStages; i++ ) {
-      const stageResult = this.runStage( encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer );
+    for ( let i = 0; i < options.numStages; i++ ) {
+      const stageResult = this.runStage( encoder, configBuffer, instructionsBuffer, inputChunksBuffer, inputEdgesBuffer, accumulationBuffer, options );
       inputChunksBuffer = stageResult.reducibleChunksBuffer;
       inputEdgesBuffer = stageResult.reducibleEdgesBuffer;
       temporaryBuffers.push( inputChunksBuffer, inputEdgesBuffer, ...stageResult.temporaryBuffers );
@@ -642,13 +651,23 @@ export default class RasterClipper {
     instructionsBuffer: GPUBuffer,
     inputChunksBuffer: GPUBuffer,
     inputEdgesBuffer: GPUBuffer,
-    accumulationBuffer: GPUBuffer
+    accumulationBuffer: GPUBuffer,
+    options: Required<RasterClipperOptions>
   ): {
     reducibleChunksBuffer: GPUBuffer;
     reducibleEdgesBuffer: GPUBuffer;
     temporaryBuffers: GPUBuffer[];
   } {
     const workgroupSize = WORKGROUP_SIZE;
+
+    const MAX_EXPONENT = options.bufferExponent;
+    const MAX_COMPLETE_CHUNKS = 2 ** MAX_EXPONENT;
+    const MAX_COMPLETE_EDGES = 2 ** MAX_EXPONENT;
+
+    const MAX_CHUNKS = 2 ** MAX_EXPONENT;
+    const MAX_EDGES = 2 ** MAX_EXPONENT;
+    const MAX_CLIPPED_CHUNKS = 2 * MAX_CHUNKS;
+    const MAX_EDGE_CLIPS = 2 * MAX_EDGES;
 
     let numUsedInputChunks = -1;
     let numUsedInputEdges = -1;

@@ -6,11 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BoundedSubpath, ClippableFace, ClippableFaceAccumulator, DeviceContext, EdgedClippedFace, EdgedFace, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterClipper, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderEvaluator, RenderExecutor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds } from '../imports.js';
+import { alpenglow, BoundedSubpath, ClippableFace, ClippableFaceAccumulator, DeviceContext, EdgedClippedFace, EdgedFace, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterClipper, RasterClipperOptions, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderEvaluator, RenderExecutor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { optionize3 } from '../../../phet-core/js/optionize.js';
+import { combineOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 
@@ -52,6 +52,8 @@ export type RasterizationOptions = {
 
   executionMethod?: RenderExecutionMethod;
 
+  rasterClipperOptions?: RasterClipperOptions;
+
   log?: RasterLog | null;
 };
 
@@ -66,6 +68,9 @@ const DEFAULT_OPTIONS = {
   renderableFaceMethod: 'traced',
   splitPrograms: true,
   executionMethod: 'instructions',
+  rasterClipperOptions: {
+    numStages: 16
+  },
   log: null
 } as const;
 
@@ -1214,15 +1219,22 @@ export default class Rasterize {
     deviceContext: DeviceContext,
     canvasContext: GPUCanvasContext,
     bounds: Bounds2,
+    // TODO: put colorSpace in options? Figure out how we're doing options
     colorSpace: 'srgb' | 'display-p3',
     providedOptions?: RasterizationOptions
   ): Promise<void> {
+
+    const options = optionize3<RasterizationOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     const renderableFaces = Rasterize.partitionRenderableFaces( renderProgram, bounds, providedOptions );
 
     const rasterClipper = RasterClipper.get( deviceContext );
 
-    await rasterClipper.rasterize( renderableFaces, canvasContext.getCurrentTexture(), colorSpace );
+    const rasterClipperOptions = combineOptions<RasterClipperOptions>( {
+      colorSpace: colorSpace
+    }, options.rasterClipperOptions );
+
+    await rasterClipper.rasterize( renderableFaces, canvasContext.getCurrentTexture(), rasterClipperOptions );
   }
 
   public static imageDataToCanvas( imageData: ImageData ): HTMLCanvasElement {
