@@ -1864,6 +1864,12 @@
       (centerX, centerY, minX, minY, maxX, maxY), but it's probably best to reduce that to a 4-dimensional sort.
     </p>
 
+    <p class="TODO">
+      Review paper for more insights. Potentially store Hilbert partials during the sort, OR just compute them to a given
+      depth and store the result? (If we get something small however with a ton of dispersed edges... could CRATER
+      performance).
+    </p>
+
     <h3 id="stage-intersection">Intersection</h3>
 
     <p>
@@ -2048,7 +2054,9 @@
 
     <p class="TODO">
       NOTE: This is better implemented by generating hashes for every simplified RenderProgram, so we can do quick
-      comparisons. Find everywhere we are doing equality right now (probably somewhat inefficiently?)
+      comparisons. Find everywhere we are doing equality right now (probably somewhat inefficiently?).
+      ONCE this is done, it will let us DAG RenderPrograms nicely on the CPU, if we store a hashmap of simplified
+      programs? (Is that useful?)
     </p>
 
     <p class="TODO">
