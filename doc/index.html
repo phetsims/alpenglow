@@ -1739,7 +1739,7 @@
 
     <p>
       For the box filter, we clip everything to the pixel grid, and then evaluate the integral over each "pixel" polygon
-      to determine the result.
+      to determine the result. For example, to evaluate the center pixel:
     </p>
 
     <div class="example">
@@ -1747,10 +1747,262 @@
     </div>
 
     <script type="module">
-      // window.addDiagram( 'box-diagram', () => window.createSceneryDiagram(
-      //   scene,
-      //   256, 256
-      // ) );
+      import { Node, Path, Text, Image } from '../../chipper/dist/js/scenery/js/imports.js';
+      import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
+      import dot from '../../chipper/dist/js/dot/js/dot.js';
+      const Matrix3 = dot.Matrix3;
+      const Bounds2 = dot.Bounds2;
+      const v2 = dot.v2;
+      // TODO: show shape of filter
+      // TODO: left diagram shows the polygon over a pixel grid. shows the clipped versions of it (strokes)
+      // TODO: arrow between
+      // TODO: right diagram shows the box-filtered version (for each pixel)
+
+      const size = 200;
+      const padding = 4;
+
+      const scale3 = ( size - 2 * padding ) / 3;
+      const scale5 = ( size - 2 * padding ) / 5;
+
+      const matrix3 = Matrix3.translation( padding + scale3, padding + scale3 ).timesMatrix( Matrix3.scaling( scale3 ) );
+      const matrix5 = Matrix3.translation( padding + 2 * scale5, padding + 2 * scale5 ).timesMatrix( Matrix3.scaling( scale5 ) );
+
+      const shape = new Shape()
+        .moveTo( -2, -1 )
+        .lineTo( -0.7, -0.5 )
+        .lineTo( 0.6, 1.5 )
+        .lineTo( 1, -0.5 )
+        .lineTo( 2.4, 0.5 )
+        .lineTo( 3, 2 )
+        .lineTo( 3, 3 )
+        .lineTo( -2, 3 )
+        .close();
+      const shape3 = shape.shapeIntersection( Shape.bounds( new Bounds2( -1, -1, 2, 2 ) ) );
+      const shape5 = shape.shapeIntersection( Shape.bounds( new Bounds2( -2, -2, 3, 3 ) ) );
+
+      const createGridShape = ( minX, minY, maxX, maxY ) => {
+        const gridShape = new Shape();
+        for ( let i = minX; i <= maxX; i++ ) {
+          gridShape.moveToPoint( v2( i, minY ) );
+          gridShape.lineToPoint( v2( i, maxY ) );
+        }
+        for ( let i = minY; i <= maxY; i++ ) {
+          gridShape.moveToPoint( v2( minX, i ) );
+          gridShape.lineToPoint( v2( maxX, i ) );
+        }
+        return gridShape;
+      };
+
+      const grid3Node = new Path( createGridShape( -1, -1, 2, 2 ).transformed( matrix3 ), {
+        stroke: 'black',
+        lineWidth: 0.5,
+        lineDash: [ 2, 2 ]
+      } );
+      const grid5Node = new Path( createGridShape( -2, -2, 3, 3 ).transformed( matrix5 ), {
+        stroke: 'black',
+        lineWidth: 0.5,
+        lineDash: [ 2, 2 ]
+      } );
+
+      const fill3Node = new Path( shape3.transformed( matrix3 ), {
+        fill: 'rgba(255,0,0,0.7)'
+      } );
+
+      const fill5Node = new Path( shape5.transformed( matrix5 ), {
+        fill: 'rgba(255,0,0,0.7)'
+      } );
+
+      const boxFilter3Node = new Path( Shape.bounds( new Bounds2( 0, 0, 1, 1 ) ).transformed( matrix3 ), {
+        fill: 'rgba(0,100,100,0.7)',
+        stroke: 'black',
+        lineWidth: 1
+      } );
+
+      const bilinearResolution = 256;
+      const bilinearFilterImageData = new ImageData( bilinearResolution, bilinearResolution );
+      for ( let i = 0; i < bilinearResolution; i++ ) {
+        const y = 2 * ( i - ( bilinearResolution - 1 ) / 2 ) / bilinearResolution;
+        for ( let j = 0; j < bilinearResolution; j++ ) {
+          const x = 2 * ( j - ( bilinearResolution - 1 ) / 2 ) / bilinearResolution;
+
+          const value = ( 1 - Math.abs( x ) ) * ( 1 - Math.abs( y ) );
+          bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) ] = 0;
+          bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 1 ] = 100;
+          bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 2 ] = 100;
+          bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 3 ] = 255 * value;
+        }
+      }
+      const bilinearFilterCanvas = document.createElement( 'canvas' );
+      bilinearFilterCanvas.width = bilinearResolution;
+      bilinearFilterCanvas.height = bilinearResolution;
+      bilinearFilterCanvas.getContext( '2d' ).putImageData( bilinearFilterImageData, 0, 0 );
+
+      const cubicResolution = 512;
+      const cubicFilterImageData = new ImageData( cubicResolution, cubicResolution );
+      for ( let i = 0; i < cubicResolution; i++ ) {
+        const y = Math.abs( 2 * ( i - ( cubicResolution - 1 ) / 2 ) / cubicResolution );
+        for ( let j = 0; j < cubicResolution; j++ ) {
+          const x = Math.abs( 2 * ( j - ( cubicResolution - 1 ) / 2 ) / cubicResolution );
+
+          // within 1: (1/6)*((12 - 9*b - 6*c)*t^3 + (-18 + 12*b + 6*c)*t^2 + (6 - 2*b))
+          // outside 1: (1/6)*((-b - 6*c)*t^3 + (6*b + 30*c)*t^2 + (-12*b - 48*c)*t + (8*b + 24*c))
+
+          let value = 1;
+          value *= x < 1 ? ( 7 / 6 * x * x * x - 2 * x * x + 8 / 9 ) : ( -7 / 18 * x * x * x + 2 * x * x - 10 / 3 * x + 16 / 9 );
+          value *= y < 1 ? ( 7 / 6 * y * y * y - 2 * y * y + 8 / 9 ) : ( -7 / 18 * y * y * y + 2 * y * y - 10 / 3 * y + 16 / 9 );
+
+          cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) ] = value > 0 ? 0 : 255;
+          cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 1 ] = value > 0 ? 100 : 0;
+          cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 2 ] = value > 0 ? 100 : 0;
+          cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 3 ] = 255 * Math.abs( value );
+        }
+      }
+      const cubicFilterCanvas = document.createElement( 'canvas' );
+      cubicFilterCanvas.width = cubicResolution;
+      cubicFilterCanvas.height = cubicResolution;
+      cubicFilterCanvas.getContext( '2d' ).putImageData( cubicFilterImageData, 0, 0 );
+
+      const bilinearFilter3Node = new Node( {
+        children: [
+          new Path( createGridShape( -0.5, -0.5, 1.5, 1.5 ).transformed( matrix3 ), {
+            stroke: 'black',
+            lineWidth: 0.5
+          } ),
+          new Node( {
+            matrix: matrix3,
+            children: [
+              new Node( {
+                x: 0.5,
+                y: 0.5,
+                scale: 2 / bilinearResolution,
+                children: [
+                  new Image( bilinearFilterCanvas, {
+                    x: -bilinearResolution / 2,
+                    y: -bilinearResolution / 2
+                  } )
+                ]
+              } )
+            ]
+          } )
+        ]
+      } );
+
+      const cubicFilter5Node = new Node( {
+        children: [
+          new Path( createGridShape( -1.5, -1.5, 2.5, 2.5 ).transformed( matrix5 ), {
+            stroke: 'black',
+            lineWidth: 0.5
+          } ),
+          new Node( {
+            matrix: matrix5,
+            children: [
+              new Node( {
+                x: 0.5,
+                y: 0.5,
+                scale: 4 / cubicResolution,
+                children: [
+                  new Image( cubicFilterCanvas, {
+                    x: -cubicResolution / 2,
+                    y: -cubicResolution / 2
+                  } )
+                ]
+              } )
+            ]
+          } )
+        ]
+      } );
+
+      const pixelsLabelNode = new Text( 'Pixels', {
+        font: '10px sans-serif',
+        right: size - 5,
+        top: 5,
+        fill: '#666'
+      } );
+
+      const boxFilterLabel = new Text( 'Box Filter', {
+        font: '12px sans-serif',
+        centerX: size / 2,
+        bottom: size - 5,
+        fill: '#333'
+      } );
+
+      const bilinearFilterLabel = new Text( 'Bilinear Filter', {
+        font: '12px sans-serif',
+        centerX: size / 2,
+        bottom: size - 5,
+        fill: '#333'
+      } );
+
+      const cubicFilterLabel = new Text( 'Mitchell-Netravali Filter', {
+        font: '12px sans-serif',
+        centerX: size / 2,
+        bottom: size - 5,
+        fill: '#333'
+      } );
+
+      window.addDiagram( 'box-diagram', () => window.createSceneryDiagram(
+        new Node( {
+          children: [
+            new Node( {
+              children: [
+                fill3Node,
+                grid3Node,
+                pixelsLabelNode
+              ]
+            } ),
+            new Node( {
+              x: size,
+              children: [
+                grid3Node,
+                boxFilter3Node,
+                pixelsLabelNode,
+                boxFilterLabel
+              ]
+            } ),
+
+
+            new Node( {
+              y: size,
+              children: [
+                fill3Node,
+                grid3Node,
+                pixelsLabelNode
+              ]
+            } ),
+            new Node( {
+              x: size,
+              y: size,
+              children: [
+                grid3Node,
+                bilinearFilter3Node,
+                pixelsLabelNode,
+                bilinearFilterLabel
+              ]
+            } ),
+
+
+            new Node( {
+              y: 2 * size,
+              children: [
+                fill5Node,
+                grid5Node,
+                pixelsLabelNode
+              ]
+            } ),
+            new Node( {
+              x: size,
+              y: 2 * size,
+              children: [
+                grid5Node,
+                cubicFilter5Node,
+                pixelsLabelNode,
+                cubicFilterLabel
+              ]
+            } )
+          ]
+        } ),
+        2 * size, 3 * size
+      ) );
     </script>
 
     <p class="TODO">Documentation with diagrams</p>
