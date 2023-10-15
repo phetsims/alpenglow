@@ -500,6 +500,7 @@
             <ul class="nav nav-list">
               <li><a href="#antialiasing-integrals">Integrals</a></li>
               <li><a href="#antialiasing-filters">Filters</a></li>
+              <li><a href="#antialiasing-examples">Examples</a></li>
             </ul>
           </li>
           <li>
@@ -572,14 +573,6 @@
 
     <p class="TODO">
       Get this built and running on GitHub pages
-    </p>
-
-    <p class="TODO">
-      Create section on the polygonal filters
-    </p>
-
-    <p class="TODO">
-      Create section on the color space handling and blending - Note the Display P3 color transform matrices.
     </p>
 
     <p class="TODO">
@@ -1806,6 +1799,11 @@
       cases, and then reflection to get down to 3).
     </p>
 
+    <p>
+      Note that this filter also has sections where it goes negative, so it can actually cause negative values.
+      We try not to clamp color values until the very end (during gamut mapping), so that this effect will work nicely.
+    </p>
+
     <script type="module">
       import { Node, Path, Text, Image, Circle } from '../../chipper/dist/js/scenery/js/imports.js';
       import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
@@ -2319,13 +2317,15 @@
       ) );
     </script>
 
-    <h5>Analytic Filtering Examples</h5>
+    <h4 id="antialiasing-examples">Examples</h4>
 
     <p>
       Aliasing (what we're trying to avoid) is the low-frequency pattern that spuriously appears when we display
       high-frequency content in a low-resolution way. In general, we want to reduce these low-frequency patterns
       without overly introducing blurring.
     </p>
+
+    <h5>Checkerboards</h5>
 
     <p>
       Checkerboard with 3d perspective has a smooth transition from low to high frequency. Note that the pattern
@@ -2360,6 +2360,8 @@
       </div>
     </div>
 
+    <h5>Siemens Stars</h5>
+
     <p>
       Siemens stars can show Moiré patterns.
     </p>
@@ -2392,13 +2394,41 @@
       </div>
     </div>
 
-    <p class="TODO">Polynomial approximation to lanczos filter would be great</p>
+    <h5>Blurs</h5>
 
-    <p class="TODO">Blur demos</p>
+    <p>
+      If we artificially scale the filter (possible in Alpenglow software, but not planned for GPU), it's possible to
+      generate blurs.
+    </p>
+
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span6 example">
+        <div id="blur-reference"></div>
+        Reference (Dirac Delta)
+      </div>
+      <div class="span6 example">
+        <div id="blur-box"></div>
+        Box Filter
+      </div>
+    </div>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span6 example">
+        <div id="blur-bilinear"></div>
+        Bilinear Filter
+      </div>
+      <div class="span6 example">
+        <div id="blur-mitchell-netravali"></div>
+        Mitchell-Netravali Filter
+      </div>
+    </div>
+
+    <p class="TODO">Polynomial approximation to lanczos filter would be great</p>
 
     <script type="module">
       import { Node, Path } from '../../chipper/dist/js/scenery/js/imports.js';
-      import { RenderStack, RenderPathBoolean, RenderPath, RenderFromNode, PolygonFilterType, RenderDepthSort } from '../../chipper/dist/js/alpenglow/js/imports.js';
+      import { RenderStack, RenderPathBoolean, RenderPath, RenderFromNode, PolygonFilterType, RenderDepthSort, RenderColor } from '../../chipper/dist/js/alpenglow/js/imports.js';
       import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
       import dot from '../../chipper/dist/js/dot/js/dot.js';
       const v2 = dot.v2;
@@ -2521,6 +2551,50 @@
         }
       };
 
+      const getFiltered = ( filter, multiplier ) => {
+        const width = 150;
+        const height = 150;
+
+        const program = new RenderStack( [
+          new RenderPathBoolean(
+            new RenderPath( 'nonzero', [ [
+              phet.dot.v2( 30, 30 ),
+              phet.dot.v2( 120, 30 ),
+              phet.dot.v2( 120, 120 ),
+              phet.dot.v2( 30, 120 )
+            ], [
+              phet.dot.v2( 35, 35 ),
+              phet.dot.v2( 45, 105 ),
+              phet.dot.v2( 90, 90 ),
+              phet.dot.v2( 105, 35 )
+            ] ] ),
+            RenderFromNode.colorFrom( 'black' ),
+            RenderFromNode.colorFrom( 'white' )
+          ),
+          new RenderPathBoolean(
+            new RenderPath( 'nonzero', [
+              ...window.shapeToPolygons( Shape.regularPolygon( 20, 5 ).transformed( Matrix3.translation( 100, 100 ) ) )
+            ] ),
+            RenderFromNode.colorFrom( 'red' ),
+            RenderColor.TRANSPARENT
+          ),
+          new RenderPathBoolean(
+            new RenderPath( 'nonzero', [ [
+              phet.dot.v2( 50, 50 ),
+              phet.dot.v2( 45, 105 ),
+              phet.dot.v2( 90, 90 )
+            ] ] ),
+            RenderFromNode.colorFrom( 'blue' ),
+            RenderColor.TRANSPARENT
+          )
+        ] );
+
+        return window.getRasterizedElement( program, width, height, {
+          polygonFiltering: filter,
+          polygonFilterWindowMultiplier: multiplier * window.devicePixelRatio
+        } );
+      };
+
       window.addDiagram( 'checkerboard-canvas', () => getCheckerboard( 'canvas' ) );
       window.addDiagram( 'checkerboard-svg', () => getCheckerboard( 'svg' ) );
       window.addDiagram( 'checkerboard-box', () => getCheckerboard( 'box' ) );
@@ -2532,6 +2606,11 @@
       window.addDiagram( 'siemens-box', () => getSiemensStar( 'box', 200 ) );
       window.addDiagram( 'siemens-bilinear', () => getSiemensStar( 'bilinear', 200 ) );
       window.addDiagram( 'siemens-mitchell-netravali', () => getSiemensStar( 'mitchellNetravali', 200 ) );
+
+      window.addDiagram( 'blur-reference', () => getFiltered( PolygonFilterType.Box, 1 ) );
+      window.addDiagram( 'blur-box', () => getFiltered( PolygonFilterType.Box, 10 ) );
+      window.addDiagram( 'blur-bilinear', () => getFiltered( PolygonFilterType.Bilinear, 10 ) );
+      window.addDiagram( 'blur-mitchell-netravali', () => getFiltered( PolygonFilterType.MitchellNetravali, 10 ) );
     </script>
 
     <h3 id="color-and-blending">Color &amp; Blending</h3>
@@ -2553,7 +2632,7 @@
 
     <p class="TODO">Premultiplication section</p>
 
-    <p class="TODO">sRGB and Display P3</p>
+    <p class="TODO">sRGB and Display P3 --- Note the Display P3 color matrices (we could not find those online)</p>
 
     <p class="TODO">Gamut Mapping</p>
 
