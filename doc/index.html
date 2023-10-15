@@ -1735,6 +1735,10 @@
     <h4 id="antialiasing-filters">Filters</h4>
     <!-- For antialiasing-->
 
+    <p>
+      For each filter, we're going to evaluate it at a pixel's "center" to get a single sample.
+    </p>
+
     <h5>Box Filter</h5>
 
     <p>
@@ -1812,14 +1816,28 @@
         fill: 'rgba(255,0,0,0.7)'
       } );
 
+      const stroke3Node = new Path( shape3.transformed( matrix3 ), {
+        stroke: 'rgba(60,0,0,0.3)'
+      } );
+
+      const stroke5Node = new Path( shape5.transformed( matrix5 ), {
+        stroke: 'rgba(60,0,0,0.3)'
+      } );
+
       const boxFilter3Node = new Path( Shape.bounds( new Bounds2( 0, 0, 1, 1 ) ).transformed( matrix3 ), {
         fill: 'rgba(0,100,100,0.7)',
         stroke: 'black',
         lineWidth: 1
       } );
 
+      const boxFilterIntersection3Node = new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0, 0, 1, 1 ) ) ).transformed( matrix3 ), {
+        fill: 'rgba(255,0,0,1)',
+        stroke: 'black'
+      } );
+
       const bilinearResolution = 256;
       const bilinearFilterImageData = new ImageData( bilinearResolution, bilinearResolution );
+      const bilinearFilterIntersectionImageData = new ImageData( bilinearResolution, bilinearResolution );
       for ( let i = 0; i < bilinearResolution; i++ ) {
         const y = 2 * ( i - ( bilinearResolution - 1 ) / 2 ) / bilinearResolution;
         for ( let j = 0; j < bilinearResolution; j++ ) {
@@ -1829,38 +1847,64 @@
           bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) ] = 0;
           bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 1 ] = 100;
           bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 2 ] = 100;
-          bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 3 ] = 255 * value;
+          bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 3 ] = 255 * Math.pow( value, 1 / 1.5 );
+
+          const intersects = shape.containsPoint( v2( x + 0.5, y + 0.5 ) );
+          const intersectedValue = intersects ? value : 0;
+          bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) ] = 255;
+          bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) + 1 ] = 0;
+          bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) + 2 ] = 0;
+          bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) + 3 ] = 255 * Math.pow( intersectedValue, 1 / 1.5 );
         }
       }
       const bilinearFilterCanvas = document.createElement( 'canvas' );
       bilinearFilterCanvas.width = bilinearResolution;
       bilinearFilterCanvas.height = bilinearResolution;
       bilinearFilterCanvas.getContext( '2d' ).putImageData( bilinearFilterImageData, 0, 0 );
+      const bilinearFilterIntersectionCanvas = document.createElement( 'canvas' );
+      bilinearFilterIntersectionCanvas.width = bilinearResolution;
+      bilinearFilterIntersectionCanvas.height = bilinearResolution;
+      bilinearFilterIntersectionCanvas.getContext( '2d' ).putImageData( bilinearFilterIntersectionImageData, 0, 0 );
 
       const cubicResolution = 512;
       const cubicFilterImageData = new ImageData( cubicResolution, cubicResolution );
+      const cubicFilterIntersectionImageData = new ImageData( cubicResolution, cubicResolution );
       for ( let i = 0; i < cubicResolution; i++ ) {
-        const y = Math.abs( 2 * ( i - ( cubicResolution - 1 ) / 2 ) / cubicResolution );
+        const y = 4 * ( i - ( cubicResolution - 1 ) / 2 ) / cubicResolution;
         for ( let j = 0; j < cubicResolution; j++ ) {
-          const x = Math.abs( 2 * ( j - ( cubicResolution - 1 ) / 2 ) / cubicResolution );
+          const x = 4 * ( j - ( cubicResolution - 1 ) / 2 ) / cubicResolution;
 
           // within 1: (1/6)*((12 - 9*b - 6*c)*t^3 + (-18 + 12*b + 6*c)*t^2 + (6 - 2*b))
           // outside 1: (1/6)*((-b - 6*c)*t^3 + (6*b + 30*c)*t^2 + (-12*b - 48*c)*t + (8*b + 24*c))
 
+          const absX = Math.abs( x );
+          const absY = Math.abs( y );
+
           let value = 1;
-          value *= x < 1 ? ( 7 / 6 * x * x * x - 2 * x * x + 8 / 9 ) : ( -7 / 18 * x * x * x + 2 * x * x - 10 / 3 * x + 16 / 9 );
-          value *= y < 1 ? ( 7 / 6 * y * y * y - 2 * y * y + 8 / 9 ) : ( -7 / 18 * y * y * y + 2 * y * y - 10 / 3 * y + 16 / 9 );
+          value *= absX < 1 ? ( 7 / 6 * absX * absX * absX - 2 * absX * absX + 8 / 9 ) : ( -7 / 18 * absX * absX * absX + 2 * absX * absX - 10 / 3 * absX + 16 / 9 );
+          value *= absY < 1 ? ( 7 / 6 * absY * absY * absY - 2 * absY * absY + 8 / 9 ) : ( -7 / 18 * absY * absY * absY + 2 * absY * absY - 10 / 3 * absY + 16 / 9 );
 
           cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) ] = value > 0 ? 0 : 255;
           cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 1 ] = value > 0 ? 100 : 0;
           cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 2 ] = value > 0 ? 100 : 0;
-          cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 3 ] = 255 * Math.abs( value );
+          cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 3 ] = 255 * Math.pow( Math.abs( value ), 1 / 1.5 );
+
+          const intersects = shape.containsPoint( v2( x + 0.5, y + 0.5 ) );
+          const intersectedValue = intersects ? value : 0;
+          cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) ] = intersectedValue > 0 ? 255 : 0;
+          cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) + 1 ] = intersectedValue > 0 ? 0 : 255;
+          cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) + 2 ] = intersectedValue > 0 ? 0 : 255;
+          cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) + 3 ] = 255 * Math.pow( Math.abs( intersectedValue ), 1 / 1.5 );
         }
       }
       const cubicFilterCanvas = document.createElement( 'canvas' );
       cubicFilterCanvas.width = cubicResolution;
       cubicFilterCanvas.height = cubicResolution;
       cubicFilterCanvas.getContext( '2d' ).putImageData( cubicFilterImageData, 0, 0 );
+      const cubicFilterIntersectionCanvas = document.createElement( 'canvas' );
+      cubicFilterIntersectionCanvas.width = cubicResolution;
+      cubicFilterIntersectionCanvas.height = cubicResolution;
+      cubicFilterIntersectionCanvas.getContext( '2d' ).putImageData( cubicFilterIntersectionImageData, 0, 0 );
 
       const bilinearFilter3Node = new Node( {
         children: [
@@ -1887,6 +1931,44 @@
         ]
       } );
 
+      const bilinearFilterIntersection3Node = new Node( {
+        children: [
+          new Path( createGridShape( -0.5, -0.5, 1.5, 1.5 ).transformed( matrix3 ), {
+            stroke: 'black',
+            lineWidth: 0.5,
+            opacity: 0.3
+          } ),
+          new Node( {
+            matrix: matrix3,
+            children: [
+              new Node( {
+                x: 0.5,
+                y: 0.5,
+                scale: 2 / bilinearResolution,
+                children: [
+                  new Image( bilinearFilterIntersectionCanvas, {
+                    x: -bilinearResolution / 2,
+                    y: -bilinearResolution / 2
+                  } )
+                ]
+              } )
+            ]
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, -0.5, 0.5, 0.5 ) ) ).transformed( matrix3 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, -0.5, 1.5, 0.5 ) ) ).transformed( matrix3 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, 0.5, 0.5, 1.5 ) ) ).transformed( matrix3 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, 0.5, 1.5, 1.5 ) ) ).transformed( matrix3 ), {
+            stroke: 'black'
+          } )
+        ]
+      } );
+
       const cubicFilter5Node = new Node( {
         children: [
           new Path( createGridShape( -1.5, -1.5, 2.5, 2.5 ).transformed( matrix5 ), {
@@ -1908,6 +1990,80 @@
                 ]
               } )
             ]
+          } )
+        ]
+      } );
+
+      const cubicFilterIntersection5Node = new Node( {
+        children: [
+          new Path( createGridShape( -1.5, -1.5, 2.5, 2.5 ).transformed( matrix5 ), {
+            stroke: 'black',
+            lineWidth: 0.5,
+            opacity: 0.3
+          } ),
+          new Node( {
+            matrix: matrix5,
+            children: [
+              new Node( {
+                x: 0.5,
+                y: 0.5,
+                scale: 4 / cubicResolution,
+                children: [
+                  new Image( cubicFilterIntersectionCanvas, {
+                    x: -cubicResolution / 2,
+                    y: -cubicResolution / 2
+                  } )
+                ]
+              } )
+            ]
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, -1.5, -0.5, -0.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, -1.5, 0.5, -0.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, -1.5, 1.5, -0.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, -1.5, 2.5, -0.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, -0.5, -0.5, 0.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, -0.5, 0.5, 0.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, -0.5, 1.5, 0.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, -0.5, 2.5, 0.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, 0.5, -0.5, 1.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, 0.5, 0.5, 1.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, 0.5, 1.5, 1.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, 0.5, 2.5, 1.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, 1.5, -0.5, 2.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, 1.5, 0.5, 2.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, 1.5, 1.5, 2.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
+          } ),
+          new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, 1.5, 2.5, 2.5 ) ) ).transformed( matrix5 ), {
+            stroke: 'black'
           } )
         ]
       } );
@@ -1940,6 +2096,13 @@
         fill: '#333'
       } );
 
+      const contributionLabel = new Text( 'Contribution (product of both)', {
+        font: '12px sans-serif',
+        centerX: size / 2,
+        bottom: size - 5,
+        fill: '#333'
+      } );
+
       window.addDiagram( 'box-diagram', () => window.createSceneryDiagram(
         new Node( {
           children: [
@@ -1957,6 +2120,16 @@
                 boxFilter3Node,
                 pixelsLabelNode,
                 boxFilterLabel
+              ]
+            } ),
+            new Node( {
+              x: 2 * size,
+              children: [
+                grid3Node,
+                stroke3Node,
+                boxFilterIntersection3Node,
+                pixelsLabelNode,
+                contributionLabel
               ]
             } ),
 
@@ -1979,6 +2152,17 @@
                 bilinearFilterLabel
               ]
             } ),
+            new Node( {
+              x: 2 * size,
+              y: size,
+              children: [
+                grid3Node,
+                stroke3Node,
+                bilinearFilterIntersection3Node,
+                pixelsLabelNode,
+                contributionLabel
+              ]
+            } ),
 
 
             new Node( {
@@ -1998,14 +2182,29 @@
                 pixelsLabelNode,
                 cubicFilterLabel
               ]
+            } ),
+            new Node( {
+              x: 2 * size,
+              y: 2 * size,
+              children: [
+                grid5Node,
+                stroke5Node,
+                cubicFilterIntersection5Node,
+                pixelsLabelNode,
+                contributionLabel
+              ]
             } )
           ]
         } ),
-        2 * size, 3 * size
+        3 * size, 3 * size
       ) );
     </script>
 
     <p class="TODO">Documentation with diagrams</p>
+
+    <p class="TODO">Add filter formulas (note we're choosing the standard B=1/3, C=1/3 for Mitchell-Netravali)</p>
+
+    <p class="TODO">Polynomial approximation to lanczos filter would be great</p>
 
     <h5>Bilinear Filter</h5>
 
