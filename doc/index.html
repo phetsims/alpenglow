@@ -21,7 +21,7 @@
       }
     };
   </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script id="MathJax-script" async src="../../sherpa/mathjax/tex-chtml.js"></script>
 
   <script>
     window.phet = window.phet || {};
@@ -585,10 +585,6 @@
     </p>
 
     <p class="TODO">
-      Use frames to split this left side!
-    </p>
-
-    <p class="TODO">
       Add TODO levels here, so we can flag critical/important ones. Also, make them searchable?
     </p>
 
@@ -597,10 +593,6 @@
       and use WGPU to get better GPU profiling? (Or if we can profile Metal using the debug tools, that could help).
       Look into <a href="https://github.com/takahirox/webgpu-devtools">webgpu-devtools</a>. But for now, we can use FPS
       tests.
-    </p>
-
-    <p class="TODO">
-      MathJax/Mermaid NOT from CDN (so it works offline)
     </p>
 
     <h3>Technology: Primarily WebGPU</h3>
@@ -4088,10 +4080,14 @@ flowchart TD
       Show which parts finish in which stages, if we stick to that?
     </p>
 
+    <p class="DEFERRED">
+      Use frames to split this left side!
+    </p>
+
     <!-- DO NOT PLACE THINGS UNDER HERE -->
 
     <script type="module">
-      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs'; // eslint-disable-line default-import-match-filename
+      import mermaid from '../../sherpa/mermaid/mermaid.esm.min.mjs'; // eslint-disable-line default-import-match-filename
       mermaid.initialize( { startOnLoad: true } );
     </script>
 
