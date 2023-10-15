@@ -88,6 +88,15 @@
       color: red;
     }
 
+    .DEFERRED::before {
+      content: "Deferred: ";
+      font-weight: bold;
+    }
+
+    .DEFERRED {
+      color: green;
+    }
+
     .example {
       margin: 0 auto;
       text-align: center;
@@ -1744,6 +1753,11 @@
       and evaluate the integral with the formula for that section.
     </p>
 
+    <p>
+      NOTE: When using a non-box filter, we'll need to examine/process a larger area than just the resulting bounds.
+      In the code, this is called the <code>contributionBounds</code>.
+    </p>
+
     <h5>Box Filter</h5>
 
     <div class="example">
@@ -1802,6 +1816,10 @@
     <p>
       Note that this filter also has sections where it goes negative, so it can actually cause negative values.
       We try not to clamp color values until the very end (during gamut mapping), so that this effect will work nicely.
+    </p>
+
+    <p>
+      It will result in 16 different sections, each of which will contribute to a final output sample (pixel).
     </p>
 
     <script type="module">
@@ -2424,7 +2442,19 @@
       </div>
     </div>
 
-    <p class="TODO">Polynomial approximation to lanczos filter would be great</p>
+    <p class="DEFERRED">Polynomial approximation to lanczos filter would be great</p>
+
+    <p class="DEFERRED">
+      Unsharp masking would be great with the "overblurring" (scaling the filter up). Is there a way to create a
+      <code>RenderBlur</code> in any reasonable fashion? This would need... multiple levels of Alpenglow reduction?
+      (Would sharpen the oklab luminosity channel)
+    </p>
+
+    <p class="DEFERRED">
+      We could compute the gradient of a moving window/filter. Compute deltas of points in the directions they will move,
+      then compute the derivative based on that. Points will move along edges if on the boundary.
+      Points in corners don't have compensation. Points on the "shifting" (not sliding) border likely have compensation.
+    </p>
 
     <script type="module">
       import { Node, Path } from '../../chipper/dist/js/scenery/js/imports.js';
