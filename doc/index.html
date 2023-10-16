@@ -539,6 +539,7 @@
               <li><a href="#WGSL-mangling">Mangling</a></li>
             </ul>
           </li>
+          <li><a href="#asyncSimulation">Async Simulation</a></li>
           <li><a href="#depthSort">Depth Sort</a></li>
         </ul>
       </li>
@@ -588,13 +589,6 @@
       Add TODO levels here, so we can flag critical/important ones. Also, make them searchable?
     </p>
 
-    <p class="TODO">
-      Create a "performance" section, to note things. Prefer Firefox for profiling CPU currently. Convert things to Rust
-      and use WGPU to get better GPU profiling? (Or if we can profile Metal using the debug tools, that could help).
-      Look into <a href="https://github.com/takahirox/webgpu-devtools">webgpu-devtools</a>. But for now, we can use FPS
-      tests.
-    </p>
-
     <h3>Technology: Primarily WebGPU</h3>
 
     <p>
@@ -602,14 +596,6 @@
       fallback (and for testing/development). In addition to a normal software route, there is a async/await
       parallelized form that can execute with the same execution model that WebGPU would use (with workgroups, storage
       buffers, etc.), that is used for validation, testing, and debugging.
-    </p>
-
-    <p class="TODO">
-      Document Parallel execution setup somewhere.
-    </p>
-
-    <p class="TODO">
-      Measure workgroup execution order on GPUs to see if we can schedule asymmetric (large) load workgroups first somehow.
     </p>
 
     <h3>Methods: Solve the Occlusion Problem First</h3>
@@ -3171,6 +3157,55 @@
       need to implement it in the chipper transpiler.
     </p>
 
+    <h3 id="asyncSimulation">Async Simulation</h3>
+
+    <p>
+      For use in rapid prototyping and debugging WGSL-like structured code, we've created the ability to run code with
+      a similar execution model to WGSL with async/await code in JS/TS.
+    </p>
+
+    <p>
+      It uses async/await to simulate the execution model by:
+    </p>
+
+    <ul>
+      <li>
+        Running threads/invocations and workgroups in parallel, by awaiting every storage/workgroup read/write (or
+        synchronization barrier).
+      </li>
+      <li>
+        Blocking all progress on threads in a workgroup on a synchronization barrier until all threads have reached it.
+      </li>
+      <li>
+        Recording all of the read/writes to storage/workgroup arrays (and which thread/workgroup they were set by),
+        with logic on synchronization barriers. This allows detecting potential data races, uniformity issues,
+        missing barriers, or other issues.
+      </li>
+      <li>
+        Returning indeterminate values from out-of-bounds or un-initialized array accesses.
+      </li>
+    </ul>
+
+    <p>
+      In the model, typically <code>ParallelStorageArray</code>s are created, and then shaders are dispatched
+      by running <code>ParallelExecutor</code>'s <code>dispatch()</code> method (with the dispatch size passed in).
+      <code>ParallelExecutor</code>s are created with <code>ParallelKernel</code>, which is roughly equivalent to
+      individual shaders. They will specify an async execute function, in addition to a way of creating workgroup-scoped
+      values (in a statically-typed way). Workgroup-scoped values can be either atomics, or <code>ParallelWorkgroupArray</code>s.
+    </p>
+
+    <p>
+      The execute function is given a reference to a context (<code>ParallelContext</code>) that will provide access to
+      workgroup-scoped values and synchronization barriers (workgroupBarrier/storageBarrier) directly.
+      It's also passed to storage/workgroup data read/writes, so that we can record the accesses and fail out assertions
+      if certain data access pattersn are detected.
+    </p>
+
+    <p>
+      <code>ParallelRaster</code> is an example of TypeScript code validating the model used for the raster-clipping
+      process. <code>ParallelRasterSplitScan</code> is an example of a single shader in this model.
+    </p>
+
     <h3 id="depthSort">Depth Sort</h3>
 
     <p>
@@ -4011,6 +4046,17 @@ flowchart TD
 
     <p class="TODO">
       Gamut mapping in WGSL seems to not be working.
+    </p>
+
+    <p class="TODO">
+      Measure workgroup execution order on GPUs to see if we can schedule asymmetric (large) load workgroups first somehow.
+    </p>
+
+    <p class="TODO">
+      Create a "performance" section, to note things. Prefer Firefox for profiling CPU currently. Convert things to Rust
+      and use WGPU to get better GPU profiling? (Or if we can profile Metal using the debug tools, that could help).
+      Look into <a href="https://github.com/takahirox/webgpu-devtools">webgpu-devtools</a>. But for now, we can use FPS
+      tests.
     </p>
 
     <p class="TODO">
