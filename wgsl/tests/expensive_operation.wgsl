@@ -27,7 +27,7 @@ fn main(
   scratch[ local_id.x ] = value;
 
   // Extra loop just runs it a bunch, for performance (overlap) testing
-  for ( var j = 0u; j < 10000u; j += 1u ) {
+  for ( var j = 0u; j < 1000u; j += 1u ) {
     for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i += 1u ) {
       workgroupBarrier();
 
