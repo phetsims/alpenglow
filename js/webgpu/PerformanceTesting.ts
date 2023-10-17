@@ -19,10 +19,9 @@ export default class PerformanceTesting {
       return;
     }
 
-    const numWorkgroups = 16;
+    const numWorkgroups = 16 * 16;
     const workgroupSize = 256;
 
-    const numbers = new Float32Array( _.range( 0, workgroupSize * numWorkgroups ).map( () => random.nextDouble() ) );
     const deviceContext = new DeviceContext( device );
 
     const expensiveShader = ComputeShader.fromSource(
@@ -58,6 +57,8 @@ export default class PerformanceTesting {
     await ( async function step() {
       // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
       window.requestAnimationFrame( step, canvas );
+
+      const numbers = new Float32Array( _.range( 0, workgroupSize * numWorkgroups ).map( () => random.nextDouble() ) );
 
       const outTexture = canvasContext.getCurrentTexture();
 

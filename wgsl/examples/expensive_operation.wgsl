@@ -44,5 +44,6 @@ fn main(
     }
   }
 
-  output[ local_id.x ] = scratch[ local_id.x ];
+//  output[ local_id.x ] = scratch[ local_id.x ];
+  output[ global_id.x ] = input[ global_id.x ];
 }

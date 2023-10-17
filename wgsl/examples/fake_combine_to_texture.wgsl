@@ -28,5 +28,5 @@ fn main(
   @builtin(workgroup_id) wg_id: vec3u
 ) {
   let index = local_id.y * 16u + local_id.x;
-  textureStore( output, global_id.xy, vec4( 0.0001f * ( buffer_a[ index ] + buffer_b[ index ] + buffer_c[ index ] + buffer_d[ index ] ), 1f, 0f, 1f ) );
+  textureStore( output, global_id.xy, vec4( 0.25f * ( buffer_a[ index ] + buffer_b[ index ] + buffer_c[ index ] + buffer_d[ index ] ), 0.1f, 0f, 1f ) );
 }
