@@ -203,15 +203,17 @@ export { default as wgsl_raster_to_texture } from '../wgsl/raster/raster_to_text
 export { default as wgsl_reduce_simple_single } from '../wgsl/examples/reduce_simple_single.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_scan_simple_single } from '../wgsl/examples/scan_simple_single.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_expensive_operation } from '../wgsl/examples/expensive_operation.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_fake_combine_to_texture } from '../wgsl/examples/fake_combine_to_texture.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_render_program } from '../wgsl/tests/test_render_program.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_expensive_operation } from '../wgsl/tests/expensive_operation.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_fake_combine_to_texture } from '../wgsl/tests/fake_combine_to_texture.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_copy_storage_operation } from '../wgsl/tests/copy_storage_operation.js';
 
 export { default as PolygonFilterType, getPolygonFilterWidth, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand, getPolygonFilterGridBounds } from './render-program/PolygonFilterType.js';
 export { default as Mesh } from './render-program/Mesh.js';

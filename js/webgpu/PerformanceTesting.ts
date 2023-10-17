@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BlitShader, ComputeShader, DeviceContext, wgsl_expensive_operation, wgsl_fake_combine_to_texture } from '../imports.js';
+import { alpenglow, Binding, BlitShader, ComputeShader, DeviceContext, wgsl_copy_storage_operation, wgsl_expensive_operation, wgsl_fake_combine_to_texture } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -23,6 +23,14 @@ export default class PerformanceTesting {
     const workgroupSize = 256;
 
     const deviceContext = new DeviceContext( device );
+
+    const copyStorageShader = ComputeShader.fromSource(
+      device, 'copy_storage_operation', wgsl_copy_storage_operation, [
+        Binding.STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], {
+      workgroupSize: workgroupSize
+    } );
 
     const expensiveShader = ComputeShader.fromSource(
       device, 'expensive_operation', wgsl_expensive_operation, [
@@ -99,7 +107,8 @@ export default class PerformanceTesting {
       device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
       buffersToDestroy.push( inputBuffer );
 
-      const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+      const middleBuffer = deviceContext.createBuffer( 4 * workgroupSize * numWorkgroups );
+      buffersToDestroy.push( middleBuffer );
 
       const outputBufferA = deviceContext.createBuffer( 4 * numWorkgroups );
       const outputBufferB = deviceContext.createBuffer( 4 * numWorkgroups );
@@ -110,17 +119,23 @@ export default class PerformanceTesting {
       buffersToDestroy.push( outputBufferC );
       buffersToDestroy.push( outputBufferD );
 
+      const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+      copyStorageShader.dispatch( encoder, [
+        inputBuffer, middleBuffer
+      ] );
+
       expensiveShader.dispatch( encoder, [
-        inputBuffer, outputBufferA
+        middleBuffer, outputBufferA
       ], numWorkgroups );
       expensiveShader.dispatch( encoder, [
-        inputBuffer, outputBufferB
+        middleBuffer, outputBufferB
       ], numWorkgroups );
       expensiveShader.dispatch( encoder, [
-        inputBuffer, outputBufferC
+        middleBuffer, outputBufferC
       ], numWorkgroups );
       expensiveShader.dispatch( encoder, [
-        inputBuffer, outputBufferD
+        middleBuffer, outputBufferD
       ], numWorkgroups );
 
       fakeCombineShader.dispatch( encoder, [
