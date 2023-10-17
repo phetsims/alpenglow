@@ -9,13 +9,13 @@
 #option preferredStorageFormat
 
 @group(0) @binding(0)
-var<storage, read> buffer_a: array<f32>;
+var<storage, read_write> buffer_a: array<f32>;
 @group(0) @binding(1)
-var<storage, read> buffer_b: array<f32>;
+var<storage, read_write> buffer_b: array<f32>;
 @group(0) @binding(2)
-var<storage, read> buffer_c: array<f32>;
+var<storage, read_write> buffer_c: array<f32>;
 @group(0) @binding(3)
-var<storage, read> buffer_d: array<f32>;
+var<storage, read_write> buffer_d: array<f32>;
 @group(0) @binding(4)
 var output: texture_storage_2d<${preferredStorageFormat}, write>;
 

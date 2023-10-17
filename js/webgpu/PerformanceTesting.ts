@@ -35,10 +35,10 @@ export default class PerformanceTesting {
 
     const fakeCombineShader = ComputeShader.fromSource(
       device, 'fake_combine_to_texture', wgsl_fake_combine_to_texture, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER,
         deviceContext.preferredStorageFormat === 'bgra8unorm' ? Binding.TEXTURE_OUTPUT_BGRA8UNORM : Binding.TEXTURE_OUTPUT_RGBA8UNORM
       ], {
         workgroupSize: 1,
