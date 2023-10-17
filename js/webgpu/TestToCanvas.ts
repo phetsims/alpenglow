@@ -92,6 +92,7 @@ export default class TestToCanvas {
     let fineOutputTexture: GPUTexture | null = null;
     const outTextureView = outTexture.createView();
 
+    // TODO: factor out this pattern
     if ( canOutputToCanvas ) {
       fineOutputTextureView = outTextureView;
     }

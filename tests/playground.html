@@ -848,6 +848,12 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.loopExpensiveMultipleTest = function() {
+    setTimeout( async function() {
+      phet.alpenglow.PerformanceTesting.loopExpensiveMultiple();
+    } );
+  };
+
   window.rasterTest = function() {
     setTimeout( async function() {
       const boundsRect = bounds => [
