@@ -1,0 +1,457 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <title>async-compute-test</title>
+</head>
+<body>
+<script type="text/javascript">
+  ( async () => {
+    const adapter = await navigator.gpu?.requestAdapter( {
+      powerPreference: 'high-performance'
+    } );
+    const supportsBGRATextureStorage = adapter?.features.has( 'bgra8unorm-storage' ) || false;
+    const device = await adapter?.requestDevice( {
+      requiredFeatures: supportsBGRATextureStorage ? [ 'bgra8unorm-storage' ] : []
+    } ) || null;
+
+    const numWorkgroups = 16 * 16;
+    const workgroupSize = 256;
+
+    const preferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat();
+    const preferredStorageFormat =
+      ( preferredCanvasFormat === 'bgra8unorm' && device.features.has( 'bgra8unorm-storage' ) )
+      ? 'bgra8unorm'
+      : 'rgba8unorm';
+
+    const copyUseReadOnly = true;
+    const expensiveUseReadOnly = true;
+    const fakeCombineUseReadOnly = true;
+
+    const copyStorageModule = device.createShaderModule( {
+      label: 'copy storage module',
+      code: `
+@group(0) @binding(0)
+var<storage, ${copyUseReadOnly ? 'read' : 'read_write'}> input: array<f32>;
+@group(0) @binding(1)
+var<storage, read_write> output: array<f32>;
+
+@compute @workgroup_size(${workgroupSize})
+fn main(
+  @builtin(global_invocation_id) global_id: vec3u
+) {
+  output[ global_id.x ] = input[ global_id.x ];
+}`
+    } );
+
+    const copyStorageBindGroupLayout = device.createBindGroupLayout( {
+      label: 'copy storage bindGroupLayout',
+      entries: [
+        { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: copyUseReadOnly ? 'read-only-storage' : 'storage' } },
+        { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }
+      ]
+    } );
+
+    const copyStoragePipeline = device.createComputePipeline( {
+      label: 'copy storage pipeline',
+      layout: device.createPipelineLayout( {
+        bindGroupLayouts: [ copyStorageBindGroupLayout ]
+      } ),
+      compute: {
+        module: copyStorageModule,
+        entryPoint: 'main'
+      }
+    } );
+
+    const expensiveModule = device.createShaderModule( {
+      label: 'expensive module',
+      code: `
+@group(0) @binding(0)
+var<storage, ${expensiveUseReadOnly ? 'read' : 'read_write'}> input: array<f32>;
+@group(0) @binding(1)
+var<storage, read_write> output: array<f32>;
+
+var<workgroup> scratch: array<f32, ${workgroupSize}u>;
+
+@compute @workgroup_size(${workgroupSize})
+fn main(
+  @builtin(global_invocation_id) global_id: vec3u,
+  @builtin(local_invocation_id) local_id: vec3u
+) {
+  var value = input[ global_id.x ];
+  scratch[ local_id.x ] = value;
+
+  // Extra loop just runs it a bunch, for performance (overlap) testing
+  for ( var j = 0u; j < 1000u; j += 1u ) {
+    for ( var i = 0u; i < ${Math.log2( workgroupSize )}u; i += 1u ) {
+      workgroupBarrier();
+
+      if ( local_id.x >= 1u << i ) {
+        let otherValue = scratch[ local_id.x - ( 1u << i ) ];
+        value = otherValue + value;
+      }
+
+      workgroupBarrier();
+      scratch[ local_id.x ] = value;
+    }
+  }
+
+  output[ global_id.x ] = scratch[ local_id.x ];
+}`
+    } );
+
+    const expensiveBindGroupLayout = device.createBindGroupLayout( {
+      label: 'expensive bindGroupLayout',
+      entries: [
+        { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: expensiveUseReadOnly ? 'read-only-storage' : 'storage' } },
+        { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } }
+      ]
+    } );
+
+    const expensivePipeline = device.createComputePipeline( {
+      label: 'expensive pipeline',
+      layout: device.createPipelineLayout( {
+        bindGroupLayouts: [ expensiveBindGroupLayout ]
+      } ),
+      compute: {
+        module: expensiveModule,
+        entryPoint: 'main'
+      }
+    } );
+
+    const fakeCombineModule = device.createShaderModule( {
+      label: 'fakeCombine module',
+      code: `
+@group(0) @binding(0)
+var<storage, ${fakeCombineUseReadOnly ? 'read' : 'read_write'}> buffer_a: array<f32>;
+@group(0) @binding(1)
+var<storage, ${fakeCombineUseReadOnly ? 'read' : 'read_write'}> buffer_b: array<f32>;
+@group(0) @binding(2)
+var<storage, ${fakeCombineUseReadOnly ? 'read' : 'read_write'}> buffer_c: array<f32>;
+@group(0) @binding(3)
+var<storage, ${fakeCombineUseReadOnly ? 'read' : 'read_write'}> buffer_d: array<f32>;
+@group(0) @binding(4)
+var output: texture_storage_2d<${preferredStorageFormat}, write>;
+
+@compute @workgroup_size(16, 16)
+fn main(
+  @builtin(global_invocation_id) global_id: vec3u,
+  @builtin(local_invocation_id) local_id: vec3u,
+  @builtin(workgroup_id) wg_id: vec3u
+) {
+  let index = global_id.y * 16u + global_id.x;
+  let bufferSum = buffer_a[ index ] + buffer_b[ index ] + buffer_c[ index ] + buffer_d[ index ];
+  textureStore( output, global_id.xy, vec4( ( 1f / ( 4f * ( 1f + f32( index ) ) ) ) * bufferSum, 0.1f, 0f, 1f ) );
+}`
+    } );
+
+    const fakeCombineBindGroupLayout = device.createBindGroupLayout( {
+      label: 'fakeCombine bindGroupLayout',
+      entries: [
+        { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: fakeCombineUseReadOnly ? 'read-only-storage' : 'storage' } },
+        { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: fakeCombineUseReadOnly ? 'read-only-storage' : 'storage' } },
+        { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: fakeCombineUseReadOnly ? 'read-only-storage' : 'storage' } },
+        { binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: fakeCombineUseReadOnly ? 'read-only-storage' : 'storage' } },
+        { binding: 4, visibility: GPUShaderStage.COMPUTE, storageTexture: {
+          access: 'write-only',
+          format: preferredStorageFormat,
+          viewDimension: '2d'
+        } }
+      ]
+    } );
+
+    const fakeCombinePipeline = device.createComputePipeline( {
+      label: 'fakeCombine pipeline',
+      layout: device.createPipelineLayout( {
+        bindGroupLayouts: [ fakeCombineBindGroupLayout ]
+      } ),
+      compute: {
+        module: fakeCombineModule,
+        entryPoint: 'main'
+      }
+    } );
+
+    const blitShaderModule = device.createShaderModule( {
+      label: 'blitShaderModule',
+      code: `@vertex
+fn vs_main(@builtin(vertex_index) ix: u32) -> @builtin(position) vec4<f32> {
+    // Generate a full screen quad in NDCs
+    var vertex = vec2(-1.0, 1.0);
+    switch ix {
+        case 1u: {
+            vertex = vec2(-1.0, -1.0);
+        }
+        case 2u, 4u: {
+            vertex = vec2(1.0, -1.0);
+        }
+        case 5u: {
+            vertex = vec2(1.0, 1.0);
+        }
+        default: {}
+    }
+    return vec4(vertex, 0.0, 1.0);
+}
+
+@group(0) @binding(0)
+var fine_output: texture_2d<f32>;
+
+@fragment
+fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
+    return textureLoad(fine_output, vec2<i32>(pos.xy), 0);
+}
+      `
+    } );
+
+    const blitShaderBindGroupLayout = device.createBindGroupLayout( {
+      label: 'blitShaderBindGroupLayout',
+      entries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.FRAGMENT,
+          texture: {
+            sampleType: 'float',
+            viewDimension: '2d',
+            multisampled: false
+          }
+        }
+      ]
+    } );
+
+    const blitShaderPipeline = device.createRenderPipeline( {
+      label: 'blitShaderPipeline',
+      layout: device.createPipelineLayout( {
+        label: 'blitShaderPipelineLayout',
+        bindGroupLayouts: [ blitShaderBindGroupLayout ]
+      } ),
+      vertex: {
+        module: blitShaderModule,
+        entryPoint: 'vs_main'
+      },
+      fragment: {
+        module: blitShaderModule,
+        entryPoint: 'fs_main',
+        targets: [
+          {
+            format: preferredCanvasFormat
+          }
+        ]
+      }
+    } );
+
+    const canvas = document.createElement( 'canvas' );
+    canvas.width = 16;
+    canvas.height = 16;
+    document.body.appendChild( canvas );
+
+    const canvasContext = canvas.getContext( 'webgpu' );
+    canvasContext.configure( {
+      device: device,
+      format: preferredCanvasFormat,
+      colorSpace: 'srgb',
+      usage: GPUTextureUsage.COPY_SRC |
+             GPUTextureUsage.RENDER_ATTACHMENT |
+             ( preferredCanvasFormat === preferredStorageFormat ? GPUTextureUsage.STORAGE_BINDING : 0 ),
+
+      // Very important, otherwise we're opaque by default and alpha is ignored. We need to stack!!!
+      alphaMode: 'premultiplied'
+    } );
+
+    await ( async function step() {
+      // Loop things for easier performance testing
+      // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
+      window.requestAnimationFrame( step, canvas );
+
+      const numbers = [];
+      while ( numbers.length < workgroupSize * numWorkgroups ) {
+        numbers.push( Math.random() - 0.5 );
+      }
+      const numbersArray = new Float32Array( numbers );
+      const bufferSize = numbersArray.byteLength;
+
+      const outTexture = canvasContext.getCurrentTexture();
+
+      const canvasTextureFormat = outTexture.format;
+      if ( canvasTextureFormat !== 'bgra8unorm' && canvasTextureFormat !== 'rgba8unorm' ) {
+        throw new Error( 'unsupported format' );
+      }
+
+      const canOutputToCanvas = canvasTextureFormat === preferredStorageFormat;
+      let fineOutputTextureView;
+      let fineOutputTexture = null;
+      const outTextureView = outTexture.createView();
+
+      if ( canOutputToCanvas ) {
+        fineOutputTextureView = outTextureView;
+      }
+      else {
+        fineOutputTexture = device.createTexture( {
+          label: 'fineOutputTexture',
+          size: {
+            width: outTexture.width,
+            height: outTexture.height,
+            depthOrArrayLayers: 1
+          },
+          format: preferredStorageFormat,
+          usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING // see TargetTexture
+        } );
+        fineOutputTextureView = fineOutputTexture.createView( {
+          label: 'fineOutputTextureView',
+          format: preferredStorageFormat,
+          dimension: '2d'
+        } );
+      }
+
+      const buffersToDestroy = [];
+
+      const inputBuffer = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      device.queue.writeBuffer( inputBuffer, 0, numbersArray.buffer );
+      buffersToDestroy.push( inputBuffer );
+
+      const middleBuffer = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      buffersToDestroy.push( middleBuffer );
+
+      const outputBufferA = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      const outputBufferB = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      const outputBufferC = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      const outputBufferD = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      buffersToDestroy.push( outputBufferA );
+      buffersToDestroy.push( outputBufferB );
+      buffersToDestroy.push( outputBufferC );
+      buffersToDestroy.push( outputBufferD );
+
+      const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+      const copyStorageComputePass = encoder.beginComputePass( {
+        label: 'copy storage compute pass'
+      } );
+      copyStorageComputePass.setPipeline( copyStoragePipeline );
+      copyStorageComputePass.setBindGroup( 0, device.createBindGroup( {
+        label: 'copyStorage bind group',
+        layout: copyStorageBindGroupLayout,
+        entries: [
+          { binding: 0, resource: { buffer: inputBuffer } },
+          { binding: 1, resource: { buffer: middleBuffer } }
+        ]
+      } ) );
+      copyStorageComputePass.dispatchWorkgroups( numWorkgroups, 1, 1 );
+      copyStorageComputePass.end();
+
+      const expensive1ComputePass = encoder.beginComputePass( {
+        label: 'expensive1 compute pass'
+      } );
+      expensive1ComputePass.setPipeline( expensivePipeline );
+      expensive1ComputePass.setBindGroup( 0, device.createBindGroup( {
+        label: 'expensive1 bind group',
+        layout: expensiveBindGroupLayout,
+        entries: [
+          { binding: 0, resource: { buffer: middleBuffer } },
+          { binding: 1, resource: { buffer: outputBufferA } }
+        ]
+      } ) );
+      expensive1ComputePass.dispatchWorkgroups( numWorkgroups, 1, 1 );
+      expensive1ComputePass.end();
+
+      const expensive2ComputePass = encoder.beginComputePass( {
+        label: 'expensive2 compute pass'
+      } );
+      expensive2ComputePass.setPipeline( expensivePipeline );
+      expensive2ComputePass.setBindGroup( 0, device.createBindGroup( {
+        label: 'expensive2 bind group',
+        layout: expensiveBindGroupLayout,
+        entries: [
+          { binding: 0, resource: { buffer: middleBuffer } },
+          { binding: 1, resource: { buffer: outputBufferB } }
+        ]
+      } ) );
+      expensive2ComputePass.dispatchWorkgroups( numWorkgroups, 1, 1 );
+      expensive2ComputePass.end();
+
+      const expensive3ComputePass = encoder.beginComputePass( {
+        label: 'expensive3 compute pass'
+      } );
+      expensive3ComputePass.setPipeline( expensivePipeline );
+      expensive3ComputePass.setBindGroup( 0, device.createBindGroup( {
+        label: 'expensive3 bind group',
+        layout: expensiveBindGroupLayout,
+        entries: [
+          { binding: 0, resource: { buffer: middleBuffer } },
+          { binding: 1, resource: { buffer: outputBufferC } }
+        ]
+      } ) );
+      expensive3ComputePass.dispatchWorkgroups( numWorkgroups, 1, 1 );
+      expensive3ComputePass.end();
+
+      const expensive4ComputePass = encoder.beginComputePass( {
+        label: 'expensive4 compute pass'
+      } );
+      expensive4ComputePass.setPipeline( expensivePipeline );
+      expensive4ComputePass.setBindGroup( 0, device.createBindGroup( {
+        label: 'expensive4 bind group',
+        layout: expensiveBindGroupLayout,
+        entries: [
+          { binding: 0, resource: { buffer: middleBuffer } },
+          { binding: 1, resource: { buffer: outputBufferD } }
+        ]
+      } ) );
+      expensive4ComputePass.dispatchWorkgroups( numWorkgroups, 1, 1 );
+      expensive4ComputePass.end();
+
+      const fakeCombineComputePass = encoder.beginComputePass( {
+        label: 'fakeCombine compute pass'
+      } );
+      fakeCombineComputePass.setPipeline( fakeCombinePipeline );
+      fakeCombineComputePass.setBindGroup( 0, device.createBindGroup( {
+        label: 'fakeCombine bind group',
+        layout: fakeCombineBindGroupLayout,
+        entries: [
+          { binding: 0, resource: { buffer: outputBufferA } },
+          { binding: 1, resource: { buffer: outputBufferB } },
+          { binding: 2, resource: { buffer: outputBufferC } },
+          { binding: 3, resource: { buffer: outputBufferD } },
+          { binding: 4, resource: fineOutputTextureView }
+        ]
+      } ) );
+      fakeCombineComputePass.dispatchWorkgroups( 1, 1, 1 );
+      fakeCombineComputePass.end();
+
+      if ( !canOutputToCanvas ) {
+        const pass = encoder.beginRenderPass( {
+          label: 'blit render pass',
+          colorAttachments: [
+            {
+              view: outTextureView,
+              clearValue: [ 0, 0, 0, 0 ],
+              loadOp: 'clear',
+              storeOp: 'store'
+            }
+          ]
+        } );
+
+        const bindGroup = this.device.createBindGroup( {
+          label: 'blit bind group',
+          layout: blitShaderBindGroupLayout,
+          entries: [
+            {
+              binding: 0,
+              resource: fineOutputTextureView
+            }
+          ]
+        } );
+
+        pass.setPipeline( blitShaderPipeline );
+        pass.setBindGroup( 0, bindGroup );
+        pass.draw( 6 );
+        pass.end();
+      }
+
+      const commandBuffer = encoder.finish();
+      device.queue.submit( [ commandBuffer ] );
+
+      buffersToDestroy.forEach( buffer => buffer.destroy() );
+    } )();
+  } )();
+
+</script>
+</body>
+</html>
