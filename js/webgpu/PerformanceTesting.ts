@@ -66,7 +66,8 @@ export default class PerformanceTesting {
       // @ts-expect-error LEGACY --- it would know to update just the DOM element's location if it's the second argument
       window.requestAnimationFrame( step, canvas );
 
-      const numbers = new Float32Array( _.range( 0, workgroupSize * numWorkgroups ).map( () => random.nextDouble() ) );
+      const numbers = new Float32Array( _.range( 0, workgroupSize * numWorkgroups ).map( () => random.nextDouble() - 0.5 ) );
+      const bufferSize = numbers.byteLength;
 
       const outTexture = canvasContext.getCurrentTexture();
 
@@ -103,17 +104,17 @@ export default class PerformanceTesting {
 
       const buffersToDestroy: GPUBuffer[] = [];
 
-      const inputBuffer = deviceContext.createBuffer( 4 * workgroupSize * numWorkgroups );
+      const inputBuffer = deviceContext.createBuffer( bufferSize );
       device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
       buffersToDestroy.push( inputBuffer );
 
-      const middleBuffer = deviceContext.createBuffer( 4 * workgroupSize * numWorkgroups );
+      const middleBuffer = deviceContext.createBuffer( bufferSize );
       buffersToDestroy.push( middleBuffer );
 
-      const outputBufferA = deviceContext.createBuffer( 4 * numWorkgroups );
-      const outputBufferB = deviceContext.createBuffer( 4 * numWorkgroups );
-      const outputBufferC = deviceContext.createBuffer( 4 * numWorkgroups );
-      const outputBufferD = deviceContext.createBuffer( 4 * numWorkgroups );
+      const outputBufferA = deviceContext.createBuffer( bufferSize );
+      const outputBufferB = deviceContext.createBuffer( bufferSize );
+      const outputBufferC = deviceContext.createBuffer( bufferSize );
+      const outputBufferD = deviceContext.createBuffer( bufferSize );
       buffersToDestroy.push( outputBufferA );
       buffersToDestroy.push( outputBufferB );
       buffersToDestroy.push( outputBufferC );

@@ -8,15 +8,12 @@
 
 #option workgroupSize
 
-const WORKGROUP_SIZE = ${u32( workgroupSize )};
-const LOG_WORKGROUP_SIZE = ${u32( Math.log2( workgroupSize ) )};
-
 @group(0) @binding(0)
 var<storage, read> input: array<f32>;
 @group(0) @binding(1)
 var<storage, read_write> output: array<f32>;
 
-var<workgroup> scratch: array<f32, WORKGROUP_SIZE>;
+var<workgroup> scratch: array<f32, ${u32( workgroupSize )}>;
 
 #bindings
 
@@ -31,7 +28,7 @@ fn main(
 
   // Extra loop just runs it a bunch, for performance (overlap) testing
   for ( var j = 0u; j < 10000u; j += 1u ) {
-    for ( var i = 0u; i < LOG_WORKGROUP_SIZE; i += 1u ) {
+    for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i += 1u ) {
       workgroupBarrier();
 
       if ( local_id.x >= 1u << i ) {
@@ -44,6 +41,5 @@ fn main(
     }
   }
 
-//  output[ local_id.x ] = scratch[ local_id.x ];
-  output[ global_id.x ] = input[ global_id.x ];
+  output[ global_id.x ] = scratch[ local_id.x ];
 }
