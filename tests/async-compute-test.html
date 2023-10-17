@@ -269,6 +269,8 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
       const numbersArray = new Float32Array( numbers );
       const bufferSize = numbersArray.byteLength;
 
+      const zeroArray = new Float32Array( numbers.map( () => 0 ) );
+
       const outTexture = canvasContext.getCurrentTexture();
 
       const canvasTextureFormat = outTexture.format;
@@ -309,12 +311,17 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
       buffersToDestroy.push( inputBuffer );
 
       const middleBuffer = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      device.queue.writeBuffer( middleBuffer, 0, zeroArray.buffer );
       buffersToDestroy.push( middleBuffer );
 
       const outputBufferA = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      device.queue.writeBuffer( outputBufferA, 0, zeroArray.buffer );
       const outputBufferB = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      device.queue.writeBuffer( outputBufferB, 0, zeroArray.buffer );
       const outputBufferC = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      device.queue.writeBuffer( outputBufferC, 0, zeroArray.buffer );
       const outputBufferD = device.createBuffer( { size: bufferSize, usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE } );
+      device.queue.writeBuffer( outputBufferD, 0, zeroArray.buffer );
       buffersToDestroy.push( outputBufferA );
       buffersToDestroy.push( outputBufferB );
       buffersToDestroy.push( outputBufferC );
