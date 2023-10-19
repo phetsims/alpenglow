@@ -213,6 +213,10 @@ export { default as wgsl_inclusive_scan_simple_single } from '../wgsl/examples/i
 export { default as wgsl_exclusive_scan_raked_blocked_single } from '../wgsl/examples/exclusive_scan_raked_blocked_single.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_inclusive_scan_raked_blocked_single } from '../wgsl/examples/inclusive_scan_raked_blocked_single.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_exclusive_scan_raked_striped_single } from '../wgsl/examples/exclusive_scan_raked_striped_single.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_inclusive_scan_raked_striped_single } from '../wgsl/examples/inclusive_scan_raked_striped_single.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
