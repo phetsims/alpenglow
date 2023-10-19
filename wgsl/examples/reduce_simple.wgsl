@@ -4,17 +4,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/unroll
+#import ../gpu/right_scan
 
 #option workgroupSize
 #option inputSize
 
 fn identity() -> f32 {
   return 0.0;
-}
-
-fn combine( a: f32, b: f32 ) -> f32 {
-  return a + b;
 }
 
 @group(0) @binding(0)
@@ -33,25 +29,15 @@ fn main(
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
   var value = select( identity(), input[ global_id.x ], global_id.x < ${u32( inputSize )} );
-  scratch[ local_id.x ] = value;
 
-  ${unroll( 0, Math.log2( workgroupSize ), ( i, isFirst, isLast ) => `
-  {
-    workgroupBarrier();
-
-    let index = local_id.x + ${u32( 1 << i )};
-    if ( index < ${u32( workgroupSize )} ) {
-      let otherValue = scratch[ index ];
-      value = combine( value, otherValue );
-    }
-
-    ${ !isLast ? `
-      workgroupBarrier();
-
-      scratch[ local_id.x ] = value;
-    ` : ``}
-  }
-  ` )}
+  ${right_scan( {
+    value: 'value',
+    scratch: 'scratch',
+    workgroupSize: workgroupSize,
+    identity: '0f',
+    combine: ( a, b ) => `${a} + ${b}`,
+    skipLastScratch: true
+  } )}
 
   if ( local_id.x == 0u ) {
     output[ workgroup_id.x ] = value;

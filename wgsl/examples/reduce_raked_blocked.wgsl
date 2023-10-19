@@ -4,6 +4,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ../gpu/right_scan
+
 #option workgroupSize
 #option grainSize
 #option inputSize
@@ -38,21 +40,15 @@ fn main(
   for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
     value = combine( value, select( identity(), input[ baseIndex + i ], baseIndex + i < ${u32( inputSize )} ) );
   }
-  scratch[ local_id.x ] = value;
 
-  for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i++ ) {
-    workgroupBarrier();
-
-    let index = local_id.x + ( 1u << i );
-    if ( index < ${u32( workgroupSize )} ) {
-      let otherValue = scratch[ index ];
-      value = combine( value, otherValue );
-    }
-
-    workgroupBarrier();
-
-    scratch[ local_id.x ] = value;
-  }
+  ${right_scan( {
+    value: 'value',
+    scratch: 'scratch',
+    workgroupSize: workgroupSize,
+    identity: '0f',
+    combine: ( a, b ) => `${a} + ${b}`,
+    skipLastScratch: true
+  } )}
 
   if ( local_id.x == 0u ) {
     output[ workgroup_id.x ] = value;
