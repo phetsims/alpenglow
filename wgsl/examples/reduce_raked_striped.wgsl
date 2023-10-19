@@ -30,9 +30,10 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  var value = input[ global_id.x * ${u32( grainSize )} ];
+  var base_index = workgroup_id.x * ${u32( workgroupSize )} * ${u32( grainSize )} + local_id.x;
+  var value = input[ base_index ];
   for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
-    value = combine( value, input[ global_id.x * ${u32( grainSize )} + i ] );
+    value = combine( value, input[ base_index + i * ${u32( workgroupSize )} ] );
   }
   scratch[ local_id.x ] = value;
 
@@ -51,6 +52,6 @@ fn main(
   }
 
   if ( local_id.x == 0u ) {
-    output[ 0u ] = value;
+    output[ workgroup_id.x ] = value;
   }
 }

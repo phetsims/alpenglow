@@ -5,6 +5,8 @@
  */
 
 #option workgroupSize
+#option grainSize
+#option inputSize
 
 fn identity() -> f32 {
   return 0.0;
@@ -29,8 +31,13 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  // TODO: ifdef things for range checks?
-  var value = input[ global_id.x ];
+  let baseIndex = ${u32( grainSize )} * global_id.x;
+  var value = select( identity(), input[ baseIndex ], baseIndex < ${u32( inputSize )} );
+  // TODO: compute the maximum i value based on the inputSize (don't need further checks inside)
+  // TODO: how to unroll? nested if statements? how can we do it without branches?
+  for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
+    value = combine( value, select( identity(), input[ baseIndex + i ], baseIndex + i < ${u32( inputSize )} ) );
+  }
   scratch[ local_id.x ] = value;
 
   for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i++ ) {
@@ -48,6 +55,6 @@ fn main(
   }
 
   if ( local_id.x == 0u ) {
-    output[ 0u ] = value;
+    output[ workgroup_id.x ] = value;
   }
 }

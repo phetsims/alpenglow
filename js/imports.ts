@@ -200,11 +200,11 @@ export { default as wgsl_raster_accumulate } from '../wgsl/raster/raster_accumul
 export { default as wgsl_raster_to_texture } from '../wgsl/raster/raster_to_texture.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_reduce_simple_single } from '../wgsl/examples/reduce_simple_single.js';
+export { default as wgsl_reduce_simple } from '../wgsl/examples/reduce_simple.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_reduce_raked_blocked_single } from '../wgsl/examples/reduce_raked_blocked_single.js';
+export { default as wgsl_reduce_raked_blocked } from '../wgsl/examples/reduce_raked_blocked.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_reduce_raked_striped_single } from '../wgsl/examples/reduce_raked_striped_single.js';
+export { default as wgsl_reduce_raked_striped } from '../wgsl/examples/reduce_raked_striped.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_exclusive_scan_simple_single } from '../wgsl/examples/exclusive_scan_simple_single.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
