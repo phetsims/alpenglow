@@ -32,7 +32,7 @@ fn main(
   var value = input[ global_id.x ];
   scratch[ local_id.x ] = value;
 
-  for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i += 1u ) {
+  for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i++ ) {
     workgroupBarrier();
 
     if ( local_id.x >= 1u << i ) {
