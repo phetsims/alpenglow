@@ -5,6 +5,7 @@
  */
 
 #option workgroupSize
+#option grainSize
 
 fn identity() -> f32 {
   return 0.0;
@@ -29,7 +30,11 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  var value = input[ global_id.x ];
+  var baseIndex = global_id.x * ${u32( grainSize )};
+  var value = input[ baseIndex ];
+  for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
+    value = combine( value, input[ baseIndex + i ] );
+  }
   scratch[ local_id.x ] = value;
 
   for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i += 1u ) {
@@ -45,5 +50,13 @@ fn main(
     scratch[ local_id.x ] = value;
   }
 
-  output[ local_id.x ] = scratch[ local_id.x ];
+  workgroupBarrier();
+
+  // TODO: maybe do a different load in the reduce above to avoid this extra workgroup barrier
+  value = select( identity(), scratch[ local_id.x - 1 ], local_id.x > 0u );
+  for ( var i = 0u; i < ${u32( grainSize )}; i++ ) {
+    output[ baseIndex + i ] = value;
+    value = combine( value, input[ baseIndex + i ] );
+    // TODO: when unrolling, can remove this last one
+  }
 }
