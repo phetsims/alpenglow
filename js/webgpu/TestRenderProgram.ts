@@ -53,8 +53,10 @@ export default class TestRenderProgram {
     const instructionEncoder = new ByteEncoder();
     RenderInstruction.instructionsToBinary( instructionEncoder, instructions );
 
+    console.groupCollapsed( 'Instructions' );
     console.log( instructions.map( instruction => instruction.toString() ).join( '\n' ) );
     console.log( instructionEncoder.getDebug32String() );
+    console.groupEnd();
 
     const configEncoder = new ByteEncoder();
     // TODO: test offsets?

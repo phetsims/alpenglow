@@ -4,6 +4,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ../gpu/unroll
+
 #option workgroupSize
 #option inputSize
 
@@ -33,19 +35,23 @@ fn main(
   var value = select( identity(), input[ global_id.x ], global_id.x < ${u32( inputSize )} );
   scratch[ local_id.x ] = value;
 
-  for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i++ ) {
+  ${unroll( 0, Math.log2( workgroupSize ), ( i, isFirst, isLast ) => `
+  {
     workgroupBarrier();
 
-    let index = local_id.x + ( 1u << i );
+    let index = local_id.x + ${u32( 1 << i )};
     if ( index < ${u32( workgroupSize )} ) {
       let otherValue = scratch[ index ];
       value = combine( value, otherValue );
     }
 
-    workgroupBarrier();
+    ${ !isLast ? `
+      workgroupBarrier();
 
-    scratch[ local_id.x ] = value;
+      scratch[ local_id.x ] = value;
+    ` : ``}
   }
+  ` )}
 
   if ( local_id.x == 0u ) {
     output[ workgroup_id.x ] = value;
