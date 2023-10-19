@@ -25,7 +25,7 @@ var output: texture_storage_2d<${preferredStorageFormat}, write>;
 fn main(
   @builtin(global_invocation_id) global_id: vec3u,
   @builtin(local_invocation_id) local_id: vec3u,
-  @builtin(workgroup_id) wg_id: vec3u
+  @builtin(workgroup_id) workgroup_id: vec3u
 ) {
   let index = global_id.y * 16u + global_id.x;
   let bufferSum = buffer_a[ index ] + buffer_b[ index ] + buffer_c[ index ] + buffer_d[ index ];

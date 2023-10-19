@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ComputeShader, DeviceContext, wgsl_reduce_simple_single, wgsl_scan_simple_single } from '../imports.js';
+import { Binding, ComputeShader, DeviceContext, wgsl_reduce_raked_blocked_single, wgsl_reduce_raked_striped_single, wgsl_reduce_simple_single, wgsl_scan_simple_single } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -139,6 +139,108 @@ asyncTestWithDevice( 'scan_simple_single', async device => {
     if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
       return `expected ${expectedValue}, actual ${actualValue}`;
     }
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'reduce_raked_blocked_single', async device => {
+  const workgroupSize = 256;
+  const grainSize = 4;
+
+  const numbers = _.range( 0, workgroupSize * grainSize ).map( () => random.nextDouble() );
+
+  const context = new DeviceContext( device );
+
+  const shader = ComputeShader.fromSource(
+    device, 'reduce_raked_blocked_single', wgsl_reduce_raked_blocked_single, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize
+    }
+  );
+
+  const inputBuffer = context.createBuffer( 4 * workgroupSize * grainSize );
+  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+
+  const outputBuffer = context.createBuffer( 4 );
+  const resultBuffer = context.createMapReadableBuffer( 4 );
+
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+  shader.dispatch( encoder, [
+    inputBuffer, outputBuffer
+  ] );
+
+  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+
+  const commandBuffer = encoder.finish();
+  device.queue.submit( [ commandBuffer ] );
+
+  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
+
+  inputBuffer.destroy();
+  outputBuffer.destroy();
+  resultBuffer.destroy();
+
+  const expectedValue = _.sum( numbers );
+  const actualValue = outputArray[ 0 ];
+
+  if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
+    return `expected ${expectedValue}, actual ${actualValue}`;
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'reduce_raked_striped_single', async device => {
+  const workgroupSize = 256;
+  const grainSize = 4;
+
+  const numbers = _.range( 0, workgroupSize * grainSize ).map( () => random.nextDouble() );
+
+  const context = new DeviceContext( device );
+
+  const shader = ComputeShader.fromSource(
+    device, 'reduce_raked_striped_single', wgsl_reduce_raked_striped_single, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize
+    }
+  );
+
+  const inputBuffer = context.createBuffer( 4 * workgroupSize * grainSize );
+  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+
+  const outputBuffer = context.createBuffer( 4 );
+  const resultBuffer = context.createMapReadableBuffer( 4 );
+
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+  shader.dispatch( encoder, [
+    inputBuffer, outputBuffer
+  ] );
+
+  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+
+  const commandBuffer = encoder.finish();
+  device.queue.submit( [ commandBuffer ] );
+
+  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
+
+  inputBuffer.destroy();
+  outputBuffer.destroy();
+  resultBuffer.destroy();
+
+  const expectedValue = _.sum( numbers );
+  const actualValue = outputArray[ 0 ];
+
+  if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
+    return `expected ${expectedValue}, actual ${actualValue}`;
   }
 
   return null;

@@ -5,6 +5,7 @@
  */
 
 #option workgroupSize
+#option grainSize
 
 fn identity() -> f32 {
   return 0.0;
@@ -29,11 +30,13 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  // TODO: ifdef things for range checks?
-  var value = input[ global_id.x ];
+  var value = input[ global_id.x * ${u32( grainSize )} ];
+  for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
+    value = combine( value, input[ global_id.x * ${u32( grainSize )} + i ] );
+  }
   scratch[ local_id.x ] = value;
 
-  for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i += 1u ) {
+  for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i++ ) {
     workgroupBarrier();
 
     let index = local_id.x + ( 1u << i );
