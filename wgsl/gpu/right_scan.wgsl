@@ -10,7 +10,9 @@ ${template( ( {
   value,
   scratch,
   workgroupSize,
+  identity,
   combine,
+  exclusive = false,
   skipLastScratch = false
 } ) => `
   ${scratch}[ local_id.x ] = ${value};
@@ -22,10 +24,17 @@ ${template( ( {
       ${value} = ${combine( value, `${scratch}[ local_id.x + ${u32( 1 << i )} ]` )};
     }
 
-    ${ isLast && skipLastScratch ? `` : `
+    ${ isLast && skipLastScratch && !exclusive ? `` : `
       workgroupBarrier();
 
       ${scratch}[ local_id.x ] = ${value};
     `}
   ` )}
+
+  // TODO: consider shift at start to potentially avoid this workgroupBarrier?
+  ${exclusive ? `
+    workgroupBarrier();
+
+    ${value} = select( ${identity}, ${scratch}[ local_id.x + 1u ], local_id.x < ${u32( workgroupSize - 1 )} );
+  ` : ``}
 ` )}

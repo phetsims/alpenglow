@@ -4,6 +4,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ../gpu/left_scan
+
 #option workgroupSize
 #option grainSize
 
@@ -35,25 +37,16 @@ fn main(
   for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
     value = combine( value, input[ baseIndex + i ] );
   }
-  scratch[ local_id.x ] = value;
 
-  for ( var i = 0u; i < ${u32( Math.log2( workgroupSize ) )}; i++ ) {
-    workgroupBarrier();
+  ${left_scan( {
+    value: 'value',
+    scratch: 'scratch',
+    workgroupSize: workgroupSize,
+    identity: '0f',
+    combine: ( a, b ) => `${a} + ${b}`,
+    exclusive: true
+  } )}
 
-    if ( local_id.x >= 1u << i ) {
-      let otherValue = scratch[ local_id.x - ( 1u << i ) ];
-      value = combine( otherValue, value );
-    }
-
-    workgroupBarrier();
-
-    scratch[ local_id.x ] = value;
-  }
-
-  workgroupBarrier();
-
-  // TODO: maybe do a different load in the reduce above to avoid this extra workgroup barrier
-  value = select( identity(), scratch[ local_id.x - 1 ], local_id.x > 0u );
   for ( var i = 0u; i < ${u32( grainSize )}; i++ ) {
     output[ baseIndex + i ] = value;
     value = combine( value, input[ baseIndex + i ] );
