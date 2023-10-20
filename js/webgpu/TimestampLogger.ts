@@ -35,7 +35,8 @@ export default class TimestampLogger {
       return null;
     }
     else {
-      this.timestampNames.push( name );
+      this.timestampNames.push( `${name} start` );
+      this.timestampNames.push( `${name} end` );
 
       const startIndex = this.index++;
       const endIndex = this.index++;
@@ -50,26 +51,39 @@ export default class TimestampLogger {
     }
   }
 
+  public mark( encoder: GPUCommandEncoder, name: string ): void {
+    if ( this.querySet ) {
+      this.timestampNames.push( name );
+
+      encoder.writeTimestamp( this.querySet, this.index++ );
+    }
+  }
+
   public resolve(
     encoder: GPUCommandEncoder,
-    bufferLogger: BufferLogger,
-    callback: ( result: TimestampLoggerResult ) => Promise<void>
-  ): void {
-    // TODO: return a promise?
+    bufferLogger: BufferLogger
+  ): Promise<TimestampLoggerResult | null> {
     if ( this.querySet && this.queryBuffer ) {
       encoder.resolveQuerySet( this.querySet, 0, this.index, this.queryBuffer, 0 );
 
-      bufferLogger.withBuffer( encoder, this.queryBuffer, async arrayBuffer => {
-        const result = new TimestampLoggerResult(
-          new BigInt64Array( arrayBuffer ),
-          this.timestampNames
-        );
+      const buffer = this.queryBuffer;
 
-        await callback( result );
+      return new Promise( ( resolve, reject ) => {
+        bufferLogger.withBuffer( encoder, buffer, async arrayBuffer => {
+          const result = new TimestampLoggerResult(
+            [ ...new BigInt64Array( arrayBuffer ) ].slice( 0, this.index ),
+            this.timestampNames
+          );
 
-        this.index = 0;
-        this.timestampNames = [];
+          this.index = 0;
+          this.timestampNames = [];
+
+          resolve( result );
+        } );
       } );
+    }
+    else {
+      return Promise.resolve( null );
     }
   }
 
@@ -81,7 +95,7 @@ export default class TimestampLogger {
 
 export class TimestampLoggerResult {
   public constructor(
-    public readonly timestamps: BigInt64Array,
+    public readonly timestamps: bigint[],
     public readonly timestampNames: string[]
   ) {}
 }

@@ -35,7 +35,7 @@ export default class GPUProfiling {
 
     const workgroupSize = 256;
     const grainSize = 5;
-    const inputSize = workgroupSize * workgroupSize * 27 - 27 * 301;
+    const inputSize = workgroupSize * workgroupSize * ( workgroupSize - 3 ) - 27 * 301;
 
     const numbers = _.range( 0, inputSize ).map( () => random.nextDouble() );
 
@@ -85,6 +85,8 @@ export default class GPUProfiling {
 
     const encoder = device.createCommandEncoder( { label: 'the encoder' } );
 
+    timestampLogger.mark( encoder, 'start' );
+
     shader0.dispatch( encoder, [
       inputBuffer, firstMiddleBuffer
     ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, dispatchOptions );
@@ -95,17 +97,22 @@ export default class GPUProfiling {
       secondMiddleBuffer, outputBuffer
     ], 1, 1, 1, dispatchOptions );
 
+    timestampLogger.mark( encoder, 'post-shader' );
+
     // TODO: use BufferLogger for this instead
     encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
 
-    // TODO: get a promise out of this that we can await below
-    timestampLogger.resolve( encoder, bufferLogger, async result => {
-      console.log( result.timestampNames );
-      console.log( result.timestamps );
-    } );
+    timestampLogger.mark( encoder, 'post-result-transfer' );
+
+    const timestampResultPromise = timestampLogger.resolve( encoder, bufferLogger );
 
     const commandBuffer = encoder.finish();
     device.queue.submit( [ commandBuffer ] );
+
+    await device.queue.onSubmittedWorkDone();
+    await bufferLogger.complete();
+
+    const timestampResult = await timestampResultPromise;
 
     const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
 
@@ -121,6 +128,11 @@ export default class GPUProfiling {
 
     console.log( `actualValue: ${actualValue}` );
     console.log( `expectedValue: ${expectedValue}` );
+
+    if ( timestampResult ) {
+      console.log( timestampResult.timestampNames );
+      console.log( timestampResult.timestamps );
+    }
   }
 }
 
