@@ -574,6 +574,7 @@ asyncTestWithDevice( 'double reduce_simple', async device => {
   const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
 
   inputBuffer.destroy();
+  middleBuffer.destroy();
   outputBuffer.destroy();
   resultBuffer.destroy();
 
@@ -651,6 +652,8 @@ asyncTestWithDevice( 'triple reduce_simple', async device => {
   const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
 
   inputBuffer.destroy();
+  firstMiddleBuffer.destroy();
+  secondMiddleBuffer.destroy();
   outputBuffer.destroy();
   resultBuffer.destroy();
 
@@ -732,6 +735,8 @@ asyncTestWithDevice( 'triple reduce_raked_blocked', async device => {
   const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
 
   inputBuffer.destroy();
+  firstMiddleBuffer.destroy();
+  secondMiddleBuffer.destroy();
   outputBuffer.destroy();
   resultBuffer.destroy();
 
