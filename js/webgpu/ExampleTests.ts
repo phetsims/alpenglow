@@ -522,3 +522,225 @@ asyncTestWithDevice( 'inclusive_scan_raked_striped_single', async device => {
 
   return null;
 } );
+
+asyncTestWithDevice( 'double reduce_simple', async device => {
+  const workgroupSize = 256;
+  const inputSize = workgroupSize * workgroupSize - 27 * 301;
+
+  const numbers = _.range( 0, inputSize ).map( () => random.nextDouble() );
+
+  const context = new DeviceContext( device );
+
+  const shader0 = ComputeShader.fromSource(
+    device, 'reduce_simple 0', wgsl_reduce_simple, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      inputSize: inputSize // TODO: more dynamic range checks
+    }
+  );
+  const shader1 = ComputeShader.fromSource(
+    device, 'reduce_simple 1', wgsl_reduce_simple, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      inputSize: Math.ceil( inputSize / workgroupSize )
+    }
+  );
+
+  const inputBuffer = context.createBuffer( 4 * inputSize );
+  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+
+  const middleBuffer = context.createBuffer( 4 * Math.ceil( inputSize / workgroupSize ) );
+  const outputBuffer = context.createBuffer( 4 );
+  const resultBuffer = context.createMapReadableBuffer( 4 );
+
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+  shader0.dispatch( encoder, [
+    inputBuffer, middleBuffer
+  ], Math.ceil( inputSize / workgroupSize ) );
+  shader1.dispatch( encoder, [
+    middleBuffer, outputBuffer
+  ] );
+
+  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+
+  const commandBuffer = encoder.finish();
+  device.queue.submit( [ commandBuffer ] );
+
+  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
+
+  inputBuffer.destroy();
+  outputBuffer.destroy();
+  resultBuffer.destroy();
+
+  const expectedValue = _.sum( numbers );
+  const actualValue = outputArray[ 0 ];
+
+  if ( Math.abs( expectedValue - actualValue ) > 1e-2 ) {
+    return `expected ${expectedValue}, actual ${actualValue}`;
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'triple reduce_simple', async device => {
+  const workgroupSize = 256;
+  const inputSize = workgroupSize * workgroupSize * 27 - 27 * 301;
+
+  const numbers = _.range( 0, inputSize ).map( () => random.nextDouble() );
+
+  const context = new DeviceContext( device );
+
+  const shader0 = ComputeShader.fromSource(
+    device, 'reduce_simple 0', wgsl_reduce_simple, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      inputSize: inputSize
+    }
+  );
+  const shader1 = ComputeShader.fromSource(
+    device, 'reduce_simple 1', wgsl_reduce_simple, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      inputSize: Math.ceil( inputSize / workgroupSize )
+    }
+  );
+  const shader2 = ComputeShader.fromSource(
+    device, 'reduce_simple 2', wgsl_reduce_simple, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) )
+    }
+  );
+
+  const inputBuffer = context.createBuffer( 4 * inputSize );
+  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+
+  const firstMiddleBuffer = context.createBuffer( 4 * Math.ceil( inputSize / workgroupSize ) );
+  const secondMiddleBuffer = context.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ) );
+  const outputBuffer = context.createBuffer( 4 );
+  const resultBuffer = context.createMapReadableBuffer( 4 );
+
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+  shader0.dispatch( encoder, [
+    inputBuffer, firstMiddleBuffer
+  ], Math.ceil( inputSize / workgroupSize ) );
+  shader1.dispatch( encoder, [
+    firstMiddleBuffer, secondMiddleBuffer
+  ], Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ) );
+  shader2.dispatch( encoder, [
+    secondMiddleBuffer, outputBuffer
+  ] );
+
+  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+
+  const commandBuffer = encoder.finish();
+  device.queue.submit( [ commandBuffer ] );
+
+  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
+
+  inputBuffer.destroy();
+  outputBuffer.destroy();
+  resultBuffer.destroy();
+
+  const expectedValue = _.sum( numbers );
+  const actualValue = outputArray[ 0 ];
+
+  if ( Math.abs( expectedValue - actualValue ) > 1e-1 ) {
+    return `expected ${expectedValue}, actual ${actualValue}`;
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'triple reduce_raked_blocked', async device => {
+  const workgroupSize = 256;
+  const grainSize = 5;
+  const inputSize = workgroupSize * workgroupSize * 27 - 27 * 301;
+
+  const numbers = _.range( 0, inputSize ).map( () => random.nextDouble() );
+
+  const context = new DeviceContext( device );
+
+  const shader0 = ComputeShader.fromSource(
+    device, 'reduce_raked_blocked 0', wgsl_reduce_raked_blocked, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      inputSize: inputSize
+    }
+  );
+  const shader1 = ComputeShader.fromSource(
+    device, 'reduce_raked_blocked 1', wgsl_reduce_raked_blocked, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
+    }
+  );
+  const shader2 = ComputeShader.fromSource(
+    device, 'reduce_raked_blocked 2', wgsl_reduce_raked_blocked, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
+    }
+  );
+
+  const inputBuffer = context.createBuffer( 4 * inputSize );
+  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+
+  const firstMiddleBuffer = context.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+  const secondMiddleBuffer = context.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+  const outputBuffer = context.createBuffer( 4 );
+  const resultBuffer = context.createMapReadableBuffer( 4 );
+
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+  shader0.dispatch( encoder, [
+    inputBuffer, firstMiddleBuffer
+  ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+  shader1.dispatch( encoder, [
+    firstMiddleBuffer, secondMiddleBuffer
+  ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+  shader2.dispatch( encoder, [
+    secondMiddleBuffer, outputBuffer
+  ] );
+
+  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+
+  const commandBuffer = encoder.finish();
+  device.queue.submit( [ commandBuffer ] );
+
+  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
+
+  inputBuffer.destroy();
+  outputBuffer.destroy();
+  resultBuffer.destroy();
+
+  const expectedValue = _.sum( numbers );
+  const actualValue = outputArray[ 0 ];
+
+  if ( Math.abs( expectedValue - actualValue ) > 1e-1 ) {
+    return `expected ${expectedValue}, actual ${actualValue}`;
+  }
+
+  return null;
+} );
