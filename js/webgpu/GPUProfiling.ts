@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, DeviceContext, TimestampLogger, wgsl_reduce_raked_blocked } from '../imports.js';
+import { alpenglow, Binding, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, DeviceContext, TimestampLogger, TimestampLoggerResult, wgsl_reduce_raked_blocked } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -70,68 +70,78 @@ export default class GPUProfiling {
       }
     );
 
-    const timestampLogger = new TimestampLogger( deviceContext, 100 ); // capacity is probably overkill
-    const dispatchOptions: ComputeShaderDispatchOptions = {
-      timestampLogger: timestampLogger
+    const getTimestampResult = async () => {
+      const timestampLogger = new TimestampLogger( deviceContext, 100 ); // capacity is probably overkill
+      const dispatchOptions: ComputeShaderDispatchOptions = {
+        timestampLogger: timestampLogger
+      };
+
+      const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
+      device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+
+      const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+      const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+      const outputBuffer = deviceContext.createBuffer( 4 );
+
+      const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+      timestampLogger.mark( encoder, 'start' );
+
+      shader0.dispatch( encoder, [
+        inputBuffer, firstMiddleBuffer
+      ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, dispatchOptions );
+      shader1.dispatch( encoder, [
+        firstMiddleBuffer, secondMiddleBuffer
+      ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1, dispatchOptions );
+      shader2.dispatch( encoder, [
+        secondMiddleBuffer, outputBuffer
+      ], 1, 1, 1, dispatchOptions );
+
+      const resultPromise = bufferLogger.arrayBufferPromise( encoder, outputBuffer );
+
+      timestampLogger.mark( encoder, 'end' );
+
+      const timestampResultPromise = timestampLogger.resolve( encoder, bufferLogger );
+
+      const commandBuffer = encoder.finish();
+      device.queue.submit( [ commandBuffer ] );
+
+      await device.queue.onSubmittedWorkDone();
+      await bufferLogger.complete();
+
+      const timestampResult = await timestampResultPromise;
+      const outputArray = new Float32Array( await resultPromise );
+
+      if ( !timestampResult ) {
+        throw new Error( 'missing timestamps' );
+      }
+
+      inputBuffer.destroy();
+      firstMiddleBuffer.destroy();
+      secondMiddleBuffer.destroy();
+      outputBuffer.destroy();
+      timestampLogger.dispose();
+
+      const expectedValue = _.sum( numbers );
+      const actualValue = outputArray[ 0 ];
+
+      // Yay inaccurate math!
+      if ( Math.abs( expectedValue - actualValue ) > 1 ) {
+        throw new Error( 'invalid result' );
+      }
+
+      return timestampResult;
     };
 
-    const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-    device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+    const quantity = 1000;
+    const timestampResults: TimestampLoggerResult[] = [];
 
-    const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-    const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-    const outputBuffer = deviceContext.createBuffer( 4 );
-    const resultBuffer = deviceContext.createMapReadableBuffer( 4 );
-
-    const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-    timestampLogger.mark( encoder, 'start' );
-
-    shader0.dispatch( encoder, [
-      inputBuffer, firstMiddleBuffer
-    ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, dispatchOptions );
-    shader1.dispatch( encoder, [
-      firstMiddleBuffer, secondMiddleBuffer
-    ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1, dispatchOptions );
-    shader2.dispatch( encoder, [
-      secondMiddleBuffer, outputBuffer
-    ], 1, 1, 1, dispatchOptions );
-
-    timestampLogger.mark( encoder, 'post-shader' );
-
-    // TODO: use BufferLogger for this instead
-    encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-    timestampLogger.mark( encoder, 'post-result-transfer' );
-
-    const timestampResultPromise = timestampLogger.resolve( encoder, bufferLogger );
-
-    const commandBuffer = encoder.finish();
-    device.queue.submit( [ commandBuffer ] );
-
-    await device.queue.onSubmittedWorkDone();
-    await bufferLogger.complete();
-
-    const timestampResult = await timestampResultPromise;
-
-    const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-
-    inputBuffer.destroy();
-    firstMiddleBuffer.destroy();
-    secondMiddleBuffer.destroy();
-    outputBuffer.destroy();
-    resultBuffer.destroy();
-    timestampLogger.dispose();
-
-    const expectedValue = _.sum( numbers );
-    const actualValue = outputArray[ 0 ];
-
-    console.log( `actualValue: ${actualValue}` );
-    console.log( `expectedValue: ${expectedValue}` );
-
-    if ( timestampResult ) {
-      console.log( timestampResult.timestampNames );
-      console.log( timestampResult.timestamps );
+    for ( let i = 1; i <= quantity; i++ ) {
+      timestampResults.push( await getTimestampResult() );
+      if ( i % 10 === 0 ) {
+        console.log( i );
+        console.log( TimestampLoggerResult.averageTimestamps( timestampResults ).toString() );
+      }
     }
   }
 }

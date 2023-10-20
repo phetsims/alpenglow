@@ -49,6 +49,17 @@ export default class BufferLogger {
     } );
   }
 
+  public arrayBufferPromise(
+    encoder: GPUCommandEncoder,
+    buffer: GPUBuffer
+  ): Promise<ArrayBuffer> {
+    return new Promise( ( resolve, reject ) => {
+      this.withBuffer( encoder, buffer, async arrayBuffer => {
+        resolve( arrayBuffer );
+      } );
+    } );
+  }
+
   public logIndexed(
     encoder: GPUCommandEncoder,
     buffer: GPUBuffer,

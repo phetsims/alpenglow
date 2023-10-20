@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, DeviceContext } from '../imports.js';
+import { alpenglow, BufferLogger, ByteEncoder, DeviceContext } from '../imports.js';
+import Utils from '../../../dot/js/Utils.js';
 
 export default class TimestampLogger {
 
@@ -70,8 +71,11 @@ export default class TimestampLogger {
 
       return new Promise( ( resolve, reject ) => {
         bufferLogger.withBuffer( encoder, buffer, async arrayBuffer => {
+          const absoluteTimestamps: bigint[] = [ ...new BigInt64Array( arrayBuffer ) ].slice( 0, this.index );
+          const relativeTimestamps: number[] = absoluteTimestamps.map( timestamp => Number( timestamp - absoluteTimestamps[ 0 ] ) );
+
           const result = new TimestampLoggerResult(
-            [ ...new BigInt64Array( arrayBuffer ) ].slice( 0, this.index ),
+            relativeTimestamps,
             this.timestampNames
           );
 
@@ -94,10 +98,65 @@ export default class TimestampLogger {
 }
 
 export class TimestampLoggerResult {
+
+  public readonly deltas: number[];
+
   public constructor(
-    public readonly timestamps: bigint[],
+    public readonly timestamps: number[],
     public readonly timestampNames: string[]
-  ) {}
+  ) {
+    this.deltas = timestamps.slice( 1 ).map( ( timestamp, i ) => timestamp - timestamps[ i ] );
+  }
+
+  public toString(): string {
+    const numToTimestamp = ( n: number ): string => {
+      let result = '';
+      let digits = '' + Utils.roundSymmetric( n );
+
+      while ( digits.length ) {
+        if ( digits.length > 3 ) {
+          result = ',' + digits.slice( -3 ) + result;
+          digits = digits.slice( 0, -3 );
+        }
+        else {
+          result = digits + result;
+          digits = '';
+        }
+      }
+      return result;
+    };
+
+    const timestampSize = Math.max( ...this.timestamps.map( n => numToTimestamp( n ).length ) );
+    const deltaSize = Math.max( ...this.deltas.map( n => numToTimestamp( n ).length ) );
+    const nameSize = Math.max( ...this.timestampNames.map( s => s.length ) );
+
+    let result = '';
+    const timestampHeader = ByteEncoder.padLeft( 'time', ' ', timestampSize );
+    const nameHeader = ByteEncoder.padRight( 'name', ' ', nameSize );
+    const deltaHeader = ByteEncoder.padLeft( 'delta', ' ', deltaSize );
+    result += `${timestampHeader} ${nameHeader} ${deltaHeader}\n`;
+    for ( let i = 0; i < this.timestamps.length; i++ ) {
+      const timestampString = ByteEncoder.padLeft( numToTimestamp( this.timestamps[ i ] ), ' ', timestampSize );
+      const nameString = ByteEncoder.padRight( this.timestampNames[ i ], ' ', nameSize );
+      const deltaString = i < this.deltas.length ? ByteEncoder.padLeft( numToTimestamp( this.deltas[ i ] ), ' ', deltaSize ) : '';
+      result += `${timestampString} ${nameString} ${deltaString}\n`;
+    }
+    return result;
+  }
+
+  public static averageTimestamps( results: TimestampLoggerResult[] ): TimestampLoggerResult {
+    if ( results.length === 0 ) {
+      throw new Error( 'Need at least one result' );
+    }
+
+    // TODO: check timestampNames in assertions?
+
+    const timestamps = _.range( 0, results[ 0 ].timestamps.length ).map( i => {
+      return _.sum( results.map( result => result.timestamps[ i ] ) ) / results.length;
+    } );
+
+    return new TimestampLoggerResult( timestamps, results[ 0 ].timestampNames );
+  }
 }
 
 alpenglow.register( 'TimestampLogger', TimestampLogger );
