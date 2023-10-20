@@ -16,6 +16,28 @@ import Random from '../../../dot/js/Random.js';
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
 
+class GPUProfiler {
+
+  public readonly results: TimestampLoggerResult[] = [];
+
+  public constructor(
+    public readonly name: string,
+    public readonly callback: () => Promise<TimestampLoggerResult>
+  ) {}
+
+  public async addResult(): Promise<void> {
+    this.results.push( await this.callback() );
+  }
+
+  public async discardResult(): Promise<void> {
+    await this.callback();
+  }
+
+  public getAverage(): TimestampLoggerResult {
+    return TimestampLoggerResult.averageTimestamps( this.results );
+  }
+}
+
 export default class GPUProfiling {
   public static async test(): Promise<void> {
 
@@ -30,6 +52,42 @@ export default class GPUProfiling {
     }
 
     const deviceContext = new DeviceContext( device );
+
+    const profilers = [
+      await GPUProfiling.getReduceRakedBlockedProfiler( deviceContext ),
+      await GPUProfiling.getReduceRakedBlockedProfiler( deviceContext )
+    ];
+
+    const discardQuantity = 2;
+    console.log( 'warmup' );
+    for ( let i = 0; i < discardQuantity; i++ ) {
+      for ( const profiler of profilers ) {
+        await profiler.discardResult();
+      }
+    }
+
+    console.log( 'profiling' );
+    const quantity = 1000;
+    for ( let i = 1; i <= quantity; i++ ) {
+      const profilerOrder = random.shuffle( _.range( 0, profilers.length ) );
+      for ( const profilerIndex of profilerOrder ) {
+        await profilers[ profilerIndex ].addResult();
+      }
+      if ( i % 10 === 0 ) {
+        console.log( i );
+        for ( const profiler of profilers ) {
+          console.log( profiler.name );
+          console.log( profiler.getAverage().toString() );
+        }
+      }
+    }
+  }
+
+  // TODO: input the numbers array?
+  public static async getReduceRakedBlockedProfiler(
+    deviceContext: DeviceContext
+  ): Promise<GPUProfiler> {
+    const device = deviceContext.device;
 
     const bufferLogger = new BufferLogger( deviceContext );
 
@@ -70,7 +128,7 @@ export default class GPUProfiling {
       }
     );
 
-    const getTimestampResult = async () => {
+    return new GPUProfiler( 'reduce_raked_blocked', async () => {
       const timestampLogger = new TimestampLogger( deviceContext, 100 ); // capacity is probably overkill
       const dispatchOptions: ComputeShaderDispatchOptions = {
         timestampLogger: timestampLogger
@@ -131,18 +189,7 @@ export default class GPUProfiling {
       }
 
       return timestampResult;
-    };
-
-    const quantity = 1000;
-    const timestampResults: TimestampLoggerResult[] = [];
-
-    for ( let i = 1; i <= quantity; i++ ) {
-      timestampResults.push( await getTimestampResult() );
-      if ( i % 10 === 0 ) {
-        console.log( i );
-        console.log( TimestampLoggerResult.averageTimestamps( timestampResults ).toString() );
-      }
-    }
+    } );
   }
 }
 
