@@ -40,6 +40,15 @@ class GPUProfiler {
 
 export default class GPUProfiling {
   public static async test(): Promise<void> {
+    await GPUProfiling.loopingTest( [
+      GPUProfiling.getReduceRakedBlockedProfiler,
+      GPUProfiling.getReduceRakedBlockedProfiler
+    ] );
+  }
+
+  public static async loopingTest(
+    profilerFactories: ( ( deviceContext: DeviceContext ) => Promise<GPUProfiler> )[]
+  ): Promise<void> {
 
     const device = await DeviceContext.getDevice( {
       maxLimits: true,
@@ -53,12 +62,12 @@ export default class GPUProfiling {
 
     const deviceContext = new DeviceContext( device );
 
-    const profilers = [
-      await GPUProfiling.getReduceRakedBlockedProfiler( deviceContext ),
-      await GPUProfiling.getReduceRakedBlockedProfiler( deviceContext )
-    ];
+    const profilers: GPUProfiler[] = [];
+    for ( const profilerFactory of profilerFactories ) {
+      profilers.push( await profilerFactory( deviceContext ) );
+    }
 
-    const discardQuantity = 2;
+    const discardQuantity = 3;
     console.log( 'warmup' );
     for ( let i = 0; i < discardQuantity; i++ ) {
       for ( const profiler of profilers ) {
