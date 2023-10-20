@@ -6,19 +6,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, DualSnippet, DualSnippetSource } from '../imports.js';
+import { alpenglow, Binding, DualSnippet, DualSnippetSource, TimestampLogger } from '../imports.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
 
 export type ComputeShaderDispatchOptions = {
-  timestampIndex?: number | null;
-  querySet?: GPUQuerySet | null;
+  timestampLogger?: TimestampLogger | null;
 };
 
 const DEFAULT_DISPATCH_OPTIONS = {
-  timestampIndex: null,
-  querySet: null
+  timestampLogger: null
 } as const;
 
 export default class ComputeShader {
@@ -84,7 +82,7 @@ export default class ComputeShader {
     const options = optionize3<ComputeShaderDispatchOptions>()( {}, DEFAULT_DISPATCH_OPTIONS, providedOptions );
 
     const computePass = encoder.beginComputePass( this.getComputePassDescriptor(
-      false, options.querySet, options.timestampIndex
+      false, options.timestampLogger
     ) );
     computePass.setPipeline( this.pipeline );
     computePass.setBindGroup( 0, this.getBindGroup( resources ) );
@@ -103,7 +101,7 @@ export default class ComputeShader {
     const options = optionize3<ComputeShaderDispatchOptions>()( {}, DEFAULT_DISPATCH_OPTIONS, providedOptions );
 
     const computePass = encoder.beginComputePass( this.getComputePassDescriptor(
-      true, options.querySet, options.timestampIndex
+      true, options.timestampLogger
     ) );
     computePass.setPipeline( this.pipeline );
     computePass.setBindGroup( 0, this.getBindGroup( resources ) );
@@ -113,19 +111,17 @@ export default class ComputeShader {
 
   private getComputePassDescriptor(
     isIndirect: boolean,
-    querySet: GPUQuerySet | null,
-    timestampIndex: number | null
+    timestampLogger: TimestampLogger | null
   ): GPUComputePassDescriptor {
     const descriptor: GPUComputePassDescriptor = {
       label: `${this.name}${isIndirect ? ' indirect' : ''} compute pass`
     };
 
-    if ( querySet && timestampIndex !== null ) {
-      descriptor.timestampWrites = {
-        querySet: querySet,
-        beginningOfPassWriteIndex: 2 * timestampIndex,
-        endOfPassWriteIndex: 2 * timestampIndex + 1
-      };
+    if ( timestampLogger ) {
+      const timestampWrites = timestampLogger.getGPUComputePassTimestampWrites( this.name );
+      if ( timestampWrites ) {
+        descriptor.timestampWrites = timestampWrites;
+      }
     }
 
     return descriptor;

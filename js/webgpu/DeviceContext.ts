@@ -24,7 +24,7 @@ const limitNames = [
   'maxTextureDimension3D',
   'maxTextureArrayLayers',
   'maxBindGroups',
-  'maxBindGroupsPlusVertexBuffers',
+  // 'maxBindGroupsPlusVertexBuffers',
   'maxBindingsPerBindGroup',
   'maxDynamicUniformBuffersPerPipelineLayout',
   'maxDynamicStorageBuffersPerPipelineLayout',
@@ -168,7 +168,12 @@ export default class DeviceContext {
       const features: GPUFeatureName[] = supportsBGRATextureStorage ? [ 'bgra8unorm-storage' ] : [];
 
       if ( options.timestampQuery ) {
-        features.push( 'timestamp-query' );
+        if ( adapter.features.has( 'timestamp-query' ) ) {
+          features.push( 'timestamp-query' );
+        }
+        else {
+          return null;
+        }
       }
 
       const limits: Record<string, number> = {};

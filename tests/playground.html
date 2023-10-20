@@ -854,6 +854,12 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.profileTest = function() {
+    setTimeout( async function() {
+      phet.alpenglow.GPUProfiling.test();
+    } );
+  };
+
   window.rasterTest = function() {
     setTimeout( async function() {
       const boundsRect = bounds => [
