@@ -8,8 +8,50 @@
 
 import { alpenglow } from '../imports.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 export type PreferredCanvasFormat = 'bgra8unorm' | 'rgba8unorm';
+
+export type DeviceContextDeviceOptions = {
+  maxLimits?: boolean;
+  timestampQuery?: boolean;
+  highPerformance?: boolean;
+};
+
+const limitNames = [
+  'maxTextureDimension1D',
+  'maxTextureDimension2D',
+  'maxTextureDimension3D',
+  'maxTextureArrayLayers',
+  'maxBindGroups',
+  'maxBindGroupsPlusVertexBuffers',
+  'maxBindingsPerBindGroup',
+  'maxDynamicUniformBuffersPerPipelineLayout',
+  'maxDynamicStorageBuffersPerPipelineLayout',
+  'maxSampledTexturesPerShaderStage',
+  'maxSamplersPerShaderStage',
+  'maxStorageBuffersPerShaderStage',
+  'maxStorageTexturesPerShaderStage',
+  'maxUniformBuffersPerShaderStage',
+  'maxUniformBufferBindingSize',
+  'maxStorageBufferBindingSize',
+  'minUniformBufferOffsetAlignment',
+  'minStorageBufferOffsetAlignment',
+  'maxVertexBuffers',
+  'maxBufferSize',
+  'maxVertexAttributes',
+  'maxVertexBufferArrayStride',
+  'maxInterStageShaderComponents',
+  'maxInterStageShaderVariables',
+  'maxColorAttachments',
+  'maxColorAttachmentBytesPerSample',
+  'maxComputeWorkgroupStorageSize',
+  'maxComputeInvocationsPerWorkgroup',
+  'maxComputeWorkgroupSizeX',
+  'maxComputeWorkgroupSizeY',
+  'maxComputeWorkgroupSizeZ',
+  'maxComputeWorkgroupsPerDimension'
+] as const;
 
 export default class DeviceContext {
 
@@ -65,6 +107,22 @@ export default class DeviceContext {
     } );
   }
 
+  // in bytes (takes 8 bytes per count)
+  public createQueryBuffer( size: number ): GPUBuffer {
+    return this.device.createBuffer( {
+      size: size,
+      usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
+    } );
+  }
+
+  // (will take 8*capacity bytes)
+  public createQuerySet( capacity: number ): GPUQuerySet {
+    return this.device.createQuerySet( {
+      type: 'timestamp',
+      count: capacity
+    } );
+  }
+
   public getCanvasContext( canvas: HTMLCanvasElement, colorSpace: 'srgb' | 'display-p3' ): GPUCanvasContext {
     const context = canvas.getContext( 'webgpu' )!;
 
@@ -86,18 +144,43 @@ export default class DeviceContext {
     return context;
   }
 
-  public static async getDevice(): Promise<GPUDevice | null> {
+  public static async getDevice( providedOptions?: DeviceContextDeviceOptions ): Promise<GPUDevice | null> {
+
+    const options = optionize<DeviceContextDeviceOptions>()( {
+      maxLimits: false,
+      timestampQuery: false,
+      highPerformance: true
+    }, providedOptions );
+
     let device: GPUDevice | null = null;
 
     try {
       const adapter = await navigator.gpu?.requestAdapter( {
-        powerPreference: 'high-performance'
+        powerPreference: options.highPerformance ? 'high-performance' : 'low-power'
       } );
 
-      const supportsBGRATextureStorage = adapter?.features.has( 'bgra8unorm-storage' ) || false;
+      if ( !adapter ) {
+        return null;
+      }
+
+      const supportsBGRATextureStorage = adapter.features.has( 'bgra8unorm-storage' ) || false;
+
+      const features: GPUFeatureName[] = supportsBGRATextureStorage ? [ 'bgra8unorm-storage' ] : [];
+
+      if ( options.timestampQuery ) {
+        features.push( 'timestamp-query' );
+      }
+
+      const limits: Record<string, number> = {};
+      if ( options.maxLimits ) {
+        limitNames.forEach( name => {
+          limits[ name ] = adapter.limits[ name ];
+        } );
+      }
 
       device = await adapter?.requestDevice( {
-        requiredFeatures: supportsBGRATextureStorage ? [ 'bgra8unorm-storage' ] : []
+        requiredFeatures: features,
+        requiredLimits: limits
       } ) || null;
     }
     catch( err ) {

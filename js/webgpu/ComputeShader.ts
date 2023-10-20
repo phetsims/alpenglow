@@ -7,8 +7,19 @@
  */
 
 import { alpenglow, Binding, DualSnippet, DualSnippetSource } from '../imports.js';
+import { optionize3 } from '../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
+
+export type ComputeShaderDispatchOptions = {
+  timestampIndex?: number | null;
+  querySet?: GPUQuerySet | null;
+};
+
+const DEFAULT_DISPATCH_OPTIONS = {
+  timestampIndex: null,
+  querySet: null
+} as const;
 
 export default class ComputeShader {
 
@@ -66,11 +77,15 @@ export default class ComputeShader {
     resources: ( GPUBuffer | GPUTextureView )[],
     dispatchX = 1,
     dispatchY = 1,
-    dispatchZ = 1
+    dispatchZ = 1,
+    providedOptions?: ComputeShaderDispatchOptions
   ): void {
-    const computePass = encoder.beginComputePass( {
-      label: `${this.name} compute pass`
-    } );
+
+    const options = optionize3<ComputeShaderDispatchOptions>()( {}, DEFAULT_DISPATCH_OPTIONS, providedOptions );
+
+    const computePass = encoder.beginComputePass( this.getComputePassDescriptor(
+      false, options.querySet, options.timestampIndex
+    ) );
     computePass.setPipeline( this.pipeline );
     computePass.setBindGroup( 0, this.getBindGroup( resources ) );
     computePass.dispatchWorkgroups( dispatchX, dispatchY, dispatchZ );
@@ -81,15 +96,39 @@ export default class ComputeShader {
     encoder: GPUCommandEncoder,
     resources: ( GPUBuffer | GPUTextureView )[],
     indirectBuffer: GPUBuffer,
-    indirectOffset: number
+    indirectOffset: number,
+    providedOptions?: ComputeShaderDispatchOptions
   ): void {
-    const computePass = encoder.beginComputePass( {
-      label: `${this.name} indirect compute pass`
-    } );
+
+    const options = optionize3<ComputeShaderDispatchOptions>()( {}, DEFAULT_DISPATCH_OPTIONS, providedOptions );
+
+    const computePass = encoder.beginComputePass( this.getComputePassDescriptor(
+      true, options.querySet, options.timestampIndex
+    ) );
     computePass.setPipeline( this.pipeline );
     computePass.setBindGroup( 0, this.getBindGroup( resources ) );
     computePass.dispatchWorkgroupsIndirect( indirectBuffer, indirectOffset );
     computePass.end();
+  }
+
+  private getComputePassDescriptor(
+    isIndirect: boolean,
+    querySet: GPUQuerySet | null,
+    timestampIndex: number | null
+  ): GPUComputePassDescriptor {
+    const descriptor: GPUComputePassDescriptor = {
+      label: `${this.name}${isIndirect ? ' indirect' : ''} compute pass`
+    };
+
+    if ( querySet && timestampIndex !== null ) {
+      descriptor.timestampWrites = {
+        querySet: querySet,
+        beginningOfPassWriteIndex: 2 * timestampIndex,
+        endOfPassWriteIndex: 2 * timestampIndex + 1
+      };
+    }
+
+    return descriptor;
   }
 
   public static fromSource(
