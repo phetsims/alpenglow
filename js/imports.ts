@@ -206,6 +206,8 @@ export { default as wgsl_reduce_raked_blocked } from '../wgsl/examples/reduce_ra
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_reduce_raked_striped } from '../wgsl/examples/reduce_raked_striped.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_reduce_raked_striped_blocked } from '../wgsl/examples/reduce_raked_striped_blocked.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_exclusive_scan_simple_single } from '../wgsl/examples/exclusive_scan_simple_single.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_inclusive_scan_simple_single } from '../wgsl/examples/inclusive_scan_simple_single.js';
