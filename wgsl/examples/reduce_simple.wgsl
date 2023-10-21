@@ -9,9 +9,8 @@
 #option workgroupSize
 #option inputSize
 
-fn identity() -> f32 {
-  return 0.0;
-}
+#option identity
+#option combine
 
 @group(0) @binding(0)
 var<storage> input: array<f32>;
@@ -28,14 +27,14 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  var value = select( identity(), input[ global_id.x ], global_id.x < ${u32( inputSize )} );
+  var value = select( ${identity}, input[ global_id.x ], global_id.x < ${u32( inputSize )} );
 
   ${right_scan( {
     value: 'value',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
-    identity: '0f',
-    combine: ( a, b ) => `${a} + ${b}`,
+    identity: identity,
+    combine: combine,
     skipLastScratch: true
   } )}
 

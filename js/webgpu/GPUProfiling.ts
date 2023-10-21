@@ -12,6 +12,7 @@
 
 import { alpenglow, Binding, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, DeviceContext, TimestampLogger, TimestampLoggerResult, wgsl_reduce_raked_blocked, wgsl_reduce_raked_striped_blocked, wgsl_reduce_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
+import { combineOptions } from '../../../phet-core/js/optionize.js';
 
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
@@ -117,32 +118,35 @@ export default class GPUProfiling {
 
     const inputSize = numbers.length;
 
+    const shaderOptions = {
+      workgroupSize: workgroupSize,
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
+    };
+
     const shader0 = ComputeShader.fromSource(
       device, 'reduce_simple 0', wgsl_reduce_simple, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        workgroupSize: workgroupSize,
+      ], combineOptions<Record<string, unknown>>( {
         inputSize: inputSize
-      }
+      }, shaderOptions )
     );
     const shader1 = ComputeShader.fromSource(
       device, 'reduce_simple 1', wgsl_reduce_simple, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        workgroupSize: workgroupSize,
+      ], combineOptions<Record<string, unknown>>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize ) )
-      }
+      }, shaderOptions )
     );
     const shader2 = ComputeShader.fromSource(
       device, 'reduce_simple 2', wgsl_reduce_simple, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        workgroupSize: workgroupSize,
+      ], combineOptions<Record<string, unknown>>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) )
-      }
+      }, shaderOptions )
     );
 
     return new GPUProfiler( 'reduce_simple', async () => {
@@ -221,35 +225,36 @@ export default class GPUProfiling {
 
     const inputSize = numbers.length;
 
+    const shaderOptions = {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
+    };
+
     const shader0 = ComputeShader.fromSource(
       device, 'reduce_raked_blocked 0', wgsl_reduce_raked_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
+      ], combineOptions<Record<string, unknown>>( {
         inputSize: inputSize
-      }
+      }, shaderOptions )
     );
     const shader1 = ComputeShader.fromSource(
       device, 'reduce_raked_blocked 1', wgsl_reduce_raked_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
+      ], combineOptions<Record<string, unknown>>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
-      }
+      }, shaderOptions )
     );
     const shader2 = ComputeShader.fromSource(
       device, 'reduce_raked_blocked 2', wgsl_reduce_raked_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
+      ], combineOptions<Record<string, unknown>>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
-      }
+      }, shaderOptions )
     );
 
     return new GPUProfiler( `reduce_raked_blocked ${grainSize}`, async () => {
@@ -328,35 +333,36 @@ export default class GPUProfiling {
 
     const inputSize = numbers.length;
 
+    const shaderOptions = {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
+    } as const;
+
     const shader0 = ComputeShader.fromSource(
       device, 'reduce_raked_striped_blocked 0', wgsl_reduce_raked_striped_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
+      ], combineOptions<Record<string, unknown>>( {
         inputSize: inputSize
-      }
+      }, shaderOptions )
     );
     const shader1 = ComputeShader.fromSource(
       device, 'reduce_raked_striped_blocked 1', wgsl_reduce_raked_striped_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
+      ], combineOptions<Record<string, unknown>>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
-      }
+      }, shaderOptions )
     );
     const shader2 = ComputeShader.fromSource(
       device, 'reduce_raked_striped_blocked 2', wgsl_reduce_raked_striped_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
+      ], combineOptions<Record<string, unknown>>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
-      }
+      }, shaderOptions )
     );
 
     return new GPUProfiler( `reduce_raked_striped_blocked ${grainSize}`, async () => {

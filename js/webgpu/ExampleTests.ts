@@ -58,7 +58,9 @@ asyncTestWithDevice( 'reduce_simple', async device => {
       Binding.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
-      inputSize: inputSize
+      inputSize: inputSize,
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
 
@@ -111,7 +113,9 @@ asyncTestWithDevice( 'reduce_raked_blocked', async device => {
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
-      inputSize: inputSize
+      inputSize: inputSize,
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
 
@@ -215,7 +219,9 @@ asyncTestWithDevice( 'reduce_raked_striped_blocked', async device => {
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
-      inputSize: inputSize
+      inputSize: inputSize,
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
 
@@ -590,7 +596,9 @@ asyncTestWithDevice( 'double reduce_simple', async device => {
       Binding.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
-      inputSize: inputSize // TODO: more dynamic range checks
+      inputSize: inputSize, // TODO: more dynamic range checks
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
   const shader1 = ComputeShader.fromSource(
@@ -599,7 +607,9 @@ asyncTestWithDevice( 'double reduce_simple', async device => {
       Binding.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
-      inputSize: Math.ceil( inputSize / workgroupSize )
+      inputSize: Math.ceil( inputSize / workgroupSize ),
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
 
@@ -655,7 +665,9 @@ asyncTestWithDevice( 'triple reduce_simple', async device => {
       Binding.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
-      inputSize: inputSize
+      inputSize: inputSize,
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
   const shader1 = ComputeShader.fromSource(
@@ -664,7 +676,9 @@ asyncTestWithDevice( 'triple reduce_simple', async device => {
       Binding.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
-      inputSize: Math.ceil( inputSize / workgroupSize )
+      inputSize: Math.ceil( inputSize / workgroupSize ),
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
   const shader2 = ComputeShader.fromSource(
@@ -673,7 +687,9 @@ asyncTestWithDevice( 'triple reduce_simple', async device => {
       Binding.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
-      inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) )
+      inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ),
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
 
@@ -736,7 +752,9 @@ asyncTestWithDevice( 'triple reduce_raked_blocked', async device => {
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
-      inputSize: inputSize
+      inputSize: inputSize,
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
   const shader1 = ComputeShader.fromSource(
@@ -746,7 +764,9 @@ asyncTestWithDevice( 'triple reduce_raked_blocked', async device => {
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
-      inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
+      inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) ),
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
   const shader2 = ComputeShader.fromSource(
@@ -756,7 +776,9 @@ asyncTestWithDevice( 'triple reduce_raked_blocked', async device => {
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
-      inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
+      inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ),
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
 

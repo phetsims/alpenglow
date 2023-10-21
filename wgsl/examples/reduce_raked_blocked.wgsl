@@ -10,13 +10,8 @@
 #option grainSize
 #option inputSize
 
-fn identity() -> f32 {
-  return 0.0;
-}
-
-fn combine( a: f32, b: f32 ) -> f32 {
-  return a + b;
-}
+#option identity
+#option combine
 
 @group(0) @binding(0)
 var<storage> input: array<f32>;
@@ -34,19 +29,19 @@ fn main(
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
   let baseIndex = ${u32( grainSize )} * global_id.x;
-  var value = select( identity(), input[ baseIndex ], baseIndex < ${u32( inputSize )} );
+  var value = select( ${identity}, input[ baseIndex ], baseIndex < ${u32( inputSize )} );
   // TODO: compute the maximum i value based on the inputSize (don't need further checks inside)
   // TODO: how to unroll? nested if statements? how can we do it without branches?
   for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
-    value = combine( value, select( identity(), input[ baseIndex + i ], baseIndex + i < ${u32( inputSize )} ) );
+    value = ${combine( `value`, `select( ${identity}, input[ baseIndex + i ], baseIndex + i < ${u32( inputSize )} )` )};
   }
 
   ${right_scan( {
     value: 'value',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
-    identity: '0f',
-    combine: ( a, b ) => `${a} + ${b}`,
+    identity: identity,
+    combine: combine,
     skipLastScratch: true
   } )}
 
