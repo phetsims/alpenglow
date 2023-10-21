@@ -35,6 +35,7 @@ fn main(
   for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
     value = ${combine( `value`, `select( ${identity}, input[ baseIndex + i ], baseIndex + i < ${u32( inputSize )} )` )};
   }
+  // TODO: unroll these?
 
   ${right_scan( {
     value: 'value',
