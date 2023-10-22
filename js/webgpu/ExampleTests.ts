@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_reduce_raked_blocked, wgsl_reduce_raked_striped, wgsl_reduce_raked_striped_blocked, wgsl_reduce_simple } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_reduce_raked_blocked, wgsl_reduce_raked_striped, wgsl_reduce_raked_striped_blocked, wgsl_reduce_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -470,11 +470,8 @@ asyncTestWithDevice( 'exclusive_scan_raked_striped_single', async device => {
   const workgroupSize = 256;
   const grainSize = 4;
 
-  const toStripedIndex = ( i: number ) => ( i % grainSize ) * workgroupSize + Math.floor( i / grainSize );
-  const fromStripedIndex = ( i: number ) => ( i % workgroupSize ) * grainSize + Math.floor( i / workgroupSize );
-
   const numbers = _.range( 0, workgroupSize * grainSize ).map( () => random.nextDouble() );
-  const stripedNumbers = numbers.map( ( n, i ) => numbers[ fromStripedIndex( i ) ] );
+  const stripedNumbers = numbers.map( ( n, i ) => numbers[ ByteEncoder.fromStripedIndex( i, workgroupSize, grainSize ) ] );
 
   const context = new DeviceContext( device );
 
@@ -506,7 +503,7 @@ asyncTestWithDevice( 'exclusive_scan_raked_striped_single', async device => {
   device.queue.submit( [ commandBuffer ] );
 
   const stripedOutputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-  const outputArray = stripedOutputArray.map( ( n, i ) => stripedOutputArray[ toStripedIndex( i ) ] );
+  const outputArray = stripedOutputArray.map( ( n, i ) => stripedOutputArray[ ByteEncoder.toStripedIndex( i, workgroupSize, grainSize ) ] );
 
   inputBuffer.destroy();
   outputBuffer.destroy();
@@ -528,11 +525,8 @@ asyncTestWithDevice( 'inclusive_scan_raked_striped_single', async device => {
   const workgroupSize = 256;
   const grainSize = 4;
 
-  const toStripedIndex = ( i: number ) => ( i % grainSize ) * workgroupSize + Math.floor( i / grainSize );
-  const fromStripedIndex = ( i: number ) => ( i % workgroupSize ) * grainSize + Math.floor( i / workgroupSize );
-
   const numbers = _.range( 0, workgroupSize * grainSize ).map( () => random.nextDouble() );
-  const stripedNumbers = numbers.map( ( n, i ) => numbers[ fromStripedIndex( i ) ] );
+  const stripedNumbers = numbers.map( ( n, i ) => numbers[ ByteEncoder.fromStripedIndex( i, workgroupSize, grainSize ) ] );
 
   const context = new DeviceContext( device );
 
@@ -564,7 +558,7 @@ asyncTestWithDevice( 'inclusive_scan_raked_striped_single', async device => {
   device.queue.submit( [ commandBuffer ] );
 
   const stripedOutputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-  const outputArray = stripedOutputArray.map( ( n, i ) => stripedOutputArray[ toStripedIndex( i ) ] );
+  const outputArray = stripedOutputArray.map( ( n, i ) => stripedOutputArray[ ByteEncoder.toStripedIndex( i, workgroupSize, grainSize ) ] );
 
   inputBuffer.destroy();
   outputBuffer.destroy();

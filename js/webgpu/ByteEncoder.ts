@@ -267,6 +267,32 @@ export default class ByteEncoder {
     view.setInt32( 0, int );
     return [ ...scratchForBytes ].reverse();
   }
+
+  /**
+   * Converts an index from a normal (blocked) order to a striped order (for improved memory coherence).
+   */
+  public static toStripedIndex( blockedIndex: number, workgroupSize: number, grainSize: number ): number {
+
+    // return ( Math.floor( blockedIndex / ( workgroupSize * grainSize ) ) * grainSize + blockedIndex % grainSize ) * workgroupSize +
+    //        Math.floor( blockedIndex % ( workgroupSize * grainSize ) / grainSize );
+
+    const localIndex = blockedIndex % ( workgroupSize * grainSize );
+
+    return Math.floor( blockedIndex / ( workgroupSize * grainSize ) ) * workgroupSize * grainSize +
+           ( blockedIndex % grainSize ) * workgroupSize +
+           Math.floor( localIndex / grainSize );
+  }
+
+  /**
+   * Converts an index from a striped order to a normal (blocked) order.
+   */
+  public static fromStripedIndex( stripedIndex: number, workgroupSize: number, grainSize: number ): number {
+    const localIndex = stripedIndex % ( workgroupSize * grainSize );
+
+    return Math.floor( stripedIndex / ( workgroupSize * grainSize ) ) * workgroupSize * grainSize +
+           ( stripedIndex % workgroupSize ) * grainSize +
+           Math.floor( localIndex / workgroupSize );
+  }
 }
 
 alpenglow.register( 'ByteEncoder', ByteEncoder );
