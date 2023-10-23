@@ -5,6 +5,7 @@
  */
 
 #import ../gpu/right_scan
+#import ../gpu/load_blocked
 
 #option workgroupSize
 #option grainSize
@@ -28,14 +29,23 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  let baseIndex = ${u32( grainSize )} * global_id.x;
-  var value = select( ${identity}, input[ baseIndex ], baseIndex < ${u32( inputSize )} );
-  // TODO: compute the maximum i value based on the inputSize (don't need further checks inside)
-  // TODO: how to unroll? nested if statements? how can we do it without branches?
-  for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
-    value = ${combine( `value`, `select( ${identity}, input[ baseIndex + i ], baseIndex + i < ${u32( inputSize )} )` )};
-  }
-  // TODO: unroll these?
+
+  ${load_blocked( {
+    value: `value`,
+    identity: identity,
+    combine: combine,
+    grainSize: grainSize,
+    inputSizeString: u32( inputSize )
+  } )}
+
+//  let baseIndex = ${u32( grainSize )} * global_id.x;
+//  var value = select( ${identity}, input[ baseIndex ], baseIndex < ${u32( inputSize )} );
+//  // TODO: compute the maximum i value based on the inputSize (don't need further checks inside)
+//  // TODO: how to unroll? nested if statements? how can we do it without branches?
+//  for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
+//    value = ${combine( `value`, `select( ${identity}, input[ baseIndex + i ], baseIndex + i < ${u32( inputSize )} )` )};
+//  }
+//  // TODO: unroll these?
 
   ${right_scan( {
     value: 'value',

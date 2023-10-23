@@ -1,6 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
+ * A template that unrolls a simple loop over a range of numbers.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

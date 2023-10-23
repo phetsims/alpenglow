@@ -1,6 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
+ * A template that performs a left-scan operation on a single workgroup.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
