@@ -48,7 +48,7 @@ asyncTestWithDevice( 'reduce_simple', async device => {
   const workgroupSize = 256;
   const inputSize = workgroupSize - 27;
 
-  const numbers = _.range( 0, inputSize ).map( () => random.nextDouble() );
+  const numbers = _.range( 0, workgroupSize ).map( () => random.nextDouble() );
 
   const context = new DeviceContext( device );
 
@@ -64,7 +64,7 @@ asyncTestWithDevice( 'reduce_simple', async device => {
     }
   );
 
-  const inputBuffer = context.createBuffer( 4 * inputSize );
+  const inputBuffer = context.createBuffer( 4 * workgroupSize );
   device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
 
   const outputBuffer = context.createBuffer( 4 );
@@ -87,7 +87,7 @@ asyncTestWithDevice( 'reduce_simple', async device => {
   outputBuffer.destroy();
   resultBuffer.destroy();
 
-  const expectedValue = _.sum( numbers );
+  const expectedValue = _.sum( numbers.slice( 0, inputSize ) );
   const actualValue = outputArray[ 0 ];
 
   if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
@@ -100,9 +100,10 @@ asyncTestWithDevice( 'reduce_simple', async device => {
 asyncTestWithDevice( 'reduce_raked_blocked', async device => {
   const workgroupSize = 256;
   const grainSize = 4;
-  const inputSize = workgroupSize * grainSize - 27;
+  const bufferSize = workgroupSize * grainSize;
+  const inputSize = bufferSize - 27;
 
-  const numbers = _.range( 0, inputSize ).map( () => random.nextDouble() );
+  const numbers = _.range( 0, bufferSize ).map( () => random.nextDouble() );
 
   const context = new DeviceContext( device );
 
@@ -119,7 +120,7 @@ asyncTestWithDevice( 'reduce_raked_blocked', async device => {
     }
   );
 
-  const inputBuffer = context.createBuffer( 4 * inputSize );
+  const inputBuffer = context.createBuffer( 4 * bufferSize );
   device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
 
   const outputBuffer = context.createBuffer( 4 );
@@ -142,7 +143,7 @@ asyncTestWithDevice( 'reduce_raked_blocked', async device => {
   outputBuffer.destroy();
   resultBuffer.destroy();
 
-  const expectedValue = _.sum( numbers );
+  const expectedValue = _.sum( numbers.slice( 0, inputSize ) );
   const actualValue = outputArray[ 0 ];
 
   if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
@@ -155,11 +156,11 @@ asyncTestWithDevice( 'reduce_raked_blocked', async device => {
 asyncTestWithDevice( 'reduce_raked_striped', async device => {
   const workgroupSize = 256;
   const grainSize = 4;
-  const inputSize = workgroupSize * grainSize - 27;
+  const bufferSize = workgroupSize * grainSize;
+  const inputSize = bufferSize - 27;
 
-  // TODO: test with padded random numbers so we ensure we're excluding the correct values
-  const numbers = _.range( 0, inputSize ).map( () => random.nextDouble() );
-  const stripedNumbers = _.range( 0, workgroupSize * grainSize ).map( i => numbers[ ByteEncoder.fromStripedIndex( i, workgroupSize, grainSize ) ] );
+  const numbers = _.range( 0, bufferSize ).map( () => random.nextDouble() );
+  const stripedNumbers = _.range( 0, bufferSize ).map( i => numbers[ ByteEncoder.fromStripedIndex( i, workgroupSize, grainSize ) ] );
 
   const context = new DeviceContext( device );
 
@@ -176,7 +177,7 @@ asyncTestWithDevice( 'reduce_raked_striped', async device => {
     }
   );
 
-  const inputBuffer = context.createBuffer( 4 * workgroupSize * grainSize );
+  const inputBuffer = context.createBuffer( 4 * bufferSize );
   device.queue.writeBuffer( inputBuffer, 0, new Float32Array( stripedNumbers ).buffer );
 
   const outputBuffer = context.createBuffer( 4 );
@@ -199,7 +200,7 @@ asyncTestWithDevice( 'reduce_raked_striped', async device => {
   outputBuffer.destroy();
   resultBuffer.destroy();
 
-  const expectedValue = _.sum( numbers );
+  const expectedValue = _.sum( numbers.slice( 0, inputSize ) );
   const actualValue = outputArray[ 0 ];
 
   if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
@@ -212,9 +213,10 @@ asyncTestWithDevice( 'reduce_raked_striped', async device => {
 asyncTestWithDevice( 'reduce_raked_striped_blocked', async device => {
   const workgroupSize = 256;
   const grainSize = 4;
-  const inputSize = workgroupSize * grainSize - 27;
+  const bufferSize = workgroupSize * grainSize;
+  const inputSize = bufferSize - 27;
 
-  const numbers = _.range( 0, inputSize ).map( () => random.nextDouble() );
+  const numbers = _.range( 0, bufferSize ).map( () => random.nextDouble() );
 
   const context = new DeviceContext( device );
 
@@ -231,7 +233,7 @@ asyncTestWithDevice( 'reduce_raked_striped_blocked', async device => {
     }
   );
 
-  const inputBuffer = context.createBuffer( 4 * inputSize );
+  const inputBuffer = context.createBuffer( 4 * bufferSize );
   device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
 
   const outputBuffer = context.createBuffer( 4 );
@@ -254,7 +256,7 @@ asyncTestWithDevice( 'reduce_raked_striped_blocked', async device => {
   outputBuffer.destroy();
   resultBuffer.destroy();
 
-  const expectedValue = _.sum( numbers );
+  const expectedValue = _.sum( numbers.slice( 0, inputSize ) );
   const actualValue = outputArray[ 0 ];
 
   if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
