@@ -25,7 +25,7 @@ ${template( ( {
   // TODO: consider nesting?
   ${unroll( 1, grainSize, i => `
     {
-      let index = base_striped_index + ${i} * ${u32( workgroupSize )};
+      let index = base_striped_index + ${u32( i * workgroupSize )};
       ${value} = ${
         combine(
           value,
