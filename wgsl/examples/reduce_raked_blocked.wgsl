@@ -32,6 +32,7 @@ fn main(
 
   ${load_blocked( {
     value: `value`,
+    load: i => `input[ ${i} ]`,
     identity: identity,
     combine: combine,
     grainSize: grainSize,

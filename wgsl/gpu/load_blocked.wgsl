@@ -8,16 +8,17 @@
 
 ${template( ( {
   value,
+  load,
   identity,
   combine,
   grainSize,
   inputSizeString = null
 } ) => `
-  let blockedBaseIndex = ${u32( grainSize )} * global_id.x;
+  let base_blocked_index = ${u32( grainSize )} * global_id.x;
   var ${value} = ${
     inputSizeString === null ?
-      `input[ blockedBaseIndex ]` :
-      `select( ${identity}, input[ blockedBaseIndex ], blockedBaseIndex < ${inputSizeString} )`
+      load( `base_blocked_index` ) :
+      `select( ${identity}, ${load( `base_blocked_index` )}, base_blocked_index < ${inputSizeString} )`
   };
 
   // TODO: consider nesting?
@@ -26,8 +27,8 @@ ${template( ( {
       combine(
         value,
         inputSizeString === null ?
-          `input[ blockedBaseIndex + ${i} ]` :
-          `select( ${identity}, input[ blockedBaseIndex + ${i} ], blockedBaseIndex + ${i} < ${inputSizeString} )`
+          load( `base_blocked_index + ${i}` ) :
+          `select( ${identity}, ${load( `base_blocked_index + ${i}` )}, base_blocked_index + ${i} < ${inputSizeString} )`
       )
     };
   ` )}

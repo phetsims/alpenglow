@@ -5,6 +5,7 @@
  */
 
 #import ../gpu/right_scan
+#import ../gpu/load_striped_blocked
 
 #option workgroupSize
 #option grainSize
@@ -28,16 +29,25 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  var base_index = workgroup_id.x * ${u32( workgroupSize * grainSize )} + local_id.x;
-  var value = select( ${identity}, input[ base_index ], base_index < ${u32( inputSize )} );
-
-  // TODO: compute the maximum i value based on the inputSize (don't need further checks inside)
-  // TODO: how to unroll? nested if statements? how can we do it without branches?
-  for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
-    let index = base_index + i * ${u32( workgroupSize )};
-    value = ${combine( `value`, `select( ${identity}, input[ index ], index < ${u32( inputSize )} )` )};
-  }
-  // TODO: unroll these?
+  ${load_striped_blocked( {
+    value: `value`,
+    load: i => `input[ ${i} ]`,
+    identity: identity,
+    combine: combine,
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    inputSizeString: u32( inputSize )
+  } )}
+//  var base_index = workgroup_id.x * ${u32( workgroupSize * grainSize )} + local_id.x;
+//  var value = select( ${identity}, input[ base_index ], base_index < ${u32( inputSize )} );
+//
+//  // TODO: compute the maximum i value based on the inputSize (don't need further checks inside)
+//  // TODO: how to unroll? nested if statements? how can we do it without branches?
+//  for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
+//    let index = base_index + i * ${u32( workgroupSize )};
+//    value = ${combine( `value`, `select( ${identity}, input[ index ], index < ${u32( inputSize )} )` )};
+//  }
+//  // TODO: unroll these?
 
   ${right_scan( {
     value: 'value',
