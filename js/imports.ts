@@ -399,7 +399,7 @@ export { default as DeviceContext } from './webgpu/DeviceContext.js';
 export type { DeviceContextDeviceOptions } from './webgpu/DeviceContext.js';
 export { default as Binding } from './webgpu/Binding.js';
 export { default as ComputeShader } from './webgpu/ComputeShader.js';
-export type { ComputeShaderDispatchOptions } from './webgpu/ComputeShader.js';
+export type { ComputeShaderOptions, ComputeShaderDispatchOptions } from './webgpu/ComputeShader.js';
 export { default as BlitShader } from './webgpu/BlitShader.js';
 export { default as ByteEncoder } from './webgpu/ByteEncoder.js';
 export type { F32, U32, I32, U8 } from './webgpu/ByteEncoder.js';

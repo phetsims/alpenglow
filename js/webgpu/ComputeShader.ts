@@ -11,9 +11,17 @@ import { optionize3 } from '../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
 
+export type ComputeShaderOptions = {
+  partialBeautify?: boolean;
+};
+
 export type ComputeShaderDispatchOptions = {
   timestampLogger?: TimestampLogger | null;
 };
+
+const DEFAULT_OPTIONS = {
+  partialBeautify: true
+} as const;
 
 const DEFAULT_DISPATCH_OPTIONS = {
   timestampLogger: null
@@ -25,13 +33,35 @@ export default class ComputeShader {
   public readonly bindGroupLayout: GPUBindGroupLayout;
   public readonly pipeline: GPUComputePipeline;
 
-  // TODO: improve this, it's pretty temporary!
   public constructor(
     public readonly name: string,
     public readonly wgsl: string,
     public readonly bindings: Binding[],
-    public readonly device: GPUDevice
+    public readonly device: GPUDevice,
+    providedOptions?: ComputeShaderOptions
   ) {
+
+    const options = optionize3<ComputeShaderOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+
+    if ( options.partialBeautify ) {
+      const lines = wgsl.split( '\n' ).filter( s => s.trim().length > 0 );
+      let count = 0;
+      let beautified = '';
+      for ( let i = 0; i < lines.length; i++ ) {
+        const line = lines[ i ].trim();
+
+        // better version of indentation for ( and {
+        if ( line.startsWith( '}' ) || line.startsWith( ')' ) ) {
+          count--;
+        }
+        beautified += `${'  '.repeat( count )}${line}\n`;
+        if ( line.endsWith( '{' ) || line.endsWith( '(' ) ) {
+          count++;
+        }
+      }
+      wgsl = beautified;
+    }
+
     if ( LOG_SHADERS ) {
       console.groupCollapsed( `[shader] ${name}` );
       console.log( wgsl.split( '\n' ).map( ( s, i ) => `${i + 1} ${s}` ).join( '\n' ) );
