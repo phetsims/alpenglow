@@ -4,6 +4,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./unroll
+
 ${template( ( {
   value,
   identity,
@@ -17,17 +19,16 @@ ${template( ( {
       `input[ blockedBaseIndex ]` :
       `select( ${identity}, input[ blockedBaseIndex ], blockedBaseIndex < ${inputSizeString} )`
   };
-  // TODO: compute the maximum i value based on the inputSize (don't need further checks inside)
-  // TODO: how to unroll? nested if statements? how can we do it without branches?
-  for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
+
+  // TODO: consider nesting?
+  ${unroll( 1, grainSize, i => `
     ${value} = ${
       combine(
         value,
         inputSizeString === null ?
-          `input[ blockedBaseIndex + i ]` :
-          `select( ${identity}, input[ blockedBaseIndex + i ], blockedBaseIndex + i < ${inputSizeString} )`
+          `input[ blockedBaseIndex + ${i} ]` :
+          `select( ${identity}, input[ blockedBaseIndex + ${i} ], blockedBaseIndex + ${i} < ${inputSizeString} )`
       )
     };
-  }
-  // TODO: unroll these?
+  ` )}
 ` )}
