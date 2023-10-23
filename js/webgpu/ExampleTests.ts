@@ -155,8 +155,11 @@ asyncTestWithDevice( 'reduce_raked_blocked', async device => {
 asyncTestWithDevice( 'reduce_raked_striped', async device => {
   const workgroupSize = 256;
   const grainSize = 4;
+  const inputSize = workgroupSize * grainSize - 27;
 
-  const numbers = _.range( 0, workgroupSize * grainSize ).map( () => random.nextDouble() );
+  // TODO: test with padded random numbers so we ensure we're excluding the correct values
+  const numbers = _.range( 0, inputSize ).map( () => random.nextDouble() );
+  const stripedNumbers = _.range( 0, workgroupSize * grainSize ).map( i => numbers[ ByteEncoder.fromStripedIndex( i, workgroupSize, grainSize ) ] );
 
   const context = new DeviceContext( device );
 
@@ -166,12 +169,15 @@ asyncTestWithDevice( 'reduce_raked_striped', async device => {
       Binding.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
-      grainSize: grainSize
+      grainSize: grainSize,
+      inputSize: inputSize,
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
     }
   );
 
   const inputBuffer = context.createBuffer( 4 * workgroupSize * grainSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( stripedNumbers ).buffer );
 
   const outputBuffer = context.createBuffer( 4 );
   const resultBuffer = context.createMapReadableBuffer( 4 );

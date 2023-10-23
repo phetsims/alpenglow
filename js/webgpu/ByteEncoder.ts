@@ -268,6 +268,8 @@ export default class ByteEncoder {
     return [ ...scratchForBytes ].reverse();
   }
 
+  // TODO: a "maxStripedIndex"?
+
   /**
    * Converts an index from a normal (blocked) order to a striped order (for improved memory coherence).
    */
