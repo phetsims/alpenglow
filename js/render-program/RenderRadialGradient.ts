@@ -28,7 +28,7 @@ const toProgram = ( item: RenderGradientStop ): RenderProgram => item.program;
 
 export default class RenderRadialGradient extends RenderProgram {
 
-  private logic: RenderRadialGradientLogic | null = null;
+  private logic: RenderRadialGradientLogic;
 
   public constructor(
     public readonly transform: Matrix3,
@@ -38,7 +38,8 @@ export default class RenderRadialGradient extends RenderProgram {
     public readonly endRadius: number,
     public readonly stops: RenderGradientStop[], // should be sorted!!
     public readonly extend: RenderExtend,
-    public readonly accuracy: RenderRadialGradientAccuracy
+    public readonly accuracy: RenderRadialGradientAccuracy,
+    logic?: RenderRadialGradientLogic
   ) {
     assert && assert( transform.isFinite() );
     assert && assert( start.isFinite() );
@@ -60,6 +61,17 @@ export default class RenderRadialGradient extends RenderProgram {
       false,
       accuracy === RenderRadialGradientAccuracy.UnsplitCentroid || accuracy === RenderRadialGradientAccuracy.SplitCentroid || accuracy === RenderRadialGradientAccuracy.SplitAccurate
     );
+
+    this.logic = logic || RenderRadialGradientLogic.from(
+      this.transform,
+      this.start,
+      this.startRadius,
+      this.end,
+      this.endRadius,
+      this.stops.map( stop => stop.ratio ),
+      this.extend,
+      this.accuracy
+    );
   }
 
   public override getName(): string {
@@ -70,7 +82,7 @@ export default class RenderRadialGradient extends RenderProgram {
     assert && assert( children.length === this.stops.length );
     return new RenderRadialGradient( this.transform, this.start, this.startRadius, this.end, this.endRadius, this.stops.map( ( stop, i ) => {
       return new RenderGradientStop( stop.ratio, children[ i ] );
-    } ), this.extend, this.accuracy );
+    } ), this.extend, this.accuracy, this.logic );
   }
 
   public override isSplittable(): boolean {
@@ -118,19 +130,6 @@ export default class RenderRadialGradient extends RenderProgram {
   }
 
   public getLogic(): RenderRadialGradientLogic {
-    if ( this.logic === null ) {
-      this.logic = RenderRadialGradientLogic.from(
-        this.transform,
-        this.start,
-        this.startRadius,
-        this.end,
-        this.endRadius,
-        this.stops.map( stop => stop.ratio ),
-        this.extend,
-        this.accuracy
-      );
-    }
-
     return this.logic;
   }
 
