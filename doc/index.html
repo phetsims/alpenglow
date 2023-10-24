@@ -1212,6 +1212,10 @@
       Check "standalone" performance against other robust implementations?
     </p>
 
+    <p class="TODO">
+      Review <a href="https://www.mdpi.com/2073-8994/10/10/477">paper</a>
+    </p>
+
     <div class="example">
       <div id="boolean-operations-example"></div>
       Example boolean operation, intersection shown in blue, differences shown in red and green.
@@ -4297,7 +4301,19 @@ flowchart TD
     </p>
 
     <p class="TODO">
+      See if out-of-bounds writes are wrecking our correctness. They can scribble anywhere in the binding?
+    </p>
+
+    <p class="TODO">
+      Restructure Parallel code handling so that out-of-bounds writes result in failures.
+    </p>
+
+    <p class="TODO">
       Can we combine all of the reduces into one buffer?
+    </p>
+
+    <p>
+      Track <a href="https://github.com/googlefonts/gpu-path-rendering-paper">https://github.com/googlefonts/gpu-path-rendering-paper</a>
     </p>
 
     <p class="TODO">
@@ -4306,6 +4322,10 @@ flowchart TD
 
     <p class="TODO">
       Measure workgroup execution order on GPUs to see if we can schedule asymmetric (large) load workgroups first somehow.
+    </p>
+
+    <p class="TODO">
+      Analyze with GPT-4 for bug detection?
     </p>
 
     <p class="TODO">
