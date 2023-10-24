@@ -538,6 +538,11 @@
               <li><a href="#WGSL-minification">Minification</a></li>
               <li><a href="#WGSL-mangling">Mangling</a></li>
               <li><a href="#WGSL-algorithms">Algorithms</a></li>
+              <li><a href="#WGSL-reduce">Reduce</a></li>
+              <li><a href="#WGSL-scan">Scan</a></li>
+              <li><a href="#WGSL-radixSort">Radix Sort</a></li>
+              <li><a href="#WGSL-mergeSort">Merge Sort</a></li>
+              <li><a href="#WGSL-memory">Memory</a></li>
               <li><a href="#WGSL-profiling">Profiling</a></li>
             </ul>
           </li>
@@ -1485,8 +1490,9 @@
     <h5>Numerical Stability (addendum)</h5>
 
     <p>
-      The above formulas seem to magnify floating-point error significantly. It's highly recommended that either of the
-      following methods be used for computation:
+      The above formulas (from <a href="https://leancrew.com/all-this/2018/01/greens-theorem-and-section-properties/">this reference</a>)
+      seem to magnify floating-point error significantly. It's highly recommended that either of the following methods
+      be used for computation:
     </p>
 
     <p>
@@ -3364,7 +3370,7 @@
       Figure out buffer reuse to avoid zero-init cost and those issues.
     </p>
 
-    <h5>Reduce</h5>
+    <h4 id="WGSL-reduce">Reduce</h4>
 
     <p class="TODO">
       Test with atomics (just a single level)
@@ -3398,7 +3404,7 @@
       Can we early-exit from a workgroup?
     </p>
 
-    <h5>Scan</h5>
+    <h4 id="WGSL-scan">Scan</h4>
 
     <p class="TODO">
       Examine Stoneberry
@@ -3409,7 +3415,7 @@
       Levien links: <a href="https://raphlinus.github.io/gpu/2021/11/17/prefix-sum-portable.html">newer</a>, <a href="https://raphlinus.github.io/gpu/2020/04/30/prefix-sum.html">older</a>.
     </p>
 
-    <h5>Radix Sort</h5>
+    <h4 id="WGSL-radixSort">Radix Sort</h4>
 
     <p>
       <a href="https://kieber-emmons.medium.com/memory-bandwidth-optimized-parallel-radix-sort-in-metal-for-apple-m1-and-beyond-4f4590cfd5d3">Metal Radix Sort</a>.
@@ -3420,13 +3426,13 @@
       <a href="https://www.reddit.com/r/GraphicsProgramming/comments/14c7gok/parallel_radix_sort_confusions_options/">reddit note</a>.
     </p>
 
-    <h5>Merge Sort</h5>
+    <h4 id="WGSL-mergeSort">Merge Sort</h4>
 
     <p>
       Might be possible, see <a href="https://moderngpu.github.io/mergesort.html">ModernGPU merge sort</a>.
     </p>
 
-    <h5>Memory</h5>
+    <h4 id="WGSL-memory">Memory</h4>
 
     <p>
       See thoughts for <a href="https://github.com/linebender/vello/issues/366">Vello</a>.
@@ -3991,11 +3997,25 @@
       we'll create two half-edges: A -> B (winding +1) and B -> A (winding -1), both marked for path X.
     </p>
 
+    <p class="TODO">
+      Look into merge sort for sorting the linked-list accumulated splits.
+    </p>
+
+    <p class="TODO">
+      If we don't sort them, is it quadratic time? However, hopefully we won't have too many intersections, and that
+      could potentially be acceptable? (Sort only if it's more than N splits in an edge?)
+    </p>
+
     <h3 id="stage-edgeSort">Edge Sort</h3>
 
     <p>
       We'll sort our rational half-edges for the next stage (first by their starting point, then by their angle, then
       by their ID).
+    </p>
+
+    <p class="TODO">
+      Perhaps use MergeSort instead of RadixSort on GPU? Radix sort might need a lot of bits, and it seems like we'd be
+      doing 8 bits per pass?
     </p>
 
     <h3 id="stage-filterConnect">Filter &amp; Connect</h3>
@@ -4018,6 +4038,11 @@
         counter-clockwise around the vertex. This will allow tracing of the edges in future steps.
       </li>
     </ul>
+
+    <p>
+      Notes: Monoid to scan edges, choose lowest index on each edge, propagate to the other edges. Presumably
+      we should use half-edges for these data structures? (Should we be computing signed area in this pass?)
+    </p>
 
     <h3 id="stage-boundaryTrace">Boundary Trace</h3>
 
@@ -4579,6 +4604,16 @@ flowchart TD
 
     <p class="TODO">
       Note "9/4 worst case ratio for quad-clip grid-clip tiling"
+    </p>
+
+    <p class="TODO">
+      Consider "CombinedRaster" like split? So we can avoid expensive mapping. Does this actually save us anything?
+      It really only helps on the CPU?
+    </p>
+
+    <p class="TODO">
+      Consider how we could split the raster-accumulate up based on what textures are needed (some passes run with some
+      textures, other passes run with others).
     </p>
 
     <p class="DEFERRED">
