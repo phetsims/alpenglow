@@ -3,6 +3,8 @@
 /**
  * Represents a half-edge (directed line segment) with rational coordinates.
  *
+ * TODO: add a flag to note "removed half edge"?
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

@@ -3,6 +3,14 @@
 /**
  * Simplification of a polygon for clipping output (compacts equal or axis-aligned-collinear points).
  *
+ * TODO: ClipSimplifier should accept Vector2, and store it if possible (instead of mutating)
+ *
+ * TODO: Create a "not-a-simplifier" to swap into the simplifier to ensure testing works nicely.
+ *
+ * TODO: ClipSimplifier collinearity checks, to see if we are missing things and this improves things drastically?
+ * TODO: Like, enable general collinearity, and inspect cases to see if it changes how many pixels get partials?
+ * TODO: Or improves performance
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

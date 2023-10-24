@@ -598,6 +598,7 @@
     <p class="TODO">
       Get font changes done with Scenery vello branch, so we can include code improvements and get RenderFromNode working
       better. Also allows showing Vello stuff in demos (will need to see if we can port over the multi branch work).
+      Merge multi-work. Remove auto-feature-detect for now, so it doesn't ping shaders on main?
     </p>
 
     <p class="TODO">
@@ -611,6 +612,11 @@
       fallback (and for testing/development). In addition to a normal software route, there is a async/await
       parallelized form that can execute with the same execution model that WebGPU would use (with workgroups, storage
       buffers, etc.), that is used for validation, testing, and debugging.
+    </p>
+
+    <p class="TODO">
+      Consider WebWorkers, and whether we can use them efficiently for any of the initial steps (instead of putting
+      all the work on the GPU).
     </p>
 
     <h3>Methods: Solve the Occlusion Problem First</h3>
@@ -880,11 +886,13 @@
       bounding box. PIP-tests are VERY accelerated on this. Clipping also potentially will be (if a node is fully within
       one side of a binary clip, we can just INCLUDE that node). Thus we'll have a linked list way of describing how
       the nodes connect (so we can reuse parts of the source within the result). At a certain point, this will be less
-      beneficial, but high-up it might be very helpful? Test PIP and clipping with this.
+      beneficial, but high-up it might be very helpful? Test PIP and clipping with this. (each section has bounds and
+      children). Linked list so we can store "sequences" immutably, that don't get changed.
     </p>
 
     <p class="TODO">
       Grid clips with bounds-pyramids could be even more efficient on the CPU. Does it really help with the GPU at all?
+      When clipped, recompute bounds (will be tighter)? Or at a certain point, do we stop recomputing bounds?
     </p>
 
     <script type="module">
@@ -1701,6 +1709,11 @@
 
       $\iint_Px^{128-1}\,dx\,dy=\frac{1}{16512}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i + x_{i+1})(x_i^2 + x_{i+1}^2)(x_i^4 + x_{i+1}^4)(x_i^8 + x_{i+1}^8)(x_i^16 + x_{i+1}^16)(x_i^32 + x_{i+1}^32)(x_i^64 + x_{i+1}^64)$
       $\iint_Px^{81-1}\,dx\,dy=\frac{1}{6642}\sum_{i}(x_iy_{i+1}-x_{i+1}y_i)(x_i^{2}+x_ix_{i+1}+x_{i+1}^{2})(x_i^{6}+x_i^{3}x_{i+1}^{3}+x_{i+1}^{6})(x_i^{18}+x_i^{9}x_{i+1}^{9}+x_{i+1}^{18})(x_i^{54}+x_i^{27}x_{i+1}^{27}+x_{i+1}^{54})$
+    </p>
+
+    <p class="TODO">
+      Note "ability to skip horizontal edges" in math doc. Can formulate area/centroid/bilinear to all ignore horizontals.
+      We can prove alternative formulas based off of Soefredi and the "opposing variable terms"
     </p>
 
     <h5>Alpenglow Area Formulas</h5>
@@ -2688,9 +2701,22 @@
 
     <p class="TODO">sRGB and Display P3 --- Note the Display P3 color matrices (we could not find those online)</p>
 
+    <p class="TODO">
+      Check that the Display P3 colors are side-by-side identical - maybe white point slight change? WE SHOULD check
+      Chrome's conversions
+    </p>
+
     <p class="TODO">Gamut Mapping</p>
 
+    <p class="TODO">
+      Better gamut mapping: <a href="https://bottosson.github.io/posts/gamutclipping/">https://bottosson.github.io/posts/gamutclipping/</a>
+    </p>
+
     <p class="TODO">More documentation</p>
+
+    <p class="TODO">
+      Get oklch color space up and running, can do hue gradients then.
+    </p>
 
     <h3 id="renderProgram">RenderProgram</h3>
 
@@ -3015,6 +3041,27 @@
 
     <p class="TODO">Docs/demo for RenderColorSpaceConversion (and color conversions), RenderPremultiply/RenderUnpremultiply</p>
     <p class="TODO">Docs/demo for RenderImage</p>
+
+    <p class="TODO">
+      Images can use the splitting infrastructure. Split with pixels. For regions of filter support. Box filter single
+      sample per square. Bilinear larger and overlapping and each has 4 samples. Mitchell-Netravali has 16 per. Need to
+      potentially store the transform, for asymmetric shear etc. we split into filterable sections.
+    </p>
+
+    <p class="TODO">
+      Mipmapping! Blend between adjacent mipmap levels (especially for perspective). Anisotropic for 3d, like
+      <a href="https://en.wikipedia.org/wiki/Anisotropic_filtering#/media/File:MipMap_Example_STS101_Anisotropic.png">this example</a>.
+      We'll want to mipmap "based on the area" if we aren't doing the "analytic" bits. So isotropic mipmap can look at the scale.
+      We'll want to "bias" presumably, adjustably?
+      We'll want to mipmap-blend the "extended" version (in each mipmap level computed, if non-power-of-2, it should be "padded" with the extended version for correct results)
+      Mipmaps should work for any filter type
+    </p>
+
+    <p class="TODO">
+      HOW are we handling Images? One atlas? How are we able to split things so this works?
+      We could always just... determine the size, and create that many atlases?
+    </p>
+
     <p class="TODO">Docs/demo for RenderAlpha</p>
     <p class="TODO">Docs/demo for RenderFilter</p>
     <p class="TODO">Docs/demo for RenderBarycentricBlend</p>
@@ -3154,6 +3201,14 @@
       Document stack-based operations with stack-effect diagrams: "( before -- after )" (top of stack states).
     </p>
 
+    <p class="TODO">
+      If we have hashed RenderPrograms, deduplicate so we only write RenderProgram instructions for one.
+    </p>
+
+    <p>
+      Note: RenderProgram instruction execution can be interrupted and saved, if we want to do so in the future.
+    </p>
+
     <h3 id="WGSL">WGSL</h3>
 
     <p class="TODO">
@@ -3270,6 +3325,10 @@
     </p>
 
     <p class="TODO">
+      Create parallel TS version of templates.
+    </p>
+
+    <p class="TODO">
       Create a map of what in WGSL are abstract/concrete/structure/composite/constructible/fixed-footprint/plain/atomic/storable types
     </p>
 
@@ -3333,6 +3392,10 @@
 
     <p>
       <a href="https://kieber-emmons.medium.com/optimizing-parallel-reduction-in-metal-for-apple-m1-8e8677b49b01">Metal Reduce</a>.
+    </p>
+
+    <p class="TODO">
+      Can we early-exit from a workgroup?
     </p>
 
     <h5>Scan</h5>
@@ -3402,7 +3465,11 @@
       <a href="https://developer.nvidia.com/blog/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/">Grid stride loops</a>,
       <a href="https://developer.nvidia.com/blog/the-peak-performance-analysis-method-for-optimizing-any-gpu-workload/">Performance analysis</a>,
       <a href="https://gpuopen.com/learn/optimizing-gpu-occupancy-resource-usage-large-thread-groups/">Optimizing occupancy</a>,
-      <a href="https://www.kodeco.com/books/metal-by-tutorials/v3.0/chapters/32-best-practices">32 best practices</a>
+      <a href="https://www.kodeco.com/books/metal-by-tutorials/v3.0/chapters/32-best-practices">32 best practices</a>,
+      <a href="https://developer.nvidia.com/gpugems/gpugems2/part-iv-general-purpose-computation-gpus-primer/chapter-35-gpu-program-optimization">GPU optimization</a>,
+      <a href="https://developer.nvidia.com/gpugems/gpugems">GPU Gems 1</a>,
+      <a href="https://developer.nvidia.com/gpugems/gpugems2">GPU Gems 2</a>,
+      <a href="https://developer.nvidia.com/gpugems/gpugems3">GPU Gems 3</a>
     </p>
 
     <p class="TODO">
@@ -3734,6 +3801,62 @@
       window.addDiagram( 'transparent-3d', () => getTransparentSpheres() );
     </script>
 
+    <p class="TODO">
+      Something wrong with normals in teapot example, set to 256x256 in demo.
+    </p>
+
+    <p class="TODO">
+      Analytic perspective correction, see notes on paper --- looks like possible to integrate?
+      <a href="https://en.wikipedia.org/wiki/Texture_mapping#Perspective_correctness">https://en.wikipedia.org/wiki/Texture_mapping#Perspective_correctness</a>
+    </p>
+
+    <p class="TODO">
+      Show arbitrary graphics with 3d perspective:
+      Quads in 3D (and putting vector graphics in them!) we'll just transform our graphics with perspective too?
+      RenderPlanar with 3 points will work for quads just fine.
+      Needs normal interpolation for quads.
+      We can store the projective transform, to get exact gradients (in fact, we just need to do perspective correction).
+    </p>
+
+    <p class="TODO">
+      Consider face consolidation after depth sort split! Should save a lot in rasterization?
+    </p>
+
+    <p class="TODO">
+      Need to do breadth-first for our splitting in DepthSort, otherwise we're doing a lot of unnecessary splitting.
+    </p>
+
+    <p class="TODO">
+      Checkerboard ground could be texture with analytic nearest image.
+    </p>
+
+    <p class="TODO">
+      Planar getDepthSplit should check to see if the line goes through the bounds. We can skip expensive clipping a lot
+    </p>
+
+    <p class="TODO">
+      Better name for RenderPlanar.
+    </p>
+
+    <p class="TODO">
+      Near-far plane clipping in depth sort?
+    </p>
+
+    <p class="TODO">
+      Stereographic/orthographic projection
+    </p>
+
+    <p class="TODO">
+      For 3d how to plug shaders into RenderProgram?
+    </p>
+
+    <p class="TODO">
+      Once we have RenderableFaces, we could split things up based on whatever shaders need to run - for instance, if
+      we only can have certain shaders loaded, we can find the faces that use it? (multiple passes, for the different shaders?).
+      If we're combining later anyway, why not skip the first (traced) consolidation?
+      (Also for rasterization, we probably should NOT combine from separate tiles).
+    </p>
+
     <h2 id="stages">Stages</h2>
 
     <h3 id="stage-transforms">Transforms</h3>
@@ -3778,6 +3901,11 @@
     <p>
       Tiling is also helpful to reduce the potential amount of cases for the later intersection step, AND with our
       integer transform, we'll be able to keep more precision for the CAG steps.
+    </p>
+
+    <p class="TODO">
+      Note possibility: Just use tiling constraints in intersections and face holes. OTHERWISE we should be able to use
+      the heterogeneous combination of tiles for other steps - but we might want to tile for rasterization too.
     </p>
 
     <h3 id="stage-integerTransform">Integer Transform</h3>
@@ -4147,6 +4275,10 @@
       We'll want to take the path representation for each RenderableFace, and determine the coverage of each pixel.
     </p>
 
+    <p class="TODO">
+      See if we should use something like Lucidchart, Mermaid is fighting us with font size and layout.
+    </p>
+
     <pre class="mermaid">
 flowchart TD
 
@@ -4297,6 +4429,10 @@ flowchart TD
     </pre>
 
     <p class="TODO">
+      Customizable execution instruction limits, error out if past a certain level. This might be what is killing performance.
+    </p>
+
+    <p class="TODO">
       Read RAVG/Massive/Vello again, might switch to a technique more like that.
     </p>
 
@@ -4312,6 +4448,15 @@ flowchart TD
       Can we combine all of the reduces into one buffer?
     </p>
 
+    <p class="TODO">
+      Can we combine our complete chunks and complete edges into one buffer? We are exporting to a bunch of other
+      buffers currently? Or are we reusing it? Perhaps use atomics to store what is used/freed, and GC?
+    </p>
+
+    <p class="TODO">
+      Try different workgroup sizes, see if it's better (especially when we can rake things)
+    </p>
+
     <p>
       Track <a href="https://github.com/googlefonts/gpu-path-rendering-paper">https://github.com/googlefonts/gpu-path-rendering-paper</a>
     </p>
@@ -4321,7 +4466,15 @@ flowchart TD
     </p>
 
     <p class="TODO">
+      Run a queue encoder for every tile independently?
+    </p>
+
+    <p class="TODO">
       Measure workgroup execution order on GPUs to see if we can schedule asymmetric (large) load workgroups first somehow.
+    </p>
+
+    <p class="TODO">
+      Test better accumulation than our atomics strategy?
     </p>
 
     <p class="TODO">
@@ -4353,7 +4506,16 @@ flowchart TD
     </p>
 
     <p class="TODO">
+      There are graphical artifacts on <code>rasterTest()</code>. Assert that each stage is area-preserving
+      (in parallel software first, then in hardware). Perhaps fuzz too.
+    </p>
+
+    <p class="TODO">
       Is indirect dispatch killing performance?
+    </p>
+
+    <p class="TODO">
+      Better handle "constant" RenderPrograms, we can exit immediately!
     </p>
 
     <p class="TODO">
@@ -4390,7 +4552,15 @@ flowchart TD
     </p>
 
     <p class="TODO">
+      Raking and other better primitives in raster-clip!
+    </p>
+
+    <p class="TODO">
       Document the approaches here.
+    </p>
+
+    <p class="TODO">
+      Check how will reduced precision affect centroid computations? Area also?
     </p>
 
     <p class="TODO">
@@ -4400,6 +4570,15 @@ flowchart TD
 
     <p class="TODO">
       Show which parts finish in which stages, if we stick to that?
+    </p>
+
+    <p class="TODO">
+      Can use different techniques for different classes of rasterization. One is “constant/variable/centroid face
+      needed”. Other is quantity of edges
+    </p>
+
+    <p class="TODO">
+      Note "9/4 worst case ratio for quad-clip grid-clip tiling"
     </p>
 
     <p class="DEFERRED">
