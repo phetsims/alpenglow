@@ -596,6 +596,11 @@
     </p>
 
     <p class="TODO">
+      Get font changes done with Scenery vello branch, so we can include code improvements and get RenderFromNode working
+      better. Also allows showing Vello stuff in demos (will need to see if we can port over the multi branch work).
+    </p>
+
+    <p class="TODO">
       Improve styling, see <a href="https://getbootstrap.com/2.3.2/scaffolding.html">Old Bootstrap docs</a>.
     </p>
 
@@ -875,7 +880,7 @@
       bounding box. PIP-tests are VERY accelerated on this. Clipping also potentially will be (if a node is fully within
       one side of a binary clip, we can just INCLUDE that node). Thus we'll have a linked list way of describing how
       the nodes connect (so we can reuse parts of the source within the result). At a certain point, this will be less
-      beneficial, but high-up it might be very helpful?
+      beneficial, but high-up it might be very helpful? Test PIP and clipping with this.
     </p>
 
     <p class="TODO">
@@ -1264,7 +1269,16 @@
       Local rationals! Don’t worry about approximate intersections. Just catch all intersections of rationalization
       within zones where curves are close. Just get rational T values, points, tangents (the slopes of the rationalized
       curves). We will be within epsilons anyway. Just act like the rational intersection is on it (for our
-      rasterization purposes)
+      rasterization purposes). Only rationalize the intersected areas. Rational endpoints, rational intersections,
+      rational parameterization.
+    </p>
+
+    <p class="TODO">
+      Can we find a class of curves that has rational intersections only?
+    </p>
+
+    <p class="TODO">
+      Review Wildberger book, see rational parametrizations of conics/circle. (Rational trigonometry?)
     </p>
 
     <h3 id="antialiasing">Anti-Aliasing</h3>
@@ -3125,6 +3139,10 @@
     </p>
 
     <p class="TODO">
+      Full unit tests to compare all of the versions. Flesh it out, fuzz it.
+    </p>
+
+    <p class="TODO">
       Detect if we run past a buffer, and set a flag so we can restart with a larger buffer? This will still cause a delay...
     </p>
 
@@ -3245,6 +3263,10 @@
     <p class="TODO">
       Allow subtract() in addition to combine() in templates, there are some cases where it might be more efficient to
       compute (if that's allowed).
+    </p>
+
+    <p class="TODO">
+      Create a map of what in WGSL are abstract/concrete/structure/composite/constructible/fixed-footprint/plain/atomic/storable types
     </p>
 
     <p class="TODO">
@@ -3381,6 +3403,10 @@
 
     <p class="TODO">
       WebGL2 if possible, see <a href="https://webgl2fundamentals.org/webgl/lessons/webgl-gpgpu.html">Compute guide</a>
+    </p>
+
+    <p class="TODO">
+      Test out a bunch of performance hypotheses.
     </p>
 
     <h3 id="asyncSimulation">Async Simulation</h3>
@@ -4265,6 +4291,10 @@ flowchart TD
 %%    end
 %%    style outputs fill:transparent,stroke:transparent
     </pre>
+
+    <p class="TODO">
+      Read RAVG/Massive/Vello again, might switch to a technique more like that.
+    </p>
 
     <p class="TODO">
       Can we combine all of the reduces into one buffer?
