@@ -537,6 +537,8 @@
               <li><a href="#WGSL-preprocessing">Preprocessing</a></li>
               <li><a href="#WGSL-minification">Minification</a></li>
               <li><a href="#WGSL-mangling">Mangling</a></li>
+              <li><a href="#WGSL-algorithms">Algorithms</a></li>
+              <li><a href="#WGSL-profiling">Profiling</a></li>
             </ul>
           </li>
           <li><a href="#asyncSimulation">Async Simulation</a></li>
@@ -587,6 +589,14 @@
 
     <p class="TODO">
       Add TODO levels here, so we can flag critical/important ones. Also, make them searchable?
+    </p>
+
+    <p class="TODO">
+      Get the demos from demos.html moved into here, so we can ditch the old code.
+    </p>
+
+    <p class="TODO">
+      Improve styling, see <a href="https://getbootstrap.com/2.3.2/scaffolding.html">Old Bootstrap docs</a>.
     </p>
 
     <h3>Technology: Primarily WebGPU</h3>
@@ -1180,6 +1190,13 @@
 
     <p class="TODO">Edge-Clipped note about preservation of counts</p>
 
+    <p class="TODO">Circular clipping and other types. Write up dual concept of clipping.</p>
+
+    <p class="TODO">
+      Read Skala summary of clipping, see if I'm missing something. Also
+      <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9605407/">this looks valuable as an intro for others.</a>
+    </p>
+
     <h3 id="booleanOperations">Boolean Operations</h3>
 
     <p class="TODO">
@@ -1238,6 +1255,17 @@
         340, 300
       ) );
     </script>
+
+    <p class="TODO">
+      Extend this to other segment types.
+    </p>
+
+    <p class="TODO">
+      Local rationals! Don’t worry about approximate intersections. Just catch all intersections of rationalization
+      within zones where curves are close. Just get rational T values, points, tangents (the slopes of the rationalized
+      curves). We will be within epsilons anyway. Just act like the rational intersection is on it (for our
+      rasterization purposes)
+    </p>
 
     <h3 id="antialiasing">Anti-Aliasing</h3>
 
@@ -3107,7 +3135,9 @@
     <h3 id="WGSL">WGSL</h3>
 
     <p class="TODO">
-      <a href="https://github.com/wgsl-analyzer/wgsl-analyzer">wgsl-analyzer</a> our non-minified output!
+      <a href="https://github.com/wgsl-analyzer/wgsl-analyzer">wgsl-analyzer</a> our non-minified output! We can
+      potentially format output too. Can we have the analysis in JS, or can we run it independently? Currently capable
+      in VSCode.
     </p>
 
     <p class="TODO">
@@ -3155,6 +3185,202 @@
     <p class="TODO">
       Mangling needs to run on all of the shader code at once. We've implemented mangling for the Vello setup, but we
       need to implement it in the chipper transpiler.
+    </p>
+
+    <p class="TODO">
+      How do we get this running with our more templated solution? Is mangling that required for our setup?
+    </p>
+
+    <h4 id="WGSL-algorithms">Algorithms</h4>
+
+    <p class="TODO">
+      Read papers and books!
+    </p>
+
+    <p>
+      Examples, see <a href="https://stoneberry.dev/docs/api/">Stoneberry API</a>, <a href="https://github.com/moderngpu/moderngpu">modernGPU</a>.
+    </p>
+
+    <p>
+      <a href="https://developer.chrome.com/blog/new-in-webgpu-118/">WebGPU updates for Chrome</a>
+    </p>
+
+    <p>
+      For overlap:
+    </p>
+
+    <ol>
+      <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-1-whats-a-barrier/">What’s a Barrier?</a></li>
+      <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-2-synchronizing-gpu-threads/">Synchronizing GPU Threads</a></li>
+      <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-3-multiple-command-processors/">https://therealmjp.github.io/posts/breaking-down-barriers-part-3-multiple-command-processors/</a></li>
+      <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-4-gpu-preemption/">https://therealmjp.github.io/posts/breaking-down-barriers-part-4-gpu-preemption/</a></li>
+      <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-5-back-to-the-real-world/">https://therealmjp.github.io/posts/breaking-down-barriers-part-5-back-to-the-real-world/</a></li>
+      <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-6-experimenting-with-overlap-and-preemption/">https://therealmjp.github.io/posts/breaking-down-barriers-part-6-experimenting-with-overlap-and-preemption/</a></li>
+    </ol>
+
+    <p class="TODO">
+      IMPORTANT: uniform probably not helping us for the storage config case. Just use it as a storage buffer(!?)
+    </p>
+
+    <p class="TODO">
+      TEST with the overlap case WITH my performance profiling. See if it reports "parallel" handling.
+      PerformanceTesting.loopExpensiveMultiple().
+      THEN profile it with PIX to see if our profiling matches PIX.
+    </p>
+
+    <p class="TODO">
+      Can we get a pattern with BufferLogger/TimestampLogger that abstracts over how we're calling things? This would
+      be nice, ESPECIALLY if we can factor in some of the "abstract things out" that Stoneberry can do.
+    </p>
+
+    <p class="TODO">
+      A templating function multiply (for constants), that can replace with bit shifts where helpful?
+    </p>
+
+    <p class="TODO">
+      Clearly note where combine() is allowed to be commutative and where it's not (in the templates).
+      Better document templates.
+    </p>
+
+    <p class="TODO">
+      Allow subtract() in addition to combine() in templates, there are some cases where it might be more efficient to
+      compute (if that's allowed).
+    </p>
+
+    <p class="TODO">
+      Use <code>arrayLength</code> builtin, perhaps we can use it to range check more efficiently? This only sometimes
+      works, if we have filled the buffer fully?
+    </p>
+
+    <p class="TODO">
+      Check into <a href="https://github.com/greggman/webgpu-utils">https://github.com/greggman/webgpu-utils</a>,
+      could it work for WGSL struct offsets?
+      <a href="https://webgpufundamentals.org/webgpu/lessons/resources/wgsl-offset-computer.html#">Offset computer</a>
+    </p>
+
+    <p>
+      Some good examples of primitives: <a href="https://github.com/fynv/webgpu_math/tree/master/client">https://github.com/fynv/webgpu_math/tree/master/client</a>
+    </p>
+
+    <p>
+      Some demos: <a href="https://tellusim.com/webgpu/">https://tellusim.com/webgpu/</a>.
+    </p>
+
+    <p class="TODO">
+      Use <a href="https://developer.mozilla.org/en-US/docs/Web/API/GPUDevice/createComputePipelineAsync">createComputePipelineAsync</a>
+      to non-blockingly create the shaders?
+    </p>
+
+    <p class="TODO">
+      Factor out all of the associated code to render things to a Canvas texture (e.g. blitshader).
+    </p>
+
+    <p class="TODO">
+      Figure out buffer reuse to avoid zero-init cost and those issues.
+    </p>
+
+    <h5>Reduce</h5>
+
+    <p class="TODO">
+      Test with atomics (just a single level)
+    </p>
+
+    <p class="TODO">
+      Do more of a guarded condition, so that we can skip an entire workgroupBarrier? Examine Stoneberry.
+    </p>
+
+    <p class="TODO">
+      Performance test with the non-unrolled versions
+    </p>
+
+    <p>
+      ModernGPU notes on grain size: By choosing an odd number for VT we avoid bank conflicts that would otherwise be incurred when re-ordering data between strided and thread orders. Within a warp, all banks (VT * tid + i) % 32 are accessed exactly once for each step i when VT is odd. If VT is a power-of-two, you can expect VT-way conflicts at each step.
+    </p>
+
+    <p>
+      Check <a href="https://compute.toys/">https://compute.toys/</a> (ShaderToy for WebGPU) for potential examples.
+    </p>
+
+    <p>
+      <a href="https://simonbyrne.github.io/notes/fastmath/">Beware fast-math</a>
+    </p>
+
+    <p>
+      <a href="https://kieber-emmons.medium.com/optimizing-parallel-reduction-in-metal-for-apple-m1-8e8677b49b01">Metal Reduce</a>.
+    </p>
+
+    <h5>Scan</h5>
+
+    <p class="TODO">
+      Examine Stoneberry
+    </p>
+
+    <p>
+      <a href="https://kieber-emmons.medium.com/efficient-parallel-prefix-sum-in-metal-for-apple-m1-9e60b974d62">Metal Scan</a>.
+      Levien links: <a href="https://raphlinus.github.io/gpu/2021/11/17/prefix-sum-portable.html">newer</a>, <a href="https://raphlinus.github.io/gpu/2020/04/30/prefix-sum.html">older</a>.
+    </p>
+
+    <h5>Radix Sort</h5>
+
+    <p>
+      <a href="https://kieber-emmons.medium.com/memory-bandwidth-optimized-parallel-radix-sort-in-metal-for-apple-m1-and-beyond-4f4590cfd5d3">Metal Radix Sort</a>.
+    </p>
+
+    <p>
+      See <a href="https://github.com/fynv/webgpu_math/blob/master/client/radix_sort.js">example</a>, or
+      <a href="https://www.reddit.com/r/GraphicsProgramming/comments/14c7gok/parallel_radix_sort_confusions_options/">reddit note</a>.
+    </p>
+
+    <h5>Merge Sort</h5>
+
+    <p>
+      Might be possible, see <a href="https://moderngpu.github.io/mergesort.html">ModernGPU merge sort</a>.
+    </p>
+
+    <h5>Memory</h5>
+
+    <p>
+      See thoughts for <a href="https://github.com/linebender/vello/issues/366">Vello</a>.
+    </p>
+
+    <h4 id="WGSL-profiling">Profiling</h4>
+
+    <p>
+      Using PIX on Windows. See <a href="https://gist.github.com/Popov72/41f71cbf8d55f2cb8cae93f439eee347">https://gist.github.com/Popov72/41f71cbf8d55f2cb8cae93f439eee347</a>
+    </p>
+
+    <p>
+      See GPUProfiling and strategies. See also <a href="https://github.com/mighdoll/alpenbench">alpenbench</a>.
+    </p>
+
+    <p>
+      Try <a href="https://renderdoc.org/">RenderDoc</a>.
+    </p>
+
+    <p class="TODO">
+      Look for cases where we should turn array-of-structures into structure-of-arrays (e.g. striding) for better
+      memory access patterns.
+    </p>
+
+    <p>
+      Note: <code>--enable-dawn-features=allow_unsafe_apis</code> for when we're profiling.
+    </p>
+
+    <p>
+      Can we profile on Metal (on macBook), see <a href="https://developer.apple.com/documentation/xcode/optimizing-gpu-performance">https://developer.apple.com/documentation/xcode/optimizing-gpu-performance</a>.
+    </p>
+
+    <p>
+      <a href="https://developer.nvidia.com/gpugems/gpugems2/part-iv-general-purpose-computation-gpus-primer/chapter-35-gpu-program-optimization">Performance tips in general</a>,
+      <a href="https://developer.nvidia.com/blog/how-access-global-memory-efficiently-cuda-c-kernels/">Global memory efficiency</a>,
+      <a href="https://developer.nvidia.com/blog/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/">Grid stride loops</a>,
+      <a href="https://developer.nvidia.com/blog/the-peak-performance-analysis-method-for-optimizing-any-gpu-workload/">Performance analysis</a>,
+      <a href="https://gpuopen.com/learn/optimizing-gpu-occupancy-resource-usage-large-thread-groups/">Optimizing occupancy</a>,
+      <a href="https://www.kodeco.com/books/metal-by-tutorials/v3.0/chapters/32-best-practices">32 best practices</a>
+    </p>
+
+    <p class="TODO">
+      WebGL2 if possible, see <a href="https://webgl2fundamentals.org/webgl/lessons/webgl-gpgpu.html">Compute guide</a>
     </p>
 
     <h3 id="asyncSimulation">Async Simulation</h3>
