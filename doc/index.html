@@ -543,11 +543,13 @@
               <li><a href="#WGSL-radixSort">Radix Sort</a></li>
               <li><a href="#WGSL-mergeSort">Merge Sort</a></li>
               <li><a href="#WGSL-memory">Memory</a></li>
+              <li><a href="#WGSL-rationals">Rationals</a></li>
               <li><a href="#WGSL-profiling">Profiling</a></li>
             </ul>
           </li>
           <li><a href="#asyncSimulation">Async Simulation</a></li>
           <li><a href="#depthSort">Depth Sort</a></li>
+          <li><a href="#vectorCanvas">Vector Canvas</a></li>
         </ul>
       </li>
       <li>
@@ -598,6 +600,10 @@
 
     <p class="TODO">
       Get the demos from demos.html moved into here, so we can ditch the old code.
+    </p>
+
+    <p class="TODO">
+      Add "loading" indicators for the diagrams, so we don't trigger reflows.
     </p>
 
     <p class="TODO">
@@ -730,6 +736,10 @@
       window.addDiagram( 'conflation-svg', () => getConflation( 'svg', 100 ) );
       window.addDiagram( 'conflation-default', () => getConflation( 'default', 100 ) );
     </script>
+
+    <p>
+      Also see <a href="https://w3.impa.br/~diego/projects/GanEtAl14/sample.html?contour">more conflation examples</a>.
+    </p>
 
     <h2 id="concepts">Concepts</h2>
 
@@ -1213,6 +1223,10 @@
     <p class="TODO">
       Read Skala summary of clipping, see if I'm missing something. Also
       <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9605407/">this looks valuable as an intro for others.</a>
+    </p>
+
+    <p class="TODO">
+      Stripe clipping gets messed up with fake edges. Vaguely? Investigate.
     </p>
 
     <h3 id="booleanOperations">Boolean Operations</h3>
@@ -2705,6 +2719,8 @@
 
     <p class="TODO">Premultiplication section</p>
 
+    <p class="TODO">Gamma correction notes</p>
+
     <p class="TODO">sRGB and Display P3 --- Note the Display P3 color matrices (we could not find those online)</p>
 
     <p class="TODO">
@@ -2731,7 +2747,19 @@
     <p class="TODO">
       NOTE: That the CAG process is essentially just simplifying into a different RenderStack (RenderUnion, because it
       is disjoint?) with each RenderableFace included. And our rasterizer is also just a RenderProgram transform, giving
-      us a RenderableFace broken down to the pixel level.
+      us a RenderableFace broken down to the pixel level. Note that we split everything except for gradients/depth at the
+      first step, THEN we split gradients/depth. We could potentially generalize to different stages of splitting, OR
+      we could force splitting all at once.
+    </p>
+
+    <p class="TODO">
+      Allow more general computation, with conditionals, RenderPrograms that provide the x,y, Constant(n), all Vector4
+      for now (based on our stack for things). Possibly, can we auto-differentiate RenderPrograms?
+    </p>
+
+    <p class="TODO">
+      Generalized first-class rasterization: Implement gaussian blur / drop shadow, by executing an overfiltered copy,
+      then combine? This would require a lot more legwork to do.
     </p>
 
     <h4 id="RenderColor">RenderColor</h4>
@@ -3438,6 +3466,38 @@
       See thoughts for <a href="https://github.com/linebender/vello/issues/366">Vello</a>.
     </p>
 
+    <p class="TODO">
+      Bump allocation with atomics
+    </p>
+
+    <p class="TODO">
+      Have a buffer that gets flags set if we run out of memory, or run into various problematic issues. (Or unrelated
+      things like intersection hit rate).
+    </p>
+
+    <h4 id="WGSL-rationals">Rationals</h4>
+
+    <p class="TODO">
+      WE NEED to keep around our initial coordinates, or store something like that initially. Because otherwise,
+      comparing Q128 cross-multiply messes with our bit depth. We would need u64u64multto128, subtracti128, etc.
+      NOTE: If it is only an issue with sorting things with the same end, perhaps we could sort with floats and would
+      have enough precision?
+    </p>
+
+    <p class="TODO">
+      Use Karatsuba multiplication to get rid of another multiply.
+    </p>
+
+    <p class="TODO">
+      HOW CRAZY: If we allow representations of square roots, could we handle cubic bezier intersections precisely?
+      Get exact bounds? probably not everything - augment with floating point (especially for atan2) for fast angle
+      comparison? OR, what is the best way to compare angles? We can still compare slope, right?
+    </p>
+
+    <p>
+      Reference for bithacks: <a href="https://graphics.stanford.edu/~seander/bithacks.html">https://graphics.stanford.edu/~seander/bithacks.html</a>.
+    </p>
+
     <h4 id="WGSL-profiling">Profiling</h4>
 
     <p>
@@ -3458,11 +3518,16 @@
     </p>
 
     <p>
-      Note: <code>--enable-dawn-features=allow_unsafe_apis</code> for when we're profiling.
+      Note: <code>--enable-dawn-features=allow_unsafe_apis</code> for when we're profiling. Or
+      <code>open -a "Google Chrome Canary" --args --enable-dawn-features=allow_unsafe_apis</code> on macOS.
     </p>
 
     <p>
       Can we profile on Metal (on macBook), see <a href="https://developer.apple.com/documentation/xcode/optimizing-gpu-performance">https://developer.apple.com/documentation/xcode/optimizing-gpu-performance</a>.
+    </p>
+
+    <p class="TODO">
+      Optimize for MAD (multiply-add, one cycle).
     </p>
 
     <p>
@@ -3863,6 +3928,31 @@
       (Also for rasterization, we probably should NOT combine from separate tiles).
     </p>
 
+    <h3 id="vectorCanvas">Vector Canvas</h3>
+
+    <p class="TODO">
+      Partially implemented in <code>VectorCanvas</code>. Basically it's possible to create a vector-accurate representation
+      with our boolean operations. Any drawing operation will affect a (split) region, and it will update the RenderProgram in
+      that region. We'll simplify all of those, then can consolidate areas with the same RenderProgram back together.
+      For this to fully work nicely, we'd want to store the rational half edges permanently, and work in the rational
+      space.
+    </p>
+
+    <p class="TODO">
+      Radial and linear stuff in the vectorTest() uncommented can cause failures
+    </p>
+
+    <h3 id="testing">Testing</h3>
+
+    <p class="TODO">
+      More unit tests! Simplification. Clippers (fuzz, ensure we preserve area and are region-constricted). Compare to
+      SVG/Canvas. Fuzz the rasterizer. Fuzz RenderPrograms.
+    </p>
+
+    <p class="TODO">
+      Add assertions to make sure our faces have area that sums to the total!
+    </p>
+
     <h2 id="stages">Stages</h2>
 
     <h3 id="stage-transforms">Transforms</h3>
@@ -3982,6 +4072,30 @@
 
     <p>
       Potentially plan to use bump allocation on the GPU, with a linked list for each edge (with atomic operations).
+    </p>
+
+    <p class="TODO">
+      We are somewhat solving a "bounding box" intersection problem, but can we filter in a better way that solves the
+      "line segment intersection" problem? When we split a line segment, remember it gets split into two smaller
+      bounding boxes (not just splitting the large bounding box).
+    </p>
+
+    <p class="TODO">
+      How inexpensively can we test 45-degree-oriented bounding boxes? This might be worth it
+    </p>
+
+    <p class="TODO">
+      Flesh out that "alternative" plan in <code>BoundsIntersectionFilter</code>.
+    </p>
+
+    <p class="TODO">
+      Can we store information about contiguous lists of segments with no intersections? Like, from guaranteed inputs,
+      or from the same curved segment (when it's split into line segments) where we can guarantee no self-intersection?
+    </p>
+
+    <p class="TODO">
+      Can we use homogeneous coordinates in intersections/etc. to avoid lots of division? equality or sort is hard? Read
+      2005 Skala.
     </p>
 
     <h3 id="stage-split">Split</h3>
