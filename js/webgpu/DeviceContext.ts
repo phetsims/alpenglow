@@ -172,7 +172,7 @@ export default class DeviceContext {
           features.push( 'timestamp-query' );
         }
         else {
-          return null;
+          throw new Error( 'timestamp-query feature not available' );
         }
       }
 
