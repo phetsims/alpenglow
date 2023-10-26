@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/right_scan
+#import ../gpu/reduce
 #import ../gpu/load_blocked
 
 #option workgroupSize
@@ -39,13 +39,12 @@ fn main(
     inputSizeString: u32( inputSize )
   } )}
 
-  ${right_scan( {
+  ${reduce( {
     value: 'value',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
     identity: identity,
-    combine: combine,
-    skipLastScratch: true
+    combine: combine
   } )}
 
   if ( local_id.x == 0u ) {
