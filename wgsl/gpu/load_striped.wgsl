@@ -15,6 +15,8 @@ ${template( ( {
   grainSize,
   inputSizeString = null
 } ) => `
+  // TODO: Figure out a good solution for variable names. We'll want to be able to run this twice, and it is
+  // TODO: exposing these names
   ${
     inputSizeString === null ?
       `

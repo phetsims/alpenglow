@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_reduce_raked_blocked, wgsl_reduce_raked_striped, wgsl_reduce_raked_striped_blocked, wgsl_reduce_simple } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_reduce_raked_blocked, wgsl_reduce_raked_striped, wgsl_reduce_raked_striped_blocked, wgsl_reduce_raked_striped_blocked_convergent, wgsl_reduce_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -222,6 +222,62 @@ asyncTestWithDevice( 'reduce_raked_striped_blocked', async device => {
 
   const shader = ComputeShader.fromSource(
     device, 'reduce_raked_striped_blocked', wgsl_reduce_raked_striped_blocked, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      inputSize: inputSize,
+      identity: '0f',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
+    }
+  );
+
+  const inputBuffer = context.createBuffer( 4 * bufferSize );
+  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+
+  const outputBuffer = context.createBuffer( 4 );
+  const resultBuffer = context.createMapReadableBuffer( 4 );
+
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+  shader.dispatch( encoder, [
+    inputBuffer, outputBuffer
+  ] );
+
+  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+
+  const commandBuffer = encoder.finish();
+  device.queue.submit( [ commandBuffer ] );
+
+  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
+
+  inputBuffer.destroy();
+  outputBuffer.destroy();
+  resultBuffer.destroy();
+
+  const expectedValue = _.sum( numbers.slice( 0, inputSize ) );
+  const actualValue = outputArray[ 0 ];
+
+  if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
+    return `expected ${expectedValue}, actual ${actualValue}`;
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'reduce_raked_striped_blocked_convergent', async device => {
+  const workgroupSize = 256;
+  const grainSize = 4;
+  const bufferSize = workgroupSize * grainSize;
+  const inputSize = bufferSize - 27;
+
+  const numbers = _.range( 0, bufferSize ).map( () => random.nextDouble() );
+
+  const context = new DeviceContext( device );
+
+  const shader = ComputeShader.fromSource(
+    device, 'reduce_raked_striped_blocked_convergent', wgsl_reduce_raked_striped_blocked_convergent, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
