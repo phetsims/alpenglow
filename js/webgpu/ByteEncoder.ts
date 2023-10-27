@@ -295,6 +295,64 @@ export default class ByteEncoder {
            ( stripedIndex % workgroupSize ) * grainSize +
            Math.floor( localIndex / workgroupSize );
   }
+
+  /**
+   * Co-rank function, that determines the indices into two arrays that would be at a given rank if they were sorted
+   * together (with a binary search).
+   *
+   * It will return the index into the first array (A), and the index into the second array (B) would just be
+   * k - result.
+   *
+   * For example, if we have two arrays:
+   *
+   * const a = [ 0, 5, 7, 7, 10, 11, 15, 16, 16, 16, 17 ];
+   * const b = [ 1, 2, 5, 6, 7, 8, 9, 10, 11, 12, 13 ];
+   *
+   * and define our co-rank function:
+   * const get = k => phet.alpenglow.ByteEncoder.getCorank( k, a.length, b.length, ( i, j ) => a[ i ] - b[ j ] );
+   *
+   * The following will return a sorted array of the values from both arrays:
+   *
+   * _.range( 0, a.length + b.length ).map( k => {
+   *   if ( get( k ) !== get( k + 1 ) ) {
+   *     return a[ get( k ) ];
+   *   } else {
+   *     return b[ k - get( k ) ]
+   *   }
+   * } );
+   * // [0, 1, 2, 5, 5, 6, 7, 7, 7, 8, 9, 10, 10, 11, 11, 12, 13, 15, 16, 16, 16, 17]
+   *
+   * @param k
+   * @param m
+   * @param n
+   * @param compare
+   */
+  public static getCorank( k: number, m: number, n: number, compare: ( aIndex: number, bIndex: number ) => number ): number {
+    let i = Math.min( k, m );
+    let j = k - i;
+    let iLow = Math.max( 0, k - n );
+    let jLow = Math.max( 0, k - m );
+    let delta;
+    // eslint-disable-next-line no-constant-condition
+    while ( true ) {
+      if ( i > 0 && j < n && compare( i - 1, j ) > 0 ) {
+        delta = ( i - iLow + 1 ) >> 1;
+        jLow = j;
+        j = j + delta;
+        i = i - delta;
+      }
+      else if ( j > 0 && i < m && compare( i, j - 1 ) <= 0 ) {
+        delta = ( j - jLow + 1 ) >> 1;
+        iLow = i;
+        i = i + delta;
+        j = j - delta;
+      }
+      else {
+        break;
+      }
+    }
+    return i;
+  }
 }
 
 alpenglow.register( 'ByteEncoder', ByteEncoder );
