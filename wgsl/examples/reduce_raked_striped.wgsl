@@ -31,6 +31,7 @@ fn main(
 ) {
   ${load_striped( {
     value: `value`,
+    valueType: 'f32',
     load: i => `input[ ${i} ]`,
     identity: identity,
     combine: combine,

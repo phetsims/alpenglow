@@ -31,6 +31,7 @@ fn main(
 
   ${reduce( {
     value: 'value',
+    valueType: 'f32',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
     identity: identity,

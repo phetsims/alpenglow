@@ -8,6 +8,7 @@
 
 ${template( ( {
   value,
+  valueType,
   load,
   identity,
   combine,
@@ -15,25 +16,28 @@ ${template( ( {
   grainSize,
   inputSizeString = null
 } ) => `
-  var base_striped_index = workgroup_id.x * ${u32( workgroupSize * grainSize )} + local_id.x;
-  var ${value} = ${
-    inputSizeString === null ?
-      load( `base_striped_index` ) :
-      `select( ${identity}, ${load( `base_striped_index` )}, base_striped_index < ${inputSizeString} )`
-  };
+  var ${value}: ${valueType};
+  {
+    var base_striped_index = workgroup_id.x * ${u32( workgroupSize * grainSize )} + local_id.x;
+    ${value} = ${
+      inputSizeString === null ?
+        load( `base_striped_index` ) :
+        `select( ${identity}, ${load( `base_striped_index` )}, base_striped_index < ${inputSizeString} )`
+    };
 
-  // TODO: consider nesting?
-  ${unroll( 1, grainSize, i => `
-    {
-      let index = base_striped_index + ${u32( i * workgroupSize )};
-      ${value} = ${
-        combine(
-          value,
-          inputSizeString === null ?
-            load( `index` ) :
-            `select( ${identity}, ${load( `index` )}, index < ${inputSizeString} )`
-        )
-      };
-    }
-  ` )}
+    // TODO: consider nesting?
+    ${unroll( 1, grainSize, i => `
+      {
+        let index = base_striped_index + ${u32( i * workgroupSize )};
+        ${value} = ${
+          combine(
+            value,
+            inputSizeString === null ?
+              load( `index` ) :
+              `select( ${identity}, ${load( `index` )}, index < ${inputSizeString} )`
+          )
+        };
+      }
+    ` )}
+  }
 ` )}
