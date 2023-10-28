@@ -31,6 +31,8 @@ an UI and Display made for visual testing and debugging.
   <script src="../../sherpa/lib/TextEncoderLite-3c9f6f0.js"></script>
   <script src="../../sherpa/lib/base64-js-1.2.0.js"></script>
 
+  <script src="https://cdn.jsdelivr.net/gh/brendan-duncan/webgpu_recorder/webgpu_recorder.js"></script>
+
   <script type="text/javascript">
     window.assertions.enableAssert();
     window.assertions.enableAssertSlow();
@@ -859,6 +861,15 @@ an UI and Display made for visual testing and debugging.
       phet.alpenglow.GPUProfiling.test();
     } );
   };
+
+  window.brokenTest = function() {
+    setTimeout( async function() {
+      const recorder = new WebGPURecorder();
+      phet.alpenglow.BrokenTesting.test();
+      window.recordWebGPU = () => recorder._generateOutput();
+    } );
+  };
+  brokenTest();
 
   window.rasterTest = function() {
     setTimeout( async function() {

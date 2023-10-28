@@ -221,6 +221,8 @@ export { default as wgsl_inclusive_scan_raked_blocked_single } from '../wgsl/exa
 export { default as wgsl_exclusive_scan_raked_striped_single } from '../wgsl/examples/exclusive_scan_raked_striped_single.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_inclusive_scan_raked_striped_single } from '../wgsl/examples/inclusive_scan_raked_striped_single.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_i32_merge } from '../wgsl/examples/i32_merge.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
@@ -411,6 +413,7 @@ export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/Time
 export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';
+export { default as BrokenTesting } from './webgpu/BrokenTesting.js';
 export { default as GPUProfiling } from './webgpu/GPUProfiling.js';
 export { default as RasterClipper } from './webgpu/RasterClipper.js';
 export type { RasterClipperOptions } from './webgpu/RasterClipper.js';
