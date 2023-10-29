@@ -42,35 +42,41 @@ export default class BrokenTesting {
       }
     );
 
-    const aBuffer = context.createBuffer( 4 * a.length );
-    device.queue.writeBuffer( aBuffer, 0, new Int32Array( a ).buffer );
-    const bBuffer = context.createBuffer( 4 * b.length );
-    device.queue.writeBuffer( bBuffer, 0, new Int32Array( b ).buffer );
+    const step = async () => {
+      window.requestAnimationFrame( step );
 
-    const outputBuffer = context.createBuffer( 4 * length );
-    const resultBuffer = context.createMapReadableBuffer( 4 * length );
+      const aBuffer = context.createBuffer( 4 * a.length );
+      device.queue.writeBuffer( aBuffer, 0, new Int32Array( a ).buffer );
+      const bBuffer = context.createBuffer( 4 * b.length );
+      device.queue.writeBuffer( bBuffer, 0, new Int32Array( b ).buffer );
 
-    const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+      const outputBuffer = context.createBuffer( 4 * length );
+      const resultBuffer = context.createMapReadableBuffer( 4 * length );
 
-    shader.dispatch( encoder, [
-      aBuffer, bBuffer, outputBuffer
-    ], dispatchSize );
+      const encoder = device.createCommandEncoder( { label: 'the encoder' } );
 
-    encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+      shader.dispatch( encoder, [
+        aBuffer, bBuffer, outputBuffer
+      ], dispatchSize );
 
-    const commandBuffer = encoder.finish();
-    device.queue.submit( [ commandBuffer ] );
+      encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
 
-    const outputArray = await DeviceContext.getMappedIntArray( resultBuffer );
+      const commandBuffer = encoder.finish();
+      device.queue.submit( [ commandBuffer ] );
 
-    aBuffer.destroy();
-    bBuffer.destroy();
-    outputBuffer.destroy();
-    resultBuffer.destroy();
+      const outputArray = await DeviceContext.getMappedIntArray( resultBuffer );
 
-    const actualValue = [ ...outputArray ].slice( 0, length );
+      aBuffer.destroy();
+      bBuffer.destroy();
+      outputBuffer.destroy();
+      resultBuffer.destroy();
 
-    console.log( actualValue );
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const actualValue = [ ...outputArray ].slice( 0, length );
+
+      // console.log( actualValue );
+    };
+    await step();
   }
 }
 
