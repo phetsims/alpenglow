@@ -941,11 +941,6 @@ asyncTestWithDevice( 'i32_merge', async device => {
     const actual = actualValue[ i ];
 
     if ( Math.abs( expected - actual ) > 1e-4 ) {
-      // console.log( 'a', a );
-      // console.log( 'b', b );
-      // console.log( 'expected', expectedValue );
-      // console.log( 'actual', actualValue );
-      // debugger;
       return `${i}: expected ${expected}, actual ${actual}`;
     }
   }

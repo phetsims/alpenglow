@@ -20,27 +20,27 @@ var<storage> a: array<i32>;
 @group(0) @binding(1)
 var<storage> b: array<i32>;
 @group(0) @binding(2)
-var<storage, read_write> c: array<i32>;
+var<storage, read_write> output: array<i32>;
 
 @compute @workgroup_size(64)
 fn main( @builtin(global_invocation_id) global_id: vec3u ) {
-  let start_output = min( 2300u, global_id.x * 8u );
-  let end_output = min( 2300u, start_output + 8u );
-  if ( start_output != end_output ) {
-    var gc_i_low: u32 = select( 0u, end_output - 1000u, end_output > 1000u );
+  let start = global_id.x * 8u;
+  if ( start < 2300u ) {
+    let end = min( 2300u, start + 8u );
+    var a: u32 = select( 0u, end - 1000u, end > 1000u );
+    var b: u32 = select( end - 1000u, 0u, end <= 1000u );
     if ( global_id.x == 0u ) {
-      c[ 0u ] = i32( gc_i_low );
-      c[ 1u ] = select( 0i, 1i, i32( gc_i_low ) >= 0i );
-      c[ 2u ] = i32( start_output );
-      c[ 3u ] = i32( end_output );
-      c[ 4u] = i32( gc_i_low );
-      c[ 5u ] = 0i;
-      c[ 6u ] = -1000i;
-      c[ 7u ] = 1000i;
+      output[ 0u ] = i32( a );
+      output[ 1u ] = i32( b );
+      output[ 2u ] = select( 0i, 1i, i32( a ) >= 0i );
+      output[ 3u ] = select( 0i, 1i, i32( b ) >= 0i );
+      output[ 4u ] = i32( start );
+      output[ 5u ] = i32( end );
+      output[ 6u ] = -1000i;
+      output[ 7u ] = 1000i;
     }
   }
 }
-
 `});
   x7 = x4.createBindGroupLayout({"label":`i32_merge bindGroupLayout`,"entries":[{"binding":0,"visibility":4,"buffer":{"type":`read-only-storage`,"hasDynamicOffset":false}},{"binding":1,"visibility":4,"buffer":{"type":`read-only-storage`,"hasDynamicOffset":false}},{"binding":2,"visibility":4,"buffer":{"type":`storage`,"hasDynamicOffset":false}}]});
   x8 = x4.createPipelineLayout({"bindGroupLayouts":[x7]});

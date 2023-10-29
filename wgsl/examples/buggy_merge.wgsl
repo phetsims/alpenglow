@@ -1,6 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
+ * Example of a compute shader that triggers a buggy issue that might be in Metal. See get_corank for more information.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
