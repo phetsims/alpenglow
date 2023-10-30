@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_i32_merge, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_reduce_raked_blocked, wgsl_reduce_raked_striped, wgsl_reduce_raked_striped_blocked, wgsl_reduce_raked_striped_blocked_convergent, wgsl_reduce_simple } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_reduce_raked_blocked, wgsl_reduce_raked_striped, wgsl_reduce_raked_striped_blocked, wgsl_reduce_raked_striped_blocked_convergent, wgsl_reduce_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -883,7 +883,7 @@ asyncTestWithDevice( 'triple reduce_raked_blocked', async device => {
   return null;
 } );
 
-asyncTestWithDevice( 'i32_merge', async device => {
+asyncTestWithDevice( 'i32_merge_simple', async device => {
   const workgroupSize = 64;
   const grainSize = 8;
   const a = _.range( 0, 1300 ).map( () => random.nextIntBetween( 0, 2000 ) ).sort( ( a, b ) => a - b );
@@ -895,7 +895,7 @@ asyncTestWithDevice( 'i32_merge', async device => {
   const context = new DeviceContext( device );
 
   const shader = ComputeShader.fromSource(
-    device, 'i32_merge', wgsl_i32_merge, [
+    device, 'i32_merge_simple', wgsl_i32_merge_simple, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
