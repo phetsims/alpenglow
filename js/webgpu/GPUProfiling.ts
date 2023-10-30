@@ -14,6 +14,8 @@
  * TODO: try disable_workgroup_init sometime, to see if we can get more parallelism, maybe record_detailed_timing_in_trace_events, disable_timestamp_query_conversion
  * TODO: --disable-dawn-features=timestamp_quantization
  *
+ * Note: Dawn toggles at https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn/native/Toggles.cpp
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
