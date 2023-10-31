@@ -33,8 +33,8 @@ fn main(
   ${merge( {
     workgroupA: `scratch_a`,
     workgroupB: `scratch_b`,
-    loadFromA: indexA => `scratch_a[ ${indexA} ]`,
-    loadFromB: indexB => `scratch_b[ ${indexB} ]`,
+    loadFromA: indexA => `a[ ${indexA} ]`,
+    loadFromB: indexB => `b[ ${indexB} ]`,
     storeOutput: ( indexOutput, value ) => `c[ ${indexOutput} ] = ${value};`,
     lengthA: u32( lengthA ),
     lengthB: u32( lengthB ),

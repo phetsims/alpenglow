@@ -17,6 +17,7 @@
 
 var<workgroup> block_start_a: u32;
 var<workgroup> block_end_a: u32;
+// TODO: don't share these, we can compute easily?
 var<workgroup> block_start_b: u32;
 var<workgroup> block_end_b: u32;
 
@@ -198,11 +199,11 @@ ${template( ( {
             ),
             setFromA: ( indexOutput, indexA ) => storeOutput(
               `( ${indexOutput} + thread_start_output )`,
-              `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`
+              `${workgroupA}[ ( ${indexA} + processed_index_a + thread_relative_start_a ) % ${u32( sharedMemorySize )} ]`
             ),
             setFromB: ( indexOutput, indexB ) => storeOutput(
               `( ${indexOutput} + thread_start_output )`,
-              `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
+              `${workgroupB}[ ( ${indexB} + processed_index_b + thread_relative_start_b ) % ${u32( sharedMemorySize )} ]`
             )
           } )}
         }
@@ -230,6 +231,7 @@ ${template( ( {
 
         processed_index_a += consumed_a;
         processed_index_b += consumed_b;
+        iteration++;
       }
     }
   }
