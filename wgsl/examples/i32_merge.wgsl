@@ -36,6 +36,7 @@ fn main(
     loadFromA: indexA => `a[ ${indexA} ]`,
     loadFromB: indexB => `b[ ${indexB} ]`,
     storeOutput: ( indexOutput, value ) => `c[ ${indexOutput} ] = ${value};`,
+//    storeOutput: ( indexOutput, value ) => ``,
     lengthA: u32( lengthA ),
     lengthB: u32( lengthB ),
     workgroupSize: workgroupSize,
@@ -43,6 +44,7 @@ fn main(
     sharedMemorySize: sharedMemorySize,
     compare: ( valueA, valueB ) => `${valueA} - ${valueB}`,
     greaterThan: ( valueA, valueB ) => `${valueA} > ${valueB}`,
-    lessThanOrEqual: ( valueA, valueB ) => `${valueA} <= ${valueB}`
+    lessThanOrEqual: ( valueA, valueB ) => `${valueA} <= ${valueB}`,
+    atomicConsumed: true
   } )}
 }

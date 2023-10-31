@@ -15,6 +15,11 @@
 
 #bindings
 
+#ifndef corankConsumed
+var<workgroup> consumed_a: atomic<u32>;
+var<workgroup> consumed_b: atomic<u32>;
+#endif
+
 var<workgroup> block_start_a: u32;
 var<workgroup> block_end_a: u32;
 // TODO: don't share these, we can compute easily?
@@ -38,7 +43,8 @@ ${template( ( {
   sharedMemorySize, // number - should be a divisor of blockOutputSize, and ideally a multiple of workgroupSize
   compare, // ( valueA, valueB ) => {-1, 0, 1} --- takes expressions (not just names)
   greaterThan, // ( valueA, valueB ) => bool --- used instead of compare if provided
-  lessThanOrEqual // ( valueA, valueB ) => bool --- used instead of compare if provided
+  lessThanOrEqual, // ( valueA, valueB ) => bool --- used instead of compare if provided
+  atomicConsumed = true
 } ) => `
   ${( assert && assert( Number.isInteger( blockOutputSize / sharedMemorySize ) ) ), ''}
   ${( assert && assert( Number.isInteger( sharedMemorySize / workgroupSize ) ) ), ''}
@@ -92,8 +98,9 @@ ${template( ( {
 
         // NOTE: two different unrolled loops here, so we (a) go memory accesses more in order, and (b) fewer registers
 
+        // TODO: don't issue READs past our lengthA/lengthB
         // Load "A" values into workgroup memory
-        let loading_a_quantity = min( block_end_a - loaded_index_a, ${u32( sharedMemorySize )} );
+        let loading_a_quantity = min( min( block_end_a, processed_index_a + ${u32( sharedMemorySize )} ) - loaded_index_a, ${u32( sharedMemorySize )} );
         ${unroll( 0, Math.ceil( sharedMemorySize / workgroupSize ), i => `
           {
             // TODO: consider more unique names, so they don't conflict with our loads/etc.
@@ -107,7 +114,7 @@ ${template( ( {
         loaded_index_a += loading_a_quantity;
 
         // Load "B" values into workgroup memory
-        let loading_b_quantity = min( block_end_b - loaded_index_b, ${u32( sharedMemorySize )} );
+        let loading_b_quantity = min( min( block_end_b, processed_index_b + ${u32( sharedMemorySize )} ) - loaded_index_b, ${u32( sharedMemorySize )} );
         ${unroll( 0, Math.ceil( sharedMemorySize / workgroupSize ), i => `
           {
             // TODO: consider more unique names, so they don't conflict with our loads/etc.
@@ -119,6 +126,13 @@ ${template( ( {
           }
         ` )}
         loaded_index_b += loading_b_quantity;
+
+        ${atomicConsumed ? `
+          if ( local_id.x == 0u ) {
+            atomicStore( &consumed_a, 0u );
+            atomicStore( &consumed_b, 0u );
+          }
+        ` : ``}
 
         workgroupBarrier();
 
@@ -183,11 +197,20 @@ ${template( ( {
             ) ) : undefined
           } )}
 
+          // Compensation for if we go past the end of the block
+//          thread_relative_start_a = min( thread_relative_start_a, ${lengthA} );
+//          thread_relative_end_a = min( thread_relative_end_a, ${lengthA} );
+
           let thread_relative_start_b = output_relative_start - thread_relative_start_a;
           let thread_relative_end_b = output_relative_end - thread_relative_end_a;
 
           let thread_length_a = thread_relative_end_a - thread_relative_start_a;
           let thread_length_b = thread_relative_end_b - thread_relative_start_b;
+
+          ${atomicConsumed ? `
+            atomicAdd( &consumed_a, thread_length_a );
+            atomicAdd( &consumed_b, thread_length_b );
+          ` : ``}
 
           ${merge_sequential( {
             lengthA: `thread_length_a`,
@@ -206,31 +229,51 @@ ${template( ( {
               `${workgroupB}[ ( ${indexB} + processed_index_b + thread_relative_start_b ) % ${u32( sharedMemorySize )} ]`
             )
           } )}
+
+//          c[ thread_start_output ] = i32( thread_end_output ) - i32( thread_start_output );
+//          c[ thread_start_output ] = i32( processed_index_b + thread_relative_start_b );
+//          c[ thread_start_output ] = i32( processed_index_b );
+//          c[ thread_start_output ] = i32( processed_index_a + thread_relative_start_a );
+//          c[ thread_start_output + 1 ] = i32( processed_index_b + thread_relative_start_b );
         }
 
-        // NOTE: The output will be invalid once we're past the end of the block, but we don't care(?)
-        ${get_corank( {
-          value: `consumed_a`,
-          outputIndex: u32( sharedMemorySize ),
-          lengthA: u32( sharedMemorySize ),
-          lengthB: u32( sharedMemorySize ),
-          compare: compare ? ( ( indexA, indexB ) => compare(
-            `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
-            `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
-          ) ) : undefined,
-          greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
-            `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
-            `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
-          ) ) : undefined,
-          lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
-            `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
-            `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
-          ) ) : undefined
-        } )}
-        let consumed_b = ${u32( sharedMemorySize )} - consumed_a;
+        ${atomicConsumed ? `
+          workgroupBarrier();
+          processed_index_a += atomicLoad( &consumed_a );
+          processed_index_b += atomicLoad( &consumed_b );
+        ` : `
+          // TODO: We don't seem to be getting the correct values out of here(!)
+          // NOTE: The output will be invalid once we're past the end of the block, but we don't care(?)
+          ${get_corank( {
+            value: `consumed_a`,
+            outputIndex: u32( sharedMemorySize ),
+            lengthA: u32( sharedMemorySize ),
+            lengthB: u32( sharedMemorySize ),
+            compare: compare ? ( ( indexA, indexB ) => compare(
+              `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
+              `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
+            ) ) : undefined,
+            greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
+              `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
+              `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
+            ) ) : undefined,
+            lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
+              `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
+              `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
+            ) ) : undefined
+          } )}
 
-        processed_index_a += consumed_a;
-        processed_index_b += consumed_b;
+          // Attempt to compensate for the incorrect consumed_a
+          // TODO: we really do need a correct value out of the above in this case.... Actually just try atomics
+          if ( consumed_a + processed_index_a > block_end_a ) {
+            consumed_a = block_end_a - processed_index_a;
+          }
+
+          let consumed_b = ${u32( sharedMemorySize )} - consumed_a;
+
+          processed_index_a += consumed_a;
+          processed_index_b += consumed_b;
+        `}
         iteration++;
       }
     }
