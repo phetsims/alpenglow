@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_reduce_raked_blocked, wgsl_reduce_raked_striped, wgsl_reduce_raked_striped_blocked, wgsl_reduce_raked_striped_blocked_convergent, wgsl_reduce_simple } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_reduce_raked_blocked, wgsl_reduce_raked_striped, wgsl_reduce_raked_striped_blocked, wgsl_reduce_raked_striped_blocked_convergent, wgsl_reduce_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -941,6 +941,75 @@ asyncTestWithDevice( 'i32_merge_simple', async device => {
     const actual = actualValue[ i ];
 
     if ( Math.abs( expected - actual ) > 1e-4 ) {
+      return `${i}: expected ${expected}, actual ${actual}`;
+    }
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'i32_merge', async device => {
+  const workgroupSize = 64;
+  const sharedMemorySize = workgroupSize * 4;
+  const blockOutputSize = sharedMemorySize * 2;
+  const a = _.range( 0, 1300 ).map( () => random.nextIntBetween( 0, 2000 ) ).sort( ( a, b ) => a - b );
+  const b = _.range( 0, 1000 ).map( () => random.nextIntBetween( 0, 2000 ) ).sort( ( a, b ) => a - b );
+
+  const length = a.length + b.length;
+  const dispatchSize = Math.ceil( length / blockOutputSize );
+
+  const context = new DeviceContext( device );
+
+  const shader = ComputeShader.fromSource(
+    device, 'i32_merge', wgsl_i32_merge, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      sharedMemorySize: sharedMemorySize,
+      blockOutputSize: blockOutputSize,
+      lengthA: a.length,
+      lengthB: b.length
+    }
+  );
+
+  const aBuffer = context.createBuffer( 4 * a.length );
+  device.queue.writeBuffer( aBuffer, 0, new Int32Array( a ).buffer );
+  const bBuffer = context.createBuffer( 4 * b.length );
+  device.queue.writeBuffer( bBuffer, 0, new Int32Array( b ).buffer );
+
+  const outputBuffer = context.createBuffer( 4 * length );
+  const resultBuffer = context.createMapReadableBuffer( 4 * length );
+
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+  shader.dispatch( encoder, [
+    aBuffer, bBuffer, outputBuffer
+  ], dispatchSize );
+
+  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+
+  const commandBuffer = encoder.finish();
+  device.queue.submit( [ commandBuffer ] );
+
+  const outputArray = await DeviceContext.getMappedIntArray( resultBuffer );
+
+  aBuffer.destroy();
+  bBuffer.destroy();
+  outputBuffer.destroy();
+  resultBuffer.destroy();
+
+  const expectedValue = [ ...a, ...b ].sort( ( a, b ) => a - b );
+  const actualValue = [ ...outputArray ].slice( 0, length );
+
+  for ( let i = 0; i < length; i++ ) {
+    const expected = expectedValue[ i ];
+    const actual = actualValue[ i ];
+
+    if ( Math.abs( expected - actual ) > 1e-4 ) {
+      console.log( expectedValue );
+      console.log( actualValue );
       return `${i}: expected ${expected}, actual ${actual}`;
     }
   }

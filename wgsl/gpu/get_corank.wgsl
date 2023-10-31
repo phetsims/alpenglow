@@ -35,10 +35,10 @@ ${template( ( {
     var gc_delta: u32;
 
     // TODO: remove oops_count
-    var oops_count = 0u;
+    var oops_count_corank = 0u;
     while ( true ) {
-      oops_count++;
-      if ( oops_count > 0xffu ) {
+      oops_count_corank++;
+      if ( oops_count_corank > 0xffu ) {
         break;
       }
 

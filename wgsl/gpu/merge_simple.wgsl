@@ -14,13 +14,13 @@ ${template( ( {
   lengthB, // expression: u32
   setFromA, // ( indexOutput, indexA ) => void
   setFromB, // ( indexOutput, indexB ) => void
-  grainSize, // expression: u32
+  grainSize, // number
   compare, // ( indexA, indexB ) => {-1, 0, 1} --- takes expressions (not just names)
   greaterThan, // ( indexA, indexB ) => bool --- used instead of compare if provided
   lessThanOrEqual // ( indexA, indexB ) => bool --- used instead of compare if provided
 } ) => `
   {
-    // TODO: don't assume a specific linear workgroup size?
+    // TODO: don't assume a specific linear workgroup size? -- use local_invocation_index?
     let max_output = ${lengthA} + ${lengthB};
     let start_output = min( max_output, global_id.x * ${u32( grainSize )} );
     let end_output = min( max_output, start_output + ${u32( grainSize )} );
