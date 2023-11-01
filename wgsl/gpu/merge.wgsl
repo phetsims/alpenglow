@@ -4,7 +4,7 @@
  * A template that merges together two sorted arrays into a single sorted array.
  *
  * This version uses block-level loading (for memory coalescing) and circular buffers noted in
- * "Programming Massively Parallel Processors".
+ * "Programming Massively Parallel Processors" by Hwu, Kirk and Hajj.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

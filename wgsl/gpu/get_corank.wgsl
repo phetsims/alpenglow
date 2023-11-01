@@ -9,6 +9,8 @@
  *
  * See ByteEncoder.getCorank for more information.
  *
+ * Somewhat adapted from "Programming Massively Parallel Processors" by Hwu, Kirk and Hajj
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -30,6 +32,7 @@ ${template( ( {
     // NOTE: Parameter order and boolean swapped here to avoid a bug in Metal
     // See i32-test.html (reports out -992 buggily, where it takes the wrong branch of the select statement), or
     // buggy_merge.wgsl.
+    // Bug report is https://bugs.chromium.org/p/tint/issues/detail?id=2087 (thanks James Price!)
     var gc_i_low: u32 = select( ${outputIndex} - ${lengthB}, 0u, ${outputIndex} <= ${lengthB} );
     var gc_j_low = select( ${outputIndex} - ${lengthA}, 0u, ${outputIndex} <= ${lengthA} );
     var gc_delta: u32;
