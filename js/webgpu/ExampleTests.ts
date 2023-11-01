@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_reduce_raked_blocked, wgsl_reduce_raked_striped, wgsl_reduce_raked_striped_blocked, wgsl_reduce_raked_striped_blocked_convergent, wgsl_reduce_simple } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -44,7 +44,7 @@ const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice ) => Promi
   } );
 };
 
-asyncTestWithDevice( 'reduce_simple', async device => {
+asyncTestWithDevice( 'f32_reduce_simple', async device => {
   const workgroupSize = 256;
   const inputSize = workgroupSize - 27;
 
@@ -53,7 +53,7 @@ asyncTestWithDevice( 'reduce_simple', async device => {
   const context = new DeviceContext( device );
 
   const shader = ComputeShader.fromSource(
-    device, 'reduce_simple', wgsl_reduce_simple, [
+    device, 'f32_reduce_simple', wgsl_f32_reduce_simple, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -97,7 +97,7 @@ asyncTestWithDevice( 'reduce_simple', async device => {
   return null;
 } );
 
-asyncTestWithDevice( 'reduce_raked_blocked', async device => {
+asyncTestWithDevice( 'f32_reduce_raked_blocked', async device => {
   const workgroupSize = 256;
   const grainSize = 4;
   const bufferSize = workgroupSize * grainSize;
@@ -108,7 +108,7 @@ asyncTestWithDevice( 'reduce_raked_blocked', async device => {
   const context = new DeviceContext( device );
 
   const shader = ComputeShader.fromSource(
-    device, 'reduce_raked_blocked', wgsl_reduce_raked_blocked, [
+    device, 'f32_reduce_raked_blocked', wgsl_f32_reduce_raked_blocked, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -153,7 +153,7 @@ asyncTestWithDevice( 'reduce_raked_blocked', async device => {
   return null;
 } );
 
-asyncTestWithDevice( 'reduce_raked_striped', async device => {
+asyncTestWithDevice( 'f32_reduce_raked_striped', async device => {
   const workgroupSize = 256;
   const grainSize = 4;
   const bufferSize = workgroupSize * grainSize;
@@ -165,7 +165,7 @@ asyncTestWithDevice( 'reduce_raked_striped', async device => {
   const context = new DeviceContext( device );
 
   const shader = ComputeShader.fromSource(
-    device, 'reduce_raked_striped', wgsl_reduce_raked_striped, [
+    device, 'f32_reduce_raked_striped', wgsl_f32_reduce_raked_striped, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -210,7 +210,7 @@ asyncTestWithDevice( 'reduce_raked_striped', async device => {
   return null;
 } );
 
-asyncTestWithDevice( 'reduce_raked_striped_blocked', async device => {
+asyncTestWithDevice( 'f32_reduce_raked_striped_blocked', async device => {
   const workgroupSize = 256;
   const grainSize = 4;
   const bufferSize = workgroupSize * grainSize;
@@ -221,7 +221,7 @@ asyncTestWithDevice( 'reduce_raked_striped_blocked', async device => {
   const context = new DeviceContext( device );
 
   const shader = ComputeShader.fromSource(
-    device, 'reduce_raked_striped_blocked', wgsl_reduce_raked_striped_blocked, [
+    device, 'f32_reduce_raked_striped_blocked', wgsl_f32_reduce_raked_striped_blocked, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -266,7 +266,7 @@ asyncTestWithDevice( 'reduce_raked_striped_blocked', async device => {
   return null;
 } );
 
-asyncTestWithDevice( 'reduce_raked_striped_blocked_convergent', async device => {
+asyncTestWithDevice( 'f32_reduce_raked_striped_blocked_convergent', async device => {
   const workgroupSize = 256;
   const grainSize = 4;
   const bufferSize = workgroupSize * grainSize;
@@ -277,7 +277,7 @@ asyncTestWithDevice( 'reduce_raked_striped_blocked_convergent', async device => 
   const context = new DeviceContext( device );
 
   const shader = ComputeShader.fromSource(
-    device, 'reduce_raked_striped_blocked_convergent', wgsl_reduce_raked_striped_blocked_convergent, [
+    device, 'f32_reduce_raked_striped_blocked_convergent', wgsl_f32_reduce_raked_striped_blocked_convergent, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -640,7 +640,7 @@ asyncTestWithDevice( 'inclusive_scan_raked_striped_single', async device => {
   return null;
 } );
 
-asyncTestWithDevice( 'double reduce_simple', async device => {
+asyncTestWithDevice( 'double f32_reduce_simple', async device => {
   const workgroupSize = 256;
   const inputSize = workgroupSize * workgroupSize - 27 * 301;
 
@@ -649,7 +649,7 @@ asyncTestWithDevice( 'double reduce_simple', async device => {
   const context = new DeviceContext( device );
 
   const shader0 = ComputeShader.fromSource(
-    device, 'reduce_simple 0', wgsl_reduce_simple, [
+    device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -660,7 +660,7 @@ asyncTestWithDevice( 'double reduce_simple', async device => {
     }
   );
   const shader1 = ComputeShader.fromSource(
-    device, 'reduce_simple 1', wgsl_reduce_simple, [
+    device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -709,7 +709,7 @@ asyncTestWithDevice( 'double reduce_simple', async device => {
   return null;
 } );
 
-asyncTestWithDevice( 'triple reduce_simple', async device => {
+asyncTestWithDevice( 'triple f32_reduce_simple', async device => {
   const workgroupSize = 256;
   const inputSize = workgroupSize * workgroupSize * 27 - 27 * 301;
 
@@ -718,7 +718,7 @@ asyncTestWithDevice( 'triple reduce_simple', async device => {
   const context = new DeviceContext( device );
 
   const shader0 = ComputeShader.fromSource(
-    device, 'reduce_simple 0', wgsl_reduce_simple, [
+    device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -729,7 +729,7 @@ asyncTestWithDevice( 'triple reduce_simple', async device => {
     }
   );
   const shader1 = ComputeShader.fromSource(
-    device, 'reduce_simple 1', wgsl_reduce_simple, [
+    device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -740,7 +740,7 @@ asyncTestWithDevice( 'triple reduce_simple', async device => {
     }
   );
   const shader2 = ComputeShader.fromSource(
-    device, 'reduce_simple 2', wgsl_reduce_simple, [
+    device, 'f32_reduce_simple 2', wgsl_f32_reduce_simple, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -794,7 +794,7 @@ asyncTestWithDevice( 'triple reduce_simple', async device => {
   return null;
 } );
 
-asyncTestWithDevice( 'triple reduce_raked_blocked', async device => {
+asyncTestWithDevice( 'triple f32_reduce_raked_blocked', async device => {
   const workgroupSize = 256;
   const grainSize = 5;
   const inputSize = workgroupSize * workgroupSize * 27 - 27 * 301;
@@ -804,7 +804,7 @@ asyncTestWithDevice( 'triple reduce_raked_blocked', async device => {
   const context = new DeviceContext( device );
 
   const shader0 = ComputeShader.fromSource(
-    device, 'reduce_raked_blocked 0', wgsl_reduce_raked_blocked, [
+    device, 'f32_reduce_raked_blocked 0', wgsl_f32_reduce_raked_blocked, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -816,7 +816,7 @@ asyncTestWithDevice( 'triple reduce_raked_blocked', async device => {
     }
   );
   const shader1 = ComputeShader.fromSource(
-    device, 'reduce_raked_blocked 1', wgsl_reduce_raked_blocked, [
+    device, 'f32_reduce_raked_blocked 1', wgsl_f32_reduce_raked_blocked, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {
@@ -828,7 +828,7 @@ asyncTestWithDevice( 'triple reduce_raked_blocked', async device => {
     }
   );
   const shader2 = ComputeShader.fromSource(
-    device, 'reduce_raked_blocked 2', wgsl_reduce_raked_blocked, [
+    device, 'f32_reduce_raked_blocked 2', wgsl_f32_reduce_raked_blocked, [
       Binding.READ_ONLY_STORAGE_BUFFER,
       Binding.STORAGE_BUFFER
     ], {

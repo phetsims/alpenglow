@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/left_scan
+#import ../../gpu/left_scan
 
 #option workgroupSize
 

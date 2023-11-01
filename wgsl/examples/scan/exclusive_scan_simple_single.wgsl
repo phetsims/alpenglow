@@ -4,15 +4,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/reduce_convergent
-#import ../gpu/load_striped_blocked
+#import ../../gpu/left_scan
 
 #option workgroupSize
-#option grainSize
-#option inputSize
-
-#option identity
-#option combine
 
 @group(0) @binding(0)
 var<storage> input: array<f32>;
@@ -29,26 +23,16 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  ${load_striped_blocked( {
-    value: `value`,
-    valueType: 'f32',
-    load: i => `input[ ${i} ]`,
-    identity: identity,
-    combine: combine,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    inputSizeString: u32( inputSize )
-  } )}
+  var value = input[ global_id.x ];
 
-  ${reduce_convergent( {
+  ${left_scan( {
     value: 'value',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
-    identity: identity,
-    combine: combine
+    identity: '0f',
+    combine: ( a, b ) => `${a} + ${b}`,
+    exclusive: true
   } )}
 
-  if ( local_id.x == 0u ) {
-    output[ workgroup_id.x ] = value;
-  }
+  output[ local_id.x ] = value;
 }

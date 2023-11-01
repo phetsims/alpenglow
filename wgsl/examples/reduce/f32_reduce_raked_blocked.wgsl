@@ -4,9 +4,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/reduce
+#import ../../gpu/reduce
+#import ../../gpu/load_blocked
 
 #option workgroupSize
+#option grainSize
 #option inputSize
 
 #option identity
@@ -27,11 +29,19 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  var value = select( ${identity}, input[ global_id.x ], global_id.x < ${u32( inputSize )} );
+
+  ${load_blocked( {
+    value: `value`,
+    valueType: 'f32',
+    load: i => `input[ ${i} ]`,
+    identity: identity,
+    combine: combine,
+    grainSize: grainSize,
+    inputSizeString: u32( inputSize )
+  } )}
 
   ${reduce( {
     value: 'value',
-    valueType: 'f32',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
     identity: identity,

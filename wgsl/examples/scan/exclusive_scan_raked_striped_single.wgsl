@@ -4,9 +4,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/left_scan
+#import ../../gpu/left_scan
 
 #option workgroupSize
+#option grainSize
+
+fn identity() -> f32 {
+  return 0.0;
+}
+
+fn combine( a: f32, b: f32 ) -> f32 {
+  return a + b;
+}
 
 @group(0) @binding(0)
 var<storage> input: array<f32>;
@@ -23,7 +32,11 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  var value = input[ global_id.x ];
+  var baseIndex = workgroup_id.x * ${u32( workgroupSize * grainSize )} + local_id.x;
+  var value = input[ baseIndex ];
+  for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
+    value = combine( value, input[ baseIndex + i * ${u32( workgroupSize )} ] );
+  }
 
   ${left_scan( {
     value: 'value',
@@ -34,5 +47,9 @@ fn main(
     exclusive: true
   } )}
 
-  output[ local_id.x ] = value;
+  for ( var i = 0u; i < ${u32( grainSize )}; i++ ) {
+    output[ baseIndex + i * ${u32( workgroupSize )} ] = value;
+    value = combine( value, input[ baseIndex + i * ${u32( workgroupSize )} ] );
+    // TODO: when unrolling, can remove this last one
+  }
 }

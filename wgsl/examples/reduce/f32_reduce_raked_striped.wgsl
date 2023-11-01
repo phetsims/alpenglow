@@ -4,8 +4,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/reduce
-#import ../gpu/load_striped
+#import ../../gpu/reduce
+#import ../../gpu/load_striped
 
 #option workgroupSize
 #option grainSize

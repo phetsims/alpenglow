@@ -4,18 +4,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/left_scan
+#import ../../gpu/reduce
+#import ../../gpu/load_striped_blocked
 
 #option workgroupSize
 #option grainSize
+#option inputSize
 
-fn identity() -> f32 {
-  return 0.0;
-}
-
-fn combine( a: f32, b: f32 ) -> f32 {
-  return a + b;
-}
+#option identity
+#option combine
 
 @group(0) @binding(0)
 var<storage> input: array<f32>;
@@ -32,24 +29,26 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  var baseIndex = global_id.x * ${u32( grainSize )};
-  var value = input[ baseIndex ];
-  for ( var i = 1u; i < ${u32( grainSize )}; i++ ) {
-    value = combine( value, input[ baseIndex + i ] );
-  }
+  ${load_striped_blocked( {
+    value: `value`,
+    valueType: 'f32',
+    load: i => `input[ ${i} ]`,
+    identity: identity,
+    combine: combine,
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    inputSizeString: u32( inputSize )
+  } )}
 
-  ${left_scan( {
+  ${reduce( {
     value: 'value',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
-    identity: '0f',
-    combine: ( a, b ) => `${a} + ${b}`,
-    exclusive: true
+    identity: identity,
+    combine: combine
   } )}
 
-  for ( var i = 0u; i < ${u32( grainSize )}; i++ ) {
-    output[ baseIndex + i ] = value;
-    value = combine( value, input[ baseIndex + i ] );
-    // TODO: when unrolling, can remove this last one
+  if ( local_id.x == 0u ) {
+    output[ workgroup_id.x ] = value;
   }
 }

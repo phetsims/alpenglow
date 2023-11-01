@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/merge_simple
+#import ../../gpu/merge_simple
 
 #option workgroupSize
 #option grainSize
