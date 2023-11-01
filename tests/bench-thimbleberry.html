@@ -48,8 +48,7 @@
   import '../../chipper/dist/js/utterance-queue/js/main.js';
   import { // eslint-disable-line single-line-import
     benchRunner,
-    gpuTiming,
-    initGpuTiming
+    gpuTiming
   } from '../node_modules/thimbleberry/dist/thimbleberry.js';
   import { // eslint-disable-line single-line-import
     Binding,
@@ -70,8 +69,6 @@
   };
 
   const getReduceSimpleShader = ( device, workgroupSize, numbers ) => {
-    initGpuTiming( device );
-
     const deviceContext = new DeviceContext( device );
 
     const inputSize = numbers.length;
@@ -127,8 +124,6 @@
           shader2.dispatch( encoder, [
             secondMiddleBuffer, outputBuffer
           ], 1, 1, 1, getDispatchOptions( 'reduce 2' ) );
-
-          // TODO: get a READ from the buffer? It might not execute otherwise?
         },
         destroy: () => {
           inputBuffer.destroy();
@@ -142,8 +137,6 @@
   };
 
   const getReduceRakedStripedBlockedConvergentShader = ( device, workgroupSize, numbers, grainSize ) => {
-    initGpuTiming( device );
-
     const deviceContext = new DeviceContext( device );
 
     const inputSize = numbers.length;
@@ -200,8 +193,6 @@
           shader2.dispatch( encoder, [
             secondMiddleBuffer, outputBuffer
           ], 1, 1, 1, getDispatchOptions( 'reduce 2' ) );
-
-          // TODO: get a READ from the buffer? It might not execute otherwise?
         },
         destroy: () => {
           inputBuffer.destroy();
