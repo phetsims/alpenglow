@@ -5,6 +5,9 @@
  *
  * NOTE: Launch Chrome with the below command line parameters to enable the timestamp query feature:
  *
+ * open -a "Google Chrome Canary" --args --enable-dawn-features=allow_unsafe_apis --enable-webgpu-developer-features --disable-dawn-features=timestamp_quantization
+ *
+ * or to dump shaders also:
  * open -a "Google Chrome Canary" --args --enable-dawn-features=allow_unsafe_apis,dump_shaders --enable-webgpu-developer-features --disable-dawn-features=timestamp_quantization
  *
  * NOTE: Potentially add dump_shaders - Dumped shaders will be log via EmitLog, thus printed "

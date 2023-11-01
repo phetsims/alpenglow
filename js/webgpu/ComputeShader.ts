@@ -16,7 +16,9 @@ export type ComputeShaderOptions = {
 };
 
 export type ComputeShaderDispatchOptions = {
+  // Mutually exclusive options
   timestampLogger?: TimestampLogger | null;
+  timestampWrites?: GPUComputePassTimestampWrites | null;
 };
 
 const DEFAULT_OPTIONS = {
@@ -24,7 +26,8 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 const DEFAULT_DISPATCH_OPTIONS = {
-  timestampLogger: null
+  timestampLogger: null,
+  timestampWrites: null
 } as const;
 
 export default class ComputeShader {
@@ -113,7 +116,7 @@ export default class ComputeShader {
     const options = optionize3<ComputeShaderDispatchOptions>()( {}, DEFAULT_DISPATCH_OPTIONS, providedOptions );
 
     const computePass = encoder.beginComputePass( this.getComputePassDescriptor(
-      false, options.timestampLogger
+      false, options.timestampLogger, options.timestampWrites
     ) );
     computePass.setPipeline( this.pipeline );
     computePass.setBindGroup( 0, this.getBindGroup( resources ) );
@@ -132,7 +135,7 @@ export default class ComputeShader {
     const options = optionize3<ComputeShaderDispatchOptions>()( {}, DEFAULT_DISPATCH_OPTIONS, providedOptions );
 
     const computePass = encoder.beginComputePass( this.getComputePassDescriptor(
-      true, options.timestampLogger
+      true, options.timestampLogger, options.timestampWrites
     ) );
     computePass.setPipeline( this.pipeline );
     computePass.setBindGroup( 0, this.getBindGroup( resources ) );
@@ -142,17 +145,24 @@ export default class ComputeShader {
 
   private getComputePassDescriptor(
     isIndirect: boolean,
-    timestampLogger: TimestampLogger | null
+    timestampLogger: TimestampLogger | null,
+    timestampWrites: GPUComputePassTimestampWrites | null
   ): GPUComputePassDescriptor {
     const descriptor: GPUComputePassDescriptor = {
       label: `${this.name}${isIndirect ? ' indirect' : ''} compute pass`
     };
+
+    assert && assert( !timestampLogger || !timestampWrites,
+      'A timestampLogger AND timestampWrites not supported at the same time' );
 
     if ( timestampLogger ) {
       const timestampWrites = timestampLogger.getGPUComputePassTimestampWrites( this.name );
       if ( timestampWrites ) {
         descriptor.timestampWrites = timestampWrites;
       }
+    }
+    else if ( timestampWrites ) {
+      descriptor.timestampWrites = timestampWrites;
     }
 
     return descriptor;

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--  at alpenglow root, `npx vite serve ..`-->
+<!--  `open -a "Google Chrome Canary" --args --enable-dawn-features=allow_unsafe_apis --enable-webgpu-developer-features --disable-dawn-features=timestamp_quantization` -->
+<!--  go to http://localhost:5173/alpenglow/tests/bench-thimbleberry.html -->
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Alpenglow Bench with Thimbleberry</title>
+
+  <script>
+    window.phet = window.phet || {};
+  </script>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../chipper/js/sim-tests/pageload-connector.js"></script>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <script src="../../assert/js/assert.js"></script>
+  <script src="../../tandem/js/PhetioIDUtils.js"></script>
+  <script src="../../sherpa/lib/linebreak-1.1.0.js"></script>
+  <script src="../../sherpa/lib/flatqueue-1.2.1.js"></script>
+  <script src="../../sherpa/lib/paper-js-0.12.17.js"></script>
+  <script src="../../sherpa/lib/he-1.1.1.js"></script>
+  <script src="../../sherpa/lib/TextEncoderLite-3c9f6f0.js"></script>
+  <script src="../../sherpa/lib/base64-js-1.2.0.js"></script>
+  <script src="../../sherpa/lib/webgpu_recorder.js"></script>
+
+  <script type="text/javascript">
+    window.assertions.enableAssert();
+    window.assertions.enableAssertSlow();
+  </script>
+</head>
+<body>
+
+<script type="module">
+  import '../../chipper/dist/js/scenery/js/main.js';
+  import '../../chipper/dist/js/alpenglow/js/main.js';
+  import '../../chipper/dist/js/phet-core/js/main.js';
+  import '../../chipper/dist/js/axon/js/main.js';
+  import '../../chipper/dist/js/dot/js/main.js';
+  import '../../chipper/dist/js/kite/js/main.js';
+  import '../../chipper/dist/js/utterance-queue/js/main.js';
+  import { // eslint-disable-line single-line-import
+    benchRunner,
+    gpuTiming,
+    initGpuTiming
+  } from '../node_modules/thimbleberry/dist/thimbleberry.js';
+  import { // eslint-disable-line single-line-import
+    Binding,
+    ComputeShader,
+    DeviceContext,
+    wgsl_f32_reduce_simple,
+    wgsl_f32_reduce_raked_striped_blocked_convergent
+  } from '../../chipper/dist/js/alpenglow/js/imports.js';
+
+  console.log( 'loaded' );
+
+  const random = new phet.dot.Random();
+
+  const getDispatchOptions = name => {
+    return {
+      timestampWrites: gpuTiming?.timestampWrites( name ) || null
+    };
+  };
+
+  const getReduceSimpleShader = ( device, workgroupSize, numbers ) => {
+    initGpuTiming( device );
+
+    const deviceContext = new DeviceContext( device );
+
+    const inputSize = numbers.length;
+
+    const shaderOptions = {
+      workgroupSize: workgroupSize,
+      identity: '0f',
+      combine: ( a, b ) => `${a} + ${b}`
+    };
+
+    const shader0 = ComputeShader.fromSource(
+      device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], phet.phetCore.merge( {
+        inputSize: inputSize
+      }, shaderOptions )
+    );
+    const shader1 = ComputeShader.fromSource(
+      device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], phet.phetCore.merge( {
+        inputSize: Math.ceil( inputSize / ( workgroupSize ) )
+      }, shaderOptions )
+    );
+    const shader2 = ComputeShader.fromSource(
+      device, 'f32_reduce_simple 2', wgsl_f32_reduce_simple, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], phet.phetCore.merge( {
+        inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) )
+      }, shaderOptions )
+    );
+
+    const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
+    device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
+
+    const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize ) ) );
+    const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ) );
+    const outputBuffer = deviceContext.createBuffer( 4 );
+
+    return {
+      shader: {
+        name: `f32_reduce_simple wg:${workgroupSize}`,
+        commands: encoder => {
+          shader0.dispatch( encoder, [
+            inputBuffer, firstMiddleBuffer
+          ], Math.ceil( inputSize / ( workgroupSize ) ), 1, 1, getDispatchOptions( 'reduce 0' ) );
+          shader1.dispatch( encoder, [
+            firstMiddleBuffer, secondMiddleBuffer
+          ], Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ), 1, 1, getDispatchOptions( 'reduce 1' ) );
+          shader2.dispatch( encoder, [
+            secondMiddleBuffer, outputBuffer
+          ], 1, 1, 1, getDispatchOptions( 'reduce 2' ) );
+
+          // TODO: get a READ from the buffer? It might not execute otherwise?
+        },
+        destroy: () => {
+          inputBuffer.destroy();
+          firstMiddleBuffer.destroy();
+          secondMiddleBuffer.destroy();
+          outputBuffer.destroy();
+        }
+      },
+      srcSize: Float32Array.BYTES_PER_ELEMENT * inputSize
+    };
+  };
+
+  const getReduceRakedStripedBlockedConvergentShader = ( device, workgroupSize, numbers, grainSize ) => {
+    initGpuTiming( device );
+
+    const deviceContext = new DeviceContext( device );
+
+    const inputSize = numbers.length;
+
+    const shaderOptions = {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      identity: '0f',
+      combine: ( a, b ) => `${a} + ${b}`
+    };
+
+    const shader0 = ComputeShader.fromSource(
+      device, 'f32_reduce_raked_striped_blocked_convergent 0', wgsl_f32_reduce_raked_striped_blocked_convergent, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], phet.phetCore.merge( {
+        inputSize: inputSize
+      }, shaderOptions )
+    );
+    const shader1 = ComputeShader.fromSource(
+      device, 'f32_reduce_raked_striped_blocked_convergent 1', wgsl_f32_reduce_raked_striped_blocked_convergent, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], phet.phetCore.merge( {
+        inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
+      }, shaderOptions )
+    );
+    const shader2 = ComputeShader.fromSource(
+      device, 'f32_reduce_raked_striped_blocked_convergent 2', wgsl_f32_reduce_raked_striped_blocked_convergent, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], phet.phetCore.merge( {
+        inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
+      }, shaderOptions )
+    );
+
+    const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
+    device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
+
+    const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+    const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+    const outputBuffer = deviceContext.createBuffer( 4 );
+
+    return {
+      shader: {
+        name: `f32_reduce_raked_striped_blocked_convergent wg:${workgroupSize}, vt:${grainSize}`,
+        commands: encoder => {
+          shader0.dispatch( encoder, [
+            inputBuffer, firstMiddleBuffer
+          ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, getDispatchOptions( 'reduce 0' ) );
+          shader1.dispatch( encoder, [
+            firstMiddleBuffer, secondMiddleBuffer
+          ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1, getDispatchOptions( 'reduce 1' ) );
+          shader2.dispatch( encoder, [
+            secondMiddleBuffer, outputBuffer
+          ], 1, 1, 1, getDispatchOptions( 'reduce 2' ) );
+
+          // TODO: get a READ from the buffer? It might not execute otherwise?
+        },
+        destroy: () => {
+          inputBuffer.destroy();
+          firstMiddleBuffer.destroy();
+          secondMiddleBuffer.destroy();
+          outputBuffer.destroy();
+        }
+      },
+      srcSize: Float32Array.BYTES_PER_ELEMENT * inputSize
+    };
+  };
+
+  ( async () => {
+    const workgroupSize = 256;
+    const inputSize = workgroupSize * workgroupSize * ( workgroupSize - 3 ) - 27 * 301;
+    const numbers = new Float32Array( _.range( 0, inputSize ).map( () => random.nextDouble() ) );
+
+    await benchRunner( [
+      {
+        makeShader: device => getReduceSimpleShader( device, workgroupSize, numbers ),
+        runs: 200
+      },
+      {
+        makeShader: device => getReduceRakedStripedBlockedConvergentShader( device, workgroupSize, numbers, 8 ),
+        runs: 200
+      }
+    ] );
+  } )();
+</script>
+</body>
+</html>
