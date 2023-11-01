@@ -210,6 +210,10 @@ export { default as wgsl_f32_reduce_raked_striped_blocked } from '../wgsl/exampl
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_f32_reduce_raked_striped_blocked_convergent } from '../wgsl/examples/reduce/f32_reduce_raked_striped_blocked_convergent.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_u32_reduce_raked_striped_blocked_convergent } from '../wgsl/examples/reduce/u32_reduce_raked_striped_blocked_convergent.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_u32_atomic_reduce_raked_striped_blocked_convergent } from '../wgsl/examples/reduce/u32_atomic_reduce_raked_striped_blocked_convergent.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_exclusive_scan_simple_single } from '../wgsl/examples/scan/exclusive_scan_simple_single.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_inclusive_scan_simple_single } from '../wgsl/examples/scan/inclusive_scan_simple_single.js';

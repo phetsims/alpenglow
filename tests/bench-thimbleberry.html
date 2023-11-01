@@ -55,7 +55,9 @@
     ComputeShader,
     DeviceContext,
     wgsl_f32_reduce_simple,
-    wgsl_f32_reduce_raked_striped_blocked_convergent
+    wgsl_f32_reduce_raked_striped_blocked_convergent,
+    wgsl_u32_reduce_raked_striped_blocked_convergent,
+    wgsl_u32_atomic_reduce_raked_striped_blocked_convergent
   } from '../../chipper/dist/js/alpenglow/js/imports.js';
 
   console.log( 'loaded' );
@@ -68,7 +70,7 @@
     };
   };
 
-  const getReduceSimpleShader = ( device, workgroupSize, numbers ) => {
+  const getF32ReduceSimpleShader = ( device, workgroupSize, numbers ) => {
     const deviceContext = new DeviceContext( device );
 
     const inputSize = numbers.length;
@@ -136,7 +138,7 @@
     };
   };
 
-  const getReduceRakedStripedBlockedConvergentShader = ( device, workgroupSize, numbers, grainSize ) => {
+  const getF32ReduceRakedStripedBlockedConvergentShader = ( device, workgroupSize, numbers, grainSize ) => {
     const deviceContext = new DeviceContext( device );
 
     const inputSize = numbers.length;
@@ -205,18 +207,139 @@
     };
   };
 
+  const getU32ReduceRakedStripedBlockedConvergentShader = ( device, workgroupSize, numbers, grainSize ) => {
+    const deviceContext = new DeviceContext( device );
+
+    const inputSize = numbers.length;
+
+    const shaderOptions = {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      identity: '0u',
+      combine: ( a, b ) => `${a} + ${b}`
+    };
+
+    const shader0 = ComputeShader.fromSource(
+      device, 'u32_reduce_raked_striped_blocked_convergent 0', wgsl_u32_reduce_raked_striped_blocked_convergent, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], phet.phetCore.merge( {
+        inputSize: inputSize
+      }, shaderOptions )
+    );
+    const shader1 = ComputeShader.fromSource(
+      device, 'u32_reduce_raked_striped_blocked_convergent 1', wgsl_u32_reduce_raked_striped_blocked_convergent, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], phet.phetCore.merge( {
+        inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
+      }, shaderOptions )
+    );
+    const shader2 = ComputeShader.fromSource(
+      device, 'u32_reduce_raked_striped_blocked_convergent 2', wgsl_u32_reduce_raked_striped_blocked_convergent, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], phet.phetCore.merge( {
+        inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
+      }, shaderOptions )
+    );
+
+    const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
+    device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
+
+    const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+    const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+    const outputBuffer = deviceContext.createBuffer( 4 );
+
+    return {
+      shader: {
+        name: `u32_reduce_raked_striped_blocked_convergent wg:${workgroupSize}, vt:${grainSize}`,
+        commands: encoder => {
+          shader0.dispatch( encoder, [
+            inputBuffer, firstMiddleBuffer
+          ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, getDispatchOptions( 'reduce 0' ) );
+          shader1.dispatch( encoder, [
+            firstMiddleBuffer, secondMiddleBuffer
+          ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1, getDispatchOptions( 'reduce 1' ) );
+          shader2.dispatch( encoder, [
+            secondMiddleBuffer, outputBuffer
+          ], 1, 1, 1, getDispatchOptions( 'reduce 2' ) );
+        },
+        destroy: () => {
+          inputBuffer.destroy();
+          firstMiddleBuffer.destroy();
+          secondMiddleBuffer.destroy();
+          outputBuffer.destroy();
+        }
+      },
+      srcSize: Uint32Array.BYTES_PER_ELEMENT * inputSize
+    };
+  };
+
+  const getU32AtomicReduceRakedStripedBlockedConvergentShader = ( device, workgroupSize, numbers, grainSize ) => {
+    const deviceContext = new DeviceContext( device );
+
+    const inputSize = numbers.length;
+
+    const shaderOptions = {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      identity: '0u',
+      combine: ( a, b ) => `${a} + ${b}`
+    };
+
+    const shader = ComputeShader.fromSource(
+      device, 'u32_atomic_reduce_raked_striped_blocked_convergent 0', wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], phet.phetCore.merge( {
+        inputSize: inputSize
+      }, shaderOptions )
+    );
+
+    const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
+    device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
+
+    const outputBuffer = deviceContext.createBuffer( 4 );
+
+    return {
+      shader: {
+        name: `u32_atomic_reduce_raked_striped_blocked_convergent wg:${workgroupSize}, vt:${grainSize}`,
+        commands: encoder => {
+          shader.dispatch( encoder, [
+            inputBuffer, outputBuffer
+          ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, getDispatchOptions( 'reduce 0' ) );
+        },
+        destroy: () => {
+          inputBuffer.destroy();
+          outputBuffer.destroy();
+        }
+      },
+      srcSize: Uint32Array.BYTES_PER_ELEMENT * inputSize
+    };
+  };
+
   ( async () => {
     const workgroupSize = 256;
     const inputSize = workgroupSize * workgroupSize * ( workgroupSize - 3 ) - 27 * 301;
-    const numbers = new Float32Array( _.range( 0, inputSize ).map( () => random.nextDouble() ) );
+    const floatNumbers = new Float32Array( _.range( 0, inputSize ).map( () => random.nextDouble() ) );
+    const uintNumbers = new Uint32Array( _.range( 0, inputSize ).map( () => random.nextInt( 0, 100 ) ) );
 
     await benchRunner( [
       {
-        makeShader: device => getReduceSimpleShader( device, workgroupSize, numbers ),
+        makeShader: device => getF32ReduceSimpleShader( device, workgroupSize, floatNumbers ),
         runs: 200
       },
       {
-        makeShader: device => getReduceRakedStripedBlockedConvergentShader( device, workgroupSize, numbers, 8 ),
+        makeShader: device => getF32ReduceRakedStripedBlockedConvergentShader( device, workgroupSize, floatNumbers, 8 ),
+        runs: 200
+      },
+      {
+        makeShader: device => getU32ReduceRakedStripedBlockedConvergentShader( device, workgroupSize, uintNumbers, 8 ),
+        runs: 200
+      },
+      {
+        makeShader: device => getU32AtomicReduceRakedStripedBlockedConvergentShader( device, workgroupSize, uintNumbers, 8 ),
         runs: 200
       }
     ] );

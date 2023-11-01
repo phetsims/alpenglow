@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -307,6 +307,62 @@ asyncTestWithDevice( 'f32_reduce_raked_striped_blocked_convergent', async device
   device.queue.submit( [ commandBuffer ] );
 
   const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
+
+  inputBuffer.destroy();
+  outputBuffer.destroy();
+  resultBuffer.destroy();
+
+  const expectedValue = _.sum( numbers.slice( 0, inputSize ) );
+  const actualValue = outputArray[ 0 ];
+
+  if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
+    return `expected ${expectedValue}, actual ${actualValue}`;
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'u32_reduce_raked_striped_blocked_convergent', async device => {
+  const workgroupSize = 256;
+  const grainSize = 4;
+  const bufferSize = workgroupSize * grainSize;
+  const inputSize = bufferSize - 27;
+
+  const numbers = _.range( 0, bufferSize ).map( () => random.nextIntBetween( 1, 10 ) );
+
+  const context = new DeviceContext( device );
+
+  const shader = ComputeShader.fromSource(
+    device, 'u32_reduce_raked_striped_blocked_convergent', wgsl_u32_reduce_raked_striped_blocked_convergent, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      inputSize: inputSize,
+      identity: '0u',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
+    }
+  );
+
+  const inputBuffer = context.createBuffer( 4 * bufferSize );
+  device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
+
+  const outputBuffer = context.createBuffer( 4 );
+  const resultBuffer = context.createMapReadableBuffer( 4 );
+
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+  shader.dispatch( encoder, [
+    inputBuffer, outputBuffer
+  ] );
+
+  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+
+  const commandBuffer = encoder.finish();
+  device.queue.submit( [ commandBuffer ] );
+
+  const outputArray = await DeviceContext.getMappedUintArray( resultBuffer );
 
   inputBuffer.destroy();
   outputBuffer.destroy();
@@ -870,6 +926,150 @@ asyncTestWithDevice( 'triple f32_reduce_raked_blocked', async device => {
   inputBuffer.destroy();
   firstMiddleBuffer.destroy();
   secondMiddleBuffer.destroy();
+  outputBuffer.destroy();
+  resultBuffer.destroy();
+
+  const expectedValue = _.sum( numbers );
+  const actualValue = outputArray[ 0 ];
+
+  if ( Math.abs( expectedValue - actualValue ) > 1e-1 ) {
+    return `expected ${expectedValue}, actual ${actualValue}`;
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'triple u32_reduce_raked_striped_blocked_convergent', async device => {
+  const workgroupSize = 256;
+  const grainSize = 5;
+  const inputSize = workgroupSize * workgroupSize * 27 - 27 * 301;
+
+  const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 1, 10 ) );
+
+  const context = new DeviceContext( device );
+
+  const shader0 = ComputeShader.fromSource(
+    device, 'u32_reduce_raked_striped_blocked_convergent 0', wgsl_u32_reduce_raked_striped_blocked_convergent, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      inputSize: inputSize,
+      identity: '0u',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
+    }
+  );
+  const shader1 = ComputeShader.fromSource(
+    device, 'u32_reduce_raked_striped_blocked_convergent 1', wgsl_u32_reduce_raked_striped_blocked_convergent, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) ),
+      identity: '0u',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
+    }
+  );
+  const shader2 = ComputeShader.fromSource(
+    device, 'u32_reduce_raked_striped_blocked_convergent 2', wgsl_u32_reduce_raked_striped_blocked_convergent, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ),
+      identity: '0u',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
+    }
+  );
+
+  const inputBuffer = context.createBuffer( 4 * inputSize );
+  device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
+
+  const firstMiddleBuffer = context.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+  const secondMiddleBuffer = context.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+  const outputBuffer = context.createBuffer( 4 );
+  const resultBuffer = context.createMapReadableBuffer( 4 );
+
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+  shader0.dispatch( encoder, [
+    inputBuffer, firstMiddleBuffer
+  ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+  shader1.dispatch( encoder, [
+    firstMiddleBuffer, secondMiddleBuffer
+  ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+  shader2.dispatch( encoder, [
+    secondMiddleBuffer, outputBuffer
+  ] );
+
+  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+
+  const commandBuffer = encoder.finish();
+  device.queue.submit( [ commandBuffer ] );
+
+  const outputArray = await DeviceContext.getMappedUintArray( resultBuffer );
+
+  inputBuffer.destroy();
+  firstMiddleBuffer.destroy();
+  secondMiddleBuffer.destroy();
+  outputBuffer.destroy();
+  resultBuffer.destroy();
+
+  const expectedValue = _.sum( numbers );
+  const actualValue = outputArray[ 0 ];
+
+  if ( Math.abs( expectedValue - actualValue ) > 1e-1 ) {
+    return `expected ${expectedValue}, actual ${actualValue}`;
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'triple-size u32_atomic_reduce_raked_striped_blocked_convergent', async device => {
+  const workgroupSize = 256;
+  const grainSize = 5;
+  const inputSize = workgroupSize * workgroupSize * 27 - 27 * 301;
+
+  const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 1, 10 ) );
+
+  const context = new DeviceContext( device );
+
+  const shader = ComputeShader.fromSource(
+    device, 'u32_atomic_reduce_raked_striped_blocked_convergent 0', wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, [
+      Binding.READ_ONLY_STORAGE_BUFFER,
+      Binding.STORAGE_BUFFER
+    ], {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      inputSize: inputSize,
+      identity: '0u',
+      combine: ( a: string, b: string ) => `${a} + ${b}`
+    }
+  );
+
+  const inputBuffer = context.createBuffer( 4 * inputSize );
+  device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
+
+  const outputBuffer = context.createBuffer( 4 );
+  const resultBuffer = context.createMapReadableBuffer( 4 );
+
+  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+
+  shader.dispatch( encoder, [
+    inputBuffer, outputBuffer
+  ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+
+  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
+
+  const commandBuffer = encoder.finish();
+  device.queue.submit( [ commandBuffer ] );
+
+  const outputArray = await DeviceContext.getMappedUintArray( resultBuffer );
+
+  inputBuffer.destroy();
   outputBuffer.destroy();
   resultBuffer.destroy();
 
