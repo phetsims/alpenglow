@@ -415,6 +415,8 @@ export { default as DualSnippet } from './webgpu/DualSnippet.js';
 export type { DualSnippetSource } from './webgpu/DualSnippet.js';
 export { default as DeviceContext } from './webgpu/DeviceContext.js';
 export type { DeviceContextDeviceOptions } from './webgpu/DeviceContext.js';
+export { default as Execution } from './webgpu/Execution.js';
+export type { ExecutionCallback } from './webgpu/Execution.js';
 export { default as Binding } from './webgpu/Binding.js';
 export { default as ComputeShader } from './webgpu/ComputeShader.js';
 export type { ComputeShaderOptions, ComputeShaderDispatchOptions } from './webgpu/ComputeShader.js';

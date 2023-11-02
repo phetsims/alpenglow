@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_workgroup_radix_sort, wgsl_u32_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_compact_single_radix_sort, BufferLogger } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -1477,17 +1477,17 @@ asyncTestWithDevice( 'u32_compact_single_radix_sort', async device => {
     }
   );
 
-  const outputArray = await context.executeSingle( ( encoder, bufferLogger, createBuffer ) => {
-    const inputBuffer = createBuffer( 4 * inputSize );
+  const outputArray = await context.executeSingle( ( encoder, execution ) => {
+    const inputBuffer = execution.createBuffer( 4 * inputSize );
     device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
 
-    const outputBuffer = createBuffer( 4 * inputSize );
+    const outputBuffer = execution.createBuffer( 4 * inputSize );
 
     shader.dispatch( encoder, [
       inputBuffer, outputBuffer
     ] );
 
-    return bufferLogger.u32Numbers( encoder, outputBuffer );
+    return execution.u32Numbers( outputBuffer );
   } );
 
   const sortedNumbers = numbers.slice().sort( ( a, b ) => a - b );

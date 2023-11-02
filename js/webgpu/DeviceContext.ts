@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger } from '../imports.js';
+import { alpenglow, Execution, ExecutionCallback } from '../imports.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import optionize from '../../../phet-core/js/optionize.js';
 
@@ -144,26 +144,8 @@ export default class DeviceContext {
     return context;
   }
 
-  public async executeSingle<T>(
-    run: ( encoder: GPUCommandEncoder, bufferLogger: BufferLogger, createBuffer: ( size: number ) => GPUBuffer ) => Promise<T>
-  ): Promise<T> {
-    const bufferLogger = new BufferLogger( this );
-    const encoder = this.device.createCommandEncoder( { label: 'the encoder' } );
-    const buffersToCleanup: GPUBuffer[] = [];
-
-    const promise = run( encoder, bufferLogger, size => {
-      const buffer = this.createBuffer( size );
-      buffersToCleanup.push( buffer );
-      return buffer;
-    } );
-
-    const commandBuffer = encoder.finish();
-    this.device.queue.submit( [ commandBuffer ] );
-    await bufferLogger.complete();
-
-    buffersToCleanup.forEach( buffer => buffer.destroy() );
-
-    return promise;
+  public async executeSingle<T>( run: ExecutionCallback<T> ): Promise<T> {
+    return new Execution( this ).executeSingle( run );
   }
 
   public static async getDevice( providedOptions?: DeviceContextDeviceOptions ): Promise<GPUDevice | null> {
