@@ -229,6 +229,8 @@ export { default as wgsl_inclusive_scan_raked_striped_single } from '../wgsl/exa
 export { default as wgsl_i32_merge_simple } from '../wgsl/examples/merge/i32_merge_simple.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_i32_merge } from '../wgsl/examples/merge/i32_merge.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_u32_workgroup_radix_sort } from '../wgsl/examples/sort/u32_workgroup_radix_sort.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
