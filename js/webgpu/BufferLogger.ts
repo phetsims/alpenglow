@@ -60,6 +60,48 @@ export default class BufferLogger {
     } );
   }
 
+  public async u32(
+    encoder: GPUCommandEncoder,
+    buffer: GPUBuffer
+  ): Promise<Uint32Array> {
+    return new Uint32Array( await this.arrayBufferPromise( encoder, buffer ) );
+  }
+
+  public async i32(
+    encoder: GPUCommandEncoder,
+    buffer: GPUBuffer
+  ): Promise<Int32Array> {
+    return new Int32Array( await this.arrayBufferPromise( encoder, buffer ) );
+  }
+
+  public async f32(
+    encoder: GPUCommandEncoder,
+    buffer: GPUBuffer
+  ): Promise<Float32Array> {
+    return new Float32Array( await this.arrayBufferPromise( encoder, buffer ) );
+  }
+
+  public async u32Numbers(
+    encoder: GPUCommandEncoder,
+    buffer: GPUBuffer
+  ): Promise<number[]> {
+    return [ ...( await this.u32( encoder, buffer ) ) ];
+  }
+
+  public async i32Numbers(
+    encoder: GPUCommandEncoder,
+    buffer: GPUBuffer
+  ): Promise<number[]> {
+    return [ ...( await this.i32( encoder, buffer ) ) ];
+  }
+
+  public async f32Numbers(
+    encoder: GPUCommandEncoder,
+    buffer: GPUBuffer
+  ): Promise<number[]> {
+    return [ ...( await this.f32( encoder, buffer ) ) ];
+  }
+
   public logIndexed(
     encoder: GPUCommandEncoder,
     buffer: GPUBuffer,
