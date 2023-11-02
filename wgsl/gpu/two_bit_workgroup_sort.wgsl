@@ -1,4 +1,4 @@
-  // Copyright 2023, University of Colorado Boulder
+// Copyright 2023, University of Colorado Boulder
 
 /**
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -15,7 +15,7 @@ ${template( ( {
   bits, // expression: u32
 } ) => `
   {
-    let tb_bits = select( 4u, ${bits}, local_id.x < ${length } ); // Choose a value that won't be used
+    let tb_bits = select( 4u, ${bits}, local_id.x < ${length} ); // Choose a value that won't be used
     var tb_bits_vector = vec4(
       select( 0u, 1u, tb_bits == 0u ),
       select( 0u, 1u, tb_bits == 1u ),

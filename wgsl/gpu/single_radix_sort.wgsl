@@ -4,33 +4,31 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ./two_bit_workgroup_sort
+#import ./two_bit_single_sort
 
 ${template( ( {
-  value, // input name (already exists)
+  valueType, // type (string)
   workgroupSize, // number
+  grainSize, // number
   numBits, // number
   bitsScratch, // var<workgroup> array<vec4u, workgroupSize> // TODO: can bit-pack this better, especially for smaller workgroup*length sizes
   valueScratch, // var<workgroup> array<T, workgroupSize>
   length, // expression: u32
   getTwoBits, // ( T, bitIndex: u32 expr ) => expression: u32
+  earlyLoad, // boolean (controls whether we load the values early or late - might affect register pressure)
 } ) => `
   for ( var wrs_i = 0u; wrs_i < ${u32( numBits )}; wrs_i += 2u ) {
-    let wrs_bits = ${getTwoBits( value, `wrs_i` )};
-
-    ${two_bit_workgroup_sort( {
-      inputValue: value,
+    ${two_bit_single_sort( {
+      valueType: valueType,
       workgroupSize: workgroupSize,
-      scratch: bitsScratch,
-      moveTo: newIndex => `${valueScratch}[ ${newIndex} ] = ${value};`,
+      grainSize: grainSize,
+      bitsScratch: bitsScratch,
+      valueScratch: valueScratch,
       length: length,
-      bits: `wrs_bits`
+      getTwoBits: value => getTwoBits( value, `wrs_i` ),
+      earlyLoad: earlyLoad,
     } )}
 
-    workgroupBarrier();
-
-    if ( local_id.x < ${length} ) {
-      ${value} = ${valueScratch}[ local_id.x ];
-    }
+    // NOTE: no workgroupBarrier here, we already have it in the function
   }
 ` )}
