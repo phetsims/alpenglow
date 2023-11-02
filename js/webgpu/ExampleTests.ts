@@ -1477,29 +1477,18 @@ asyncTestWithDevice( 'u32_compact_single_radix_sort', async device => {
     }
   );
 
-  const bufferLogger = new BufferLogger( context );
+  const outputArray = await context.executeSingle( ( encoder, bufferLogger, createBuffer ) => {
+    const inputBuffer = createBuffer( 4 * inputSize );
+    device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
 
-  const inputBuffer = context.createBuffer( 4 * inputSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
+    const outputBuffer = createBuffer( 4 * inputSize );
 
-  const outputBuffer = context.createBuffer( 4 * inputSize );
+    shader.dispatch( encoder, [
+      inputBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    inputBuffer, outputBuffer
-  ] );
-
-  const outputPromise = bufferLogger.u32Numbers( encoder, outputBuffer );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-  await bufferLogger.complete();
-
-  const outputArray = ( await outputPromise ).slice( 0, inputSize );
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
+    return bufferLogger.u32Numbers( encoder, outputBuffer );
+  } );
 
   const sortedNumbers = numbers.slice().sort( ( a, b ) => a - b );
 
