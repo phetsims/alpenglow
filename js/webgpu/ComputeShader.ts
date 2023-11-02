@@ -82,6 +82,7 @@ export default class ComputeShader {
       entries: this.bindings.map( ( binding, i ) => binding.getBindGroupLayoutEntry( i ) )
     } );
 
+    // TODO: use createComputePipelineAsync, so that we're not blocking? Perhaps ComputeShaders will need a "ready" Promise?
     this.pipeline = device.createComputePipeline( {
       label: `${name} pipeline`,
       layout: device.createPipelineLayout( {

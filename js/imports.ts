@@ -232,6 +232,8 @@ export { default as wgsl_i32_merge } from '../wgsl/examples/merge/i32_merge.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u32_workgroup_radix_sort } from '../wgsl/examples/sort/u32_workgroup_radix_sort.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_u32_compact_workgroup_radix_sort } from '../wgsl/examples/sort/u32_compact_workgroup_radix_sort.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u32_single_radix_sort } from '../wgsl/examples/sort/u32_single_radix_sort.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER

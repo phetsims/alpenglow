@@ -1,6 +1,12 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
+ * Performs a 2-bit radix sort of an array in workgroup memory (no longer than the workgroup size).
+ * For simplicity, it packs bits into a vec4u (two_bit_compact_workgroup_sort is more memory-efficient, but involves
+ * more complexity).
+ *
+ * NOTE: This is a stable sort, but it only sorts things BASED ON ONLY TWO BITS of the key (so it's not a full sort)
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
