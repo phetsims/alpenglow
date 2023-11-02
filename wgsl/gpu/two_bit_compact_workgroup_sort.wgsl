@@ -57,6 +57,7 @@ ${template( ( {
     } )}
 
     if ( local_id.x < ${length} ) {
+      // TODO: a way to compute the index and access both of these efficiently?
       ${moveTo( `( ${bit_pack_radix_access( {
         bitVector: `tb_offsets`,
         bits: bits,

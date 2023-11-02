@@ -4,12 +4,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../../gpu/single_radix_sort
+#import ../../gpu/compact_single_radix_sort
 #import ../../gpu/unroll
 
 #option workgroupSize
 #option grainSize
 #option inputSize
+#option bitQuantity
+#option bitVectorSize
 #option earlyLoad
 
 @group(0) @binding(0)
@@ -18,7 +20,7 @@ var<storage> input: array<u32>;
 var<storage, read_write> output: array<u32>;
 
 var<workgroup> value_scratch: array<u32, ${workgroupSize * grainSize}>;
-var<workgroup> bits_scratch: array<vec4u, ${workgroupSize}>;
+var<workgroup> bits_scratch: array<vec2u, ${workgroupSize}>;
 
 #bindings
 
@@ -40,16 +42,18 @@ fn main(
     }
   ` )}
 
-  ${single_radix_sort( {
+  ${compact_single_radix_sort( {
     valueType: 'u32',
     workgroupSize: workgroupSize,
     grainSize: grainSize,
     numBits: 32,
+    bitQuantity: bitQuantity,
+    bitVectorSize: bitVectorSize,
     bitsScratch: `bits_scratch`,
     valueScratch: `value_scratch`,
     length: u32( inputSize ),
     // NOTE: somewhat defensive with parentheses
-    getTwoBits: ( valueName, bitIndex ) => `( ( ( ${valueName} ) >> ( ${bitIndex} ) ) & 0x3u )`,
+    getBits: ( valueName, bitIndex ) => `( ( ( ${valueName} ) >> ( ${bitIndex} ) ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`,
     earlyLoad: earlyLoad,
   } )}
 

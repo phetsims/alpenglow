@@ -9,7 +9,7 @@
 ${template( ( {
   value, // input name (already exists)
   workgroupSize, // number
-  numBits, // number
+  numBits, // number - number of bits in the key
   bitsScratch, // var<workgroup> array<u32, workgroupSize>
   valueScratch, // var<workgroup> array<T, workgroupSize>
   length, // expression: u32

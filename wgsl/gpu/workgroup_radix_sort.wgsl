@@ -9,7 +9,7 @@
 ${template( ( {
   value, // input name (already exists)
   workgroupSize, // number
-  numBits, // number
+  numBits, // number - number of bits in the key
   bitsScratch, // var<workgroup> array<vec4u, workgroupSize> // TODO: can bit-pack this better, especially for smaller workgroup*length sizes
   valueScratch, // var<workgroup> array<T, workgroupSize>
   length, // expression: u32
