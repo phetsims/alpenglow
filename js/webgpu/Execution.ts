@@ -8,7 +8,9 @@
 
 import { alpenglow, BufferLogger, DeviceContext } from '../imports.js';
 
-export type ExecutionCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => Promise<T>;
+export type ExecutionSingleCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => Promise<T>;
+export type ExecutionMultipleCallback<T extends Record<string, Promise<unknown>>> = ( encoder: GPUCommandEncoder, execution: Execution ) => T;
+export type Unpromised<T extends Record<string, Promise<unknown>>> = { [ K in keyof T ]: T[ K ] extends Promise<infer U> ? U : T[ K ] };
 
 export default class Execution {
 
@@ -67,7 +69,7 @@ export default class Execution {
   }
 
   public async executeSingle<T>(
-    callback: ExecutionCallback<T>
+    callback: ExecutionSingleCallback<T>
   ): Promise<T> {
     const promise = callback( this.encoder, this );
 
@@ -78,6 +80,26 @@ export default class Execution {
     this.buffersToCleanup.forEach( buffer => buffer.destroy() );
 
     return promise;
+  }
+
+  public async execute<T extends Record<string, Promise<unknown>>>(
+    callback: ExecutionMultipleCallback<T>
+  ): Promise<Unpromised<T>> {
+    const promise = callback( this.encoder, this );
+
+    const commandBuffer = this.encoder.finish();
+    this.deviceContext.device.queue.submit( [ commandBuffer ] );
+    await this.bufferLogger.complete();
+
+    this.buffersToCleanup.forEach( buffer => buffer.destroy() );
+
+    const result: Partial<Unpromised<T>> = {};
+    for ( const key in promise ) {
+      // @ts-expect-error Is there a way to get this to type check?
+      result[ key ] = await promise[ key ];
+    }
+
+    return result as Unpromised<T>;
   }
 }
 
