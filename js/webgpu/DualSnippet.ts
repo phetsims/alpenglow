@@ -14,6 +14,7 @@ export type DualSnippetSource = ( includesMap: Record<string, unknown> ) => {
   before: string;
   after: string;
   imports: DualSnippetSource[];
+  // TODO: add bindings here!
 };
 
 let globalSnippetIdCounter = 0;

@@ -1314,27 +1314,45 @@ const runU32MapShader = (
   const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xffffff ) );
   // const numbers = [ 1364798, 10578516, 13737492, 12024015, 6833872, 1085794, 11654541, 10021432, 12380875, 13992316, 10975796, 7346702, 5537158, 1332951, 12063124, 1168340, 11226432, 11351003, 2658100, 8013178, 2935064, 4986846, 3655186, 9195201, 4752512, 2991050, 184691, 14302236, 13507149, 6783564, 11474160, 14031909, 5493767, 1416634, 6987188, 11531481, 2406390, 5115375, 2094553, 9423993, 6086038, 13384702, 182017, 4169775, 11980008, 6707413, 8584240, 8280376, 14451307, 1933745, 8175693, 9975559, 5262379, 7958169, 9120440, 13747926, 5744633, 5917187, 4965169, 8737585, 2974432, 14230926, 14456879, 6214823, 5596467, 12766047, 14564176, 10991757, 14116332, 12441721, 12070690, 15825806, 11651175, 13458483, 11608000, 15438313, 13118163, 5446140, 3660418, 11746788, 7340727, 7114397, 16239338, 2349902, 12217420, 15981017, 13375611, 9995336, 16658243, 9133712, 4732204, 16144371, 7339899, 4919670, 1896281, 10742962, 7671583, 3865637, 9402432, 8157912, 15808196, 3009630, 12779673, 6270909, 7614192, 16265779, 16525844, 12767534, 820730, 15302437, 4796180, 7435716, 6507160, 2729961, 14587416, 8865717, 10710001, 6731445, 4011240, 1260218, 14366678, 10927967, 12337799, 14667591, 10442499, 13625584, 3511385, 5341608, 1113391, 2657725, 3257943, 3424633, 10421712, 2130189, 7909189, 9613348, 2273494, 221599, 4366598, 7734762, 5197867, 15877025, 4359548, 5444363, 9405434, 5569078, 7299554, 7389264, 14815290, 9084891, 13265744, 11124531, 3828772, 1962979, 13670617, 15007973, 10461364, 14508678, 5602579, 15091981, 8106688, 4098433, 1824647, 9724572, 5936634, 1993189, 14598925, 4829241, 15560534, 2361968, 1507773, 11099474, 13402589, 15119769, 11396042, 3184134, 8425672, 6897428, 4116714, 2501611, 6593567, 16401674, 3117816, 3819496, 6619055, 14873598, 14707469, 9310676, 6205182, 4522448, 6820920, 8877544, 15935190, 13538118, 16608867, 2095019, 12075575, 8882342, 11901644, 5349467, 7503746, 13401532, 7765114, 10723323, 10027836, 7067600, 3135197, 8206987, 2949001, 7089516, 15855764, 7503, 9588033, 9821242, 3202839, 12873462, 2515022, 493784, 728998, 4351782, 13715672, 750997, 10985591, 2532275, 7092819, 5210656, 13937186, 10988941, 11785752 ];
 
-  asyncTestWithDevice( 'u32_single_radix_sort', async ( device, deviceContext ) => {
+  asyncTestWithDevice( 'u32_single_radix_sort early', async ( device, deviceContext ) => {
 
     const shader = ComputeShader.fromSource(
-      device, 'u32_single_radix_sort', wgsl_u32_single_radix_sort, [
+      device, 'u32_single_radix_sort early', wgsl_u32_single_radix_sort, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
         inputSize: inputSize,
-        earlyLoad: false // TODO: try multiple variations. Also profile?
+        earlyLoad: true
       }
     );
 
     return testSort( numbers, runU32MapShader( deviceContext, shader ) );
   } );
 
-  asyncTestWithDevice( 'u32_compact_single_radix_sort', async ( device, deviceContext ) => {
+  asyncTestWithDevice( 'u32_single_radix_sort late', async ( device, deviceContext ) => {
 
     const shader = ComputeShader.fromSource(
-      device, 'u32_compact_single_radix_sort', wgsl_u32_compact_single_radix_sort, [
+      device, 'u32_single_radix_sort late', wgsl_u32_single_radix_sort, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], {
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        inputSize: inputSize,
+        earlyLoad: false
+      }
+    );
+
+    return testSort( numbers, runU32MapShader( deviceContext, shader ) );
+  } );
+
+  // TODO: profile these differences(!)
+  asyncTestWithDevice( 'u32_compact_single_radix_sort early', async ( device, deviceContext ) => {
+
+    const shader = ComputeShader.fromSource(
+      device, 'u32_compact_single_radix_sort early', wgsl_u32_compact_single_radix_sort, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
       ], {
@@ -1343,7 +1361,45 @@ const runU32MapShader = (
         inputSize: inputSize,
         bitQuantity: 2,
         bitVectorSize: 2,
-        earlyLoad: false // TODO: try multiple variations. Also profile?
+        earlyLoad: true
+      }
+    );
+
+    return testSort( numbers, runU32MapShader( deviceContext, shader ) );
+  } );
+
+  asyncTestWithDevice( 'u32_compact_single_radix_sort late', async ( device, deviceContext ) => {
+
+    const shader = ComputeShader.fromSource(
+      device, 'u32_compact_single_radix_sort late', wgsl_u32_compact_single_radix_sort, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], {
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        inputSize: inputSize,
+        bitQuantity: 2,
+        bitVectorSize: 2,
+        earlyLoad: false
+      }
+    );
+
+    return testSort( numbers, runU32MapShader( deviceContext, shader ) );
+  } );
+
+  asyncTestWithDevice( 'u32_compact_single_radix_sort late 3-bit vec3u', async ( device, deviceContext ) => {
+
+    const shader = ComputeShader.fromSource(
+      device, 'u32_compact_single_radix_sort late 3-bit vec3u', wgsl_u32_compact_single_radix_sort, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], {
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        inputSize: inputSize,
+        bitQuantity: 3,
+        bitVectorSize: 3,
+        earlyLoad: false
       }
     );
 
