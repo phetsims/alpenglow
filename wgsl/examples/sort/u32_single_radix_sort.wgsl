@@ -5,6 +5,7 @@
  */
 
 #import ../../gpu/single_radix_sort
+#import ../../gpu/coalesced_loop
 #import ../../gpu/unroll
 
 #option workgroupSize
@@ -28,18 +29,15 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  // TODO: have a template function for this!!!
-  // coalesced loads
-  ${unroll( 0, grainSize, i => `
-    {
-      let local_index = ${u32( i * workgroupSize )} + local_id.x;
-      let global_index = workgroup_id.x * ${u32( workgroupSize * grainSize )} + local_index;
-      if ( global_index < ${u32( inputSize )} ) {
-        value_scratch[ local_index ] = input[ workgroup_id.x * ${u32( workgroupSize * grainSize )} + local_index ];
-      }
-    }
-  ` )}
+  // Read
+  ${coalesced_loop( {
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    length: u32( inputSize ),
+    callback: ( scratchIndex, dataIndex ) => `value_scratch[ ${scratchIndex} ] = input[ ${dataIndex} ];`,
+  } )}
 
+  // Sort
   ${single_radix_sort( {
     valueType: 'u32',
     workgroupSize: workgroupSize,
@@ -48,19 +46,15 @@ fn main(
     bitsScratch: `bits_scratch`,
     valueScratch: `value_scratch`,
     length: u32( inputSize ),
-    // NOTE: somewhat defensive with parentheses
-    getTwoBits: ( valueName, bitIndex ) => `( ( ( ${valueName} ) >> ( ${bitIndex} ) ) & 0x3u )`,
+    getTwoBits: ( valueName, bitIndex ) => `( ( ( ${valueName} ) >> ( ${bitIndex} ) ) & 0x3u )`, // two-bit sort
     earlyLoad: earlyLoad,
   } )}
 
-  // coalesced writes
-  ${unroll( 0, grainSize, i => `
-    {
-      let local_index = ${u32( i * workgroupSize )} + local_id.x;
-      let global_index = workgroup_id.x * ${u32( workgroupSize * grainSize )} + local_index;
-      if ( global_index < ${u32( inputSize )} ) {
-        output[ workgroup_id.x * ${u32( workgroupSize * grainSize )} + local_index ] = value_scratch[ local_index ];
-      }
-    }
-  ` )}
+  // Write
+  ${coalesced_loop( {
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    length: u32( inputSize ),
+    callback: ( scratchIndex, dataIndex ) => `output[ ${dataIndex} ] = value_scratch[ ${scratchIndex} ];`,
+  } )}
 }
