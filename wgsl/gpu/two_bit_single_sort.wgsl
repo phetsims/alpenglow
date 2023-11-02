@@ -16,7 +16,7 @@ ${template( ( {
   valueType, // type (string)
   workgroupSize, // number
   grainSize, // number
-  bitsScratch, // var<workgroup> array<vec4u, workgroupSize> // TODO: can bit-pack this better, especially for smaller workgroup*length sizes
+  bitsScratch, // var<workgroup> array<vec4u, workgroupSize>
   valueScratch, // var<workgroup> array<T, workgroupSize * grainSize>
   length, // expression: u32
   getTwoBits, // ( T ) => expression: u32

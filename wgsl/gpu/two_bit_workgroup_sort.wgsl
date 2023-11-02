@@ -15,7 +15,7 @@
 ${template( ( {
   inputValue, // input name
   workgroupSize, // number
-  scratch, // var<workgroup> array<vec4u> // TODO: can bit-pack this better, especially for smaller workgroup*length sizes
+  scratch, // var<workgroup> array<vec4u>
   moveTo, // ( newIndex ) => void
   length, // expression: u32
   bits, // expression: u32
