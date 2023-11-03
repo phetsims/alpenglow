@@ -419,7 +419,7 @@ export { default as Execution } from './webgpu/Execution.js';
 export type { ExecutionSingleCallback, ExecutionMultipleCallback, Unpromised } from './webgpu/Execution.js';
 export { default as Binding } from './webgpu/Binding.js';
 export { default as ComputeShader } from './webgpu/ComputeShader.js';
-export type { ComputeShaderOptions, ComputeShaderDispatchOptions } from './webgpu/ComputeShader.js';
+export type { ComputeShaderOptions, ComputeShaderDispatchOptions, ComputeShaderSourceOptions } from './webgpu/ComputeShader.js';
 export { default as BlitShader } from './webgpu/BlitShader.js';
 export { default as ByteEncoder } from './webgpu/ByteEncoder.js';
 export type { F32, U32, I32, U8 } from './webgpu/ByteEncoder.js';

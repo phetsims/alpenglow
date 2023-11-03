@@ -22,7 +22,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, DeviceContext, TimestampLogger, TimestampLoggerResult, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
+import { alpenglow, Binding, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, ComputeShaderSourceOptions, DeviceContext, Execution, TimestampLogger, TimestampLoggerResult, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 
@@ -140,7 +140,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
@@ -148,7 +148,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize ) )
       }, shaderOptions )
     );
@@ -156,7 +156,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_simple 2', wgsl_f32_reduce_simple, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) )
       }, shaderOptions )
     );
@@ -248,7 +248,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_raked_blocked 0', wgsl_f32_reduce_raked_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
@@ -256,7 +256,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_raked_blocked 1', wgsl_f32_reduce_raked_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
@@ -264,7 +264,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_raked_blocked 2', wgsl_f32_reduce_raked_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )
     );
@@ -356,7 +356,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_raked_striped_blocked 0', wgsl_f32_reduce_raked_striped_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
@@ -364,7 +364,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_raked_striped_blocked 1', wgsl_f32_reduce_raked_striped_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
@@ -372,7 +372,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_raked_striped_blocked 2', wgsl_f32_reduce_raked_striped_blocked, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )
     );
@@ -448,9 +448,6 @@ export default class GPUProfiling {
     grainSize: number
   ): Promise<GPUProfiler> {
     const device = deviceContext.device;
-
-    const bufferLogger = new BufferLogger( deviceContext );
-
     const inputSize = numbers.length;
 
     const shaderOptions = {
@@ -464,7 +461,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_raked_striped_blocked_convergent 0', wgsl_f32_reduce_raked_striped_blocked_convergent, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
@@ -472,7 +469,7 @@ export default class GPUProfiling {
       device, 'f32_reduce_raked_striped_blocked_convergent 1', wgsl_f32_reduce_raked_striped_blocked_convergent, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
@@ -480,62 +477,35 @@ export default class GPUProfiling {
       device, 'f32_reduce_raked_striped_blocked_convergent 2', wgsl_f32_reduce_raked_striped_blocked_convergent, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], combineOptions<Record<string, unknown>>( {
+      ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )
     );
 
+    // TODO: are we... causing slower patterns with our new profiling pattern?
     return new GPUProfiler( `f32_reduce_raked_striped_blocked_convergent ${grainSize}`, async () => {
-      const timestampLogger = new TimestampLogger( deviceContext, 100 ); // capacity is probably overkill
-      const dispatchOptions: ComputeShaderDispatchOptions = {
-        timestampLogger: timestampLogger
-      };
+      const execution = new Execution( deviceContext );
 
-      const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-      device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
+      const outputArray = await execution.executeSingle( async ( encoder: GPUCommandEncoder, execution: Execution ) => {
+        const inputBuffer = execution.createBuffer( 4 * inputSize );
+        device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
 
-      const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-      const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-      const outputBuffer = deviceContext.createBuffer( 4 );
+        const firstMiddleBuffer = execution.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+        const secondMiddleBuffer = execution.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+        const outputBuffer = execution.createBuffer( 4 );
 
-      const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+        execution.dispatch( shader0, [
+          inputBuffer, firstMiddleBuffer
+        ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1 );
+        execution.dispatch( shader1, [
+          firstMiddleBuffer, secondMiddleBuffer
+        ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1 );
+        execution.dispatch( shader2, [
+          secondMiddleBuffer, outputBuffer
+        ], 1, 1, 1 );
 
-      timestampLogger.mark( encoder, 'start' );
-
-      shader0.dispatch( encoder, [
-        inputBuffer, firstMiddleBuffer
-      ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, dispatchOptions );
-      shader1.dispatch( encoder, [
-        firstMiddleBuffer, secondMiddleBuffer
-      ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1, dispatchOptions );
-      shader2.dispatch( encoder, [
-        secondMiddleBuffer, outputBuffer
-      ], 1, 1, 1, dispatchOptions );
-
-      const resultPromise = bufferLogger.arrayBufferPromise( encoder, outputBuffer );
-
-      timestampLogger.mark( encoder, 'end' );
-
-      const timestampResultPromise = timestampLogger.resolve( encoder, bufferLogger );
-
-      const commandBuffer = encoder.finish();
-      device.queue.submit( [ commandBuffer ] );
-
-      await device.queue.onSubmittedWorkDone();
-      await bufferLogger.complete();
-
-      const timestampResult = await timestampResultPromise;
-      const outputArray = new Float32Array( await resultPromise );
-
-      if ( !timestampResult ) {
-        throw new Error( 'missing timestamps' );
-      }
-
-      inputBuffer.destroy();
-      firstMiddleBuffer.destroy();
-      secondMiddleBuffer.destroy();
-      outputBuffer.destroy();
-      timestampLogger.dispose();
+        return execution.f32Numbers( outputBuffer );
+      } );
 
       const expectedValue = _.sum( [ ...numbers ] );
       const actualValue = outputArray[ 0 ];
@@ -543,6 +513,12 @@ export default class GPUProfiling {
       // Yay inaccurate math!
       if ( Math.abs( expectedValue - actualValue ) > 1 ) {
         throw new Error( 'invalid result' );
+      }
+
+      const timestampResult = await execution.timestampResultPromise;
+
+      if ( !timestampResult ) {
+        throw new Error( 'missing timestamps' );
       }
 
       return timestampResult;

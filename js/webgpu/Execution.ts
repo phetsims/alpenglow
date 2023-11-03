@@ -6,24 +6,50 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, DeviceContext } from '../imports.js';
+import { alpenglow, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, DeviceContext, TimestampLogger, TimestampLoggerResult } from '../imports.js';
+import { optionize3 } from '../../../phet-core/js/optionize.js';
 
+export type ExecutionAnyCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => T;
 export type ExecutionSingleCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => Promise<T>;
 export type ExecutionMultipleCallback<T extends Record<string, Promise<unknown>>> = ( encoder: GPUCommandEncoder, execution: Execution ) => T;
 export type Unpromised<T extends Record<string, Promise<unknown>>> = { [ K in keyof T ]: T[ K ] extends Promise<infer U> ? U : T[ K ] };
 
+export type ExecutionOptions = {
+  timestampLog?: boolean;
+  timestampLoggerCapacity?: number;
+};
+
+const DEFAULT_OPTIONS = {
+  timestampLog: true,
+  timestampLoggerCapacity: 100
+};
+
 export default class Execution {
 
-  public readonly bufferLogger: BufferLogger;
   public readonly encoder: GPUCommandEncoder;
+  public readonly bufferLogger: BufferLogger;
+  public readonly timestampLogger: TimestampLogger;
+  public readonly timestampResultPromise: Promise<TimestampLoggerResult | null>;
 
-  private buffersToCleanup: GPUBuffer[] = [];
+  private readonly buffersToCleanup: GPUBuffer[] = [];
+  private timestampResultResolve!: ( result: TimestampLoggerResult | null ) => void;
 
   public constructor(
-    public readonly deviceContext: DeviceContext
+    public readonly deviceContext: DeviceContext,
+    providedOptions?: ExecutionOptions
   ) {
+    const options = optionize3<ExecutionOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+
     this.bufferLogger = new BufferLogger( deviceContext );
+    this.timestampLogger = new TimestampLogger(
+      options.timestampLog ? deviceContext : null,
+      options.timestampLoggerCapacity
+    );
     this.encoder = deviceContext.device.createCommandEncoder( { label: 'the encoder' } );
+
+    this.timestampResultPromise = new Promise( resolve => {
+      this.timestampResultResolve = resolve;
+    } );
   }
 
   public createBuffer( size: number ): GPUBuffer {
@@ -68,10 +94,41 @@ export default class Execution {
     return this.bufferLogger.f32Numbers( this.encoder, buffer );
   }
 
-  public async executeSingle<T>(
-    callback: ExecutionSingleCallback<T>
+  public getDispatchOptions(): ComputeShaderDispatchOptions {
+    return {
+      timestampLogger: this.timestampLogger
+    };
+  }
+
+  public dispatch(
+    shader: ComputeShader,
+    resources: ( GPUBuffer | GPUTextureView )[],
+    dispatchX = 1,
+    dispatchY = 1,
+    dispatchZ = 1
+  ): void {
+    shader.dispatch( this.encoder, resources, dispatchX, dispatchY, dispatchZ, this.getDispatchOptions() );
+  }
+
+  public dispatchIndirect(
+    shader: ComputeShader,
+    resources: ( GPUBuffer | GPUTextureView )[],
+    indirectBuffer: GPUBuffer,
+    indirectOffset: number
+  ): void {
+    shader.dispatchIndirect( this.encoder, resources, indirectBuffer, indirectOffset, this.getDispatchOptions() );
+  }
+
+  private async executeInternal<T>(
+    callback: ExecutionAnyCallback<T>
   ): Promise<T> {
+    this.timestampLogger.mark( this.encoder, 'start' );
+
     const promise = callback( this.encoder, this );
+
+    this.timestampLogger.mark( this.encoder, 'end' );
+
+    this.timestampLogger.resolve( this.encoder, this.bufferLogger ).then( result => this.timestampResultResolve( result ) ).catch( e => { throw e; } );
 
     const commandBuffer = this.encoder.finish();
     this.deviceContext.device.queue.submit( [ commandBuffer ] );
@@ -79,19 +136,21 @@ export default class Execution {
 
     this.buffersToCleanup.forEach( buffer => buffer.destroy() );
 
+    this.timestampLogger.dispose();
+
     return promise;
+  }
+
+  public async executeSingle<T>(
+    callback: ExecutionSingleCallback<T>
+  ): Promise<T> {
+    return this.executeInternal( callback );
   }
 
   public async execute<T extends Record<string, Promise<unknown>>>(
     callback: ExecutionMultipleCallback<T>
   ): Promise<Unpromised<T>> {
-    const promise = callback( this.encoder, this );
-
-    const commandBuffer = this.encoder.finish();
-    this.deviceContext.device.queue.submit( [ commandBuffer ] );
-    await this.bufferLogger.complete();
-
-    this.buffersToCleanup.forEach( buffer => buffer.destroy() );
+    const promise = this.executeInternal( callback );
 
     const result: Partial<Unpromised<T>> = {};
     for ( const key in promise ) {

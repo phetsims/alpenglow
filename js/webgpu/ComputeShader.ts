@@ -21,6 +21,8 @@ export type ComputeShaderDispatchOptions = {
   timestampWrites?: GPUComputePassTimestampWrites | null;
 };
 
+export type ComputeShaderSourceOptions = Record<string, unknown>;
+
 const DEFAULT_OPTIONS = {
   partialBeautify: true
 } as const;
