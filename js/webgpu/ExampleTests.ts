@@ -50,7 +50,6 @@ asyncTestWithDevice( 'f32_reduce_simple', async ( device, deviceContext ) => {
 
   const numbers = _.range( 0, workgroupSize ).map( () => random.nextDouble() );
 
-
   const shader = ComputeShader.fromSource(
     device, 'f32_reduce_simple', wgsl_f32_reduce_simple, [
       Binding.READ_ONLY_STORAGE_BUFFER,
@@ -63,31 +62,20 @@ asyncTestWithDevice( 'f32_reduce_simple', async ( device, deviceContext ) => {
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * workgroupSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+  const actualValue = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createBuffer( 4 * workgroupSize );
+    device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
 
-  const outputBuffer = deviceContext.createBuffer( 4 );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 );
+    const outputBuffer = execution.createBuffer( 4 );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
+    shader.dispatch( encoder, [
+      inputBuffer, outputBuffer
+    ] );
 
-  shader.dispatch( encoder, [
-    inputBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return ( await execution.f32Numbers( outputBuffer ) )[ 0 ];
+  } );
 
   const expectedValue = _.sum( numbers.slice( 0, inputSize ) );
-  const actualValue = outputArray[ 0 ];
 
   if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
     return `expected ${expectedValue}, actual ${actualValue}`;
