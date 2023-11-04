@@ -7,7 +7,7 @@
  */
 
 // Math.ceil( x / y ), but with unsigned numbers
-${template( ( {
+${template( (
   x, // expr: u32
-  y, // expr: u32
-} ) => `( ( ( ${x} + ( ${y} ) - 1u ) / ( ${y} ) )` )}
+  y, // number
+) => `( ( ( ${x} ) + ${u32( y - 1 )} ) / ${u32( y )} )` )}

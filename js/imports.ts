@@ -239,6 +239,8 @@ export { default as wgsl_u32_single_radix_sort } from '../wgsl/examples/sort/u32
 export { default as wgsl_u32_compact_single_radix_sort } from '../wgsl/examples/sort/u32_compact_single_radix_sort.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u32_histogram } from '../wgsl/examples/histogram/u32_histogram.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_u32_radix_histogram } from '../wgsl/examples/sort/u32_radix_histogram.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_exclusive_scan_raked_blocked_single, wgsl_exclusive_scan_raked_striped_single, wgsl_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_inclusive_scan_raked_blocked_single, wgsl_inclusive_scan_raked_striped_single, wgsl_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -1453,3 +1453,79 @@ const test_u32_histogram = (
 
 test_u32_histogram( 256, 8, 256 * 6, 256 );
 test_u32_histogram( 64, 4, 256 * 64, 512 );
+
+const test_u32_radix_histogram = (
+  workgroupSize: number,
+  grainSize: number,
+  inputSize: number,
+  numBins: number
+) => {
+  const name = `u32_radix_histogram wg:${workgroupSize} g:${grainSize} i:${inputSize} bins:${numBins}`;
+
+  asyncTestWithDevice( name, async ( device, deviceContext ) => {
+    const dispatchSize = Math.ceil( inputSize / ( workgroupSize * grainSize ) );
+    const tableSize = numBins * dispatchSize;
+
+    // Fill all our workgroups with numbers, even if we only use some
+    const numbers = _.range( 0, dispatchSize * workgroupSize * grainSize ).map( () => random.nextIntBetween( 0, numBins - 1 ) );
+
+    const shader = ComputeShader.fromSource(
+      device, name, wgsl_u32_radix_histogram, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], {
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        inputSize: inputSize,
+        numBins: numBins
+      }
+    );
+
+    const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+      const inputBuffer = execution.createBuffer( 4 * numbers.length );
+      device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
+
+      const outputBuffer = execution.createBuffer( 4 * tableSize );
+
+      shader.dispatch( encoder, [
+        inputBuffer, outputBuffer
+      ], dispatchSize );
+
+      return execution.u32Numbers( outputBuffer );
+    } );
+
+    const expectedArray = _.range( 0, tableSize ).map( () => 0 );
+    for ( let i = 0; i < inputSize; i++ ) {
+      const bin = numbers[ i ];
+      const workgroup = Math.floor( i / ( workgroupSize * grainSize ) );
+      const index = bin * dispatchSize + workgroup;
+      expectedArray[ index ]++;
+    }
+
+    for ( let bin = 0; bin < numBins; bin++ ) {
+      for ( let workgroup = 0; workgroup < dispatchSize; workgroup++ ) {
+        const actualValue = outputArray[ bin * dispatchSize + workgroup ];
+        const expectedValue = expectedArray[ bin * dispatchSize + workgroup ];
+
+        if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
+
+          console.log( `failed on dispatch ${workgroup}, bin ${bin}` );
+
+          console.log( 'expected' );
+          console.log( _.chunk( expectedArray, 16 ) );
+
+          console.log( 'actual' );
+          console.log( _.chunk( outputArray, 16 ) );
+
+          return `expected ${expectedValue}, actual ${actualValue}`;
+        }
+      }
+    }
+
+    return null;
+  } );
+};
+
+test_u32_radix_histogram( 256, 8, 256 * 8 * 8 - 256 * 2 - 27, 256 );
+test_u32_radix_histogram( 64, 4, 256 * 64 * 7, 512 );
+test_u32_radix_histogram( 64, 4, 256 * 64 * 27, 512 );
