@@ -18,6 +18,8 @@
 // TODO: once we have the orderings handled, CONDENSE THE AMOUNT OF EXAMPLES
 // TODO: combine reduce.wgsl and reduce_convergent.wgsl (reduce) so we can just adjust things easily
 
+// TODO: name change? load_reduced (yup)
+
 ${template( ( {
   // the "output" variable name
   value,
@@ -32,6 +34,11 @@ ${template( ( {
 
   // T, expression (should be the identity element of the combine operation)
   identity,
+
+  // ( a: T, b: T ) => expr T - expression (should combine the two values) -- wrap with parentheses as needed TODO: should we always do this to prevent errors?
+  combineExpression,
+  // ( varName: string, a: T, b: T ) => statements setting varName: T, (should combine the two values)
+  combineStatements,
 
   // number (the number of threads running this command)
   workgroupSize,
@@ -53,11 +60,6 @@ ${template( ( {
 
   // ( expression: u32 ) | null - if provided, it will enable range checks (based on the inputOrder)
   length = null,
-
-  // ( a: T, b: T ) => expr T - expression (should combine the two values) -- wrap with parentheses as needed TODO: should we always do this to prevent errors?
-  combineExpression,
-  // ( varName: string, a: T, b: T ) => statements setting varName: T, (should combine the two values)
-  combineStatements,
 
   // The actual order of the data in memory (needed for range checks, not required if range checks are disabled)
   inputOrder = null, // 'blocked' | 'striped'

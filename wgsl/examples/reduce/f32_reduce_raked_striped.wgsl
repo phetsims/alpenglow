@@ -5,7 +5,7 @@
  */
 
 #import ../../gpu/reduce
-#import ../../gpu/load_striped
+#import ../../gpu/reduced_load
 
 #option workgroupSize
 #option grainSize
@@ -29,15 +29,17 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  ${load_striped( {
+  ${reduced_load( {
     value: `value`,
     valueType: 'f32',
-    load: i => `input[ ${i} ]`,
+    loadExpression: i => `input[ ${i} ]`,
     identity: identity,
-    combine: combine,
+    combineExpression: combine,
     workgroupSize: workgroupSize,
     grainSize: grainSize,
-    inputSizeString: u32( inputSize )
+    length: u32( inputSize ),
+    inputOrder: 'striped',
+    inputAccessOrder: 'striped'
   } )}
 
   ${reduce( {

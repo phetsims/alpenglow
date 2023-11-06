@@ -5,7 +5,7 @@
  */
 
 #import ../../gpu/reduce_convergent
-#import ../../gpu/load_striped_blocked
+#import ../../gpu/reduced_load
 
 #option workgroupSize
 #option grainSize
@@ -29,15 +29,17 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  ${load_striped_blocked( {
+  ${reduced_load( {
     value: `value`,
     valueType: 'u32',
-    load: i => `input[ ${i} ]`,
+    loadExpression: i => `input[ ${i} ]`,
     identity: identity,
-    combine: combine,
+    combineExpression: combine,
     workgroupSize: workgroupSize,
     grainSize: grainSize,
-    inputSizeString: u32( inputSize )
+    length: u32( inputSize ),
+    inputOrder: 'blocked',
+    inputAccessOrder: 'striped'
   } )}
 
   ${reduce_convergent( {
