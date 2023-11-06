@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../../gpu/reduced_load
+#import ../../gpu/load_reduced
 
 #option workgroupSize
 #option grainSize
@@ -33,7 +33,7 @@ fn main(
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
 
-  ${reduced_load( {
+  ${load_reduced( {
     value: `val`,
     valueType: valueType,
     loadExpression: useLoadExpression ? index => `input[ ${index} ]` : null,

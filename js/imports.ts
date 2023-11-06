@@ -242,7 +242,7 @@ export { default as wgsl_u32_histogram } from '../wgsl/examples/histogram/u32_hi
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u32_radix_histogram } from '../wgsl/examples/sort/u32_radix_histogram.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_example_reduced_load } from '../wgsl/examples/data/example_reduced_load.js';
+export { default as wgsl_example_load_reduced } from '../wgsl/examples/data/example_load_reduced.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';

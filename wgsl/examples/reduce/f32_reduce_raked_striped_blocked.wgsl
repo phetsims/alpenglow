@@ -5,7 +5,7 @@
  */
 
 #import ../../gpu/reduce
-#import ../../gpu/reduced_load
+#import ../../gpu/load_reduced
 
 #option workgroupSize
 #option grainSize
@@ -29,7 +29,7 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  ${reduced_load( {
+  ${load_reduced( {
     value: `value`,
     valueType: 'f32',
     loadExpression: i => `input[ ${i} ]`,

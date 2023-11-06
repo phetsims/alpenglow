@@ -18,8 +18,6 @@
 // TODO: once we have the orderings handled, CONDENSE THE AMOUNT OF EXAMPLES
 // TODO: combine reduce.wgsl and reduce_convergent.wgsl (reduce) so we can just adjust things easily
 
-// TODO: name change? load_reduced (yup)
-
 ${template( ( {
   // the "output" variable name
   value,

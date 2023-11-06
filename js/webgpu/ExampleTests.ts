@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort, wgsl_example_reduced_load, u32 } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort, wgsl_example_load_reduced, u32 } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
@@ -1550,13 +1550,13 @@ type ReducedLoadOptions = {
   bytesPerItem: number;
   expectedValue: ArrayBuffer;
 };
-const test_reduced_load = ( subname: string, options: ReducedLoadOptions ) => {
-  const name = `reduced_load ${subname}`;
+const test_load_reduced = ( subname: string, options: ReducedLoadOptions ) => {
+  const name = `load_reduced ${subname}`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const dispatchSize = Math.ceil( options.actualLength / ( options.workgroupSize * options.grainSize ) );
 
     const shader = ComputeShader.fromSource(
-      device, name, wgsl_example_reduced_load, [
+      device, name, wgsl_example_load_reduced, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
       ], options
@@ -1602,7 +1602,7 @@ const test_reduced_load = ( subname: string, options: ReducedLoadOptions ) => {
         return;
       }
 
-      test_reduced_load( `u32_tiny_example load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+      test_load_reduced( `u32_tiny_example load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
         workgroupSize: 4,
         grainSize: 2,
         valueType: 'u32',
@@ -1622,7 +1622,7 @@ const test_reduced_load = ( subname: string, options: ReducedLoadOptions ) => {
         expectedValue: new Uint32Array( [ 1, 5, 9, 13, 17, 10 ] ).buffer
       } );
 
-      test_reduced_load( `u32_tiny_example (no-length) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+      test_load_reduced( `u32_tiny_example (no-length) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
         workgroupSize: 4,
         grainSize: 2,
         valueType: 'u32',
@@ -1642,7 +1642,7 @@ const test_reduced_load = ( subname: string, options: ReducedLoadOptions ) => {
         expectedValue: new Uint32Array( [ 1, 5, 9, 13, 17, 21, 25, 29 ] ).buffer
       } );
 
-      test_reduced_load( `u32_tiny_example (striped access) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+      test_load_reduced( `u32_tiny_example (striped access) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
         workgroupSize: 4,
         grainSize: 2,
         valueType: 'u32',
@@ -1662,7 +1662,7 @@ const test_reduced_load = ( subname: string, options: ReducedLoadOptions ) => {
         expectedValue: new Uint32Array( [ 4, 6, 8, 10, 8, 9, 10 ] ).buffer
       } );
 
-      test_reduced_load( `u32_tiny_example (striped access, no-length) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+      test_load_reduced( `u32_tiny_example (striped access, no-length) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
         workgroupSize: 4,
         grainSize: 2,
         valueType: 'u32',
@@ -1682,7 +1682,7 @@ const test_reduced_load = ( subname: string, options: ReducedLoadOptions ) => {
         expectedValue: new Uint32Array( [ 4, 6, 8, 10, 20, 22, 24, 26 ] ).buffer
       } );
 
-      test_reduced_load( `u32_tiny_example (striped access, striped-order!!) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+      test_load_reduced( `u32_tiny_example (striped access, striped-order!!) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
         workgroupSize: 4,
         grainSize: 2,
         valueType: 'u32',
@@ -1707,7 +1707,7 @@ const test_reduced_load = ( subname: string, options: ReducedLoadOptions ) => {
         const result = bic2( new Vector2( a, b ), new Vector2( c, d ) );
         return [ result.x, result.y ];
       };
-      test_reduced_load( `non-commutative bicyclic semigroup load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+      test_load_reduced( `non-commutative bicyclic semigroup load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
         workgroupSize: 4,
         grainSize: 2,
         valueType: 'vec2u',
@@ -1762,7 +1762,7 @@ const test_reduced_load = ( subname: string, options: ReducedLoadOptions ) => {
         return [ result.x, result.y ];
       };
 
-      test_reduced_load( `non-commutative bicyclic semigroup 3-grain load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+      test_load_reduced( `non-commutative bicyclic semigroup 3-grain load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
         workgroupSize: 4,
         grainSize: 3,
         valueType: 'vec2u',
@@ -1809,7 +1809,7 @@ const test_reduced_load = ( subname: string, options: ReducedLoadOptions ) => {
         ] ).buffer
       } );
 
-      test_reduced_load( `non-commutative bicyclic semigroup 3-grain no-length load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+      test_load_reduced( `non-commutative bicyclic semigroup 3-grain no-length load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
         workgroupSize: 4,
         grainSize: 3,
         valueType: 'vec2u',
