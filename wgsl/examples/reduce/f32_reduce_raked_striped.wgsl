@@ -47,7 +47,7 @@ fn main(
     scratch: 'scratch',
     workgroupSize: workgroupSize,
     identity: identity,
-    combine: combine
+    combineExpression: combine
   } )}
 
   if ( local_id.x == 0u ) {

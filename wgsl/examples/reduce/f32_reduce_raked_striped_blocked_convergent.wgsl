@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../../gpu/reduce_convergent
+#import ../../gpu/reduce
 #import ../../gpu/load_reduced
 
 #option workgroupSize
@@ -42,12 +42,13 @@ fn main(
     inputAccessOrder: 'striped'
   } )}
 
-  ${reduce_convergent( {
+  ${reduce( {
     value: 'value',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
     identity: identity,
-    combine: combine
+    combineExpression: combine,
+    convergent: true
   } )}
 
   if ( local_id.x == 0u ) {
