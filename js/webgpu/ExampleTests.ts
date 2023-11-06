@@ -85,8 +85,8 @@ asyncTestWithDevice( 'f32_reduce_simple', async ( device, deviceContext ) => {
   return null;
 } );
 
-const testF32RakedReduce = ( subname: string, combineWithExpression: boolean ) => {
-  const name = `f32 reduce ${subname}`;
+const testF32RakedReduce = ( combineWithExpression: boolean, convergent: boolean, inputOrder: 'blocked' | 'striped', inputAccessOrder: 'blocked' | 'striped' ) => {
+  const name = `f32 raked reduce combine-${combineWithExpression ? 'expr' : 'statement'} convergent:${convergent ? 'true' : 'false'} input:${inputOrder} access:${inputAccessOrder}`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const workgroupSize = 256;
     const grainSize = 4;
@@ -96,11 +96,8 @@ const testF32RakedReduce = ( subname: string, combineWithExpression: boolean ) =
     const dispatchSize = Math.ceil( inputSize / ( workgroupSize * grainSize ) );
     const inputBufferSize = dispatchSize * blockSize;
 
-    const convergent = false;
-    const inputOrder = 'blocked';
-    const inputAccessOrder = 'blocked';
-
-    const numbers = _.range( 0, inputBufferSize ).map( () => random.nextDouble() );
+    const numbers = _.range( 0, inputBufferSize ).map( i => random.nextDouble() );
+    const inputNumbers = inputOrder === 'blocked' ? numbers : numbers.map( ( n, i ) => numbers[ ByteEncoder.fromStripedIndex( i, workgroupSize, grainSize ) ] );
 
     const shader = ComputeShader.fromSource(
       device, name, wgsl_example_raked_reduce, [
@@ -122,7 +119,7 @@ const testF32RakedReduce = ( subname: string, combineWithExpression: boolean ) =
 
     const actualNumbers = await deviceContext.executeSingle( async ( encoder, execution ) => {
       const inputBuffer = execution.createBuffer( 4 * inputBufferSize );
-      device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+      device.queue.writeBuffer( inputBuffer, 0, new Float32Array( inputNumbers ).buffer );
 
       const outputBuffer = execution.createBuffer( 4 * dispatchSize );
 
@@ -140,6 +137,12 @@ const testF32RakedReduce = ( subname: string, combineWithExpression: boolean ) =
       const actualValue = actualNumbers[ i ];
 
       if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
+        console.log( 'numbers' );
+        console.log( numbers );
+
+        console.log( 'inputNumbers' );
+        console.log( inputNumbers );
+
         console.log( 'expected' );
         console.log( expectedNumbers );
 
@@ -153,8 +156,19 @@ const testF32RakedReduce = ( subname: string, combineWithExpression: boolean ) =
     return null;
   } );
 };
-testF32RakedReduce( 'blocked, combine-expr', true );
-testF32RakedReduce( 'blocked, combine-statements', false );
+
+testF32RakedReduce( true, false, 'blocked', 'blocked' );
+testF32RakedReduce( false, false, 'blocked', 'blocked' );
+testF32RakedReduce( true, false, 'blocked', 'striped' );
+testF32RakedReduce( false, false, 'blocked', 'striped' );
+testF32RakedReduce( true, false, 'striped', 'striped' );
+testF32RakedReduce( false, false, 'striped', 'striped' );
+testF32RakedReduce( true, true, 'blocked', 'blocked' );
+testF32RakedReduce( false, true, 'blocked', 'blocked' );
+testF32RakedReduce( true, true, 'blocked', 'striped' );
+testF32RakedReduce( false, true, 'blocked', 'striped' );
+testF32RakedReduce( true, true, 'striped', 'striped' );
+testF32RakedReduce( false, true, 'striped', 'striped' );
 
 asyncTestWithDevice( 'f32_reduce_raked_blocked', async ( device, deviceContext ) => {
   const workgroupSize = 256;

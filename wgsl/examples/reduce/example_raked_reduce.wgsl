@@ -43,14 +43,13 @@ fn main(
     workgroupSize: workgroupSize,
     grainSize: grainSize,
     length: length,
-    inputOrder: 'blocked',
-    inputAccessOrder: 'blocked'
+    inputOrder: inputOrder,
+    inputAccessOrder: inputAccessOrder
   } )}
 
   // TODO: good way of combining the valueType/identity/combine*?
   ${reduce( {
     value: 'value',
-    valueType: valueType,
     scratch: 'scratch',
     workgroupSize: workgroupSize,
     identity: identity,

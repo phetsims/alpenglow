@@ -12,9 +12,6 @@ ${template( ( {
   // the "input" and "output" variable name
   value,
 
-  // null | type T, only needed if we use combine statements
-  valueType = null,
-
   // name for var<workgroup> array<T, workgroupSize> TODO: consider abstracting, so we could run multiple reduces
   // TODO: concurrently
   scratch,
@@ -51,7 +48,6 @@ ${template( ( {
   assert && assert( [ combineExpression, combineStatements ].filter( _.identity ).length === 1,
     'Must provide exactly one of combineExpression or combineStatements' );
   assert && assert( !convergent || Number.isInteger( Math.log2( workgroupSize ) ) );
-  assert && assert( !combineStatements || valueType !== null );
 
   const start = convergent ? Math.log2( workgroupSize ) : 0;
   const end = convergent ? 0 : Math.log2( workgroupSize );
@@ -73,9 +69,7 @@ ${template( ( {
         ${combineExpression ? `
           ${value} = ${combineExpression( value, `${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )};
         ` : `
-          var next_value: ${valueType};
-          ${combineStatements( `next_value`, value, `${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )}
-          ${value} = next_value;
+          ${combineStatements( value, value, `${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )}
         `}
 
         ${ !isLast ? `
