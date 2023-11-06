@@ -297,6 +297,29 @@ export default class ByteEncoder {
   }
 
   /**
+   * Converts to/from convergent indices (and handles the modulo-size portion)
+   */
+  public static getConvergentIndex( index: number, size: number ): number {
+    const bits = Math.log2( size );
+    assert && assert( Number.isInteger( bits ) );
+
+    let result = 0;
+
+    for ( let bit = 0; bit < 32; bit++ ) {
+      if ( ( index & ( 1 << bit ) ) !== 0 ) {
+        if ( bit < bits ) {
+          result |= ( 1 << ( bits - bit - 1 ) );
+        }
+        else {
+          result |= ( 1 << bit );
+        }
+      }
+    }
+
+    return result >>> 0; // convert to unsigned
+  }
+
+  /**
    * Co-rank function, that determines the indices into two arrays that would be at a given rank if they were sorted
    * together (with a binary search).
    *

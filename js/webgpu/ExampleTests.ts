@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort, wgsl_example_load_reduced, u32, wgsl_u32_from_striped, DualSnippetSource, wgsl_u32_to_striped } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort, wgsl_example_load_reduced, u32, wgsl_u32_from_striped, DualSnippetSource, wgsl_u32_to_striped, wgsl_u32_flip_convergent } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
@@ -1905,3 +1905,8 @@ const reorderTest = ( name: string, source: DualSnippetSource, indexMap: ( index
 
 reorderTest( 'u32_from_striped', wgsl_u32_from_striped, ByteEncoder.fromStripedIndex );
 reorderTest( 'u32_to_striped', wgsl_u32_to_striped, ByteEncoder.toStripedIndex );
+reorderTest(
+  'u32_flip_convergent',
+  wgsl_u32_flip_convergent,
+  ( index, workgroupSize, grainSize ) => ByteEncoder.getConvergentIndex( index, workgroupSize * grainSize )
+);

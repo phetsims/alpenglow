@@ -16,5 +16,5 @@ ${template( ( {
 } ) => {
   assert && assert( Number.isInteger( Math.log2( size ) ) );
 
-  return `( reverseBits( ${expr} ) >> ${u32( 32 - Math.log2( size ) )} )`;
+  return `( reverseBits( ${i} ) >> ${u32( 32 - Math.log2( size ) )} )`;
 } )}

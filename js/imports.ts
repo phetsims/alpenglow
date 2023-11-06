@@ -247,6 +247,8 @@ export { default as wgsl_example_load_reduced } from '../wgsl/examples/data/exam
 export { default as wgsl_u32_from_striped } from '../wgsl/examples/data/u32_from_striped.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u32_to_striped } from '../wgsl/examples/data/u32_to_striped.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_u32_flip_convergent } from '../wgsl/examples/data/u32_flip_convergent.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
