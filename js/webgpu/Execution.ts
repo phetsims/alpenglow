@@ -58,6 +58,12 @@ export default class Execution {
     return buffer;
   }
 
+  public async arrayBuffer(
+    buffer: GPUBuffer
+  ): Promise<ArrayBuffer> {
+    return this.bufferLogger.arrayBuffer( this.encoder, buffer );
+  }
+
   public async u32(
     buffer: GPUBuffer
   ): Promise<Uint32Array> {

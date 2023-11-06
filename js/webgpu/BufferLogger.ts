@@ -60,6 +60,13 @@ export default class BufferLogger {
     } );
   }
 
+  public async arrayBuffer(
+    encoder: GPUCommandEncoder,
+    buffer: GPUBuffer
+  ): Promise<ArrayBuffer> {
+    return this.arrayBufferPromise( encoder, buffer );
+  }
+
   public async u32(
     encoder: GPUCommandEncoder,
     buffer: GPUBuffer

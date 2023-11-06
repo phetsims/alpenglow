@@ -6,8 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort, wgsl_example_reduced_load, u32 } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
@@ -1529,3 +1530,326 @@ const test_u32_radix_histogram = (
 test_u32_radix_histogram( 256, 8, 256 * 8 * 8 - 256 * 2 - 27, 256 );
 test_u32_radix_histogram( 64, 4, 256 * 64 * 7, 512 );
 test_u32_radix_histogram( 64, 4, 256 * 64 * 27, 512 );
+
+type ReducedLoadOptions = {
+  workgroupSize: number;
+  grainSize: number;
+  valueType: string;
+  useLoadExpression: boolean;
+  identity: string;
+  length: string | null;
+  combineExpression: null | ( ( aExpr: string, bExpr: string ) => string );
+  combineStatements: null | ( ( varName: string, aExpr: string, bExpr: string ) => string );
+  inputOrder: null | 'blocked' | 'striped';
+  inputAccessOrder: 'blocked' | 'striped';
+  factorOutSubexpressions: boolean;
+  nestSubexpressions: boolean;
+
+  actualLength: number;
+  inputData: ArrayBuffer;
+  bytesPerItem: number;
+  expectedValue: ArrayBuffer;
+};
+const test_reduced_load = ( subname: string, options: ReducedLoadOptions ) => {
+  const name = `reduced_load ${subname}`;
+  asyncTestWithDevice( name, async ( device, deviceContext ) => {
+    const dispatchSize = Math.ceil( options.actualLength / ( options.workgroupSize * options.grainSize ) );
+
+    const shader = ComputeShader.fromSource(
+      device, name, wgsl_example_reduced_load, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], options
+    );
+
+    const actualValue = await deviceContext.executeSingle( async ( encoder, execution ) => {
+      const inputBuffer = execution.createBuffer( options.inputData.byteLength );
+      device.queue.writeBuffer( inputBuffer, 0, options.inputData );
+
+      const outputBuffer = execution.createBuffer( options.bytesPerItem * options.workgroupSize * dispatchSize );
+
+      shader.dispatch( encoder, [
+        inputBuffer, outputBuffer
+      ], dispatchSize );
+
+      return execution.arrayBuffer( outputBuffer );
+    } );
+
+    const expectedArray = [ ...new Uint32Array( options.expectedValue ) ];
+    const actualArray = [ ...new Uint32Array( actualValue ) ].slice( 0, expectedArray.length );
+
+    for ( let i = 0; i < expectedArray.length; i++ ) {
+      if ( expectedArray[ i ] !== actualArray[ i ] ) {
+        console.log( 'expected' );
+        console.log( _.chunk( expectedArray, 16 ) );
+
+        console.log( 'actual' );
+        console.log( _.chunk( actualArray, 16 ) );
+
+        return `expected ${expectedArray[ i ]}, actual ${actualArray[ i ]}`;
+      }
+    }
+
+    return null;
+  } );
+};
+
+[ false, true ].forEach( useCombineExpression => {
+  [ false, true ].forEach( useLoadExpression => {
+    [ 'factored', 'not factored', 'nested' ].forEach( style => {
+      if ( style === 'nested' && ( !useLoadExpression || !useCombineExpression ) ) {
+        // Can't put nesting with statements
+        return;
+      }
+
+      test_reduced_load( `u32_tiny_example load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+        workgroupSize: 4,
+        grainSize: 2,
+        valueType: 'u32',
+        useLoadExpression: useLoadExpression,
+        identity: '0u',
+        combineExpression: useCombineExpression ? ( ( a, b ) => `${a} + ${b}` ) : null,
+        combineStatements: useCombineExpression ? null : ( ( varName, a, b ) => `${varName} = ${a} + ${b};` ),
+        inputOrder: 'blocked',
+        inputAccessOrder: 'blocked',
+        factorOutSubexpressions: style === 'factored',
+        nestSubexpressions: style === 'nested',
+        length: u32( 11 ),
+
+        actualLength: 13,
+        inputData: new Uint32Array( [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, /* cut */ 11, 12 ] ).buffer,
+        bytesPerItem: 4,
+        expectedValue: new Uint32Array( [ 1, 5, 9, 13, 17, 10 ] ).buffer
+      } );
+
+      test_reduced_load( `u32_tiny_example (no-length) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+        workgroupSize: 4,
+        grainSize: 2,
+        valueType: 'u32',
+        useLoadExpression: useLoadExpression,
+        identity: '0u',
+        combineExpression: useCombineExpression ? ( ( a, b ) => `${a} + ${b}` ) : null,
+        combineStatements: useCombineExpression ? null : ( ( varName, a, b ) => `${varName} = ${a} + ${b};` ),
+        inputOrder: 'blocked',
+        inputAccessOrder: 'blocked',
+        factorOutSubexpressions: style === 'factored',
+        nestSubexpressions: style === 'nested',
+        length: null,
+
+        actualLength: 16,
+        inputData: new Uint32Array( [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ] ).buffer,
+        bytesPerItem: 4,
+        expectedValue: new Uint32Array( [ 1, 5, 9, 13, 17, 21, 25, 29 ] ).buffer
+      } );
+
+      test_reduced_load( `u32_tiny_example (striped access) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+        workgroupSize: 4,
+        grainSize: 2,
+        valueType: 'u32',
+        useLoadExpression: useLoadExpression,
+        identity: '0u',
+        combineExpression: useCombineExpression ? ( ( a, b ) => `${a} + ${b}` ) : null,
+        combineStatements: useCombineExpression ? null : ( ( varName, a, b ) => `${varName} = ${a} + ${b};` ),
+        inputOrder: 'blocked',
+        inputAccessOrder: 'striped',
+        factorOutSubexpressions: style === 'factored',
+        nestSubexpressions: style === 'nested',
+        length: u32( 11 ),
+
+        actualLength: 13,
+        inputData: new Uint32Array( [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, /* cut */ 11, 12 ] ).buffer,
+        bytesPerItem: 4,
+        expectedValue: new Uint32Array( [ 4, 6, 8, 10, 8, 9, 10 ] ).buffer
+      } );
+
+      test_reduced_load( `u32_tiny_example (striped access, no-length) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+        workgroupSize: 4,
+        grainSize: 2,
+        valueType: 'u32',
+        useLoadExpression: useLoadExpression,
+        identity: '0u',
+        combineExpression: useCombineExpression ? ( ( a, b ) => `${a} + ${b}` ) : null,
+        combineStatements: useCombineExpression ? null : ( ( varName, a, b ) => `${varName} = ${a} + ${b};` ),
+        inputOrder: 'blocked',
+        inputAccessOrder: 'striped',
+        factorOutSubexpressions: style === 'factored',
+        nestSubexpressions: style === 'nested',
+        length: null,
+
+        actualLength: 16,
+        inputData: new Uint32Array( [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ] ).buffer,
+        bytesPerItem: 4,
+        expectedValue: new Uint32Array( [ 4, 6, 8, 10, 20, 22, 24, 26 ] ).buffer
+      } );
+
+      test_reduced_load( `u32_tiny_example (striped access, striped-order!!) load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+        workgroupSize: 4,
+        grainSize: 2,
+        valueType: 'u32',
+        useLoadExpression: useLoadExpression,
+        identity: '0u',
+        combineExpression: useCombineExpression ? ( ( a, b ) => `${a} + ${b}` ) : null,
+        combineStatements: useCombineExpression ? null : ( ( varName, a, b ) => `${varName} = ${a} + ${b};` ),
+        inputOrder: 'striped',
+        inputAccessOrder: 'striped',
+        factorOutSubexpressions: style === 'factored',
+        nestSubexpressions: style === 'nested',
+        length: u32( 11 ),
+
+        actualLength: 16,
+        inputData: new Uint32Array( [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ] ).buffer,
+        bytesPerItem: 4,
+        expectedValue: new Uint32Array( [ 4, 6, 8, 10, 20, 9, 0, 0 ] ).buffer
+      } );
+
+      const bic2 = ( a: Vector2, b: Vector2 ) => a.plus( b ).minusScalar( Math.min( a.y, b.x ) );
+      const bic2Array = ( a: number, b: number, c: number, d: number ) => {
+        const result = bic2( new Vector2( a, b ), new Vector2( c, d ) );
+        return [ result.x, result.y ];
+      };
+      test_reduced_load( `non-commutative bicyclic semigroup load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+        workgroupSize: 4,
+        grainSize: 2,
+        valueType: 'vec2u',
+        useLoadExpression: useLoadExpression,
+        identity: 'vec2( 0u )',
+        combineExpression: useCombineExpression ? ( ( a, b ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )` ) : null,
+        combineStatements: useCombineExpression ? null : ( ( varName, a, b ) => `
+          let fa = ${a};
+          let fb = ${b};
+          ${varName} = fa + fb - min( fa.y, fb.x );
+        ` ),
+        inputOrder: 'blocked',
+        inputAccessOrder: 'blocked',
+        factorOutSubexpressions: style === 'factored',
+        nestSubexpressions: style === 'nested',
+        length: u32( 11 ),
+
+        actualLength: 16,
+        inputData: new Uint32Array( [
+          0, 5,
+          2, 3,
+          4, 5,
+          1, 1,
+          2, 7,
+          8, 3,
+          6, 2,
+          9, 1,
+          3, 8,
+          7, 4,
+          9, 1,
+          // cut
+          12, 20,
+          4, 15,
+          5, 1,
+          9, 17,
+          20, 21
+        ] ).buffer,
+        bytesPerItem: 8,
+        expectedValue: new Uint32Array( [
+          ...bic2Array( 0, 5, 2, 3 ),
+          ...bic2Array( 4, 5, 1, 1 ),
+          ...bic2Array( 2, 7, 8, 3 ),
+          ...bic2Array( 6, 2, 9, 1 ),
+          ...bic2Array( 3, 8, 7, 4 ),
+          ...bic2Array( 9, 1, 0, 0 )
+        ] ).buffer
+      } );
+
+      const bic3 = ( a: Vector2, b: Vector2, c: Vector2 ) => bic2( a, bic2( b, c ) );
+      const bic3Array = ( a: number, b: number, c: number, d: number, e: number, f: number ) => {
+        const result = bic3( new Vector2( a, b ), new Vector2( c, d ), new Vector2( e, f ) );
+        return [ result.x, result.y ];
+      };
+
+      test_reduced_load( `non-commutative bicyclic semigroup 3-grain load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+        workgroupSize: 4,
+        grainSize: 3,
+        valueType: 'vec2u',
+        useLoadExpression: useLoadExpression,
+        identity: 'vec2( 0u )',
+        combineExpression: useCombineExpression ? ( ( a, b ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )` ) : null,
+        combineStatements: useCombineExpression ? null : ( ( varName, a, b ) => `
+          let fa = ${a};
+          let fb = ${b};
+          ${varName} = fa + fb - min( fa.y, fb.x );
+        ` ),
+        inputOrder: 'blocked',
+        inputAccessOrder: 'blocked',
+        factorOutSubexpressions: style === 'factored',
+        nestSubexpressions: style === 'nested',
+        length: u32( 11 ),
+
+        actualLength: 16,
+        inputData: new Uint32Array( [
+          0, 5,
+          2, 3,
+          4, 5,
+          1, 1,
+          2, 7,
+          8, 3,
+          6, 2,
+          9, 1,
+          3, 8,
+          7, 4,
+          9, 1,
+          // cut
+          12, 20,
+          4, 15,
+          5, 1,
+          9, 17,
+          20, 21
+        ] ).buffer,
+        bytesPerItem: 8,
+        expectedValue: new Uint32Array( [
+          ...bic3Array( 0, 5, 2, 3, 4, 5 ),
+          ...bic3Array( 1, 1, 2, 7, 8, 3 ),
+          ...bic3Array( 6, 2, 9, 1, 3, 8 ),
+          ...bic3Array( 7, 4, 9, 1, 0, 0 )
+        ] ).buffer
+      } );
+
+      test_reduced_load( `non-commutative bicyclic semigroup 3-grain no-length load-${useLoadExpression ? 'expr' : 'statement'}, combine-${useCombineExpression ? 'expr' : 'statement'}, ${style}`, {
+        workgroupSize: 4,
+        grainSize: 3,
+        valueType: 'vec2u',
+        useLoadExpression: useLoadExpression,
+        identity: 'vec2( 0u )',
+        combineExpression: useCombineExpression ? ( ( a, b ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )` ) : null,
+        combineStatements: useCombineExpression ? null : ( ( varName, a, b ) => `
+          let fa = ${a};
+          let fb = ${b};
+          ${varName} = fa + fb - min( fa.y, fb.x );
+        ` ),
+        inputOrder: 'blocked',
+        inputAccessOrder: 'blocked',
+        factorOutSubexpressions: style === 'factored',
+        nestSubexpressions: style === 'nested',
+        length: null,
+
+        actualLength: 12,
+        inputData: new Uint32Array( [
+          0, 5,
+          2, 3,
+          4, 5,
+          1, 1,
+          2, 7,
+          8, 3,
+          6, 2,
+          9, 1,
+          3, 8,
+          7, 4,
+          9, 1,
+          12, 20
+        ] ).buffer,
+        bytesPerItem: 8,
+        expectedValue: new Uint32Array( [
+          ...bic3Array( 0, 5, 2, 3, 4, 5 ),
+          ...bic3Array( 1, 1, 2, 7, 8, 3 ),
+          ...bic3Array( 6, 2, 9, 1, 3, 8 ),
+          ...bic3Array( 7, 4, 9, 1, 12, 20 )
+        ] ).buffer
+      } );
+    } );
+  } );
+} );
