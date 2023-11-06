@@ -73,9 +73,8 @@ ${template( ( {
         ${combineExpression ? `
           ${value} = ${combineExpression( value, `${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )};
         ` : `
-          // TODO: test this
-          let next_value: ${valueType};
-          ${combineStatements( `nextValue`, value, `${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )}
+          var next_value: ${valueType};
+          ${combineStatements( `next_value`, value, `${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )}
           ${value} = next_value;
         `}
 

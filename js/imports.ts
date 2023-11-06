@@ -200,6 +200,8 @@ export { default as wgsl_raster_accumulate } from '../wgsl/raster/raster_accumul
 export { default as wgsl_raster_to_texture } from '../wgsl/raster/raster_to_texture.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_example_raked_reduce } from '../wgsl/examples/reduce/example_raked_reduce.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_f32_reduce_simple } from '../wgsl/examples/reduce/f32_reduce_simple.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_f32_reduce_raked_blocked } from '../wgsl/examples/reduce/f32_reduce_raked_blocked.js';

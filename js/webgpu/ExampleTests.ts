@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort, wgsl_example_load_reduced, u32, wgsl_u32_from_striped, DualSnippetSource, wgsl_u32_to_striped, wgsl_u32_flip_convergent } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_workgroup_radix_sort, wgsl_example_load_reduced, u32, wgsl_u32_from_striped, DualSnippetSource, wgsl_u32_to_striped, wgsl_u32_flip_convergent, wgsl_example_raked_reduce } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
@@ -84,6 +84,77 @@ asyncTestWithDevice( 'f32_reduce_simple', async ( device, deviceContext ) => {
 
   return null;
 } );
+
+const testF32RakedReduce = ( subname: string, combineWithExpression: boolean ) => {
+  const name = `f32 reduce ${subname}`;
+  asyncTestWithDevice( name, async ( device, deviceContext ) => {
+    const workgroupSize = 256;
+    const grainSize = 4;
+    const blockSize = workgroupSize * grainSize;
+    const inputSize = blockSize * 5 - 27;
+
+    const dispatchSize = Math.ceil( inputSize / ( workgroupSize * grainSize ) );
+    const inputBufferSize = dispatchSize * blockSize;
+
+    const convergent = false;
+    const inputOrder = 'blocked';
+    const inputAccessOrder = 'blocked';
+
+    const numbers = _.range( 0, inputBufferSize ).map( () => random.nextDouble() );
+
+    const shader = ComputeShader.fromSource(
+      device, name, wgsl_example_raked_reduce, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], {
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        length: u32( inputSize ),
+        valueType: 'f32',
+        identity: '0f',
+        combineExpression: combineWithExpression ? ( a: string, b: string ) => `${a} + ${b}` : null,
+        combineStatements: combineWithExpression ? null : ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
+        convergent: convergent,
+        inputOrder: inputOrder,
+        inputAccessOrder: inputAccessOrder
+      }
+    );
+
+    const actualNumbers = await deviceContext.executeSingle( async ( encoder, execution ) => {
+      const inputBuffer = execution.createBuffer( 4 * inputBufferSize );
+      device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+
+      const outputBuffer = execution.createBuffer( 4 * dispatchSize );
+
+      shader.dispatch( encoder, [
+        inputBuffer, outputBuffer
+      ], dispatchSize );
+
+      return execution.f32Numbers( outputBuffer );
+    } );
+
+    const expectedNumbers = _.chunk( numbers.slice( 0, inputSize ), blockSize ).map( _.sum );
+
+    for ( let i = 0; i < expectedNumbers.length; i++ ) {
+      const expectedValue = expectedNumbers[ i ];
+      const actualValue = actualNumbers[ i ];
+
+      if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
+        console.log( 'expected' );
+        console.log( expectedNumbers );
+
+        console.log( 'actual' );
+        console.log( actualNumbers );
+
+        return `expected ${expectedValue}, actual ${actualValue}`;
+      }
+    }
+
+    return null;
+  } );
+};
+testF32RakedReduce( 'blocked, combine-expr', true );
+testF32RakedReduce( 'blocked, combine-statements', false );
 
 asyncTestWithDevice( 'f32_reduce_raked_blocked', async ( device, deviceContext ) => {
   const workgroupSize = 256;
