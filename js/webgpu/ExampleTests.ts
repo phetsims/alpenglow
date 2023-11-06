@@ -17,6 +17,46 @@ QUnit.module( 'Example' );
 
 // TODO: deduplicate with SnippetTests
 
+// Bicyclic semigroup object, a good example of a non-commutative operation
+class Bic {
+  public constructor(
+    public readonly x: number,
+    public readonly y: number
+  ) {}
+
+  public getNumbers(): [ number, number ] {
+    return [ this.x, this.y ];
+  }
+
+  public equals( other: Bic ): boolean {
+    return this.x === other.x && this.y === other.y;
+  }
+
+  public toString(): string {
+    return `Bic( ${this.x}, ${this.y} )`;
+  }
+
+  public static combine( a: Bic, b: Bic ): Bic {
+    const min = Math.min( a.y, b.x );
+    return new Bic(
+      a.x + b.x - min,
+      a.y + b.y - min
+    );
+  }
+
+  public static readonly IDENTITY = new Bic( 0, 0 );
+
+  public static combineMultiple( ...values: Bic[] ): Bic {
+    let bic = Bic.IDENTITY;
+    values.forEach( value => {
+      bic = Bic.combine( bic, value );
+    } );
+    return bic;
+  }
+
+  public static readonly BYTES = 8;
+}
+
 const devicePromise: Promise<GPUDevice | null> = ( async () => {
   try {
     const adapter = await navigator.gpu?.requestAdapter();
@@ -169,6 +209,97 @@ testF32RakedReduce( true, true, 'blocked', 'striped' );
 testF32RakedReduce( false, true, 'blocked', 'striped' );
 testF32RakedReduce( true, true, 'striped', 'striped' );
 testF32RakedReduce( false, true, 'striped', 'striped' );
+
+const testBicRakedReduce = ( combineWithExpression: boolean, convergent: boolean, inputOrder: 'blocked' | 'striped', inputAccessOrder: 'blocked' | 'striped' ) => {
+  const name = `bic raked reduce combine-${combineWithExpression ? 'expr' : 'statement'} convergent:${convergent ? 'true' : 'false'} input:${inputOrder} access:${inputAccessOrder}`;
+  asyncTestWithDevice( name, async ( device, deviceContext ) => {
+    const workgroupSize = 256;
+    const grainSize = 4;
+    const blockSize = workgroupSize * grainSize;
+    const inputSize = blockSize * 5 - 27;
+
+    const dispatchSize = Math.ceil( inputSize / ( workgroupSize * grainSize ) );
+    const fullInputSize = dispatchSize * blockSize;
+
+    const bics = _.range( 0, fullInputSize ).map( () => new Bic( random.nextIntBetween( 1, 64 ), random.nextIntBetween( 1, 64 ) ) );
+    const inputBics = inputOrder === 'blocked' ? bics : bics.map( ( n, i ) => bics[ ByteEncoder.fromStripedIndex( i, workgroupSize, grainSize ) ] );
+
+    const shader = ComputeShader.fromSource(
+      device, name, wgsl_example_raked_reduce, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], {
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        length: u32( inputSize ),
+        valueType: 'vec2u',
+        identity: 'vec2( 0u )',
+        combineExpression: combineWithExpression ? ( ( a: string, b: string ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )` ) : null,
+        combineStatements: combineWithExpression ? null : ( ( varName: string, a: string, b: string ) => `
+          let fa = ${a};
+          let fb = ${b};
+          ${varName} = fa + fb - min( fa.y, fb.x );
+        ` ),
+        convergent: convergent,
+        inputOrder: inputOrder,
+        inputAccessOrder: inputAccessOrder
+      }
+    );
+
+    const actualNumbers = await deviceContext.executeSingle( async ( encoder, execution ) => {
+      const inputBuffer = execution.createBuffer( Bic.BYTES * fullInputSize );
+      device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( inputBics.flatMap( bic => bic.getNumbers() ) ).buffer );
+
+      const outputBuffer = execution.createBuffer( Bic.BYTES * dispatchSize );
+
+      shader.dispatch( encoder, [
+        inputBuffer, outputBuffer
+      ], dispatchSize );
+
+      return execution.u32Numbers( outputBuffer );
+    } );
+
+    const actualBics: Bic[] = [];
+    for ( let i = 0; i < actualNumbers.length - 1; i += 2 ) {
+      actualBics.push( new Bic( actualNumbers[ i ], actualNumbers[ i + 1 ] ) );
+    }
+
+    const expectedBics = _.chunk( bics.slice( 0, inputSize ), blockSize ).map( bicList => Bic.combineMultiple( ...bicList ) );
+
+    for ( let i = 0; i < expectedBics.length; i++ ) {
+      const expectedValue = expectedBics[ i ];
+      const actualValue = actualBics[ i ];
+
+      if ( !expectedValue.equals( actualValue ) ) {
+        console.log( 'bics' );
+        console.log( bics );
+
+        console.log( 'inputBics' );
+        console.log( inputBics );
+
+        console.log( 'expected' );
+        console.log( expectedBics );
+
+        console.log( 'actual' );
+        console.log( actualBics );
+
+        return `expected ${expectedValue.toString()}, actual ${actualValue.toString()}`;
+      }
+    }
+
+    return null;
+  } );
+};
+
+testBicRakedReduce( true, false, 'blocked', 'blocked' );
+testBicRakedReduce( false, false, 'blocked', 'blocked' );
+testBicRakedReduce( true, false, 'striped', 'striped' );
+testBicRakedReduce( false, false, 'striped', 'striped' );
+// TODO: remap them to be convergent(!) so we can get this working
+// testBicRakedReduce( true, true, 'blocked', 'blocked' );
+// testBicRakedReduce( false, true, 'blocked', 'blocked' );
+// testBicRakedReduce( true, true, 'striped', 'striped' );
+// testBicRakedReduce( false, true, 'striped', 'striped' );
 
 asyncTestWithDevice( 'u32_reduce_raked_striped_blocked_convergent', async ( device, deviceContext ) => {
   const workgroupSize = 256;
