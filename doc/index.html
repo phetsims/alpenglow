@@ -3417,6 +3417,10 @@
     </p>
 
     <p class="TODO">
+      What about workgroup-level atomics reduction for atomic-able types? Either
+    </p>
+
+    <p class="TODO">
       Doc load_reduced
     </p>
 
@@ -3455,6 +3459,17 @@
     </p>
 
     <p class="TODO">
+      Strategies:<br>
+      1-level: just scan the whole thing (we have that already)<br>
+      2-level reduce-scan-scan: reduce the scan blocks (save 1 value per workgroup), scan that buffer/data (save), scan the scan blocks (with add)<br>
+      2-level scan-scan-add: scan the scan blocks (save entire thing + 1 value per workgroup), scan that buffer/data (save), scan/add the scan blocks (save)<br>
+      2-level reduce-scan+add (vello-like): reduce the scan blocks (save 1), scan that IN EACH, use value for scan with scan blocks<br>
+      3-level reduce-scan-scan-scan: reduce the scan blocks (save 1), scan the middle (save + 1), scan the base (save), scan/add the scan blocks - pull indices from multiple layers (save)<br>
+      3-level reduce-reduce-scan-scan-scan: reduce the scan blocks (save 1), reduce middle (save 1), scan the base (save), scan/add the middle (save), scan/add the scan blocks (save)<br>
+      3-level (atomic): reduce-scan-scan-scan: reduce the scan blocks (save 1 middle, atomic-save to base), scan the base (save), scan/add the middle (save), scan/add the scan blocks (save)<br>
+    </p>
+
+    <p class="TODO">
       Performance Tests:<br>
       Non-commutative non-raked striped-load, remap to blocked in shared memory (and then... convergent), and do convergent scan?
     </p>
@@ -3470,6 +3485,11 @@
     </p>
 
     <h4 id="WGSL-radixSort">Radix Sort</h4>
+
+    <p class="TODO">
+      Handle "lightweight" sorting for cases where there is a ton of associated data, but we only
+      need a fraction of that to get the keys for sorting (or for comparisons).
+    </p>
 
     <p>
       <a href="https://kieber-emmons.medium.com/memory-bandwidth-optimized-parallel-radix-sort-in-metal-for-apple-m1-and-beyond-4f4590cfd5d3">Metal Radix Sort</a>.
