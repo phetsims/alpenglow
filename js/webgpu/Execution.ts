@@ -24,33 +24,50 @@ const DEFAULT_OPTIONS = {
   timestampLoggerCapacity: 100
 };
 
-export default class Execution {
+type Execution = {
+  encoder: GPUCommandEncoder;
+  createBuffer: ( size: number ) => GPUBuffer;
+  createDataBuffer: ( data: ArrayBufferView ) => GPUBuffer;
+  createU32Buffer: ( data: number[] ) => GPUBuffer;
+  createI32Buffer: ( data: number[] ) => GPUBuffer;
+  createF32Buffer: ( data: number[] ) => GPUBuffer;
+  arrayBuffer: ( buffer: GPUBuffer ) => Promise<ArrayBuffer>;
+  u32: ( buffer: GPUBuffer ) => Promise<Uint32Array>;
+  i32: ( buffer: GPUBuffer ) => Promise<Int32Array>;
+  f32: ( buffer: GPUBuffer ) => Promise<Float32Array>;
+  u32Numbers: ( buffer: GPUBuffer ) => Promise<number[]>;
+  i32Numbers: ( buffer: GPUBuffer ) => Promise<number[]>;
+  f32Numbers: ( buffer: GPUBuffer ) => Promise<number[]>;
+  getDispatchOptions: () => ComputeShaderDispatchOptions;
+  dispatch: (
+    shader: ComputeShader,
+    resources: ( GPUBuffer | GPUTextureView )[],
+    dispatchX?: number,
+    dispatchY?: number,
+    dispatchZ?: number
+  ) => void;
+  dispatchIndirect: (
+    shader: ComputeShader,
+    resources: ( GPUBuffer | GPUTextureView )[],
+    indirectBuffer: GPUBuffer,
+    indirectOffset: number
+  ) => void;
+};
+export default Execution;
 
-  public readonly encoder: GPUCommandEncoder;
+export abstract class BaseExecution {
   public readonly bufferLogger: BufferLogger;
-  public readonly timestampLogger: TimestampLogger;
-  public readonly timestampResultPromise: Promise<TimestampLoggerResult | null>;
 
-  private readonly buffersToCleanup: GPUBuffer[] = [];
-  private timestampResultResolve!: ( result: TimestampLoggerResult | null ) => void;
+  protected readonly buffersToCleanup: GPUBuffer[] = [];
 
   public constructor(
     public readonly deviceContext: DeviceContext,
-    providedOptions?: ExecutionOptions
+    public readonly encoder: GPUCommandEncoder
   ) {
-    const options = optionize3<ExecutionOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
-
     this.bufferLogger = new BufferLogger( deviceContext );
-    this.timestampLogger = new TimestampLogger(
-      options.timestampLog ? deviceContext : null,
-      options.timestampLoggerCapacity
-    );
-    this.encoder = deviceContext.device.createCommandEncoder( { label: 'the encoder' } );
-
-    this.timestampResultPromise = new Promise( resolve => {
-      this.timestampResultResolve = resolve;
-    } );
   }
+
+  public abstract getDispatchOptions(): ComputeShaderDispatchOptions;
 
   public createBuffer( size: number ): GPUBuffer {
     const buffer = this.deviceContext.createBuffer( size );
@@ -124,12 +141,6 @@ export default class Execution {
     return this.bufferLogger.f32Numbers( this.encoder, buffer );
   }
 
-  public getDispatchOptions(): ComputeShaderDispatchOptions {
-    return {
-      timestampLogger: this.timestampLogger
-    };
-  }
-
   public dispatch(
     shader: ComputeShader,
     resources: ( GPUBuffer | GPUTextureView )[],
@@ -147,6 +158,41 @@ export default class Execution {
     indirectOffset: number
   ): void {
     shader.dispatchIndirect( this.encoder, resources, indirectBuffer, indirectOffset, this.getDispatchOptions() );
+  }
+}
+
+export class BasicExecution extends BaseExecution implements Execution {
+
+  public readonly timestampLogger: TimestampLogger;
+  public readonly timestampResultPromise: Promise<TimestampLoggerResult | null>;
+
+  private timestampResultResolve!: ( result: TimestampLoggerResult | null ) => void;
+
+  public constructor(
+    deviceContext: DeviceContext,
+    providedOptions?: ExecutionOptions
+  ) {
+    super(
+      deviceContext,
+      deviceContext.device.createCommandEncoder( { label: 'the encoder' } )
+    );
+
+    const options = optionize3<ExecutionOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+
+    this.timestampLogger = new TimestampLogger(
+      options.timestampLog ? deviceContext : null,
+      options.timestampLoggerCapacity
+    );
+
+    this.timestampResultPromise = new Promise( resolve => {
+      this.timestampResultResolve = resolve;
+    } );
+  }
+
+  public getDispatchOptions(): ComputeShaderDispatchOptions {
+    return {
+      timestampLogger: this.timestampLogger
+    };
   }
 
   private async executeInternal<T>(
@@ -192,4 +238,4 @@ export default class Execution {
   }
 }
 
-alpenglow.register( 'Execution', Execution );
+alpenglow.register( 'BasicExecution', BasicExecution );

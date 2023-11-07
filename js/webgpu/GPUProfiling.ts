@@ -22,7 +22,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, ComputeShaderSourceOptions, DeviceContext, Execution, TimestampLogger, TimestampLoggerResult, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
+import { alpenglow, BasicExecution, Binding, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, ComputeShaderSourceOptions, DeviceContext, Execution, TimestampLogger, TimestampLoggerResult, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 
@@ -484,7 +484,7 @@ export default class GPUProfiling {
 
     // TODO: are we... causing slower patterns with our new profiling pattern?
     return new GPUProfiler( `f32_reduce_raked_striped_blocked_convergent ${grainSize}`, async () => {
-      const execution = new Execution( deviceContext );
+      const execution = new BasicExecution( deviceContext );
 
       const outputArray = await execution.executeSingle( async ( encoder: GPUCommandEncoder, execution: Execution ) => {
         const inputBuffer = execution.createBuffer( 4 * inputSize );
