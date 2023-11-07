@@ -14,7 +14,9 @@
 export { default as alpenglow } from './alpenglow.js';
 
 export { default as u32 } from './webgpu/u32.js';
+export { default as u32Hex } from './webgpu/u32Hex.js';
 export { default as i32 } from './webgpu/i32.js';
+export { default as i32Hex } from './webgpu/i32Hex.js';
 export { default as f32 } from './webgpu/f32.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER

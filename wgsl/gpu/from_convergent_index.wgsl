@@ -17,8 +17,8 @@ ${template( ( {
   const convergentMask = size - 1;
   const outsideMask = 0xffffffff - convergentMask;
 
-  return `( ( ${i} & ${u32( outsideMask )} ) | ${get_convergent_index( {
-    i: `( ${i} & ${u32( convergentMask )} )`,
+  return `( ( ${i} & ${u32Hex( outsideMask )} ) | ${get_convergent_index( {
+    i: `( ${i} & ${u32Hex( convergentMask )} )`,
     size: size
   } )} )`;
 } )}

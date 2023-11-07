@@ -3259,7 +3259,7 @@
       Create a pattern so that we can easily pre-load shaders before they are used.
     </p>
 
-    <p class="TODO">
+    <p class="DEFERRED">
       Check the WGSL/WebGPU spec for changes!
     </p>
 
@@ -3274,10 +3274,9 @@
       Live WGSL sandbox with compute input/output (and all our existing WGSL included?)
     </p>
 
-    <p class="TODO">
-      Figure out casing. CamelCase is nice for types, how is snake_case treating us? The disconnect with TypeScript styles
-      is tricky. We're adding parenthesis to conditional statements when we don't have to (that the minifier is not yet
-      confident enough to detect/remove).
+    <p>
+      In WGSL, prefer CamelCase for types, but snake_case for variables/functions. This helps differentiate (a bit)
+      the template variables (camcelCase).
     </p>
 
     <h4 id="WGSL-snippets">Snippets</h4>
@@ -3312,7 +3311,7 @@
     </p>
 
     <p class="TODO">
-      Read papers and books!
+      Read papers and books! - Notably Levien one with the scan patterns.
     </p>
 
     <p>

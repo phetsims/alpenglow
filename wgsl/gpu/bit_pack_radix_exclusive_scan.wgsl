@@ -38,7 +38,7 @@ ${template( ( {
       if ( shiftAmount > 0 ) {
         expr = `( ${expr} >> ${u32( shiftAmount )} )`;
       }
-      return `${expr} & ${u32( singleMask )}`;
+      return `${expr} & ${u32Hex( singleMask )}`;
     };
     const setAtIndex = ( index, value ) => {
       const vectorIndexExpr = bitVectorSize > 1 ? [ '.x', '.y', '.z', '.w' ][ Math.floor( index / countsPerComponent ) ] : ``;
@@ -46,7 +46,7 @@ ${template( ( {
       const shiftAmount = countBitQuantity * ( index % countsPerComponent );
       const existingMask = fullMask - ( ( singleMask << shiftAmount ) >>> 0 );
       const shiftedValueExpr = shiftAmount === 0 ? value : `( ( ${value} ) << ${u32( shiftAmount )} )`;
-      return `${accessExpr} = ( ${accessExpr} & ${u32( existingMask )} ) | ${shiftedValueExpr}`;
+      return `${accessExpr} = ( ${accessExpr} & ${u32Hex( existingMask )} ) | ${shiftedValueExpr}`;
     };
     let str = `
       var bitty_value = 0u;
