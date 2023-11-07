@@ -43,11 +43,18 @@ ${template( ( {
   // index 128, the third element at index 64, etc.). See get_convergent_index for more information.
   // For instance, the order of reduction of the first 16 hex digits (in a convergent order) would be
   // 084c2a6e195d3b7f.
-  convergent = false
+  convergent = false,
+
+  // If true, we won't need to load the value INTO the scratch array
+  scratchPreloaded = false,
+
+  // If true, we won't need to load the value FROM the scratch array
+  valuePreloaded = true,
 } ) => {
   assert && assert( [ combineExpression, combineStatements ].filter( _.identity ).length === 1,
     'Must provide exactly one of combineExpression or combineStatements' );
   assert && assert( !convergent || Number.isInteger( Math.log2( workgroupSize ) ) );
+  assert && assert( scratchPreloaded || valuePreloaded );
 
   const start = convergent ? Math.log2( workgroupSize ) : 0;
   const end = convergent ? 0 : Math.log2( workgroupSize );
@@ -59,7 +66,12 @@ ${template( ( {
     : `${localIndex} + ${u32( 1 << i )}`;
 
   return `
-    ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};
+    ${!scratchPreloaded ? `
+      ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};
+    ` : ``}
+    ${!valuePreloaded ? `
+      ${value} = ${scratch}[ ${mapScratchIndex( localIndex )} ];
+    ` : ``}
 
     ${unroll( start, end, ( i, isFirst, isLast ) => `
       workgroupBarrier();

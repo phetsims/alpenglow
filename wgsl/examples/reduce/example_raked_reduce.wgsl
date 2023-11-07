@@ -6,6 +6,7 @@
 
 #import ../../gpu/reduce
 #import ../../gpu/load_reduced
+#import ../../gpu/to_convergent_index
 
 #option workgroupSize
 #option grainSize
@@ -17,6 +18,10 @@
 #option inputOrder
 #option inputAccessOrder
 #option valueType
+
+// Whether we should remap the data to convergent indices before reducing (i.e. a convergent reduce with non-commutative
+// data.
+#option convergentRemap
 
 @group(0) @binding(0)
 var<storage> input: array<${valueType}>;
@@ -47,6 +52,12 @@ fn main(
     inputAccessOrder: inputAccessOrder
   } )}
 
+  ${convergentRemap ? `
+    scratch[ ${to_convergent_index( { i: `local_id.x`, size: workgroupSize } )} ] = value;
+
+    workgroupBarrier();
+  ` : ``}
+
   // TODO: good way of combining the valueType/identity/combine*?
   ${reduce( {
     value: 'value',
@@ -55,7 +66,9 @@ fn main(
     identity: identity,
     combineExpression: combineExpression,
     combineStatements: combineStatements,
-    convergent: convergent
+    convergent: convergent,
+    scratchPreloaded: convergentRemap, // if we convergently reloaded, we don't need to update the scratch
+    valuePreloaded: !convergentRemap // if we convergently reloaded, we'll need to load the value from scratch
   } )}
 
   if ( local_id.x == 0u ) {
