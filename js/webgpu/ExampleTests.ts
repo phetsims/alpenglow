@@ -297,7 +297,6 @@ testBicRakedReduce( true, false, 'blocked', 'blocked' );
 testBicRakedReduce( false, false, 'blocked', 'blocked' );
 testBicRakedReduce( true, false, 'striped', 'striped' );
 testBicRakedReduce( false, false, 'striped', 'striped' );
-// TODO: remap them to be convergent(!) so we can get this working
 testBicRakedReduce( true, true, 'blocked', 'blocked' );
 testBicRakedReduce( false, true, 'blocked', 'blocked' );
 testBicRakedReduce( true, true, 'striped', 'striped' );
