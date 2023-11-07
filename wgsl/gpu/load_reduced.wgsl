@@ -13,12 +13,6 @@
 // CASE: if non-commutative reduce, we want to ... load blocked (?), reverseBits into convergent, and convergent-reduce?
 // CASE: if non-commutative reduce on striped data, we want to load striped, morph into convergent, and convergent-reduce
 // CASE: scan: load how the data is stored (blocked/striped), NO storeOrder, then scan.
-//       TODO: what if... for exclusive prefix sums, we MIGHT want to load data one-offset?
-// TODO: WE WILL WANT to store non-commutative reduce (and ALL scan) data in striped order, so we can load it efficiently
-
-// TODO: also create load_multiple (we don't reduce things, we just load them into an array)
-// TODO: once we have the orderings handled, CONDENSE THE AMOUNT OF EXAMPLES
-// TODO: combine reduce.wgsl and reduce_convergent.wgsl (reduce) so we can just adjust things easily
 
 ${template( ( {
   // the "output" variable name

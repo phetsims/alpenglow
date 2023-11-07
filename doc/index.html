@@ -3361,6 +3361,11 @@
     </p>
 
     <p class="TODO">
+      Investigate compute ordering of workgroups across devices, see https://compute.toys/view/207
+      and https://compute.toys/view/210
+    </p>
+
+    <p class="TODO">
       Allow subtract() in addition to combine() in templates, there are some cases where it might be more efficient to
       compute (if that's allowed).
     </p>
@@ -3408,7 +3413,22 @@
     <h4 id="WGSL-reduce">Reduce</h4>
 
     <p class="TODO">
-      Performance test with the non-unrolled versions
+      Condense examples. Create some reusable "examples" that we can use for BOTH unit tests AND profiling.
+    </p>
+
+    <p class="TODO">
+      Doc load_reduced
+    </p>
+
+    <p class="TODO">
+      Create load_multiple (... find examples where we would use?) - basically loading in different orders, with
+      range checks similar to load_reduced, but instead of combining them, we assign them to different places in shared
+      memory.
+    </p>
+
+    <p class="TODO">
+      Performance Tests:<br>
+      Non-commutative non-raked striped-load, remap to blocked in shared memory (and then... convergent), and do convergent reduce?
     </p>
 
     <p>
@@ -3427,11 +3447,22 @@
       <a href="https://kieber-emmons.medium.com/optimizing-parallel-reduction-in-metal-for-apple-m1-8e8677b49b01">Metal Reduce</a>.
     </p>
 
+    <h4 id="WGSL-scan">Scan</h4>
+
     <p class="TODO">
-      Can we early-exit from a workgroup?
+      Consider keeping lower scans inclusive (and loading-offset OR zero things out, like we do in raster-clipper),
+      or we could also do the extra workgroupBarrier() and put them into exclusive (so loading is easier).
     </p>
 
-    <h4 id="WGSL-scan">Scan</h4>
+    <p class="TODO">
+      Performance Tests:<br>
+      Non-commutative non-raked striped-load, remap to blocked in shared memory (and then... convergent), and do convergent scan?
+    </p>
+
+    <p class="TODO">
+      Create a scan using Brent-Kung (see Chap11 of Programming Massively Parallel Processors, code p250), for cases where our
+      comparison might be doing memory loads (or other expensive work), we can get better work efficiency.
+    </p>
 
     <p>
       <a href="https://kieber-emmons.medium.com/efficient-parallel-prefix-sum-in-metal-for-apple-m1-9e60b974d62">Metal Scan</a>.
