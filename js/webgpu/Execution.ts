@@ -58,6 +58,30 @@ export default class Execution {
     return buffer;
   }
 
+  public createDataBuffer( data: ArrayBufferView ): GPUBuffer {
+    const buffer = this.deviceContext.createDataBuffer( data );
+    this.buffersToCleanup.push( buffer );
+    return buffer;
+  }
+
+  public createU32Buffer( data: number[] ): GPUBuffer {
+    const buffer = this.deviceContext.createU32Buffer( data );
+    this.buffersToCleanup.push( buffer );
+    return buffer;
+  }
+
+  public createI32Buffer( data: number[] ): GPUBuffer {
+    const buffer = this.deviceContext.createI32Buffer( data );
+    this.buffersToCleanup.push( buffer );
+    return buffer;
+  }
+
+  public createF32Buffer( data: number[] ): GPUBuffer {
+    const buffer = this.deviceContext.createF32Buffer( data );
+    this.buffersToCleanup.push( buffer );
+    return buffer;
+  }
+
   public async arrayBuffer(
     buffer: GPUBuffer
   ): Promise<ArrayBuffer> {

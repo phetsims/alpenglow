@@ -100,6 +100,24 @@ export default class DeviceContext {
     } );
   }
 
+  public createDataBuffer( data: ArrayBufferView ): GPUBuffer {
+    const buffer = this.createBuffer( data.byteLength );
+    this.device.queue.writeBuffer( buffer, 0, data.buffer );
+    return buffer;
+  }
+
+  public createU32Buffer( data: number[] ): GPUBuffer {
+    return this.createDataBuffer( new Uint32Array( data ) );
+  }
+
+  public createI32Buffer( data: number[] ): GPUBuffer {
+    return this.createDataBuffer( new Int32Array( data ) );
+  }
+
+  public createF32Buffer( data: number[] ): GPUBuffer {
+    return this.createDataBuffer( new Float32Array( data ) );
+  }
+
   // in bytes
   public createMapReadableBuffer( size: number ): GPUBuffer {
     return this.device.createBuffer( {

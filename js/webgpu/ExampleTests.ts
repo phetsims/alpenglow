@@ -159,9 +159,7 @@ const testF32RakedReduce = ( combineWithExpression: boolean, convergent: boolean
     );
 
     const actualNumbers = await deviceContext.executeSingle( async ( encoder, execution ) => {
-      const inputBuffer = execution.createBuffer( 4 * inputBufferSize );
-      device.queue.writeBuffer( inputBuffer, 0, new Float32Array( inputNumbers ).buffer );
-
+      const inputBuffer = execution.createF32Buffer( inputNumbers );
       const outputBuffer = execution.createBuffer( 4 * dispatchSize );
 
       shader.dispatch( encoder, [
@@ -249,9 +247,7 @@ const testBicRakedReduce = ( combineWithExpression: boolean, convergent: boolean
     );
 
     const actualNumbers = await deviceContext.executeSingle( async ( encoder, execution ) => {
-      const inputBuffer = execution.createBuffer( Bic.BYTES * fullInputSize );
-      device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( inputBics.flatMap( bic => bic.getNumbers() ) ).buffer );
-
+      const inputBuffer = execution.createU32Buffer( inputBics.flatMap( bic => bic.getNumbers() ) );
       const outputBuffer = execution.createBuffer( Bic.BYTES * dispatchSize );
 
       shader.dispatch( encoder, [
@@ -310,7 +306,6 @@ asyncTestWithDevice( 'u32_reduce_raked_striped_blocked_convergent', async ( devi
 
   const numbers = _.range( 0, bufferSize ).map( () => random.nextIntBetween( 1, 10 ) );
 
-
   const shader = ComputeShader.fromSource(
     device, 'u32_reduce_raked_striped_blocked_convergent', wgsl_u32_reduce_raked_striped_blocked_convergent, [
       Binding.READ_ONLY_STORAGE_BUFFER,
@@ -324,28 +319,16 @@ asyncTestWithDevice( 'u32_reduce_raked_striped_blocked_convergent', async ( devi
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * bufferSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createU32Buffer( numbers );
+    const outputBuffer = execution.createBuffer( 4 );
 
-  const outputBuffer = deviceContext.createBuffer( 4 );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 );
+    shader.dispatch( encoder, [
+      inputBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    inputBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedUintArray( resultBuffer );
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.u32Numbers( outputBuffer );
+  } );
 
   const expectedValue = _.sum( numbers.slice( 0, inputSize ) );
   const actualValue = outputArray[ 0 ];
@@ -372,28 +355,16 @@ asyncTestWithDevice( 'f32_exclusive_scan_simple_single', async ( device, deviceC
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * workgroupSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createF32Buffer( numbers );
+    const outputBuffer = execution.createBuffer( 4 * workgroupSize );
 
-  const outputBuffer = deviceContext.createBuffer( 4 * workgroupSize );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 * workgroupSize );
+    shader.dispatch( encoder, [
+      inputBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    inputBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.f32Numbers( outputBuffer );
+  } );
 
   for ( let i = 0; i < workgroupSize; i++ ) {
     const expectedValue = _.sum( numbers.slice( 0, i ) );
@@ -422,28 +393,16 @@ asyncTestWithDevice( 'f32_inclusive_scan_simple_single', async ( device, deviceC
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * workgroupSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createF32Buffer( numbers );
+    const outputBuffer = execution.createBuffer( 4 * workgroupSize );
 
-  const outputBuffer = deviceContext.createBuffer( 4 * workgroupSize );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 * workgroupSize );
+    shader.dispatch( encoder, [
+      inputBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    inputBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.f32Numbers( outputBuffer );
+  } );
 
   for ( let i = 0; i < workgroupSize; i++ ) {
     const expectedValue = _.sum( numbers.slice( 0, i + 1 ) );
@@ -474,28 +433,16 @@ asyncTestWithDevice( 'f32_exclusive_scan_raked_blocked_single', async ( device, 
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * workgroupSize * grainSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createF32Buffer( numbers );
+    const outputBuffer = execution.createBuffer( 4 * workgroupSize * grainSize );
 
-  const outputBuffer = deviceContext.createBuffer( 4 * workgroupSize * grainSize );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 * workgroupSize * grainSize );
+    shader.dispatch( encoder, [
+      inputBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    inputBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.f32Numbers( outputBuffer );
+  } );
 
   for ( let i = 0; i < workgroupSize; i++ ) {
     const expectedValue = _.sum( numbers.slice( 0, i ) );
@@ -526,28 +473,16 @@ asyncTestWithDevice( 'inclusive_scan_raked_blocked_single', async ( device, devi
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * workgroupSize * grainSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createF32Buffer( numbers );
+    const outputBuffer = execution.createBuffer( 4 * workgroupSize * grainSize );
 
-  const outputBuffer = deviceContext.createBuffer( 4 * workgroupSize * grainSize );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 * workgroupSize * grainSize );
+    shader.dispatch( encoder, [
+      inputBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    inputBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.f32Numbers( outputBuffer );
+  } );
 
   for ( let i = 0; i < workgroupSize; i++ ) {
     const expectedValue = _.sum( numbers.slice( 0, i + 1 ) );
@@ -579,29 +514,17 @@ asyncTestWithDevice( 'f32_exclusive_scan_raked_striped_single', async ( device, 
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * workgroupSize * grainSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( stripedNumbers ).buffer );
+  const stripedOutputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createF32Buffer( stripedNumbers );
+    const outputBuffer = execution.createBuffer( 4 * workgroupSize * grainSize );
 
-  const outputBuffer = deviceContext.createBuffer( 4 * workgroupSize * grainSize );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 * workgroupSize * grainSize );
+    shader.dispatch( encoder, [
+      inputBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    inputBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const stripedOutputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
+    return execution.f32Numbers( outputBuffer );
+  } );
   const outputArray = stripedOutputArray.map( ( n, i ) => stripedOutputArray[ ByteEncoder.toStripedIndex( i, workgroupSize, grainSize ) ] );
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
 
   for ( let i = 0; i < workgroupSize; i++ ) {
     const expectedValue = _.sum( numbers.slice( 0, i ) );
@@ -633,29 +556,17 @@ asyncTestWithDevice( 'f32_inclusive_scan_raked_striped_single', async ( device, 
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * workgroupSize * grainSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( stripedNumbers ).buffer );
+  const stripedOutputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createF32Buffer( stripedNumbers );
+    const outputBuffer = execution.createBuffer( 4 * workgroupSize * grainSize );
 
-  const outputBuffer = deviceContext.createBuffer( 4 * workgroupSize * grainSize );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 * workgroupSize * grainSize );
+    shader.dispatch( encoder, [
+      inputBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    inputBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const stripedOutputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
+    return execution.f32Numbers( outputBuffer );
+  } );
   const outputArray = stripedOutputArray.map( ( n, i ) => stripedOutputArray[ ByteEncoder.toStripedIndex( i, workgroupSize, grainSize ) ] );
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
 
   for ( let i = 0; i < workgroupSize; i++ ) {
     const expectedValue = _.sum( numbers.slice( 0, i + 1 ) );
@@ -699,33 +610,20 @@ asyncTestWithDevice( 'double f32_reduce_simple', async ( device, deviceContext )
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createF32Buffer( numbers );
+    const middleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / workgroupSize ) );
+    const outputBuffer = execution.createBuffer( 4 );
 
-  const middleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / workgroupSize ) );
-  const outputBuffer = deviceContext.createBuffer( 4 );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 );
+    shader0.dispatch( encoder, [
+      inputBuffer, middleBuffer
+    ], Math.ceil( inputSize / workgroupSize ) );
+    shader1.dispatch( encoder, [
+      middleBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader0.dispatch( encoder, [
-    inputBuffer, middleBuffer
-  ], Math.ceil( inputSize / workgroupSize ) );
-  shader1.dispatch( encoder, [
-    middleBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-
-  inputBuffer.destroy();
-  middleBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.f32Numbers( outputBuffer );
+  } );
 
   const expectedValue = _.sum( numbers );
   const actualValue = outputArray[ 0 ];
@@ -778,38 +676,24 @@ asyncTestWithDevice( 'triple f32_reduce_simple', async ( device, deviceContext )
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createF32Buffer( numbers );
+    const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / workgroupSize ) );
+    const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ) );
+    const outputBuffer = deviceContext.createBuffer( 4 );
 
-  const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / workgroupSize ) );
-  const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ) );
-  const outputBuffer = deviceContext.createBuffer( 4 );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 );
+    shader0.dispatch( encoder, [
+      inputBuffer, firstMiddleBuffer
+    ], Math.ceil( inputSize / workgroupSize ) );
+    shader1.dispatch( encoder, [
+      firstMiddleBuffer, secondMiddleBuffer
+    ], Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ) );
+    shader2.dispatch( encoder, [
+      secondMiddleBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader0.dispatch( encoder, [
-    inputBuffer, firstMiddleBuffer
-  ], Math.ceil( inputSize / workgroupSize ) );
-  shader1.dispatch( encoder, [
-    firstMiddleBuffer, secondMiddleBuffer
-  ], Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ) );
-  shader2.dispatch( encoder, [
-    secondMiddleBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-
-  inputBuffer.destroy();
-  firstMiddleBuffer.destroy();
-  secondMiddleBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.f32Numbers( outputBuffer );
+  } );
 
   const expectedValue = _.sum( numbers );
   const actualValue = outputArray[ 0 ];
@@ -866,38 +750,24 @@ asyncTestWithDevice( 'triple f32_reduce_raked_blocked', async ( device, deviceCo
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createF32Buffer( numbers );
+    const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+    const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+    const outputBuffer = deviceContext.createBuffer( 4 );
 
-  const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-  const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-  const outputBuffer = deviceContext.createBuffer( 4 );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 );
+    shader0.dispatch( encoder, [
+      inputBuffer, firstMiddleBuffer
+    ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+    shader1.dispatch( encoder, [
+      firstMiddleBuffer, secondMiddleBuffer
+    ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+    shader2.dispatch( encoder, [
+      secondMiddleBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader0.dispatch( encoder, [
-    inputBuffer, firstMiddleBuffer
-  ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-  shader1.dispatch( encoder, [
-    firstMiddleBuffer, secondMiddleBuffer
-  ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-  shader2.dispatch( encoder, [
-    secondMiddleBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedFloatArray( resultBuffer );
-
-  inputBuffer.destroy();
-  firstMiddleBuffer.destroy();
-  secondMiddleBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.f32Numbers( outputBuffer );
+  } );
 
   const expectedValue = _.sum( numbers );
   const actualValue = outputArray[ 0 ];
@@ -954,38 +824,24 @@ asyncTestWithDevice( 'triple u32_reduce_raked_striped_blocked_convergent', async
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createU32Buffer( numbers );
+    const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+    const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+    const outputBuffer = deviceContext.createBuffer( 4 );
 
-  const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-  const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-  const outputBuffer = deviceContext.createBuffer( 4 );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 );
+    shader0.dispatch( encoder, [
+      inputBuffer, firstMiddleBuffer
+    ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+    shader1.dispatch( encoder, [
+      firstMiddleBuffer, secondMiddleBuffer
+    ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
+    shader2.dispatch( encoder, [
+      secondMiddleBuffer, outputBuffer
+    ] );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader0.dispatch( encoder, [
-    inputBuffer, firstMiddleBuffer
-  ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-  shader1.dispatch( encoder, [
-    firstMiddleBuffer, secondMiddleBuffer
-  ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-  shader2.dispatch( encoder, [
-    secondMiddleBuffer, outputBuffer
-  ] );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedUintArray( resultBuffer );
-
-  inputBuffer.destroy();
-  firstMiddleBuffer.destroy();
-  secondMiddleBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.u32Numbers( outputBuffer );
+  } );
 
   const expectedValue = _.sum( numbers );
   const actualValue = outputArray[ 0 ];
@@ -1018,28 +874,16 @@ asyncTestWithDevice( 'triple-size u32_atomic_reduce_raked_striped_blocked_conver
     }
   );
 
-  const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-  device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const inputBuffer = execution.createU32Buffer( numbers );
+    const outputBuffer = deviceContext.createBuffer( 4 );
 
-  const outputBuffer = deviceContext.createBuffer( 4 );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 );
+    shader.dispatch( encoder, [
+      inputBuffer, outputBuffer
+    ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    inputBuffer, outputBuffer
-  ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedUintArray( resultBuffer );
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.u32Numbers( outputBuffer );
+  } );
 
   const expectedValue = _.sum( numbers );
   const actualValue = outputArray[ 0 ];
@@ -1074,31 +918,17 @@ asyncTestWithDevice( 'i32_merge_simple', async ( device, deviceContext ) => {
     }
   );
 
-  const aBuffer = deviceContext.createBuffer( 4 * a.length );
-  device.queue.writeBuffer( aBuffer, 0, new Int32Array( a ).buffer );
-  const bBuffer = deviceContext.createBuffer( 4 * b.length );
-  device.queue.writeBuffer( bBuffer, 0, new Int32Array( b ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const aBuffer = execution.createI32Buffer( a );
+    const bBuffer = execution.createI32Buffer( b );
+    const outputBuffer = deviceContext.createBuffer( 4 * length );
 
-  const outputBuffer = deviceContext.createBuffer( 4 * length );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 * length );
+    shader.dispatch( encoder, [
+      aBuffer, bBuffer, outputBuffer
+    ], dispatchSize );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    aBuffer, bBuffer, outputBuffer
-  ], dispatchSize );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedIntArray( resultBuffer );
-
-  aBuffer.destroy();
-  bBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.i32Numbers( outputBuffer );
+  } );
 
   const expectedValue = [ ...a, ...b ].sort( ( a, b ) => a - b );
   const actualValue = [ ...outputArray ].slice( 0, length );
@@ -1142,31 +972,17 @@ asyncTestWithDevice( 'i32_merge', async ( device, deviceContext ) => {
     }
   );
 
-  const aBuffer = deviceContext.createBuffer( 4 * a.length );
-  device.queue.writeBuffer( aBuffer, 0, new Int32Array( a ).buffer );
-  const bBuffer = deviceContext.createBuffer( 4 * b.length );
-  device.queue.writeBuffer( bBuffer, 0, new Int32Array( b ).buffer );
+  const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
+    const aBuffer = execution.createI32Buffer( a );
+    const bBuffer = execution.createI32Buffer( b );
+    const outputBuffer = deviceContext.createBuffer( 4 * length );
 
-  const outputBuffer = deviceContext.createBuffer( 4 * length );
-  const resultBuffer = deviceContext.createMapReadableBuffer( 4 * length );
+    shader.dispatch( encoder, [
+      aBuffer, bBuffer, outputBuffer
+    ], dispatchSize );
 
-  const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-  shader.dispatch( encoder, [
-    aBuffer, bBuffer, outputBuffer
-  ], dispatchSize );
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  const outputArray = await DeviceContext.getMappedIntArray( resultBuffer );
-
-  aBuffer.destroy();
-  bBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
+    return execution.i32Numbers( outputBuffer );
+  } );
 
   const expectedValue = [ ...a, ...b ].sort( ( a, b ) => a - b );
   const actualValue = [ ...outputArray ].slice( 0, length );
@@ -1238,9 +1054,7 @@ const runU32MapShader = (
   shader: ComputeShader
 ): ( ( numbers: number[] ) => Promise<number[]> ) => {
   return ( numbers: number[] ) => deviceContext.executeSingle( ( encoder, execution ) => {
-    const inputBuffer = execution.createBuffer( 4 * numbers.length );
-    deviceContext.device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
-
+    const inputBuffer = execution.createU32Buffer( numbers );
     const outputBuffer = execution.createBuffer( 4 * numbers.length );
 
     shader.dispatch( encoder, [
@@ -1419,9 +1233,7 @@ const test_u32_histogram = (
     );
 
     const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
-      const inputBuffer = execution.createBuffer( 4 * numbers.length );
-      device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
-
+      const inputBuffer = execution.createU32Buffer( numbers );
       const outputBuffer = execution.createBuffer( 4 * numBins );
 
       shader.dispatch( encoder, [
@@ -1479,9 +1291,7 @@ const test_u32_radix_histogram = (
     );
 
     const outputArray = await deviceContext.executeSingle( async ( encoder, execution ) => {
-      const inputBuffer = execution.createBuffer( 4 * numbers.length );
-      device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
-
+      const inputBuffer = execution.createU32Buffer( numbers );
       const outputBuffer = execution.createBuffer( 4 * tableSize );
 
       shader.dispatch( encoder, [
@@ -1871,9 +1681,7 @@ const reorderTest = ( name: string, source: DualSnippetSource, indexMap: ( index
     );
 
     const outputNumbers = await deviceContext.executeSingle( async ( encoder, execution ) => {
-      const inputBuffer = execution.createBuffer( 4 * quantity );
-      device.queue.writeBuffer( inputBuffer, 0, new Uint32Array( numbers ).buffer );
-
+      const inputBuffer = execution.createU32Buffer( numbers );
       const outputBuffer = execution.createBuffer( 4 * quantity );
 
       shader.dispatch( encoder, [
