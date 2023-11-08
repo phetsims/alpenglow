@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, DualSnippetSource, u32, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
+import { Binding, ByteEncoder, ComputeShader, DeviceContext, DualSnippetSource, ExampleShaders, u32, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
@@ -88,32 +88,15 @@ const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, deviceCon
 asyncTestWithDevice( 'f32_reduce_simple', async ( device, deviceContext ) => {
   const workgroupSize = 256;
   const inputSize = workgroupSize - 27;
+  const executableShader = await ExampleShaders.getSimpleF32Reduce( {
+    workgroupSize: workgroupSize,
+    inputSize: inputSize
+  } )( deviceContext );
 
   const numbers = _.range( 0, workgroupSize ).map( () => random.nextDouble() );
 
-  const shader = ComputeShader.fromSource(
-    device, 'f32_reduce_simple', wgsl_f32_reduce_simple, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
-    ], {
-      workgroupSize: workgroupSize,
-      inputSize: inputSize,
-      identity: '0f',
-      combine: ( a: string, b: string ) => `${a} + ${b}`
-    }
-  );
-
   const actualValue = await deviceContext.executeSingle( async ( encoder, execution ) => {
-    const inputBuffer = execution.createBuffer( 4 * workgroupSize );
-    device.queue.writeBuffer( inputBuffer, 0, new Float32Array( numbers ).buffer );
-
-    const outputBuffer = execution.createBuffer( 4 );
-
-    shader.dispatch( encoder, [
-      inputBuffer, outputBuffer
-    ] );
-
-    return ( await execution.f32Numbers( outputBuffer ) )[ 0 ];
+    return executableShader.execute( execution, numbers );
   } );
 
   const expectedValue = _.sum( numbers.slice( 0, inputSize ) );

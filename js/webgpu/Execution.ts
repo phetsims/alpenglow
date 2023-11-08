@@ -55,6 +55,13 @@ type Execution = {
 };
 export default Execution;
 
+export type ExecutableShader<In, Out> = {
+  execute: ( execution: Execution, input: In ) => Promise<Out>;
+  dispose?: () => void;
+};
+
+export type ExecutableShaderTemplate<In, Out> = ( deviceContext: DeviceContext ) => Promise<ExecutableShader<In, Out>>;
+
 export abstract class BaseExecution {
   public readonly bufferLogger: BufferLogger;
 
