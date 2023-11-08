@@ -161,7 +161,7 @@ ${template( ( {
 
   const loadWithRangeCheckStatements = ( varName, i ) => {
     if ( loadExpression ) {
-      return `let ${varName} = ${loadWithRangeCheckExpression( i )};`;
+      return `var ${varName} = ${loadWithRangeCheckExpression( i )};`;
     }
     else {
       if ( rangeCheckIndexExpression ) {
@@ -190,7 +190,7 @@ ${template( ( {
 
   // TODO: more unique names to prevent namespace collision!
   return nestSubexpressions ? `
-    let ${value} = ${getNestedExpression( grainSize - 1 )};
+    var ${value} = ${getNestedExpression( grainSize - 1 )};
   ` :`
     var ${value}: ${valueType};
     {

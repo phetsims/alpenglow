@@ -157,6 +157,54 @@ asyncTestWithDevice( 'u32 test reduce', async ( device, deviceContext ) => {
   return null;
 } );
 
+asyncTestWithDevice( 'u32 test reduce (nested)', async ( device, deviceContext ) => {
+  const workgroupSize = 256;
+  const grainSize = 8;
+  const inputSize = workgroupSize * grainSize * 5 - 27;
+
+  const shader = await SingleReduceShader.create<number>( deviceContext, 'u32 test reduce (nested)', {
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    valueType: 'u32',
+    bytesPerElement: 4,
+    identityExpression: '0u',
+    combineExpression: ( a: string, b: string ) => `${a} + ${b}`,
+    encodeElement: ( n: number, encoder: ByteEncoder ) => encoder.pushU32( n ),
+    decodeElement: ( encoder: ByteEncoder, offset: number ) => encoder.fullU32Array[ offset ],
+    lengthExpression: u32( inputSize ),
+    inputOrder: 'blocked',
+    inputAccessOrder: 'striped',
+    convergent: true,
+    factorOutSubexpressions: false,
+    nestSubexpressions: true
+  } );
+
+  const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xffff ) );
+
+  const actualValue = await deviceContext.executeShader( shader, numbers );
+  const expectedValue = _.chunk( numbers.slice( 0, inputSize ), workgroupSize * grainSize ).map( _.sum );
+
+  for ( let i = 0; i < expectedValue.length; i++ ) {
+    const expected = expectedValue[ i ];
+    const actual = actualValue[ i ];
+
+    if ( expected !== actual ) {
+      console.log( 'input' );
+      console.log( numbers );
+
+      console.log( 'expected' );
+      console.log( expectedValue );
+
+      console.log( 'actual' );
+      console.log( actualValue );
+
+      return `expected ${expected.toString()}, actual ${actual.toString()}`;
+    }
+  }
+
+  return null;
+} );
+
 const testF32RakedReduce = ( combineWithExpression: boolean, convergent: boolean, inputOrder: 'blocked' | 'striped', inputAccessOrder: 'blocked' | 'striped' ) => {
   const name = `f32 raked reduce combine-${combineWithExpression ? 'expr' : 'statement'} convergent:${convergent ? 'true' : 'false'} input:${inputOrder} access:${inputAccessOrder}`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {

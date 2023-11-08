@@ -38,6 +38,10 @@ export type SingleReduceOptions<T> = {
 
   // How we access the input data. TODO note consequences of this not matching inputOrder for non-commutative data
   inputAccessOrder?: 'blocked' | 'striped';
+
+  factorOutSubexpressions?: boolean;
+
+  nestSubexpressions?: boolean;
 };
 
 const DEFAULT_OPTIONS = {
@@ -49,7 +53,9 @@ const DEFAULT_OPTIONS = {
   convergent: false,
   convergentRemap: false,
   inputOrder: 'blocked',
-  inputAccessOrder: 'blocked'
+  inputAccessOrder: 'blocked',
+  factorOutSubexpressions: true,
+  nestSubexpressions: false
 } as const;
 
 export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
@@ -76,7 +82,9 @@ export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
         convergent: options.convergent,
         convergentRemap: options.convergentRemap,
         inputOrder: options.inputOrder,
-        inputAccessOrder: options.inputAccessOrder
+        inputAccessOrder: options.inputAccessOrder,
+        factorOutSubexpressions: options.factorOutSubexpressions,
+        nestSubexpressions: options.nestSubexpressions
       }
     );
 

@@ -18,6 +18,8 @@
 #option inputOrder
 #option inputAccessOrder
 #option valueType
+#option factorOutSubexpressions
+#option nestSubexpressions
 
 // Whether we should remap the data to convergent indices before reducing (i.e. a convergent reduce with non-commutative
 // data.
@@ -49,7 +51,9 @@ fn main(
     grainSize: grainSize,
     length: length,
     inputOrder: inputOrder,
-    inputAccessOrder: inputAccessOrder
+    inputAccessOrder: inputAccessOrder,
+    factorOutSubexpressions: factorOutSubexpressions,
+    nestSubexpressions: nestSubexpressions
   } )}
 
   ${convergentRemap ? `
