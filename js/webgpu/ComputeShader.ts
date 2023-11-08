@@ -64,7 +64,7 @@ export default class ComputeShader {
         if ( line.startsWith( '}' ) || line.startsWith( ')' ) ) {
           count--;
         }
-        beautified += `${'  '.repeat( count )}${line}\n`;
+        beautified += `${'  '.repeat( Math.max( count, 0 ) )}${line}\n`;
         if ( line.endsWith( '{' ) || line.endsWith( '(' ) ) {
           count++;
         }
