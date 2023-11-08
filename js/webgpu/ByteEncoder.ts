@@ -24,11 +24,22 @@ export default class ByteEncoder {
   private _u32Array: Uint32Array;
   private _u8Array: Uint8Array;
 
-  public constructor( initialSize = 512 ) {
-    this._byteLength = 0;
+  public constructor(
+    // Allow creating it with an existing ArrayBuffer (which can have a specific starting length)
+    arrayBuffer?: ArrayBuffer
+  ) {
 
-    // TODO: resizable buffers once supported by Firefox, use maxByteLength (no copying!!!)
-    this._arrayBuffer = new ArrayBuffer( initialSize );
+    if ( arrayBuffer ) {
+      this._byteLength = arrayBuffer.byteLength;
+      this._arrayBuffer = arrayBuffer;
+    }
+    else {
+      this._byteLength = 0;
+
+      // TODO: resizable buffers once supported by Firefox, use maxByteLength (no copying!!!)
+      this._arrayBuffer = new ArrayBuffer( 512 ); // Don't require crazy expansion, so start with a default
+    }
+
     this._f32Array = new Float32Array( this._arrayBuffer );
     this._i32Array = new Int32Array( this._arrayBuffer );
     this._u32Array = new Uint32Array( this._arrayBuffer );
@@ -167,6 +178,24 @@ export default class ByteEncoder {
     this._f32Array = new Float32Array( this._arrayBuffer );
     this._u32Array = new Uint32Array( this._arrayBuffer );
     this._u8Array = new Uint8Array( this._arrayBuffer );
+  }
+
+  public encodeValues<T>( values: T[], encode: ( element: T, encoder: ByteEncoder ) => void ): this {
+    for ( let i = 0; i < values.length; i++ ) {
+      encode( values[ i ], this );
+    }
+
+    // allow chaining
+    return this;
+  }
+
+  public decodeValues<T>( decode: ( encoder: ByteEncoder, offset: number ) => T, bytesPerElement: number ): T[] {
+    const result: T[] = [];
+    const numElements = Math.floor( this.byteLength / bytesPerElement );
+    for ( let i = 0; i < numElements; i++ ) {
+      result.push( decode( this, i * bytesPerElement / 4 ) );
+    }
+    return result;
   }
 
   public static padLeft( input: string, padding: string, length: number ): string {

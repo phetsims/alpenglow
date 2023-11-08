@@ -6,43 +6,46 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ComputeShader, DeviceContext, ExecutableShader, ExecutableShaderTemplate, Execution, wgsl_f32_reduce_simple } from '../imports.js';
+import { alpenglow, Binding, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_f32_reduce_simple } from '../imports.js';
 
-export default class ExampleShaders {
-  public static getSimpleF32Reduce( options: {
-    workgroupSize: number;
-    inputSize: number;
-  } ): ExecutableShaderTemplate<number[], number> {
-    return async ( deviceContext: DeviceContext ) => {
-      const shader = await ComputeShader.fromSourceAsync(
-        deviceContext.device, 'f32_reduce_simple', wgsl_f32_reduce_simple, [
-          Binding.READ_ONLY_STORAGE_BUFFER,
-          Binding.STORAGE_BUFFER
-        ], {
-          workgroupSize: options.workgroupSize,
-          inputSize: options.inputSize,
-          identity: '0f',
-          combine: ( a: string, b: string ) => `${a} + ${b}`
-        }
-      );
+export class ExampleSimpleF32Reduce extends ExecutableShader<number[], number> {
 
-      return new ExecutableShader( async ( execution: Execution, numbers: number[] ) => {
-        assert && assert( numbers.length >= options.inputSize );
+  public static async create(
+    deviceContext: DeviceContext,
+    name: string,
+    options: {
+      workgroupSize: number;
+      inputSize: number;
+    }
+  ): Promise<ExampleSimpleF32Reduce> {
+    const shader = await ComputeShader.fromSourceAsync(
+      deviceContext.device, name, wgsl_f32_reduce_simple, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], {
+        workgroupSize: options.workgroupSize,
+        inputSize: options.inputSize,
+        identity: '0f',
+        combine: ( a: string, b: string ) => `${a} + ${b}`
+      }
+    );
 
-        const inputBuffer = execution.createF32Buffer( numbers );
-        const outputBuffer = execution.createBuffer( 4 );
+    return new ExampleSimpleF32Reduce( async ( execution: Execution, numbers: number[] ) => {
+      assert && assert( numbers.length >= options.inputSize );
 
-        execution.dispatch( shader, [
-          inputBuffer, outputBuffer
-        ] );
+      const inputBuffer = execution.createF32Buffer( numbers );
+      const outputBuffer = execution.createBuffer( 4 );
 
-        return ( await execution.f32Numbers( outputBuffer ) )[ 0 ];
-      } );
-    };
+      execution.dispatch( shader, [
+        inputBuffer, outputBuffer
+      ] );
+
+      return ( await execution.f32Numbers( outputBuffer ) )[ 0 ];
+    } );
   }
 }
 
-alpenglow.register( 'ExampleShaders', ExampleShaders );
+alpenglow.register( 'ExampleSimpleF32Reduce', ExampleSimpleF32Reduce );
 
 // Bicyclic semigroup object, a good example of a non-commutative operation
 export class Bic {

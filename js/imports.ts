@@ -255,6 +255,9 @@ export { default as wgsl_u32_to_striped } from '../wgsl/examples/data/u32_to_str
 export { default as wgsl_u32_flip_convergent } from '../wgsl/examples/data/u32_flip_convergent.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_main_reduce } from '../wgsl/gpu/main_reduce.js';
+
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_render_program } from '../wgsl/tests/test_render_program.js';
@@ -447,7 +450,8 @@ export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';
 export { default as BrokenTesting } from './webgpu/BrokenTesting.js';
-export { default as ExampleShaders, Bic } from './webgpu/ExampleShaders.js';
+export { ExampleSimpleF32Reduce, Bic } from './webgpu/ExampleShaders.js';
+export { default as SingleReduceShader } from './webgpu/shaders/SingleReduceShader.js';
 export { default as GPUProfiling } from './webgpu/GPUProfiling.js';
 export { default as RasterClipper } from './webgpu/RasterClipper.js';
 export type { RasterClipperOptions } from './webgpu/RasterClipper.js';

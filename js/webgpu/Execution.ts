@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, DeviceContext, TimestampLogger, TimestampLoggerResult } from '../imports.js';
+import { alpenglow, BufferLogger, ByteEncoder, ComputeShader, ComputeShaderDispatchOptions, DeviceContext, TimestampLogger, TimestampLoggerResult } from '../imports.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 
 export type ExecutionAnyCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => T;
@@ -31,6 +31,7 @@ type Execution = {
   createU32Buffer: ( data: number[] ) => GPUBuffer;
   createI32Buffer: ( data: number[] ) => GPUBuffer;
   createF32Buffer: ( data: number[] ) => GPUBuffer;
+  createByteEncoderBuffer: ( encoder: ByteEncoder ) => GPUBuffer;
   arrayBuffer: ( buffer: GPUBuffer ) => Promise<ArrayBuffer>;
   u32: ( buffer: GPUBuffer ) => Promise<Uint32Array>;
   i32: ( buffer: GPUBuffer ) => Promise<Int32Array>;
@@ -55,7 +56,7 @@ type Execution = {
 };
 export default Execution;
 
-export class ExecutableShader<In, Out> {
+export abstract class ExecutableShader<In, Out> {
   public constructor(
     public readonly execute: ( execution: Execution, input: In ) => Promise<Out>,
     public readonly dispose?: () => void
@@ -104,6 +105,12 @@ export abstract class BaseExecution {
 
   public createF32Buffer( data: number[] ): GPUBuffer {
     const buffer = this.deviceContext.createF32Buffer( data );
+    this.buffersToCleanup.push( buffer );
+    return buffer;
+  }
+
+  public createByteEncoderBuffer( encoder: ByteEncoder ): GPUBuffer {
+    const buffer = this.deviceContext.createByteEncoderBuffer( encoder );
     this.buffersToCleanup.push( buffer );
     return buffer;
   }

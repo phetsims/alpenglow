@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { Binding, ByteEncoder, ComputeShader, DeviceContext, DualSnippetSource, ExampleShaders, u32, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
+import { Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DualSnippetSource, ExampleSimpleF32Reduce, SingleReduceShader, u32, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
@@ -16,46 +16,6 @@ const random = new Random();
 QUnit.module( 'Example' );
 
 // TODO: deduplicate with SnippetTests
-
-// Bicyclic semigroup object, a good example of a non-commutative operation
-class Bic {
-  public constructor(
-    public readonly x: number,
-    public readonly y: number
-  ) {}
-
-  public getNumbers(): [ number, number ] {
-    return [ this.x, this.y ];
-  }
-
-  public equals( other: Bic ): boolean {
-    return this.x === other.x && this.y === other.y;
-  }
-
-  public toString(): string {
-    return `Bic( ${this.x}, ${this.y} )`;
-  }
-
-  public static combine( a: Bic, b: Bic ): Bic {
-    const min = Math.min( a.y, b.x );
-    return new Bic(
-      a.x + b.x - min,
-      a.y + b.y - min
-    );
-  }
-
-  public static readonly IDENTITY = new Bic( 0, 0 );
-
-  public static combineMultiple( ...values: Bic[] ): Bic {
-    let bic = Bic.IDENTITY;
-    values.forEach( value => {
-      bic = Bic.combine( bic, value );
-    } );
-    return bic;
-  }
-
-  public static readonly BYTES = 8;
-}
 
 const devicePromise: Promise<GPUDevice | null> = ( async () => {
   try {
@@ -88,10 +48,10 @@ const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, deviceCon
 asyncTestWithDevice( 'f32_reduce_simple', async ( device, deviceContext ) => {
   const workgroupSize = 256;
   const inputSize = workgroupSize - 27;
-  const shader = await ExampleShaders.getSimpleF32Reduce( {
+  const shader = await ExampleSimpleF32Reduce.create( deviceContext, 'f32_reduce_simple', {
     workgroupSize: workgroupSize,
     inputSize: inputSize
-  } )( deviceContext );
+  } );
 
   const numbers = _.range( 0, workgroupSize ).map( () => random.nextDouble() );
 
@@ -100,6 +60,98 @@ asyncTestWithDevice( 'f32_reduce_simple', async ( device, deviceContext ) => {
 
   if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {
     return `expected ${expectedValue}, actual ${actualValue}`;
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'bic test reduce', async ( device, deviceContext ) => {
+  const workgroupSize = 256;
+  const grainSize = 8;
+  const inputSize = workgroupSize * grainSize * 5 - 27;
+
+  const shader = await SingleReduceShader.create<Bic>( deviceContext, 'bic test reduce', {
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    valueType: 'vec2u',
+    bytesPerElement: Bic.BYTES,
+    identityExpression: 'vec2( 0u )',
+    combineExpression: ( a: string, b: string ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
+    encodeElement: ( bic: Bic, encoder: ByteEncoder ) => {
+      encoder.pushU32( bic.x );
+      encoder.pushU32( bic.y );
+    },
+    decodeElement: ( encoder: ByteEncoder, offset: number ) => new Bic( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ] ),
+    lengthExpression: u32( inputSize )
+  } );
+
+  const bics = _.range( 0, inputSize ).map( () => new Bic( random.nextIntBetween( 0, 63 ), random.nextIntBetween( 0, 63 ) ) );
+
+  const actualValue = await deviceContext.executeShader( shader, bics );
+  const expectedValue = _.chunk( bics.slice( 0, inputSize ), workgroupSize * grainSize ).map( bicList => Bic.combineMultiple( ...bicList ) );
+
+  for ( let i = 0; i < expectedValue.length; i++ ) {
+    const expected = expectedValue[ i ];
+    const actual = actualValue[ i ];
+
+    if ( !expected.equals( actual ) ) {
+      console.log( 'input' );
+      console.log( bics );
+
+      console.log( 'expected' );
+      console.log( expectedValue );
+
+      console.log( 'actual' );
+      console.log( actualValue );
+
+      return `expected ${expected.toString()}, actual ${actual.toString()}`;
+    }
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'u32 test reduce', async ( device, deviceContext ) => {
+  const workgroupSize = 256;
+  const grainSize = 8;
+  const inputSize = workgroupSize * grainSize * 5 - 27;
+
+  const shader = await SingleReduceShader.create<number>( deviceContext, 'u32 test reduce', {
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    valueType: 'u32',
+    bytesPerElement: 4,
+    identityExpression: '0u',
+    combineExpression: ( a: string, b: string ) => `${a} + ${b}`,
+    encodeElement: ( n: number, encoder: ByteEncoder ) => encoder.pushU32( n ),
+    decodeElement: ( encoder: ByteEncoder, offset: number ) => encoder.fullU32Array[ offset ],
+    lengthExpression: u32( inputSize ),
+    inputOrder: 'blocked',
+    inputAccessOrder: 'striped',
+    convergent: true
+  } );
+
+  const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xffff ) );
+
+  const actualValue = await deviceContext.executeShader( shader, numbers );
+  const expectedValue = _.chunk( numbers.slice( 0, inputSize ), workgroupSize * grainSize ).map( _.sum );
+
+  for ( let i = 0; i < expectedValue.length; i++ ) {
+    const expected = expectedValue[ i ];
+    const actual = actualValue[ i ];
+
+    if ( expected !== actual ) {
+      console.log( 'input' );
+      console.log( numbers );
+
+      console.log( 'expected' );
+      console.log( expectedValue );
+
+      console.log( 'actual' );
+      console.log( actualValue );
+
+      return `expected ${expected.toString()}, actual ${actual.toString()}`;
+    }
   }
 
   return null;

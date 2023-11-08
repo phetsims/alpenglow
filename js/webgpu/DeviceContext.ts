@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BasicExecution, ExecutableShader, ExecutionMultipleCallback, ExecutionSingleCallback } from '../imports.js';
+import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionSingleCallback } from '../imports.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import { Unpromised } from './Execution.js';
@@ -116,6 +116,12 @@ export default class DeviceContext {
 
   public createF32Buffer( data: number[] ): GPUBuffer {
     return this.createDataBuffer( new Float32Array( data ) );
+  }
+
+  public createByteEncoderBuffer( encoder: ByteEncoder ): GPUBuffer {
+    const buffer = this.createBuffer( encoder.byteLength );
+    this.device.queue.writeBuffer( buffer, 0, encoder.fullArrayBuffer, 0, encoder.byteLength );
+    return buffer;
   }
 
   // in bytes
