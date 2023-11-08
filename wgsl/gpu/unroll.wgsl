@@ -6,4 +6,4 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-${template( ( start, end, callback ) => _.range( start, end ).map( i => callback( i, i === start, i === end - 1 ) ).join( '\n' ) )}
+${template( ( start, end, callback ) => _.range( start, end ).map( i => callback( i, i === start, i === end + ( start < end ? -1 : 1 ) ) ).join( '\n' ) )}
