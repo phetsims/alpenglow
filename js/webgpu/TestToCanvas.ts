@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BlitShader, ComputeShader, DeviceContext, DualSnippet, PolygonalFace, wgsl_test_to_canvas } from '../imports.js';
+import { alpenglow, Binding, BlitShader, ComputeShader, DeviceContext, PolygonalFace, wgsl_test_to_canvas } from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 
 export default class TestToCanvas {
@@ -67,15 +67,13 @@ export default class TestToCanvas {
     const dataBuffer = deviceContext.createBuffer( 4 * pathPoints.length );
     device.queue.writeBuffer( dataBuffer, 0, new Float32Array( pathPoints ).buffer );
 
-    const snippet = DualSnippet.fromSource( wgsl_test_to_canvas, {
-      preferredStorageFormat: deviceContext.preferredStorageFormat
-    } );
-
-    const shader = new ComputeShader( 'shader', snippet.toString(), [
+    const shader = ComputeShader.fromSource( device, 'shader', wgsl_test_to_canvas, [
       Binding.UNIFORM_BUFFER,
       deviceContext.preferredStorageFormat === 'bgra8unorm' ? Binding.TEXTURE_OUTPUT_BGRA8UNORM : Binding.TEXTURE_OUTPUT_RGBA8UNORM,
       Binding.READ_ONLY_STORAGE_BUFFER
-    ], device );
+    ], {
+      preferredStorageFormat: deviceContext.preferredStorageFormat
+    } );
     const blitShader = new BlitShader( device, deviceContext.preferredCanvasFormat );
 
     const encoder = device.createCommandEncoder( {

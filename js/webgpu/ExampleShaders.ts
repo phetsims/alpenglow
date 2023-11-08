@@ -14,8 +14,7 @@ export default class ExampleShaders {
     inputSize: number;
   } ): ExecutableShaderTemplate<number[], number> {
     return async ( deviceContext: DeviceContext ) => {
-      // TODO: async it! (this should be possible)
-      const shader = ComputeShader.fromSource(
+      const shader = await ComputeShader.fromSourceAsync(
         deviceContext.device, 'f32_reduce_simple', wgsl_f32_reduce_simple, [
           Binding.READ_ONLY_STORAGE_BUFFER,
           Binding.STORAGE_BUFFER

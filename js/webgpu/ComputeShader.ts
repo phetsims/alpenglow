@@ -36,13 +36,18 @@ export default class ComputeShader {
 
   public readonly module: GPUShaderModule;
   public readonly bindGroupLayout: GPUBindGroupLayout;
-  public readonly pipeline: GPUComputePipeline;
+
+  // This will be available by the time it can be accessed publicly
+  public pipeline!: GPUComputePipeline;
+
+  private readonly pipelinePromise: Promise<GPUComputePipeline>;
 
   public constructor(
     public readonly name: string,
     public readonly wgsl: string,
     public readonly bindings: Binding[],
     public readonly device: GPUDevice,
+    async: boolean,
     providedOptions?: ComputeShaderOptions
   ) {
 
@@ -84,8 +89,7 @@ export default class ComputeShader {
       entries: this.bindings.map( ( binding, i ) => binding.getBindGroupLayoutEntry( i ) )
     } );
 
-    // TODO: use createComputePipelineAsync, so that we're not blocking? Perhaps ComputeShaders will need a "ready" Promise?
-    this.pipeline = device.createComputePipeline( {
+    const pipelineDescriptor: GPUComputePipelineDescriptor = {
       label: `${name} pipeline`,
       layout: device.createPipelineLayout( {
         bindGroupLayouts: [ this.bindGroupLayout ]
@@ -94,7 +98,19 @@ export default class ComputeShader {
         module: this.module,
         entryPoint: 'main'
       }
-    } );
+    };
+
+    if ( async ) {
+      this.pipelinePromise = device.createComputePipelineAsync( pipelineDescriptor );
+
+      this.pipelinePromise.then( pipeline => {
+        this.pipeline = pipeline;
+      } ).catch( e => { throw e; } );
+    }
+    else {
+      this.pipeline = device.createComputePipeline( pipelineDescriptor );
+      this.pipelinePromise = Promise.resolve( this.pipeline );
+    }
   }
 
   private getBindGroup( resources: ( GPUBuffer | GPUTextureView )[] ): GPUBindGroup {
@@ -179,7 +195,20 @@ export default class ComputeShader {
     options: Record<string, unknown> = {}
   ): ComputeShader {
     const snippet = DualSnippet.fromSource( source, options );
-    return new ComputeShader( name, snippet.toString(), bindings, device );
+    return new ComputeShader( name, snippet.toString(), bindings, device, false );
+  }
+
+  public static async fromSourceAsync(
+    device: GPUDevice,
+    name: string,
+    source: DualSnippetSource,
+    bindings: Binding[],
+    options: Record<string, unknown> = {}
+  ): Promise<ComputeShader> {
+    const snippet = DualSnippet.fromSource( source, options );
+    const computeShader = new ComputeShader( name, snippet.toString(), bindings, device, true );
+    await computeShader.pipelinePromise;
+    return computeShader;
   }
 }
 
