@@ -42,6 +42,8 @@ export type SingleReduceOptions<T> = {
   factorOutSubexpressions?: boolean;
 
   nestSubexpressions?: boolean;
+
+  stripeOutput?: boolean;
 };
 
 const DEFAULT_OPTIONS = {
@@ -55,7 +57,8 @@ const DEFAULT_OPTIONS = {
   inputOrder: 'blocked',
   inputAccessOrder: 'blocked',
   factorOutSubexpressions: true,
-  nestSubexpressions: false
+  nestSubexpressions: false,
+  stripeOutput: false
 } as const;
 
 export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
@@ -84,7 +87,8 @@ export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
         inputOrder: options.inputOrder,
         inputAccessOrder: options.inputAccessOrder,
         factorOutSubexpressions: options.factorOutSubexpressions,
-        nestSubexpressions: options.nestSubexpressions
+        nestSubexpressions: options.nestSubexpressions,
+        stripeOutput: options.stripeOutput
       }
     );
 

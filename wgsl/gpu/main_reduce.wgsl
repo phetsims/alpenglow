@@ -7,6 +7,7 @@
 #import ../gpu/reduce
 #import ../gpu/load_reduced
 #import ../gpu/to_convergent_index
+#import ../gpu/to_striped_index
 
 #option workgroupSize
 #option grainSize
@@ -20,6 +21,9 @@
 #option valueType
 #option factorOutSubexpressions
 #option nestSubexpressions
+
+// We can stripe the output (so the next layer of reduce can read it as striped)
+#option stripeOutput
 
 // Whether we should remap the data to convergent indices before reducing (i.e. a convergent reduce with non-commutative
 // data.
@@ -76,6 +80,10 @@ fn main(
   } )}
 
   if ( local_id.x == 0u ) {
-    output[ workgroup_id.x ] = value;
+    output[ ${stripeOutput ? to_striped_index( {
+      i: `workgroup_id.x`,
+      workgroupSize: workgroupSize,
+      grainSize: grainSize
+    } ) : `workgroup_id.x`} ] = value;
   }
 }
