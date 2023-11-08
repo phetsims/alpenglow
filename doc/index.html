@@ -3415,6 +3415,29 @@
 
     <h4 id="WGSL-reduce">Reduce</h4>
 
+    <p>
+      Commutative and non-commutative monoids have to be handled differently. For commutative cases, we can load it
+      in a striped memory-access pattern regardless of the original ordering (although we need to know the original
+      ordering to do range-based checks). For non-commutative cases, a raked reduce doesn't work well unless we're
+      loading in the normal (blocked) order.
+    </p>
+
+    <p>
+      Both can be run as a "convergent" reduce, but for non-commutative cases we'll need to transform it within shared
+      memory for this to work.
+    </p>
+
+    <p>
+      For any atomic-combinable type, we should always just do one level of reduction, which stores the result to a
+      single atomic. For other types, we'll need to run a multi-level reduce if the input size is potentially large
+      enough to require it.
+    </p>
+
+    <p class="TODO">
+      Why are i32 atomic reduce add/max/xor failing (but min/and/or are working?)... what did I miss? Hopefully not
+      another compiler issue?
+    </p>
+
     <p class="TODO">
       Condense examples. Create some reusable "examples" that we can use for BOTH unit tests AND profiling.
     </p>

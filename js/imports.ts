@@ -256,6 +256,8 @@ export { default as wgsl_u32_flip_convergent } from '../wgsl/examples/data/u32_f
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_reduce } from '../wgsl/gpu/main_reduce.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_main_reduce_atomic } from '../wgsl/gpu/main_reduce_atomic.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
@@ -452,6 +454,9 @@ export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';
 export { default as BrokenTesting } from './webgpu/BrokenTesting.js';
 export { ExampleSimpleF32Reduce, Bic } from './webgpu/ExampleShaders.js';
 export { default as SingleReduceShader } from './webgpu/shaders/SingleReduceShader.js';
+export type { SingleReduceShaderOptions } from './webgpu/shaders/SingleReduceShader.js';
+export { default as AtomicReduceShader } from './webgpu/shaders/AtomicReduceShader.js';
+export type { AtomicReduceShaderOptions, AtomicType, AtomicOperation } from './webgpu/shaders/AtomicReduceShader.js';
 export { default as GPUProfiling } from './webgpu/GPUProfiling.js';
 export { default as RasterClipper } from './webgpu/RasterClipper.js';
 export type { RasterClipperOptions } from './webgpu/RasterClipper.js';

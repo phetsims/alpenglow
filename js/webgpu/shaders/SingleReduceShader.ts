@@ -9,7 +9,7 @@
 import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_reduce } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 
-export type SingleReduceOptions<T> = {
+export type SingleReduceShaderOptions<T> = {
   // The type of the data for WGSL, e.g. 'f32'
   valueType: string;
 
@@ -66,9 +66,9 @@ export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
   public static async create<T>(
     deviceContext: DeviceContext,
     name: string,
-    providedOptions: SingleReduceOptions<T>
+    providedOptions: SingleReduceShaderOptions<T>
   ): Promise<SingleReduceShader<T>> {
-    const options = optionize3<SingleReduceOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+    const options = optionize3<SingleReduceShaderOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     const shader = await ComputeShader.fromSourceAsync(
       deviceContext.device, name, wgsl_main_reduce, [
