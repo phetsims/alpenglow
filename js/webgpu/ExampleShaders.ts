@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ComputeShader, DeviceContext, ExecutableShaderTemplate, Execution, wgsl_f32_reduce_simple } from '../imports.js';
+import { alpenglow, Binding, ComputeShader, DeviceContext, ExecutableShader, ExecutableShaderTemplate, Execution, wgsl_f32_reduce_simple } from '../imports.js';
 
 export default class ExampleShaders {
   public static getSimpleF32Reduce( options: {
@@ -26,20 +26,18 @@ export default class ExampleShaders {
         }
       );
 
-      return {
-        execute: async ( execution: Execution, numbers: number[] ) => {
-          assert && assert( numbers.length >= options.inputSize );
+      return new ExecutableShader( async ( execution: Execution, numbers: number[] ) => {
+        assert && assert( numbers.length >= options.inputSize );
 
-          const inputBuffer = execution.createF32Buffer( numbers );
-          const outputBuffer = execution.createBuffer( 4 );
+        const inputBuffer = execution.createF32Buffer( numbers );
+        const outputBuffer = execution.createBuffer( 4 );
 
-          execution.dispatch( shader, [
-            inputBuffer, outputBuffer
-          ] );
+        execution.dispatch( shader, [
+          inputBuffer, outputBuffer
+        ] );
 
-          return ( await execution.f32Numbers( outputBuffer ) )[ 0 ];
-        }
-      };
+        return ( await execution.f32Numbers( outputBuffer ) )[ 0 ];
+      } );
     };
   }
 }

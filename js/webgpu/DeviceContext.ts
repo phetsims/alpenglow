@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BasicExecution, ExecutionMultipleCallback, ExecutionSingleCallback } from '../imports.js';
+import { alpenglow, BasicExecution, ExecutableShader, ExecutionMultipleCallback, ExecutionSingleCallback } from '../imports.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import { Unpromised } from './Execution.js';
@@ -175,6 +175,12 @@ export default class DeviceContext {
    */
   public async execute<T extends Record<string, Promise<unknown>>>( run: ExecutionMultipleCallback<T> ): Promise<Unpromised<T>> {
     return new BasicExecution( this ).execute( run );
+  }
+
+  public async executeShader<In, Out>( shader: ExecutableShader<In, Out>, input: In ): Promise<Out> {
+    return this.executeSingle( async ( encoder, execution ) => {
+      return shader.execute( execution, input );
+    } );
   }
 
   public static async getDevice( providedOptions?: DeviceContextDeviceOptions ): Promise<GPUDevice | null> {

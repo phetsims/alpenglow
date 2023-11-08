@@ -88,17 +88,14 @@ const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, deviceCon
 asyncTestWithDevice( 'f32_reduce_simple', async ( device, deviceContext ) => {
   const workgroupSize = 256;
   const inputSize = workgroupSize - 27;
-  const executableShader = await ExampleShaders.getSimpleF32Reduce( {
+  const shader = await ExampleShaders.getSimpleF32Reduce( {
     workgroupSize: workgroupSize,
     inputSize: inputSize
   } )( deviceContext );
 
   const numbers = _.range( 0, workgroupSize ).map( () => random.nextDouble() );
 
-  const actualValue = await deviceContext.executeSingle( async ( encoder, execution ) => {
-    return executableShader.execute( execution, numbers );
-  } );
-
+  const actualValue = await deviceContext.executeShader( shader, numbers );
   const expectedValue = _.sum( numbers.slice( 0, inputSize ) );
 
   if ( Math.abs( expectedValue - actualValue ) > 1e-4 ) {

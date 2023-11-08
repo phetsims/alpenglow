@@ -55,10 +55,12 @@ type Execution = {
 };
 export default Execution;
 
-export type ExecutableShader<In, Out> = {
-  execute: ( execution: Execution, input: In ) => Promise<Out>;
-  dispose?: () => void;
-};
+export class ExecutableShader<In, Out> {
+  public constructor(
+    public readonly execute: ( execution: Execution, input: In ) => Promise<Out>,
+    public readonly dispose?: () => void
+  ) {}
+}
 
 export type ExecutableShaderTemplate<In, Out> = ( deviceContext: DeviceContext ) => Promise<ExecutableShader<In, Out>>;
 
