@@ -19,10 +19,10 @@ export default class ByteEncoder {
 
   private _byteLength: number;
   private _arrayBuffer: ArrayBuffer;
-  private _f32Array: Float32Array;
-  private _i32Array: Int32Array;
-  private _u32Array: Uint32Array;
-  private _u8Array: Uint8Array;
+  private _f32Array!: Float32Array;
+  private _i32Array!: Int32Array;
+  private _u32Array!: Uint32Array;
+  private _u8Array!: Uint8Array;
 
   public constructor(
     // Allow creating it with an existing ArrayBuffer (which can have a specific starting length)
@@ -40,10 +40,7 @@ export default class ByteEncoder {
       this._arrayBuffer = new ArrayBuffer( 512 ); // Don't require crazy expansion, so start with a default
     }
 
-    this._f32Array = new Float32Array( this._arrayBuffer );
-    this._i32Array = new Int32Array( this._arrayBuffer );
-    this._u32Array = new Uint32Array( this._arrayBuffer );
-    this._u8Array = new Uint8Array( this._arrayBuffer );
+    this.setTypedArrays();
   }
 
   // Direct access, for when performance is helpful
@@ -165,6 +162,13 @@ export default class ByteEncoder {
     }
   }
 
+  private setTypedArrays(): void {
+    this._f32Array = new Float32Array( this._arrayBuffer );
+    this._i32Array = new Int32Array( this._arrayBuffer );
+    this._u32Array = new Uint32Array( this._arrayBuffer );
+    this._u8Array = new Uint8Array( this._arrayBuffer );
+  }
+
   // NOTE: this MAY truncate
   public resize( byteLength = 0 ): void {
     // TODO: This is a hot-spot!
@@ -175,9 +179,7 @@ export default class ByteEncoder {
     const newU8Array = new Uint8Array( newArrayBuffer );
     newU8Array.set( this._u8Array.slice( 0, Math.min( this._byteLength, byteLength ) ) );
     this._arrayBuffer = newArrayBuffer;
-    this._f32Array = new Float32Array( this._arrayBuffer );
-    this._u32Array = new Uint32Array( this._arrayBuffer );
-    this._u8Array = new Uint8Array( this._arrayBuffer );
+    this.setTypedArrays();
   }
 
   public encodeValues<T>( values: T[], encode: ( element: T, encoder: ByteEncoder ) => void ): this {

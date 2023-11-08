@@ -201,13 +201,12 @@ atomicReduceTest( 'u32', 'atomicAnd', ( a, b ) => a & b, 0xffffffff );
 atomicReduceTest( 'u32', 'atomicOr', ( a, b ) => a | b, 0 );
 atomicReduceTest( 'u32', 'atomicXor', ( a, b ) => a ^ b, 0 );
 
-// TODO: fix failing tests?!?
-// atomicReduceTest( 'i32', 'atomicAdd', ( a, b ) => a + b, 0 );
-// atomicReduceTest( 'i32', 'atomicMax', ( a, b ) => Math.max( a, b ), Number.NEGATIVE_INFINITY );
+atomicReduceTest( 'i32', 'atomicAdd', ( a, b ) => a + b, 0 );
+atomicReduceTest( 'i32', 'atomicMax', ( a, b ) => Math.max( a, b ), Number.NEGATIVE_INFINITY );
 atomicReduceTest( 'i32', 'atomicMin', ( a, b ) => Math.min( a, b ), Number.POSITIVE_INFINITY );
 atomicReduceTest( 'i32', 'atomicAnd', ( a, b ) => a & b, -1 );
 atomicReduceTest( 'i32', 'atomicOr', ( a, b ) => a | b, 0 );
-// atomicReduceTest( 'i32', 'atomicXor', ( a, b ) => a ^ b, 0 );
+atomicReduceTest( 'i32', 'atomicXor', ( a, b ) => a ^ b, 0 );
 
 asyncTestWithDevice( 'u32 test reduce (nested)', async ( device, deviceContext ) => {
   const workgroupSize = 256;

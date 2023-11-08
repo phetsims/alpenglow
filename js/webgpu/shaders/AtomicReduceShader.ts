@@ -104,14 +104,16 @@ export default class AtomicReduceShader extends ExecutableShader<number[], numbe
     return new AtomicReduceShader( async ( execution: Execution, values: number[] ) => {
       const dispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
-      const inputBuffer = execution.createByteEncoderBuffer( new ByteEncoder().encodeValues( values, ( element, encoder ) => {
+      const byteEncoder = new ByteEncoder().encodeValues( values, ( element, encoder ) => {
         if ( options.valueType === 'u32' ) {
           encoder.pushU32( element );
         }
         else {
           encoder.pushI32( element );
         }
-      } ) );
+      } );
+
+      const inputBuffer = execution.createByteEncoderBuffer( byteEncoder );
       const outputBuffer = execution.createBuffer( 4 * dispatchSize );
 
       execution.dispatch( shader, [
