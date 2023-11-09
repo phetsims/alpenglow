@@ -37,6 +37,8 @@ fn main(
     callback: ( scratchIndex, dataIndex ) => `value_scratch[ ${scratchIndex} ] = input[ ${dataIndex} ];`,
   } )}
 
+  workgroupBarrier();
+
   // Sort
   ${single_radix_sort( {
     valueType: 'u32',

@@ -44,6 +44,8 @@ fn main(
     callback: ( scratchIndex, dataIndex ) => `value_scratch[ ${scratchIndex} ] = input[ ${dataIndex} ];`,
   } )}
 
+  workgroupBarrier();
+
   // Sort
   ${compact_single_radix_sort( {
     valueType: 'u32',
