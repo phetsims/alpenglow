@@ -67,6 +67,8 @@ ${template( ( {
 
   // Whether to nest the combine calls, e.g. combine( combine( combine( a, b ), c ), d )
   nestSubexpressions = false,
+
+  useSelectIfOptional = false,
 } ) => {
   assert && assert( value );
   assert && assert( identity );
@@ -159,30 +161,35 @@ ${template( ( {
     ? `select( ${identity}, ${loadExpression( loadIndexExpression( i ) )}, ${rangeCheckIndexExpression( i )} < ${length} )`
     : loadExpression( loadIndexExpression( i ) );
 
-  const loadWithRangeCheckStatements = ( varName, i ) => {
-    if ( loadExpression ) {
-      return `var ${varName} = ${loadWithRangeCheckExpression( i )};`;
+  const ifRangeCheck = ( i, trueStatements ) => rangeCheckIndexExpression ? `
+    if ( ${rangeCheckIndexExpression( i )} < ${length} ) {
+      ${trueStatements}
+    }
+  ` : trueStatements;
+
+  const ifElseRangeCheck = ( i, trueStatements, falseStatements ) => rangeCheckIndexExpression ? `
+    if ( ${rangeCheckIndexExpression( i )} < ${length} ) {
+      ${trueStatements}
     }
     else {
-      if ( rangeCheckIndexExpression ) {
-        return `
-          var ${varName}: ${valueType};
-          if ( ${rangeCheckIndexExpression( i )} < ${length} ) {
-            ${loadStatements( varName, loadIndexExpression( i ) )}
-          }
-          else {
-            ${varName} = ${identity};
-          }
-        `;
-      }
-      else {
-        return `
-          var ${varName}: ${valueType};
-          ${loadStatements( varName, loadIndexExpression( i ) )}
-        `;
-      }
+      ${falseStatements}
     }
-  };
+  ` : trueStatements;
+
+  const indexedLoadStatements = ( varName, i, declaration ) => loadExpression ? `
+    ${declaration ? `${declaration} ` : ``}${varName} = ${loadExpression( loadIndexExpression( i ) )};
+  ` : `
+    ${declaration ? `
+      var ${varName}: ${valueType};
+    ` : ``}
+    ${loadStatements( varName, loadIndexExpression( i ) )}
+  `;
+
+  const loadWithRangeCheckStatements = ( varName, i ) => ifElseRangeCheck( i, `
+    ${indexedLoadStatements( varName, i )}
+  `, `
+    ${varName} = ${identity};
+  ` );
 
   const getNestedExpression = i => {
     return i === 0 ? loadWithRangeCheckExpression( 0 ) : combineExpression( getNestedExpression( i - 1 ), loadWithRangeCheckExpression( i ) )
@@ -197,29 +204,32 @@ ${template( ( {
       ${outerDeclarations.join( '\n' )}
       {
         ${loadDeclarations.map( declaration => declaration( 0 ) ).join( '\n' )}
-        ${loadExpression ? `
+        ${( loadExpression && useSelectIfOptional ) ? `
           ${value} = ${loadWithRangeCheckExpression( 0 )};
         ` : `
-          ${loadWithRangeCheckStatements( `first_value`, 0 )}
-          ${value} = first_value;
+          ${loadWithRangeCheckStatements( value, 0 )}
         `}
       }
       ${unroll( 1, grainSize, i => `
         {
           ${loadDeclarations.map( declaration => declaration( i ) ).join( '\n' )}
           ${combineExpression ? (
-            loadExpression ? `
+            ( loadExpression && useSelectIfOptional ) ? `
               ${value} = ${combineExpression( value, loadWithRangeCheckExpression( i ) )};
             ` : `
-              ${loadWithRangeCheckStatements( `next_value`, i )}
-              ${value} = ${combineExpression( value, `next_value` )};
+              ${ifRangeCheck( i, `
+                ${indexedLoadStatements( `next_value`, i, `let` )}
+                ${value} = ${combineExpression( value, `next_value` )};
+              ` )}
             `
           ) : (
-            loadExpression ? `
+            ( loadExpression && useSelectIfOptional ) ? `
               ${combineStatements( value, value, loadWithRangeCheckExpression( i ) )}
             ` : `
-              ${loadWithRangeCheckStatements( `next_value`, i )}
-              ${combineStatements( value, value, `next_value` )}
+              ${ifRangeCheck( i, `
+                ${indexedLoadStatements( `next_value`, i, `let` )}
+                ${combineStatements( value, value, `next_value` )}
+              ` )}
             `
           ) }
         }
