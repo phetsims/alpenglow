@@ -1,25 +1,15 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * A reduction of u32/i32 with atomics so that we can achieve it in a single level.
+ * A reduction of u32/i32 with (even more) atomics so that we can achieve it in a single level.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_reduce_atomic } from '../../imports.js';
+import { alpenglow, AtomicOperation, AtomicType, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_atomic_reduce_atomic } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 
-export type AtomicType = 'u32' | 'i32';
-
-export type AtomicOperation =
-  'atomicAdd' |
-  'atomicMax' |
-  'atomicMin' |
-  'atomicAnd' |
-  'atomicOr' |
-  'atomicXor';
-
-export type AtomicReduceShaderOptions = {
+export type FullAtomicReduceShaderOptions = {
   // The type of the data for WGSL, e.g. 'f32'
   valueType: AtomicType;
 
@@ -29,20 +19,19 @@ export type AtomicReduceShaderOptions = {
   grainSize?: number;
   lengthExpression?: string | null; // if null, no range checks will be made
 
-  // The actual ordering of the input data. TODO describe striping order
-  inputOrder?: 'blocked' | 'striped';
+  // TODO: doc
+  numAtomics?: number;
 
-  factorOutSubexpressions?: boolean;
-  nestSubexpressions?: boolean;
+  // TODO: doc
+  directAtomics?: boolean;
 };
 
 const DEFAULT_OPTIONS = {
   workgroupSize: 256,
   grainSize: 8,
   lengthExpression: null,
-  factorOutSubexpressions: true,
-  nestSubexpressions: false,
-  inputOrder: 'blocked'
+  numAtomics: 8,
+  directAtomics: false
 } as const;
 
 const u32Identities = {
@@ -65,43 +54,32 @@ const i32Identities = {
   atomicXor: '0i'
 } as const;
 
-const combineExpressions = {
-  atomicAdd: ( a: string, b: string ) => `${a} + ${b}`,
-  atomicMax: ( a: string, b: string ) => `max( ${a}, ${b} )`,
-  atomicMin: ( a: string, b: string ) => `min( ${a}, ${b} )`,
-  atomicAnd: ( a: string, b: string ) => `${a} & ${b}`,
-  atomicOr: ( a: string, b: string ) => `${a} | ${b}`,
-  atomicXor: ( a: string, b: string ) => `${a} ^ ${b}`
-} as const;
-
-export default class AtomicReduceShader extends ExecutableShader<number[], number> {
+export default class FullAtomicReduceShader extends ExecutableShader<number[], number> {
 
   public static async create(
     deviceContext: DeviceContext,
     name: string,
-    providedOptions: AtomicReduceShaderOptions
-  ): Promise<AtomicReduceShader> {
-    const options = optionize3<AtomicReduceShaderOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+    providedOptions: FullAtomicReduceShaderOptions
+  ): Promise<FullAtomicReduceShader> {
+    const options = optionize3<FullAtomicReduceShaderOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     const shader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, name, wgsl_main_reduce_atomic, [
+      deviceContext.device, name, wgsl_main_atomic_reduce_atomic, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
       ], {
         valueType: options.valueType,
         atomicOperation: options.atomicOperation,
-        inputOrder: options.inputOrder,
         identity: ( options.valueType === 'u32' ? u32Identities : i32Identities )[ options.atomicOperation ],
-        combineExpression: combineExpressions[ options.atomicOperation ],
         length: options.lengthExpression,
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
-        factorOutSubexpressions: options.factorOutSubexpressions,
-        nestSubexpressions: options.nestSubexpressions
+        numAtomics: options.numAtomics,
+        directAtomics: options.directAtomics
       }
     );
 
-    return new AtomicReduceShader( async ( execution: Execution, values: number[] ) => {
+    return new FullAtomicReduceShader( async ( execution: Execution, values: number[] ) => {
       const dispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
       const byteEncoder = new ByteEncoder().encodeValues( values, ( element, encoder ) => {
@@ -127,4 +105,4 @@ export default class AtomicReduceShader extends ExecutableShader<number[], numbe
   }
 }
 
-alpenglow.register( 'AtomicReduceShader', AtomicReduceShader );
+alpenglow.register( 'FullAtomicReduceShader', FullAtomicReduceShader );

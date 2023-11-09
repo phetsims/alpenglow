@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AtomicOperation, AtomicReduceShader, AtomicType, Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DualSnippetSource, ExampleSimpleF32Reduce, SingleReduceShader, u32, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
+import { AtomicOperation, AtomicReduceShader, AtomicType, Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, u32, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
@@ -207,6 +207,62 @@ atomicReduceTest( 'i32', 'atomicMin', ( a, b ) => Math.min( a, b ), Number.POSIT
 atomicReduceTest( 'i32', 'atomicAnd', ( a, b ) => a & b, -1 );
 atomicReduceTest( 'i32', 'atomicOr', ( a, b ) => a | b, 0 );
 atomicReduceTest( 'i32', 'atomicXor', ( a, b ) => a ^ b, 0 );
+
+const fullAtomicReduceTest = ( valueType: AtomicType, atomicOperation: AtomicOperation, directAtomics: boolean, jsOperation: ( a: number, b: number ) => number, jsIdentity: number ) => {
+  const name = `${valueType} FULL atomic ${atomicOperation} reduce direct:${directAtomics}`;
+  asyncTestWithDevice( name, async ( device, deviceContext ) => {
+    const workgroupSize = 256;
+    const grainSize = 8;
+    const numAtomics = 8;
+    const inputSize = workgroupSize * grainSize * 5 - 27;
+
+    const shader = await FullAtomicReduceShader.create( deviceContext, name, {
+      valueType: valueType,
+      atomicOperation: atomicOperation,
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      lengthExpression: u32( inputSize ),
+      numAtomics: numAtomics,
+      directAtomics: directAtomics
+    } );
+
+    const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xffff ) );
+
+    const actualValue = await deviceContext.executeShader( shader, numbers );
+    const expectedValue = numbers.slice( 0, inputSize ).reduce( jsOperation, 0 );
+
+    if ( ( expectedValue >>> 0 ) !== ( actualValue >>> 0 ) ) {
+      console.log( 'input' );
+      console.log( numbers );
+
+      console.log( 'expected' );
+      console.log( expectedValue );
+
+      console.log( 'actual' );
+      console.log( actualValue );
+
+      return `expected ${expectedValue}, actual ${actualValue}`;
+    }
+
+    return null;
+  } );
+};
+
+[ false, true ].forEach( directAtomics => {
+  fullAtomicReduceTest( 'u32', 'atomicAdd', directAtomics, ( a, b ) => a + b, 0 );
+  fullAtomicReduceTest( 'u32', 'atomicMax', directAtomics, ( a, b ) => Math.max( a, b ), 0 );
+  fullAtomicReduceTest( 'u32', 'atomicMin', directAtomics, ( a, b ) => Math.min( a, b ), Number.POSITIVE_INFINITY );
+  fullAtomicReduceTest( 'u32', 'atomicAnd', directAtomics, ( a, b ) => a & b, 0xffffffff );
+  fullAtomicReduceTest( 'u32', 'atomicOr', directAtomics, ( a, b ) => a | b, 0 );
+  fullAtomicReduceTest( 'u32', 'atomicXor', directAtomics, ( a, b ) => a ^ b, 0 );
+
+  fullAtomicReduceTest( 'i32', 'atomicAdd', directAtomics, ( a, b ) => a + b, 0 );
+  fullAtomicReduceTest( 'i32', 'atomicMax', directAtomics, ( a, b ) => Math.max( a, b ), Number.NEGATIVE_INFINITY );
+  fullAtomicReduceTest( 'i32', 'atomicMin', directAtomics, ( a, b ) => Math.min( a, b ), Number.POSITIVE_INFINITY );
+  fullAtomicReduceTest( 'i32', 'atomicAnd', directAtomics, ( a, b ) => a & b, -1 );
+  fullAtomicReduceTest( 'i32', 'atomicOr', directAtomics, ( a, b ) => a | b, 0 );
+  fullAtomicReduceTest( 'i32', 'atomicXor', directAtomics, ( a, b ) => a ^ b, 0 );
+} );
 
 asyncTestWithDevice( 'u32 test reduce (nested)', async ( device, deviceContext ) => {
   const workgroupSize = 256;

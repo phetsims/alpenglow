@@ -119,7 +119,7 @@ ${template( ( {
         outerDeclarations.push( `let base_striped_index = ${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex};` );
       }
 
-      loadDeclarations.push( i => `let striped_index = base_striped_index + ${u32( i  * workgroupSize )};` );
+      loadDeclarations.push( i => `let striped_index = base_striped_index + ${u32( i * workgroupSize )};` );
       loadIndexExpression = i => `striped_index`;
 
       if ( length !== null ) {
@@ -135,7 +135,7 @@ ${template( ( {
       }
     }
     else {
-      loadIndexExpression = i => `${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex} + ${u32( i  * workgroupSize )}`;
+      loadIndexExpression = i => `${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex} + ${u32( i * workgroupSize )}`;
       if ( length !== null ) {
         if ( inputOrder === 'striped' ) {
           rangeCheckIndexExpression = i => `${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex} * ${u32( grainSize )} + ${u32( i )}`; // TODO: simplify i=0?
