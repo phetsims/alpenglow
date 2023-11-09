@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, AtomicOperation, AtomicType, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_atomic_reduce_atomic } from '../../imports.js';
+import { alpenglow, AtomicOperation, AtomicReduceShader, AtomicType, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, i32AtomicIdentities, u32AtomicIdentities, wgsl_main_atomic_reduce_atomic } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type FullAtomicReduceShaderOptions = {
@@ -34,26 +34,6 @@ const DEFAULT_OPTIONS = {
   directAtomics: false
 } as const;
 
-const u32Identities = {
-  atomicAdd: '0u',
-  atomicMax: '0u',
-  atomicMin: '0xffffffffu',
-  atomicAnd: '0xffffffffu',
-  atomicOr: '0u',
-  atomicXor: '0u'
-} as const;
-
-// TODO: double-check some of these
-const i32Identities = {
-  atomicAdd: '0i',
-  // atomicMax: '-0x80000000i', // what, why can't this be represented?
-  atomicMax: '-0x7fffffffi',
-  atomicMin: '0x7fffffffi',
-  atomicAnd: '-1i',
-  atomicOr: '0i',
-  atomicXor: '0i'
-} as const;
-
 export default class FullAtomicReduceShader extends ExecutableShader<number[], number> {
 
   public static async create(
@@ -70,7 +50,7 @@ export default class FullAtomicReduceShader extends ExecutableShader<number[], n
       ], {
         valueType: options.valueType,
         atomicOperation: options.atomicOperation,
-        identity: ( options.valueType === 'u32' ? u32Identities : i32Identities )[ options.atomicOperation ],
+        identity: AtomicReduceShader.getIdentityExpression( options.atomicOperation, options.valueType ),
         length: options.lengthExpression,
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
@@ -92,7 +72,14 @@ export default class FullAtomicReduceShader extends ExecutableShader<number[], n
       } );
 
       const inputBuffer = execution.createByteEncoderBuffer( byteEncoder );
-      const outputBuffer = execution.createBuffer( 4 * dispatchSize );
+
+      // We have to conditionally initialize the atomic result!
+      const identityValue = AtomicReduceShader.getIdentityNumericValue( options.atomicOperation, options.valueType );
+      const outputBuffer = identityValue === 0 ? execution.createBuffer( 4 * dispatchSize ) : (
+        options.valueType === 'u32'
+          ? execution.createU32Buffer( [ identityValue ] )
+          : execution.createI32Buffer( [ identityValue ] )
+      );
 
       execution.dispatch( shader, [
         inputBuffer, outputBuffer

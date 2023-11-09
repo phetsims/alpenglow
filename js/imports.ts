@@ -457,7 +457,7 @@ export { default as BrokenTesting } from './webgpu/BrokenTesting.js';
 export { ExampleSimpleF32Reduce, Bic } from './webgpu/ExampleShaders.js';
 export { default as SingleReduceShader } from './webgpu/shaders/SingleReduceShader.js';
 export type { SingleReduceShaderOptions } from './webgpu/shaders/SingleReduceShader.js';
-export { default as AtomicReduceShader } from './webgpu/shaders/AtomicReduceShader.js';
+export { default as AtomicReduceShader, u32AtomicIdentities, i32AtomicIdentities } from './webgpu/shaders/AtomicReduceShader.js';
 export type { AtomicReduceShaderOptions, AtomicType, AtomicOperation } from './webgpu/shaders/AtomicReduceShader.js';
 export { default as FullAtomicReduceShader } from './webgpu/shaders/FullAtomicReduceShader.js';
 export type { FullAtomicReduceShaderOptions } from './webgpu/shaders/FullAtomicReduceShader.js';

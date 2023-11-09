@@ -172,10 +172,10 @@ const atomicReduceTest = ( valueType: AtomicType, atomicOperation: AtomicOperati
       lengthExpression: u32( inputSize )
     } );
 
-    const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xffff ) );
+    const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( valueType === 'u32' ? 0xff : -0xffff, 0xffff ) );
 
     const actualValue = await deviceContext.executeShader( shader, numbers );
-    const expectedValue = numbers.slice( 0, inputSize ).reduce( jsOperation, 0 );
+    const expectedValue = numbers.slice( 0, inputSize ).reduce( jsOperation, jsIdentity );
 
     if ( ( expectedValue >>> 0 ) !== ( actualValue >>> 0 ) ) {
       console.log( 'input' );
@@ -226,10 +226,10 @@ const fullAtomicReduceTest = ( valueType: AtomicType, atomicOperation: AtomicOpe
       directAtomics: directAtomics
     } );
 
-    const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xffff ) );
+    const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( valueType === 'u32' ? 0xff : -0xffff, 0xffff ) );
 
     const actualValue = await deviceContext.executeShader( shader, numbers );
-    const expectedValue = numbers.slice( 0, inputSize ).reduce( jsOperation, 0 );
+    const expectedValue = numbers.slice( 0, inputSize ).reduce( jsOperation, jsIdentity );
 
     if ( ( expectedValue >>> 0 ) !== ( actualValue >>> 0 ) ) {
       console.log( 'input' );

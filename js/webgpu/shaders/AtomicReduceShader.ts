@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_reduce_atomic } from '../../imports.js';
+import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, i32, u32, wgsl_main_reduce_atomic } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type AtomicType = 'u32' | 'i32';
@@ -45,24 +45,24 @@ const DEFAULT_OPTIONS = {
   inputOrder: 'blocked'
 } as const;
 
-const u32Identities = {
-  atomicAdd: '0u',
-  atomicMax: '0u',
-  atomicMin: '0xffffffffu',
-  atomicAnd: '0xffffffffu',
-  atomicOr: '0u',
-  atomicXor: '0u'
+export const u32AtomicIdentities = {
+  atomicAdd: 0,
+  atomicMax: 0,
+  atomicMin: 0xffffffff,
+  atomicAnd: 0xffffffff,
+  atomicOr: 0,
+  atomicXor: 0
 } as const;
 
 // TODO: double-check some of these
-const i32Identities = {
-  atomicAdd: '0i',
-  // atomicMax: '-0x80000000i', // what, why can't this be represented?
-  atomicMax: '-0x7fffffffi',
-  atomicMin: '0x7fffffffi',
-  atomicAnd: '-1i',
-  atomicOr: '0i',
-  atomicXor: '0i'
+export const i32AtomicIdentities = {
+  atomicAdd: 0,
+  // atomicMax: -0x80000000, // what, why can't this be represented?
+  atomicMax: -0x7fffffff,
+  atomicMin: 0x7fffffff,
+  atomicAnd: -1,
+  atomicOr: 0,
+  atomicXor: 0
 } as const;
 
 const combineExpressions = {
@@ -91,7 +91,7 @@ export default class AtomicReduceShader extends ExecutableShader<number[], numbe
         valueType: options.valueType,
         atomicOperation: options.atomicOperation,
         inputOrder: options.inputOrder,
-        identity: ( options.valueType === 'u32' ? u32Identities : i32Identities )[ options.atomicOperation ],
+        identity: AtomicReduceShader.getIdentityExpression( options.atomicOperation, options.valueType ),
         combineExpression: combineExpressions[ options.atomicOperation ],
         length: options.lengthExpression,
         workgroupSize: options.workgroupSize,
@@ -114,7 +114,14 @@ export default class AtomicReduceShader extends ExecutableShader<number[], numbe
       } );
 
       const inputBuffer = execution.createByteEncoderBuffer( byteEncoder );
-      const outputBuffer = execution.createBuffer( 4 * dispatchSize );
+
+      // We have to conditionally initialize the atomic result!
+      const identityValue = AtomicReduceShader.getIdentityNumericValue( options.atomicOperation, options.valueType );
+      const outputBuffer = identityValue === 0 ? execution.createBuffer( 4 * dispatchSize ) : (
+        options.valueType === 'u32'
+          ? execution.createU32Buffer( [ identityValue ] )
+          : execution.createI32Buffer( [ identityValue ] )
+      );
 
       execution.dispatch( shader, [
         inputBuffer, outputBuffer
@@ -124,6 +131,15 @@ export default class AtomicReduceShader extends ExecutableShader<number[], numbe
       const array = options.valueType === 'u32' ? new Uint32Array( arrayBuffer ) : new Int32Array( arrayBuffer );
       return array[ 0 ];
     } );
+  }
+
+  public static getIdentityNumericValue( atomicOperation: AtomicOperation, valueType: AtomicType ): number {
+    return ( valueType === 'u32' ? u32AtomicIdentities : i32AtomicIdentities )[ atomicOperation ];
+  }
+
+  public static getIdentityExpression( atomicOperation: AtomicOperation, valueType: AtomicType ): string {
+    const identityValue = AtomicReduceShader.getIdentityNumericValue( atomicOperation, valueType );
+    return valueType === 'u32' ? u32( identityValue ) : i32( identityValue );
   }
 }
 
