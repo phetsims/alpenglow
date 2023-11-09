@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ./left_scan
+#import ./scan
 #import ./unroll
 
 ${template( ( {
@@ -42,14 +42,14 @@ ${template( ( {
       }
     ` )}
 
-    ${left_scan( {
+    ${scan( {
       value: `tb_bits_vector`,
       scratch: bitsScratch,
       workgroupSize: workgroupSize,
       identity: `vec4( 0u )`,
-      combine: ( a, b ) => `${a} + ${b}`,
+      combineExpression: ( a, b ) => `${a} + ${b}`,
       exclusive: true,
-      skipLastScratch: false
+      needsValidScratch: true
     } )}
 
     // now tb_bits_vector holds the partial exclusive scan, but the inclusive scan is still in the array

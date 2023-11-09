@@ -74,7 +74,10 @@ ${template( ( {
     ` : ``}
 
     ${unroll( start, end, ( i, isFirst, isLast ) => `
-      workgroupBarrier();
+      // We don't need the first workgroupBarrier() if scratchPreloaded is true
+      ${!scratchPreloaded || !isFirst ? `
+        workgroupBarrier();
+      ` : ``}
 
       // TODO: check performance differences with a select/combine?
       if ( ${condition( i )} ) {

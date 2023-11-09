@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../../gpu/left_scan
+#import ../../gpu/scan
 
 #option workgroupSize
 
@@ -25,12 +25,12 @@ fn main(
 ) {
   var value = input[ global_id.x ];
 
-  ${left_scan( {
+  ${scan( {
     value: 'value',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
     identity: '0f',
-    combine: ( a, b ) => `${a} + ${b}`,
+    combineExpression: ( a, b ) => `${a} + ${b}`,
     skipLastScratch: true
   } )}
 

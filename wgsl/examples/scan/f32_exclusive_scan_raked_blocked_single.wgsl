@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../../gpu/left_scan
+#import ../../gpu/scan
 
 #option workgroupSize
 #option grainSize
@@ -38,15 +38,21 @@ fn main(
     value = combine( value, input[ baseIndex + i ] );
   }
 
-  ${left_scan( {
+  ${scan( {
     value: 'value',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
     identity: '0f',
-    combine: ( a, b ) => `${a} + ${b}`,
+    combineExpression: ( a, b ) => `${a} + ${b}`,
     exclusive: true
   } )}
 
+  // TODO: can we do these without the SECOND input memory read? or will that be cached?
+  // TODO: consider a case where we load fully into memory? maybe raking not worth it?
+
+  // TODO: if we put everything in, so SERIAL *SCAN* at the first past
+
+  // TODO: index checks! Isolate out. It's essentially a serial scan, with mapped indices
   for ( var i = 0u; i < ${u32( grainSize )}; i++ ) {
     output[ baseIndex + i ] = value;
     value = combine( value, input[ baseIndex + i ] );

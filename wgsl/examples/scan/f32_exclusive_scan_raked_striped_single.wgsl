@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../../gpu/left_scan
+#import ../../gpu/scan
 
 #option workgroupSize
 #option grainSize
@@ -38,12 +38,12 @@ fn main(
     value = combine( value, input[ baseIndex + i * ${u32( workgroupSize )} ] );
   }
 
-  ${left_scan( {
+  ${scan( {
     value: 'value',
     scratch: 'scratch',
     workgroupSize: workgroupSize,
     identity: '0f',
-    combine: ( a, b ) => `${a} + ${b}`,
+    combineExpression: ( a, b ) => `${a} + ${b}`,
     exclusive: true
   } )}
 

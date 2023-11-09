@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ./left_scan
+#import ./scan
 
 ${template( ( {
   inputValue, // input name
@@ -30,14 +30,14 @@ ${template( ( {
     );
     // TODO: consider tb_bits_vector[ bits ] = 1u instead of 4 selects?
 
-    ${left_scan( {
+    ${scan( {
       value: `tb_bits_vector`,
       scratch: scratch,
       workgroupSize: workgroupSize,
       identity: `vec4( 0u )`,
-      combine: ( a, b ) => `${a} + ${b}`,
+      combineExpression: ( a, b ) => `${a} + ${b}`,
       exclusive: true,
-      skipLastScratch: false
+      needsValidScratch: true
     } )}
 
     // now tb_bits_vector holds the partial exclusive scan, but the inclusive scan is still in the array
