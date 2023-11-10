@@ -8,31 +8,18 @@
 
 #import ./unroll
 
-// CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
-//       rearranging. We'll use convergent reduce anyway
-// CASE: if non-commutative reduce, we want to ... load blocked (?), reverseBits into convergent, and convergent-reduce?
-// CASE: if non-commutative reduce on striped data, we want to load striped, morph into convergent, and convergent-reduce
-// CASE: scan: load how the data is stored (blocked/striped), NO storeOrder, then scan.
-
 ${template( ( {
-  // the "output" variable name
-  value,
 
-  // the type of the "output" variable (T) - can be omitted if nestSubexpressions is true
-  valueType,
-
-  // ( index ) => T, expression, -- wrap with parentheses as needed TODO: should we always do this to prevent errors?
+  // ( index: expr-u32 ) => expr-T, -- wrap with parentheses as needed TODO: should we always do this to prevent errors?
   loadExpression,
   // ( varName: string, index ) => statements setting varName: T,
   loadStatements,
 
-  // T, expression (should be the identity element of the combine operation)
-  identity,
+  // ( index: expr-32, value: expr-T ) => void
+  storeStatements,
 
-  // ( a: T, b: T ) => expr T - expression (should combine the two values) -- wrap with parentheses as needed TODO: should we always do this to prevent errors?
-  combineExpression,
-  // ( varName: string, a: T, b: T ) => statements setting varName: T, (should combine the two values)
-  combineStatements,
+  // the type of the variable (T)
+  valueType,
 
   // number (the number of threads running this command)
   workgroupSize,
@@ -55,43 +42,42 @@ ${template( ( {
   // ( expression: u32 ) | null - if provided, it will enable range checks (based on the inputOrder)
   length = null,
 
+  // T, expression - if a length is provided
+  outOfRangeValue = null,
+
   // The actual order of the data in memory (needed for range checks, not required if range checks are disabled)
   inputOrder = null, // 'blocked' | 'striped'
 
   // The order of access to the input data (determines the "value" output order also)
-  inputAccessOrder, // 'blocked' | 'striped'
+  inputAccessOrder = 'striped', // 'blocked' | 'striped'  NOTE: Not just striped, if we're using this somehow and mapping indices ourselves
+
+  // TODO: outputOrder, support blocked or striped (we're always putting it in the original order right now)
 
   // Whether local variables should be used to factor out subexpressions (potentially more register usage, but less
   // computation).
   factorOutSubexpressions = true,
-
-  // Whether to nest the combine calls, e.g. combine( combine( combine( a, b ), c ), d )
-  nestSubexpressions = false,
-
-  useSelectIfOptional = false,
 } ) => {
-  assert && assert( value );
-  assert && assert( identity );
+  // TODO: factor out the range checks based on inputOrder (we're going to share that with load_reduced)
+
+  assert && assert( length !== null || outOfRangeValue !== null );
   assert && assert( workgroupSize );
   assert && assert( grainSize );
-  assert && assert( nestSubexpressions || valueType, 'valueType required if not nesting subexpressions' );
   assert && assert( !length || ( inputOrder === 'blocked' || inputOrder === 'striped' ),
     'If range checks are enabled, inputOrder is required' );
   assert && assert( inputAccessOrder === 'blocked' || inputAccessOrder === 'striped' );
 
   assert && assert( inputOrder !== 'striped' || inputAccessOrder !== 'blocked', 'Do not use blocked order on striped data' );
-  assert && assert( !nestSubexpressions || ( !factorOutSubexpressions && !combineStatements ),
-    'Cannot nest and either factor out subexpressions nor have combination statements' );
   assert && assert( [ loadExpression, loadStatements ].filter( _.identity ).length === 1,
     'Must provide exactly one of loadExpression or loadStatements' );
-  assert && assert( [ combineExpression, combineStatements ].filter( _.identity ).length === 1,
-    'Must provide exactly one of combineExpression or combineStatements' );
 
   let outerDeclarations = []; // array<statement>
   let loadDeclarations = []; // array<( index: number ) => statement>
   let loadIndexExpression = null; // ( index: u32 ) => u32
   let rangeCheckIndexExpression = null;
 
+  // TODO: can we extract a general... index-mapping iteration? Note which indices we need (e.g. for instance, base_workgroup would be useful here)
+  // TODO: add outputOrder(!)
+  // TODO: identity vs outOfRangeValue
   if ( inputAccessOrder === 'blocked' ) {
     if ( factorOutSubexpressions ) {
       outerDeclarations.push( `let base_blocked_index = ${u32( grainSize )} * ${globalIndex};` );
@@ -158,7 +144,7 @@ ${template( ( {
   assert && assert( !rangeCheckIndexExpression === ( length === null ), 'rangeCheckIndexExpression must be created iff length is provided' );
 
   const loadWithRangeCheckExpression = i => rangeCheckIndexExpression
-    ? `select( ${identity}, ${loadExpression( loadIndexExpression( i ) )}, ${rangeCheckIndexExpression( i )} < ${length} )`
+    ? `select( ${outOfRangeValue}, ${loadExpression( loadIndexExpression( i ) )}, ${rangeCheckIndexExpression( i )} < ${length} )`
     : loadExpression( loadIndexExpression( i ) );
 
   const ifRangeCheck = ( i, trueStatements ) => rangeCheckIndexExpression ? `
@@ -188,50 +174,22 @@ ${template( ( {
   const loadWithRangeCheckStatements = ( varName, i ) => ifElseRangeCheck( i, `
     ${indexedLoadStatements( varName, i )}
   `, `
-    ${varName} = ${identity};
+    ${varName} = ${outOfRangeValue};
   ` );
 
-  const getNestedExpression = i => {
-    return i === 0 ? loadWithRangeCheckExpression( 0 ) : combineExpression( getNestedExpression( i - 1 ), loadWithRangeCheckExpression( i ) )
-  };
-
   // TODO: more unique names to prevent namespace collision!
-  return nestSubexpressions ? `
-    var ${value} = ${getNestedExpression( grainSize - 1 )};
-  ` : `
-    var ${value}: ${valueType};
+  return `
     {
       ${outerDeclarations.join( '\n' )}
-      {
-        ${loadDeclarations.map( declaration => declaration( 0 ) ).join( '\n' )}
-        ${( loadExpression && useSelectIfOptional ) ? `
-          ${value} = ${loadWithRangeCheckExpression( 0 )};
-        ` : `
-          ${loadWithRangeCheckStatements( value, 0 )}
-        `}
-      }
-      ${unroll( 1, grainSize, i => `
+      ${unroll( 0, grainSize, i => `
         {
           ${loadDeclarations.map( declaration => declaration( i ) ).join( '\n' )}
-          ${combineExpression ? (
-            ( loadExpression && useSelectIfOptional ) ? `
-              ${value} = ${combineExpression( value, loadWithRangeCheckExpression( i ) )};
-            ` : `
-              ${ifRangeCheck( i, `
-                ${indexedLoadStatements( `next_value`, i, `let` )}
-                ${value} = ${combineExpression( value, `next_value` )};
-              ` )}
-            `
-          ) : (
-            ( loadExpression && useSelectIfOptional ) ? `
-              ${combineStatements( value, value, loadWithRangeCheckExpression( i ) )}
-            ` : `
-              ${ifRangeCheck( i, `
-                ${indexedLoadStatements( `next_value`, i, `let` )}
-                ${combineStatements( value, value, `next_value` )}
-              ` )}
-            `
-          ) }
+
+          var lm_val: ${valueType};
+          ${loadWithRangeCheckStatements( `lm_val`, i )}
+
+          // TODO: can we further simplify?
+          ${storeStatements( `${loadIndexExpression( i )} - ${workgroupIndex} * ${u32( workgroupSize * grainSize )}`, `lm_val` )}
         }
       ` )}
     }

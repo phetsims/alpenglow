@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AtomicOperation, AtomicReduceShader, AtomicType, Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, u32, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
+import { AtomicOperation, AtomicReduceShader, AtomicType, Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, u32, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
@@ -1901,3 +1901,75 @@ reorderTest(
   wgsl_u32_flip_convergent,
   ( index, workgroupSize, grainSize ) => ByteEncoder.getConvergentIndex( index, workgroupSize * grainSize )
 );
+
+const multipleLoadTest = ( useLoadExpression: boolean, useLength: boolean, inputOrder: string, inputAccessOrder: string, indexMap: ( index: number, workgroupSize: number, grainSize: number ) => number ) => {
+  const name = `load_multiple useLoadExpr:${useLoadExpression}, useLength:${useLength}, inputOrder:${inputOrder}, inputAccessOrder:${inputAccessOrder}`;
+  asyncTestWithDevice( name, async ( device, deviceContext ) => {
+    // const workgroupSize = 256;
+    // const grainSize = 8;
+    // const dispatchSize = 5;
+    //
+    // const quantity = useLength ? dispatchSize * workgroupSize * grainSize - 27 : dispatchSize * workgroupSize * grainSize;
+
+    const workgroupSize = 4;
+    const grainSize = 2;
+    const dispatchSize = 5;
+
+    const quantity = useLength ? dispatchSize * workgroupSize * grainSize - 5 : dispatchSize * workgroupSize * grainSize;
+
+    // const numbers = _.range( 0, quantity ).map( () => random.nextIntBetween( 0, 0xffff ) );
+    const numbers = _.range( 0, quantity );
+
+    const shader = ComputeShader.fromSource(
+      device, name, wgsl_example_load_multiple, [
+        Binding.READ_ONLY_STORAGE_BUFFER,
+        Binding.STORAGE_BUFFER
+      ], {
+        length: useLength ? u32( quantity ) : null,
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        valueType: 'u32',
+        outOfRangeValue: 0,
+        useLoadExpression: useLoadExpression,
+        inputOrder: inputOrder,
+        inputAccessOrder: inputAccessOrder,
+        factorOutSubexpressions: true
+      }
+    );
+
+    const outputNumbers = await deviceContext.executeSingle( async ( encoder, execution ) => {
+      const inputBuffer = execution.createU32Buffer( numbers );
+      const outputBuffer = execution.createBuffer( 4 * dispatchSize * workgroupSize * grainSize );
+
+      shader.dispatch( encoder, [
+        inputBuffer, outputBuffer
+      ], dispatchSize );
+
+      return execution.u32Numbers( outputBuffer );
+    } );
+
+    for ( let i = 0; i < quantity; i++ ) {
+      if ( numbers[ i ] !== outputNumbers[ indexMap( i, workgroupSize, grainSize ) ] ) {
+        console.log( 'expected' );
+        console.log( _.chunk( numbers, 16 ) );
+
+        console.log( 'actual' );
+        console.log( _.chunk( outputNumbers, 16 ) );
+
+        return `expected ${numbers[ i ]}, actual ${outputNumbers[ indexMap( i, workgroupSize, grainSize ) ]}. i:${i}`;
+      }
+    }
+
+    return null;
+  } );
+};
+
+[ false, true ].forEach( useLoadExpression => {
+  [ false, true ].forEach( useLength => {
+    multipleLoadTest( useLoadExpression, useLength, 'blocked', 'blocked', _.identity );
+    multipleLoadTest( useLoadExpression, useLength, 'blocked', 'striped', _.identity );
+    if ( !useLength ) {
+      multipleLoadTest( useLoadExpression, useLength, 'striped', 'striped', _.identity );
+    }
+  } );
+} );
