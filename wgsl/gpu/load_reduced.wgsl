@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./conditional_if
 #import ./unroll
 
 // CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
@@ -161,20 +162,9 @@ ${template( ( {
     ? `select( ${identity}, ${loadExpression( loadIndexExpression( i ) )}, ${rangeCheckIndexExpression( i )} < ${length} )`
     : loadExpression( loadIndexExpression( i ) );
 
-  const ifRangeCheck = ( i, trueStatements ) => rangeCheckIndexExpression ? `
-    if ( ${rangeCheckIndexExpression( i )} < ${length} ) {
-      ${trueStatements}
-    }
-  ` : trueStatements;
-
-  const ifElseRangeCheck = ( i, trueStatements, falseStatements ) => rangeCheckIndexExpression ? `
-    if ( ${rangeCheckIndexExpression( i )} < ${length} ) {
-      ${trueStatements}
-    }
-    else {
-      ${falseStatements}
-    }
-  ` : trueStatements;
+  const ifRangeCheck = ( i, trueStatements, falseStatements = null ) => {
+    return conditional_if( rangeCheckIndexExpression ? `${rangeCheckIndexExpression( i )} < ${length}` : null, trueStatements, falseStatements );
+  };
 
   const indexedLoadStatements = ( varName, i, declaration ) => loadExpression ? `
     ${declaration ? `${declaration} ` : ``}${varName} = ${loadExpression( loadIndexExpression( i ) )};
@@ -185,7 +175,7 @@ ${template( ( {
     ${loadStatements( varName, loadIndexExpression( i ) )}
   `;
 
-  const loadWithRangeCheckStatements = ( varName, i ) => ifElseRangeCheck( i, `
+  const loadWithRangeCheckStatements = ( varName, i ) => ifRangeCheck( i, `
     ${indexedLoadStatements( varName, i )}
   `, `
     ${varName} = ${identity};
