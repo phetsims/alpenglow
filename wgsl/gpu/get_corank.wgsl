@@ -14,6 +14,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
+
 ${template( ( {
   value, // output name
   outputIndex, // expression: u32
@@ -24,6 +26,8 @@ ${template( ( {
   lessThanOrEqual // ( indexA, indexB ) => bool --- used instead of compare if provided
 } ) => `
   // TODO: add assertions
+
+  ${comment( 'begin get_corank' )}
 
   var ${value} = min( ${outputIndex}, ${lengthA} );
   {
@@ -62,4 +66,6 @@ ${template( ( {
       }
     }
   }
+
+  ${comment( 'end get_corank' )}
 ` )}

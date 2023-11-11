@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./coalesced_loop
 
 ${template( ( {
@@ -15,6 +16,7 @@ ${template( ( {
   getBin, // ( index ) => u32
   length, // expression: u32
 } ) => `
+  ${comment( 'begin histogram' )}
   {
     ${coalesced_loop( {
       workgroupSize: workgroupSize,
@@ -25,4 +27,5 @@ ${template( ( {
       `
     } )}
   }
+  ${comment( 'end histogram' )}
 ` )}

@@ -6,6 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
+
 ${template( ( {
   bitVector, // (u32/vec2u/vec3u/vec4u) name
   bitQuantity, // e.g. 2 for a two-bit sort
@@ -64,6 +66,10 @@ ${template( ( {
         str += `bitty_value = bitty_next_value;\n`;
       }
     }
-    return str;
+    return `
+      ${comment( 'begin bit_pack_radix_exclusive_scan' )}
+      ${str}
+      ${comment( 'end bit_pack_radix_exclusive_scan' )}
+    `;
   }
 } )}

@@ -10,6 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./scan
 
 ${template( ( {
@@ -20,6 +21,8 @@ ${template( ( {
   length, // expression: u32
   bits, // expression: u32
 } ) => `
+  ${comment( 'begin two_bit_workgroup_sort' )}
+
   {
     let tb_bits = select( 4u, ${bits}, local_id.x < ${length} ); // Choose a value that won't be used
     var tb_bits_vector = vec4(
@@ -53,4 +56,6 @@ ${template( ( {
       ${moveTo( `tb_offsets[ tb_bits ] + tb_bits_vector[ tb_bits ]` )}
     }
   }
+
+  ${comment( 'end two_bit_workgroup_sort' )}
 ` )}

@@ -4,6 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./n_bit_compact_single_sort
 
 ${template( ( {
@@ -19,6 +20,8 @@ ${template( ( {
   getBits, // ( T, bitIndex: u32 expr ) => expression: u32
   earlyLoad, // boolean (controls whether we load the values early or late - might affect register pressure)
 } ) => `
+  ${comment( 'begin compact_single_radix_sort' )}
+
   for ( var wrs_i = 0u; wrs_i < ${u32( numBits )}; wrs_i += ${u32( bitQuantity )} ) {
     ${n_bit_compact_single_sort( {
       valueType: valueType,
@@ -35,4 +38,6 @@ ${template( ( {
 
     // NOTE: no workgroupBarrier here, we already have it in the function
   }
+
+  ${comment( 'end compact_single_radix_sort' )}
 ` )}

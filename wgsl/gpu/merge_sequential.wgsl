@@ -6,6 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
+
 ${template( ( {
   lengthA, // expression: u32
   lengthB, // expression: u32
@@ -13,6 +15,7 @@ ${template( ( {
   setFromA, // ( indexOutput, indexA ) => void
   setFromB, // ( indexOutput, indexB ) => void
 } ) => `
+  ${comment( 'begin merge_sequential' )}
   {
     var ms_i = 0u;
     var ms_j = 0u;
@@ -63,4 +66,5 @@ ${template( ( {
       ms_k++;
     }
   }
+  ${comment( 'end merge_sequential' )}
 ` )}

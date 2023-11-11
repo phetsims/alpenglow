@@ -8,6 +8,7 @@
 
 #import ./conditional_if
 #import ./unroll
+#import ./comment
 
 // CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
 //       rearranging. We'll use convergent reduce anyway
@@ -189,6 +190,7 @@ ${template( ( {
   return nestSubexpressions ? `
     var ${value} = ${getNestedExpression( grainSize - 1 )};
   ` : `
+    ${comment( 'begin load_reduced' )}
     var ${value}: ${valueType};
     {
       ${outerDeclarations.join( '\n' )}
@@ -225,5 +227,6 @@ ${template( ( {
         }
       ` )}
     }
+    ${comment( 'end load_reduced' )}
   `;
 } )}

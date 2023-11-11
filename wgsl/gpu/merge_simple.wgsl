@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./get_corank
 #import ./merge_sequential
 
@@ -19,6 +20,7 @@ ${template( ( {
   greaterThan, // ( indexA, indexB ) => bool --- used instead of compare if provided
   lessThanOrEqual // ( indexA, indexB ) => bool --- used instead of compare if provided
 } ) => `
+  ${comment( 'begin merge_simple' )}
   {
     // TODO: don't assume a specific linear workgroup size? -- use local_invocation_index?
     let max_output = ${lengthA} + ${lengthB};
@@ -61,4 +63,5 @@ ${template( ( {
       } )}
     }
   }
+  ${comment( 'end merge_simple' )}
 ` )}

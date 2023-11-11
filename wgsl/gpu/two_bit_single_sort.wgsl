@@ -9,6 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./scan
 #import ./unroll
 
@@ -22,6 +23,7 @@ ${template( ( {
   getTwoBits, // ( T ) => expression: u32
   earlyLoad = false, // boolean (controls whether we load the values early or late - might affect register pressure)
 } ) => `
+  ${comment( 'begin two_bit_single_sort' )}
   {
     var tb_bits_vector = vec4( 0u );
 
@@ -87,4 +89,5 @@ ${template( ( {
 
     workgroupBarrier();
   }
+  ${comment( 'end two_bit_single_sort' )}
 ` )}

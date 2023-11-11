@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./unroll
 
 ${template( ( {
@@ -66,6 +67,7 @@ ${template( ( {
     : `${localIndex} + ${u32( 1 << i )}`;
 
   return `
+    ${comment( `begin reduce convergent:${convergent}` )}
     ${!scratchPreloaded ? `
       ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};
     ` : ``}
@@ -92,5 +94,6 @@ ${template( ( {
         ` : ``}
       }
     ` )}
+    ${comment( 'end reduce' )}
   `
 } )}

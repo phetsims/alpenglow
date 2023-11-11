@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./unroll
 
 ${template( ( {
@@ -66,6 +67,7 @@ ${template( ( {
     : `${scratch}[ ${mapScratchIndex( `${localIndex} + ${u32( 1 << i )}` )} ]`;
 
   return `
+    ${comment( `begin scan direction:${direction} exclusive:${exclusive}` )}
     ${!scratchPreloaded ? `
       ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};
     ` : ``}
@@ -108,5 +110,6 @@ ${template( ( {
     ` : ``}
 
     // TODO: consider if we should update the scratch values after, OR keep it nice after exclusive.
+    ${comment( 'end scan' )}
   `;
 } )}

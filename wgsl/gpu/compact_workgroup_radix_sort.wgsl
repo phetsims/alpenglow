@@ -4,6 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./two_bit_compact_workgroup_sort
 
 ${template( ( {
@@ -15,6 +16,8 @@ ${template( ( {
   length, // expression: u32
   getTwoBits, // ( T, bitIndex: u32 expr ) => expression: u32
 } ) => `
+  ${comment( 'begin compact_workgroup_radix_sort' )}
+
   for ( var wrs_i = 0u; wrs_i < ${u32( numBits )}; wrs_i += 2u ) {
     let wrs_bits = ${getTwoBits( value, `wrs_i` )};
 
@@ -33,4 +36,6 @@ ${template( ( {
       ${value} = ${valueScratch}[ local_id.x ];
     }
   }
+
+  ${comment( 'end compact_workgroup_radix_sort' )}
 ` )}

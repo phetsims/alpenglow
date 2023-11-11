@@ -9,6 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./get_corank
 #import ./merge_sequential
 #import ./unroll
@@ -58,6 +59,7 @@ ${template( ( {
   // boolean - controls whether we use atomics to track consumed_a/consumed_b, OR whether we compute another corank
   atomicConsumed = true
 } ) => `
+  ${comment( 'begin merge' )}
   ${( assert && assert( Number.isInteger( blockOutputSize / sharedMemorySize ) ) ), ''}
   ${( assert && assert( Number.isInteger( sharedMemorySize / workgroupSize ) ) ), ''}
   {
@@ -302,4 +304,5 @@ ${template( ( {
       }
     }
   }
+  ${comment( 'end merge' )}
 ` )}

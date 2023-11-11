@@ -10,6 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./bit_pack_radix_access
 #import ./bit_pack_radix_exclusive_scan
 #import ./bit_pack_radix_increment
@@ -23,6 +24,8 @@ ${template( ( {
   length, // expression: u32
   bits, // expression: u32
 } ) => `
+  ${comment( 'begin two_bit_compact_workgroup_sort' )}
+
   {
     var tb_bits_vector = 0u;
 
@@ -73,4 +76,6 @@ ${template( ( {
       } )} )` )}
     }
   }
+
+  ${comment( 'end two_bit_compact_workgroup_sort' )}
 ` )}

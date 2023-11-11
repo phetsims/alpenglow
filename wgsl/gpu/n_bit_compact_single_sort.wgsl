@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./bit_pack_radix_access
 #import ./bit_pack_radix_exclusive_scan
 #import ./bit_pack_radix_increment
@@ -24,6 +25,8 @@ ${template( ( {
   getBits, // ( T ) => expression: u32
   earlyLoad = false, // boolean (controls whether we load the values early or late - might affect register pressure)
 } ) => `
+  ${comment( 'begin n_bit_compact_single_sort' )}
+
   {
     var tb_bits_vector = ${{
       1: '0u',
@@ -126,4 +129,6 @@ ${template( ( {
 
     workgroupBarrier();
   }
+
+  ${comment( 'end n_bit_compact_single_sort' )}
 ` )}

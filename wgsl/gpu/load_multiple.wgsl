@@ -8,6 +8,7 @@
 
 #import ./conditional_if
 #import ./unroll
+#import ./comment
 
 ${template( ( {
 
@@ -165,6 +166,7 @@ ${template( ( {
 
   // TODO: more unique names to prevent namespace collision!
   return `
+    ${comment( 'begin load_multiple' )}
     {
       ${outerDeclarations.join( '\n' )}
       ${unroll( 0, grainSize, i => `
@@ -179,5 +181,6 @@ ${template( ( {
         }
       ` )}
     }
+    ${comment( 'end load_multiple' )}
   `;
 } )}

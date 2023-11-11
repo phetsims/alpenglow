@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ./comment
 #import ./histogram
 #import ./unroll
 #import ./ceil_divide_constant_divisor
@@ -22,6 +23,8 @@ ${template( ( {
   // indices up to numBins * Math.ceil( length / ( workgroupSize * grainSize ) )
   storeHistogram,
 } ) => `
+  ${comment( 'begin radix_histogram' )}
+
   {
     ${histogram( {
       workgroupSize: workgroupSize,
@@ -46,4 +49,6 @@ ${template( ( {
       ` )}
     }
   }
+
+  ${comment( 'end radix_histogram' )}
 ` )}

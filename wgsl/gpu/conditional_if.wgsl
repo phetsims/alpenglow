@@ -1,8 +1,6 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc (it's one of the more important ones)
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
