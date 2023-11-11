@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: docs
+ * A simple unrolled loop that provides both a "blocked" and "striped" (coalesced) index for each iteration.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

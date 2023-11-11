@@ -1,7 +1,10 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc (it's one of the more important ones)
+ * Loads data (usually from main memory) with multiple values per thread, storing them typically in shared memory.
+ * Notably supports larger sizes than the workgroup size.
+ *
+ * grainSize controls how many items are loaded per thread.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

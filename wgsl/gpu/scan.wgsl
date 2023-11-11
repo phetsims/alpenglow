@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * A template that performs a scan operation using workgroup memory on a single workgroup.
+ * A template that performs a scan operation using workgroup memory on a single workgroup (one value per thread).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

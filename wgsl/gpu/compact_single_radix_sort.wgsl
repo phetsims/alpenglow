@@ -1,6 +1,10 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
+ * Performs a full radix-sort of an array in workgroup memory (which can be of length workgroupSize * grainSize),
+ * using a more complicated/computational but lower-memory approach by packing the accumulated bits (that we scan over)
+ * into a more compact form (packed into either a u32/vec2u/vec3u/vec4u, depending on the bitVectorSize parameter).
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
