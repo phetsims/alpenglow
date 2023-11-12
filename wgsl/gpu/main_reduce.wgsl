@@ -4,10 +4,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/reduce
-#import ../gpu/load_reduced
-#import ../gpu/to_convergent_index
-#import ../gpu/to_striped_index
+#import ./reduce
+#import ./load_reduced
+#import ./to_convergent_index
+#import ./to_striped_index
 
 #option workgroupSize
 #option grainSize

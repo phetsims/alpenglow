@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/unroll
+#import ./unroll
 
 #option workgroupSize
 #option grainSize

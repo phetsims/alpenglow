@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AtomicOperation, AtomicReduceShader, AtomicType, Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, u32, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
+import { AtomicOperation, AtomicReduceShader, AtomicType, Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, SingleScanShader, u32, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
@@ -1973,3 +1973,130 @@ const multipleLoadTest = ( useLoadExpression: boolean, useLength: boolean, input
     }
   } );
 } );
+
+const testU32SingleScan = ( exclusive: boolean ) => {
+  const name = `main_scan (SingleScanShader) u32 single exclusive:${exclusive}`;
+  asyncTestWithDevice( name, async ( device, deviceContext ) => {
+    const workgroupSize = 256;
+    const grainSize = 8;
+    const inputSize = workgroupSize * grainSize * 5 - 27;
+
+    const shader = await SingleScanShader.create<number>( deviceContext, name, {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      valueType: 'u32',
+      bytesPerElement: 4,
+      identityExpression: '0u',
+      combineExpression: ( a: string, b: string ) => `${a} + ${b}`,
+      encodeElement: ( n: number, encoder: ByteEncoder ) => encoder.pushU32( n ),
+      decodeElement: ( encoder: ByteEncoder, offset: number ) => encoder.fullU32Array[ offset ],
+      lengthExpression: u32( inputSize ),
+      inputOrder: 'blocked',
+      inputAccessOrder: 'striped',
+      exclusive: exclusive
+    } );
+
+    const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xffff ) );
+
+    const actualValue = await deviceContext.executeShader( shader, numbers );
+    const expectedValue = _.chunk( numbers.slice( 0, inputSize ), workgroupSize * grainSize ).flatMap( values => {
+      const result: number[] = [];
+      let value = 0;
+      for ( let i = 0; i < values.length; i++ ) {
+        exclusive && result.push( value );
+
+        value += values[ i ];
+
+        !exclusive && result.push( value );
+      }
+      return result;
+    } );
+
+    for ( let i = 0; i < expectedValue.length; i++ ) {
+      const expected = expectedValue[ i ];
+      const actual = actualValue[ i ];
+
+      if ( expected !== actual ) {
+        console.log( 'input' );
+        console.log( numbers );
+
+        console.log( 'expected' );
+        console.log( expectedValue );
+
+        console.log( 'actual' );
+        console.log( actualValue );
+
+        return `expected ${expected.toString()}, actual ${actual.toString()} ${i}`;
+      }
+    }
+
+    return null;
+  } );
+};
+
+testU32SingleScan( false );
+testU32SingleScan( true );
+
+const testBicSingleScan = ( exclusive: boolean ) => {
+  const name = `main_scan (SingleScanShader) bic single exclusive:${exclusive}`;
+  asyncTestWithDevice( name, async ( device, deviceContext ) => {
+    const workgroupSize = 256;
+    const grainSize = 8;
+    const inputSize = workgroupSize * grainSize * 5 - 27;
+
+    const shader = await SingleScanShader.create<Bic>( deviceContext, name, {
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      valueType: 'vec2u',
+      bytesPerElement: Bic.BYTES,
+      identityExpression: 'vec2( 0u )',
+      combineExpression: ( a: string, b: string ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
+      encodeElement: ( bic: Bic, encoder: ByteEncoder ) => {
+        encoder.pushU32( bic.x );
+        encoder.pushU32( bic.y );
+      },
+      decodeElement: ( encoder: ByteEncoder, offset: number ) => new Bic( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ] ),
+      lengthExpression: u32( inputSize ),
+      exclusive: exclusive
+    } );
+
+    const bics = _.range( 0, inputSize ).map( () => new Bic( random.nextIntBetween( 0, 63 ), random.nextIntBetween( 0, 63 ) ) );
+
+    const actualValue = await deviceContext.executeShader( shader, bics );
+    const expectedValue = _.chunk( bics.slice( 0, inputSize ), workgroupSize * grainSize ).flatMap( values => {
+      const result: Bic[] = [];
+      let value = Bic.IDENTITY;
+      for ( let i = 0; i < values.length; i++ ) {
+        exclusive && result.push( value );
+
+        value = Bic.combine( value, values[ i ] );
+
+        !exclusive && result.push( value );
+      }
+      return result;
+    } );
+
+    for ( let i = 0; i < expectedValue.length; i++ ) {
+      const expected = expectedValue[ i ];
+      const actual = actualValue[ i ];
+
+      if ( !expected.equals( actual ) ) {
+        console.log( 'input' );
+        console.log( bics );
+
+        console.log( 'expected' );
+        console.log( expectedValue );
+
+        console.log( 'actual' );
+        console.log( actualValue );
+
+        return `expected ${expected.toString()}, actual ${actual.toString()}`;
+      }
+    }
+
+    return null;
+  } );
+};
+
+testBicSingleScan( false );
+testBicSingleScan( true );

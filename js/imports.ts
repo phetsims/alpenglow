@@ -262,6 +262,8 @@ export { default as wgsl_main_reduce } from '../wgsl/gpu/main_reduce.js';
 export { default as wgsl_main_reduce_atomic } from '../wgsl/gpu/main_reduce_atomic.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_atomic_reduce_atomic } from '../wgsl/gpu/main_atomic_reduce_atomic.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_main_scan } from '../wgsl/gpu/main_scan.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
@@ -463,6 +465,8 @@ export { default as AtomicReduceShader, u32AtomicIdentities, i32AtomicIdentities
 export type { AtomicReduceShaderOptions, AtomicType, AtomicOperation } from './webgpu/shaders/AtomicReduceShader.js';
 export { default as FullAtomicReduceShader } from './webgpu/shaders/FullAtomicReduceShader.js';
 export type { FullAtomicReduceShaderOptions } from './webgpu/shaders/FullAtomicReduceShader.js';
+export { default as SingleScanShader } from './webgpu/shaders/SingleScanShader.js';
+export type { SingleScanShaderOptions } from './webgpu/shaders/SingleScanShader.js';
 export { default as GPUProfiling } from './webgpu/GPUProfiling.js';
 export { default as RasterClipper } from './webgpu/RasterClipper.js';
 export type { RasterClipperOptions } from './webgpu/RasterClipper.js';

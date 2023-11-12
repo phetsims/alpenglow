@@ -7,8 +7,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/reduce
-#import ../gpu/load_reduced
+#import ./reduce
+#import ./load_reduced
 
 #option workgroupSize
 #option grainSize
