@@ -14,10 +14,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ./load_multiple
-#import ./unroll
-#import ./scan
-#import ./coalesced_loop
+#import ./scan_comprehensive
 
 #option workgroupSize
 #option grainSize
@@ -46,88 +43,17 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
-  // Load into workgroup memory
-  ${load_multiple( {
-    loadExpression: index => `input[ ${index} ]`,
-    storeStatements: ( index, value ) => `scratch[ ${index} ] = ${value};`,
-    valueType: valueType,
+  ${scan_comprehensive( {
     workgroupSize: workgroupSize,
     grainSize: grainSize,
     length: length,
-    outOfRangeValue: identity,
-    inputOrder: inputOrder,
-    inputAccessOrder: inputAccessOrder,
-    factorOutSubexpressions: factorOutSubexpressions,
-  } )}
-
-  workgroupBarrier();
-
-  // TODO: consider factoring out local_id.x * ${u32( grainSize )}? -- it will take up an extra register?
-
-  // TODO: isolate out into scan_sequential?
-  // Sequential scan of each thread's tile (inclusive)
-  var value = scratch[ local_id.x * ${u32( grainSize )} ];
-  ${unroll( 1, grainSize, i => `
-    {
-      // TODO: we should factor out this combineExpression/combineStatements pattern, where we just want to assign it?
-      ${combineExpression ? `
-        value = ${combineExpression( `value`, `scratch[ local_id.x * ${u32( grainSize )} + ${u32( i )} ]` )};
-      ` : `
-        ${combineStatements( `value`, `value`, `scratch[ local_id.x * ${u32( grainSize )} + ${u32( i )} ]` )}
-      `}
-
-      scratch[ local_id.x * ${u32( grainSize )} + ${u32( i )} ] = value;
-    }
-  `)}
-
-  // For the first scan step, since it will access other indices in scratch
-  workgroupBarrier();
-
-  // Scan the last-scanned element of each thread's tile (inclusive)
-  ${scan( {
-    value: `value`,
-    scratch: `scratch`,
-    workgroupSize: workgroupSize,
     identity: identity,
     combineExpression: combineExpression,
     combineStatements: combineStatements,
-    mapScratchIndex: index => `( ${index} ) * ${u32( grainSize )} + ${u32( grainSize - 1 )}`,
-    exclusive: false,
-    needsValidScratch: true,
-
-    // both `value` and the scratch value should be matching!
-    scratchPreloaded: true,
-    valuePreloaded: true,
-  } )}
-
-  workgroupBarrier();
-
-  // IF exclusive and we want the full reduced value, we'd need to extract it now.
-
-  // Add those values into all the other elements of the next tile
-  let added_value = select( ${identity}, scratch[ local_id.x * ${u32( grainSize )} - 1u ], local_id.x > 0 );
-  ${unroll( 0, grainSize - 1, i => `
-    {
-      let index = local_id.x * ${u32( grainSize )} + ${u32( i )};
-      ${combineExpression ? `
-        scratch[ index ] = ${combineExpression( `added_value`, `scratch[ index ]` )};
-      ` : `
-        var current_value = scratch[ index ];
-        ${combineStatements( `current_value`, `added_value`, `current_value` )}
-        scratch[ index ] = current_value;
-      `}
-    }
-  `)}
-
-  workgroupBarrier();
-
-  // Write our output in a coalesced order.
-  ${coalesced_loop( {
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    length: length,
-    callback: ( localIndex, dataIndex ) => `
-      output[ ${dataIndex} ] = ${exclusive ? `select( ${identity}, scratch[ ${localIndex} - 1u ], ${localIndex} > 0u )` : `scratch[ ${localIndex} ]`};
-    `
+    inputOrder: inputOrder,
+    inputAccessOrder: inputAccessOrder,
+    valueType: valueType,
+    factorOutSubexpressions: factorOutSubexpressions,
+    exclusive: exclusive,
   } )}
 }
