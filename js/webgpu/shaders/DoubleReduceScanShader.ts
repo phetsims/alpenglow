@@ -86,7 +86,7 @@ export default class DoubleReduceScanShader<T> extends ExecutableShader<T[], T[]
         convergent: options.isCommutative,
         convergentRemap: false, // TODO: reconsider if we can enable this?
         inputOrder: options.inputOrder,
-        inputAccessOrder: options.inputAccessOrder,
+        inputAccessOrder: options.isCommutative ? options.inputAccessOrder : 'blocked',
         factorOutSubexpressions: options.factorOutSubexpressions,
         nestSubexpressions: options.nestSubexpressions,
         stripeOutput: false // TODO: experiment with this

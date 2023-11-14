@@ -2189,7 +2189,7 @@ const testBicDoubleScan = ( exclusive: boolean ) => {
       decodeElement: ( encoder: ByteEncoder, offset: number ) => new Bic( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ] ),
       lengthExpression: u32( inputSize ),
       inputOrder: 'blocked',
-      inputAccessOrder: 'blocked', // TODO: how to get the striped order to work here?!? What part is going wrong?
+      inputAccessOrder: 'striped', // TODO: CAN we get the reduce to be striped? (we could try an approach that loads into memory)
       exclusive: exclusive,
       factorOutSubexpressions: true,
       nestSubexpressions: false,
