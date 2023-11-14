@@ -3350,6 +3350,10 @@
     </p>
 
     <p class="TODO">
+      Note whether we "run out of memory" (arrayLength on buffers), and flag a condition!
+    </p>
+
+    <p class="TODO">
       Can we get a pattern with BufferLogger/TimestampLogger that abstracts over how we're calling things? This would
       be nice, ESPECIALLY if we can factor in some of the "abstract things out" that Stoneberry can do.
     </p>
@@ -3378,12 +3382,28 @@
     </p>
 
     <p class="TODO">
+      Higher-level language(!)<br>
+      Notably, we can support striped objects (across different buffer locations). We can support split-up bitcasted
+      objects (pack things into u32 arrays, that is handled by the language). Treat WGSL as our "assembly language".
+      Use "structure of arrays" (SoA) instead of "array of structures" (AoS) for better memory access patterns
+      (where possible).
+    </p>
+
+    <p class="TODO">
+      PIX didn't show occupancy information on my OS/GPU. Find a way where we can inspect occupancy directly.
+    </p>
+
+    <p class="TODO">
       Create a map of what in WGSL are abstract/concrete/structure/composite/constructible/fixed-footprint/plain/atomic/storable types
     </p>
 
     <p class="TODO">
       Use <code>arrayLength</code> builtin, perhaps we can use it to range check more efficiently? This only sometimes
       works, if we have filled the buffer fully?
+    </p>
+
+    <p class="DEFERRED">
+      Convolution? "Halo" load in convolution, see Programming Massively Parallel Processors book.
     </p>
 
     <p class="TODO">
@@ -3429,6 +3449,39 @@
     </p>
 
     <p class="TODO">
+      Use binary_expression_statement (like in scan_comprehensive) in many places.
+    </p>
+
+    <p class="TODO">
+      A "sequential-raked" reduce for blocked non-commutative cases. We either do this in
+    </p>
+    <ol class="TODO">
+      <li>
+        Zero-memory-overhead case, we keep the reduction in scratch[0], read in a workgroup-chunk into shared memory,
+        fully reduce it (and during the read-in we combine new[0] with our reduced scratch[0]). This is a bit simpler.
+      </li>
+      <li>
+        Fewer operations/workgroupBarriers: we keep a workgroup-var of whatever size (in addition to scratch) that will
+        hold partial results. We read in a workgroup-chunk into shared memory, and PARTIALLY reduce it, storing the
+        (multiple) partially reduced values into the workgroup-var of partials. We do this until the end (filling our
+        workgroup-var, choosing our partial reduction depth to do this), and then run a normal full reduce on that.
+      </li>
+    </ol>
+
+    <p class="TODO">
+      DOCUMENT TEMPLATES HERE
+    </p>
+
+    <p class="TODO">
+      Get index_mapped_loop working nicely (it's created, but not really used yet). load_multiple and load_reduced.
+    </p>
+
+    <p class="TODO">
+      Unrelated, but we should handle the devicePixelRatio switch (here, but mainly in common code).
+      <a href="https://github.com/phetsims/scenery/issues/1585">https://github.com/phetsims/scenery/issues/1585</a>
+    </p>
+
+    <p class="TODO">
       Condense examples. Create some reusable "examples" that we can use for BOTH unit tests AND profiling.
     </p>
 
@@ -3456,8 +3509,17 @@
     <h4 id="WGSL-scan">Scan</h4>
 
     <p class="TODO">
-      Consider keeping lower scans inclusive (and loading-offset OR zero things out, like we do in raster-clipper),
-      or we could also do the extra workgroupBarrier() and put them into exclusive (so loading is easier).
+      DOCUMENT TEMPLATES HERE
+    </p>
+
+    <p class="TODO">
+      Remember for 3-level atomic-able, we can single-reduce and distribute atomics. For others, we'll need
+      multi-step reduce (if we are doing reduce-scan+add strategies). If we do the atomic-able, we can start with the
+      scan on the bottom level.
+    </p>
+
+    <p class="TODO">
+      After we get blocked non-commutative better reduce, do 3-level scans next. Get an optimized u32 scan (consider u16 packed scan?)
     </p>
 
     <p class="TODO">
