@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * All of the needed logic for a raked workgroup scan (including the logic to load and store the data).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -19,6 +19,9 @@ ${template( ( {
 
   // varname of output var<storage> array<{valueType}> (can be the same as the input)
   output,
+
+  // varname of output var<workgroup> array<${valueType}, ${workgroupSize * grainSize}>
+  scratch,
 
   // the type of the "output" variable (T) - can be omitted if nestSubexpressions is true
   valueType,
@@ -58,6 +61,9 @@ ${template( ( {
   // This is designed to be used for multi-level scans, where you essentially want to add an "offset" value to
   // everything in the workgroup.
   getAddedValue = null,
+
+  // We can opt out of the extra workgroupBarrier if getAddedValue executes one itself (say, for atomics).
+  addedValueNeedsWorkgroupBarrier = true,
 } ) => {
   const combineToValue = ( varName, a, b ) => binary_expression_statement( varName, combineExpression, combineStatements, a, b );
 
@@ -66,8 +72,8 @@ ${template( ( {
 
     // Load into workgroup memory
     ${load_multiple( {
-      loadExpression: index => `input[ ${index} ]`,
-      storeStatements: ( index, value ) => `scratch[ ${index} ] = ${value};`,
+      loadExpression: index => `${input}[ ${index} ]`,
+      storeStatements: ( index, value ) => `${scratch}[ ${index} ] = ${value};`,
       valueType: valueType,
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -84,11 +90,11 @@ ${template( ( {
 
     // TODO: isolate out into scan_sequential?
     // Sequential scan of each thread's tile (inclusive)
-    var value = scratch[ local_id.x * ${u32( grainSize )} ];
+    var value = ${scratch}[ local_id.x * ${u32( grainSize )} ];
     ${unroll( 1, grainSize, i => `
       {
-        ${combineToValue( `value`, `value`, `scratch[ local_id.x * ${u32( grainSize )} + ${u32( i )} ]` )}
-        scratch[ local_id.x * ${u32( grainSize )} + ${u32( i )} ] = value;
+        ${combineToValue( `value`, `value`, `${scratch}[ local_id.x * ${u32( grainSize )} + ${u32( i )} ]` )}
+        ${scratch}[ local_id.x * ${u32( grainSize )} + ${u32( i )} ] = value;
       }
     `)}
 
@@ -117,23 +123,26 @@ ${template( ( {
     // IF exclusive and we want the full reduced value, we'd need to extract it now.
 
     // Add those values into all the other elements of the next tile
-    var added_value = select( ${identity}, scratch[ local_id.x * ${u32( grainSize )} - 1u ], local_id.x > 0 );
+    var added_value = select( ${identity}, ${scratch}[ local_id.x * ${u32( grainSize )} - 1u ], local_id.x > 0 );
     ${getAddedValue ? `
-      // We need to LOAD the value before anything writes to it, since we'll be modifying those values
-      workgroupBarrier();
 
       // Get the value we'll add to everything
-      var workgroup_added_value: ${valueType}
+      var workgroup_added_value: ${valueType};
       ${getAddedValue( `workgroup_added_value` )}
+
+      // We need to LOAD the value before anything writes to it, since we'll be modifying those values
+      ${addedValueNeedsWorkgroupBarrier ? `
+        workgroupBarrier();
+      ` : ``}
 
       // Update the last element of this tile (which would otherwise go untouched)
       {
-        let last_value = scratch[ local_id.x * ${u32( grainSize )} + ${u32( grainSize - 1 )} ];
+        let last_value = ${scratch}[ local_id.x * ${u32( grainSize )} + ${u32( grainSize - 1 )} ];
 
         var new_last_value: ${valueType};
         ${combineToValue( `new_last_value`, `workgroup_added_value`, `last_value` )}
 
-        scratch[ local_id.x * ${u32( grainSize )} + ${u32( grainSize - 1 )} ] = new_last_value;
+        ${scratch}[ local_id.x * ${u32( grainSize )} + ${u32( grainSize - 1 )} ] = new_last_value;
       }
 
       // Add the value to what we'll add to everything else
@@ -144,8 +153,8 @@ ${template( ( {
       {
         let index = local_id.x * ${u32( grainSize )} + ${u32( i )};
         var current_value: ${valueType};
-        ${combineToValue( `current_value`, `added_value`, `scratch[ index ]` )}
-        scratch[ index ] = current_value;
+        ${combineToValue( `current_value`, `added_value`, `${scratch}[ index ]` )}
+        ${scratch}[ index ] = current_value;
       }
     `)}
 
@@ -157,7 +166,7 @@ ${template( ( {
       grainSize: grainSize,
       length: length,
       callback: ( localIndex, dataIndex ) => `
-        output[ ${dataIndex} ] = ${exclusive ? `select( ${identity}, scratch[ ${localIndex} - 1u ], ${localIndex} > 0u )` : `scratch[ ${localIndex} ]`};
+        ${output}[ ${dataIndex} ] = ${exclusive ? `select( ${getAddedValue ? `workgroup_added_value` : identity}, ${scratch}[ ${localIndex} - 1u ], ${localIndex} > 0u )` : `${scratch}[ ${localIndex} ]`};
       `
     } )}
 

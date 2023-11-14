@@ -1,15 +1,8 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * A raked scan implementation capable of non-commutable cases, where:
- *
- * 1. All threads load state into workgroup memory in a coalesced fashion
- * 2. All threads perform an inclusive sequential scan on their data (of grainSize elements)
- * 3. All threads perform an inclusive scan of the "reuced" values for each thread (Hillis-Steele)
- * 4. The remaining values are filled in with the previous scanned value.workgroup
- * 5. The workgroup memory is written to the main output in a coalesced fashion
- *
- * Based on the described coarsened scan in "Programming Massively Parallel Processors" by Hwu, Kirk and Hajj, chap11.
+ * Like main_scan, but replaces the content in the input array with the scan result, and adds a value from an array of
+ * scanned reductions.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -27,14 +20,18 @@
 #option valueType
 #option factorOutSubexpressions
 #option exclusive
-#option getAddedValue
+#option isReductionExclusive
 
 @group(0) @binding(0)
 var<storage> input: array<${valueType}>;
 @group(0) @binding(1)
+var<storage> scanned_reduction: array<${valueType}>;
+@group(0) @binding(2)
 var<storage, read_write> output: array<${valueType}>;
 
 var<workgroup> scratch: array<${valueType}, ${workgroupSize * grainSize}>;
+
+var<workgroup> reduction_value: ${valueType};
 
 #bindings
 
@@ -59,6 +56,27 @@ fn main(
     valueType: valueType,
     factorOutSubexpressions: factorOutSubexpressions,
     exclusive: exclusive,
-    getAddedValue: getAddedValue,
+    getAddedValue: addedValue => `
+      if ( local_id.x == 0u ) {
+        // If our reductions are scanned exclusively, then we can just use the value directly
+        ${isReductionExclusive ? `
+          reduction_value = scanned_reduction[ workgroup_id.x ];
+        ` : `
+          // NOTE: assumes the same workgroup/grain size for each level
+          // This should work for any level of workgroup handling
+          if ( workgroup_id.x % ${u32( workgroupSize * grainSize )} == 0u ) {
+            reduction_value = ${addedValue};
+          }
+          else {
+            reduction_value = scanned_reduction[ workgroup_id.x - 1u ];
+          }
+        `}
+      }
+
+      workgroupBarrier();
+
+      ${addedValue} = reduction_value;
+    `,
+    addedValueNeedsWorkgroupBarrier: false,
   } )}
 }

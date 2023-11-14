@@ -1,15 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * A raked scan implementation capable of non-commutable cases, where:
- *
- * 1. All threads load state into workgroup memory in a coalesced fashion
- * 2. All threads perform an inclusive sequential scan on their data (of grainSize elements)
- * 3. All threads perform an inclusive scan of the "reuced" values for each thread (Hillis-Steele)
- * 4. The remaining values are filled in with the previous scanned value.workgroup
- * 5. The workgroup memory is written to the main output in a coalesced fashion
- *
- * Based on the described coarsened scan in "Programming Massively Parallel Processors" by Hwu, Kirk and Hajj, chap11.
+ * Like main_scan, but with the same input/output.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -30,9 +22,7 @@
 #option getAddedValue
 
 @group(0) @binding(0)
-var<storage> input: array<${valueType}>;
-@group(0) @binding(1)
-var<storage, read_write> output: array<${valueType}>;
+var<storage, read_write> data: array<${valueType}>;
 
 var<workgroup> scratch: array<${valueType}, ${workgroupSize * grainSize}>;
 
@@ -45,8 +35,8 @@ fn main(
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
   ${scan_comprehensive( {
-    input: `input`,
-    output: `output`,
+    input: `data`,
+    output: `data`,
     scratch: `scratch`,
     workgroupSize: workgroupSize,
     grainSize: grainSize,

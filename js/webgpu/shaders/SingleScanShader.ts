@@ -32,6 +32,9 @@ export type SingleScanShaderOptions<T> = {
   // How we access the input data.
   inputAccessOrder?: 'blocked' | 'striped';
 
+  // Writes into a value that will be added to everything in the scan
+  getAddedValue?: ( ( varName: string ) => string ) | null;
+
   factorOutSubexpressions?: boolean;
 
   // The number of bytes
@@ -50,7 +53,8 @@ const DEFAULT_OPTIONS = {
   inputOrder: 'blocked',
   inputAccessOrder: 'striped', // TODO: why would we ever want non-striped? hmm
   factorOutSubexpressions: true,
-  exclusive: false
+  exclusive: false,
+  getAddedValue: null
 } as const;
 
 export default class SingleScanShader<T> extends ExecutableShader<T[], T[]> {
@@ -77,7 +81,8 @@ export default class SingleScanShader<T> extends ExecutableShader<T[], T[]> {
         inputOrder: options.inputOrder,
         inputAccessOrder: options.inputAccessOrder,
         factorOutSubexpressions: options.factorOutSubexpressions,
-        exclusive: options.exclusive
+        exclusive: options.exclusive,
+        getAddedValue: options.getAddedValue
       }
     );
 
