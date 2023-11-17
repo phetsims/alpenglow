@@ -176,8 +176,6 @@ export default class GPUProfiling {
 
       const encoder = device.createCommandEncoder( { label: 'the encoder' } );
 
-      timestampLogger.mark( encoder, 'start' );
-
       shader0.dispatch( encoder, [
         inputBuffer, firstMiddleBuffer
       ], Math.ceil( inputSize / ( workgroupSize ) ), 1, 1, dispatchOptions );
@@ -189,8 +187,6 @@ export default class GPUProfiling {
       ], 1, 1, 1, dispatchOptions );
 
       const resultPromise = bufferLogger.arrayBufferPromise( encoder, outputBuffer );
-
-      timestampLogger.mark( encoder, 'end' );
 
       const timestampResultPromise = timestampLogger.resolve( encoder, bufferLogger );
 
@@ -284,8 +280,6 @@ export default class GPUProfiling {
 
       const encoder = device.createCommandEncoder( { label: 'the encoder' } );
 
-      timestampLogger.mark( encoder, 'start' );
-
       shader0.dispatch( encoder, [
         inputBuffer, firstMiddleBuffer
       ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, dispatchOptions );
@@ -297,8 +291,6 @@ export default class GPUProfiling {
       ], 1, 1, 1, dispatchOptions );
 
       const resultPromise = bufferLogger.arrayBufferPromise( encoder, outputBuffer );
-
-      timestampLogger.mark( encoder, 'end' );
 
       const timestampResultPromise = timestampLogger.resolve( encoder, bufferLogger );
 
@@ -392,8 +384,6 @@ export default class GPUProfiling {
 
       const encoder = device.createCommandEncoder( { label: 'the encoder' } );
 
-      timestampLogger.mark( encoder, 'start' );
-
       shader0.dispatch( encoder, [
         inputBuffer, firstMiddleBuffer
       ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, dispatchOptions );
@@ -405,8 +395,6 @@ export default class GPUProfiling {
       ], 1, 1, 1, dispatchOptions );
 
       const resultPromise = bufferLogger.arrayBufferPromise( encoder, outputBuffer );
-
-      timestampLogger.mark( encoder, 'end' );
 
       const timestampResultPromise = timestampLogger.resolve( encoder, bufferLogger );
 

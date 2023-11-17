@@ -214,11 +214,8 @@ export class BasicExecution extends BaseExecution implements Execution {
   private async executeInternal<T>(
     callback: ExecutionAnyCallback<T>
   ): Promise<T> {
-    this.timestampLogger.mark( this.encoder, 'start' );
 
     const promise = callback( this.encoder, this );
-
-    this.timestampLogger.mark( this.encoder, 'end' );
 
     this.timestampLogger.resolve( this.encoder, this.bufferLogger ).then( result => this.timestampResultResolve( result ) ).catch( e => { throw e; } );
 

@@ -52,14 +52,6 @@ export default class TimestampLogger {
     }
   }
 
-  public mark( encoder: GPUCommandEncoder, name: string ): void {
-    if ( this.querySet ) {
-      this.timestampNames.push( name );
-
-      encoder.writeTimestamp( this.querySet, this.index++ );
-    }
-  }
-
   public resolve(
     encoder: GPUCommandEncoder,
     bufferLogger: BufferLogger
