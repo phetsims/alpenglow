@@ -12,6 +12,7 @@
 #import ./scan
 #import ./coalesced_loop
 #import ./binary_expression_statement
+#import ./to_striped_index
 
 ${template( ( {
   // varname of input var<storage> array<{valueType}>
@@ -39,6 +40,10 @@ ${template( ( {
   combineExpression,
   // ( varName: string, a: T, b: T ) => statements setting varName: T, (should combine the two values)
   combineStatements,
+
+  // null | ( index expr, expr: T ) => statements - Stores out the "fully reduced" value
+  storeReduction = null,
+  stripeReducedOutput = false,
 
   // ( expression: u32 ) | null - if provided, it will enable range checks (based on the inputOrder)
   length = null,
@@ -121,6 +126,19 @@ ${template( ( {
     workgroupBarrier();
 
     // IF exclusive and we want the full reduced value, we'd need to extract it now.
+    // TODO: we'll need to change indices if we allow right-scans(!)
+    ${storeReduction ? `
+      if ( local_id.x == ${u32( workgroupSize - 1 )} ) {
+        ${storeReduction(
+          stripeReducedOutput ? to_striped_index( {
+            i: `workgroup_id.x`,
+            workgroupSize: workgroupSize,
+            grainSize: grainSize
+          } ) : `workgroup_id.x`,
+          `value`
+        )}
+      }
+    ` : ``}
 
     // Add those values into all the other elements of the next tile
     var added_value = select( ${identity}, ${scratch}[ local_id.x * ${u32( grainSize )} - 1u ], local_id.x > 0 );

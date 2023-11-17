@@ -29,7 +29,7 @@ export type DoubleReduceScanShaderOptions<T> = {
   lengthExpression?: string | null; // if null, no range checks will be made
 
   // The actual ordering of the input data. TODO describe striping order
-  inputOrder?: 'blocked' | 'striped';
+  inputOrder?: 'blocked' | 'striped'; // TODO: do we... stripe the output now? Is this... supported?
 
   // How we access the input data.
   inputAccessOrder?: 'blocked' | 'striped';
@@ -53,7 +53,7 @@ const DEFAULT_OPTIONS = {
   combineStatements: null,
   lengthExpression: null,
   inputOrder: 'blocked',
-  inputAccessOrder: 'striped', // TODO: why would we ever want non-striped? hmm
+  inputAccessOrder: 'striped', // TODO: why would we ever want non-striped? hmm (for performance testing?)
   factorOutSubexpressions: true,
   nestSubexpressions: false,
   isReductionExclusive: false,
