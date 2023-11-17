@@ -8,6 +8,7 @@
 
 #import ./comment
 #import ./unroll
+#import ./binary_expression_statement
 
 ${template( ( {
   // the "input" and "output" variable name
@@ -66,6 +67,8 @@ ${template( ( {
     ? `${localIndex} + ${u32( 1 << ( i - 1 ) )}`
     : `${localIndex} + ${u32( 1 << i )}`;
 
+  const combineToValue = ( varName, a, b ) => binary_expression_statement( varName, combineExpression, combineStatements, a, b );
+
   return `
     ${comment( `begin reduce convergent:${convergent}` )}
     ${!scratchPreloaded ? `
@@ -83,11 +86,7 @@ ${template( ( {
 
       // TODO: check performance differences with a select/combine?
       if ( ${condition( i )} ) {
-        ${combineExpression ? `
-          ${value} = ${combineExpression( value, `${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )};
-        ` : `
-          ${combineStatements( value, value, `${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )}
-        `}
+        ${combineToValue( value, value, `${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )}
 
         ${ !isLast ? `
           ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};

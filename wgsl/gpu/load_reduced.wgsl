@@ -14,6 +14,7 @@
 #import ./conditional_if
 #import ./unroll
 #import ./comment
+#import ./binary_expression_statement
 
 // CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
 //       rearranging. We'll use convergent reduce anyway
@@ -191,6 +192,8 @@ ${template( ( {
     return i === 0 ? loadWithRangeCheckExpression( 0 ) : combineExpression( getNestedExpression( i - 1 ), loadWithRangeCheckExpression( i ) )
   };
 
+  const combineToValue = ( varName, a, b ) => binary_expression_statement( varName, combineExpression, combineStatements, a, b );
+
   // TODO: more unique names to prevent namespace collision!
   return nestSubexpressions ? `
     var ${value} = ${getNestedExpression( grainSize - 1 )};
@@ -210,25 +213,14 @@ ${template( ( {
       ${unroll( 1, grainSize, i => `
         {
           ${loadDeclarations.map( declaration => declaration( i ) ).join( '\n' )}
-          ${combineExpression ? (
-            ( loadExpression && useSelectIfOptional ) ? `
-              ${value} = ${combineExpression( value, loadWithRangeCheckExpression( i ) )};
-            ` : `
-              ${ifRangeCheck( i, `
-                ${indexedLoadStatements( `next_value`, i, `let` )}
-                ${value} = ${combineExpression( value, `next_value` )};
-              ` )}
-            `
-          ) : (
-            ( loadExpression && useSelectIfOptional ) ? `
-              ${combineStatements( value, value, loadWithRangeCheckExpression( i ) )}
-            ` : `
-              ${ifRangeCheck( i, `
-                ${indexedLoadStatements( `next_value`, i, `let` )}
-                ${combineStatements( value, value, `next_value` )}
-              ` )}
-            `
-          ) }
+          ${( loadExpression && useSelectIfOptional ) ? `
+            ${combineToValue( value, value, loadWithRangeCheckExpression( i ) )}
+          ` : `
+            ${ifRangeCheck( i, `
+              ${indexedLoadStatements( `next_value`, i, `let` )}
+              ${combineToValue( value, value, `next_value` )}
+            ` )}
+          `}
         }
       ` )}
     }

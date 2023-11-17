@@ -8,6 +8,7 @@
 
 #import ./comment
 #import ./unroll
+#import ./binary_expression_statement
 
 ${template( ( {
   // the "input" and "output" variable name
@@ -66,6 +67,8 @@ ${template( ( {
     ? value
     : `${scratch}[ ${mapScratchIndex( `${localIndex} + ${u32( 1 << i )}` )} ]`;
 
+  const combineToValue = ( varName, a, b ) => binary_expression_statement( varName, combineExpression, combineStatements, a, b );
+
   return `
     ${comment( `begin scan direction:${direction} exclusive:${exclusive}` )}
     ${!scratchPreloaded ? `
@@ -84,11 +87,7 @@ ${template( ( {
 
       // TODO: check performance differences with a select/combine?
       if ( ${condition( i )} ) {
-        ${combineExpression ? `
-          ${value} = ${combineExpression( combineLeft( i ), combineRight( i ) )};
-        ` : `
-          ${combineStatements( value, combineLeft( i ), combineRight( i ) )}
-        `}
+        ${combineToValue( value, combineLeft( i ), combineRight( i ) )}
       }
 
       ${ isLast && !needsValidScratch && !exclusive ? `` : `
