@@ -261,6 +261,8 @@ export { default as wgsl_main_reduce } from '../wgsl/gpu/main_reduce.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_reduce_atomic } from '../wgsl/gpu/main_reduce_atomic.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_main_reduce_non_commutative } from '../wgsl/gpu/main_reduce_non_commutative.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_atomic_reduce_atomic } from '../wgsl/gpu/main_atomic_reduce_atomic.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_scan } from '../wgsl/gpu/main_scan.js';
