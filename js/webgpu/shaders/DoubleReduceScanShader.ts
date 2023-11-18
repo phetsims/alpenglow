@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_reduce, wgsl_main_reduce_non_commutative, wgsl_main_scan_replace, wgsl_main_scan_replace_add_1 } from '../../imports.js';
-import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_reduce, wgsl_main_reduce_non_commutative, wgsl_main_scan_replace, wgsl_main_scan_replace_add_1 } from '../../imports.js';
+import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type DoubleReduceScanShaderOptions<T> = {
 
@@ -71,63 +71,51 @@ export default class DoubleReduceScanShader<T> extends ExecutableShader<T[], T[]
 
     const dataCount = options.workgroupSize * options.grainSize;
 
+    const sharedOptions: Record<string, unknown> = {
+      valueType: options.valueType,
+      identity: options.identityExpression,
+      combineExpression: options.combineExpression,
+      combineStatements: options.combineStatements,
+      workgroupSize: options.workgroupSize,
+      grainSize: options.grainSize,
+      factorOutSubexpressions: options.factorOutSubexpressions,
+      nestSubexpressions: options.nestSubexpressions
+    };
+
     // If we have a non-commutative reduction (with a striped access order)
     const reduceShader = ( options.inputOrder === 'blocked' && options.inputAccessOrder === 'striped' && !options.isCommutative ) ? await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} reduction (non-commutative)`, wgsl_main_reduce_non_commutative, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        valueType: options.valueType,
-        identity: options.identityExpression,
-        combineExpression: options.combineExpression,
-        combineStatements: options.combineStatements,
+      ], combineOptions<ComputeShaderSourceOptions>( {
         length: options.lengthExpression,
-        workgroupSize: options.workgroupSize,
-        grainSize: options.grainSize,
-        factorOutSubexpressions: options.factorOutSubexpressions,
-        nestSubexpressions: options.nestSubexpressions,
         stripeOutput: false // TODO: experiment with this
-      }
+      }, sharedOptions )
     ) : await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} reduction`, wgsl_main_reduce, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        valueType: options.valueType,
-        identity: options.identityExpression,
-        combineExpression: options.combineExpression,
-        combineStatements: options.combineStatements,
+      ], combineOptions<ComputeShaderSourceOptions>( {
         length: options.lengthExpression,
-        workgroupSize: options.workgroupSize,
-        grainSize: options.grainSize,
         convergent: options.isCommutative,
         convergentRemap: false, // TODO: reconsider if we can enable this?
         inputOrder: options.inputOrder,
         inputAccessOrder: options.inputAccessOrder,
-        factorOutSubexpressions: options.factorOutSubexpressions,
-        nestSubexpressions: options.nestSubexpressions,
         stripeOutput: false // TODO: experiment with this
-      }
+      }, sharedOptions )
     );
 
     const lowerScanShader = await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} lower scan`, wgsl_main_scan_replace, [
         Binding.STORAGE_BUFFER
-      ], {
-        valueType: options.valueType,
-        identity: options.identityExpression,
-        combineExpression: options.combineExpression,
-        combineStatements: options.combineStatements,
+      ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
         length: options.lengthExpression ? `( ${options.lengthExpression} + ${u32( dataCount - 1 )} ) / ${u32( dataCount )}` : null,
-        workgroupSize: options.workgroupSize,
-        grainSize: options.grainSize,
         inputOrder: 'blocked',
         inputAccessOrder: options.inputAccessOrder,
-        factorOutSubexpressions: options.factorOutSubexpressions,
         exclusive: options.isReductionExclusive,
         getAddedValue: null
-      }
+      }, sharedOptions )
     );
 
     const upperScanShader = await ComputeShader.fromSourceAsync(
@@ -135,20 +123,13 @@ export default class DoubleReduceScanShader<T> extends ExecutableShader<T[], T[]
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        valueType: options.valueType,
-        identity: options.identityExpression,
-        combineExpression: options.combineExpression,
-        combineStatements: options.combineStatements,
+      ], combineOptions<ComputeShaderSourceOptions>( {
         length: options.lengthExpression,
-        workgroupSize: options.workgroupSize,
-        grainSize: options.grainSize,
         inputOrder: options.inputOrder,
         inputAccessOrder: options.inputAccessOrder,
-        factorOutSubexpressions: options.factorOutSubexpressions,
         exclusive: options.exclusive,
         isReductionExclusive: options.isReductionExclusive
-      }
+      }, sharedOptions )
     );
 
     return new DoubleReduceScanShader<T>( async ( execution: Execution, values: T[] ) => {
