@@ -95,6 +95,7 @@ ${template( ( {
 
     // TODO: isolate out into scan_sequential?
     // Sequential scan of each thread's tile (inclusive)
+    ${comment( 'begin (sequential scan of tile)' )}
     var value = ${scratch}[ local_id.x * ${u32( grainSize )} ];
     ${unroll( 1, grainSize, i => `
       {
@@ -102,6 +103,7 @@ ${template( ( {
         ${scratch}[ local_id.x * ${u32( grainSize )} + ${u32( i )} ] = value;
       }
     `)}
+    ${comment( 'end (sequential scan of tile)' )}
 
     // For the first scan step, since it will access other indices in scratch
     workgroupBarrier();
@@ -128,6 +130,7 @@ ${template( ( {
     // IF exclusive and we want the full reduced value, we'd need to extract it now.
     // TODO: we'll need to change indices if we allow right-scans(!)
     ${storeReduction ? `
+      ${comment( 'begin (store reduction)' )}
       if ( local_id.x == ${u32( workgroupSize - 1 )} ) {
         ${storeReduction(
           stripeReducedOutput ? to_striped_index( {
@@ -138,11 +141,14 @@ ${template( ( {
           `value`
         )}
       }
+      ${comment( 'end (store reduction)' )}
     ` : ``}
 
     // Add those values into all the other elements of the next tile
+    ${comment( 'begin (add scanned values to tile)' )}
     var added_value = select( ${identity}, ${scratch}[ local_id.x * ${u32( grainSize )} - 1u ], local_id.x > 0 );
     ${getAddedValue ? `
+      ${comment( 'begin (get global added values)' )}
 
       // Get the value we'll add to everything
       var workgroup_added_value: ${valueType};
@@ -165,6 +171,8 @@ ${template( ( {
 
       // Add the value to what we'll add to everything else
       ${combineToValue( `added_value`, `workgroup_added_value`, `added_value` )}
+
+      ${comment( 'end (get global added values)' )}
     ` : `
     `}
     ${unroll( 0, grainSize - 1, i => `
@@ -175,10 +183,12 @@ ${template( ( {
         ${scratch}[ index ] = current_value;
       }
     `)}
+    ${comment( 'end (add scanned values to tile)' )}
 
     workgroupBarrier();
 
     // Write our output in a coalesced order.
+    ${comment( 'begin (output write)' )}
     ${coalesced_loop( {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -187,6 +197,7 @@ ${template( ( {
         ${output}[ ${dataIndex} ] = ${exclusive ? `select( ${getAddedValue ? `workgroup_added_value` : identity}, ${scratch}[ ${localIndex} - 1u ], ${localIndex} > 0u )` : `${scratch}[ ${localIndex} ]`};
       `
     } )}
+    ${comment( 'end (output write)' )}
 
     ${comment( 'end scan_comprehensive' )}
   `;

@@ -65,7 +65,7 @@ fn main(
           // NOTE: assumes the same workgroup/grain size for each level
           // This should work for any level of workgroup handling
           if ( workgroup_id.x % ${u32( workgroupSize * grainSize )} == 0u ) {
-            reduction_value = ${addedValue};
+            reduction_value = ${identity};
           }
           else {
             reduction_value = scanned_reduction[ workgroup_id.x - 1u ];
