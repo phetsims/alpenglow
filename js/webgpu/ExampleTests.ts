@@ -2238,39 +2238,8 @@ const testBicDoubleScan = ( options: MultilevelTestScanOptions ) => {
   } );
 };
 
-[ false, true ].forEach( exclusive => {
-  [ 'factored', 'not factored', 'nested' ].forEach( style => {
-    ( [ 'blocked', 'striped' ] as const ).forEach( inputAccessOrder => {
-      const factorOutSubexpressions = style === 'factored';
-      const nestSubexpressions = style === 'nested';
-
-      [ false, true ].forEach( isReductionExclusive => {
-        testU32DoubleScan( {
-          exclusive: exclusive,
-          inputAccessOrder: inputAccessOrder,
-          factorOutSubexpressions: factorOutSubexpressions,
-          nestSubexpressions: nestSubexpressions,
-          isReductionExclusive: isReductionExclusive
-        } );
-
-        testBicDoubleScan( {
-          exclusive: exclusive,
-          inputAccessOrder: inputAccessOrder,
-          factorOutSubexpressions: factorOutSubexpressions,
-          nestSubexpressions: nestSubexpressions,
-          isReductionExclusive: isReductionExclusive
-        } );
-      } );
-    } );
-  } );
-} );
-
-// testBicDoubleScan( false );
-// testBicDoubleScan( true );
-
-// TODO: test more with single scans first before we vary things too much!
-const testU32TripleScan = ( exclusive: boolean ) => {
-  const name = `triple scan u32 exclusive:${exclusive}`;
+const testU32TripleScan = ( options: MultilevelTestScanOptions ) => {
+  const name = `triple scan u32 (exclusive:${options.exclusive} access:${options.inputAccessOrder} factor:${options.factorOutSubexpressions} nest:${options.nestSubexpressions} isReductionExclusive:${options.isReductionExclusive})`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const workgroupSize = 16;
     const grainSize = 4;
@@ -2288,11 +2257,11 @@ const testU32TripleScan = ( exclusive: boolean ) => {
       decodeElement: ( encoder: ByteEncoder, offset: number ) => encoder.fullU32Array[ offset ],
       lengthExpression: u32( inputSize ),
       inputOrder: 'blocked',
-      inputAccessOrder: 'striped',
-      exclusive: exclusive,
-      factorOutSubexpressions: true,
-      nestSubexpressions: false,
-      isReductionExclusive: false // TODO: test!
+      inputAccessOrder: options.inputAccessOrder,
+      exclusive: options.exclusive,
+      factorOutSubexpressions: options.factorOutSubexpressions,
+      nestSubexpressions: options.nestSubexpressions,
+      isReductionExclusive: options.isReductionExclusive
     } );
 
     const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xff ) );
@@ -2302,11 +2271,11 @@ const testU32TripleScan = ( exclusive: boolean ) => {
     const expectedValue: number[] = [];
     let value = 0;
     for ( let i = 0; i < inputSize; i++ ) {
-      exclusive && expectedValue.push( value );
+      options.exclusive && expectedValue.push( value );
 
       value += numbers[ i ];
 
-      !exclusive && expectedValue.push( value );
+      !options.exclusive && expectedValue.push( value );
     }
 
     for ( let i = 0; i < expectedValue.length; i++ ) {
@@ -2331,11 +2300,8 @@ const testU32TripleScan = ( exclusive: boolean ) => {
   } );
 };
 
-testU32TripleScan( false );
-testU32TripleScan( true );
-
-const testBicTripleScan = ( exclusive: boolean ) => {
-  const name = `triple scan bic exclusive:${exclusive}`;
+const testBicTripleScan = ( options: MultilevelTestScanOptions ) => {
+  const name = `triple scan bic (exclusive:${options.exclusive} access:${options.inputAccessOrder} factor:${options.factorOutSubexpressions} nest:${options.nestSubexpressions} isReductionExclusive:${options.isReductionExclusive})`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const workgroupSize = 16;
     const grainSize = 4;
@@ -2356,11 +2322,11 @@ const testBicTripleScan = ( exclusive: boolean ) => {
       decodeElement: ( encoder: ByteEncoder, offset: number ) => new Bic( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ] ),
       lengthExpression: u32( inputSize ),
       inputOrder: 'blocked',
-      inputAccessOrder: 'striped',
-      exclusive: exclusive,
-      factorOutSubexpressions: true,
-      nestSubexpressions: false,
-      isReductionExclusive: false // TODO: test!
+      inputAccessOrder: options.inputAccessOrder,
+      exclusive: options.exclusive,
+      factorOutSubexpressions: options.factorOutSubexpressions,
+      nestSubexpressions: options.nestSubexpressions,
+      isReductionExclusive: options.isReductionExclusive
     } );
 
     const bics = _.range( 0, inputSize ).map( () => new Bic( random.nextIntBetween( 0, 63 ), random.nextIntBetween( 0, 63 ) ) );
@@ -2370,11 +2336,11 @@ const testBicTripleScan = ( exclusive: boolean ) => {
     const expectedValue: Bic[] = [];
     let value = Bic.IDENTITY;
     for ( let i = 0; i < inputSize; i++ ) {
-      exclusive && expectedValue.push( value );
+      options.exclusive && expectedValue.push( value );
 
       value = Bic.combine( value, bics[ i ] );
 
-      !exclusive && expectedValue.push( value );
+      !options.exclusive && expectedValue.push( value );
     }
 
     for ( let i = 0; i < expectedValue.length; i++ ) {
@@ -2399,5 +2365,45 @@ const testBicTripleScan = ( exclusive: boolean ) => {
   } );
 };
 
-testBicTripleScan( false );
-testBicTripleScan( true );
+[ false, true ].forEach( exclusive => {
+  [ 'factored', 'not factored', 'nested' ].forEach( style => {
+    ( [ 'blocked', 'striped' ] as const ).forEach( inputAccessOrder => {
+      const factorOutSubexpressions = style === 'factored';
+      const nestSubexpressions = style === 'nested';
+
+      [ false, true ].forEach( isReductionExclusive => {
+        testU32DoubleScan( {
+          exclusive: exclusive,
+          inputAccessOrder: inputAccessOrder,
+          factorOutSubexpressions: factorOutSubexpressions,
+          nestSubexpressions: nestSubexpressions,
+          isReductionExclusive: isReductionExclusive
+        } );
+
+        testBicDoubleScan( {
+          exclusive: exclusive,
+          inputAccessOrder: inputAccessOrder,
+          factorOutSubexpressions: factorOutSubexpressions,
+          nestSubexpressions: nestSubexpressions,
+          isReductionExclusive: isReductionExclusive
+        } );
+
+        testU32TripleScan( {
+          exclusive: exclusive,
+          inputAccessOrder: inputAccessOrder,
+          factorOutSubexpressions: factorOutSubexpressions,
+          nestSubexpressions: nestSubexpressions,
+          isReductionExclusive: isReductionExclusive
+        } );
+
+        testBicTripleScan( {
+          exclusive: exclusive,
+          inputAccessOrder: inputAccessOrder,
+          factorOutSubexpressions: factorOutSubexpressions,
+          nestSubexpressions: nestSubexpressions,
+          isReductionExclusive: isReductionExclusive
+        } );
+      } );
+    } );
+  } );
+} );

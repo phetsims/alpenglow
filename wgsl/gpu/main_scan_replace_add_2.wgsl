@@ -64,7 +64,7 @@ fn main(
         // If our reductions are scanned exclusively, then we can just use the value directly
         ${isReductionExclusive ? `
           let middle_value = scanned_reduction[ workgroup_id.x ];
-          let lower_value = double_scanned_reduction[ workgroup_id.x / ${u32( workgroupSize * grainSize )} ]
+          let lower_value = double_scanned_reduction[ workgroup_id.x / ${u32( workgroupSize * grainSize )} ];
         ` : `
           var middle_value: ${valueType};
           var lower_value: ${valueType};
