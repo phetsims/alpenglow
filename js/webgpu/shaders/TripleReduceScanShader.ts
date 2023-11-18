@@ -1,7 +1,14 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * A three-level standalone scan. TODO: more docs about the approach
+ * A three-level standalone scan.
+ *
+ * Four stages:
+ *
+ * 1. A level of reduction (takes the "upper" input data, and reduces it to a single value per workgroup, saved in reduces)
+ * 2. Scan of the reduces (in place, but also outputs another level of reduces ("double reduces")).
+ * 3. Scan of the double reduces (the entire "lower" data will fit within a single workgroup)
+ * 4. Scan of the original data, where the relevant reduce and double-reduce is added to each workgroup's elements.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -37,7 +44,8 @@ export type TripleReduceScanShaderOptions<T> = {
   factorOutSubexpressions?: boolean;
   nestSubexpressions?: boolean;
 
-  isReductionExclusive?: boolean; // TODO: tests!
+  // Whether our internal "reduces" data will be exclusive or inclusive (both are possible)
+  isReductionExclusive?: boolean;
 
   // The number of bytes
   bytesPerElement: number;
