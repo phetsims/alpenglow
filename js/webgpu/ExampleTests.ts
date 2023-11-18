@@ -2102,9 +2102,17 @@ const testBicSingleScan = ( exclusive: boolean ) => {
 testBicSingleScan( false );
 testBicSingleScan( true );
 
+type MultilevelTestScanOptions = {
+  exclusive: boolean;
+  inputAccessOrder: 'blocked' | 'striped';
+  factorOutSubexpressions: boolean;
+  nestSubexpressions: boolean;
+  isReductionExclusive: boolean;
+};
+
 // TODO: test more with single scans first before we vary things too much!
-const testU32DoubleScan = ( exclusive: boolean ) => {
-  const name = `double scan u32 exclusive:${exclusive}`;
+const testU32DoubleScan = ( options: MultilevelTestScanOptions ) => {
+  const name = `double scan u32 (exclusive:${options.exclusive} access:${options.inputAccessOrder} factor:${options.factorOutSubexpressions} nest:${options.nestSubexpressions} isReductionExclusive:${options.isReductionExclusive})`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const workgroupSize = 256;
     const grainSize = 8;
@@ -2122,11 +2130,11 @@ const testU32DoubleScan = ( exclusive: boolean ) => {
       decodeElement: ( encoder: ByteEncoder, offset: number ) => encoder.fullU32Array[ offset ],
       lengthExpression: u32( inputSize ),
       inputOrder: 'blocked',
-      inputAccessOrder: 'striped',
-      exclusive: exclusive,
-      factorOutSubexpressions: true,
-      nestSubexpressions: false,
-      isReductionExclusive: false // TODO: test!
+      inputAccessOrder: options.inputAccessOrder,
+      exclusive: options.exclusive,
+      factorOutSubexpressions: options.factorOutSubexpressions,
+      nestSubexpressions: options.nestSubexpressions,
+      isReductionExclusive: options.isReductionExclusive
     } );
 
     const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xff ) );
@@ -2136,11 +2144,11 @@ const testU32DoubleScan = ( exclusive: boolean ) => {
     const expectedValue: number[] = [];
     let value = 0;
     for ( let i = 0; i < inputSize; i++ ) {
-      exclusive && expectedValue.push( value );
+      options.exclusive && expectedValue.push( value );
 
       value += numbers[ i ];
 
-      !exclusive && expectedValue.push( value );
+      !options.exclusive && expectedValue.push( value );
     }
 
     for ( let i = 0; i < expectedValue.length; i++ ) {
@@ -2165,11 +2173,8 @@ const testU32DoubleScan = ( exclusive: boolean ) => {
   } );
 };
 
-testU32DoubleScan( false );
-testU32DoubleScan( true );
-
-const testBicDoubleScan = ( exclusive: boolean ) => {
-  const name = `double scan u32 exclusive:${exclusive}`;
+const testBicDoubleScan = ( options: MultilevelTestScanOptions ) => {
+  const name = `double scan bic (exclusive:${options.exclusive} access:${options.inputAccessOrder} factor:${options.factorOutSubexpressions} nest:${options.nestSubexpressions} isReductionExclusive:${options.isReductionExclusive})`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const workgroupSize = 256;
     const grainSize = 4;
@@ -2190,11 +2195,11 @@ const testBicDoubleScan = ( exclusive: boolean ) => {
       decodeElement: ( encoder: ByteEncoder, offset: number ) => new Bic( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ] ),
       lengthExpression: u32( inputSize ),
       inputOrder: 'blocked',
-      inputAccessOrder: 'striped',
-      exclusive: exclusive,
-      factorOutSubexpressions: true,
-      nestSubexpressions: false,
-      isReductionExclusive: false // TODO: test!
+      inputAccessOrder: options.inputAccessOrder,
+      exclusive: options.exclusive,
+      factorOutSubexpressions: options.factorOutSubexpressions,
+      nestSubexpressions: options.nestSubexpressions,
+      isReductionExclusive: options.isReductionExclusive
     } );
 
     const bics = _.range( 0, inputSize ).map( () => new Bic( random.nextIntBetween( 0, 63 ), random.nextIntBetween( 0, 63 ) ) );
@@ -2204,11 +2209,11 @@ const testBicDoubleScan = ( exclusive: boolean ) => {
     const expectedValue: Bic[] = [];
     let value = Bic.IDENTITY;
     for ( let i = 0; i < inputSize; i++ ) {
-      exclusive && expectedValue.push( value );
+      options.exclusive && expectedValue.push( value );
 
       value = Bic.combine( value, bics[ i ] );
 
-      !exclusive && expectedValue.push( value );
+      !options.exclusive && expectedValue.push( value );
     }
 
     for ( let i = 0; i < expectedValue.length; i++ ) {
@@ -2233,8 +2238,35 @@ const testBicDoubleScan = ( exclusive: boolean ) => {
   } );
 };
 
-testBicDoubleScan( false );
-testBicDoubleScan( true );
+[ false, true ].forEach( exclusive => {
+  [ 'factored', 'not factored', 'nested' ].forEach( style => {
+    ( [ 'blocked', 'striped' ] as const ).forEach( inputAccessOrder => {
+      const factorOutSubexpressions = style === 'factored';
+      const nestSubexpressions = style === 'nested';
+
+      [ false, true ].forEach( isReductionExclusive => {
+        testU32DoubleScan( {
+          exclusive: exclusive,
+          inputAccessOrder: inputAccessOrder,
+          factorOutSubexpressions: factorOutSubexpressions,
+          nestSubexpressions: nestSubexpressions,
+          isReductionExclusive: isReductionExclusive
+        } );
+
+        testBicDoubleScan( {
+          exclusive: exclusive,
+          inputAccessOrder: inputAccessOrder,
+          factorOutSubexpressions: factorOutSubexpressions,
+          nestSubexpressions: nestSubexpressions,
+          isReductionExclusive: isReductionExclusive
+        } );
+      } );
+    } );
+  } );
+} );
+
+// testBicDoubleScan( false );
+// testBicDoubleScan( true );
 
 // TODO: test more with single scans first before we vary things too much!
 const testU32TripleScan = ( exclusive: boolean ) => {
@@ -2303,7 +2335,7 @@ testU32TripleScan( false );
 testU32TripleScan( true );
 
 const testBicTripleScan = ( exclusive: boolean ) => {
-  const name = `triple scan u32 exclusive:${exclusive}`;
+  const name = `triple scan bic exclusive:${exclusive}`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const workgroupSize = 16;
     const grainSize = 4;

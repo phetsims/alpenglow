@@ -37,7 +37,8 @@ export type DoubleReduceScanShaderOptions<T> = {
   factorOutSubexpressions?: boolean;
   nestSubexpressions?: boolean;
 
-  isReductionExclusive?: boolean; // TODO: tests!
+  isReductionExclusive?: boolean;
+  internalStriping?: false; // TODO: fix the feature!
 
   // The number of bytes
   bytesPerElement: number;
@@ -57,6 +58,7 @@ const DEFAULT_OPTIONS = {
   factorOutSubexpressions: true,
   nestSubexpressions: false,
   isReductionExclusive: false,
+  internalStriping: false,
   exclusive: false
 } as const;
 
@@ -89,7 +91,7 @@ export default class DoubleReduceScanShader<T> extends ExecutableShader<T[], T[]
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         length: options.lengthExpression,
-        stripeOutput: false // TODO: experiment with this
+        stripeOutput: options.internalStriping
       }, sharedOptions )
     ) : await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} reduction`, wgsl_main_reduce, [
@@ -98,10 +100,10 @@ export default class DoubleReduceScanShader<T> extends ExecutableShader<T[], T[]
       ], combineOptions<ComputeShaderSourceOptions>( {
         length: options.lengthExpression,
         convergent: options.isCommutative,
-        convergentRemap: false, // TODO: reconsider if we can enable this?
+        convergentRemap: false, // NOTE: could consider trying to enable this, but probably not worth it
         inputOrder: options.inputOrder,
         inputAccessOrder: options.inputAccessOrder,
-        stripeOutput: false // TODO: experiment with this
+        stripeOutput: options.internalStriping
       }, sharedOptions )
     );
 
@@ -111,7 +113,7 @@ export default class DoubleReduceScanShader<T> extends ExecutableShader<T[], T[]
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
         length: options.lengthExpression ? `( ${options.lengthExpression} + ${u32( dataCount - 1 )} ) / ${u32( dataCount )}` : null,
-        inputOrder: 'blocked',
+        inputOrder: options.internalStriping ? 'striped' : 'blocked',
         inputAccessOrder: options.inputAccessOrder,
         exclusive: options.isReductionExclusive,
         getAddedValue: null
