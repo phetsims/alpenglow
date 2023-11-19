@@ -483,6 +483,8 @@ export { default as SingleScanShader } from './webgpu/shaders/SingleScanShader.j
 export type { SingleScanShaderOptions } from './webgpu/shaders/SingleScanShader.js';
 export { default as DoubleReduceScanShader } from './webgpu/shaders/DoubleReduceScanShader.js';
 export type { DoubleReduceScanShaderOptions } from './webgpu/shaders/DoubleReduceScanShader.js';
+export { default as TripleReduceScanShader } from './webgpu/shaders/TripleReduceScanShader.js';
+export type { TripleReduceScanShaderOptions } from './webgpu/shaders/TripleReduceScanShader.js';
 export { default as GPUProfiling } from './webgpu/GPUProfiling.js';
 export { default as RasterClipper } from './webgpu/RasterClipper.js';
 export type { RasterClipperOptions } from './webgpu/RasterClipper.js';

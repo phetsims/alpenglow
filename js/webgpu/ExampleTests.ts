@@ -6,10 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { AtomicOperation, AtomicReduceShader, AtomicType, Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, SingleScanShader, u32, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort } from '../imports.js';
+// eslint-disable-next-line single-line-import
+import {
+  AtomicOperation, AtomicReduceShader, AtomicType, Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, SingleScanShader, TripleReduceScanShader, u32, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
+} from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import TripleReduceScanShader from './shaders/TripleReduceScanShader.js';
+import DoubleRadixSortShader from './shaders/DoubleRadixSortShader.js';
 
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
@@ -2406,4 +2409,79 @@ const testBicTripleScan = ( options: MultilevelTestScanOptions ) => {
       } );
     } );
   } );
+} );
+
+asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) => {
+  const totalBits = 32;
+  const bitQuantity = 3;
+  const innerBitQuantity = 2;
+  const innerBitVectorSize = 1;
+  const earlyLoad = false;
+  const factorOutSubexpressions = true;
+  const nestSubexpressions = false;
+  const isReductionExclusive = false;
+
+  const workgroupSize = 8;
+  const grainSize = 2;
+
+  const inputSize = ( workgroupSize * grainSize ) * 5 - 27;
+
+  const shader = await DoubleRadixSortShader.create<number>( deviceContext, 'u32 double radix sort', {
+    valueType: 'u32',
+    totalBits: totalBits,
+    getBits: ( value: string, bitOffset: number, bitQuantity: number ) => {
+      return `( ( ${value} >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
+    },
+
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    lengthExpression: u32( inputSize ),
+
+    // radix options
+    bitQuantity: bitQuantity,
+    innerBitQuantity: innerBitQuantity,
+    innerBitVectorSize: innerBitVectorSize,
+    earlyLoad: earlyLoad,
+
+    // scan options
+    factorOutSubexpressions: factorOutSubexpressions,
+    nestSubexpressions: nestSubexpressions,
+    isReductionExclusive: isReductionExclusive,
+
+    // The number of bytes
+    bytesPerElement: 4,
+
+    encodeElement: ( n: number, encoder: ByteEncoder ) => encoder.pushU32( n ),
+    decodeElement: ( encoder: ByteEncoder, offset: number ) => encoder.fullU32Array[ offset ]
+  } );
+
+  // const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xff ) );
+  const numbers = [ 4, 9, 11, 15, 15, 16, 22, 24, 24, 29, 35, 38, 38, 41, 49, 53, 68, 79, 88, 89, 89, 90, 92, 94, 94, 112, 112, 122, 124, 129, 137, 159, 161, 164, 177, 177, 184, 186, 187, 187, 194, 201, 211, 212, 214, 219, 223, 227, 229, 233, 238, 240, 247 ];
+
+  const actualValue = await deviceContext.executeShader( shader, numbers );
+
+  const expectedValue: number[] = numbers.sort( ( a, b ) => a - b );
+
+  for ( let i = 0; i < expectedValue.length; i++ ) {
+    const expected = expectedValue[ i ];
+    const actual = actualValue[ i ];
+
+    if ( expected !== actual ) {
+      console.log( 'input' );
+      console.log( numbers );
+
+      console.log( 'expected' );
+      console.log( expectedValue );
+
+      console.log( 'actual' );
+      console.log( actualValue );
+
+      // eslint-disable-next-line no-debugger
+      debugger;
+
+      return `expected ${expected.toString()}, actual ${actual.toString()} ${i}`;
+    }
+  }
+
+  return null;
 } );

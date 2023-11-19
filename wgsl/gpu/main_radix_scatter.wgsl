@@ -4,10 +4,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+#import ../gpu/comment
 #import ../gpu/conditional_if
-#import ../gpu/radix_histogram
 #import ../gpu/scan_raked
 #import ../gpu/unroll
+#import ../gpu/ceil_divide_constant_divisor
+#import ../gpu/load_multiple
+#import ../gpu/n_bit_compact_single_sort
 
 #option workgroupSize
 #option grainSize
@@ -88,7 +91,7 @@ fn main(
         bitsScratch: `bits_scratch`,
         valueScratch: `value_scratch`,
         length: length ? `reduced_length` : null,
-        getBits: value => `( ( ${getBits( value ) >> srs_i} ) & ${u32( ( 1 << innerBitQuantity ) - 1 )} )`,
+        getBits: value => `( ( ( ${getBits( value )} ) >> srs_i ) & ${u32( ( 1 << innerBitQuantity ) - 1 )} )`,
         earlyLoad: earlyLoad,
       } )}
     }

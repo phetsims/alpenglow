@@ -76,7 +76,7 @@ ${template( ( {
     // Scan the last-scanned element of each thread's tile (inclusive)
     ${scan( {
       value: `value`,
-      scratch: `scratch`,
+      scratch: scratch,
       workgroupSize: workgroupSize,
       identity: identity,
       combineExpression: combineExpression,

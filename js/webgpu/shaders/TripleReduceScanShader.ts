@@ -167,6 +167,7 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
       const doubleReductionBuffer = execution.createBuffer( options.bytesPerElement * middleDispatchSize );
       const outputBuffer = execution.createBuffer( options.bytesPerElement * values.length );
 
+      // TODO: allow factoring all of this out, without the "read" at the end! We haven't created the best pattern here.
       execution.dispatch( reduceShader, [
         inputBuffer, reductionBuffer
       ], upperDispatchSize );
