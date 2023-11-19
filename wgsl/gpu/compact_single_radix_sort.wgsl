@@ -18,7 +18,7 @@ ${template( ( {
   numBits, // number - number of bits in the key
   bitQuantity, // number - the number of bits we're using for the sort (e.g. 2 for a two_bit equivalent sort)
   bitVectorSize, // number - (1/2/3/4) for (u32/vec2u/vec3u/vec4u) e.g. 4 for a vec4u - whatever is in bitsScratch
-  bitsScratch, // var<workgroup> array<vec4u, workgroupSize> // TODO: can bit-pack this better, especially for smaller workgroup*length sizes
+  bitsScratch, // var<workgroup> array<u32|vec2u|vec3u|vec4u, workgroupSize>
   valueScratch, // var<workgroup> array<T, workgroupSize>
   length, // expression: u32
   getBits, // ( T, bitIndex: u32 expr ) => expression: u32

@@ -161,12 +161,6 @@ ${template( ( {
     ${loadStatements( varName, loadIndexExpression( i ) )}
   `;
 
-  const loadWithRangeCheckStatements = ( varName, i ) => ifRangeCheck( i, `
-    ${indexedLoadStatements( varName, i )}
-  `, `
-    ${varName} = ${outOfRangeValue};
-  ` );
-
   // TODO: more unique names to prevent namespace collision!
   return `
     ${comment( 'begin load_multiple' )}
@@ -176,11 +170,24 @@ ${template( ( {
         {
           ${loadDeclarations.map( declaration => declaration( i ) ).join( '\n' )}
 
-          var lm_val: ${valueType};
-          ${loadWithRangeCheckStatements( `lm_val`, i )}
+          ${outOfRangeValue ? `
+            var lm_val: ${valueType};
+            ${ifRangeCheck( i, `
+              ${indexedLoadStatements( `lm_val`, i )}
+            `, `
+              lm_val = ${outOfRangeValue};
+            ` )}
 
-          // TODO: can we further simplify?
-          ${storeStatements( `${loadIndexExpression( i )} - ${workgroupIndex} * ${u32( workgroupSize * grainSize )}`, `lm_val` )}
+            // TODO: can we further simplify?
+            ${storeStatements( `${loadIndexExpression( i )} - ${workgroupIndex} * ${u32( workgroupSize * grainSize )}`, `lm_val` )}
+          ` : `
+            ${ifRangeCheck( i, `
+              var lm_val: ${valueType};
+              ${indexedLoadStatements( `lm_val`, i )}
+
+              ${storeStatements( `${loadIndexExpression( i )} - ${workgroupIndex} * ${u32( workgroupSize * grainSize )}`, `lm_val` )}
+            ` )}
+          `}
         }
       ` )}
     }

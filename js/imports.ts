@@ -274,6 +274,10 @@ export { default as wgsl_main_scan_replace_reduce } from '../wgsl/gpu/main_scan_
 export { default as wgsl_main_scan_replace_add_1 } from '../wgsl/gpu/main_scan_replace_add_1.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_scan_replace_add_2 } from '../wgsl/gpu/main_scan_replace_add_2.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_main_radix_histogram } from '../wgsl/gpu/main_radix_histogram.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_main_radix_scatter } from '../wgsl/gpu/main_radix_scatter.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
