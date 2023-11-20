@@ -8,11 +8,10 @@
 
 // eslint-disable-next-line single-line-import
 import {
-  AtomicOperation, AtomicReduceShader, AtomicType, Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, SingleScanShader, TripleReduceScanShader, u32, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
+  AtomicOperation, AtomicReduceShader, AtomicType, Bic, Binding, ByteEncoder, ComputeShader, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
 } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import DoubleRadixSortShader from './shaders/DoubleRadixSortShader.js';
 
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
@@ -2455,12 +2454,12 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
     decodeElement: ( encoder: ByteEncoder, offset: number ) => encoder.fullU32Array[ offset ]
   } );
 
-  // const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xff ) );
-  const numbers = [ 4, 9, 11, 15, 15, 16, 22, 24, 24, 29, 35, 38, 38, 41, 49, 53, 68, 79, 88, 89, 89, 90, 92, 94, 94, 112, 112, 122, 124, 129, 137, 159, 161, 164, 177, 177, 184, 186, 187, 187, 194, 201, 211, 212, 214, 219, 223, 227, 229, 233, 238, 240, 247 ];
+  const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xff ) );
+  // const numbers = [ 4, 9, 11, 15, 15, 16, 22, 24, 24, 29, 35, 38, 38, 41, 49, 53, 68, 79, 88, 89, 89, 90, 92, 94, 94, 112, 112, 122, 124, 129, 137, 159, 161, 164, 177, 177, 184, 186, 187, 187, 194, 201, 211, 212, 214, 219, 223, 227, 229, 233, 238, 240, 247 ];
 
   const actualValue = await deviceContext.executeShader( shader, numbers );
 
-  const expectedValue: number[] = numbers.sort( ( a, b ) => a - b );
+  const expectedValue: number[] = numbers.slice().sort( ( a, b ) => a - b );
 
   for ( let i = 0; i < expectedValue.length; i++ ) {
     const expected = expectedValue[ i ];
@@ -2478,6 +2477,85 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
 
       // eslint-disable-next-line no-debugger
       debugger;
+
+      return `expected ${expected.toString()}, actual ${actual.toString()} ${i}`;
+    }
+  }
+
+  return null;
+} );
+
+asyncTestWithDevice( 'u32 triple radix sort', async ( device, deviceContext ) => {
+  const totalBits = 32;
+  const bitQuantity = 3;
+  const innerBitQuantity = 2;
+  const innerBitVectorSize = 1;
+  const earlyLoad = false;
+  const factorOutSubexpressions = true;
+  const nestSubexpressions = false;
+  const isReductionExclusive = false;
+
+  // TODO: this seems to fail when we bump to 128?
+  const workgroupSize = 64;
+  const grainSize = 4;
+
+  const inputSize = ( workgroupSize * grainSize ) * workgroupSize * grainSize * 5 - 27;
+
+  const shader = await TripleRadixSortShader.create<number>( deviceContext, 'u32 triple radix sort', {
+    valueType: 'u32',
+    totalBits: totalBits,
+    getBits: ( value: string, bitOffset: number, bitQuantity: number ) => {
+      return `( ( ${value} >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
+    },
+
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    lengthExpression: u32( inputSize ),
+
+    // radix options
+    bitQuantity: bitQuantity,
+    innerBitQuantity: innerBitQuantity,
+    innerBitVectorSize: innerBitVectorSize,
+    earlyLoad: earlyLoad,
+
+    // scan options
+    factorOutSubexpressions: factorOutSubexpressions,
+    nestSubexpressions: nestSubexpressions,
+    isReductionExclusive: isReductionExclusive,
+
+    // The number of bytes
+    bytesPerElement: 4,
+
+    encodeElement: ( n: number, encoder: ByteEncoder ) => encoder.pushU32( n ),
+    decodeElement: ( encoder: ByteEncoder, offset: number ) => encoder.fullU32Array[ offset ]
+  } );
+
+  const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xffffffff ) );
+  // const numbers = [ 4, 9, 11, 15, 15, 16, 22, 24, 24, 29, 35, 38, 38, 41, 49, 53, 68, 79, 88, 89, 89, 90, 92, 94, 94, 112, 112, 122, 124, 129, 137, 159, 161, 164, 177, 177, 184, 186, 187, 187, 194, 201, 211, 212, 214, 219, 223, 227, 229, 233, 238, 240, 247 ];
+  // const numbers = [
+  //   211, 133, 132, 159, 149, 86, 250, 13, 216, 20, 101, 191, 24, 52, 21, 47, 232, 91, 193, 39, 193, 159, 158, 192, 95, 109, 247, 50, 27, 255, 155, 181, 41, 83, 39, 107, 91, 2, 244, 199, 63, 154, 107, 88, 114, 54, 157, 96, 68, 220, 15, 240, 166, 183, 214, 194, 176, 33, 53, 174, 45, 101, 102, 72, 79, 243, 24, 156, 101, 177, 146, 146, 124, 220, 70, 33, 145, 172, 0, 0, 105, 215, 70, 234, 14, 146, 102, 124, 7, 122, 229, 143, 252, 145, 63, 52, 66, 217, 188, 38, 20, 40, 56, 162, 28, 213, 44, 40, 166, 116, 167, 27, 39, 47, 9, 233, 55, 229, 89, 108, 75, 252, 196, 79, 129, 244, 168, 11, 159, 201, 32, 114, 99, 100, 162, 161, 97, 216, 85, 96, 160, 32, 22, 173, 210, 241, 140, 22, 77, 192, 161, 75, 186, 236, 183, 105, 190, 39, 251, 61, 100, 58, 69, 102, 9, 64, 92, 138, 234, 194, 146, 154, 220, 123, 129, 169, 58, 255, 198, 185, 65, 26, 7, 204, 44, 48, 207, 212, 56, 233, 219, 0, 98, 240, 222, 129, 129, 7, 217, 18, 9, 193, 112, 183, 138, 234, 242, 19, 56, 116, 186, 120, 186, 180, 76, 19, 184, 23, 98, 188, 169, 75, 172, 186, 106, 22, 131, 191, 78, 189, 11, 84, 160, 208, 123, 100, 147, 165, 241, 159, 115, 38, 233, 26, 85, 124, 252, 1, 143, 77, 210, 119, 52, 133, 24, 181, 117, 226, 171, 51, 90, 35, 181, 218, 249, 179, 115, 18, 236, 129, 174, 71, 65, 214, 8, 194, 248, 68, 37, 54, 176, 63, 215, 7, 184, 39, 197, 102, 62, 12, 4, 254, 154, 167, 62, 205, 253, 207, 76, 185, 22, 41, 137, 155, 133, 107, 184, 183, 109, 13, 53, 17, 252, 161, 81, 4, 160, 188, 130, 27, 100, 235, 209, 246, 146, 22, 73, 41, 34, 192, 6, 15, 106, 224, 19, 136, 62, 143, 9, 192, 196, 49, 64, 131, 245, 94, 225, 161, 246, 243, 14, 115, 14, 239, 191, 52, 170, 145, 242, 58, 190, 30, 246, 65, 35, 143, 201, 13, 244, 227, 62, 111, 96, 52, 50, 152, 211, 116, 123, 39, 251, 157, 115, 18, 240, 165, 25, 123, 140, 70, 140, 13, 139, 222, 127, 126, 95, 139, 4, 56, 202, 64, 246, 117, 99, 229, 181, 114, 40, 136, 79, 131, 225, 171, 160, 29, 230, 46, 244, 14, 139, 200, 80, 47, 154, 199, 124, 148, 82, 200, 14, 117, 96, 196, 238, 170, 138, 171, 38, 106, 254, 155, 208, 92, 95, 28, 91, 67, 34, 219, 222, 103, 116, 76, 247, 207, 211, 92, 92, 52, 18, 61, 169, 76, 177, 233, 215, 158, 154, 180, 146, 170, 221, 162, 130, 210, 138, 133, 170, 146, 179, 6, 70, 150, 190, 85, 187, 80, 244, 42, 179, 69, 80, 210, 234, 146, 174, 30, 228, 179, 155, 243, 153, 181, 51, 96, 140, 48, 200, 89, 142, 187, 127, 212, 112, 42, 121, 135, 31, 27, 237, 166, 44, 51, 243, 21, 86, 200, 73, 192, 156, 142, 133, 104, 115, 185, 230, 61, 129, 169, 250, 3, 156, 1, 20, 60, 92, 36, 191, 110, 109, 114, 149, 101, 141, 206, 130, 140, 198, 139, 139, 196, 234, 236, 254, 100, 188, 253, 65, 92, 220, 42, 204, 26, 143, 177, 0, 15, 59, 62, 105, 64, 214, 129, 148, 68, 78, 91, 233, 185, 167, 173, 52, 225, 126, 202, 217, 218, 41, 91, 23, 55, 195, 202, 102, 65, 117, 157, 59, 40, 183, 13, 193
+  // ];
+  // ].map( n => n + 16 );
+
+  const actualValue = await deviceContext.executeShader( shader, numbers );
+
+  const expectedValue: number[] = numbers.slice().sort( ( a, b ) => a - b );
+
+  // console.log( actualValue );
+
+  for ( let i = 0; i < expectedValue.length; i++ ) {
+    const expected = expectedValue[ i ];
+    const actual = actualValue[ i ];
+
+    if ( expected !== actual ) {
+      console.log( 'input' );
+      console.log( numbers );
+
+      console.log( 'expected' );
+      console.log( expectedValue );
+
+      console.log( 'actual' );
+      console.log( actualValue );
 
       return `expected ${expected.toString()}, actual ${actual.toString()} ${i}`;
     }
