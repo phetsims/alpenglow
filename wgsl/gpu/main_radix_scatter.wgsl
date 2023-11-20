@@ -4,13 +4,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/comment
-#import ../gpu/conditional_if
-#import ../gpu/scan_raked
-#import ../gpu/unroll
-#import ../gpu/ceil_divide_constant_divisor
-#import ../gpu/load_multiple
-#import ../gpu/n_bit_compact_single_sort
+#import ./comment
+#import ./conditional_if
+#import ./scan_raked
+#import ./unroll
+#import ./ceil_divide_constant_divisor
+#import ./load_multiple
+#import ./n_bit_compact_single_sort
+#import ./log
 
 #option workgroupSize
 #option grainSize
@@ -47,6 +48,10 @@ fn main(
   @builtin(local_invocation_id) local_id: vec3u,
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
+  ${log( {
+    name: 'main_radix_scatter start'
+  } )}
+
   let num_valid_workgroups = ${ceil_divide_constant_divisor( length, workgroupSize * grainSize )};
 
   if ( workgroup_id.x < num_valid_workgroups ) {

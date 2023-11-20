@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionSingleCallback } from '../imports.js';
+import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionOptions, ExecutionSingleCallback } from '../imports.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import { Unpromised } from './Execution.js';
@@ -172,21 +172,30 @@ export default class DeviceContext {
   /**
    * Executes a callback with a single-promise result.
    */
-  public async executeSingle<T>( run: ExecutionSingleCallback<T> ): Promise<T> {
-    return new BasicExecution( this ).executeSingle( run );
+  public async executeSingle<T>(
+    run: ExecutionSingleCallback<T>,
+    options?: ExecutionOptions
+  ): Promise<T> {
+    return new BasicExecution( this, options ).executeSingle( run );
   }
 
   /**
    * Executes a callback with a record-of-promises result, returning a record-of-values.
    */
-  public async execute<T extends Record<string, Promise<unknown>>>( run: ExecutionMultipleCallback<T> ): Promise<Unpromised<T>> {
-    return new BasicExecution( this ).execute( run );
+  public async execute<T extends Record<string, Promise<unknown>>>(
+    run: ExecutionMultipleCallback<T>,
+    options?: ExecutionOptions
+  ): Promise<Unpromised<T>> {
+    return new BasicExecution( this, options ).execute( run );
   }
 
-  public async executeShader<In, Out>( shader: ExecutableShader<In, Out>, input: In ): Promise<Out> {
+  public async executeShader<In, Out>(
+    shader: ExecutableShader<In, Out>, input: In,
+    options?: ExecutionOptions
+  ): Promise<Out> {
     return this.executeSingle( async ( encoder, execution ) => {
       return shader.execute( execution, input );
-    } );
+    }, options );
   }
 
   public static async getDevice( providedOptions?: DeviceContextDeviceOptions ): Promise<GPUDevice | null> {

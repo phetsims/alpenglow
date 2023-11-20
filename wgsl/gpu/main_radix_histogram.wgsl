@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-#import ../gpu/radix_histogram
+#import ./radix_histogram
 
 #option workgroupSize
 #option grainSize

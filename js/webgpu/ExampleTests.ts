@@ -2607,6 +2607,8 @@ asyncTestWithDevice( 'u32 triple radix sort - broken?', async ( device, deviceCo
     // The number of bytes
     bytesPerElement: 4,
 
+    log: true,
+
     encodeElement: ( n: number, encoder: ByteEncoder ) => encoder.pushU32( n ),
     decodeElement: ( encoder: ByteEncoder, offset: number ) => encoder.fullU32Array[ offset ]
   } );
@@ -2619,7 +2621,9 @@ asyncTestWithDevice( 'u32 triple radix sort - broken?', async ( device, deviceCo
   // ].map( n => n + 16 );
   const numbers = [ 3847306696, 2377498173, 2470353917, 717079321, 147504580, 702378067, 1444197343, 3217167611, 3773484904, 4010043499, 2558397794, 403140455, 2084097890, 3410758653, 3490829283, 1582110645, 2965696626, 1827600100, 2054506022, 2210736970, 3012191564, 2016887839, 2720159507, 86327093, 463947735, 773722777, 3537521717, 2926593510, 4057977322, 2319894829, 2004306820, 2464549218, 1946736138, 2339697028, 2999003543, 2537341334, 2926898048, 1717424534, 3310497694, 3208957849, 4222135264, 155720214, 1737866322, 2145917008, 2785908496, 1303509577, 1367828770, 1491715308, 1373468654, 3546679997, 3195865655, 1046021702, 3865636931, 3612902841, 2329011154, 3619134737, 2822324182, 3236208749, 3761910469, 2663052449, 4242665697, 776933049, 2554102121, 967417434 ];
 
-  const actualValue = await deviceContext.executeShader( shader, numbers );
+  const actualValue = await deviceContext.executeShader( shader, numbers, {
+    log: true
+  } );
 
   const expectedValue: number[] = numbers.slice().sort( ( a, b ) => a - b );
 

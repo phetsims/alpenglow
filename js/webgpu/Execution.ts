@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ByteEncoder, ComputeShader, ComputeShaderDispatchOptions, DeviceContext, TimestampLogger, TimestampLoggerResult } from '../imports.js';
+import { alpenglow, BufferLogger, ByteEncoder, ComputeShader, ComputeShaderDispatchOptions, ConsoleLogger, DeviceContext, TimestampLogger, TimestampLoggerResult } from '../imports.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 
 export type ExecutionAnyCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => T;
@@ -17,11 +17,15 @@ export type Unpromised<T extends Record<string, Promise<unknown>>> = { [ K in ke
 export type ExecutionOptions = {
   timestampLog?: boolean;
   timestampLoggerCapacity?: number;
+  log?: boolean;
+  logBufferSize?: number;
 };
 
 const DEFAULT_OPTIONS = {
   timestampLog: true,
-  timestampLoggerCapacity: 100
+  timestampLoggerCapacity: 100,
+  log: false,
+  logBufferSize: 1 << 20
 };
 
 type Execution = {
@@ -181,6 +185,9 @@ export class BasicExecution extends BaseExecution implements Execution {
 
   public readonly timestampLogger: TimestampLogger;
   public readonly timestampResultPromise: Promise<TimestampLoggerResult | null>;
+  private readonly log: boolean;
+  private readonly logBufferSize: number;
+  private logBuffer: GPUBuffer | null = null;
 
   private timestampResultResolve!: ( result: TimestampLoggerResult | null ) => void;
 
@@ -203,11 +210,15 @@ export class BasicExecution extends BaseExecution implements Execution {
     this.timestampResultPromise = new Promise( resolve => {
       this.timestampResultResolve = resolve;
     } );
+
+    this.log = options.log;
+    this.logBufferSize = options.logBufferSize;
   }
 
   public getDispatchOptions(): ComputeShaderDispatchOptions {
     return {
-      timestampLogger: this.timestampLogger
+      timestampLogger: this.timestampLogger,
+      logBuffer: this.logBuffer
     };
   }
 
@@ -215,13 +226,27 @@ export class BasicExecution extends BaseExecution implements Execution {
     callback: ExecutionAnyCallback<T>
   ): Promise<T> {
 
+    this.logBuffer = this.log ? this.createBuffer( this.logBufferSize ) : null;
+
     const promise = callback( this.encoder, this );
+
+    const logPromise = this.logBuffer ? this.arrayBuffer( this.logBuffer ) : Promise.resolve( null );
 
     this.timestampLogger.resolve( this.encoder, this.bufferLogger ).then( result => this.timestampResultResolve( result ) ).catch( e => { throw e; } );
 
     const commandBuffer = this.encoder.finish();
     this.deviceContext.device.queue.submit( [ commandBuffer ] );
     await this.bufferLogger.complete();
+
+    const logResult = await logPromise;
+
+    // TODO: better parsing of log results
+    if ( logResult ) {
+      console.log( ConsoleLogger.toEntries( logResult ) );
+      const data = new Uint32Array( logResult );
+      const length = data[ 0 ];
+      console.log( [ ...data ].slice( 1, length + 1 ) );
+    }
 
     this.buffersToCleanup.forEach( buffer => buffer.destroy() );
 

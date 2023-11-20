@@ -457,7 +457,7 @@ export type { DualSnippetSource } from './webgpu/DualSnippet.js';
 export { default as DeviceContext } from './webgpu/DeviceContext.js';
 export type { DeviceContextDeviceOptions } from './webgpu/DeviceContext.js';
 export { BaseExecution, BasicExecution, ExecutableShader } from './webgpu/Execution.js';
-export type { default as Execution, ExecutableShaderTemplate } from './webgpu/Execution.js';
+export type { default as Execution, ExecutionOptions, ExecutableShaderTemplate } from './webgpu/Execution.js';
 export type { ExecutionSingleCallback, ExecutionMultipleCallback, Unpromised } from './webgpu/Execution.js';
 export { default as Binding } from './webgpu/Binding.js';
 export { default as ComputeShader } from './webgpu/ComputeShader.js';
@@ -465,6 +465,8 @@ export type { ComputeShaderOptions, ComputeShaderDispatchOptions, ComputeShaderS
 export { default as BlitShader } from './webgpu/BlitShader.js';
 export { default as ByteEncoder } from './webgpu/ByteEncoder.js';
 export type { F32, U32, I32, U8 } from './webgpu/ByteEncoder.js';
+export { default as ConsoleLogger, ConsoleLogEntry } from './webgpu/ConsoleLogger.js';
+export type { ConsoleLogInfo } from './webgpu/ConsoleLogger.js';
 export { default as BufferLogger } from './webgpu/BufferLogger.js';
 export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/BufferLogger.js';
 export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/TimestampLogger.js';

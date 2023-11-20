@@ -7,30 +7,43 @@
  */
 
 import { alpenglow, Binding, DualSnippet, DualSnippetSource, TimestampLogger } from '../imports.js';
-import { optionize3 } from '../../../phet-core/js/optionize.js';
+import { combineOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
 
 export type ComputeShaderOptions = {
   partialBeautify?: boolean;
+  log?: boolean;
 };
 
 export type ComputeShaderDispatchOptions = {
   // Mutually exclusive options
   timestampLogger?: TimestampLogger | null;
   timestampWrites?: GPUComputePassTimestampWrites | null;
+
+  logBuffer?: GPUBuffer | null;
 };
 
 export type ComputeShaderSourceOptions = Record<string, unknown>;
 
+// Our logging buffer will be at @group(0) @binding(${LOG_BINDING})
+const LOG_BINDING = 64;
+
 const DEFAULT_OPTIONS = {
-  partialBeautify: true
+  partialBeautify: true,
+  log: false
 } as const;
 
 const DEFAULT_DISPATCH_OPTIONS = {
   timestampLogger: null,
-  timestampWrites: null
+  timestampWrites: null,
+  logBuffer: null
 } as const;
+
+const DEFAULT_SOURCE_OPTIONS = {
+  log: false,
+  logBinding: LOG_BINDING
+};
 
 export default class ComputeShader {
 
@@ -42,6 +55,8 @@ export default class ComputeShader {
 
   private readonly pipelinePromise: Promise<GPUComputePipeline>;
 
+  private readonly log: boolean;
+
   public constructor(
     public readonly name: string,
     public readonly wgsl: string,
@@ -52,6 +67,8 @@ export default class ComputeShader {
   ) {
 
     const options = optionize3<ComputeShaderOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+
+    this.log = options.log;
 
     if ( options.partialBeautify ) {
       const lines = wgsl.split( '\n' ).filter( s => s.trim().length > 0 );
@@ -86,7 +103,12 @@ export default class ComputeShader {
 
     this.bindGroupLayout = device.createBindGroupLayout( {
       label: `${name} bindGroupLayout`,
-      entries: this.bindings.map( ( binding, i ) => binding.getBindGroupLayoutEntry( i ) )
+      entries: [
+        ...this.bindings.map( ( binding, i ) => binding.getBindGroupLayoutEntry( i ) ),
+
+        // Add in an entry for our logging buffer (if we're logging)
+        ...( this.log ? [ Binding.STORAGE_BUFFER.getBindGroupLayoutEntry( LOG_BINDING ) ] : [] )
+      ]
     } );
 
     const pipelineDescriptor: GPUComputePipelineDescriptor = {
@@ -113,13 +135,18 @@ export default class ComputeShader {
     }
   }
 
-  private getBindGroup( resources: ( GPUBuffer | GPUTextureView )[] ): GPUBindGroup {
+  private getBindGroup( resources: ( GPUBuffer | GPUTextureView )[], logBuffer: GPUBuffer | null ): GPUBindGroup {
     assert && assert( this.bindings.length === resources.length );
+    assert && assert( !this.log || logBuffer, 'logBuffer should be provided if we are logging' );
 
+    // TODO: can we avoid creating bind groups for EVERY dispatch?
     return this.device.createBindGroup( {
       label: `${this.name} bindGroup`,
       layout: this.bindGroupLayout,
-      entries: this.bindings.map( ( binding, i ) => binding.getBindGroupEntry( i, resources[ i ] ) )
+      entries: [
+        ...this.bindings.map( ( binding, i ) => binding.getBindGroupEntry( i, resources[ i ] ) ),
+        ...( ( this.log && logBuffer ) ? [ Binding.STORAGE_BUFFER.getBindGroupEntry( LOG_BINDING, logBuffer ) ] : [] )
+      ]
     } );
   }
 
@@ -138,7 +165,7 @@ export default class ComputeShader {
       false, options.timestampLogger, options.timestampWrites
     ) );
     computePass.setPipeline( this.pipeline );
-    computePass.setBindGroup( 0, this.getBindGroup( resources ) );
+    computePass.setBindGroup( 0, this.getBindGroup( resources, options.logBuffer ) );
     computePass.dispatchWorkgroups( dispatchX, dispatchY, dispatchZ );
     computePass.end();
   }
@@ -157,7 +184,7 @@ export default class ComputeShader {
       true, options.timestampLogger, options.timestampWrites
     ) );
     computePass.setPipeline( this.pipeline );
-    computePass.setBindGroup( 0, this.getBindGroup( resources ) );
+    computePass.setBindGroup( 0, this.getBindGroup( resources, options.logBuffer ) );
     computePass.dispatchWorkgroupsIndirect( indirectBuffer, indirectOffset );
     computePass.end();
   }
@@ -192,10 +219,19 @@ export default class ComputeShader {
     name: string,
     source: DualSnippetSource,
     bindings: Binding[],
-    options: Record<string, unknown> = {}
+    providedOptions: ComputeShaderSourceOptions = {}
   ): ComputeShader {
+    const options = combineOptions<ComputeShaderSourceOptions>( {
+      shaderName: name
+    }, DEFAULT_SOURCE_OPTIONS, providedOptions );
+
+    assert && assert( typeof options.log === 'boolean' );
+    const log = options.log as boolean;
+
     const snippet = DualSnippet.fromSource( source, options );
-    return new ComputeShader( name, snippet.toString(), bindings, device, false );
+    return new ComputeShader( name, snippet.toString(), bindings, device, false, {
+      log: log
+    } );
   }
 
   public static async fromSourceAsync(
@@ -203,10 +239,19 @@ export default class ComputeShader {
     name: string,
     source: DualSnippetSource,
     bindings: Binding[],
-    options: Record<string, unknown> = {}
+    providedOptions: ComputeShaderSourceOptions = {}
   ): Promise<ComputeShader> {
+    const options = combineOptions<ComputeShaderSourceOptions>( {
+      shaderName: name
+    }, DEFAULT_SOURCE_OPTIONS, providedOptions );
+
+    assert && assert( typeof options.log === 'boolean' );
+    const log = options.log as boolean;
+
     const snippet = DualSnippet.fromSource( source, options );
-    const computeShader = new ComputeShader( name, snippet.toString(), bindings, device, true );
+    const computeShader = new ComputeShader( name, snippet.toString(), bindings, device, true, {
+      log: log
+    } );
     await computeShader.pipelinePromise;
     return computeShader;
   }

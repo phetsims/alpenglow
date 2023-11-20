@@ -37,6 +37,9 @@ export type TripleRadixSortShaderOptions<T> = {
   // The number of bytes
   bytesPerElement: number;
 
+  // TODO: we shouldn't have to pass this through everywhere, right?
+  log?: boolean;
+
   encodeElement: ( element: T, encoder: ByteEncoder ) => void;
   decodeElement: ( encoder: ByteEncoder, offset: number ) => T;
 };
@@ -54,6 +57,8 @@ const DEFAULT_OPTIONS = {
   factorOutSubexpressions: true,
   nestSubexpressions: false,
   isReductionExclusive: false,
+
+  log: false,
 
   exclusive: false
 } as const;
@@ -76,7 +81,8 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       workgroupSize: options.workgroupSize,
       grainSize: options.grainSize,
       factorOutSubexpressions: options.factorOutSubexpressions,
-      nestSubexpressions: options.nestSubexpressions
+      nestSubexpressions: options.nestSubexpressions,
+      log: options.log
     };
 
     const histogramShaders: ComputeShader[] = [];
@@ -118,7 +124,8 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       combineExpression: ( a: string, b: string ) => `${a} + ${b}`,
       combineStatements: null,
       factorOutSubexpressions: options.factorOutSubexpressions,
-      nestSubexpressions: options.nestSubexpressions
+      nestSubexpressions: options.nestSubexpressions,
+      log: options.log
     };
 
     // WGSL "ceil" equivalent
