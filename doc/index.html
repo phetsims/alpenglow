@@ -3311,20 +3311,99 @@
     <h4 id="WGSL-algorithms">Algorithms</h4>
 
     <p class="TODO">
-      Templates should be able to create variable names that are unique.
+      Organize this section!
+    </p>
+
+    <h5>Logging/debugging</h5>
+
+    <p class="TODO">
+      Have option/define-controlled logging integrated with ComputeShader and our templating. ComputeShader COULD
+      define this for us if we don't define it, so anything can have an #option for it. Potentially leave logging
+      in the code always, and only when debugging is enabled will it report out. ALSO: we'll want to enable only
+      enabling logging on a single shader(?) or potentially the whole thing? We'll be able to pass this through
+      multiple stages, so that will be nice.
+    </p>
+
+    <p>
+      Potentially log out the input buffer data.
+    </p>
+
+    <p>
+      We'll want to tag start/end of shaders with "marks" that provide no data other than an ID. Also have comments
+      issue this (with the comment string) - should help with our linearization issues?
+    </p>
+
+    <ol>
+      <li>
+        Declared identifier (based on the invoked shader code, basically gives us a semi-unique ID - loops and things
+        are issues. Should GIVE US a string label (so we can adjust the label in the shader, and see the output in the
+        logging).
+      </li>
+      <li>
+        Length of entry (we'll be using bump allocation, e.g. a struct that is atomic + data). We don't care about
+        performance of this RIGHT NOW, so we won't start with privatization (keeping an atomic+data workgroup-side,
+        then allocating/setting nicely).
+      </li>
+      <li>
+        Additional identifier (for uniqueness if helpful) - either from unroll, OR also computed dynamically (in for
+        loops).
+      </li>
+      <li>
+        Flag (combined with above) for whether it contains multiple data elements per one invocation
+      </li>
+      <li>
+        Local x/y/z and workgroup x/y/z for the thread
+      </li>
+      <li>
+        Data indices (the x/y/z of the data provided
+      </li>
+      <li>
+        The actual data! Have every type (e.g. where we pass valueType) be convertable into u32s.
+      </li>
+    </ol>
+
+    <p>
+      Avoid adding workgroupBarrier().
+    </p>
+
+    <p>
+      Probably bind debug buffer at the same binding always? Thus can be handled in ComputeShader
+    </p>
+
+    <p>
+      Lots of potential for visual debugging (adding a debugging interface). We're essentially going to add "padding",
+      so viewing layers at each level might be helpful. BUT we'll want to programmatically access data a lot of the
+      time. -- Even for console output, breaking things up BY the workgroup (and potentially also by the thread)
+      would be useful.
     </p>
 
     <p class="TODO">
-      Read papers and books! - Notably Levien one with the scan patterns.
+      Think about ways to add assertions into this?
     </p>
 
-    <p>
-      Examples, see <a href="https://stoneberry.dev/docs/api/">Stoneberry API</a>, <a href="https://github.com/moderngpu/moderngpu">modernGPU</a>.
+    <p class="TODO">
+      How to handle "raked" (multiple) data? How to handle subsets (only some threads report out due to length...?)
     </p>
 
-    <p>
-      <a href="https://developer.chrome.com/blog/new-in-webgpu-118/">WebGPU updates for Chrome</a>
+    <p class="TODO">
+      How to handle only a workgroup-level log? (would we just do that for local_id === 0?)
     </p>
+
+    <p class="TODO">
+      HOW to take our linearized single-thread logs, and combine them (adding spacers for "missing" things) - how to
+      identify what is missing?
+    </p>
+
+    <h5>Linking</h5>
+
+    <p>
+      How can we get more reusable/combinable shader patterns? HOW TO FUSE, and how to reuse (e.g. scans in radix sort).
+      Notably, we DO NOT want the final READ, we might want to control how the buffers are handled (a big part of
+      how to design composition), but we really want to create composable pieces! Higher-level language would help a lot.
+      Templating with sections for each shader part would be amazing(!)? - where we have "shaderBarrier()" in-between.
+    </p>
+
+    <h5>Overlap (multiple shaders running at the same time)</h5>
 
     <p>
       For overlap:
@@ -3338,6 +3417,38 @@
       <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-5-back-to-the-real-world/">https://therealmjp.github.io/posts/breaking-down-barriers-part-5-back-to-the-real-world/</a></li>
       <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-6-experimenting-with-overlap-and-preemption/">https://therealmjp.github.io/posts/breaking-down-barriers-part-6-experimenting-with-overlap-and-preemption/</a></li>
     </ol>
+
+    <h5>Miscellaneous</h5>
+
+    <p class="TODO">
+      Check subgroups proposal: <a href="https://github.com/gpuweb/gpuweb/pull/4368">https://github.com/gpuweb/gpuweb/pull/4368</a>.
+    </p>
+
+    <p class="TODO">
+      Watch <a href="https://github.com/gpuweb/gpuweb/commits/main">https://github.com/gpuweb/gpuweb/commits/main</a>
+      for changes to the spec. Also see
+      <a href="https://developer.chrome.com/blog/new-in-webgpu-118/">https://developer.chrome.com/blog/new-in-webgpu-118/</a>
+    </p>
+
+    <p class="TODO">
+      Check <a href="https://usegpu.live/">https://usegpu.live/</a> for patterns.
+    </p>
+
+    <p class="TODO">
+      Unrelated, but get light/dark background changing based on OS setting (auto-dark at night)
+    </p>
+
+    <p class="TODO">
+      Templates should be able to create variable names that are unique.
+    </p>
+
+    <p class="TODO">
+      Read papers and books! - Notably Levien one with the scan patterns.
+    </p>
+
+    <p>
+      Examples, see <a href="https://stoneberry.dev/docs/api/">Stoneberry API</a>, <a href="https://github.com/moderngpu/moderngpu">modernGPU</a>.
+    </p>
 
     <p class="TODO">
       IMPORTANT: uniform probably not helping us for the storage config case. Just use it as a storage buffer(!?)
@@ -3478,6 +3589,10 @@
     </p>
 
     <p class="TODO">
+      Alpenglow is VERY BROKEN with a non-integral devicePixelRatio! (browser zoom in)
+    </p>
+
+    <p class="TODO">
       Condense examples. Create some reusable "examples" that we can use for BOTH unit tests AND profiling.
     </p>
 
@@ -3549,6 +3664,27 @@
     <h4 id="WGSL-radixSort">Radix Sort</h4>
 
     <p class="TODO">
+      Get this better-cleaned-up.
+    </p>
+
+    <p class="TODO">
+      Separate out workgroup/grain for the scan and the radix operation(!), the radix op takes a lot more memory, and
+      might be more limited.
+    </p>
+
+    <p class="TODO">
+      Initial work going nicely. We have a bug in scatter with the 128-size workgroup to investigate.
+    </p>
+
+    <p class="TODO">
+      3-level scan with the multi-level reduce based on atomics might fit nicely here.
+    </p>
+
+    <p class="TODO">
+      getBits/getBin should handle statements.
+    </p>
+
+    <p class="TODO">
       Handle "lightweight" sorting for cases where there is a ton of associated data, but we only
       need a fraction of that to get the keys for sorting (or for comparisons).
     </p>
@@ -3563,6 +3699,14 @@
     </p>
 
     <h4 id="WGSL-mergeSort">Merge Sort</h4>
+
+    <p class="TODO">
+      Implement this, and figure out a way to sort a workgroup's raked worth! We could radix-sort it if we can get bits.
+      Otherwise, what's a good parallel efficient sort? We could actually just merge-sort if it comes to it?
+      Sorting networks/circuits?
+      <a href="https://en.wikipedia.org/wiki/Bitonic_sorter">https://en.wikipedia.org/wiki/Bitonic_sorter</a>
+      is recommended?!?
+    </p>
 
     <p>
       Might be possible, see <a href="https://moderngpu.github.io/mergesort.html">ModernGPU merge sort</a>.
