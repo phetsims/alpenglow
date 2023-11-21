@@ -98,12 +98,31 @@ fn main(
     ` )}
     ${comment( 'end load histogram offsets' )}
 
+    ${log( {
+      name: 'scanned histogram',
+      dataLength: Math.ceil( ( 2 ** bitQuantity ) / workgroupSize ),
+      writeU32s: ( arr, offset ) => `
+        workgroupBarrier();
+        ${unroll( 0, Math.ceil( ( 2 ** bitQuantity ) / workgroupSize ), i => `
+          ${arr}[ ${offset} + ${u32( i )} ] = histogram_offsets[ ${u32( Math.ceil( ( 2 ** bitQuantity ) / workgroupSize ) )} * local_id.x + ${u32( i )} ];
+        `)}
+      `,
+      deserialize: arr => [ ...arr ],
+    } )}
+
     // Our workgroupBarrier will apply for value_scratch AND local_histogram_offsets
     workgroupBarrier();
 
     ${length ? `
       let reduced_length = ( ${length} ) - workgroup_id.x * ${u32( workgroupSize * grainSize )};
     ` : ``}
+
+    ${log( {
+      name: 'reduced_length',
+      dataLength: 1,
+      writeU32s: ( arr, offset ) => `${arr}[ ${offset} ] = reduced_length;`,
+      deserialize: arr => arr[ 0 ],
+    } )}
 
     for ( var srs_i = 0u; srs_i < ${u32( bitQuantity )}; srs_i += ${u32( innerBitQuantity )} ) {
       ${n_bit_compact_single_sort( {
@@ -117,6 +136,19 @@ fn main(
         length: length ? `reduced_length` : null,
         getBits: value => `( ( ( ${getBits( value )} ) >> srs_i ) & ${u32( ( 1 << innerBitQuantity ) - 1 )} )`,
         earlyLoad: earlyLoad,
+      } )}
+
+      ${log( {
+        name: `after b_bit_sort ${innerBitQuantity} ${innerBitVectorSize}`,
+        dataLength: grainSize,
+        writeU32s: ( arr, offset ) => `
+          workgroupBarrier();
+          ${unroll( 0, grainSize, i => `
+            ${arr}[ ${offset} + ${u32( i )} ] = value_scratch[ ${u32( grainSize )} * local_id.x + ${u32( i )} ];
+          `)}
+        `,
+        deserialize: arr => [ ...arr ],
+        additionalIndex: `srs_i`,
       } )}
     }
 
@@ -166,5 +198,17 @@ fn main(
       }
     `)}
     ${comment( 'end write output' )}
+
+    ${log( {
+      name: 'exit data',
+      dataLength: grainSize,
+      writeU32s: ( arr, offset ) => `
+        storageBarrier();
+        ${unroll( 0, grainSize, i => `
+          ${arr}[ ${offset} + ${u32( i )} ] = output[ ${u32( workgroupSize * grainSize )} * workgroup_id.x + ${u32( grainSize )} * local_id.x + ${u32( i )} ];
+        `)}
+      `,
+      deserialize: arr => [ ...arr ],
+    } )}
   }
 }

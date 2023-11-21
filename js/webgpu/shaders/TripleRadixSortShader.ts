@@ -217,13 +217,13 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       logShader && execution.setLogBarrierShader( logShader );
 
       for ( let i = 0; i < iterationCount; i++ ) {
-        execution.u32Numbers( inBuffer ).then( histogram => console.log( `input ${i}`, histogram ) ).catch( e => { throw e; } );
+        // execution.u32Numbers( inBuffer ).then( histogram => console.log( `input ${i}`, histogram ) ).catch( e => { throw e; } );
 
         execution.dispatch( histogramShaders[ i ], [
           inBuffer, histogramBuffer
         ], upperDispatchSize );
 
-        execution.u32Numbers( histogramBuffer ).then( histogram => console.log( `histogram ${i}`, histogram ) ).catch( e => { throw e; } );
+        // execution.u32Numbers( histogramBuffer ).then( histogram => console.log( `histogram ${i}`, histogram ) ).catch( e => { throw e; } );
 
         execution.dispatch( reduceShader, [
           histogramBuffer, reductionBuffer
@@ -249,13 +249,13 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           histogramBuffer, reductionBuffer, doubleReductionBuffer, scannedHistogramBuffer
         ], middleDispatchSize );
 
-        execution.u32Numbers( scannedHistogramBuffer ).then( histogram => console.log( `scanned histogram ${i}`, histogram ) ).catch( e => { throw e; } );
+        // execution.u32Numbers( scannedHistogramBuffer ).then( histogram => console.log( `scanned histogram ${i}`, histogram ) ).catch( e => { throw e; } );
 
         execution.dispatch( scatterShaders[ i ], [
           inBuffer, scannedHistogramBuffer, outBuffer
         ], upperDispatchSize );
 
-        execution.u32Numbers( outBuffer ).then( histogram => console.log( `output ${i}`, histogram ) ).catch( e => { throw e; } );
+        // execution.u32Numbers( outBuffer ).then( histogram => console.log( `output ${i}`, histogram ) ).catch( e => { throw e; } );
 
         const temp = inBuffer;
         inBuffer = outBuffer;

@@ -10,6 +10,10 @@ import { alpenglow, ComputeShader, DeviceContext, wgsl_main_log_barrier } from '
 import Vector3 from '../../../dot/js/Vector3.js';
 
 export type ConsoleLogInfo<T = unknown> = {
+  // Filled in when registered
+  id: number;
+
+  // Provided by the registering code
   logName: string;
   shaderName: string;
   hasAdditionalIndex: boolean;
@@ -22,7 +26,11 @@ export default class ConsoleLogger {
   private static readonly identifierMap = new Map<number, ConsoleLogInfo>();
 
   public static register( info: ConsoleLogInfo ): number {
+    assert && assert( info.id === undefined, 'Should not be defined yet.' );
+
     const id = ConsoleLogger.nextGlobalId++;
+
+    info.id = id;
 
     ConsoleLogger.identifierMap.set( id, info );
 
@@ -101,11 +109,26 @@ export default class ConsoleLogger {
 }
 
 export class ConsoleLoggedEntry<T = unknown> {
+
+  public readonly uniqueId: string;
+
   public constructor(
     public readonly info: ConsoleLogInfo,
     public readonly data: T,
-    public readonly additionalIndex: number | null
-  ) {}
+    public readonly additionalIndex: number | null,
+    otherEntries: ConsoleLoggedEntry[]
+  ) {
+    // We'll want to "increment" our ID if it shows up multiple times in the same thread
+    let id = `${info.id}:${additionalIndex}`;
+
+    // Hopefully doesn't come up a lot, this isn't the best algorithm for this (!)
+    // eslint-disable-next-line @typescript-eslint/no-loop-func
+    while ( otherEntries.some( entry => entry.uniqueId === id ) ) {
+      id += '!';
+    }
+
+    this.uniqueId = id;
+  }
 }
 
 // TODO: Should we create ConsoleLoggedWorkgroup?
@@ -123,7 +146,7 @@ export class ConsoleLoggedThread {
     data: unknown,
     additionalIndex: number | null
   ): void {
-    this.entries.push( new ConsoleLoggedEntry( info, data, additionalIndex ) );
+    this.entries.push( new ConsoleLoggedEntry( info, data, additionalIndex, this.entries ) );
   }
 
   public compare( other: ConsoleLoggedThread ): number {
@@ -149,11 +172,20 @@ export class ConsoleLoggedThread {
   }
 }
 
+export class ConsoleLoggedLine {
+  public constructor(
+    public readonly info: ConsoleLogInfo,
+    public readonly additionalIndex: number | null,
+    public readonly dataArray: unknown[]
+  ) {}
+}
+
 export class ConsoleLoggedShader {
 
   public shaderName: string | null = null;
   public readonly threads: ConsoleLoggedThread[] = [];
   public readonly threadMap: Record<string, ConsoleLoggedThread> = {};
+  public readonly logLines: ConsoleLoggedLine[] = [];
 
   public add(
     info: ConsoleLogInfo,
@@ -184,6 +216,82 @@ export class ConsoleLoggedShader {
 
   public finalize(): void {
     this.sortThreads();
+
+    const uniqueIdSet = new Set<string>();
+    for ( const thread of this.threads ) {
+      for ( const entry of thread.entries ) {
+        uniqueIdSet.add( entry.uniqueId );
+      }
+    }
+
+    const uniqueIds = Array.from( uniqueIdSet );
+
+    const comparisons = new Map<string, number>();
+
+    for ( let i = 0; i < uniqueIds.length; i++ ) {
+      for ( let j = i + 1; j < uniqueIds.length; j++ ) {
+        const a = uniqueIds[ i ];
+        const b = uniqueIds[ j ];
+
+        let count = 0;
+        for ( const thread of this.threads ) {
+          const indexA = thread.entries.findIndex( entry => entry.uniqueId === a );
+          const indexB = thread.entries.findIndex( entry => entry.uniqueId === b );
+
+          if ( indexA >= 0 && indexB >= 0 ) {
+            count += Math.sign( indexA - indexB );
+          }
+        }
+
+        comparisons.set( `${a} ${b}`, count );
+        comparisons.set( `${b} ${a}`, -count );
+      }
+    }
+
+    const compare = ( a: string, b: string ) => {
+      return comparisons.get( `${a} ${b}` )!;
+    };
+
+    const sortedIds: string[] = [];
+
+    // Since we might have some ids that are "tied" in comparisons, we'll do an O(n^3) sort (sorry!).
+    // TODO: find a better way of doing these comparisons! We can probably subtract off things? Find a better-in-general
+    // TODO: way of handling this.
+    while ( uniqueIds.length ) {
+      const scores = uniqueIds.map( id => {
+        let score = 0;
+        for ( const otherId of uniqueIds ) {
+          if ( id === otherId ) { continue; }
+
+          const comp = compare( id, otherId );
+
+          if ( comp > 0 ) {
+            score += 0xffff;
+          }
+          else if ( comp < 0 ) {
+            score--;
+          }
+        }
+        return score;
+      } );
+
+      const minIndex = scores.indexOf( Math.min( ...scores ) );
+
+      const id = uniqueIds[ minIndex ];
+      sortedIds.push( id );
+      uniqueIds.splice( minIndex, 1 );
+    }
+
+    sortedIds.forEach( id => {
+      const entries = this.threads.map( thread => thread.entries.find( entry => entry.uniqueId === id ) || null );
+      const firstEntry = entries.find( entry => entry !== null )!;
+
+      this.logLines.push( new ConsoleLoggedLine(
+        firstEntry.info,
+        firstEntry.additionalIndex,
+        entries.map( entry => entry ? entry.data : null )
+      ) );
+    } );
   }
 
   private sortThreads(): void {

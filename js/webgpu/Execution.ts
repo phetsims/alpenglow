@@ -253,10 +253,26 @@ export class BasicExecution extends BaseExecution implements Execution {
 
     // TODO: better parsing of log results
     if ( logResult ) {
-      console.log( ConsoleLogger.analyze( logResult ) );
-      const data = new Uint32Array( logResult );
-      const length = data[ 0 ];
-      console.log( [ ...data ].slice( 1, length + 1 ) );
+      const logData = ConsoleLogger.analyze( logResult );
+
+      logData.forEach( shaderData => {
+        // console.log( `shader: ${shaderData.shaderName}` );
+
+        shaderData.logLines.forEach( lineData => {
+          console.log(
+            shaderData.shaderName,
+            `>>> ${lineData.info.logName}${lineData.additionalIndex !== null ? ` (${lineData.additionalIndex})` : ''}`,
+
+            // TODO: log types (change our splits, etc.)
+            lineData.info.dataLength > 0 ? lineData.dataArray : null
+          );
+        } );
+      } );
+
+      // console.log( ConsoleLogger.analyze( logResult ) );
+      // const data = new Uint32Array( logResult );
+      // const length = data[ 0 ];
+      // console.log( [ ...data ].slice( 1, length + 1 ) );
     }
 
     this.buffersToCleanup.forEach( buffer => buffer.destroy() );
