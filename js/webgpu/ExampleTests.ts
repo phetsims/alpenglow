@@ -2568,7 +2568,7 @@ asyncTestWithDevice( 'u32 triple radix sort - broken?', async ( device, deviceCo
   const totalBits = 32;
   const bitQuantity = 3;
   const innerBitQuantity = 2;
-  const innerBitVectorSize = 1;
+  const innerBitVectorSize = 2;
   const earlyLoad = false;
   const factorOutSubexpressions = true;
   const nestSubexpressions = false;

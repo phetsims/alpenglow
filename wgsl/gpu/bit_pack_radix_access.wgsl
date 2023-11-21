@@ -23,6 +23,10 @@
  *   count6 | ( count7 << 10 )
  * )
  *
+ * TODO: We could actually have the bitVector workgroup variable be shorter(!) since a lot of the time we don't need
+ * TODO: that much memory. ACTUALLY this depends on... the length? Likely unless we know our data is shorter, this is
+ * TODO: NOT the case
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -35,7 +39,7 @@ ${template( ( {
 } ) => {
   const countBitQuantity = Math.ceil( Math.log2( maxCount ) );
   const countsPerComponent = Math.floor( 32 / countBitQuantity );
-  assert && assert( bitVectorSize * countsPerComponent >= bitQuantity, 'Not enough space for bit-packing' );
+  assert && assert( bitVectorSize * countsPerComponent >= ( 1 << bitQuantity ), 'Not enough space for bit-packing' );
 
   return `${
     // Opening paren needed if we have multiple components each

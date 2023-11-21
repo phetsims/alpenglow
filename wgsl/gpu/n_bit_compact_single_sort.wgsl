@@ -18,6 +18,7 @@
 #import ./bit_pack_radix_increment
 #import ./scan
 #import ./unroll
+#import ./log
 
 ${template( ( {
   valueType, // type (string)
@@ -25,13 +26,17 @@ ${template( ( {
   grainSize, // number
   bitQuantity, // number - the number of bits we're using for the sort (e.g. 2 for a two_bit equivalent sort)
   bitVectorSize, // number - (1/2/3/4) for (u32/vec2u/vec3u/vec4u) e.g. 4 for a vec4u - whatever is in bitsScratch
-  bitsScratch, // var<workgroup> array<u32|vec2u|vec3u|vec4u, workgroupSize>
+  bitsScratch, // var<workgroup> array<u32|vec2u|vec3u|vec4u, workgroupSize> TODO: we can pack this more efficiently, no?
   valueScratch, // var<workgroup> array<T, workgroupSize * grainSize>
   length, // expression: u32
   getBits, // ( T ) => expression: u32
   earlyLoad = false, // boolean (controls whether we load the values early or late - might affect register pressure)
 } ) => `
   ${comment( 'begin n_bit_compact_single_sort' )}
+
+  ${log( {
+    name: `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitQuantity:${bitQuantity}, bitVectorSize:${bitVectorSize}, length:"${length}" earlyLoad:${earlyLoad}`,
+  } )}
 
   {
     var tb_bits_vector = ${{
@@ -45,11 +50,19 @@ ${template( ( {
       var tb_values: array<${valueType}, ${grainSize}>;
     ` : ``}
 
+    // Store our thread's "raked" values histogram into tb_bits_vector
     ${unroll( 0, grainSize, i => `
       // TODO: see if factoring out constants doesn't kill registers
       if ( ${u32( grainSize )} * local_id.x + ${u32( i )} < ${length} ) {
         let tb_value = ${valueScratch}[ ${u32( grainSize )} * local_id.x + ${u32( i )} ];
         let tb_bits = ${getBits( `tb_value` )};
+
+        ${log( {
+          name: `tb_bits (raked index ${i})`,
+          dataLength: 1,
+          writeU32s: ( arr, offset ) => `${arr}[ ${offset} ] = tb_bits;`,
+          deserialize: arr => arr[ 0 ],
+        } )}
 
         ${bit_pack_radix_increment( {
           bitVector: `tb_bits_vector`,
@@ -64,6 +77,49 @@ ${template( ( {
         ` : ``}
       }
     ` )}
+
+    ${log( {
+      name: `n_bit histogram initial (countBitQuantity: ${Math.ceil( Math.log2( workgroupSize * grainSize ) )})`,
+      dataLength: bitVectorSize,
+      writeU32s: ( arr, offset ) => `
+        workgroupBarrier();
+        ${{
+          1: `
+            ${arr}[ ${offset} ] = tb_bits_vector;
+          `,
+          2: `
+            ${arr}[ ${offset} + 0u ] = tb_bits_vector.x;
+            ${arr}[ ${offset} + 1u ] = tb_bits_vector.y;
+          `,
+          3: `
+            ${arr}[ ${offset} + 0u ] = tb_bits_vector.x;
+            ${arr}[ ${offset} + 1u ] = tb_bits_vector.y;
+            ${arr}[ ${offset} + 2u ] = tb_bits_vector.z;
+          `,
+          4: `
+            ${arr}[ ${offset} + 0u ] = tb_bits_vector.x;
+            ${arr}[ ${offset} + 1u ] = tb_bits_vector.y;
+            ${arr}[ ${offset} + 2u ] = tb_bits_vector.z;
+            ${arr}[ ${offset} + 3u ] = tb_bits_vector.w;
+          `
+        }[ bitVectorSize ]}
+      `,
+      deserialize: arr => [ ...arr ].map( value => {
+        const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
+        const countsPerComponent = Math.floor( 32 / countBitQuantity );
+
+        return [
+          // raw
+          ByteEncoder.toU32Hex( value ),
+          ...( _.range( 0, countsPerComponent ).map( i => {
+            const start = i * countBitQuantity;
+            const end = ( i + 1 ) * countBitQuantity;
+            return ( value >> start ) & ( ( 1 << countBitQuantity ) - 1 );
+          } ) )
+        ];
+      } ),
+      lineToLog: ConsoleLoggedLine.toLogExisting,
+    } )}
 
     ${scan( {
       value: `tb_bits_vector`,

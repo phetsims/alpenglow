@@ -15,7 +15,7 @@ ${template( ( {
 } ) => {
   const countBitQuantity = Math.ceil( Math.log2( maxCount ) );
   const countsPerComponent = Math.floor( 32 / countBitQuantity );
-  assert && assert( bitVectorSize * countsPerComponent >= bitQuantity, 'Not enough space for bit-packing' );
+  assert && assert( bitVectorSize * countsPerComponent >= ( 1 << bitQuantity ), 'Not enough space for bit-packing' );
 
   return `
     ${bitVector}${bitVectorSize > 1 ? `[ ${
