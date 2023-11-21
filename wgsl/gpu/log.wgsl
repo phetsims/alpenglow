@@ -84,7 +84,13 @@ ${template( ( {
           let _log_item_length = ${u32( nonDataLength )} + _log_data_length;
         ` )}
 
-        let _log_offset = atomicAdd( &_log.next_space, _log_item_length );
+        var _log_offset = atomicAdd( &_log.next_space, _log_item_length );
+
+        // Don't write past the end (it could scribble, mess up our atomic counter, and make us think we did NOT overrun it)
+        if ( _log_offset + _log_item_length > arrayLength( &_log.data ) ) {
+          _log.data[ 0u ] = 0xffffffffu;
+          _log_offset = 1;
+        }
 
         _log.data[ _log_offset + ${u32( countableIndex++ )} ] = ${u32( id )};
         _log.data[ _log_offset + ${u32( countableIndex++ )} ] = workgroup_id.x;

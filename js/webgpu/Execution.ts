@@ -8,6 +8,7 @@
 
 import { alpenglow, BufferLogger, ByteEncoder, ComputeShader, ComputeShaderDispatchOptions, ConsoleLogger, DeviceContext, TimestampLogger, TimestampLoggerResult } from '../imports.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
+import Utils from '../../../dot/js/Utils.js';
 
 export type ExecutionAnyCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => T;
 export type ExecutionSingleCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => Promise<T>;
@@ -251,29 +252,25 @@ export class BasicExecution extends BaseExecution implements Execution {
 
     const logResult = await logPromise;
 
-    // TODO: better parsing of log results
     if ( logResult ) {
+      const data = new Uint32Array( logResult );
+      const length = data[ 0 ];
+      const usedMessage = `logging used ${length} of ${data.length - 1} u32s (${Utils.roundSymmetric( 100 * length / ( data.length - 1 ) )}%)`;
+      console.log( usedMessage );
+
       const logData = ConsoleLogger.analyze( logResult );
 
       logData.forEach( shaderData => {
-        // console.log( `shader: ${shaderData.shaderName}` );
-
         shaderData.logLines.forEach( lineData => {
           console.log(
             shaderData.shaderName,
             `>>> ${lineData.info.logName}${lineData.additionalIndex !== null ? ` (${lineData.additionalIndex})` : ''}`,
-
-            // TODO: log types (change our splits, etc.)
             lineData.info.lineToLog( lineData )
-            // lineData.info.dataLength === 0 ? null : lineData.dataArray
           );
         } );
       } );
 
-      // console.log( ConsoleLogger.analyze( logResult ) );
-      // const data = new Uint32Array( logResult );
-      // const length = data[ 0 ];
-      // console.log( [ ...data ].slice( 1, length + 1 ) );
+      console.log( usedMessage );
     }
 
     this.buffersToCleanup.forEach( buffer => buffer.destroy() );
