@@ -24,6 +24,7 @@ ${template( ( {
   dataLength = 0, // number (of u32s)
   writeU32s = () => {}, // ( arrayVarName, offset ) => string statements --- only if dataLength > 0
   additionalIndex = null, // null | string:expression:u32 - if provided, will be used as an additional index for the log
+  deserialize = arr => arr.length > 1 ? arr : arr[ 0 ], // ( arr: Uint32Array ) => T, takes the data and turns it into a usable value
 } ) => {
 
   if ( !log ) {
@@ -43,7 +44,8 @@ ${template( ( {
       logName: name,
       shaderName: shaderName,
       dataLength: dataLength,
-      hasAdditionalIndex: additionalIndex !== null
+      hasAdditionalIndex: additionalIndex !== null,
+      deserialize: deserialize
     } );
 
     const fullLength =

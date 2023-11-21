@@ -9,11 +9,12 @@
 import { alpenglow, ComputeShader, DeviceContext, wgsl_main_log_barrier } from '../imports.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 
-export type ConsoleLogInfo = {
+export type ConsoleLogInfo<T = unknown> = {
   logName: string;
   shaderName: string;
   hasAdditionalIndex: boolean;
   dataLength: number;
+  deserialize: ( arr: Uint32Array ) => T;
 };
 
 export default class ConsoleLogger {
@@ -73,11 +74,14 @@ export default class ConsoleLogger {
 
       const rawData = data.slice( dataOffset, dataOffset + info.dataLength );
 
+      const deserializedData = rawData.length ? info.deserialize( rawData ) : null;
+
       entries.push( new ConsoleLogEntry(
         info,
         workgroupIndex,
         localIndex,
         rawData,
+        deserializedData,
         additionalIndex
       ) );
 
@@ -101,12 +105,17 @@ export default class ConsoleLogger {
   }
 }
 
+// export class ConsoleLoggedShader {
+//
+// }
+
 export class ConsoleLogEntry {
   public constructor(
     public readonly info: ConsoleLogInfo,
     public readonly workgroupIndex: Vector3,
     public readonly localIndex: Vector3,
     public readonly rawData: Uint32Array,
+    public readonly data: unknown,
     public readonly additionalIndex: number | null
   ) {}
 }

@@ -54,6 +54,13 @@ fn main(
 
   let num_valid_workgroups = ${ceil_divide_constant_divisor( length, workgroupSize * grainSize )};
 
+  ${log( {
+    name: 'num_valid_workgroups',
+    dataLength: 1,
+    writeU32s: ( arr, offset ) => `${arr}[ ${offset} ] = num_valid_workgroups;`,
+    deserialize: arr => arr[ 0 ],
+  } )}
+
   if ( workgroup_id.x < num_valid_workgroups ) {
     ${load_multiple( {
       loadExpression: index => `input[ ${index} ]`,
@@ -66,6 +73,18 @@ fn main(
       inputOrder: 'blocked',
       inputAccessOrder: 'striped',
       factorOutSubexpressions: factorOutSubexpressions,
+    } )}
+
+    ${log( {
+      name: 'initial data',
+      dataLength: grainSize,
+      writeU32s: ( arr, offset ) => `
+        workgroupBarrier();
+        ${unroll( 0, grainSize, i => `
+          ${arr}[ ${offset} + ${u32( i )} ] = value_scratch[ ${u32( grainSize )} * local_id.x + ${u32( i )} ];
+        `)}
+      `,
+      deserialize: arr => [ ...arr ],
     } )}
 
     ${comment( 'begin load histogram offsets' )}
