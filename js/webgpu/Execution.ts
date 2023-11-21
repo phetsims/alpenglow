@@ -264,7 +264,8 @@ export class BasicExecution extends BaseExecution implements Execution {
             `>>> ${lineData.info.logName}${lineData.additionalIndex !== null ? ` (${lineData.additionalIndex})` : ''}`,
 
             // TODO: log types (change our splits, etc.)
-            lineData.info.dataLength > 0 ? lineData.dataArray : null
+            lineData.info.lineToLog( lineData )
+            // lineData.info.dataLength === 0 ? null : lineData.dataArray
           );
         } );
       } );

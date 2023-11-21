@@ -12,6 +12,7 @@
 #import ./load_multiple
 #import ./n_bit_compact_single_sort
 #import ./log
+#import ./if_log
 
 #option workgroupSize
 #option grainSize
@@ -75,17 +76,41 @@ fn main(
       factorOutSubexpressions: factorOutSubexpressions,
     } )}
 
-    ${log( {
-      name: 'initial data',
-      dataLength: grainSize,
-      writeU32s: ( arr, offset ) => `
-        workgroupBarrier();
-        ${unroll( 0, grainSize, i => `
-          ${arr}[ ${offset} + ${u32( i )} ] = value_scratch[ ${u32( grainSize )} * local_id.x + ${u32( i )} ];
-        `)}
-      `,
-      deserialize: arr => [ ...arr ],
-    } )}
+    ${if_log( `
+      workgroupBarrier();
+      let base_log_index = workgroup_id.x * ${u32( workgroupSize * grainSize )};
+      let base_local_log_index = ${u32( grainSize )} * local_id.x;
+      let combined_base = base_log_index + base_local_log_index;
+
+      if ( combined_base < ${length} ) {
+        let log_length = min( ${length} - combined_base, ${u32( grainSize )} );
+
+      ${log( {
+        name: 'log_length',
+        dataLength: 1,
+        writeU32s: ( arr, offset ) => `${arr}[ ${offset} ] = log_length;`,
+        deserialize: arr => arr[ 0 ],
+        lineToLog: ConsoleLoggedLine.toLogExisting,
+      } )}
+
+        ${log( {
+          name: 'initial data',
+//          dataLength: grainSize,
+          dataLength: `log_length`,
+          writeU32s: ( arr, offset ) => `
+            for ( var _i = 0u; _i < log_length; _i++ ) {
+              ${arr}[ ${offset} + _i ] = value_scratch[ base_local_log_index + _i ];
+            }
+//            ${unroll( 0, grainSize, i => `
+//              ${arr}[ ${offset} + ${u32( i )} ] = value_scratch[ ${u32( grainSize )} * local_id.x + ${u32( i )} ];
+//            `)}
+          `,
+          deserialize: arr => [ ...arr ],
+          lineToLog: ConsoleLoggedLine.toLogExistingFlat,
+        } )}
+      }
+    ` )}
+
 
     ${comment( 'begin load histogram offsets' )}
     ${unroll( 0, Math.ceil( ( 2 ** bitQuantity ) / workgroupSize ), i => `

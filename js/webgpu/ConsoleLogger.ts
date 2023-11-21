@@ -17,8 +17,9 @@ export type ConsoleLogInfo<T = unknown> = {
   logName: string;
   shaderName: string;
   hasAdditionalIndex: boolean;
-  dataLength: number;
+  dataLength: number | null; // null if it is dynamic, and will be written into the entry
   deserialize: ( arr: Uint32Array ) => T;
+  lineToLog: ( line: ConsoleLoggedLine ) => unknown;
 };
 
 export default class ConsoleLogger {
@@ -47,47 +48,60 @@ export default class ConsoleLogger {
 
     let index = 1;
     while ( index < offsetLength ) {
-      const id = data[ index ];
+
+      // TODO: clean up old console.logs once this code is more mature
+
+      // console.log( `reading ${index}` );
+
+      const id = data[ index++ ];
 
       // handle "shader barriers" (null entries)
       if ( id === 0 ) {
+        // console.log( 'shader barrier' );
         if ( !shader.isEmpty() ) {
           shader.finalize();
           result.push( shader );
           shader = new ConsoleLoggedShader();
         }
-        index++;
         continue;
       }
 
+      // console.log( `id: ${id}` );
+
       const info = ConsoleLogger.identifierMap.get( id )!;
+      // if ( !info ) {
+      //   debugger;
+      // }
       assert && assert( info );
 
-      const length = info.dataLength + ( info.hasAdditionalIndex ? 1 : 0 ) + 7;
-
       const workgroupIndex = new Vector3(
-        data[ index + 1 ],
-        data[ index + 2 ],
-        data[ index + 3 ]
+        data[ index++ ],
+        data[ index++ ],
+        data[ index++ ]
       );
 
       const localIndex = new Vector3(
-        data[ index + 4 ],
-        data[ index + 5 ],
-        data[ index + 6 ]
+        data[ index++ ],
+        data[ index++ ],
+        data[ index++ ]
       );
 
-      const additionalIndex = info.hasAdditionalIndex ? data[ index + 7 ] : null;
+      const additionalIndex = info.hasAdditionalIndex ? data[ index++ ] : null;
+      const dataLength = info.dataLength === null ? data[ index++ ] : info.dataLength;
 
-      const dataOffset = index + ( info.hasAdditionalIndex ? 8 : 7 );
+      const dataOffset = index;
 
-      const rawData = data.slice( dataOffset, dataOffset + info.dataLength );
+      const rawData = data.slice( dataOffset, dataOffset + dataLength );
+      index += dataLength;
+
+      // if ( id === 4 ) {
+      //   debugger;
+      // }
 
       const deserializedData = rawData.length ? info.deserialize( rawData ) : null;
 
+      // console.log( info, workgroupIndex, localIndex, deserializedData, additionalIndex );
       shader.add( info, workgroupIndex, localIndex, deserializedData, additionalIndex );
-
-      index += length;
     }
 
     if ( !shader.isEmpty() ) {
@@ -176,8 +190,27 @@ export class ConsoleLoggedLine {
   public constructor(
     public readonly info: ConsoleLogInfo,
     public readonly additionalIndex: number | null,
-    public readonly dataArray: unknown[]
+    public readonly dataArray: unknown[],
+
+    // Stored so it can be used for display (since our data is matched to these)
+    public readonly threads: ConsoleLoggedThread[]
   ) {}
+
+  public static toLogNull( line: ConsoleLoggedLine ): unknown {
+    return null;
+  }
+
+  public static toLogRaw( line: ConsoleLoggedLine ): unknown {
+    return line.dataArray;
+  }
+
+  public static toLogExisting( line: ConsoleLoggedLine ): unknown {
+    return line.dataArray.filter( data => data !== null );
+  }
+
+  public static toLogExistingFlat( line: ConsoleLoggedLine ): unknown {
+    return line.dataArray.filter( data => data !== null ).flat();
+  }
 }
 
 export class ConsoleLoggedShader {
@@ -289,7 +322,8 @@ export class ConsoleLoggedShader {
       this.logLines.push( new ConsoleLoggedLine(
         firstEntry.info,
         firstEntry.additionalIndex,
-        entries.map( entry => entry ? entry.data : null )
+        entries.map( entry => entry ? entry.data : null ),
+        this.threads
       ) );
     } );
   }
