@@ -57,6 +57,7 @@ type Execution = {
     indirectBuffer: GPUBuffer,
     indirectOffset: number
   ) => void;
+  setLogBarrierShader: ( shader: ComputeShader ) => void;
 };
 export default Execution;
 
@@ -73,6 +74,8 @@ export abstract class BaseExecution {
   public readonly bufferLogger: BufferLogger;
 
   protected readonly buffersToCleanup: GPUBuffer[] = [];
+
+  private logBarrierShader: ComputeShader | null = null;
 
   public constructor(
     public readonly deviceContext: DeviceContext,
@@ -161,6 +164,10 @@ export abstract class BaseExecution {
     return this.bufferLogger.f32Numbers( this.encoder, buffer );
   }
 
+  public setLogBarrierShader( shader: ComputeShader ): void {
+    this.logBarrierShader = shader;
+  }
+
   public dispatch(
     shader: ComputeShader,
     resources: ( GPUBuffer | GPUTextureView )[],
@@ -168,6 +175,8 @@ export abstract class BaseExecution {
     dispatchY = 1,
     dispatchZ = 1
   ): void {
+    this.logBarrierShader && this.logBarrierShader.dispatch( this.encoder, [], 1, 1, 1, this.getDispatchOptions() );
+
     shader.dispatch( this.encoder, resources, dispatchX, dispatchY, dispatchZ, this.getDispatchOptions() );
   }
 
@@ -177,6 +186,8 @@ export abstract class BaseExecution {
     indirectBuffer: GPUBuffer,
     indirectOffset: number
   ): void {
+    this.logBarrierShader && this.logBarrierShader.dispatch( this.encoder, [], 1, 1, 1, this.getDispatchOptions() );
+
     shader.dispatchIndirect( this.encoder, resources, indirectBuffer, indirectOffset, this.getDispatchOptions() );
   }
 }

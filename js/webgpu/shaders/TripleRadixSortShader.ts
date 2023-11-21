@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_2, wgsl_main_scan_replace_reduce } from '../../imports.js';
+import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_2, wgsl_main_scan_replace_reduce } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type TripleRadixSortShaderOptions<T> = {
@@ -190,6 +190,8 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       }, reduceSharedOptions )
     );
 
+    const logShader = options.log ? await ConsoleLogger.getLogBarrierComputeShader( deviceContext ) : null;
+
     return new TripleRadixSortShader<T>( async ( execution: Execution, values: T[] ) => {
       const upperDispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
@@ -211,6 +213,8 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
       let inBuffer = inputBuffer;
       let outBuffer = otherDataBuffer;
+
+      logShader && execution.setLogBarrierShader( logShader );
 
       for ( let i = 0; i < iterationCount; i++ ) {
         execution.u32Numbers( inBuffer ).then( histogram => console.log( `input ${i}`, histogram ) ).catch( e => { throw e; } );

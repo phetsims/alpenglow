@@ -278,6 +278,8 @@ export { default as wgsl_main_scan_replace_add_2 } from '../wgsl/gpu/main_scan_r
 export { default as wgsl_main_radix_histogram } from '../wgsl/gpu/main_radix_histogram.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_radix_scatter } from '../wgsl/gpu/main_radix_scatter.js';
+// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
+export { default as wgsl_main_log_barrier } from '../wgsl/gpu/main_log_barrier.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';

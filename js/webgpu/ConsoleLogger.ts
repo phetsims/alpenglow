@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
+import { alpenglow, ComputeShader, DeviceContext, wgsl_main_log_barrier } from '../imports.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 
 export type ConsoleLogInfo = {
@@ -28,16 +28,28 @@ export default class ConsoleLogger {
     return id;
   }
 
-  public static toEntries( arrayBuffer: ArrayBuffer ): ConsoleLogEntry[] {
+  public static toEntries( arrayBuffer: ArrayBuffer ): ConsoleLogEntry[][] {
     const data = new Uint32Array( arrayBuffer );
     const length = data[ 0 ];
     const offsetLength = length + 1;
 
-    const entries = [];
+    const result: ConsoleLogEntry[][] = [];
+    let entries: ConsoleLogEntry[] = [];
 
     let index = 1;
     while ( index < offsetLength ) {
       const id = data[ index ];
+
+      // handle "shader barriers" (null entries)
+      if ( id === 0 ) {
+        if ( entries.length ) {
+          result.push( entries );
+          entries = [];
+        }
+        index++;
+        continue;
+      }
+
       const info = ConsoleLogger.identifierMap.get( id )!;
       assert && assert( info );
 
@@ -72,7 +84,20 @@ export default class ConsoleLogger {
       index += length;
     }
 
-    return entries;
+    if ( entries.length ) {
+      result.push( entries );
+    }
+
+    return result;
+  }
+
+  public static async getLogBarrierComputeShader( deviceContext: DeviceContext ): Promise<ComputeShader> {
+    // TODO: memoize
+    return ComputeShader.fromSourceAsync(
+      deviceContext.device, 'log barrier', wgsl_main_log_barrier, [], {
+        log: true
+      }
+    );
   }
 }
 
