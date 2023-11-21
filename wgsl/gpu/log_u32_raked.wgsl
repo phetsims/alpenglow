@@ -20,14 +20,19 @@ ${template( ( {
   grainSize,
   length = null, // ASSUMED to be provided? (if not provided(!)) TODO support not provided
   relativeLength = null,
-  skipWorkgroupBarrier = false,
-  accessExpression, // ( index ) => string:expression:u32
+  skipBarriers = false,
+
+  accessExpression = null, // ( index ) => string:expression:u32
+  relativeAccessExpression = null, // ( index ) => string:expression:u32
 } ) => {
+  assert && assert( !accessExpression !== !relativeAccessExpression, 'One should be provided' );
+
   return `
     ${if_log( `
       {
-        ${!skipWorkgroupBarrier ? `
+        ${!skipBarriers ? `
           workgroupBarrier();
+          storageBarrier();
         ` : ``}
 
         let base_log_index = workgroup_id.x * ${u32( workgroupSize * grainSize )};
@@ -57,7 +62,13 @@ ${template( ( {
           dataLength: `log_length`,
           writeU32s: ( arr, offset ) => `
             for ( var _i = 0u; _i < log_length; _i++ ) {
-              ${arr}[ ${offset} + _i ] = ${accessExpression( `base_local_log_index + _i` )};
+              ${accessExpression ? `
+                // "global" access
+                ${arr}[ ${offset} + _i ] = ${accessExpression( `combined_base + _i` )};
+              ` : `
+                // "local" access
+                ${arr}[ ${offset} + _i ] = ${relativeAccessExpression( `base_local_log_index + _i` )};
+              `}
             }
           `,
         } )}

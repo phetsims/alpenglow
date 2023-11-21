@@ -83,7 +83,7 @@ fn main(
       workgroupSize: workgroupSize,
       grainSize: grainSize,
       length: length,
-      accessExpression: index => `value_scratch[ ${index} ]`,
+      relativeAccessExpression: index => `value_scratch[ ${index} ]`,
     } )}
 
     ${comment( 'begin load histogram offsets' )}
@@ -102,7 +102,7 @@ fn main(
       workgroupSize: workgroupSize,
       grainSize: grainSize,
       relativeLength: u32( 1 << bitQuantity ),
-      accessExpression: index => `histogram_offsets[ ${index} ]`,
+      relativeAccessExpression: index => `histogram_offsets[ ${index} ]`,
     } )}
 
     // Our workgroupBarrier will apply for value_scratch AND local_histogram_offsets
@@ -138,7 +138,7 @@ fn main(
         workgroupSize: workgroupSize,
         grainSize: grainSize,
 //        length: length, TODO: in debugging, checking past the length is helpful!
-        accessExpression: index => `value_scratch[ ${index} ]`,
+        relativeAccessExpression: index => `value_scratch[ ${index} ]`,
         additionalIndex: `srs_i`,
       } )}
     }
@@ -190,16 +190,12 @@ fn main(
     `)}
     ${comment( 'end write output' )}
 
-    ${log( {
-      name: 'exit data',
-      dataLength: grainSize,
-      writeU32s: ( arr, offset ) => `
-        storageBarrier();
-        ${unroll( 0, grainSize, i => `
-          ${arr}[ ${offset} + ${u32( i )} ] = output[ ${u32( workgroupSize * grainSize )} * workgroup_id.x + ${u32( grainSize )} * local_id.x + ${u32( i )} ];
-        `)}
-      `,
-      deserialize: arr => [ ...arr ],
+    ${log_u32_raked( {
+      name: 'exit(!) data',
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      length: length,
+      accessExpression: index => `output[ ${index} ]`,
     } )}
   }
 }

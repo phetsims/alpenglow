@@ -105,6 +105,7 @@ ${template( ( {
             dataLength: 1,
             writeU32s: ( arr, offset ) => `${arr}[ ${offset} ] = tb_bits;`,
             deserialize: arr => arr[ 0 ],
+            lineToLog: ConsoleLoggedLine.toLogExisting
           } )}
 
           ${bit_pack_radix_increment( {
