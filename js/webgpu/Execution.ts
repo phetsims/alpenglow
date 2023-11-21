@@ -253,7 +253,7 @@ export class BasicExecution extends BaseExecution implements Execution {
 
     // TODO: better parsing of log results
     if ( logResult ) {
-      console.log( ConsoleLogger.toEntries( logResult ) );
+      console.log( ConsoleLogger.analyze( logResult ) );
       const data = new Uint32Array( logResult );
       const length = data[ 0 ];
       console.log( [ ...data ].slice( 1, length + 1 ) );

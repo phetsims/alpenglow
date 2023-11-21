@@ -29,13 +29,13 @@ export default class ConsoleLogger {
     return id;
   }
 
-  public static toEntries( arrayBuffer: ArrayBuffer ): ConsoleLogEntry[][] {
+  public static analyze( arrayBuffer: ArrayBuffer ): ConsoleLoggedShader[] {
     const data = new Uint32Array( arrayBuffer );
     const length = data[ 0 ];
     const offsetLength = length + 1;
 
-    const result: ConsoleLogEntry[][] = [];
-    let entries: ConsoleLogEntry[] = [];
+    const result: ConsoleLoggedShader[] = [];
+    let shader = new ConsoleLoggedShader();
 
     let index = 1;
     while ( index < offsetLength ) {
@@ -43,9 +43,10 @@ export default class ConsoleLogger {
 
       // handle "shader barriers" (null entries)
       if ( id === 0 ) {
-        if ( entries.length ) {
-          result.push( entries );
-          entries = [];
+        if ( !shader.isEmpty() ) {
+          shader.finalize();
+          result.push( shader );
+          shader = new ConsoleLoggedShader();
         }
         index++;
         continue;
@@ -76,20 +77,14 @@ export default class ConsoleLogger {
 
       const deserializedData = rawData.length ? info.deserialize( rawData ) : null;
 
-      entries.push( new ConsoleLogEntry(
-        info,
-        workgroupIndex,
-        localIndex,
-        rawData,
-        deserializedData,
-        additionalIndex
-      ) );
+      shader.add( info, workgroupIndex, localIndex, deserializedData, additionalIndex );
 
       index += length;
     }
 
-    if ( entries.length ) {
-      result.push( entries );
+    if ( !shader.isEmpty() ) {
+      shader.finalize();
+      result.push( shader );
     }
 
     return result;
@@ -105,19 +100,95 @@ export default class ConsoleLogger {
   }
 }
 
-// export class ConsoleLoggedShader {
-//
-// }
-
-export class ConsoleLogEntry {
+export class ConsoleLoggedEntry<T = unknown> {
   public constructor(
     public readonly info: ConsoleLogInfo,
-    public readonly workgroupIndex: Vector3,
-    public readonly localIndex: Vector3,
-    public readonly rawData: Uint32Array,
-    public readonly data: unknown,
+    public readonly data: T,
     public readonly additionalIndex: number | null
   ) {}
+}
+
+// TODO: Should we create ConsoleLoggedWorkgroup?
+export class ConsoleLoggedThread {
+
+  public readonly entries: ConsoleLoggedEntry[] = [];
+
+  public constructor(
+    public readonly workgroupIndex: Vector3,
+    public readonly localIndex: Vector3
+  ) {}
+
+  public add(
+    info: ConsoleLogInfo,
+    data: unknown,
+    additionalIndex: number | null
+  ): void {
+    this.entries.push( new ConsoleLoggedEntry( info, data, additionalIndex ) );
+  }
+
+  public compare( other: ConsoleLoggedThread ): number {
+    if ( this.workgroupIndex.z !== other.workgroupIndex.z ) {
+      return this.workgroupIndex.z - other.workgroupIndex.z;
+    }
+    if ( this.workgroupIndex.y !== other.workgroupIndex.y ) {
+      return this.workgroupIndex.y - other.workgroupIndex.y;
+    }
+    if ( this.workgroupIndex.x !== other.workgroupIndex.x ) {
+      return this.workgroupIndex.x - other.workgroupIndex.x;
+    }
+    if ( this.localIndex.z !== other.localIndex.z ) {
+      return this.localIndex.z - other.localIndex.z;
+    }
+    if ( this.localIndex.y !== other.localIndex.y ) {
+      return this.localIndex.y - other.localIndex.y;
+    }
+    if ( this.localIndex.x !== other.localIndex.x ) {
+      return this.localIndex.x - other.localIndex.x;
+    }
+    return 0;
+  }
+}
+
+export class ConsoleLoggedShader {
+
+  public shaderName: string | null = null;
+  public readonly threads: ConsoleLoggedThread[] = [];
+  public readonly threadMap: Record<string, ConsoleLoggedThread> = {};
+
+  public add(
+    info: ConsoleLogInfo,
+    workgroupIndex: Vector3,
+    localIndex: Vector3,
+    data: unknown,
+    additionalIndex: number | null
+  ): void {
+    const key = `${workgroupIndex.x},${workgroupIndex.y},${workgroupIndex.z},${localIndex.x},${localIndex.y},${localIndex.z}`;
+    let thread = this.threadMap[ key ];
+    if ( !thread ) {
+      thread = new ConsoleLoggedThread( workgroupIndex, localIndex );
+      this.threadMap[ key ] = thread;
+      this.threads.push( thread );
+    }
+    thread.add( info, data, additionalIndex );
+
+    if ( this.shaderName === null ) {
+      this.shaderName = info.shaderName;
+    }
+
+    assert && assert( this.shaderName === info.shaderName );
+  }
+
+  public isEmpty(): boolean {
+    return this.threads.length === 0;
+  }
+
+  public finalize(): void {
+    this.sortThreads();
+  }
+
+  private sortThreads(): void {
+    this.threads.sort( ( a, b ) => a.compare( b ) );
+  }
 }
 
 alpenglow.register( 'ConsoleLogger', ConsoleLogger );
