@@ -8,16 +8,12 @@
 
 import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_2, wgsl_main_scan_replace_reduce } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
+import { RadixComparable } from '../types/ConcreteType.js';
 
 export type TripleRadixSortShaderOptions<T> = {
-
-  // The type of the data for WGSL, e.g. 'f32'
-  valueType: string;
+  order: RadixComparable<T>;
 
   totalBits: number;
-
-  // Extracting the bits from the value
-  getBits: ( value: string, bitOffset: number, bitQuantity: number ) => string;
 
   workgroupSize?: number;
   grainSize?: number;
@@ -34,14 +30,8 @@ export type TripleRadixSortShaderOptions<T> = {
   nestSubexpressions?: boolean;
   isReductionExclusive?: boolean; // Whether our internal "reduces" data will be exclusive or inclusive (both are possible)
 
-  // The number of bytes
-  bytesPerElement: number;
-
   // TODO: we shouldn't have to pass this through everywhere, right?
   log?: boolean;
-
-  encodeElement: ( element: T, encoder: ByteEncoder ) => void;
-  decodeElement: ( encoder: ByteEncoder, offset: number ) => T;
 };
 
 const DEFAULT_OPTIONS = {
@@ -72,12 +62,15 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
   ): Promise<TripleRadixSortShader<T>> {
     const options = optionize3<TripleRadixSortShaderOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
 
+    const order = options.order;
+    const type = order.type;
+
     const dataCount = options.workgroupSize * options.grainSize;
 
     const iterationCount = Math.ceil( options.totalBits / options.bitQuantity );
 
     const radixSharedOptions: Record<string, unknown> = {
-      valueType: options.valueType,
+      valueType: type.valueType,
       workgroupSize: options.workgroupSize,
       grainSize: options.grainSize,
       factorOutSubexpressions: options.factorOutSubexpressions,
@@ -96,7 +89,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         ], combineOptions<ComputeShaderSourceOptions>( {
           length: options.lengthExpression,
           bitQuantity: options.bitQuantity,
-          getBits: ( value: string ) => options.getBits( value, i * options.bitQuantity, options.bitQuantity )
+          getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitQuantity, options.bitQuantity )
         }, radixSharedOptions )
       ) );
       scatterShaders.push( await ComputeShader.fromSourceAsync(
@@ -109,7 +102,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           bitQuantity: options.bitQuantity,
           innerBitQuantity: options.innerBitQuantity,
           innerBitVectorSize: options.innerBitVectorSize,
-          getBits: ( value: string ) => options.getBits( value, i * options.bitQuantity, options.bitQuantity ),
+          getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitQuantity, options.bitQuantity ),
           factorOutSubexpressions: options.factorOutSubexpressions,
           earlyLoad: options.earlyLoad
         }, radixSharedOptions )
@@ -204,12 +197,12 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
       // TODO: improve buffer usage patterns(!)
 
-      const inputBuffer = execution.createByteEncoderBuffer( new ByteEncoder().encodeValues( values, options.encodeElement ) );
+      const inputBuffer = execution.createByteEncoderBuffer( new ByteEncoder().encodeValues( values, type.encode ) );
       const histogramBuffer = execution.createBuffer( 4 * histogramElementCount );
       const scannedHistogramBuffer = execution.createBuffer( 4 * histogramElementCount ); // TODO: just replace
       const reductionBuffer = execution.createBuffer( 4 * middleDispatchSize );
       const doubleReductionBuffer = execution.createBuffer( 4 * lowerDispatchSize );
-      const otherDataBuffer = execution.createBuffer( options.bytesPerElement * values.length );
+      const otherDataBuffer = execution.createBuffer( type.bytesPerElement * values.length );
 
       let inBuffer = inputBuffer;
       let outBuffer = otherDataBuffer;
@@ -262,7 +255,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         outBuffer = temp;
       }
 
-      return new ByteEncoder( await execution.arrayBuffer( inBuffer ) ).decodeValues( options.decodeElement, options.bytesPerElement ).slice( 0, values.length );
+      return new ByteEncoder( await execution.arrayBuffer( inBuffer ) ).decodeValues( type.decode, type.bytesPerElement ).slice( 0, values.length );
     } );
   }
 }

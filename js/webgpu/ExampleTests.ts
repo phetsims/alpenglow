@@ -2486,8 +2486,8 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
 } );
 
 asyncTestWithDevice( 'u32 triple radix sort', async ( device, deviceContext ) => {
-  const comparison = U32Order;
-  const type = comparison.type;
+  const order = U32Order;
+  const type = order.type;
 
   const totalBits = 32;
   const bitQuantity = 3;
@@ -2507,9 +2507,9 @@ asyncTestWithDevice( 'u32 triple radix sort', async ( device, deviceContext ) =>
   const inputSize = 65;
 
   const shader = await TripleRadixSortShader.create<number>( deviceContext, 'u32 triple radix sort', {
-    valueType: type.valueType,
+    order: order,
+
     totalBits: totalBits,
-    getBits: comparison.getBitsWGSL,
 
     workgroupSize: workgroupSize,
     grainSize: grainSize,
@@ -2526,14 +2526,8 @@ asyncTestWithDevice( 'u32 triple radix sort', async ( device, deviceContext ) =>
     nestSubexpressions: nestSubexpressions,
     isReductionExclusive: isReductionExclusive,
 
-    // The number of bytes
-    bytesPerElement: type.bytesPerElement,
-
     // TODO: is there a good way where we might not have to pass this in to both places?
-    log: log,
-
-    encodeElement: type.encode,
-    decodeElement: type.decode
+    log: log
   } );
 
   const inputValues = _.range( 0, inputSize ).map( () => type.generateRandom( true ) );
@@ -2548,7 +2542,7 @@ asyncTestWithDevice( 'u32 triple radix sort', async ( device, deviceContext ) =>
     log: log
   } );
 
-  const expectedValues: number[] = inputValues.slice().sort( comparison.compare );
+  const expectedValues: number[] = inputValues.slice().sort( order.compare );
 
   // console.log( actualValues );
 
@@ -2556,7 +2550,7 @@ asyncTestWithDevice( 'u32 triple radix sort', async ( device, deviceContext ) =>
     const expected = expectedValues[ i ];
     const actual = actualValues[ i ];
 
-    if ( !comparison.equals( expected, actual ) ) {
+    if ( !order.equals( expected, actual ) ) {
       console.log( 'input' );
       console.log( inputValues );
 
