@@ -35,7 +35,7 @@ var<storage> input: array<${valueType}>;
 @group(0) @binding(1)
 var<storage> histogram_offsets: array<u32>;
 @group(0) @binding(2)
-var<storage, read_write> output: array<u32>;
+var<storage, read_write> output: array<${valueType}>;
 
 // TODO: see how we can potentially reuse some memory?
 var<workgroup> bits_scratch: array<${{ 1: 'u32', 2: 'vec2u', 3: 'vec3u', 4: 'vec4u' }[ innerBitVectorSize ]}, ${workgroupSize}>;

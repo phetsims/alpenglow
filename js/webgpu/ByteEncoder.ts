@@ -230,6 +230,22 @@ export default class ByteEncoder {
     return ByteEncoder.padLeft( n.toString( 2 ), '0', 32 );
   }
 
+  // A safer right-shift that handles negative and out-of-range values
+  public static rightShiftU32( n: number, shift: number ): number {
+    if ( shift >= 32 ) {
+      return 0;
+    }
+    else if ( shift >= 0 ) {
+      return n >>> shift;
+    }
+    else if ( shift >= -31 ) {
+      return ( n << -shift ) >>> 0;
+    }
+    else {
+      return 0;
+    }
+  }
+
   public getDebug32String(): string {
     const u32Array = this.u32Array;
     const i32Array = this.i32Array;

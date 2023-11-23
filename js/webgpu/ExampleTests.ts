@@ -8,10 +8,11 @@
 
 // eslint-disable-next-line single-line-import
 import {
-  AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, ComputeShader, ConcreteType, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, Vec2uBic, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
+  AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, ComputeShader, ConcreteType, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, U32ReverseOrder, Vec2uBic, Vec2uLexicographicalOrder, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
 } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import { Comparable, RadixComparable } from './types/ConcreteType.js';
 
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
@@ -63,7 +64,7 @@ const compareArrays = <T>( type: ConcreteType<T>, inputValues: T[], expectedValu
       console.log( 'actual' );
       console.log( actualValues );
 
-      return `expected ${type.toDebugString( expected )}, actual ${type.toDebugString( actual )}`;
+      return `expected ${type.toDebugString( expected )}, actual ${type.toDebugString( actual )} at index ${i}`;
     }
   }
 
@@ -2394,53 +2395,75 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
   return compareArrays( type, inputValues, expectedValues, actualValues );
 } );
 
-asyncTestWithDevice( 'u32 triple radix sort', async ( device, deviceContext ) => {
-  const order = U32Order;
-  const type = order.type;
+type RadixSortOptions<T> = {
+  order: RadixComparable<T> & Comparable<T>;
+  fullSize: boolean;
+};
 
-  const totalBits = 32;
-  const bitQuantity = 3;
-  const innerBitQuantity = 2;
-  const innerBitVectorSize = 1;
-  const earlyLoad = false;
-  const factorOutSubexpressions = true;
-  const nestSubexpressions = false;
-  const isReductionExclusive = false;
+// Just do Comparable for easier testing
+const testTripleRadixSort = <T>( options: RadixSortOptions<T> ) => {
+  const name = `${options.order.name} triple radix sort (fullSize:${options.fullSize})`;
+  asyncTestWithDevice( name, async ( device, deviceContext ) => {
+    const type = options.order.type;
 
-  const workgroupSize = 8;
-  const grainSize = 4;
+    const bitQuantity = 3;
+    const innerBitQuantity = 2;
+    const innerBitVectorSize = 1; // TODO: compute this(!), and make sure it isn't more than 4
+    const earlyLoad = false;
+    const factorOutSubexpressions = true;
+    const nestSubexpressions = false;
+    const isReductionExclusive = false;
 
-  const inputSize = ( workgroupSize * grainSize ) * workgroupSize * grainSize * 5 - 27;
+    const workgroupSize = 8;
+    const grainSize = 4;
 
-  const shader = await TripleRadixSortShader.create<number>( deviceContext, 'u32 triple radix sort', {
-    order: order,
+    const inputSize = ( workgroupSize * grainSize ) * workgroupSize * grainSize * 5 - 27;
 
-    totalBits: totalBits,
+    const shader = await TripleRadixSortShader.create<T>( deviceContext, name, {
+      order: options.order,
 
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    lengthExpression: u32( inputSize ),
+      totalBits: type.bytesPerElement * 8,
 
-    // radix options
-    bitQuantity: bitQuantity,
-    innerBitQuantity: innerBitQuantity,
-    innerBitVectorSize: innerBitVectorSize, // TODO: compute this(!), and make sure it isn't more than 4
-    earlyLoad: earlyLoad,
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      lengthExpression: u32( inputSize ),
 
-    // scan options
-    factorOutSubexpressions: factorOutSubexpressions,
-    nestSubexpressions: nestSubexpressions,
-    isReductionExclusive: isReductionExclusive,
+      // radix options
+      bitQuantity: bitQuantity,
+      innerBitQuantity: innerBitQuantity,
+      innerBitVectorSize: innerBitVectorSize, // TODO: compute this(!), and make sure it isn't more than 4
+      earlyLoad: earlyLoad,
 
-    log: false
+      // scan options
+      factorOutSubexpressions: factorOutSubexpressions,
+      nestSubexpressions: nestSubexpressions,
+      isReductionExclusive: isReductionExclusive,
+
+      log: false
+    } );
+
+    const inputValues = _.range( 0, inputSize ).map( () => type.generateRandom( options.fullSize ) );
+
+    const actualValues = await deviceContext.executeShader( shader, inputValues );
+
+    const expectedValues: T[] = inputValues.slice().sort( options.order.compare );
+
+    return compareArrays( type, inputValues, expectedValues, actualValues );
   } );
+};
 
-  const inputValues = _.range( 0, inputSize ).map( () => type.generateRandom( true ) );
-
-  const actualValues = await deviceContext.executeShader( shader, inputValues );
-
-  // TODO: test with different types, factor out number here
-  const expectedValues: number[] = inputValues.slice().sort( order.compare );
-
-  return compareArrays( type, inputValues, expectedValues, actualValues );
+[ false, true ].forEach( fullSize => {
+  testTripleRadixSort( {
+    order: U32Order,
+    fullSize: fullSize
+  } );
+  testTripleRadixSort( {
+    order: U32ReverseOrder,
+    fullSize: fullSize
+  } );
+  testTripleRadixSort( {
+    order: Vec2uLexicographicalOrder,
+    fullSize: fullSize
+  } );
 } );
+

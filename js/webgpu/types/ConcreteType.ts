@@ -126,7 +126,7 @@ export const U32Type: ConcreteType<number> = {
 };
 
 export const U32Add: BinaryOp<number> = {
-  name: 'u32Add',
+  name: 'u32 addition',
   type: U32Type,
   isCommutative: true,
 
@@ -138,9 +138,10 @@ export const U32Add: BinaryOp<number> = {
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
+// TODO: add other atomic typesf
 
 export const U32Order: ( RadixComparable<number> & Comparable<number> ) = {
-  name: 'u32Order',
+  name: 'u32 order',
   type: U32Type,
 
   compare( a: number, b: number ): number {
@@ -171,7 +172,35 @@ export const U32Order: ( RadixComparable<number> & Comparable<number> ) = {
   }
 };
 
-// TODO: add other atomic typesf
+export const U32ReverseOrder: ( RadixComparable<number> & Comparable<number> ) = {
+  name: 'u32 reverse order',
+  type: U32Type,
+
+  compare( a: number, b: number ): number {
+    return b - a;
+  },
+
+  getBits: ( value: number, bitOffset: number, bitQuantity: number ): number => {
+    return ( ( ( 0xffffffff - value ) >>> bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0;
+  },
+
+  compareWGSL: ( a: string, b: string ): string => {
+    return `select( -1i, select( 0i, 1i, ${a} < ${b} ), ${a} > ${b} )`;
+  },
+
+  greaterThan: ( a: string, b: string ): string => {
+    return `( ${a} < ${b} )`;
+  },
+
+  lessThanOrEqual: ( a: string, b: string ): string => {
+    return `( ${a} >= ${b} )`;
+  },
+
+  getBitsWGSL: ( value: string, bitOffset: number, bitQuantity: number ): string => {
+    // TODO: is there a bitwise trick?
+    return `( ( ( 0xffffffffu - ${value} ) >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
+  }
+};
 
 export const I32Type: ConcreteType<number> = {
   name: 'i32',
@@ -242,7 +271,7 @@ export const Vec2uType: ConcreteType<Vector2> = {
 };
 
 export const Vec2uBic: BinaryOp<Vector2> = {
-  name: 'vec2uBic',
+  name: 'vec2u bicyclic semigroup',
   type: Vec2uType,
   isCommutative: false,
 
@@ -258,4 +287,48 @@ export const Vec2uBic: BinaryOp<Vector2> = {
   identityWGSL: 'vec2( 0u )',
   combineExpression: ( a: string, b: string ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b} - min( ${a}.y, ${b}.x );`
+};
+
+export const Vec2uLexicographicalOrder: ( RadixComparable<Vector2> & Comparable<Vector2> ) = {
+  name: 'vec2u lexicographical order',
+  type: Vec2uType,
+
+  compare( a: Vector2, b: Vector2 ): number {
+    const xOrder = U32Order.compare( a.x, b.x );
+    if ( xOrder !== 0 ) {
+      return xOrder;
+    }
+    else {
+      return U32Order.compare( a.y, b.y );
+    }
+  },
+
+  // TODO: test
+  getBits: ( value: Vector2, bitOffset: number, bitQuantity: number ): number => {
+    return ( ( ByteEncoder.rightShiftU32( value.x, bitOffset - 32 ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0 ) +
+           ( ( ByteEncoder.rightShiftU32( value.y, bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0 );
+  },
+
+  // TODO: support statements
+  compareWGSL: ( a: string, b: string ): string => {
+    return `select( -1i, select( select( -1i, select( 0i, 1i, ${a}.y > ${b}.y ), ${a}.y < ${b}.y ), 1i, ${a}.x > ${b}.x ), ${a}.x < ${b}.x )`;
+  },
+
+  greaterThan: ( a: string, b: string ): string => {
+    return `( ${a}.x > ${b}.x || ( ${a}.x == ${b}.x && ${a}.y > ${b}.y ) )`;
+  },
+
+  lessThanOrEqual: ( a: string, b: string ): string => {
+    return `( ${a}.x <= ${b}.x && ( ${a}.x != ${b}.x || ${a}.y <= ${b}.y ) )`;
+  },
+
+  // TODO: test
+  getBitsWGSL: ( value: string, bitOffset: number, bitQuantity: number ): string => {
+    if ( bitOffset < 32 ) {
+      return `( ( ( ${value}.x << ${u32( 32 - bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} ) | ( ( ${value}.y >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} ) )`;
+    }
+    else {
+      return `( ( ${value}.x >> ${u32( bitOffset - 32 )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
+    }
+  }
 };
