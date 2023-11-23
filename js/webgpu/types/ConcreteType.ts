@@ -14,7 +14,16 @@ import Random from '../../../../dot/js/Random.js';
 const random = new Random();
 
 type ConcreteType<T> = {
+  name: string;
+
   bytesPerElement: number;
+
+  // TS
+  equals: ( a: T, b: T ) => boolean;
+
+  // WGSL
+  // ( a: expr:T, b: expr:T ) => expr:bool
+  equalsWGSL: ( a: string, b: string ) => string;
 
   // Encodes a given value into the end of the encoder
   encode( value: T, encoder: ByteEncoder ): void;
@@ -35,7 +44,7 @@ type ConcreteType<T> = {
   // Helper for testing
   generateRandom( fullSize?: boolean ): T;
 
-  getDebugString( value: T ): string;
+  toDebugString( value: T ): string;
 
   // TODO: reading? (e.g. from structure-of-arrays, but also from just... other types and generic u32 buffers?)
 };
@@ -43,20 +52,23 @@ type ConcreteType<T> = {
 export default ConcreteType;
 
 export type BinaryOp<T> = {
+  name: string;
   type: ConcreteType<T>;
   isCommutative: boolean;
 
   // TS
+  identity: T;
   apply: ( a: T, b: T ) => T;
 
   // WGSL
-  identity: string;
+  identityWGSL: string;
   combineExpression?: ( a: string, b: string ) => string;
   combineStatements?: ( varName: string, a: string, b: string ) => string;
   atomicName?: string;
 };
 
 export type RadixComparable<T> = {
+  name: string;
   type: ConcreteType<T>;
 
   // TS
@@ -67,15 +79,13 @@ export type RadixComparable<T> = {
 };
 
 export type Comparable<T> = {
+  name: string;
   type: ConcreteType<T>;
 
   // TS
-  equals: ( a: T, b: T ) => boolean;
   compare: ( a: T, b: T ) => number;
 
   // WGSL
-  // ( a: expr:T, b: expr:T ) => expr:bool
-  equalsWGSL: ( a: string, b: string ) => string;
   // ( a: expr:T, b: expr:T ) => expr:i32
   compareWGSL: ( a: string, b: string ) => string;
   // ( a: expr:T, b: expr:T ) => expr:bool
@@ -85,7 +95,16 @@ export type Comparable<T> = {
 };
 
 export const U32Type: ConcreteType<number> = {
+  name: 'u32',
   bytesPerElement: 4,
+
+  equals( a: number, b: number ): boolean {
+    return a === b;
+  },
+
+  equalsWGSL: ( a: string, b: string ): string => {
+    return `( ${a} == ${b} )`;
+  },
 
   encode( value: number, encoder: ByteEncoder ): void {
     encoder.pushU32( value );
@@ -103,27 +122,26 @@ export const U32Type: ConcreteType<number> = {
 
   generateRandom: ( fullSize = false ) => random.nextIntBetween( 0, fullSize ? 0xffffffff : 0xff ),
 
-  getDebugString: ( value: number ) => value.toString()
+  toDebugString: ( value: number ) => value.toString()
 };
 
 export const U32Add: BinaryOp<number> = {
+  name: 'u32Add',
   type: U32Type,
   isCommutative: true,
 
+  identity: 0,
   apply: ( a: number, b: number ): number => a + b,
 
-  identity: '0u',
+  identityWGSL: '0u',
   combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
 
 export const U32Order: ( RadixComparable<number> & Comparable<number> ) = {
+  name: 'u32Order',
   type: U32Type,
-
-  equals( a: number, b: number ): boolean {
-    return a === b;
-  },
 
   compare( a: number, b: number ): number {
     return a - b;
@@ -131,10 +149,6 @@ export const U32Order: ( RadixComparable<number> & Comparable<number> ) = {
 
   getBits: ( value: number, bitOffset: number, bitQuantity: number ): number => {
     return ( ( value >>> bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0;
-  },
-
-  equalsWGSL: ( a: string, b: string ): string => {
-    return `( ${a} == ${b} )`;
   },
 
   compareWGSL: ( a: string, b: string ): string => {
@@ -160,7 +174,16 @@ export const U32Order: ( RadixComparable<number> & Comparable<number> ) = {
 // TODO: add other atomic typesf
 
 export const I32Type: ConcreteType<number> = {
+  name: 'i32',
   bytesPerElement: 4,
+
+  equals( a: number, b: number ): boolean {
+    return a === b;
+  },
+
+  equalsWGSL: ( a: string, b: string ): string => {
+    return `( ${a} == ${b} )`;
+  },
 
   encode( value: number, encoder: ByteEncoder ): void {
     encoder.pushI32( value );
@@ -178,11 +201,21 @@ export const I32Type: ConcreteType<number> = {
 
   generateRandom: ( fullSize = false ) => random.nextIntBetween( 0, fullSize ? -0x7fffffff : -0x7f, fullSize ? 0x7fffffff : 0x7f ),
 
-  getDebugString: ( value: number ) => value.toString()
+  toDebugString: ( value: number ) => value.toString()
 };
 
 export const Vec2uType: ConcreteType<Vector2> = {
+  name: 'vec2u',
   bytesPerElement: 8,
+
+  equals( a: Vector2, b: Vector2 ): boolean {
+    return a.equals( b );
+  },
+
+  equalsWGSL: ( a: string, b: string ): string => {
+    // TODO: test
+    return `all( ${a} == ${b} )`;
+  },
 
   encode( value: Vector2, encoder: ByteEncoder ): void {
     encoder.pushU32( value.x );
@@ -205,13 +238,15 @@ export const Vec2uType: ConcreteType<Vector2> = {
     U32Type.generateRandom( fullSize )
   ),
 
-  getDebugString: ( value: Vector2 ) => `vec2u(${value.x}, ${value.y})`
+  toDebugString: ( value: Vector2 ) => `vec2u(${value.x}, ${value.y})`
 };
 
 export const Vec2uBic: BinaryOp<Vector2> = {
+  name: 'vec2uBic',
   type: Vec2uType,
   isCommutative: false,
 
+  identity: Vector2.ZERO,
   apply: ( a: Vector2, b: Vector2 ): Vector2 => {
     const min = Math.min( a.y, b.x );
     return new Vector2(
@@ -220,7 +255,7 @@ export const Vec2uBic: BinaryOp<Vector2> = {
     );
   },
 
-  identity: 'vec2( 0u )',
+  identityWGSL: 'vec2( 0u )',
   combineExpression: ( a: string, b: string ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b} - min( ${a}.y, ${b}.x );`
 };

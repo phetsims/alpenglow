@@ -6,21 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_scan } from '../../imports.js';
+import { alpenglow, BinaryOp, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_scan } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type SingleScanShaderOptions<T> = {
-
-  // The type of the data for WGSL, e.g. 'f32'
-  valueType: string;
-
-  identityExpression: string;
+  binaryOp: BinaryOp<T>;
 
   exclusive?: boolean;
-
-  // One of these two "combine" options should be provided.
-  combineExpression?: ( ( aExpression: string, bExpression: string ) => string ) | null;
-  combineStatements?: ( ( varName: string, aExpression: string, bExpression: string ) => string ) | null;
 
   workgroupSize?: number;
   grainSize?: number;
@@ -37,24 +29,20 @@ export type SingleScanShaderOptions<T> = {
 
   factorOutSubexpressions?: boolean;
 
-  // The number of bytes
-  bytesPerElement: number;
-
-  encodeElement: ( element: T, encoder: ByteEncoder ) => void;
-  decodeElement: ( encoder: ByteEncoder, offset: number ) => T;
+  log?: boolean;
 };
 
 const DEFAULT_OPTIONS = {
   workgroupSize: 256,
   grainSize: 8,
-  combineExpression: null,
-  combineStatements: null,
   lengthExpression: null,
   inputOrder: 'blocked',
   inputAccessOrder: 'striped', // TODO: why would we ever want non-striped? hmm
   factorOutSubexpressions: true,
   exclusive: false,
-  getAddedValue: null
+  getAddedValue: null,
+
+  log: false
 } as const;
 
 export default class SingleScanShader<T> extends ExecutableShader<T[], T[]> {
@@ -66,15 +54,18 @@ export default class SingleScanShader<T> extends ExecutableShader<T[], T[]> {
   ): Promise<SingleScanShader<T>> {
     const options = optionize3<SingleScanShaderOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
 
+    const binaryOp = options.binaryOp;
+    const type = binaryOp.type;
+
     const shader = await ComputeShader.fromSourceAsync(
       deviceContext.device, name, wgsl_main_scan, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
       ], {
-        valueType: options.valueType,
-        identity: options.identityExpression,
-        combineExpression: options.combineExpression,
-        combineStatements: options.combineStatements,
+        valueType: type.valueType,
+        identity: binaryOp.identityWGSL,
+        combineExpression: binaryOp.combineExpression,
+        combineStatements: binaryOp.combineExpression ? null : binaryOp.combineStatements,
         length: options.lengthExpression,
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
@@ -82,22 +73,23 @@ export default class SingleScanShader<T> extends ExecutableShader<T[], T[]> {
         inputAccessOrder: options.inputAccessOrder,
         factorOutSubexpressions: options.factorOutSubexpressions,
         exclusive: options.exclusive,
-        getAddedValue: options.getAddedValue
+        getAddedValue: options.getAddedValue,
+        log: options.log
       }
     );
 
     return new SingleScanShader<T>( async ( execution: Execution, values: T[] ) => {
       const dispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
-      const inputBuffer = execution.createByteEncoderBuffer( new ByteEncoder().encodeValues( values, options.encodeElement ) );
-      const outputBuffer = execution.createBuffer( options.bytesPerElement * values.length );
+      const inputBuffer = execution.createByteEncoderBuffer( new ByteEncoder().encodeValues( values, type.encode ) );
+      const outputBuffer = execution.createBuffer( type.bytesPerElement * values.length );
 
       execution.dispatch( shader, [
         inputBuffer, outputBuffer
       ], dispatchSize );
 
-      return new ByteEncoder( await execution.arrayBuffer( outputBuffer ) ).decodeValues( options.decodeElement, options.bytesPerElement ).slice( 0, values.length );
-    } );
+      return new ByteEncoder( await execution.arrayBuffer( outputBuffer ) ).decodeValues( type.decode, type.bytesPerElement ).slice( 0, values.length );
+    }, options );
   }
 }
 
