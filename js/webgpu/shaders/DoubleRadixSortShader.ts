@@ -6,18 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_1 } from '../../imports.js';
+import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_1 } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
+import { RadixComparable } from '../types/ConcreteType.js';
 
 export type DoubleRadixSortShaderOptions<T> = {
-
-  // The type of the data for WGSL, e.g. 'f32'
-  valueType: string;
+  order: RadixComparable<T>;
 
   totalBits: number;
-
-  // Extracting the bits from the value
-  getBits: ( value: string, bitOffset: number, bitQuantity: number ) => string;
 
   workgroupSize?: number;
   grainSize?: number;
@@ -34,11 +30,7 @@ export type DoubleRadixSortShaderOptions<T> = {
   nestSubexpressions?: boolean;
   isReductionExclusive?: boolean; // Whether our internal "reduces" data will be exclusive or inclusive (both are possible)
 
-  // The number of bytes
-  bytesPerElement: number;
-
-  encodeElement: ( element: T, encoder: ByteEncoder ) => void;
-  decodeElement: ( encoder: ByteEncoder, offset: number ) => T;
+  log?: boolean;
 };
 
 const DEFAULT_OPTIONS = {
@@ -55,7 +47,7 @@ const DEFAULT_OPTIONS = {
   nestSubexpressions: false,
   isReductionExclusive: false,
 
-  exclusive: false
+  log: false
 } as const;
 
 export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]> {
@@ -67,16 +59,20 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
   ): Promise<DoubleRadixSortShader<T>> {
     const options = optionize3<DoubleRadixSortShaderOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
 
+    const order = options.order;
+    const type = order.type;
+
     const dataCount = options.workgroupSize * options.grainSize;
 
     const iterationCount = Math.ceil( options.totalBits / options.bitQuantity );
 
     const radixSharedOptions: Record<string, unknown> = {
-      valueType: options.valueType,
+      valueType: type.valueType,
       workgroupSize: options.workgroupSize,
       grainSize: options.grainSize,
       factorOutSubexpressions: options.factorOutSubexpressions,
-      nestSubexpressions: options.nestSubexpressions
+      nestSubexpressions: options.nestSubexpressions,
+      log: options.log
     };
 
     const histogramShaders: ComputeShader[] = [];
@@ -90,7 +86,7 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         ], combineOptions<ComputeShaderSourceOptions>( {
           length: options.lengthExpression,
           bitQuantity: options.bitQuantity,
-          getBits: ( value: string ) => options.getBits( value, i * options.bitQuantity, options.bitQuantity )
+          getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitQuantity, options.bitQuantity )
         }, radixSharedOptions )
       ) );
       scatterShaders.push( await ComputeShader.fromSourceAsync(
@@ -103,7 +99,7 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           bitQuantity: options.bitQuantity,
           innerBitQuantity: options.innerBitQuantity,
           innerBitVectorSize: options.innerBitVectorSize,
-          getBits: ( value: string ) => options.getBits( value, i * options.bitQuantity, options.bitQuantity ),
+          getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitQuantity, options.bitQuantity ),
           factorOutSubexpressions: options.factorOutSubexpressions,
           earlyLoad: options.earlyLoad
         }, radixSharedOptions )
@@ -118,7 +114,8 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       combineExpression: ( a: string, b: string ) => `${a} + ${b}`,
       combineStatements: null,
       factorOutSubexpressions: options.factorOutSubexpressions,
-      nestSubexpressions: options.nestSubexpressions
+      nestSubexpressions: options.nestSubexpressions,
+      log: options.log
     };
 
     const scanLength = options.lengthExpression ? `( ( ( ( ${options.lengthExpression} ) + ${u32( options.workgroupSize * options.grainSize - 1 )} ) / ${u32( options.workgroupSize * options.grainSize )} ) << ${u32( options.bitQuantity )} )` : null;
@@ -164,6 +161,9 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       }, reduceSharedOptions )
     );
 
+    // TODO: can we factor this out(!)
+    const logShader = options.log ? await ConsoleLogger.getLogBarrierComputeShader( deviceContext ) : null;
+
     return new DoubleRadixSortShader<T>( async ( execution: Execution, values: T[] ) => {
       const upperDispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
@@ -175,14 +175,16 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
       // TODO: improve buffer usage patterns(!)
 
-      const inputBuffer = execution.createByteEncoderBuffer( new ByteEncoder().encodeValues( values, options.encodeElement ) );
+      const inputBuffer = execution.createByteEncoderBuffer( new ByteEncoder().encodeValues( values, type.encode ) );
       const histogramBuffer = execution.createBuffer( 4 * histogramElementCount );
       const scannedHistogramBuffer = execution.createBuffer( 4 * histogramElementCount ); // TODO: just replace
       const reductionBuffer = execution.createBuffer( 4 * middleDispatchSize );
-      const otherDataBuffer = execution.createBuffer( options.bytesPerElement * values.length );
+      const otherDataBuffer = execution.createBuffer( type.bytesPerElement * values.length );
 
       let inBuffer = inputBuffer;
       let outBuffer = otherDataBuffer;
+
+      logShader && execution.setLogBarrierShader( logShader );
 
       for ( let i = 0; i < iterationCount; i++ ) {
         // execution.u32Numbers( inBuffer ).then( histogram => console.log( `input ${i}`, histogram ) ).catch( e => { throw e; } );
@@ -216,8 +218,8 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         outBuffer = temp;
       }
 
-      return new ByteEncoder( await execution.arrayBuffer( inBuffer ) ).decodeValues( options.decodeElement, options.bytesPerElement ).slice( 0, values.length );
-    } );
+      return new ByteEncoder( await execution.arrayBuffer( inBuffer ) ).decodeValues( type.decode, type.bytesPerElement ).slice( 0, values.length );
+    }, options );
   }
 }
 

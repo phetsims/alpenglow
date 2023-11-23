@@ -47,9 +47,7 @@ const DEFAULT_OPTIONS = {
   nestSubexpressions: false,
   isReductionExclusive: false,
 
-  log: false,
-
-  exclusive: false
+  log: false
 } as const;
 
 export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]> {

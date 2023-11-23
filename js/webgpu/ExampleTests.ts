@@ -2411,6 +2411,9 @@ const testBicTripleScan = ( options: MultilevelTestScanOptions ) => {
 } );
 
 asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) => {
+  const order = U32Order;
+  const type = order.type;
+
   const totalBits = 32;
   const bitQuantity = 3;
   const innerBitQuantity = 2;
@@ -2426,11 +2429,8 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
   const inputSize = ( workgroupSize * grainSize ) * 5 - 27;
 
   const shader = await DoubleRadixSortShader.create<number>( deviceContext, 'u32 double radix sort', {
-    valueType: 'u32',
+    order: order,
     totalBits: totalBits,
-    getBits: ( value: string, bitOffset: number, bitQuantity: number ) => {
-      return `( ( ${value} >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
-    },
 
     workgroupSize: workgroupSize,
     grainSize: grainSize,
@@ -2447,27 +2447,22 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
     nestSubexpressions: nestSubexpressions,
     isReductionExclusive: isReductionExclusive,
 
-    // The number of bytes
-    bytesPerElement: 4,
-
-    encodeElement: ( n: number, encoder: ByteEncoder ) => encoder.pushU32( n ),
-    decodeElement: ( encoder: ByteEncoder, offset: number ) => encoder.fullU32Array[ offset ]
+    log: false
   } );
 
-  const numbers = _.range( 0, inputSize ).map( () => random.nextIntBetween( 0, 0xff ) );
-  // const numbers = [ 4, 9, 11, 15, 15, 16, 22, 24, 24, 29, 35, 38, 38, 41, 49, 53, 68, 79, 88, 89, 89, 90, 92, 94, 94, 112, 112, 122, 124, 129, 137, 159, 161, 164, 177, 177, 184, 186, 187, 187, 194, 201, 211, 212, 214, 219, 223, 227, 229, 233, 238, 240, 247 ];
+  const inputValues = _.range( 0, inputSize ).map( () => type.generateRandom( true ) );
 
-  const actualValue = await deviceContext.executeShader( shader, numbers );
+  const actualValue = await deviceContext.executeShader( shader, inputValues );
 
-  const expectedValue: number[] = numbers.slice().sort( ( a, b ) => a - b );
+  const expectedValue: number[] = inputValues.slice().sort( order.compare );
 
   for ( let i = 0; i < expectedValue.length; i++ ) {
     const expected = expectedValue[ i ];
     const actual = actualValue[ i ];
 
-    if ( expected !== actual ) {
+    if ( !order.equals( expected, actual ) ) {
       console.log( 'input' );
-      console.log( numbers );
+      console.log( inputValues );
 
       console.log( 'expected' );
       console.log( expectedValue );
@@ -2478,7 +2473,7 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
       // eslint-disable-next-line no-debugger
       debugger;
 
-      return `expected ${expected.toString()}, actual ${actual.toString()} ${i}`;
+      return `expected ${type.getDebugString( expected )}, actual ${type.getDebugString( actual )} ${i}`;
     }
   }
 
