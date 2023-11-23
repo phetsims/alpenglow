@@ -13,6 +13,8 @@ import {
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Comparable, RadixComparable } from './types/ConcreteType.js';
+import { getRadixBitVectorSize } from './shaders/TripleRadixSortShader.js';
+import { combineOptions } from '../../../phet-core/js/optionize.js';
 
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
@@ -2396,28 +2398,31 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
 } );
 
 type RadixSortOptions<T> = {
+  workgroupSize: number;
+  grainSize: number;
   order: RadixComparable<T> & Comparable<T>;
+  bitsPerPass: number;
+  bitsPerInnerPass: number;
   fullSize: boolean;
+  earlyLoad: boolean;
+  isReductionExclusive: boolean;
 };
 
 // Just do Comparable for easier testing
 const testTripleRadixSort = <T>( options: RadixSortOptions<T> ) => {
-  const name = `${options.order.name} triple radix sort (fullSize:${options.fullSize})`;
+  const factorOutSubexpressions = true;
+  const nestSubexpressions = false;
+
+  const workgroupSize = options.workgroupSize;
+  const grainSize = options.grainSize;
+
+  const innerBitVectorSize = getRadixBitVectorSize( workgroupSize, grainSize, options.bitsPerInnerPass );
+
+  const inputSize = ( workgroupSize * grainSize ) * workgroupSize * grainSize * 5 - 27;
+
+  const name = `${options.order.name} triple radix sort (wg:${workgroupSize} gr:${grainSize} bits:${options.bitsPerPass}, bitQ:${options.bitsPerInnerPass} bitVec:${innerBitVectorSize} full:${options.fullSize} early:${options.earlyLoad} reducEx:${options.isReductionExclusive})`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const type = options.order.type;
-
-    const bitQuantity = 3;
-    const innerBitQuantity = 2;
-    const innerBitVectorSize = 1; // TODO: compute this(!), and make sure it isn't more than 4
-    const earlyLoad = false;
-    const factorOutSubexpressions = true;
-    const nestSubexpressions = false;
-    const isReductionExclusive = false;
-
-    const workgroupSize = 8;
-    const grainSize = 4;
-
-    const inputSize = ( workgroupSize * grainSize ) * workgroupSize * grainSize * 5 - 27;
 
     const shader = await TripleRadixSortShader.create<T>( deviceContext, name, {
       order: options.order,
@@ -2429,15 +2434,15 @@ const testTripleRadixSort = <T>( options: RadixSortOptions<T> ) => {
       lengthExpression: u32( inputSize ),
 
       // radix options
-      bitQuantity: bitQuantity,
-      innerBitQuantity: innerBitQuantity,
-      innerBitVectorSize: innerBitVectorSize, // TODO: compute this(!), and make sure it isn't more than 4
-      earlyLoad: earlyLoad,
+      // TODO: rename bitQuantity => bitsPerPass, innerBitQuantity => bitsPerInnerPass
+      bitQuantity: options.bitsPerPass,
+      innerBitQuantity: options.bitsPerInnerPass,
+      earlyLoad: options.earlyLoad,
 
       // scan options
       factorOutSubexpressions: factorOutSubexpressions,
       nestSubexpressions: nestSubexpressions,
-      isReductionExclusive: isReductionExclusive,
+      isReductionExclusive: options.isReductionExclusive,
 
       log: false
     } );
@@ -2453,17 +2458,26 @@ const testTripleRadixSort = <T>( options: RadixSortOptions<T> ) => {
 };
 
 [ false, true ].forEach( fullSize => {
-  testTripleRadixSort( {
-    order: U32Order,
-    fullSize: fullSize
-  } );
-  testTripleRadixSort( {
-    order: U32ReverseOrder,
-    fullSize: fullSize
-  } );
-  testTripleRadixSort( {
-    order: Vec2uLexicographicalOrder,
-    fullSize: fullSize
-  } );
+  const commonOptions = {
+    workgroupSize: 8,
+    grainSize: 4,
+    bitsPerPass: 3,
+    bitsPerInnerPass: 2,
+    fullSize: fullSize,
+    earlyLoad: false,
+    isReductionExclusive: false
+  } as const;
+
+  testTripleRadixSort( combineOptions<RadixSortOptions<number>>( {
+    order: U32Order
+  }, commonOptions ) );
+
+  testTripleRadixSort( combineOptions<RadixSortOptions<number>>( {
+    order: U32ReverseOrder
+  }, commonOptions ) );
+
+  testTripleRadixSort( combineOptions<RadixSortOptions<Vector2>>( {
+    order: Vec2uLexicographicalOrder
+  }, commonOptions ) );
 } );
 

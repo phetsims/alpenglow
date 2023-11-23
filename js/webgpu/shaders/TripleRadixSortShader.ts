@@ -13,6 +13,7 @@ import { RadixComparable } from '../types/ConcreteType.js';
 export type TripleRadixSortShaderOptions<T> = {
   order: RadixComparable<T>;
 
+  // NOTE: this is specified here, since we may be using FEWER than the maximum number of bits in the order.
   totalBits: number;
 
   workgroupSize?: number;
@@ -22,7 +23,6 @@ export type TripleRadixSortShaderOptions<T> = {
   // radix options
   bitQuantity?: number;
   innerBitQuantity?: number;
-  innerBitVectorSize?: number;
   earlyLoad?: boolean;
 
   // scan options
@@ -40,7 +40,6 @@ const DEFAULT_OPTIONS = {
 
   bitQuantity: 8,
   innerBitQuantity: 2,
-  innerBitVectorSize: 1,
   earlyLoad: false,
 
   factorOutSubexpressions: true,
@@ -49,6 +48,25 @@ const DEFAULT_OPTIONS = {
 
   log: false
 } as const;
+
+export const getMaxRadixBitQuantity = ( workgroupSize: number, grainSize: number ): number => {
+  const maxBitVectorSize = 4;
+
+  const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
+  const countsPerComponent = Math.floor( 32 / countBitQuantity );
+
+  return Math.floor( Math.log2( maxBitVectorSize * countsPerComponent ) );
+};
+
+export const getRadixBitVectorSize = ( workgroupSize: number, grainSize: number, bitQuantity: number ): number => {
+  const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
+  const countsPerComponent = Math.floor( 32 / countBitQuantity );
+
+  const result = Math.ceil( ( 1 << bitQuantity ) / countsPerComponent );
+  assert && assert( result <= 4 );
+
+  return result;
+};
 
 export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]> {
 
@@ -65,6 +83,11 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     const dataCount = options.workgroupSize * options.grainSize;
 
     const iterationCount = Math.ceil( options.totalBits / options.bitQuantity );
+
+    assert && assert( getMaxRadixBitQuantity( options.workgroupSize, options.grainSize ) >= options.innerBitQuantity,
+      'Not enough bits for inner radix sort' );
+
+    const bitVectorSize = getRadixBitVectorSize( options.workgroupSize, options.grainSize, options.innerBitQuantity );
 
     const radixSharedOptions: Record<string, unknown> = {
       valueType: type.valueType,
@@ -98,7 +121,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           length: options.lengthExpression,
           bitQuantity: options.bitQuantity,
           innerBitQuantity: options.innerBitQuantity,
-          innerBitVectorSize: options.innerBitVectorSize,
+          innerBitVectorSize: bitVectorSize,
           getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitQuantity, options.bitQuantity ),
           factorOutSubexpressions: options.factorOutSubexpressions,
           earlyLoad: options.earlyLoad
