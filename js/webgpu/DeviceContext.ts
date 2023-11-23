@@ -8,7 +8,7 @@
 
 import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionOptions, ExecutionSingleCallback } from '../imports.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
 import { Unpromised } from './Execution.js';
 
 export type PreferredCanvasFormat = 'bgra8unorm' | 'rgba8unorm';
@@ -193,6 +193,12 @@ export default class DeviceContext {
     shader: ExecutableShader<In, Out>, input: In,
     options?: ExecutionOptions
   ): Promise<Out> {
+
+    // Provide a default for logging (that is whether the shader has been set up with logging).
+    options = combineOptions<ExecutionOptions>( {
+      log: shader.log
+    }, options );
+
     return this.executeSingle( async ( encoder, execution ) => {
       return shader.execute( execution, input );
     }, options );

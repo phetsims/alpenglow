@@ -30,7 +30,6 @@ export type TripleRadixSortShaderOptions<T> = {
   nestSubexpressions?: boolean;
   isReductionExclusive?: boolean; // Whether our internal "reduces" data will be exclusive or inclusive (both are possible)
 
-  // TODO: we shouldn't have to pass this through everywhere, right?
   log?: boolean;
 };
 
@@ -256,7 +255,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       }
 
       return new ByteEncoder( await execution.arrayBuffer( inBuffer ) ).decodeValues( type.decode, type.bytesPerElement ).slice( 0, values.length );
-    } );
+    }, options );
   }
 }
 

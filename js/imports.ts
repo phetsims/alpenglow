@@ -459,7 +459,7 @@ export type { DualSnippetSource } from './webgpu/DualSnippet.js';
 export { default as DeviceContext } from './webgpu/DeviceContext.js';
 export type { DeviceContextDeviceOptions } from './webgpu/DeviceContext.js';
 export { BaseExecution, BasicExecution, ExecutableShader } from './webgpu/Execution.js';
-export type { default as Execution, ExecutionOptions, ExecutableShaderTemplate } from './webgpu/Execution.js';
+export type { default as Execution, ExecutionOptions, ExecutableShaderTemplate, ExecutableShaderOptions } from './webgpu/Execution.js';
 export type { ExecutionSingleCallback, ExecutionMultipleCallback, Unpromised } from './webgpu/Execution.js';
 export { default as Binding } from './webgpu/Binding.js';
 export { default as ComputeShader } from './webgpu/ComputeShader.js';
