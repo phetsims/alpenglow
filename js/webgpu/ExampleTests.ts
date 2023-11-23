@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line single-line-import
 import {
-  AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, ComputeShader, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, Vec2uBic, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
+  AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, ComputeShader, ConcreteType, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, Vec2uBic, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
 } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -46,6 +46,28 @@ const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, deviceCon
 
     done();
   } );
+};
+
+const compareArrays = <T>( type: ConcreteType<T>, inputValues: T[], expectedValues: T[], actualValues: T[] ): string | null => {
+  for ( let i = 0; i < expectedValues.length; i++ ) {
+    const expected = expectedValues[ i ];
+    const actual = actualValues[ i ];
+
+    if ( !type.equals( expected, actual ) ) {
+      console.log( 'input' );
+      console.log( inputValues );
+
+      console.log( 'expected' );
+      console.log( expectedValues );
+
+      console.log( 'actual' );
+      console.log( actualValues );
+
+      return `expected ${type.toDebugString( expected )}, actual ${type.toDebugString( actual )}`;
+    }
+  }
+
+  return null;
 };
 
 asyncTestWithDevice( 'f32_reduce_simple', async ( device, deviceContext ) => {
@@ -2008,26 +2030,7 @@ const testSingleScan = <T>( binaryOp: BinaryOp<T>, exclusive: boolean ) => {
       return result;
     } );
 
-    // TODO: factor out these checks (now that we have a type object).
-    for ( let i = 0; i < expectedValues.length; i++ ) {
-      const expected = expectedValues[ i ];
-      const actual = actualValues[ i ];
-
-      if ( !binaryOp.type.equals( expected, actual ) ) {
-        console.log( 'input' );
-        console.log( inputValues );
-
-        console.log( 'expected' );
-        console.log( expectedValues );
-
-        console.log( 'actual' );
-        console.log( actualValues );
-
-        return `expected ${binaryOp.type.toDebugString( expected )}, actual ${binaryOp.type.toDebugString( actual )}`;
-      }
-    }
-
-    return null;
+    return compareArrays( binaryOp.type, inputValues, expectedValues, actualValues );
   } );
 };
 
@@ -2384,32 +2387,11 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
 
   const inputValues = _.range( 0, inputSize ).map( () => type.generateRandom( true ) );
 
-  const actualValue = await deviceContext.executeShader( shader, inputValues );
+  const actualValues = await deviceContext.executeShader( shader, inputValues );
 
-  const expectedValue: number[] = inputValues.slice().sort( order.compare );
+  const expectedValues: number[] = inputValues.slice().sort( order.compare );
 
-  for ( let i = 0; i < expectedValue.length; i++ ) {
-    const expected = expectedValue[ i ];
-    const actual = actualValue[ i ];
-
-    if ( !type.equals( expected, actual ) ) {
-      console.log( 'input' );
-      console.log( inputValues );
-
-      console.log( 'expected' );
-      console.log( expectedValue );
-
-      console.log( 'actual' );
-      console.log( actualValue );
-
-      // eslint-disable-next-line no-debugger
-      debugger;
-
-      return `expected ${type.toDebugString( expected )}, actual ${type.toDebugString( actual )} ${i}`;
-    }
-  }
-
-  return null;
+  return compareArrays( type, inputValues, expectedValues, actualValues );
 } );
 
 asyncTestWithDevice( 'u32 triple radix sort', async ( device, deviceContext ) => {
@@ -2460,23 +2442,5 @@ asyncTestWithDevice( 'u32 triple radix sort', async ( device, deviceContext ) =>
   // TODO: test with different types, factor out number here
   const expectedValues: number[] = inputValues.slice().sort( order.compare );
 
-  for ( let i = 0; i < expectedValues.length; i++ ) {
-    const expected = expectedValues[ i ];
-    const actual = actualValues[ i ];
-
-    if ( !type.equals( expected, actual ) ) {
-      console.log( 'input' );
-      console.log( inputValues );
-
-      console.log( 'expected' );
-      console.log( expectedValues );
-
-      console.log( 'actual' );
-      console.log( actualValues );
-
-      return `expected ${type.toDebugString( expected )}, actual ${type.toDebugString( actual )} ${i}`;
-    }
-  }
-
-  return null;
+  return compareArrays( type, inputValues, expectedValues, actualValues );
 } );
