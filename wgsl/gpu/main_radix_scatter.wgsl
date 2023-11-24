@@ -22,7 +22,7 @@
 #option length
 #option factorOutSubexpressions
 #option bitQuantity
-#option innerBitQuantity
+#option bitsPerInnerPass
 #option innerBitVectorSize
 #option earlyLoad
 
@@ -119,22 +119,22 @@ fn main(
       deserialize: arr => arr[ 0 ],
     } )}
 
-    for ( var srs_i = 0u; srs_i < ${u32( bitQuantity )}; srs_i += ${u32( innerBitQuantity )} ) {
+    for ( var srs_i = 0u; srs_i < ${u32( bitQuantity )}; srs_i += ${u32( bitsPerInnerPass )} ) {
       ${n_bit_compact_single_sort( {
         valueType: valueType,
         workgroupSize: workgroupSize,
         grainSize: grainSize,
-        bitQuantity: innerBitQuantity,
+        bitQuantity: bitsPerInnerPass,
         bitVectorSize: innerBitVectorSize,
         bitsScratch: `bits_scratch`,
         valueScratch: `value_scratch`,
         length: length ? `reduced_length` : null,
-        getBits: value => `( ( ( ${getBits( value )} ) >> srs_i ) & ${u32( ( 1 << innerBitQuantity ) - 1 )} )`,
+        getBits: value => `( ( ( ${getBits( value )} ) >> srs_i ) & ${u32( ( 1 << bitsPerInnerPass ) - 1 )} )`,
         earlyLoad: earlyLoad,
       } )}
 
       ${log_u32_raked( {
-        name: `after b_bit_sort ${innerBitQuantity} ${innerBitVectorSize}`,
+        name: `after b_bit_sort ${bitsPerInnerPass} ${innerBitVectorSize}`,
         workgroupSize: workgroupSize,
         grainSize: grainSize,
 //        length: length, TODO: in debugging, checking past the length is helpful!

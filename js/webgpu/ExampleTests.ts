@@ -2353,8 +2353,8 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
   const type = order.type;
 
   const totalBits = 32;
-  const bitQuantity = 3;
-  const innerBitQuantity = 2;
+  const bitsPerPass = 3;
+  const bitsPerInnerPass = 2;
   const innerBitVectorSize = 1;
   const earlyLoad = false;
   const factorOutSubexpressions = true;
@@ -2375,8 +2375,8 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
     lengthExpression: u32( inputSize ),
 
     // radix options
-    bitQuantity: bitQuantity,
-    innerBitQuantity: innerBitQuantity,
+    bitsPerPass: bitsPerPass,
+    bitsPerInnerPass: bitsPerInnerPass,
     innerBitVectorSize: innerBitVectorSize,
     earlyLoad: earlyLoad,
 
@@ -2433,9 +2433,8 @@ const testTripleRadixSort = <T>( options: RadixSortOptions<T> ) => {
       lengthExpression: u32( options.inputSize ),
 
       // radix options
-      // TODO: rename bitQuantity => bitsPerPass, innerBitQuantity => bitsPerInnerPass
-      bitQuantity: options.bitsPerPass,
-      innerBitQuantity: options.bitsPerInnerPass,
+      bitsPerPass: options.bitsPerPass,
+      bitsPerInnerPass: options.bitsPerInnerPass,
       earlyLoad: options.earlyLoad,
 
       // scan options

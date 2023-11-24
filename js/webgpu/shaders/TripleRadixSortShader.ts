@@ -21,8 +21,8 @@ export type TripleRadixSortShaderOptions<T> = {
   lengthExpression?: string | null; // if null, no range checks will be made
 
   // radix options
-  bitQuantity?: number;
-  innerBitQuantity?: number;
+  bitsPerPass?: number;
+  bitsPerInnerPass?: number;
   earlyLoad?: boolean;
 
   // scan options
@@ -38,8 +38,8 @@ const DEFAULT_OPTIONS = {
   grainSize: 8,
   lengthExpression: null,
 
-  bitQuantity: 8,
-  innerBitQuantity: 2,
+  bitsPerPass: 8,
+  bitsPerInnerPass: 2,
   earlyLoad: false,
 
   factorOutSubexpressions: true,
@@ -81,7 +81,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
   public static getMaximumElementQuantity(
     workgroupSize: number,
     grainSize: number,
-    bitsPerPass: number // TODO: rename bitsPerPass (?)
+    bitsPerPass: number
   ): number {
     const scanDataCount = workgroupSize * grainSize;
 
@@ -100,12 +100,12 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
     const dataCount = options.workgroupSize * options.grainSize;
 
-    const iterationCount = Math.ceil( options.totalBits / options.bitQuantity );
+    const iterationCount = Math.ceil( options.totalBits / options.bitsPerPass );
 
-    assert && assert( getMaxRadixBitQuantity( options.workgroupSize, options.grainSize ) >= options.innerBitQuantity,
+    assert && assert( getMaxRadixBitQuantity( options.workgroupSize, options.grainSize ) >= options.bitsPerInnerPass,
       'Not enough bits for inner radix sort' );
 
-    const bitVectorSize = getRadixBitVectorSize( options.workgroupSize, options.grainSize, options.innerBitQuantity );
+    const bitVectorSize = getRadixBitVectorSize( options.workgroupSize, options.grainSize, options.bitsPerInnerPass );
 
     const radixSharedOptions: Record<string, unknown> = {
       valueType: type.valueType,
@@ -126,8 +126,8 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           Binding.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
           length: options.lengthExpression,
-          bitQuantity: options.bitQuantity,
-          getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitQuantity, options.bitQuantity )
+          bitQuantity: options.bitsPerPass,
+          getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitsPerPass, options.bitsPerPass )
         }, radixSharedOptions )
       ) );
       scatterShaders.push( await ComputeShader.fromSourceAsync(
@@ -137,10 +137,10 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           Binding.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
           length: options.lengthExpression,
-          bitQuantity: options.bitQuantity,
-          innerBitQuantity: options.innerBitQuantity,
+          bitQuantity: options.bitsPerPass,
+          bitsPerInnerPass: options.bitsPerInnerPass,
           innerBitVectorSize: bitVectorSize,
-          getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitQuantity, options.bitQuantity ),
+          getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitsPerPass, options.bitsPerPass ),
           factorOutSubexpressions: options.factorOutSubexpressions,
           earlyLoad: options.earlyLoad
         }, radixSharedOptions )
@@ -161,7 +161,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
     // WGSL "ceil" equivalent
     // TODO: yeah, get length statements/expressions handled.
-    const scanLength = options.lengthExpression ? `( ( ( ( ${options.lengthExpression} ) + ${u32( options.workgroupSize * options.grainSize - 1 )} ) / ${u32( options.workgroupSize * options.grainSize )} ) << ${u32( options.bitQuantity )} )` : null;
+    const scanLength = options.lengthExpression ? `( ( ( ( ${options.lengthExpression} ) + ${u32( options.workgroupSize * options.grainSize - 1 )} ) / ${u32( options.workgroupSize * options.grainSize )} ) << ${u32( options.bitsPerPass )} )` : null;
 
     // If we have a non-commutative reduction (with a striped access order)
     const reduceShader = await ComputeShader.fromSourceAsync(
@@ -226,7 +226,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     return new TripleRadixSortShader<T>( async ( execution: Execution, values: T[] ) => {
       const upperDispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
-      const histogramElementCount = upperDispatchSize * ( 1 << options.bitQuantity );
+      const histogramElementCount = upperDispatchSize * ( 1 << options.bitsPerPass );
 
       assert && assert( histogramElementCount <= dataCount * dataCount * dataCount );
 
