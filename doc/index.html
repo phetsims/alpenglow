@@ -3319,84 +3319,64 @@
       Organize this section!
     </p>
 
+    <h5>Known bugs</h5>
+
+    <p class="TODO">
+      Overflows on left-shifts are a problem! <code>&lt;&lt; 32</code> was causing all sorts of issues in the radix
+      sort. Investigate full overflow handling for u32/i32. Make sure we're not overflowing (or at least shifting by 32).
+    </p>
+
+    <p class="TODO">
+      Check the radix sort, and make sure it's not requesting more bitVector size than it is using.
+    </p>
+
+    <h5>TypeScript switch</h5>
+
+    <p class="TODO">
+      We've lost a ton of safety by having our massive amount of templating in JS. We're not gaining benefits by having
+      things in *.wgsl files, especially with how complicated our templates are. MOVE THESE BACK TO A TYPESCRIPT SYSTEM.
+    </p>
+
+    <h5>Unit tests</h5>
+
+    <p class="TODO">
+      Minimize duplication in unit tests (and get more of our "shaders" up to speed, like the radix ones).
+    </p>
+
     <h5>Logging/debugging</h5>
 
     <p class="TODO">
-      Have option/define-controlled logging integrated with ComputeShader and our templating. ComputeShader COULD
-      define this for us if we don't define it, so anything can have an #option for it. Potentially leave logging
-      in the code always, and only when debugging is enabled will it report out. ALSO: we'll want to enable only
-      enabling logging on a single shader(?) or potentially the whole thing? We'll be able to pass this through
-      multiple stages, so that will be nice.
-    </p>
-
-    <p>
-      Potentially log out the input buffer data.
-    </p>
-
-    <p>
-      We'll want to tag start/end of shaders with "marks" that provide no data other than an ID. Also have comments
-      issue this (with the comment string) - should help with our linearization issues?
-    </p>
-
-    <ol>
-      <li>
-        Declared identifier (based on the invoked shader code, basically gives us a semi-unique ID - loops and things
-        are issues. Should GIVE US a string label (so we can adjust the label in the shader, and see the output in the
-        logging).
-      </li>
-      <li>
-        Length of entry (we'll be using bump allocation, e.g. a struct that is atomic + data). We don't care about
-        performance of this RIGHT NOW, so we won't start with privatization (keeping an atomic+data workgroup-side,
-        then allocating/setting nicely).
-      </li>
-      <li>
-        Additional identifier (for uniqueness if helpful) - either from unroll, OR also computed dynamically (in for
-        loops).
-      </li>
-      <li>
-        Flag (combined with above) for whether it contains multiple data elements per one invocation
-      </li>
-      <li>
-        Local x/y/z and workgroup x/y/z for the thread
-      </li>
-      <li>
-        Data indices (the x/y/z of the data provided
-      </li>
-      <li>
-        The actual data! Have every type (e.g. where we pass valueType) be convertable into u32s.
-      </li>
-    </ol>
-
-    <p>
-      Avoid adding workgroupBarrier().
-    </p>
-
-    <p>
-      Probably bind debug buffer at the same binding always? Thus can be handled in ComputeShader
-    </p>
-
-    <p>
-      Lots of potential for visual debugging (adding a debugging interface). We're essentially going to add "padding",
-      so viewing layers at each level might be helpful. BUT we'll want to programmatically access data a lot of the
-      time. -- Even for console output, breaking things up BY the workgroup (and potentially also by the thread)
-      would be useful.
+      Either convert to TypeScript, OR add a bunch of assertions (ideally do the TypeScript conversion).
     </p>
 
     <p class="TODO">
-      Think about ways to add assertions into this?
+      Handle different output formats (rather than the raw, existing, etc.). Per-thread formats? My notes show
+      "flat", "workgroup", "indexed" (show all threads), "no-data", "ranged" (show only a range of threads).
     </p>
 
     <p class="TODO">
-      How to handle "raked" (multiple) data? How to handle subsets (only some threads report out due to length...?)
+      Look more at per-thread slices if helpful
     </p>
 
     <p class="TODO">
-      How to handle only a workgroup-level log? (would we just do that for local_id === 0?)
+      Think about ways to add assertions into this? (Runtime assertions would be helpful).
     </p>
 
     <p class="TODO">
-      HOW to take our linearized single-thread logs, and combine them (adding spacers for "missing" things) - how to
-      identify what is missing?
+      How to handle only a workgroup-level log? (would we just do that for local_id === 0?) - Currently better than our
+      "log every thread that gets it" approach, BUT it _IS_ collapsed.
+    </p>
+
+    <h5>Types</h5>
+
+    <p class="TODO">
+      For the binary-op based things, use the isCommutative flag for all sorts of things.
+    </p>
+
+    <p class="TODO">
+      For ConcreteType, add in structured types (structs), and the ability to BETTER BIT PACK(!). We'll be able to
+      serialize/deserialize. We could actually write code that does NOT read in the whole structure (e.g. structure of
+      arrays type).
     </p>
 
     <h5>Linking</h5>
@@ -3476,11 +3456,6 @@
 
     <p class="TODO">
       A templating function multiply (for constants), that can replace with bit shifts where helpful?
-    </p>
-
-    <p class="TODO">
-      Clearly note where combine() is allowed to be commutative and where it's not (in the templates).
-      Better document templates.
     </p>
 
     <p class="TODO">
@@ -3669,16 +3644,16 @@
     <h4 id="WGSL-radixSort">Radix Sort</h4>
 
     <p class="TODO">
-      Get this better-cleaned-up.
+      Scan code for TODOs
+    </p>
+
+    <p class="TODO">
+      Extract the SCAN code out of the RADIX wrapper.
     </p>
 
     <p class="TODO">
       Separate out workgroup/grain for the scan and the radix operation(!), the radix op takes a lot more memory, and
       might be more limited.
-    </p>
-
-    <p class="TODO">
-      Initial work going nicely. We have a bug in scatter with the 128-size workgroup to investigate.
     </p>
 
     <p class="TODO">
