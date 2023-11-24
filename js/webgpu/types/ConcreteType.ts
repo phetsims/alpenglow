@@ -9,6 +9,8 @@
 import { ByteEncoder, u32 } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Random from '../../../../dot/js/Random.js';
+import Vector3 from '../../../../dot/js/Vector3.js';
+import Vector4 from '../../../../dot/js/Vector4.js';
 
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
@@ -387,13 +389,99 @@ export const Vec2uLexicographicalOrder: Order<Vector2> = {
     return `( ${a}.x <= ${b}.x && ( ${a}.x != ${b}.x || ${a}.y <= ${b}.y ) )`;
   },
 
-  // TODO: test
   getBitsWGSL: ( value: string, bitOffset: number, bitQuantity: number ): string => {
-    if ( bitOffset < 32 ) {
+    // NOTE: WGSL doesn't like `<< 32u`, so we split it like so.
+    if ( bitOffset === 0 ) {
+      return `( ( ${value}.y >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
+    }
+    else if ( bitOffset < 32 ) {
       return `( ( ( ${value}.x << ${u32( 32 - bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} ) | ( ( ${value}.y >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} ) )`;
     }
     else {
       return `( ( ${value}.x >> ${u32( bitOffset - 32 )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
     }
   }
+};
+
+export const Vec3uType: ConcreteType<Vector3> = {
+  name: 'vec3u',
+  bytesPerElement: 12,
+
+  equals( a: Vector3, b: Vector3 ): boolean {
+    return a.equals( b );
+  },
+
+  equalsWGSL: ( a: string, b: string ): string => {
+    // TODO: test
+    return `all( ${a} == ${b} )`;
+  },
+
+  encode( value: Vector3, encoder: ByteEncoder ): void {
+    encoder.pushU32( value.x );
+    encoder.pushU32( value.y );
+    encoder.pushU32( value.z );
+  },
+  decode( encoder: ByteEncoder, offset: number ): Vector3 {
+    return new Vector3( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ], encoder.fullU32Array[ offset + 2 ] );
+  },
+
+  valueType: 'vec3u',
+  writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
+    return `
+       ${storeStatement( '0u', `${value}.x` )}
+       ${storeStatement( '1u', `${value}.y` )}
+       ${storeStatement( '2u', `${value}.z` )}
+    `;
+  },
+
+  generateRandom: ( fullSize = false ) => new Vector3(
+    U32Type.generateRandom( fullSize ),
+    U32Type.generateRandom( fullSize ),
+    U32Type.generateRandom( fullSize )
+  ),
+
+  toDebugString: ( value: Vector3 ) => `vec3u(${value.x}, ${value.y}, ${value.z})`
+};
+
+export const Vec4uType: ConcreteType<Vector4> = {
+  name: 'vec4u',
+  bytesPerElement: 16,
+
+  equals( a: Vector4, b: Vector4 ): boolean {
+    return a.equals( b );
+  },
+
+  equalsWGSL: ( a: string, b: string ): string => {
+    // TODO: test
+    return `all( ${a} == ${b} )`;
+  },
+
+  encode( value: Vector4, encoder: ByteEncoder ): void {
+    encoder.pushU32( value.x );
+    encoder.pushU32( value.y );
+    encoder.pushU32( value.z );
+    encoder.pushU32( value.w );
+  },
+  decode( encoder: ByteEncoder, offset: number ): Vector4 {
+    return new Vector4( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ], encoder.fullU32Array[ offset + 2 ], encoder.fullU32Array[ offset + 3 ] );
+  },
+
+  valueType: 'vec4u',
+  writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
+    return `
+       ${storeStatement( '0u', `${value}.x` )}
+       ${storeStatement( '1u', `${value}.y` )}
+       ${storeStatement( '2u', `${value}.z` )}
+       ${storeStatement( '3u', `${value}.w` )}
+    `;
+  },
+
+  generateRandom: ( fullSize = false ) => new Vector4(
+    U32Type.generateRandom( fullSize ),
+    U32Type.generateRandom( fullSize ),
+    U32Type.generateRandom( fullSize ),
+    U32Type.generateRandom( fullSize )
+  ),
+
+  toDebugString: ( value: Vector4 ) => `vec4u(${value.x}, ${value.y}, ${value.z}, ${value.w})`
 };

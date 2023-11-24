@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ComputeShader, DeviceContext, wgsl_main_log_barrier } from '../imports.js';
+import { alpenglow, ByteEncoder, ComputeShader, ConcreteType, DeviceContext, wgsl_main_log_barrier } from '../imports.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 
 export type ConsoleLogInfo<T = unknown> = {
@@ -17,8 +17,9 @@ export type ConsoleLogInfo<T = unknown> = {
   logName: string;
   shaderName: string;
   hasAdditionalIndex: boolean;
-  dataLength: number | null; // null if it is dynamic, and will be written into the entry
-  deserialize: ( arr: Uint32Array ) => T;
+
+  type: ConcreteType<T> | null;
+  dataCount: number | null; // null if it is dynamic, and will be written into the entry
   lineToLog: ( line: ConsoleLoggedLine ) => unknown;
 };
 
@@ -28,6 +29,7 @@ export default class ConsoleLogger {
 
   public static register( info: ConsoleLogInfo ): number {
     assert && assert( info.id === undefined, 'Should not be defined yet.' );
+    assert && assert( ( info.type === null ) === ( info.dataCount === 0 ) );
 
     const id = ConsoleLogger.nextGlobalId++;
 
@@ -39,7 +41,9 @@ export default class ConsoleLogger {
   }
 
   public static analyze( arrayBuffer: ArrayBuffer ): ConsoleLoggedShader[] {
-    const data = new Uint32Array( arrayBuffer );
+    const encoder = new ByteEncoder( arrayBuffer );
+    const data = encoder.fullU32Array;
+
     const length = data[ 0 ];
     const offsetLength = length + 1;
 
@@ -87,18 +91,22 @@ export default class ConsoleLogger {
       );
 
       const additionalIndex = info.hasAdditionalIndex ? data[ index++ ] : null;
-      const dataLength = info.dataLength === null ? data[ index++ ] : info.dataLength;
 
-      const dataOffset = index;
+      let deserializedData: unknown = null;
 
-      const rawData = data.slice( dataOffset, dataOffset + dataLength );
-      index += dataLength;
+      if ( info.type ) {
+        const type = info.type;
+        const u32sPerElement = type.bytesPerElement / 4;
+        const dataCount = info.dataCount === null ? data[ index++ ] : info.dataCount;
 
-      // if ( id === 4 ) {
-      //   debugger;
-      // }
+        const dataOffset = index;
 
-      const deserializedData = rawData.length ? info.deserialize( rawData ) : null;
+        deserializedData = _.range( 0, dataCount ).map( i => {
+          return type.decode( encoder, dataOffset + i * u32sPerElement );
+        } );
+
+        index += dataCount * u32sPerElement;
+      }
 
       // console.log( info, workgroupIndex, localIndex, deserializedData, additionalIndex );
       shader.add( info, workgroupIndex, localIndex, deserializedData, additionalIndex );
@@ -186,11 +194,11 @@ export class ConsoleLoggedThread {
   }
 }
 
-export class ConsoleLoggedLine {
+export class ConsoleLoggedLine<T = unknown> {
   public constructor(
     public readonly info: ConsoleLogInfo,
     public readonly additionalIndex: number | null,
-    public readonly dataArray: unknown[],
+    public readonly dataArray: T[],
 
     // Stored so it can be used for display (since our data is matched to these)
     public readonly threads: ConsoleLoggedThread[]

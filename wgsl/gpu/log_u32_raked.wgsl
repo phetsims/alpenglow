@@ -13,7 +13,8 @@ ${template( ( {
   // TODO: better forwarding of our options through?
   name, // string | null - if null, we will mark it as a barrier BETWEEN shaders
   additionalIndex = null, // null | string:expression:u32 - if provided, will be used as an additional index for the log
-  deserialize = arr => [ ...arr ], // ( arr: Uint32Array ) => T, takes the data and turns it into a usable value
+
+  type,
   lineToLog = ConsoleLoggedLine.toLogExistingFlat, // ( line: ConsoleLoggedLine ) => unknown - whatever JS-like format we want to log
 
   workgroupSize,
@@ -57,18 +58,20 @@ ${template( ( {
         ${log( {
           name: name,
           additionalIndex: additionalIndex,
-          deserialize: deserialize,
+
+          type: type,
           lineToLog: lineToLog,
-          dataLength: `log_length`,
-          writeU32s: ( arr, offset ) => `
+          dataCount: `log_length`,
+          writeU32s: storeStatement => `
             for ( var _i = 0u; _i < log_length; _i++ ) {
               ${accessExpression ? `
                 // "global" access
-                ${arr}[ ${offset} + _i ] = ${accessExpression( `combined_base + _i` )};
+                let _expr = ${accessExpression( `combined_base + _i` )};
               ` : `
                 // "local" access
-                ${arr}[ ${offset} + _i ] = ${relativeAccessExpression( `base_local_log_index + _i` )};
+                let _expr = ${relativeAccessExpression( `base_local_log_index + _i` )};
               `}
+              ${type.writeU32s( ( offset, expr ) => storeStatement( `_i * ${u32( type.bytesPerElement / 4 )} + ${offset}`, expr ), `_expr` )}
             }
           `,
         } )}

@@ -20,6 +20,7 @@
 #import ./unroll
 #import ./log
 
+// TODO: Just take in the "order", replaces valueType, getBits {{and allows logging values out}}
 ${template( ( {
   valueType, // type (string)
   workgroupSize, // number
@@ -32,45 +33,33 @@ ${template( ( {
   getBits, // ( T ) => expression: u32
   earlyLoad = false, // boolean (controls whether we load the values early or late - might affect register pressure)
 } ) => {
+  const bitType = {
+    1: U32Type,
+    2: Vec2uType,
+    3: Vec3uType,
+    4: Vec4uType
+  }[ bitVectorSize ];
+
   const log_packed_bits = ( name, varName ) => log( {
     name: `${name} (countBitQuantity: ${Math.ceil( Math.log2( workgroupSize * grainSize ) )})`,
-    dataLength: bitVectorSize,
-    writeU32s: ( arr, offset ) => `
-      ${{
-        1: `
-          ${arr}[ ${offset} ] = ${varName};
-        `,
-        2: `
-          ${arr}[ ${offset} + 0u ] = ${varName}.x;
-          ${arr}[ ${offset} + 1u ] = ${varName}.y;
-        `,
-        3: `
-          ${arr}[ ${offset} + 0u ] = ${varName}.x;
-          ${arr}[ ${offset} + 1u ] = ${varName}.y;
-          ${arr}[ ${offset} + 2u ] = ${varName}.z;
-        `,
-        4: `
-          ${arr}[ ${offset} + 0u ] = ${varName}.x;
-          ${arr}[ ${offset} + 1u ] = ${varName}.y;
-          ${arr}[ ${offset} + 2u ] = ${varName}.z;
-          ${arr}[ ${offset} + 3u ] = ${varName}.w;
-        `
-      }[ bitVectorSize ]}
-    `,
-    deserialize: arr => [ ...arr ].map( value => {
-      const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
-      const countsPerComponent = Math.floor( 32 / countBitQuantity );
-
-      return [
-        // raw
-        ByteEncoder.toU32Hex( value ),
-        ...( _.range( 0, countsPerComponent ).map( i => {
-          const start = i * countBitQuantity;
-          const end = ( i + 1 ) * countBitQuantity;
-          return ( value >> start ) & ( ( 1 << countBitQuantity ) - 1 );
-        } ) )
-      ];
-    } ),
+    type: bitType,
+    dataCount: bitVectorSize,
+    writeU32s: storeStatement => bitType.writeU32s( storeStatement, varName ),
+    // TODO: allow overriding data output?? (an extra filter on top?) --- or also one that just provides the U32s raw.
+//    deserialize: arr => [ ...arr ].map( value => {
+//      const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
+//      const countsPerComponent = Math.floor( 32 / countBitQuantity );
+//
+//      return [
+//        // raw
+//        ByteEncoder.toU32Hex( value ),
+//        ...( _.range( 0, countsPerComponent ).map( i => {
+//          const start = i * countBitQuantity;
+//          const end = ( i + 1 ) * countBitQuantity;
+//          return ( value >> start ) & ( ( 1 << countBitQuantity ) - 1 );
+//        } ) )
+//      ];
+//    } ),
     lineToLog: ConsoleLoggedLine.toLogExisting,
   } );
 
@@ -100,12 +89,19 @@ ${template( ( {
           let tb_value = ${valueScratch}[ ${u32( grainSize )} * local_id.x + ${u32( i )} ];
           let tb_bits = ${getBits( `tb_value` )};
 
+          // TODO: factor this out(!)
+//          ${log( {
+//            name: `tb_value (raked index ${i})`,
+//            type: Vec2uType, // TODO: pass in(!)
+//            dataCount: 1,
+//            writeU32s: storeStatement => Vec2uType.writeU32s( storeStatement, `tb_value` ),
+//          } )}
+
           ${log( {
             name: `tb_bits (raked index ${i})`,
-            dataLength: 1,
-            writeU32s: ( arr, offset ) => `${arr}[ ${offset} ] = tb_bits;`,
-            deserialize: arr => arr[ 0 ],
-            lineToLog: ConsoleLoggedLine.toLogExisting
+            type: U32Type,
+            dataCount: 1,
+            writeU32s: storeStatement => storeStatement( `0u`, `tb_bits` ),
           } )}
 
           ${bit_pack_radix_increment( {

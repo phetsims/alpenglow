@@ -58,9 +58,9 @@ fn main(
 
       ${log( {
         name: 'num_valid_workgroups',
-        dataLength: 1,
-        writeU32s: ( arr, offset ) => `${arr}[ ${offset} ] = num_valid_workgroups;`,
-        deserialize: arr => arr[ 0 ],
+        type: U32Type,
+        dataCount: 1,
+        writeU32s: storeStatement => storeStatement( `0u`, `num_valid_workgroups` ),
       } )}
 
       if ( workgroup_id.x < num_valid_workgroups ) {
@@ -79,6 +79,7 @@ fn main(
 
         ${log_u32_raked( {
           name: 'initial data',
+          type: order.type,
           workgroupSize: workgroupSize,
           grainSize: grainSize,
           length: length,
@@ -98,6 +99,7 @@ fn main(
 
         ${log_u32_raked( {
           name: 'scanned histogram',
+          type: U32Type,
           workgroupSize: workgroupSize,
           grainSize: grainSize,
           relativeLength: u32( 1 << bitsPerPass ),
@@ -113,12 +115,19 @@ fn main(
 
         ${log( {
           name: 'reduced_length',
-          dataLength: 1,
-          writeU32s: ( arr, offset ) => `${arr}[ ${offset} ] = reduced_length;`,
-          deserialize: arr => arr[ 0 ],
+          type: U32Type,
+          dataCount: 1,
+          writeU32s: storeStatement => storeStatement( `0u`, `reduced_length` ),
         } )}
 
         for ( var srs_i = 0u; srs_i < ${u32( bitsPerPass )}; srs_i += ${u32( bitsPerInnerPass )} ) {
+          ${log( {
+            name: 'srs_i',
+            type: U32Type,
+            dataCount: 1,
+            writeU32s: storeStatement => storeStatement( `0u`, `srs_i` ),
+          } )}
+
           ${n_bit_compact_single_sort( {
             valueType: order.type.valueType,
             workgroupSize: workgroupSize,
@@ -134,9 +143,10 @@ fn main(
 
           ${log_u32_raked( {
             name: `after b_bit_sort ${bitsPerInnerPass} ${innerBitVectorSize}`,
+            type: order.type,
             workgroupSize: workgroupSize,
             grainSize: grainSize,
-    //        length: length, TODO: in debugging, checking past the length is helpful!
+            length: length,
             relativeAccessExpression: index => `value_scratch[ ${index} ]`,
             additionalIndex: `srs_i`,
           } )}
@@ -191,6 +201,7 @@ fn main(
 
         ${log_u32_raked( {
           name: 'exit(!) data',
+          type: order.type,
           workgroupSize: workgroupSize,
           grainSize: grainSize,
           length: length,
