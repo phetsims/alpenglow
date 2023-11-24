@@ -19,6 +19,8 @@
 #import ./scan
 #import ./unroll
 #import ./log
+#import ./log_value
+#import ./log_string
 
 // TODO: Just take in the "order", replaces valueType, getBits {{and allows logging values out}}
 ${template( ( {
@@ -66,9 +68,7 @@ ${template( ( {
   return `
     ${comment( 'begin n_bit_compact_single_sort' )}
 
-    ${log( {
-      name: `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${length}" earlyLoad:${earlyLoad}`,
-    } )}
+    ${log_string( `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${length}" earlyLoad:${earlyLoad}` )}
 
     {
       var tb_bits_vector = ${{
@@ -90,18 +90,16 @@ ${template( ( {
           let tb_bits = ${getBits( `tb_value` )};
 
           // TODO: factor this out(!)
-//          ${log( {
+//          ${log_value( {
+//            value: `tb_value`,
 //            name: `tb_value (raked index ${i})`,
 //            type: Vec2uType, // TODO: pass in(!)
-//            dataCount: 1,
-//            writeU32s: storeStatement => Vec2uType.writeU32s( storeStatement, `tb_value` ),
 //          } )}
 
-          ${log( {
+          ${log_value( {
+            value: `tb_bits`,
             name: `tb_bits (raked index ${i})`,
-            type: U32Type,
-            dataCount: 1,
-            writeU32s: storeStatement => storeStatement( `0u`, `tb_bits` ),
+            type: U32Type
           } )}
 
           ${bit_pack_radix_increment( {

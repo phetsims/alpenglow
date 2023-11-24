@@ -11,7 +11,8 @@
 #import ./ceil_divide_constant_divisor
 #import ./load_multiple
 #import ./n_bit_compact_single_sort
-#import ./log
+#import ./log_string
+#import ./log_value
 #import ./log_u32_raked
 
 #option workgroupSize
@@ -50,17 +51,13 @@ fn main(
     const getBits = value => order.getBitsWGSL( value, pass * bitsPerPass, bitsPerPass );
 
     return `
-      ${log( {
-        name: 'main_radix_scatter start'
-      } )}
+      ${log_string( 'main_radix_scatter start' )}
 
       let num_valid_workgroups = ${ceil_divide_constant_divisor( length, workgroupSize * grainSize )};
 
-      ${log( {
-        name: 'num_valid_workgroups',
+      ${log_value( {
+        value: `num_valid_workgroups`,
         type: U32Type,
-        dataCount: 1,
-        writeU32s: storeStatement => storeStatement( `0u`, `num_valid_workgroups` ),
       } )}
 
       if ( workgroup_id.x < num_valid_workgroups ) {
@@ -113,19 +110,15 @@ fn main(
           let reduced_length = ( ${length} ) - workgroup_id.x * ${u32( workgroupSize * grainSize )};
         ` : ``}
 
-        ${log( {
-          name: 'reduced_length',
+        ${log_value( {
+          value: `reduced_length`,
           type: U32Type,
-          dataCount: 1,
-          writeU32s: storeStatement => storeStatement( `0u`, `reduced_length` ),
         } )}
 
         for ( var srs_i = 0u; srs_i < ${u32( bitsPerPass )}; srs_i += ${u32( bitsPerInnerPass )} ) {
-          ${log( {
-            name: 'srs_i',
+          ${log_value( {
+            value: `srs_i`,
             type: U32Type,
-            dataCount: 1,
-            writeU32s: storeStatement => storeStatement( `0u`, `srs_i` ),
           } )}
 
           ${n_bit_compact_single_sort( {

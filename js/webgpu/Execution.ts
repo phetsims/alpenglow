@@ -26,7 +26,7 @@ const DEFAULT_OPTIONS = {
   timestampLog: true,
   timestampLoggerCapacity: 100,
   log: false,
-  logBufferSize: 1 << 20
+  logBufferSize: 1 << 22
 };
 
 type Execution = {
