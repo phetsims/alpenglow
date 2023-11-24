@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_replace_add_2 } from '../../imports.js';
+import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_add_2 } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type TripleRadixSortShaderOptions<T> = {
@@ -205,7 +205,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     );
 
     const upperScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} upper scan`, wgsl_main_scan_replace_add_2, [
+      deviceContext.device, `${name} upper scan`, wgsl_main_scan_add_2, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.READ_ONLY_STORAGE_BUFFER,
@@ -215,7 +215,8 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         inputOrder: 'blocked',
         inputAccessOrder: 'striped',
         exclusive: true,
-        isReductionExclusive: options.isReductionExclusive
+        isReductionExclusive: options.isReductionExclusive,
+        inPlace: false // TODO: allow in-place!
       }, reduceSharedOptions )
     );
 

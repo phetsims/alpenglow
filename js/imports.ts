@@ -269,9 +269,9 @@ export { default as wgsl_main_scan } from '../wgsl/gpu/main_scan.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_scan_reduce } from '../wgsl/gpu/main_scan_reduce.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_main_scan_replace_add_1 } from '../wgsl/gpu/main_scan_replace_add_1.js';
+export { default as wgsl_main_scan_add_1 } from '../wgsl/gpu/main_scan_add_1.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_main_scan_replace_add_2 } from '../wgsl/gpu/main_scan_replace_add_2.js';
+export { default as wgsl_main_scan_add_2 } from '../wgsl/gpu/main_scan_add_2.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_radix_histogram } from '../wgsl/gpu/main_radix_histogram.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
