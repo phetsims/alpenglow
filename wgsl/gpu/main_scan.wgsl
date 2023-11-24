@@ -28,11 +28,17 @@
 #option factorOutSubexpressions
 #option exclusive
 #option getAddedValue
+#option inPlace
 
-@group(0) @binding(0)
-var<storage> input: array<${valueType}>;
-@group(0) @binding(1)
-var<storage, read_write> output: array<${valueType}>;
+${inPlace ? `
+  @group(0) @binding(0)
+  var<storage, read_write> data: array<${valueType}>;
+` : `
+  @group(0) @binding(0)
+  var<storage> input: array<${valueType}>;
+  @group(0) @binding(1)
+  var<storage, read_write> output: array<${valueType}>;
+`}
 
 var<workgroup> scratch: array<${valueType}, ${workgroupSize * grainSize}>;
 
@@ -45,8 +51,8 @@ fn main(
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
   ${scan_comprehensive( {
-    input: `input`,
-    output: `output`,
+    input: inPlace ? `data` : `input`,
+    output: inPlace ? `data` : `output`,
     scratch: `scratch`,
     workgroupSize: workgroupSize,
     grainSize: grainSize,

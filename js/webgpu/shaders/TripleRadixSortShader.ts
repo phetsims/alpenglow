@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_2, wgsl_main_scan_replace_reduce } from '../../imports.js';
+import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_replace_add_2 } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type TripleRadixSortShaderOptions<T> = {
@@ -175,7 +175,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     );
 
     const middleScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} middle scan`, wgsl_main_scan_replace_reduce, [
+      deviceContext.device, `${name} middle scan`, wgsl_main_scan_reduce, [
         Binding.STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
@@ -185,12 +185,13 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         inputAccessOrder: 'striped',
         exclusive: options.isReductionExclusive,
         getAddedValue: null,
-        stripeReducedOutput: false
+        stripeReducedOutput: false,
+        inPlace: true
       }, reduceSharedOptions )
     );
 
     const lowerScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} lower scan`, wgsl_main_scan_replace, [
+      deviceContext.device, `${name} lower scan`, wgsl_main_scan, [
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
@@ -198,7 +199,8 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         inputOrder: 'blocked',
         inputAccessOrder: 'striped',
         exclusive: options.isReductionExclusive,
-        getAddedValue: null
+        getAddedValue: null,
+        inPlace: true
       }, reduceSharedOptions )
     );
 

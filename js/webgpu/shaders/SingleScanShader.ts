@@ -74,7 +74,8 @@ export default class SingleScanShader<T> extends ExecutableShader<T[], T[]> {
         factorOutSubexpressions: options.factorOutSubexpressions,
         exclusive: options.exclusive,
         getAddedValue: options.getAddedValue,
-        log: options.log
+        log: options.log,
+        inPlace: false
       }
     );
 

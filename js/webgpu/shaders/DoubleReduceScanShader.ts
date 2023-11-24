@@ -12,7 +12,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_reduce, wgsl_main_reduce_non_commutative, wgsl_main_scan_replace, wgsl_main_scan_replace_add_1 } from '../../imports.js';
+import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_reduce, wgsl_main_reduce_non_commutative, wgsl_main_scan, wgsl_main_scan_replace_add_1 } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type DoubleReduceScanShaderOptions<T> = {
@@ -116,7 +116,7 @@ export default class DoubleReduceScanShader<T> extends ExecutableShader<T[], T[]
     );
 
     const lowerScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} lower scan`, wgsl_main_scan_replace, [
+      deviceContext.device, `${name} lower scan`, wgsl_main_scan, [
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
@@ -124,7 +124,8 @@ export default class DoubleReduceScanShader<T> extends ExecutableShader<T[], T[]
         inputOrder: options.internalStriping ? 'striped' : 'blocked',
         inputAccessOrder: options.inputAccessOrder,
         exclusive: options.isReductionExclusive,
-        getAddedValue: null
+        getAddedValue: null,
+        inPlace: true
       }, sharedOptions )
     );
 

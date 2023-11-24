@@ -267,11 +267,7 @@ export { default as wgsl_main_atomic_reduce_atomic } from '../wgsl/gpu/main_atom
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_scan } from '../wgsl/gpu/main_scan.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_main_scan_replace } from '../wgsl/gpu/main_scan_replace.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_scan_reduce } from '../wgsl/gpu/main_scan_reduce.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_main_scan_replace_reduce } from '../wgsl/gpu/main_scan_replace_reduce.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_main_scan_replace_add_1 } from '../wgsl/gpu/main_scan_replace_add_1.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER

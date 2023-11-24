@@ -13,7 +13,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_reduce, wgsl_main_reduce_non_commutative, wgsl_main_scan_replace, wgsl_main_scan_replace_add_2, wgsl_main_scan_replace_reduce } from '../../imports.js';
+import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_reduce, wgsl_main_reduce_non_commutative, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_replace_add_2 } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type TripleReduceScanShaderOptions<T> = {
@@ -114,7 +114,7 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
     );
 
     const middleScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} middle scan`, wgsl_main_scan_replace_reduce, [
+      deviceContext.device, `${name} middle scan`, wgsl_main_scan_reduce, [
         Binding.STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
@@ -124,12 +124,13 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
         inputAccessOrder: options.inputAccessOrder,
         exclusive: options.isReductionExclusive,
         getAddedValue: null,
-        stripeReducedOutput: false // TODO experiment with this!
+        stripeReducedOutput: false, // TODO experiment with this!
+        inPlace: true
       }, sharedOptions )
     );
 
     const lowerScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} lower scan`, wgsl_main_scan_replace, [
+      deviceContext.device, `${name} lower scan`, wgsl_main_scan, [
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
@@ -137,7 +138,8 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
         inputOrder: 'blocked',
         inputAccessOrder: options.inputAccessOrder,
         exclusive: options.isReductionExclusive,
-        getAddedValue: null
+        getAddedValue: null,
+        inPlace: true
       }, sharedOptions )
     );
 

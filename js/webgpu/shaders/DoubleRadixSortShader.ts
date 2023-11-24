@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, getMaxRadixBitsPerInnerPass, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_1 } from '../../imports.js';
+import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, getMaxRadixBitsPerInnerPass, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_replace_add_1 } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 import { getRadixBitVectorSize } from './TripleRadixSortShader.js';
 
@@ -149,7 +149,7 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     );
 
     const lowerScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} lower scan`, wgsl_main_scan_replace, [
+      deviceContext.device, `${name} lower scan`, wgsl_main_scan, [
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
@@ -157,7 +157,8 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         inputOrder: 'blocked',
         inputAccessOrder: 'striped',
         exclusive: options.isReductionExclusive,
-        getAddedValue: null
+        getAddedValue: null,
+        inPlace: true
       }, reduceSharedOptions )
     );
 

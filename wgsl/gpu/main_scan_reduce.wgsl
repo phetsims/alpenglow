@@ -3,6 +3,8 @@
 /**
  * TODO: doc
  *
+ * TODO: Roll this into main_scan
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -21,12 +23,18 @@
 #option exclusive
 #option getAddedValue
 #option stripeReducedOutput
+#option inPlace
 
-@group(0) @binding(0)
-var<storage> input: array<${valueType}>;
-@group(0) @binding(1)
-var<storage, read_write> output: array<${valueType}>;
-@group(0) @binding(2)
+${inPlace ? `
+  @group(0) @binding(0)
+  var<storage, read_write> data: array<${valueType}>;
+` : `
+  @group(0) @binding(0)
+  var<storage> input: array<${valueType}>;
+  @group(0) @binding(1)
+  var<storage, read_write> output: array<${valueType}>;
+`}
+@group(0) @binding(${inPlace ? 1 : 2})
 var<storage, read_write> reductions: array<${valueType}>;
 
 var<workgroup> scratch: array<${valueType}, ${workgroupSize * grainSize}>;
@@ -40,8 +48,8 @@ fn main(
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
   ${scan_comprehensive( {
-    input: `input`,
-    output: `output`,
+    input: inPlace ? `data` : `input`,
+    output: inPlace ? `data` : `output`,
     scratch: `scratch`,
     workgroupSize: workgroupSize,
     grainSize: grainSize,
