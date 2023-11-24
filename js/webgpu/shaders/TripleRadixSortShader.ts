@@ -49,8 +49,7 @@ const DEFAULT_OPTIONS = {
   log: false
 } as const;
 
-// TODO: rename to getMaxRadixBitsPerInnerPass
-export const getMaxRadixBitQuantity = (
+export const getMaxRadixBitsPerInnerPass = (
   workgroupSize: number,
   grainSize: number
 ): number => {
@@ -65,12 +64,12 @@ export const getMaxRadixBitQuantity = (
 export const getRadixBitVectorSize = (
   workgroupSize: number,
   grainSize: number,
-  bitQuantity: number // TODO: rename bitsPerInnerPass(?)
+  bitsPerInnerPass: number
 ): number => {
   const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
   const countsPerComponent = Math.floor( 32 / countBitQuantity );
 
-  const result = Math.ceil( ( 1 << bitQuantity ) / countsPerComponent );
+  const result = Math.ceil( ( 1 << bitsPerInnerPass ) / countsPerComponent );
   assert && assert( result <= 4 );
 
   return result;
@@ -102,7 +101,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
     const iterationCount = Math.ceil( options.totalBits / options.bitsPerPass );
 
-    assert && assert( getMaxRadixBitQuantity( options.workgroupSize, options.grainSize ) >= options.bitsPerInnerPass,
+    assert && assert( getMaxRadixBitsPerInnerPass( options.workgroupSize, options.grainSize ) >= options.bitsPerInnerPass,
       'Not enough bits for inner radix sort' );
 
     const bitVectorSize = getRadixBitVectorSize( options.workgroupSize, options.grainSize, options.bitsPerInnerPass );
@@ -126,7 +125,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           Binding.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
           length: options.lengthExpression,
-          bitQuantity: options.bitsPerPass,
+          bitsPerPass: options.bitsPerPass,
           getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitsPerPass, options.bitsPerPass )
         }, radixSharedOptions )
       ) );
@@ -137,7 +136,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           Binding.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
           length: options.lengthExpression,
-          bitQuantity: options.bitsPerPass,
+          bitsPerPass: options.bitsPerPass,
           bitsPerInnerPass: options.bitsPerInnerPass,
           innerBitVectorSize: bitVectorSize,
           getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitsPerPass, options.bitsPerPass ),

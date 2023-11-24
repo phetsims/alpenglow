@@ -10,7 +10,7 @@
 #option grainSize
 #option valueType
 #option length
-#option bitQuantity
+#option bitsPerPass
 
 // ( value ) => bits
 #option getBits
@@ -20,7 +20,7 @@ var<storage> input: array<${valueType}>;
 @group(0) @binding(1)
 var<storage, read_write> output: array<u32>;
 
-var<workgroup> histogram_scratch: array<atomic<u32>, ${2 ** bitQuantity}>;
+var<workgroup> histogram_scratch: array<atomic<u32>, ${2 ** bitsPerPass}>;
 
 #bindings
 
@@ -35,7 +35,7 @@ fn main(
     grainSize: grainSize,
     histogramScratch: `histogram_scratch`,
     getBin: index => getBits( `input[ ${index} ]` ), // TODO: consider rename of getBin
-    numBins: 2 ** bitQuantity,
+    numBins: 2 ** bitsPerPass,
     length: length,
     storeHistogram: ( index, value ) => `output[ ${index} ] = ${value};`
   } )}

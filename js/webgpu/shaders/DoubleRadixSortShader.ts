@@ -85,7 +85,7 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           Binding.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
           length: options.lengthExpression,
-          bitQuantity: options.bitsPerPass,
+          bitsPerPass: options.bitsPerPass,
           getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitsPerPass, options.bitsPerPass )
         }, radixSharedOptions )
       ) );
@@ -96,7 +96,7 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           Binding.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
           length: options.lengthExpression,
-          bitQuantity: options.bitsPerPass,
+          bitsPerPass: options.bitsPerPass,
           bitsPerInnerPass: options.bitsPerInnerPass,
           innerBitVectorSize: options.innerBitVectorSize,
           getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitsPerPass, options.bitsPerPass ),

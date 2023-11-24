@@ -33,7 +33,7 @@ ${template( ( {
       ${bit_pack_radix_increment( {
         bitVector: `tb_bits_vector`,
         bits: bits,
-        bitQuantity: 2,
+        bitsPerInnerPass: 2,
         bitVectorSize: 1,
         maxCount: workgroupSize
       } )}
@@ -54,7 +54,7 @@ ${template( ( {
 
     ${bit_pack_radix_exclusive_scan( {
       bitVector: `tb_offsets`,
-      bitQuantity: 2,
+      bitsPerInnerPass: 2,
       bitVectorSize: 1,
       maxCount: workgroupSize
     } )}
@@ -64,13 +64,13 @@ ${template( ( {
       ${moveTo( `( ${bit_pack_radix_access( {
         bitVector: `tb_offsets`,
         bits: bits,
-        bitQuantity: 2,
+        bitsPerInnerPass: 2,
         bitVectorSize: 1,
         maxCount: workgroupSize
       } )} ) + ( ${bit_pack_radix_access( {
         bitVector: `tb_bits_vector`,
         bits: bits,
-        bitQuantity: 2,
+        bitsPerInnerPass: 2,
         bitVectorSize: 1,
         maxCount: workgroupSize
       } )} )` )}

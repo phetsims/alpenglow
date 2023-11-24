@@ -16,7 +16,7 @@ ${template( ( {
   workgroupSize, // number
   grainSize, // number
   numBits, // number - number of bits in the key
-  bitQuantity, // number - the number of bits we're using for the sort (e.g. 2 for a two_bit equivalent sort)
+  bitsPerInnerPass, // number - the number of bits we're using for the sort (e.g. 2 for a two_bit equivalent sort)
   bitVectorSize, // number - (1/2/3/4) for (u32/vec2u/vec3u/vec4u) e.g. 4 for a vec4u - whatever is in bitsScratch
   bitsScratch, // var<workgroup> array<u32|vec2u|vec3u|vec4u, workgroupSize>
   valueScratch, // var<workgroup> array<T, workgroupSize>
@@ -26,12 +26,12 @@ ${template( ( {
 } ) => `
   ${comment( 'begin compact_single_radix_sort' )}
 
-  for ( var wrs_i = 0u; wrs_i < ${u32( numBits )}; wrs_i += ${u32( bitQuantity )} ) {
+  for ( var wrs_i = 0u; wrs_i < ${u32( numBits )}; wrs_i += ${u32( bitsPerInnerPass )} ) {
     ${n_bit_compact_single_sort( {
       valueType: valueType,
       workgroupSize: workgroupSize,
       grainSize: grainSize,
-      bitQuantity: bitQuantity,
+      bitsPerInnerPass: bitsPerInnerPass,
       bitVectorSize: bitVectorSize,
       bitsScratch: bitsScratch,
       valueScratch: valueScratch,

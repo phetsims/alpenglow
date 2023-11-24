@@ -11,7 +11,7 @@
 #option workgroupSize
 #option grainSize
 #option inputSize
-#option bitQuantity
+#option bitsPerInnerPass
 #option bitVectorSize
 #option earlyLoad
 
@@ -52,12 +52,12 @@ fn main(
     workgroupSize: workgroupSize,
     grainSize: grainSize,
     numBits: 32,
-    bitQuantity: bitQuantity,
+    bitsPerInnerPass: bitsPerInnerPass,
     bitVectorSize: bitVectorSize,
     bitsScratch: `bits_scratch`,
     valueScratch: `value_scratch`,
     length: u32( inputSize ),
-    getBits: ( valueName, bitIndex ) => `( ( ( ${valueName} ) >> ( ${bitIndex} ) ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`,
+    getBits: ( valueName, bitIndex ) => `( ( ( ${valueName} ) >> ( ${bitIndex} ) ) & ${u32( ( 1 << bitsPerInnerPass ) - 1 )} )`,
     earlyLoad: earlyLoad,
   } )}
 

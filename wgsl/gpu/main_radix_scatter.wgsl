@@ -21,7 +21,7 @@
 #option valueType
 #option length
 #option factorOutSubexpressions
-#option bitQuantity
+#option bitsPerPass
 #option bitsPerInnerPass
 #option innerBitVectorSize
 #option earlyLoad
@@ -40,7 +40,7 @@ var<storage, read_write> output: array<${valueType}>;
 // TODO: see how we can potentially reuse some memory?
 var<workgroup> bits_scratch: array<${{ 1: 'u32', 2: 'vec2u', 3: 'vec3u', 4: 'vec4u' }[ innerBitVectorSize ]}, ${workgroupSize}>;
 var<workgroup> value_scratch: array<${valueType}, ${workgroupSize * grainSize}>;
-var<workgroup> local_histogram_offsets: array<u32, ${u32( 2 ** bitQuantity )}>;
+var<workgroup> local_histogram_offsets: array<u32, ${u32( 2 ** bitsPerPass )}>;
 var<workgroup> start_indices: array<u32, ${workgroupSize * grainSize}>;
 
 #bindings
@@ -87,10 +87,10 @@ fn main(
     } )}
 
     ${comment( 'begin load histogram offsets' )}
-    ${unroll( 0, Math.ceil( ( 2 ** bitQuantity ) / workgroupSize ), i => `
+    ${unroll( 0, Math.ceil( ( 2 ** bitsPerPass ) / workgroupSize ), i => `
       {
         let local_index = ${u32( workgroupSize * i )} + local_id.x;
-        if ( local_index < ${u32( 2 ** bitQuantity )} ) {
+        if ( local_index < ${u32( 2 ** bitsPerPass )} ) {
           local_histogram_offsets[ local_index ] = histogram_offsets[ local_index * num_valid_workgroups + workgroup_id.x ];
         }
       }
@@ -101,7 +101,7 @@ fn main(
       name: 'scanned histogram',
       workgroupSize: workgroupSize,
       grainSize: grainSize,
-      relativeLength: u32( 1 << bitQuantity ),
+      relativeLength: u32( 1 << bitsPerPass ),
       relativeAccessExpression: index => `histogram_offsets[ ${index} ]`,
     } )}
 
@@ -119,12 +119,12 @@ fn main(
       deserialize: arr => arr[ 0 ],
     } )}
 
-    for ( var srs_i = 0u; srs_i < ${u32( bitQuantity )}; srs_i += ${u32( bitsPerInnerPass )} ) {
+    for ( var srs_i = 0u; srs_i < ${u32( bitsPerPass )}; srs_i += ${u32( bitsPerInnerPass )} ) {
       ${n_bit_compact_single_sort( {
         valueType: valueType,
         workgroupSize: workgroupSize,
         grainSize: grainSize,
-        bitQuantity: bitsPerInnerPass,
+        bitsPerInnerPass: bitsPerInnerPass,
         bitVectorSize: innerBitVectorSize,
         bitsScratch: `bits_scratch`,
         valueScratch: `value_scratch`,

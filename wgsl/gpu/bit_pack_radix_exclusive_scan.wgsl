@@ -10,13 +10,13 @@
 
 ${template( ( {
   bitVector, // (u32/vec2u/vec3u/vec4u) name
-  bitQuantity, // e.g. 2 for a two-bit sort
+  bitsPerInnerPass, // e.g. 2 for a two-bit sort
   bitVectorSize, // (1/2/3/4) for (u32/vec2u/vec3u/vec4u) e.g. 4 for a vec4u
   maxCount, // the maximum count in the histogram
 } ) => {
   const countBitQuantity = Math.ceil( Math.log2( maxCount ) );
   const countsPerComponent = Math.floor( 32 / countBitQuantity );
-  assert && assert( bitVectorSize * countsPerComponent >= ( 1 << bitQuantity ), 'Not enough space for bit-packing' );
+  assert && assert( bitVectorSize * countsPerComponent >= ( 1 << bitsPerInnerPass ), 'Not enough space for bit-packing' );
 
   if ( countsPerComponent === 1 ) {
     switch( bitVectorSize ) {
@@ -54,7 +54,7 @@ ${template( ( {
       var bitty_value = 0u;
       var bitty_next_value = 0u;
     `;
-    const numBins = ( 1 << bitQuantity ) >>> 0;
+    const numBins = ( 1 << bitsPerInnerPass ) >>> 0;
     for ( let i = 0; i < numBins; i++ ) {
       const isLast = i === numBins - 1;
 

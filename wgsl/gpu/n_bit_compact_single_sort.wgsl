@@ -5,7 +5,7 @@
  * using a more complicated/computational but lower-memory approach by packing the accumulated bits (that we scan over)
  * into a more compact form (packed into either a u32/vec2u/vec3u/vec4u, depending on the bitVectorSize parameter).
  *
- * NOTE: This is a stable sort, but it only sorts things BASED ON ONLY N (bitQuantity) BITS of the key (so it's not a
+ * NOTE: This is a stable sort, but it only sorts things BASED ON ONLY N (bitsPerInnerPass) BITS of the key (so it's not a
  * full sort). You'll want to run this multiple times (giving different sections of bits each time, from lower to higher)
  * in order to achieve a full sort.
  *
@@ -24,7 +24,7 @@ ${template( ( {
   valueType, // type (string)
   workgroupSize, // number
   grainSize, // number
-  bitQuantity, // number - the number of bits we're using for the sort (e.g. 2 for a two_bit equivalent sort)
+  bitsPerInnerPass, // number - the number of bits we're using for the sort (e.g. 2 for a two_bit equivalent sort)
   bitVectorSize, // number - (1/2/3/4) for (u32/vec2u/vec3u/vec4u) e.g. 4 for a vec4u - whatever is in bitsScratch
   bitsScratch, // var<workgroup> array<u32|vec2u|vec3u|vec4u, workgroupSize> TODO: we can pack this more efficiently, no?
   valueScratch, // var<workgroup> array<T, workgroupSize * grainSize>
@@ -78,7 +78,7 @@ ${template( ( {
     ${comment( 'begin n_bit_compact_single_sort' )}
 
     ${log( {
-      name: `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitQuantity:${bitQuantity}, bitVectorSize:${bitVectorSize}, length:"${length}" earlyLoad:${earlyLoad}`,
+      name: `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${length}" earlyLoad:${earlyLoad}`,
     } )}
 
     {
@@ -111,7 +111,7 @@ ${template( ( {
           ${bit_pack_radix_increment( {
             bitVector: `tb_bits_vector`,
             bits: `tb_bits`,
-            bitQuantity: bitQuantity,
+            bitsPerInnerPass: bitsPerInnerPass,
             bitVectorSize: bitVectorSize,
             maxCount: workgroupSize * grainSize
           } )}
@@ -146,7 +146,7 @@ ${template( ( {
 
       ${bit_pack_radix_exclusive_scan( {
         bitVector: `tb_offsets`,
-        bitQuantity: bitQuantity,
+        bitsPerInnerPass: bitsPerInnerPass,
         bitVectorSize: bitVectorSize,
         maxCount: workgroupSize * grainSize
       } )}
@@ -172,13 +172,13 @@ ${template( ( {
           ${valueScratch}[ ( ${bit_pack_radix_access( {
             bitVector: `tb_offsets`,
             bits: `tb_bits`,
-            bitQuantity: bitQuantity,
+            bitsPerInnerPass: bitsPerInnerPass,
             bitVectorSize: bitVectorSize,
             maxCount: workgroupSize * grainSize
           } )} ) + ( ${bit_pack_radix_access( {
             bitVector: `tb_bits_vector`,
             bits: `tb_bits`,
-            bitQuantity: bitQuantity,
+            bitsPerInnerPass: bitsPerInnerPass,
             bitVectorSize: bitVectorSize,
             maxCount: workgroupSize * grainSize
           } )} ) ] = tb_value;
@@ -187,7 +187,7 @@ ${template( ( {
           ${bit_pack_radix_increment( {
             bitVector: `tb_bits_vector`,
             bits: `tb_bits`,
-            bitQuantity: bitQuantity,
+            bitsPerInnerPass: bitsPerInnerPass,
             bitVectorSize: bitVectorSize,
             maxCount: workgroupSize * grainSize
           } )}
