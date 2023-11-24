@@ -40,7 +40,7 @@ var<storage, read_write> output: array<${valueType}>;
 // TODO: see how we can potentially reuse some memory?
 var<workgroup> bits_scratch: array<${{ 1: 'u32', 2: 'vec2u', 3: 'vec3u', 4: 'vec4u' }[ innerBitVectorSize ]}, ${workgroupSize}>;
 var<workgroup> value_scratch: array<${valueType}, ${workgroupSize * grainSize}>;
-var<workgroup> local_histogram_offsets: array<u32, ${u32( 2 ** bitsPerPass )}>;
+var<workgroup> local_histogram_offsets: array<u32, ${u32( 1 << bitsPerPass )}>;
 var<workgroup> start_indices: array<u32, ${workgroupSize * grainSize}>;
 
 #bindings
@@ -87,10 +87,10 @@ fn main(
     } )}
 
     ${comment( 'begin load histogram offsets' )}
-    ${unroll( 0, Math.ceil( ( 2 ** bitsPerPass ) / workgroupSize ), i => `
+    ${unroll( 0, Math.ceil( ( 1 << bitsPerPass ) / workgroupSize ), i => `
       {
         let local_index = ${u32( workgroupSize * i )} + local_id.x;
-        if ( local_index < ${u32( 2 ** bitsPerPass )} ) {
+        if ( local_index < ${u32( 1 << bitsPerPass )} ) {
           local_histogram_offsets[ local_index ] = histogram_offsets[ local_index * num_valid_workgroups + workgroup_id.x ];
         }
       }
