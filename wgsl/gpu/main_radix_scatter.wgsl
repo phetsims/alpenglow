@@ -122,6 +122,7 @@ fn main(
           } )}
 
           ${n_bit_compact_single_sort( {
+            order: order,
             valueType: order.type.valueType,
             workgroupSize: workgroupSize,
             grainSize: grainSize,

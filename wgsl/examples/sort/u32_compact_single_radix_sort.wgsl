@@ -48,7 +48,7 @@ fn main(
 
   // Sort
   ${compact_single_radix_sort( {
-    valueType: 'u32',
+    order: U32Order,
     workgroupSize: workgroupSize,
     grainSize: grainSize,
     numBits: 32,

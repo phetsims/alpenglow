@@ -12,7 +12,7 @@
 #import ./n_bit_compact_single_sort
 
 ${template( ( {
-  valueType, // type (string)
+  order, // BitOrder
   workgroupSize, // number
   grainSize, // number
   numBits, // number - number of bits in the key
@@ -28,7 +28,7 @@ ${template( ( {
 
   for ( var wrs_i = 0u; wrs_i < ${u32( numBits )}; wrs_i += ${u32( bitsPerInnerPass )} ) {
     ${n_bit_compact_single_sort( {
-      valueType: valueType,
+      order: order,
       workgroupSize: workgroupSize,
       grainSize: grainSize,
       bitsPerInnerPass: bitsPerInnerPass,

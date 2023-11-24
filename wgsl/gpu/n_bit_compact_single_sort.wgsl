@@ -22,9 +22,8 @@
 #import ./log_value
 #import ./log_string
 
-// TODO: Just take in the "order", replaces valueType, getBits {{and allows logging values out}}
 ${template( ( {
-  valueType, // type (string)
+  order, // BitOrder - Currently mostly used for the type, but we might be able to use it for more later.
   workgroupSize, // number
   grainSize, // number
   bitsPerInnerPass, // number - the number of bits we're using for the sort (e.g. 2 for a two_bit equivalent sort)
@@ -79,7 +78,7 @@ ${template( ( {
       }[ bitVectorSize ]};
 
       ${earlyLoad ? `
-        var tb_values: array<${valueType}, ${grainSize}>;
+        var tb_values: array<${order.type.valueType}, ${grainSize}>;
       ` : ``}
 
       // Store our thread's "raked" values histogram into tb_bits_vector
@@ -89,12 +88,11 @@ ${template( ( {
           let tb_value = ${valueScratch}[ ${u32( grainSize )} * local_id.x + ${u32( i )} ];
           let tb_bits = ${getBits( `tb_value` )};
 
-          // TODO: factor this out(!)
-//          ${log_value( {
-//            value: `tb_value`,
-//            name: `tb_value (raked index ${i})`,
-//            type: Vec2uType, // TODO: pass in(!)
-//          } )}
+          ${log_value( {
+            value: `tb_value`,
+            name: `tb_value (raked index ${i})`,
+            type: order.type,
+          } )}
 
           ${log_value( {
             value: `tb_bits`,
@@ -146,7 +144,7 @@ ${template( ( {
       } )}
 
       ${!earlyLoad ? `
-        var tb_values: array<${valueType}, ${grainSize}>;
+        var tb_values: array<${order.type.valueType}, ${grainSize}>;
 
         ${unroll( 0, grainSize, i => `
           // TODO: see if factoring out constants doesn't kill registers
