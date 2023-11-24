@@ -35,7 +35,7 @@ type ConcreteType<T> = {
   valueType: string;
   writeU32s(
     // given an expr:u32 offset and expr:u32 value, it will store the value at the offset
-    storeStatement: ( offset: string, u32: string ) => string,
+    storeStatement: ( offset: string, u32expr: string ) => string,
 
     // the variable name (e.g. expr:T) that is being stored
     value: string
@@ -96,6 +96,70 @@ export type CompareOrder<T> = {
 
 export type Order<T> = BitOrder<T> & CompareOrder<T>;
 
+export const getArrayType = <T>( type: ConcreteType<T>, size: number ): ConcreteType<T[]> => {
+  const u32sPerElement = type.bytesPerElement / 4;
+
+  return {
+    name: `${type.name}[${size}]`,
+    bytesPerElement: type.bytesPerElement * size,
+
+    equals( a: T[], b: T[] ): boolean {
+      assert && assert( a.length === size );
+      assert && assert( b.length === size );
+
+      for ( let i = 0; i < size; i++ ) {
+        if ( !type.equals( a[ i ], b[ i ] ) ) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+
+    equalsWGSL( a: string, b: string ): string {
+      return `( ${_.range( 0, size ).map( i => {
+        return type.equalsWGSL( `${a}[ ${u32( i )} ]`, `${b}[ ${u32( i )} ]` );
+      } ).join( ' && ' )} )`;
+    },
+
+    encode( value: T[], encoder: ByteEncoder ): void {
+      assert && assert( value.length === size );
+
+      for ( let i = 0; i < size; i++ ) {
+        type.encode( value[ i ], encoder );
+      }
+    },
+
+    decode( encoder: ByteEncoder, offset: number ): T[] {
+      const array: T[] = [];
+
+      for ( let i = 0; i < size; i++ ) {
+        array.push( type.decode( encoder, offset + i * u32sPerElement ) );
+      }
+
+      return array;
+    },
+
+    valueType: `array<${type.valueType}, ${size}>`,
+    writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
+      return _.range( 0, size ).map( i => {
+        return type.writeU32s(
+          ( offset, u32expr ) => storeStatement( `( ${offset} + ${u32( i * u32sPerElement )} )`, u32expr ),
+          `${value}[ ${u32( i )} ]`
+        );
+      } ).join( '\n' );
+    },
+
+    generateRandom( fullSize = false ): T[] {
+      return _.range( 0, size ).map( () => type.generateRandom( fullSize ) );
+    },
+
+    toDebugString( value: T[] ): string {
+      return `[${value.map( v => type.toDebugString( v ) ).join( ', ' )}]`;
+    }
+  };
+};
+
 export const U32Type: ConcreteType<number> = {
   name: 'u32',
   bytesPerElement: 4,
@@ -116,7 +180,7 @@ export const U32Type: ConcreteType<number> = {
   },
 
   valueType: 'u32',
-  writeU32s( storeStatement: ( offset: string, u32: string ) => string, value: string ): string {
+  writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
     return `
        ${storeStatement( '0u', value )}
     `;
@@ -224,7 +288,7 @@ export const I32Type: ConcreteType<number> = {
   },
 
   valueType: 'i32',
-  writeU32s( storeStatement: ( offset: string, u32: string ) => string, value: string ): string {
+  writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
     return `
        ${storeStatement( '0u', `bitcast<u32>( ${value} )` )}
     `;
@@ -257,7 +321,7 @@ export const Vec2uType: ConcreteType<Vector2> = {
   },
 
   valueType: 'vec2u',
-  writeU32s( storeStatement: ( offset: string, u32: string ) => string, value: string ): string {
+  writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
     return `
        ${storeStatement( '0u', `${value}.x` )}
        ${storeStatement( '1u', `${value}.y` )}
