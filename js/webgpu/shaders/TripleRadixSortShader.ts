@@ -49,7 +49,11 @@ const DEFAULT_OPTIONS = {
   log: false
 } as const;
 
-export const getMaxRadixBitQuantity = ( workgroupSize: number, grainSize: number ): number => {
+// TODO: rename to getMaxRadixBitsPerInnerPass
+export const getMaxRadixBitQuantity = (
+  workgroupSize: number,
+  grainSize: number
+): number => {
   const maxBitVectorSize = 4;
 
   const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
@@ -58,7 +62,11 @@ export const getMaxRadixBitQuantity = ( workgroupSize: number, grainSize: number
   return Math.floor( Math.log2( maxBitVectorSize * countsPerComponent ) );
 };
 
-export const getRadixBitVectorSize = ( workgroupSize: number, grainSize: number, bitQuantity: number ): number => {
+export const getRadixBitVectorSize = (
+  workgroupSize: number,
+  grainSize: number,
+  bitQuantity: number // TODO: rename bitsPerInnerPass(?)
+): number => {
   const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
   const countsPerComponent = Math.floor( 32 / countBitQuantity );
 
@@ -69,6 +77,16 @@ export const getRadixBitVectorSize = ( workgroupSize: number, grainSize: number,
 };
 
 export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]> {
+
+  public static getMaximumElementQuantity(
+    workgroupSize: number,
+    grainSize: number,
+    bitsPerPass: number // TODO: rename bitsPerPass (?)
+  ): number {
+    const scanDataCount = workgroupSize * grainSize;
+
+    return scanDataCount * Math.floor( scanDataCount * scanDataCount * scanDataCount / ( 1 << bitsPerPass ) );
+  }
 
   public static async create<T>(
     deviceContext: DeviceContext,
@@ -208,7 +226,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     return new TripleRadixSortShader<T>( async ( execution: Execution, values: T[] ) => {
       const upperDispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
-      const histogramElementCount = upperDispatchSize * ( 2 ** options.bitQuantity );
+      const histogramElementCount = upperDispatchSize * ( 1 << options.bitQuantity );
 
       assert && assert( histogramElementCount <= dataCount * dataCount * dataCount );
 

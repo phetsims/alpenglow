@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line single-line-import
 import {
-  AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, ComputeShader, ConcreteType, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, SingleReduceShader, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, U32ReverseOrder, Vec2uBic, Vec2uLexicographicalOrder, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
+  AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, ComputeShader, ConcreteType, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, getMaxRadixBitQuantity, SingleReduceShader, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, U32ReverseOrder, Vec2uBic, Vec2uLexicographicalOrder, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
 } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -2400,6 +2400,7 @@ asyncTestWithDevice( 'u32 double radix sort', async ( device, deviceContext ) =>
 type RadixSortOptions<T> = {
   workgroupSize: number;
   grainSize: number;
+  inputSize: number;
   order: RadixComparable<T> & Comparable<T>;
   bitsPerPass: number;
   bitsPerInnerPass: number;
@@ -2418,9 +2419,7 @@ const testTripleRadixSort = <T>( options: RadixSortOptions<T> ) => {
 
   const innerBitVectorSize = getRadixBitVectorSize( workgroupSize, grainSize, options.bitsPerInnerPass );
 
-  const inputSize = ( workgroupSize * grainSize ) * workgroupSize * grainSize * 5 - 27;
-
-  const name = `${options.order.name} triple radix sort (wg:${workgroupSize} gr:${grainSize} bits:${options.bitsPerPass}, bitQ:${options.bitsPerInnerPass} bitVec:${innerBitVectorSize} full:${options.fullSize} early:${options.earlyLoad} reducEx:${options.isReductionExclusive})`;
+  const name = `${options.order.name} triple radix sort (#:${options.inputSize} wg:${workgroupSize} gr:${grainSize} bits:${options.bitsPerPass}, bitQ:${options.bitsPerInnerPass} bitVec:${innerBitVectorSize} full:${options.fullSize} early:${options.earlyLoad} reducEx:${options.isReductionExclusive})`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const type = options.order.type;
 
@@ -2431,7 +2430,7 @@ const testTripleRadixSort = <T>( options: RadixSortOptions<T> ) => {
 
       workgroupSize: workgroupSize,
       grainSize: grainSize,
-      lengthExpression: u32( inputSize ),
+      lengthExpression: u32( options.inputSize ),
 
       // radix options
       // TODO: rename bitQuantity => bitsPerPass, innerBitQuantity => bitsPerInnerPass
@@ -2447,7 +2446,7 @@ const testTripleRadixSort = <T>( options: RadixSortOptions<T> ) => {
       log: false
     } );
 
-    const inputValues = _.range( 0, inputSize ).map( () => type.generateRandom( options.fullSize ) );
+    const inputValues = _.range( 0, options.inputSize ).map( () => type.generateRandom( options.fullSize ) );
 
     const actualValues = await deviceContext.executeShader( shader, inputValues );
 
@@ -2457,27 +2456,48 @@ const testTripleRadixSort = <T>( options: RadixSortOptions<T> ) => {
   } );
 };
 
+// TODO: for less shader compilation, get a way where we're not compiling a shader for each radix pass
 [ false, true ].forEach( fullSize => {
-  const commonOptions = {
-    workgroupSize: 8,
-    grainSize: 4,
-    bitsPerPass: 3,
-    bitsPerInnerPass: 2,
-    fullSize: fullSize,
-    earlyLoad: false,
-    isReductionExclusive: false
-  } as const;
+  ( [
+    { workgroupSize: 8, grainSize: 4 },
+    { workgroupSize: 128, grainSize: 4 }
+  ] as const ).forEach( ( { workgroupSize, grainSize } ) => {
 
-  testTripleRadixSort( combineOptions<RadixSortOptions<number>>( {
-    order: U32Order
-  }, commonOptions ) );
+    const maxBitsPerInnerPass = getMaxRadixBitQuantity( workgroupSize, grainSize );
 
-  testTripleRadixSort( combineOptions<RadixSortOptions<number>>( {
-    order: U32ReverseOrder
-  }, commonOptions ) );
+    [ maxBitsPerInnerPass, 2 ].filter( bits => bits <= maxBitsPerInnerPass ).forEach( bitsPerInnerPass => {
 
-  testTripleRadixSort( combineOptions<RadixSortOptions<Vector2>>( {
-    order: Vec2uLexicographicalOrder
-  }, commonOptions ) );
+      // TODO: how to handle memory size limits?
+      [ 4, 8 ].forEach( bitsPerPass => {
+        [ false, true ].forEach( isReductionExclusive => {
+          const maxInputSize = TripleRadixSortShader.getMaximumElementQuantity( workgroupSize, grainSize, bitsPerPass );
+
+          // TODO: separate workgroup sizes for the scan and the rest(!)
+          const commonOptions = {
+            workgroupSize: workgroupSize,
+            grainSize: grainSize,
+            bitsPerPass: bitsPerPass,
+            bitsPerInnerPass: bitsPerInnerPass,
+            fullSize: fullSize,
+            earlyLoad: false,
+            isReductionExclusive: isReductionExclusive,
+            inputSize: Math.min( maxInputSize, ( workgroupSize * grainSize ) * workgroupSize * grainSize * 2 ) - 27
+          } as const;
+
+          testTripleRadixSort( combineOptions<RadixSortOptions<number>>( {
+            order: U32Order
+          }, commonOptions ) );
+
+          testTripleRadixSort( combineOptions<RadixSortOptions<number>>( {
+            order: U32ReverseOrder
+          }, commonOptions ) );
+
+          testTripleRadixSort( combineOptions<RadixSortOptions<Vector2>>( {
+            order: Vec2uLexicographicalOrder
+          }, commonOptions ) );
+        } );
+      } );
+    } );
+  } );
 } );
 

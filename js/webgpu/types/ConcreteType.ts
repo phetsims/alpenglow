@@ -303,7 +303,6 @@ export const Vec2uLexicographicalOrder: ( RadixComparable<Vector2> & Comparable<
     }
   },
 
-  // TODO: test
   getBits: ( value: Vector2, bitOffset: number, bitQuantity: number ): number => {
     return ( ( ByteEncoder.rightShiftU32( value.x, bitOffset - 32 ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0 ) +
            ( ( ByteEncoder.rightShiftU32( value.y, bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0 );
