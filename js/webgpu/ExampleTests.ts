@@ -8,11 +8,10 @@
 
 // eslint-disable-next-line single-line-import
 import {
-  AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, ComputeShader, ConcreteType, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, getMaxRadixBitsPerInnerPass, SingleReduceShader, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, U32ReverseOrder, Vec2uBic, Vec2uLexicographicalOrder, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
+  AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, ComputeShader, ConcreteType, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, getMaxRadixBitsPerInnerPass, Order, SingleReduceShader, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, U32ReverseOrder, Vec2uBic, Vec2uLexicographicalOrder, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
 } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { Comparable, RadixComparable } from './types/ConcreteType.js';
 import { getRadixBitVectorSize } from './shaders/TripleRadixSortShader.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 
@@ -2401,7 +2400,7 @@ type RadixSortOptions<T> = {
   workgroupSize: number;
   grainSize: number;
   inputSize: number;
-  order: RadixComparable<T> & Comparable<T>;
+  order: Order<T>;
   bitsPerPass: number;
   bitsPerInnerPass: number;
   fullSize: boolean;
@@ -2409,7 +2408,7 @@ type RadixSortOptions<T> = {
   isReductionExclusive: boolean;
 };
 
-// Just do Comparable for easier testing
+// Just do CompareOrder for easier testing
 const testTripleRadixSort = <T>( options: RadixSortOptions<T> ) => {
   const factorOutSubexpressions = true;
   const nestSubexpressions = false;

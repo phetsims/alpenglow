@@ -67,7 +67,7 @@ export type BinaryOp<T> = {
   atomicName?: string;
 };
 
-export type RadixComparable<T> = {
+export type BitOrder<T> = {
   name: string;
   type: ConcreteType<T>;
 
@@ -78,7 +78,7 @@ export type RadixComparable<T> = {
   getBitsWGSL: ( value: string, bitOffset: number, bitQuantity: number ) => string;
 };
 
-export type Comparable<T> = {
+export type CompareOrder<T> = {
   name: string;
   type: ConcreteType<T>;
 
@@ -93,6 +93,8 @@ export type Comparable<T> = {
   // ( a: expr:T, b: expr:T ) => expr:bool
   lessThanOrEqual: ( a: string, b: string ) => string;
 };
+
+export type Order<T> = BitOrder<T> & CompareOrder<T>;
 
 export const U32Type: ConcreteType<number> = {
   name: 'u32',
@@ -140,7 +142,7 @@ export const U32Add: BinaryOp<number> = {
 };
 // TODO: add other atomic typesf
 
-export const U32Order: ( RadixComparable<number> & Comparable<number> ) = {
+export const U32Order: Order<number> = {
   name: 'u32 order',
   type: U32Type,
 
@@ -172,7 +174,7 @@ export const U32Order: ( RadixComparable<number> & Comparable<number> ) = {
   }
 };
 
-export const U32ReverseOrder: ( RadixComparable<number> & Comparable<number> ) = {
+export const U32ReverseOrder: Order<number> = {
   name: 'u32 reverse order',
   type: U32Type,
 
@@ -289,7 +291,7 @@ export const Vec2uBic: BinaryOp<Vector2> = {
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b} - min( ${a}.y, ${b}.x );`
 };
 
-export const Vec2uLexicographicalOrder: ( RadixComparable<Vector2> & Comparable<Vector2> ) = {
+export const Vec2uLexicographicalOrder: Order<Vector2> = {
   name: 'vec2u lexicographical order',
   type: Vec2uType,
 

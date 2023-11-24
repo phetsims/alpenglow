@@ -6,12 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_1 } from '../../imports.js';
+import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_1 } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
-import { RadixComparable } from '../types/ConcreteType.js';
 
 export type DoubleRadixSortShaderOptions<T> = {
-  order: RadixComparable<T>;
+  order: BitOrder<T>;
 
   totalBits: number;
 
