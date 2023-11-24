@@ -23,8 +23,10 @@
 #option stripeReducedOutput
 
 @group(0) @binding(0)
-var<storage, read_write> data: array<${valueType}>;
+var<storage> input: array<${valueType}>;
 @group(0) @binding(1)
+var<storage, read_write> output: array<${valueType}>;
+@group(0) @binding(2)
 var<storage, read_write> reductions: array<${valueType}>;
 
 var<workgroup> scratch: array<${valueType}, ${workgroupSize * grainSize}>;
@@ -38,8 +40,8 @@ fn main(
   @builtin(workgroup_id) workgroup_id: vec3u
 ) {
   ${scan_comprehensive( {
-    input: `data`,
-    output: `data`,
+    input: `input`,
+    output: `output`,
     scratch: `scratch`,
     workgroupSize: workgroupSize,
     grainSize: grainSize,
