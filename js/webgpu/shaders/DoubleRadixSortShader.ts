@@ -65,27 +65,28 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
     const iterationCount = Math.ceil( options.totalBits / options.bitsPerPass );
 
-    const radixSharedOptions: Record<string, unknown> = {
-      valueType: type.valueType,
-      workgroupSize: options.workgroupSize,
-      grainSize: options.grainSize,
-      factorOutSubexpressions: options.factorOutSubexpressions,
-      nestSubexpressions: options.nestSubexpressions,
-      log: options.log
-    };
-
     const histogramShaders: ComputeShader[] = [];
     const scatterShaders: ComputeShader[] = [];
 
     for ( let i = 0; i < iterationCount; i++ ) {
+      const radixSharedOptions: Record<string, unknown> = {
+        order: order,
+        pass: i,
+        workgroupSize: options.workgroupSize,
+        grainSize: options.grainSize,
+        factorOutSubexpressions: options.factorOutSubexpressions,
+        nestSubexpressions: options.nestSubexpressions,
+        length: options.lengthExpression,
+        bitsPerPass: options.bitsPerPass,
+        log: options.log
+      };
+
       histogramShaders.push( await ComputeShader.fromSourceAsync(
         deviceContext.device, `${name} histogram ${i}`, wgsl_main_radix_histogram, [
           Binding.READ_ONLY_STORAGE_BUFFER,
           Binding.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
-          length: options.lengthExpression,
-          bitsPerPass: options.bitsPerPass,
-          getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitsPerPass, options.bitsPerPass )
+
         }, radixSharedOptions )
       ) );
       scatterShaders.push( await ComputeShader.fromSourceAsync(
@@ -94,11 +95,8 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           Binding.READ_ONLY_STORAGE_BUFFER,
           Binding.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
-          length: options.lengthExpression,
-          bitsPerPass: options.bitsPerPass,
           bitsPerInnerPass: options.bitsPerInnerPass,
           innerBitVectorSize: options.innerBitVectorSize,
-          getBits: ( value: string ) => order.getBitsWGSL( value, i * options.bitsPerPass, options.bitsPerPass ),
           factorOutSubexpressions: options.factorOutSubexpressions,
           earlyLoad: options.earlyLoad
         }, radixSharedOptions )
