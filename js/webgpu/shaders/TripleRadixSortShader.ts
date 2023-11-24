@@ -217,6 +217,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       }, reduceSharedOptions )
     );
 
+    // TODO: can we factor this out(!)
     const logShader = options.log ? await ConsoleLogger.getLogBarrierComputeShader( deviceContext ) : null;
 
     return new TripleRadixSortShader<T>( async ( execution: Execution, values: T[] ) => {

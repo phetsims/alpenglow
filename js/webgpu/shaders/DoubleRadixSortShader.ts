@@ -6,12 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_1 } from '../../imports.js';
+import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, getMaxRadixBitsPerInnerPass, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan_replace, wgsl_main_scan_replace_add_1 } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
+import { getRadixBitVectorSize } from './TripleRadixSortShader.js';
 
 export type DoubleRadixSortShaderOptions<T> = {
   order: BitOrder<T>;
 
+  // NOTE: this is specified here, since we may be using FEWER than the maximum number of bits in the order.
   totalBits: number;
 
   workgroupSize?: number;
@@ -21,7 +23,6 @@ export type DoubleRadixSortShaderOptions<T> = {
   // radix options
   bitsPerPass?: number;
   bitsPerInnerPass?: number;
-  innerBitVectorSize?: number;
   earlyLoad?: boolean;
 
   // scan options
@@ -39,7 +40,6 @@ const DEFAULT_OPTIONS = {
 
   bitsPerPass: 8,
   bitsPerInnerPass: 2,
-  innerBitVectorSize: 1,
   earlyLoad: false,
 
   factorOutSubexpressions: true,
@@ -50,6 +50,16 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]> {
+
+  public static getMaximumElementQuantity(
+    workgroupSize: number,
+    grainSize: number,
+    bitsPerPass: number
+  ): number {
+    const scanDataCount = workgroupSize * grainSize;
+
+    return scanDataCount * Math.floor( scanDataCount * scanDataCount / ( 1 << bitsPerPass ) );
+  }
 
   public static async create<T>(
     deviceContext: DeviceContext,
@@ -64,6 +74,11 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     const dataCount = options.workgroupSize * options.grainSize;
 
     const iterationCount = Math.ceil( options.totalBits / options.bitsPerPass );
+
+    assert && assert( getMaxRadixBitsPerInnerPass( options.workgroupSize, options.grainSize ) >= options.bitsPerInnerPass,
+      'Not enough bits for inner radix sort' );
+
+    const bitVectorSize = getRadixBitVectorSize( options.workgroupSize, options.grainSize, options.bitsPerInnerPass );
 
     const histogramShaders: ComputeShader[] = [];
     const scatterShaders: ComputeShader[] = [];
@@ -96,7 +111,7 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
           Binding.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
           bitsPerInnerPass: options.bitsPerInnerPass,
-          innerBitVectorSize: options.innerBitVectorSize,
+          innerBitVectorSize: bitVectorSize,
           factorOutSubexpressions: options.factorOutSubexpressions,
           earlyLoad: options.earlyLoad
         }, radixSharedOptions )
@@ -115,6 +130,8 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       log: options.log
     };
 
+    // WGSL "ceil" equivalent
+    // TODO: yeah, get length statements/expressions handled.
     const scanLength = options.lengthExpression ? `( ( ( ( ${options.lengthExpression} ) + ${u32( options.workgroupSize * options.grainSize - 1 )} ) / ${u32( options.workgroupSize * options.grainSize )} ) << ${u32( options.bitsPerPass )} )` : null;
 
     const reduceShader = await ComputeShader.fromSourceAsync(
