@@ -17,16 +17,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-${template( (
+import { alpenglow, WGSLExpressionBool, WGSLStatements } from '../../imports.js';
+
+const conditionalIfWGSL = (
   // null | string (expr:bool) - if null, trueStatements will be executed. If non-null, it will create an if(else)
-  optionalConditional,
+  optionalConditional: WGSLExpressionBool | null,
 
-  // string (statements)
-  trueStatements,
-
-  // null | string (statements)
-  falseStatements = null
-) => {
+  trueStatements: WGSLStatements,
+  falseStatements: WGSLStatements | null
+): WGSLStatements => {
   if ( optionalConditional === null ) {
     return trueStatements;
   }
@@ -39,7 +38,11 @@ ${template( (
         else {
           ${falseStatements}
         }
-      ` : ``}
+      ` : ''}
     `;
   }
-} )}
+};
+
+export default conditionalIfWGSL;
+
+alpenglow.register( 'conditionalIfWGSL', conditionalIfWGSL );

@@ -3249,10 +3249,19 @@
 
     <h3 id="WGSL">WGSL</h3>
 
+    <p>
+      Specification changes: <a href="https://github.com/gpuweb/gpuweb/commits/main">https://github.com/gpuweb/gpuweb/commits/main</a>,
+      WebGPU Chrome changes: <a href="https://developer.chrome.com/blog/new-in-webgpu-118/">https://developer.chrome.com/blog/new-in-webgpu-118/</a>,
+      subgroups proposal: <a href="https://github.com/gpuweb/gpuweb/pull/4368">https://github.com/gpuweb/gpuweb/pull/4368</a>.
+    </p>
+
     <p class="TODO">
-      <a href="https://github.com/wgsl-analyzer/wgsl-analyzer">wgsl-analyzer</a> our non-minified output! We can
-      potentially format output too. Can we have the analysis in JS, or can we run it independently? Currently capable
-      in VSCode.
+      Lint with  <a href="https://github.com/wgsl-analyzer/wgsl-analyzer">wgsl-analyzer</a> on generated output, in an
+      automated way.
+    </p>
+
+    <p>
+      WGSL Parsing options: <a href="https://lezer.codemirror.net/">https://lezer.codemirror.net/</a>
     </p>
 
     <p class="TODO">
@@ -3261,10 +3270,6 @@
 
     <p class="TODO">
       Create a pattern so that we can easily pre-load shaders before they are used.
-    </p>
-
-    <p class="DEFERRED">
-      Check the WGSL/WebGPU spec for changes!
     </p>
 
     <p class="TODO">
@@ -3285,7 +3290,11 @@
 
     <h4 id="WGSL-snippets">Snippets</h4>
 
-    <p class="TODO">Note DualSnippet. Note ComputeShader</p>
+    <p class="TODO">
+      Get rid of DualSnippet, since we don't need the "dual" nature.
+    </p>
+
+    <p class="TODO">Doc things like ComputeShader and things once stabilized</p>
 
     <h4 id="WGSL-preprocessing">Preprocessing</h4>
 
@@ -3404,16 +3413,6 @@
     </ol>
 
     <h5>Miscellaneous</h5>
-
-    <p class="TODO">
-      Check subgroups proposal: <a href="https://github.com/gpuweb/gpuweb/pull/4368">https://github.com/gpuweb/gpuweb/pull/4368</a>.
-    </p>
-
-    <p class="TODO">
-      Watch <a href="https://github.com/gpuweb/gpuweb/commits/main">https://github.com/gpuweb/gpuweb/commits/main</a>
-      for changes to the spec. Also see
-      <a href="https://developer.chrome.com/blog/new-in-webgpu-118/">https://developer.chrome.com/blog/new-in-webgpu-118/</a>
-    </p>
 
     <p class="TODO">
       Check <a href="https://usegpu.live/">https://usegpu.live/</a> for patterns.

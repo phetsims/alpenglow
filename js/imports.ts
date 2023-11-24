@@ -466,12 +466,24 @@ export { default as BlitShader } from './webgpu/BlitShader.js';
 export { default as ByteEncoder } from './webgpu/ByteEncoder.js';
 export type { F32, U32, I32, U8 } from './webgpu/ByteEncoder.js';
 export { U32Type, U32Add, U32Order, U32ReverseOrder, I32Type, Vec2uType, Vec2uBic, Vec3uType, Vec4uType, Vec2uLexicographicalOrder, getArrayType } from './webgpu/types/ConcreteType.js';
-export type { default as ConcreteType, BinaryOp, BitOrder, CompareOrder, Order } from './webgpu/types/ConcreteType.js';
+export type { default as ConcreteType, BinaryOp, BitOrder, CompareOrder, Order, WGSLExpression, WGSLStatements, WGSLVariableName, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionBool } from './webgpu/types/ConcreteType.js';
 export { default as ConsoleLogger, ConsoleLoggedEntry, ConsoleLoggedThread, ConsoleLoggedLine, ConsoleLoggedShader } from './webgpu/ConsoleLogger.js';
 export type { ConsoleLogInfo } from './webgpu/ConsoleLogger.js';
 export { default as BufferLogger } from './webgpu/BufferLogger.js';
 export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/BufferLogger.js';
 export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/TimestampLogger.js';
+
+export { default as binaryExpressionStatementWGSL } from './webgpu/templates/binaryExpressionStatementWGSL.js';
+export { default as commentWGSL } from './webgpu/templates/commentWGSL.js';
+export { default as conditionalIfWGSL } from './webgpu/templates/conditionalIfWGSL.js';
+export { default as loadMultipleWGSL } from './webgpu/templates/loadMultipleWGSL.js';
+export type { LoadMultipleWGSLOptions } from './webgpu/templates/loadMultipleWGSL.js';
+export { default as reduceWGSL } from './webgpu/templates/reduceWGSL.js';
+export type { ReduceWGSLOptions } from './webgpu/templates/reduceWGSL.js';
+export { default as scanWGSL } from './webgpu/templates/scanWGSL.js';
+export type { ScanWGSLOptions } from './webgpu/templates/scanWGSL.js';
+export { default as unrollWGSL } from './webgpu/templates/unrollWGSL.js';
+
 export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';

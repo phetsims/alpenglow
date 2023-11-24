@@ -15,6 +15,15 @@ import Vector4 from '../../../../dot/js/Vector4.js';
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
 
+export type WGSLExpression = string;
+export type WGSLExpressionU32 = WGSLExpression;
+export type WGSLExpressionI32 = WGSLExpression;
+export type WGSLExpressionBool = WGSLExpression;
+export type WGSLStatements = string;
+export type WGSLVariableName = string;
+export type WGSLBinaryExpression = ( a: WGSLExpression, b: WGSLExpression ) => WGSLExpression;
+export type WGSLBinaryStatements = ( value: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => WGSLStatements;
+
 type ConcreteType<T> = {
   name: string;
 
