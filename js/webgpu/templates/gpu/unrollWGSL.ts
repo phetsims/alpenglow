@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WGSLStatements } from '../../imports.js';
+import { alpenglow, WGSLStatements } from '../../../imports.js';
 
 const unrollWGSL = (
   start: number,

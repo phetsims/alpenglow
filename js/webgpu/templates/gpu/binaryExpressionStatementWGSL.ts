@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpression, WGSLStatements, WGSLVariableName } from '../../imports.js';
+import { alpenglow, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpression, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 
 const binaryExpressionStatementWGSL = (
   value: WGSLVariableName,

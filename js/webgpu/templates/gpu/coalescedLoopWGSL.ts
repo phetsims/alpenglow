@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, conditionalIfWGSL, u32, unrollWGSL, WGSLExpressionU32, WGSLStatements } from '../../imports.js';
-import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import { alpenglow, conditionalIfWGSL, u32, unrollWGSL, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type coalescedLoopWGSLOptions = {
   workgroupSize: number;

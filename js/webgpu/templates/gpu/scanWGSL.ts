@@ -6,11 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, u32, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../imports.js';
-import commentWGSL from './commentWGSL.js';
-import { optionize3 } from '../../../../phet-core/js/optionize.js';
-import binaryExpressionStatementWGSL from './binaryExpressionStatementWGSL.js';
-import unrollWGSL from './unrollWGSL.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type scanWGSLOptions<T> = {
   // the "input" and "output" variable name

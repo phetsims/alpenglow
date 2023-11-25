@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, u32, WGSLExpressionU32, WGSLStatements } from '../../imports.js';
+import { alpenglow, u32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 
 export type getConvergentIndexWGSLOptions = {
   i: WGSLExpressionU32;

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, u32, WGSLExpressionU32, WGSLStatements } from '../../imports.js';
+import { alpenglow, u32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 
 export type toStripedIndexWGSLOptions = {
   // represents a normal (blocked) index into data. So 0 is the 1st element, 1 is the 2nd, etc.

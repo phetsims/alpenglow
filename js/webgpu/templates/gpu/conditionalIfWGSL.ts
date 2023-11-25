@@ -17,7 +17,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WGSLExpressionBool, WGSLStatements } from '../../imports.js';
+import { alpenglow, WGSLExpressionBool, WGSLStatements } from '../../../imports.js';
 
 const conditionalIfWGSL = (
   // null | string (expr:bool) - if null, trueStatements will be executed. If non-null, it will create an if(else)

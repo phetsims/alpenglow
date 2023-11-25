@@ -1,32 +1,38 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Loads data (usually from main memory) with multiple values per thread, storing them typically in shared memory.
- * Notably supports larger sizes than the workgroup size.
+ * Loads data (usually from main memory) with multiple values per thread, but reduces them into a single value per
+ * thread. Supports multiple orders of data (both in access order and storage order).
  *
  * grainSize controls how many items are loaded per thread.
+ *
+ * For each thread, it will essentially load the first value, and then combine that with subsequently loaded values.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ConcreteType, u32, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../imports.js';
-import commentWGSL from './commentWGSL.js';
-import { optionize3 } from '../../../../phet-core/js/optionize.js';
-import unrollWGSL from './unrollWGSL.js';
-import conditionalIfWGSL from './conditionalIfWGSL.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, conditionalIfWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type WGSLExpressionT = WGSLExpression;
 
-export type loadMultipleWGSLOptions<T> = {
+// CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
+//       rearranging. We'll use convergent reduce anyway
+// CASE: if non-commutative reduce, we want to ... load blocked (?), reverseBits into convergent, and convergent-reduce?
+// CASE: if non-commutative reduce on striped data, we want to load striped, morph into convergent, and convergent-reduce
+// CASE: scan: load how the data is stored (blocked/striped), NO storeOrder, then scan.
+
+export type loadReducedWGSLOptions<T> = {
+
+  // the "output" variable name
+  value: WGSLVariableName;
+
+  binaryOp: BinaryOp<T>;
 
   // wrap with parentheses as needed TODO: should we always do this to prevent errors?
   loadExpression?: ( ( index: WGSLExpressionU32 ) => WGSLExpressionT ) | null;
   // ( varName: string, index ) => statements setting varName: T,
   loadStatements?: ( ( varName: WGSLVariableName, index: WGSLExpressionU32 ) => WGSLStatements ) | null;
-
-  storeStatements: ( index: WGSLExpressionU32, value: WGSLExpressionT ) => WGSLStatements;
-
-  type: ConcreteType<T>;
 
   // the number of threads running this command
   workgroupSize: number;
@@ -49,20 +55,20 @@ export type loadMultipleWGSLOptions<T> = {
   // if provided, it will enable range checks (based on the inputOrder)
   length?: WGSLExpressionU32 | null;
 
-  // if a length is provided, used to map things out-of-range
-  outOfRangeValue?: WGSLExpressionT | null;
-
   // The actual order of the data in memory (needed for range checks, not required if range checks are disabled)
-  inputOrder: 'blocked' | 'striped';
+  inputOrder?: 'blocked' | 'striped';
 
   // The order of access to the input data (determines the "value" output order also)
   inputAccessOrder?: 'blocked' | 'striped'; // NOTE: Not just striped, if we're using this somehow and mapping indices ourselves
 
-  // TODO: outputOrder, support blocked or striped (we're always putting it in the original order right now)
-
   // Whether local variables should be used to factor out subexpressions (potentially more register usage, but less
   // computation).
   factorOutSubexpressions?: boolean;
+
+  // Whether to nest the combine calls, e.g. combine( combine( combine( a, b ), c ), d )
+  nestSubexpressions?: boolean;
+
+  useSelectIfOptional?: boolean;
 };
 
 const DEFAULT_OPTIONS = {
@@ -72,35 +78,36 @@ const DEFAULT_OPTIONS = {
   workgroupIndex: 'workgroup_id.x',
   localIndex: 'local_id.x',
   length: null,
-  outOfRangeValue: null,
+  inputOrder: 'blocked',
   inputAccessOrder: 'striped',
-  factorOutSubexpressions: true
+  factorOutSubexpressions: true,
+  nestSubexpressions: false,
+  useSelectIfOptional: false
 } as const;
 
-const loadMultipleWGSL = <T>(
-  providedOptions: loadMultipleWGSLOptions<T>
+const loadReducedWGSL = <T>(
+  providedOptions: loadReducedWGSLOptions<T>
 ): WGSLStatements => {
 
-  const options = optionize3<loadMultipleWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<loadReducedWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
 
+  const value = options.value;
+  const binaryOp = options.binaryOp;
   const loadExpression = options.loadExpression;
   const loadStatements = options.loadStatements;
-  const storeStatements = options.storeStatements;
-  const type = options.type;
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;
   const globalIndex = options.globalIndex;
   const workgroupIndex = options.workgroupIndex;
   const localIndex = options.localIndex;
   const length = options.length;
-  const outOfRangeValue = options.outOfRangeValue;
   const inputOrder = options.inputOrder;
   const inputAccessOrder = options.inputAccessOrder;
   const factorOutSubexpressions = options.factorOutSubexpressions;
+  const nestSubexpressions = options.nestSubexpressions;
+  const useSelectIfOptional = options.useSelectIfOptional;
 
-  // TODO: factor out the range checks based on inputOrder (we're going to share that with load_reduced)
-
-  assert && assert( length !== null || outOfRangeValue !== null );
+  assert && assert( value );
   assert && assert( workgroupSize );
   assert && assert( grainSize );
   assert && assert( !length || ( inputOrder === 'blocked' || inputOrder === 'striped' ),
@@ -108,6 +115,8 @@ const loadMultipleWGSL = <T>(
   assert && assert( inputAccessOrder === 'blocked' || inputAccessOrder === 'striped' );
 
   assert && assert( inputOrder !== 'striped' || inputAccessOrder !== 'blocked', 'Do not use blocked order on striped data' );
+  assert && assert( !nestSubexpressions || ( !factorOutSubexpressions && !binaryOp.combineStatements ),
+    'Cannot nest and either factor out subexpressions nor have combination statements' );
   assert && assert( [ loadExpression, loadStatements ].filter( _.identity ).length === 1,
     'Must provide exactly one of loadExpression or loadStatements' );
 
@@ -116,14 +125,11 @@ const loadMultipleWGSL = <T>(
   let loadIndexExpression: ( ( i : number ) => WGSLExpression ) | null = null;
   let rangeCheckIndexExpression: ( ( i : number ) => WGSLExpression ) | null = null;
 
-  // TODO: can we extract a general... index-mapping iteration? Note which indices we need (e.g. for instance, base_workgroup would be useful here)
-  // TODO: add outputOrder(!)
-  // TODO: identity vs outOfRangeValue
   if ( inputAccessOrder === 'blocked' ) {
     if ( factorOutSubexpressions ) {
       outerDeclarations.push( `let base_blocked_index = ${u32( grainSize )} * ${globalIndex};` );
       loadDeclarations.push( i => `let blocked_index = base_blocked_index + ${u32( i )};` ); // TODO: simplify i=0?
-      loadIndexExpression = i => 'blocked_index';
+      loadIndexExpression = () => 'blocked_index';
       if ( length !== null ) {
         // NOTE: only have to do the 'blocked' case, since for striped data we're not supporting blocked access order
         rangeCheckIndexExpression = loadIndexExpression;
@@ -184,6 +190,10 @@ const loadMultipleWGSL = <T>(
 
   assert && assert( !rangeCheckIndexExpression === ( length === null ), 'rangeCheckIndexExpression must be created iff length is provided' );
 
+  const loadWithRangeCheckExpression = ( i: number ) => rangeCheckIndexExpression
+    ? `select( ${binaryOp.identityWGSL}, ${loadExpression!( loadIndexExpression!( i ) )}, ${rangeCheckIndexExpression( i )} < ${length} )`
+    : loadExpression!( loadIndexExpression!( i ) );
+
   const ifRangeCheck = ( i: number, trueStatements: WGSLStatements, falseStatements: WGSLStatements | null = null ) => {
     return conditionalIfWGSL( rangeCheckIndexExpression ? `${rangeCheckIndexExpression( i )} < ${length}` : null, trueStatements, falseStatements );
   };
@@ -192,45 +202,59 @@ const loadMultipleWGSL = <T>(
     ${declaration ? `${declaration} ` : ''}${varName} = ${loadExpression( loadIndexExpression!( i ) )};
   ` : `
     ${declaration ? `
-      var ${varName}: ${type.valueType};
+      var ${varName}: ${binaryOp.type.valueType};
     ` : ''}
     ${loadStatements!( varName, loadIndexExpression!( i ) )}
   `;
 
+  const loadWithRangeCheckStatements = ( varName: WGSLVariableName, i: number ) => ifRangeCheck( i, `
+    ${indexedLoadStatements( varName, i )}
+  `, `
+    ${varName} = ${binaryOp.identityWGSL};
+  ` );
+
+  const getNestedExpression = ( i: number ): WGSLExpression => {
+    return i === 0 ? loadWithRangeCheckExpression( 0 ) : binaryOp.combineExpression!( getNestedExpression( i - 1 ), loadWithRangeCheckExpression( i ) );
+  };
+
+  const combineToValue = ( varName: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => {
+    return binaryExpressionStatementWGSL( varName, binaryOp.combineExpression || null, binaryOp.combineStatements || null, a, b );
+  };
+
   // TODO: more unique names to prevent namespace collision!
-  return `
-    ${commentWGSL( 'begin load_multiple' )}
+  return nestSubexpressions ? `
+    var ${value} = ${getNestedExpression( grainSize - 1 )};
+  ` : `
+    ${commentWGSL( 'begin load_reduced' )}
+    var ${value}: ${binaryOp.type.valueType};
     {
       ${outerDeclarations.join( '\n' )}
-      ${unrollWGSL( 0, grainSize, i => `
+      {
+        ${loadDeclarations.map( declaration => declaration( 0 ) ).join( '\n' )}
+        ${( loadExpression && useSelectIfOptional ) ? `
+          ${value} = ${loadWithRangeCheckExpression( 0 )};
+        ` : `
+          ${loadWithRangeCheckStatements( value, 0 )}
+        `}
+      }
+      ${unrollWGSL( 1, grainSize, i => `
         {
           ${loadDeclarations.map( declaration => declaration( i ) ).join( '\n' )}
-
-          ${outOfRangeValue ? `
-            var lm_val: ${type.valueType};
-            ${ifRangeCheck( i, `
-              ${indexedLoadStatements( 'lm_val', i )}
-            `, `
-              lm_val = ${outOfRangeValue};
-            ` )}
-
-            // TODO: can we further simplify?
-            ${storeStatements( `${loadIndexExpression!( i )} - ${workgroupIndex} * ${u32( workgroupSize * grainSize )}`, 'lm_val' )}
+          ${( loadExpression && useSelectIfOptional ) ? `
+            ${combineToValue( value, value, loadWithRangeCheckExpression( i ) )}
           ` : `
             ${ifRangeCheck( i, `
-              var lm_val: ${type.valueType};
-              ${indexedLoadStatements( 'lm_val', i )}
-
-              ${storeStatements( `${loadIndexExpression!( i )} - ${workgroupIndex} * ${u32( workgroupSize * grainSize )}`, 'lm_val' )}
+              ${indexedLoadStatements( 'next_value', i, 'let' )}
+              ${combineToValue( value, value, 'next_value' )}
             ` )}
           `}
         }
       ` )}
     }
-    ${commentWGSL( 'end load_multiple' )}
+    ${commentWGSL( 'end load_reduced' )}
   `;
 };
 
-export default loadMultipleWGSL;
+export default loadReducedWGSL;
 
-alpenglow.register( 'loadMultipleWGSL', loadMultipleWGSL );
+alpenglow.register( 'loadReducedWGSL', loadReducedWGSL );
