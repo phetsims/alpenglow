@@ -24,7 +24,7 @@ const conditionalIfWGSL = (
   optionalConditional: WGSLExpressionBool | null,
 
   trueStatements: WGSLStatements,
-  falseStatements: WGSLStatements | null
+  falseStatements: WGSLStatements | null = null
 ): WGSLStatements => {
   if ( optionalConditional === null ) {
     return trueStatements;

@@ -474,14 +474,24 @@ export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/Buf
 export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/TimestampLogger.js';
 
 export { default as binaryExpressionStatementWGSL } from './webgpu/templates/binaryExpressionStatementWGSL.js';
+export { default as coalescedLoopWGSL } from './webgpu/templates/coalescedLoopWGSL.js';
+export type { coalescedLoopWGSLOptions } from './webgpu/templates/coalescedLoopWGSL.js';
 export { default as commentWGSL } from './webgpu/templates/commentWGSL.js';
 export { default as conditionalIfWGSL } from './webgpu/templates/conditionalIfWGSL.js';
+export { default as fromStripedIndexWGSL } from './webgpu/templates/fromStripedIndexWGSL.js';
+export type { fromStripedIndexWGSLOptions } from './webgpu/templates/fromStripedIndexWGSL.js';
+export { default as getConvergentIndexWGSL } from './webgpu/templates/getConvergentIndexWGSL.js';
+export type { getConvergentIndexWGSLOptions } from './webgpu/templates/getConvergentIndexWGSL.js';
 export { default as loadMultipleWGSL } from './webgpu/templates/loadMultipleWGSL.js';
-export type { LoadMultipleWGSLOptions } from './webgpu/templates/loadMultipleWGSL.js';
+export type { loadMultipleWGSLOptions } from './webgpu/templates/loadMultipleWGSL.js';
+export { default as loadReducedWGSL } from './webgpu/templates/loadReducedWGSL.js';
+export type { loadReducedWGSLOptions } from './webgpu/templates/loadReducedWGSL.js';
 export { default as reduceWGSL } from './webgpu/templates/reduceWGSL.js';
-export type { ReduceWGSLOptions } from './webgpu/templates/reduceWGSL.js';
+export type { reduceWGSLOptions } from './webgpu/templates/reduceWGSL.js';
 export { default as scanWGSL } from './webgpu/templates/scanWGSL.js';
-export type { ScanWGSLOptions } from './webgpu/templates/scanWGSL.js';
+export type { scanWGSLOptions } from './webgpu/templates/scanWGSL.js';
+export { default as toStripedIndexWGSL } from './webgpu/templates/toStripedIndexWGSL.js';
+export type { toStripedIndexWGSLOptions } from './webgpu/templates/toStripedIndexWGSL.js';
 export { default as unrollWGSL } from './webgpu/templates/unrollWGSL.js';
 
 export { default as TestToCanvas } from './webgpu/TestToCanvas.js';

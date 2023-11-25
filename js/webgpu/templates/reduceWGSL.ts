@@ -12,7 +12,7 @@ import { optionize3 } from '../../../../phet-core/js/optionize.js';
 import binaryExpressionStatementWGSL from './binaryExpressionStatementWGSL.js';
 import unrollWGSL from './unrollWGSL.js';
 
-export type ReduceWGSLOptions<T> = {
+export type reduceWGSLOptions<T> = {
   // the "input" and "output" variable name
   value: WGSLVariableName;
 
@@ -58,10 +58,10 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 const reduceWGSL = <T>(
-  providedOptions: ReduceWGSLOptions<T>
+  providedOptions: reduceWGSLOptions<T>
 ): WGSLStatements => {
 
-  const options = optionize3<ReduceWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<reduceWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
 
   const value = options.value;
   const scratch = options.scratch;
