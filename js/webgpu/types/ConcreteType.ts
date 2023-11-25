@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ByteEncoder, u32 } from '../../imports.js';
+import { alpenglow, ByteEncoder, u32 } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Random from '../../../../dot/js/Random.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
@@ -171,6 +171,8 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number ): Concrete
   };
 };
 
+alpenglow.register( 'getArrayType', getArrayType );
+
 export const U32Type: ConcreteType<number> = {
   name: 'u32',
   bytesPerElement: 4,
@@ -202,6 +204,8 @@ export const U32Type: ConcreteType<number> = {
   toDebugString: ( value: number ) => value.toString()
 };
 
+alpenglow.register( 'U32Type', U32Type );
+
 export const U32Add: BinaryOp<number> = {
   name: 'u32 addition',
   type: U32Type,
@@ -215,7 +219,9 @@ export const U32Add: BinaryOp<number> = {
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
-// TODO: add other atomic typesf
+// TODO: add other atomic types
+
+alpenglow.register( 'U32Add', U32Add );
 
 export const U32Order: Order<number> = {
   name: 'u32 order',
@@ -249,6 +255,8 @@ export const U32Order: Order<number> = {
   }
 };
 
+alpenglow.register( 'U32Order', U32Order );
+
 export const U32ReverseOrder: Order<number> = {
   name: 'u32 reverse order',
   type: U32Type,
@@ -278,6 +286,8 @@ export const U32ReverseOrder: Order<number> = {
     return `( ( ( 0xffffffffu - ${value} ) >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
   }
 };
+
+alpenglow.register( 'U32ReverseOrder', U32ReverseOrder );
 
 export const I32Type: ConcreteType<number> = {
   name: 'i32',
@@ -309,6 +319,8 @@ export const I32Type: ConcreteType<number> = {
 
   toDebugString: ( value: number ) => value.toString()
 };
+
+alpenglow.register( 'I32Type', I32Type );
 
 export const Vec2uType: ConcreteType<Vector2> = {
   name: 'vec2u',
@@ -347,6 +359,8 @@ export const Vec2uType: ConcreteType<Vector2> = {
   toDebugString: ( value: Vector2 ) => `vec2u(${value.x}, ${value.y})`
 };
 
+alpenglow.register( 'Vec2uType', Vec2uType );
+
 export const Vec2uBic: BinaryOp<Vector2> = {
   name: 'vec2u bicyclic semigroup',
   type: Vec2uType,
@@ -365,6 +379,8 @@ export const Vec2uBic: BinaryOp<Vector2> = {
   combineExpression: ( a: string, b: string ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b} - min( ${a}.y, ${b}.x );`
 };
+
+alpenglow.register( 'Vec2uBic', Vec2uBic );
 
 export const Vec2uLexicographicalOrder: Order<Vector2> = {
   name: 'vec2u lexicographical order',
@@ -412,6 +428,8 @@ export const Vec2uLexicographicalOrder: Order<Vector2> = {
   }
 };
 
+alpenglow.register( 'Vec2uLexicographicalOrder', Vec2uLexicographicalOrder );
+
 export const Vec3uType: ConcreteType<Vector3> = {
   name: 'vec3u',
   bytesPerElement: 12,
@@ -451,6 +469,8 @@ export const Vec3uType: ConcreteType<Vector3> = {
 
   toDebugString: ( value: Vector3 ) => `vec3u(${value.x}, ${value.y}, ${value.z})`
 };
+
+alpenglow.register( 'Vec3uType', Vec3uType );
 
 export const Vec4uType: ConcreteType<Vector4> = {
   name: 'vec4u',
@@ -494,3 +514,5 @@ export const Vec4uType: ConcreteType<Vector4> = {
 
   toDebugString: ( value: Vector4 ) => `vec4u(${value.x}, ${value.y}, ${value.z}, ${value.w})`
 };
+
+alpenglow.register( 'Vec4uType', Vec4uType );
