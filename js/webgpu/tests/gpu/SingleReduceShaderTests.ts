@@ -26,7 +26,7 @@ const testSingleReduceShader = <T>(
       workgroupSize: workgroupSize,
       grainSize: grainSize,
       loadReducedOptions: combineOptions<Required<SingleReduceShaderOptions<T>>[ 'loadReducedOptions' ]>( {
-        length: u32( inputSize ) // TODO: rename lengthExpression?
+        lengthExpression: u32( inputSize )
       }, options.loadReducedOptions )
     }, options ) );
 
