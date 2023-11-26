@@ -12,6 +12,8 @@ export type mainReduceWGSLOptions<T> = {
   workgroupSize: number;
   grainSize: number;
 
+  // TODO: add in-place option
+
   binaryOp: BinaryOp<T>;
 
   // We can stripe the output (so the next layer of reduce can read it as striped)
