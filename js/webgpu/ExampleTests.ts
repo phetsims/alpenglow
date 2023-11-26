@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line single-line-import
 import {
-  AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, ComputeShader, ConcreteType, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, getMaxRadixBitsPerInnerPass, Order, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, U32ReverseOrder, Vec2uBic, Vec2uLexicographicalOrder, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
+  asyncTestWithDevice, AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, compareArrays, ComputeShader, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, getMaxRadixBitsPerInnerPass, Order, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, U32ReverseOrder, Vec2uBic, Vec2uLexicographicalOrder, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
 } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -21,56 +21,6 @@ const random = new Random();
 QUnit.module( 'Example' );
 
 // TODO: deduplicate with SnippetTests
-
-const devicePromise: Promise<GPUDevice | null> = ( async () => {
-  try {
-    const adapter = await navigator.gpu?.requestAdapter();
-    return ( await adapter?.requestDevice() ) || null;
-  }
-  catch( e ) {
-    return null;
-  }
-} )();
-
-const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, deviceContext: DeviceContext ) => Promise<string | null> ) => {
-  QUnit.test( name, async assert => {
-    const done = assert.async();
-
-    const device = await devicePromise;
-
-    if ( !device ) {
-      assert.expect( 0 );
-    }
-    else {
-      const result = await test( device, new DeviceContext( device ) );
-      assert.ok( result === null, result || '' );
-    }
-
-    done();
-  } );
-};
-
-const compareArrays = <T>( type: ConcreteType<T>, inputValues: T[], expectedValues: T[], actualValues: T[] ): string | null => {
-  for ( let i = 0; i < expectedValues.length; i++ ) {
-    const expected = expectedValues[ i ];
-    const actual = actualValues[ i ];
-
-    if ( !type.equals( expected, actual ) ) {
-      console.log( 'input' );
-      console.log( inputValues );
-
-      console.log( 'expected' );
-      console.log( expectedValues );
-
-      console.log( 'actual' );
-      console.log( actualValues );
-
-      return `expected ${type.toDebugString( expected )}, actual ${type.toDebugString( actual )} at index ${i}`;
-    }
-  }
-
-  return null;
-};
 
 asyncTestWithDevice( 'f32_reduce_simple', async ( device, deviceContext ) => {
   const workgroupSize = 256;

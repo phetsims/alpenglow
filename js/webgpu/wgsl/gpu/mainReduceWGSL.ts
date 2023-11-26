@@ -33,11 +33,8 @@ export type mainReduceWGSLOptions<T> = {
   inputAccessOrder?: 'blocked' | 'striped'; // NOTE: Not just striped, if we're using this somehow and mapping indices ourselves
 
   // Whether local variables should be used to factor out subexpressions (potentially more register usage, but less
-  // computation).
-  factorOutSubexpressions?: boolean;
-
-  // Whether to nest the combine calls, e.g. combine( combine( combine( a, b ), c ), d )
-  nestSubexpressions?: boolean;
+  // computation), or also whether to nest the combine calls, e.g. combine( combine( combine( a, b ), c ), d )
+  sequentialReduceStyle?: 'factored' | 'unfactored' | 'nested';
 
   // TODO: grab options from other types we use, so they propagate
 
@@ -56,8 +53,7 @@ const DEFAULT_OPTIONS = {
   length: null,
   inputOrder: 'blocked',
   inputAccessOrder: 'striped',
-  factorOutSubexpressions: true,
-  nestSubexpressions: false
+  sequentialReduceStyle: 'factored'
 } as const;
 
 const mainReduceWGSL = <T>(
@@ -73,8 +69,7 @@ const mainReduceWGSL = <T>(
   const length = options.length;
   const inputOrder = options.inputOrder;
   const inputAccessOrder = options.inputAccessOrder;
-  const factorOutSubexpressions = options.factorOutSubexpressions;
-  const nestSubexpressions = options.nestSubexpressions;
+  const sequentialReduceStyle = options.sequentialReduceStyle;
   const stripeOutput = options.stripeOutput;
   const convergentRemap = options.convergentRemap;
 
@@ -104,8 +99,7 @@ const mainReduceWGSL = <T>(
         length: length,
         inputOrder: inputOrder,
         inputAccessOrder: inputAccessOrder,
-        factorOutSubexpressions: factorOutSubexpressions,
-        nestSubexpressions: nestSubexpressions
+        sequentialReduceStyle: sequentialReduceStyle
       } )}
     
       ${convergentRemap ? `

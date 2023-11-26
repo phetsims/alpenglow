@@ -62,11 +62,8 @@ export type loadReducedWGSLOptions<T> = {
   inputAccessOrder?: 'blocked' | 'striped'; // NOTE: Not just striped, if we're using this somehow and mapping indices ourselves
 
   // Whether local variables should be used to factor out subexpressions (potentially more register usage, but less
-  // computation).
-  factorOutSubexpressions?: boolean;
-
-  // Whether to nest the combine calls, e.g. combine( combine( combine( a, b ), c ), d )
-  nestSubexpressions?: boolean;
+  // computation), or also whether to nest the combine calls, e.g. combine( combine( combine( a, b ), c ), d )
+  sequentialReduceStyle?: 'factored' | 'unfactored' | 'nested';
 
   useSelectIfOptional?: boolean;
 };
@@ -80,8 +77,7 @@ const DEFAULT_OPTIONS = {
   length: null,
   inputOrder: 'blocked',
   inputAccessOrder: 'striped',
-  factorOutSubexpressions: true,
-  nestSubexpressions: false,
+  sequentialReduceStyle: 'factored',
   useSelectIfOptional: false
 } as const;
 
@@ -103,8 +99,7 @@ const loadReducedWGSL = <T>(
   const length = options.length;
   const inputOrder = options.inputOrder;
   const inputAccessOrder = options.inputAccessOrder;
-  const factorOutSubexpressions = options.factorOutSubexpressions;
-  const nestSubexpressions = options.nestSubexpressions;
+  const sequentialReduceStyle = options.sequentialReduceStyle;
   const useSelectIfOptional = options.useSelectIfOptional;
 
   assert && assert( value );
@@ -115,8 +110,6 @@ const loadReducedWGSL = <T>(
   assert && assert( inputAccessOrder === 'blocked' || inputAccessOrder === 'striped' );
 
   assert && assert( inputOrder !== 'striped' || inputAccessOrder !== 'blocked', 'Do not use blocked order on striped data' );
-  assert && assert( !nestSubexpressions || ( !factorOutSubexpressions && !binaryOp.combineStatements ),
-    'Cannot nest and either factor out subexpressions nor have combination statements' );
   assert && assert( [ loadExpression, loadStatements ].filter( _.identity ).length === 1,
     'Must provide exactly one of loadExpression or loadStatements' );
 
@@ -126,7 +119,7 @@ const loadReducedWGSL = <T>(
   let rangeCheckIndexExpression: ( ( i : number ) => WGSLExpression ) | null = null;
 
   if ( inputAccessOrder === 'blocked' ) {
-    if ( factorOutSubexpressions ) {
+    if ( sequentialReduceStyle === 'factored' ) {
       outerDeclarations.push( `let base_blocked_index = ${u32( grainSize )} * ${globalIndex};` );
       loadDeclarations.push( i => `let blocked_index = base_blocked_index + ${u32( i )};` ); // TODO: simplify i=0?
       loadIndexExpression = () => 'blocked_index';
@@ -144,7 +137,7 @@ const loadReducedWGSL = <T>(
     }
   }
   else if ( inputAccessOrder === 'striped' ) {
-    if ( factorOutSubexpressions ) {
+    if ( sequentialReduceStyle === 'factored' ) {
       if ( inputOrder === 'striped' && length ) {
         outerDeclarations.push( `let base_workgroup = ${workgroupIndex} * ${u32( workgroupSize * grainSize )};` );
         outerDeclarations.push( `let base_striped_index = base_workgroup + ${localIndex};` );
@@ -222,7 +215,7 @@ const loadReducedWGSL = <T>(
   };
 
   // TODO: more unique names to prevent namespace collision!
-  return nestSubexpressions ? `
+  return sequentialReduceStyle === 'nested' ? `
     var ${value} = ${getNestedExpression( grainSize - 1 )};
   ` : `
     ${commentWGSL( 'begin load_reduced' )}

@@ -18,7 +18,7 @@ const testSingleReduceShader = <T>(
   options: Partial<SingleReduceShaderOptions<T>> & PickRequired<SingleReduceShaderOptions<T>, 'binaryOp'>
 ) => {
   const binaryOp = options.binaryOp;
-  const name = `${binaryOp.name} SingleReduceShader`;
+  const name = `${binaryOp.name} SingleReduceShader ${options.sequentialReduceStyle}`;
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const workgroupSize = 256;
     const grainSize = 8;
@@ -41,11 +41,18 @@ const testSingleReduceShader = <T>(
   } );
 };
 
-testSingleReduceShader( {
-  binaryOp: U32Add
+( [ 'factored', 'unfactored', 'nested' ] as const ).forEach( sequentialReduceStyle => {
+  testSingleReduceShader( {
+    binaryOp: U32Add,
+    sequentialReduceStyle: sequentialReduceStyle
+  } );
+
+  testSingleReduceShader( {
+    binaryOp: Vec2uBic,
+    inputAccessOrder: 'blocked',
+    sequentialReduceStyle: sequentialReduceStyle
+  } );
+
+  // TODO: test other orders
 } );
-testSingleReduceShader( {
-  binaryOp: Vec2uBic,
-  inputAccessOrder: 'blocked'
-} );
-// TODO: test other orders
+
