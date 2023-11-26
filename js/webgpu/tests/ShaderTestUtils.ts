@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ConcreteType, DeviceContext } from '../../imports.js';
+import { alpenglow, ConcreteType, DeviceContext } from '../../imports.js';
 
 export const shaderTestDevicePromise: Promise<GPUDevice | null> = ( async () => {
   try {
@@ -17,6 +17,8 @@ export const shaderTestDevicePromise: Promise<GPUDevice | null> = ( async () => 
     return null;
   }
 } )();
+
+alpenglow.register( 'shaderTestDevicePromise', shaderTestDevicePromise );
 
 export const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, deviceContext: DeviceContext ) => Promise<string | null> ): void => {
   QUnit.test( name, async assert => {
@@ -36,9 +38,13 @@ export const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, de
   } );
 };
 
+alpenglow.register( 'asyncTestWithDevice', asyncTestWithDevice );
+
 export const asyncTestWithDeviceContext = ( name: string, test: ( deviceContext: DeviceContext ) => Promise<string | null> ): void => {
   asyncTestWithDevice( name, ( device, deviceContext ) => test( deviceContext ) );
 };
+
+alpenglow.register( 'asyncTestWithDeviceContext', asyncTestWithDeviceContext );
 
 export const compareArrays = <T>( type: ConcreteType<T>, inputValues: T[], expectedValues: T[], actualValues: T[] ): string | null => {
   for ( let i = 0; i < expectedValues.length; i++ ) {
@@ -61,3 +67,5 @@ export const compareArrays = <T>( type: ConcreteType<T>, inputValues: T[], expec
 
   return null;
 };
+
+alpenglow.register( 'compareArrays', compareArrays );

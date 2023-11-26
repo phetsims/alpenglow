@@ -108,7 +108,7 @@ export type CompareOrder<T> = {
 
 export type Order<T> = BitOrder<T> & CompareOrder<T>;
 
-export const getArrayType = <T>( type: ConcreteType<T>, size: number ): ConcreteType<T[]> => {
+export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRangeElement?: T ): ConcreteType<T[]> => {
   const u32sPerElement = type.bytesPerElement / 4;
 
   return {
@@ -135,10 +135,10 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number ): Concrete
     },
 
     encode( value: T[], encoder: ByteEncoder ): void {
-      assert && assert( value.length === size );
+      assert && assert( outOfRangeElement || value.length === size );
 
       for ( let i = 0; i < size; i++ ) {
-        type.encode( value[ i ], encoder );
+        type.encode( i < value.length ? value[ i ] : outOfRangeElement!, encoder );
       }
     },
 

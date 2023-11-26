@@ -57,6 +57,6 @@ const testSingleReduceShader = <T>(
     }
   } );
 
-  // TODO: test other orders
+  // TODO: test more
 } );
 

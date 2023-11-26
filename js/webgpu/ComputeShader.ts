@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, DualSnippet, DualSnippetSource, TimestampLogger, WGSLModuleDeclarations } from '../imports.js';
+import { alpenglow, Binding, DualSnippet, DualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLModuleDeclarations } from '../imports.js';
 import { combineOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
@@ -71,7 +71,7 @@ export default class ComputeShader {
     this.log = options.log;
 
     if ( options.partialBeautify ) {
-      wgsl = ComputeShader.partialBeautify( wgsl );
+      wgsl = partialWGSLBeautify( wgsl );
     }
 
     if ( LOG_SHADERS ) {
@@ -197,25 +197,6 @@ export default class ComputeShader {
     }
 
     return descriptor;
-  }
-
-  public static partialBeautify( wgsl: WGSLModuleDeclarations ): WGSLModuleDeclarations {
-    const lines = wgsl.split( '\n' ).filter( s => s.trim().length > 0 );
-    let count = 0;
-    let beautified = '';
-    for ( let i = 0; i < lines.length; i++ ) {
-      const line = lines[ i ].trim();
-
-      // better version of indentation for ( and {
-      if ( line.startsWith( '}' ) || line.startsWith( ')' ) ) {
-        count--;
-      }
-      beautified += `${'  '.repeat( Math.max( count, 0 ) )}${line}\n`;
-      if ( line.endsWith( '{' ) || line.endsWith( '(' ) ) {
-        count++;
-      }
-    }
-    return beautified;
   }
 
   public static fromSource(
