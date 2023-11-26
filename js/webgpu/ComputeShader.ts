@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, DualSnippet, DualSnippetSource, TimestampLogger } from '../imports.js';
+import { alpenglow, Binding, DualSnippet, DualSnippetSource, TimestampLogger, WGSLModuleDeclarations } from '../imports.js';
 import { combineOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
@@ -71,22 +71,7 @@ export default class ComputeShader {
     this.log = options.log;
 
     if ( options.partialBeautify ) {
-      const lines = wgsl.split( '\n' ).filter( s => s.trim().length > 0 );
-      let count = 0;
-      let beautified = '';
-      for ( let i = 0; i < lines.length; i++ ) {
-        const line = lines[ i ].trim();
-
-        // better version of indentation for ( and {
-        if ( line.startsWith( '}' ) || line.startsWith( ')' ) ) {
-          count--;
-        }
-        beautified += `${'  '.repeat( Math.max( count, 0 ) )}${line}\n`;
-        if ( line.endsWith( '{' ) || line.endsWith( '(' ) ) {
-          count++;
-        }
-      }
-      wgsl = beautified;
+      wgsl = ComputeShader.partialBeautify( wgsl );
     }
 
     if ( LOG_SHADERS ) {
@@ -214,6 +199,25 @@ export default class ComputeShader {
     return descriptor;
   }
 
+  public static partialBeautify( wgsl: WGSLModuleDeclarations ): WGSLModuleDeclarations {
+    const lines = wgsl.split( '\n' ).filter( s => s.trim().length > 0 );
+    let count = 0;
+    let beautified = '';
+    for ( let i = 0; i < lines.length; i++ ) {
+      const line = lines[ i ].trim();
+
+      // better version of indentation for ( and {
+      if ( line.startsWith( '}' ) || line.startsWith( ')' ) ) {
+        count--;
+      }
+      beautified += `${'  '.repeat( Math.max( count, 0 ) )}${line}\n`;
+      if ( line.endsWith( '{' ) || line.endsWith( '(' ) ) {
+        count++;
+      }
+    }
+    return beautified;
+  }
+
   public static fromSource(
     device: GPUDevice,
     name: string,
@@ -249,9 +253,21 @@ export default class ComputeShader {
     const log = options.log as boolean;
 
     const snippet = DualSnippet.fromSource( source, options );
-    const computeShader = new ComputeShader( name, snippet.toString(), bindings, device, true, {
+    return ComputeShader.fromWGSLAsync( device, name, snippet.toString(), bindings, {
       log: log
     } );
+  }
+
+  public static async fromWGSLAsync(
+    device: GPUDevice,
+    name: string,
+    wgsl: WGSLModuleDeclarations,
+    bindings: Binding[],
+    providedOptions?: ComputeShaderOptions
+  ): Promise<ComputeShader> {
+    const options = combineOptions<ComputeShaderOptions>( {}, DEFAULT_OPTIONS, providedOptions );
+
+    const computeShader = new ComputeShader( name, wgsl, bindings, device, true, options );
     await computeShader.pipelinePromise;
     return computeShader;
   }

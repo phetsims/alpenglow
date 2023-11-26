@@ -78,6 +78,8 @@ const mainReduceWGSL = <T>(
   const stripeOutput = options.stripeOutput;
   const convergentRemap = options.convergentRemap;
 
+  assert && assert( binaryOp.isCommutative || inputOrder === inputAccessOrder );
+
   return `
     
     @group(0) @binding(0)
@@ -86,8 +88,6 @@ const mainReduceWGSL = <T>(
     var<storage, read_write> output: array<${binaryOp.type.valueType}>;
     
     var<workgroup> scratch: array<${binaryOp.type.valueType}, ${workgroupSize}>;
-    
-    #bindings
     
     @compute @workgroup_size(${workgroupSize})
     fn main(

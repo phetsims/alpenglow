@@ -20,6 +20,7 @@ export type WGSLExpressionU32 = WGSLExpression;
 export type WGSLExpressionI32 = WGSLExpression;
 export type WGSLExpressionBool = WGSLExpression;
 export type WGSLStatements = string;
+export type WGSLModuleDeclarations = string;
 export type WGSLVariableName = string;
 export type WGSLBinaryExpression = ( a: WGSLExpression, b: WGSLExpression ) => WGSLExpression;
 export type WGSLBinaryStatements = ( value: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => WGSLStatements;
