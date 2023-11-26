@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, loadReducedWGSL, loadReducedWGSLOptions, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
+import { alpenglow, BinaryOp, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -63,6 +63,8 @@ const mainReduceWGSL = <T>(
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
+      ${logStringWGSL( context, `mainReduceWGSL start ${binaryOp.name}` )}
+    
       ${loadReducedWGSL( combineOptions<loadReducedWGSLOptions<T>>( {
         value: 'value',
         binaryOp: binaryOp,

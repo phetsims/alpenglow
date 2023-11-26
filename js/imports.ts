@@ -492,6 +492,9 @@ export { default as loadReducedWGSL } from './webgpu/wgsl/gpu/loadReducedWGSL.js
 export type { loadReducedWGSLOptions } from './webgpu/wgsl/gpu/loadReducedWGSL.js';
 export { default as logWGSL } from './webgpu/wgsl/gpu/logWGSL.js';
 export type { logWGSLOptions } from './webgpu/wgsl/gpu/logWGSL.js';
+export { default as logValueWGSL } from './webgpu/wgsl/gpu/logValueWGSL.js';
+export type { logValueWGSLOptions } from './webgpu/wgsl/gpu/logValueWGSL.js';
+export { default as logStringWGSL } from './webgpu/wgsl/gpu/logStringWGSL.js';
 export { default as mainReduceWGSL } from './webgpu/wgsl/gpu/mainReduceWGSL.js';
 export type { mainReduceWGSLOptions } from './webgpu/wgsl/gpu/mainReduceWGSL.js';
 export { default as reduceWGSL } from './webgpu/wgsl/gpu/reduceWGSL.js';
