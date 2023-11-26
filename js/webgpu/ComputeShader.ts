@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, Binding, DualSnippet, DualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLModuleDeclarations } from '../imports.js';
+import { addLineNumbers, alpenglow, Binding, DualSnippet, DualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
 import { combineOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
@@ -237,6 +237,18 @@ export default class ComputeShader {
     return ComputeShader.fromWGSLAsync( device, name, snippet.toString(), bindings, {
       log: log
     } );
+  }
+
+  public static async fromContextAsync(
+    device: GPUDevice,
+    name: string,
+    context: WGSLContext,
+    bindings: Binding[],
+    providedOptions?: ComputeShaderOptions
+  ): Promise<ComputeShader> {
+    return ComputeShader.fromWGSLAsync( device, name, context.toString(), bindings, combineOptions<ComputeShaderOptions>( {
+      log: context.log
+    }, providedOptions ) );
   }
 
   public static async fromWGSLAsync(

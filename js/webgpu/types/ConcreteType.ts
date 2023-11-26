@@ -25,6 +25,8 @@ export type WGSLVariableName = string;
 export type WGSLBinaryExpression = ( a: WGSLExpression, b: WGSLExpression ) => WGSLExpression;
 export type WGSLBinaryStatements = ( value: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => WGSLStatements;
 
+type StoreStatementCallback = ( offset: WGSLExpressionU32, u32expr: WGSLExpressionU32 ) => WGSLStatements;
+
 type ConcreteType<T> = {
   name: string;
 
@@ -47,11 +49,11 @@ type ConcreteType<T> = {
   valueType: string;
   writeU32s(
     // given an expr:u32 offset and expr:u32 value, it will store the value at the offset
-    storeStatement: ( offset: string, u32expr: string ) => string,
+    storeStatement: StoreStatementCallback,
 
     // the variable name (e.g. expr:T) that is being stored
-    value: string
-  ): string;
+    value: WGSLExpression
+  ): WGSLStatements;
 
   // Helper for testing
   generateRandom( fullSize?: boolean ): T;
@@ -153,7 +155,7 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
     },
 
     valueType: `array<${type.valueType}, ${size}>`,
-    writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
+    writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
       return _.range( 0, size ).map( i => {
         return type.writeU32s(
           ( offset, u32expr ) => storeStatement( `( ${offset} + ${u32( i * u32sPerElement )} )`, u32expr ),
@@ -194,7 +196,7 @@ export const U32Type: ConcreteType<number> = {
   },
 
   valueType: 'u32',
-  writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
+  writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
     return `
        ${storeStatement( '0u', value )}
     `;
@@ -310,7 +312,7 @@ export const I32Type: ConcreteType<number> = {
   },
 
   valueType: 'i32',
-  writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
+  writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
     return `
        ${storeStatement( '0u', `bitcast<u32>( ${value} )` )}
     `;
@@ -345,7 +347,7 @@ export const Vec2uType: ConcreteType<Vector2> = {
   },
 
   valueType: 'vec2u',
-  writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
+  writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
     return `
        ${storeStatement( '0u', `${value}.x` )}
        ${storeStatement( '1u', `${value}.y` )}
@@ -454,7 +456,7 @@ export const Vec3uType: ConcreteType<Vector3> = {
   },
 
   valueType: 'vec3u',
-  writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
+  writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
     return `
        ${storeStatement( '0u', `${value}.x` )}
        ${storeStatement( '1u', `${value}.y` )}
@@ -497,7 +499,7 @@ export const Vec4uType: ConcreteType<Vector4> = {
   },
 
   valueType: 'vec4u',
-  writeU32s( storeStatement: ( offset: string, u32expr: string ) => string, value: string ): string {
+  writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
     return `
        ${storeStatement( '0u', `${value}.x` )}
        ${storeStatement( '1u', `${value}.y` )}

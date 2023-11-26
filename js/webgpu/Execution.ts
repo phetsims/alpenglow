@@ -69,6 +69,12 @@ export type ExecutableShaderOptions<In, Out> = {
   dispose?: () => void;
 };
 
+// We'll likely want this typed in the future, so disabling the linter so we don't have to modify a ton of places.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export type ExecutableShaderExternalOptions<In, Out> = {
+  log?: boolean;
+};
+
 const DEFAULT_EXECUTABLE_SHADER_OPTIONS = {
   log: false,
   dispose: _.noop

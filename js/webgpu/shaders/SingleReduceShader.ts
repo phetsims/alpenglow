@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, mainReduceWGSL, mainReduceWGSLOptions } from '../../imports.js';
+import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, mainReduceWGSL, mainReduceWGSLOptions, WGSLContext } from '../../imports.js';
+import { ExecutableShaderExternalOptions } from '../Execution.js';
 
-export type SingleReduceShaderOptions<T> = mainReduceWGSLOptions<T>;
+export type SingleReduceShaderOptions<T> = mainReduceWGSLOptions<T> & ExecutableShaderExternalOptions<T[], T[]>;
 
 export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
 
@@ -18,16 +19,14 @@ export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
     options: SingleReduceShaderOptions<T>
   ): Promise<SingleReduceShader<T>> {
 
-    const shader = await ComputeShader.fromWGSLAsync(
+    const shader = await ComputeShader.fromContextAsync(
       deviceContext.device,
       name,
-      mainReduceWGSL( options ),
+      new WGSLContext( name, !!options.log ).with( context => mainReduceWGSL( context, options ) ),
       [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
-      ], {
-        log: false
-      }
+      ]
     );
 
     const type = options.binaryOp.type;
@@ -43,6 +42,8 @@ export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
       ], dispatchSize );
 
       return new ByteEncoder( await execution.arrayBuffer( outputBuffer ) ).decodeValues( type.decode, type.bytesPerElement ).slice( 0, dispatchSize );
+    }, {
+      log: options.log
     } );
   }
 }

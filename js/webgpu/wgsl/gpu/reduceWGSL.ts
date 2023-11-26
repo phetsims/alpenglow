@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, logWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type reduceWGSLOptions<T> = {
@@ -55,6 +55,7 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 const reduceWGSL = <T>(
+  context: WGSLContext,
   providedOptions: reduceWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -94,6 +95,15 @@ const reduceWGSL = <T>(
     ${!valuePreloaded ? `
       ${value} = ${scratch}[ ${mapScratchIndex( localIndex )} ];
     ` : ''}
+    
+    ${logWGSL( context, {
+      name: `before reduce convergent:${convergent}`,
+      type: binaryOp.type,
+      writeData: write => `
+        ${write( '0u', 'value' )}
+      `,
+      dataCount: 1
+    } )}
 
     ${unrollWGSL( start, end, ( i, isFirst, isLast ) => `
       // We don't need the first workgroupBarrier() if scratchPreloaded is true

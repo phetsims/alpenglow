@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, loadReducedWGSL, loadReducedWGSLOptions, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLStatements } from '../../../imports.js';
+import { alpenglow, BinaryOp, loadReducedWGSL, loadReducedWGSLOptions, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -36,6 +36,7 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 const mainReduceWGSL = <T>(
+  context: WGSLContext,
   providedOptions: mainReduceWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -76,7 +77,7 @@ const mainReduceWGSL = <T>(
         workgroupBarrier();
       ` : ''}
     
-      ${reduceWGSL( combineOptions<reduceWGSLOptions<T>>( {
+      ${reduceWGSL( context, combineOptions<reduceWGSLOptions<T>>( {
         value: 'value',
         binaryOp: binaryOp,
         scratch: 'scratch',

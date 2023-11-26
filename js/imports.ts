@@ -475,6 +475,7 @@ export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/Time
 export { default as TypedBuffer } from './webgpu/TypedBuffer.js';
 
 export { partialWGSLBeautify, addLineNumbers } from './webgpu/wgsl/WGSLUtils.js';
+export { default as WGSLContext } from './webgpu/wgsl/WGSLContext.js';
 
 export { default as binaryExpressionStatementWGSL } from './webgpu/wgsl/gpu/binaryExpressionStatementWGSL.js';
 export { default as coalescedLoopWGSL } from './webgpu/wgsl/gpu/coalescedLoopWGSL.js';
@@ -489,6 +490,8 @@ export { default as loadMultipleWGSL } from './webgpu/wgsl/gpu/loadMultipleWGSL.
 export type { loadMultipleWGSLOptions } from './webgpu/wgsl/gpu/loadMultipleWGSL.js';
 export { default as loadReducedWGSL } from './webgpu/wgsl/gpu/loadReducedWGSL.js';
 export type { loadReducedWGSLOptions } from './webgpu/wgsl/gpu/loadReducedWGSL.js';
+export { default as logWGSL } from './webgpu/wgsl/gpu/logWGSL.js';
+export type { logWGSLOptions } from './webgpu/wgsl/gpu/logWGSL.js';
 export { default as mainReduceWGSL } from './webgpu/wgsl/gpu/mainReduceWGSL.js';
 export type { mainReduceWGSLOptions } from './webgpu/wgsl/gpu/mainReduceWGSL.js';
 export { default as reduceWGSL } from './webgpu/wgsl/gpu/reduceWGSL.js';

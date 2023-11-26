@@ -27,7 +27,8 @@ const testSingleReduceShader = <T>(
       grainSize: grainSize,
       loadReducedOptions: combineOptions<Required<SingleReduceShaderOptions<T>>[ 'loadReducedOptions' ]>( {
         lengthExpression: u32( inputSize )
-      }, options.loadReducedOptions )
+      }, options.loadReducedOptions ),
+      log: false
     }, options ) );
 
     const inputValues = _.range( 0, inputSize ).map( () => binaryOp.type.generateRandom( false ) );

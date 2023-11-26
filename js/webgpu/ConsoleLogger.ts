@@ -8,6 +8,7 @@
 
 import { alpenglow, ByteEncoder, ComputeShader, ConcreteType, DeviceContext, wgsl_main_log_barrier } from '../imports.js';
 import Vector3 from '../../../dot/js/Vector3.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 
 export type ConsoleLogInfo<T = unknown> = {
   // Filled in when registered
@@ -27,15 +28,15 @@ export default class ConsoleLogger {
   private static nextGlobalId = 1;
   private static readonly identifierMap = new Map<number, ConsoleLogInfo>();
 
-  public static register( info: ConsoleLogInfo ): number {
-    assert && assert( info.id === undefined, 'Should not be defined yet.' );
+  public static register<T>( info: StrictOmit<ConsoleLogInfo<T>, 'id'> ): number {
     assert && assert( ( info.type === null ) === ( info.dataCount === 0 ) );
 
     const id = ConsoleLogger.nextGlobalId++;
 
+    // @ts-expect-error We're changing the type of the object (effectively)
     info.id = id;
 
-    ConsoleLogger.identifierMap.set( id, info );
+    ConsoleLogger.identifierMap.set( id, info as ConsoleLogInfo );
 
     return id;
   }
