@@ -474,7 +474,7 @@ export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/Buf
 export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/TimestampLogger.js';
 export { default as TypedBuffer } from './webgpu/TypedBuffer.js';
 
-export { partialWGSLBeautify } from './webgpu/wgsl/WGSLUtils.js';
+export { partialWGSLBeautify, addLineNumbers } from './webgpu/wgsl/WGSLUtils.js';
 
 export { default as binaryExpressionStatementWGSL } from './webgpu/wgsl/gpu/binaryExpressionStatementWGSL.js';
 export { default as coalescedLoopWGSL } from './webgpu/wgsl/gpu/coalescedLoopWGSL.js';

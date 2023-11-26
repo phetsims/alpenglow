@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, DualSnippet, DualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLModuleDeclarations } from '../imports.js';
+import { addLineNumbers, alpenglow, Binding, DualSnippet, DualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLModuleDeclarations } from '../imports.js';
 import { combineOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
@@ -76,8 +76,8 @@ export default class ComputeShader {
 
     if ( LOG_SHADERS ) {
       console.groupCollapsed( `[shader] ${name}` );
-      console.log( wgsl.split( '\n' ).map( ( s, i ) => `${i + 1} ${s}` ).join( '\n' ) );
-      // console.log( wgsl.split( '\n' ).filter( _.identity ).map( ( s, i ) => `${s}` ).join( '\n' ) );
+      console.log( addLineNumbers( wgsl ) );
+      // console.log( wgsl ) );
       console.groupEnd();
     }
 

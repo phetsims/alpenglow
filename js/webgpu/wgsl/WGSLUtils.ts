@@ -28,3 +28,9 @@ export const partialWGSLBeautify = ( wgsl: WGSLModuleDeclarations ): WGSLModuleD
 };
 
 alpenglow.register( 'partialWGSLBeautify', partialWGSLBeautify );
+
+export const addLineNumbers = ( wgsl: WGSLModuleDeclarations ): string => {
+  return wgsl.split( '\n' ).map( ( s, i ) => `${i + 1} ${s}` ).join( '\n' );
+};
+
+alpenglow.register( 'addLineNumbers', addLineNumbers );
