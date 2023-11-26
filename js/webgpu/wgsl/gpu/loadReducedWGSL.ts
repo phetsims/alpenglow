@@ -66,6 +66,10 @@ export type loadReducedWGSLOptions<T> = {
   sequentialReduceStyle?: 'factored' | 'unfactored' | 'nested';
 
   useSelectIfOptional?: boolean;
+
+  // (WARNING: only use this if you know what you are doing) If true, we will not check that the binaryOp is commutative
+  // if the order does not match.
+  orderOverride?: boolean;
 };
 
 const DEFAULT_OPTIONS = {
@@ -78,7 +82,8 @@ const DEFAULT_OPTIONS = {
   inputOrder: 'blocked',
   inputAccessOrder: 'striped',
   sequentialReduceStyle: 'factored',
-  useSelectIfOptional: false
+  useSelectIfOptional: false,
+  orderOverride: false
 } as const;
 
 const loadReducedWGSL = <T>(
@@ -101,6 +106,7 @@ const loadReducedWGSL = <T>(
   const inputAccessOrder = options.inputAccessOrder;
   const sequentialReduceStyle = options.sequentialReduceStyle;
   const useSelectIfOptional = options.useSelectIfOptional;
+  const orderOverride = options.orderOverride;
 
   assert && assert( value );
   assert && assert( workgroupSize );
@@ -112,6 +118,8 @@ const loadReducedWGSL = <T>(
   assert && assert( inputOrder !== 'striped' || inputAccessOrder !== 'blocked', 'Do not use blocked order on striped data' );
   assert && assert( [ loadExpression, loadStatements ].filter( _.identity ).length === 1,
     'Must provide exactly one of loadExpression or loadStatements' );
+  assert && assert( orderOverride || binaryOp.isCommutative || inputOrder === inputAccessOrder,
+    'Unless you know what you are doing (orderOverride), cannot do an out-of-order reduce on non-commutative data' );
 
   const outerDeclarations: WGSLStatements[] = [];
   const loadDeclarations: ( ( i : number ) => WGSLStatements )[] = [];

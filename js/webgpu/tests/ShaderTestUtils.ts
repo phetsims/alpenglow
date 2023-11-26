@@ -36,6 +36,10 @@ export const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, de
   } );
 };
 
+export const asyncTestWithDeviceContext = ( name: string, test: ( deviceContext: DeviceContext ) => Promise<string | null> ): void => {
+  asyncTestWithDevice( name, ( device, deviceContext ) => test( deviceContext ) );
+};
+
 export const compareArrays = <T>( type: ConcreteType<T>, inputValues: T[], expectedValues: T[], actualValues: T[] ): string | null => {
   for ( let i = 0; i < expectedValues.length; i++ ) {
     const expected = expectedValues[ i ];

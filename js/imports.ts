@@ -523,4 +523,4 @@ export { default as GPUProfiling } from './webgpu/GPUProfiling.js';
 export { default as RasterClipper } from './webgpu/RasterClipper.js';
 export type { RasterClipperOptions } from './webgpu/RasterClipper.js';
 
-export { shaderTestDevicePromise, asyncTestWithDevice, compareArrays } from './webgpu/tests/ShaderTestUtils.js';
+export { shaderTestDevicePromise, asyncTestWithDevice, asyncTestWithDeviceContext, compareArrays } from './webgpu/tests/ShaderTestUtils.js';

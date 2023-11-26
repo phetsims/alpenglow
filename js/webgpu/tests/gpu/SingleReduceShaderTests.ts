@@ -6,11 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { SingleReduceShader, SingleReduceShaderOptions, u32, U32Add, Vec2uBic } from '../../../imports.js';
-import { asyncTestWithDevice, compareArrays } from '../../../imports.js';
+import { asyncTestWithDeviceContext, compareArrays, SingleReduceShader, SingleReduceShaderOptions, u32, U32Add, Vec2uBic } from '../../../imports.js';
 import PickRequired from '../../../../../phet-core/js/types/PickRequired.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
-
 
 QUnit.module( 'WGSL SingleReduceShader' );
 
@@ -18,8 +16,8 @@ const testSingleReduceShader = <T>(
   options: Partial<SingleReduceShaderOptions<T>> & PickRequired<SingleReduceShaderOptions<T>, 'binaryOp'>
 ) => {
   const binaryOp = options.binaryOp;
-  const name = `${binaryOp.name} SingleReduceShader ${options.sequentialReduceStyle}`;
-  asyncTestWithDevice( name, async ( device, deviceContext ) => {
+  const name = `${binaryOp.name} SingleReduceShader ${options.loadReducedOptions?.sequentialReduceStyle}`;
+  asyncTestWithDeviceContext( name, async deviceContext => {
     const workgroupSize = 256;
     const grainSize = 8;
     const inputSize = workgroupSize * grainSize * 5 - 27;
@@ -27,7 +25,9 @@ const testSingleReduceShader = <T>(
     const shader = await SingleReduceShader.create<T>( deviceContext, name, combineOptions<SingleReduceShaderOptions<T>>( {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
-      length: u32( inputSize ) // TODO: rename lengthExpression?
+      loadReducedOptions: combineOptions<Required<SingleReduceShaderOptions<T>>[ 'loadReducedOptions' ]>( {
+        length: u32( inputSize ) // TODO: rename lengthExpression?
+      }, options.loadReducedOptions )
     }, options ) );
 
     const inputValues = _.range( 0, inputSize ).map( () => binaryOp.type.generateRandom( false ) );
@@ -44,13 +44,17 @@ const testSingleReduceShader = <T>(
 ( [ 'factored', 'unfactored', 'nested' ] as const ).forEach( sequentialReduceStyle => {
   testSingleReduceShader( {
     binaryOp: U32Add,
-    sequentialReduceStyle: sequentialReduceStyle
+    loadReducedOptions: {
+      sequentialReduceStyle: sequentialReduceStyle
+    }
   } );
 
   testSingleReduceShader( {
     binaryOp: Vec2uBic,
-    inputAccessOrder: 'blocked',
-    sequentialReduceStyle: sequentialReduceStyle
+    loadReducedOptions: {
+      inputAccessOrder: 'blocked',
+      sequentialReduceStyle: sequentialReduceStyle
+    }
   } );
 
   // TODO: test other orders
