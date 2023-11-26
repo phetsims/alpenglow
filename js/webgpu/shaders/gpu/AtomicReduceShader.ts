@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, i32, u32, wgsl_main_reduce_atomic } from '../../imports.js';
-import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, i32, u32, wgsl_main_reduce_atomic } from '../../../imports.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type AtomicType = 'u32' | 'i32';
 

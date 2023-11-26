@@ -1,22 +1,21 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * A three-level standalone scan.
+ * A two-level standalone scan.
  *
- * Four stages:
+ * Three stages:
  *
  * 1. A level of reduction (takes the "upper" input data, and reduces it to a single value per workgroup, saved in reduces)
- * 2. Scan of the reduces (in place, but also outputs another level of reduces ("double reduces")).
- * 3. Scan of the double reduces (the entire "lower" data will fit within a single workgroup)
- * 4. Scan of the original data, where the relevant reduce and double-reduce is added to each workgroup's elements.
+ * 2. Scan of the reduces (the entire "lower" data will fit within a single workgroup)
+ * 3. Scan of the original data, where the relevant reduce is added to each workgroup's elements.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_reduce, wgsl_main_reduce_non_commutative, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_add_2 } from '../../imports.js';
-import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
+import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_reduce, wgsl_main_reduce_non_commutative, wgsl_main_scan, wgsl_main_scan_add_1 } from '../../../imports.js';
+import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 
-export type TripleReduceScanShaderOptions<T> = {
+export type DoubleReduceScanShaderOptions<T> = {
 
   // The type of the data for WGSL, e.g. 'f32'
   valueType: string;
@@ -47,6 +46,8 @@ export type TripleReduceScanShaderOptions<T> = {
   // Whether our internal "reduces" data will be exclusive or inclusive (both are possible)
   isReductionExclusive?: boolean;
 
+  internalStriping?: false; // TODO: fix the feature!
+
   // The number of bytes
   bytesPerElement: number;
 
@@ -65,17 +66,18 @@ const DEFAULT_OPTIONS = {
   factorOutSubexpressions: true,
   nestSubexpressions: false,
   isReductionExclusive: false,
+  internalStriping: false,
   exclusive: false
 } as const;
 
-export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]> {
+export default class DoubleReduceScanShader<T> extends ExecutableShader<T[], T[]> {
 
   public static async create<T>(
     deviceContext: DeviceContext,
     name: string,
-    providedOptions: TripleReduceScanShaderOptions<T>
-  ): Promise<TripleReduceScanShader<T>> {
-    const options = optionize3<TripleReduceScanShaderOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+    providedOptions: DoubleReduceScanShaderOptions<T>
+  ): Promise<DoubleReduceScanShader<T>> {
+    const options = optionize3<DoubleReduceScanShaderOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     const dataCount = options.workgroupSize * options.grainSize;
 
@@ -97,35 +99,19 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         length: options.lengthExpression,
-        stripeOutput: false // TODO: experiment with this
+        stripeOutput: options.internalStriping
       }, sharedOptions )
     ) : await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} reduction`, wgsl_main_reduce, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
+        length: options.lengthExpression,
         convergent: options.isCommutative,
-        convergentRemap: false, // TODO: reconsider if we can enable this?
+        convergentRemap: false, // NOTE: could consider trying to enable this, but probably not worth it
         inputOrder: options.inputOrder,
         inputAccessOrder: options.inputAccessOrder,
-        length: options.lengthExpression,
-        stripeOutput: false // TODO: experiment with this
-      }, sharedOptions )
-    );
-
-    const middleScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} middle scan`, wgsl_main_scan_reduce, [
-        Binding.STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
-        // WGSL "ceil" equivalent
-        length: options.lengthExpression ? `( ${options.lengthExpression} + ${u32( dataCount - 1 )} ) / ${u32( dataCount )}` : null,
-        inputOrder: 'blocked',
-        inputAccessOrder: options.inputAccessOrder,
-        exclusive: options.isReductionExclusive,
-        getAddedValue: null,
-        stripeReducedOutput: false, // TODO experiment with this!
-        inPlace: true
+        stripeOutput: options.internalStriping
       }, sharedOptions )
     );
 
@@ -134,8 +120,8 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
-        length: options.lengthExpression ? `( ${options.lengthExpression} + ${u32( dataCount * dataCount - 1 )} ) / ${u32( dataCount * dataCount )}` : null,
-        inputOrder: 'blocked',
+        length: options.lengthExpression ? `( ${options.lengthExpression} + ${u32( dataCount - 1 )} ) / ${u32( dataCount )}` : null,
+        inputOrder: options.internalStriping ? 'striped' : 'blocked',
         inputAccessOrder: options.inputAccessOrder,
         exclusive: options.isReductionExclusive,
         getAddedValue: null,
@@ -144,8 +130,7 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
     );
 
     const upperScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} upper scan`, wgsl_main_scan_add_2, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
+      deviceContext.device, `${name} upper scan`, wgsl_main_scan_add_1, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
@@ -159,29 +144,23 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
       }, sharedOptions )
     );
 
-    return new TripleReduceScanShader<T>( async ( execution: Execution, values: T[] ) => {
-      assert && assert( values.length <= dataCount * dataCount * dataCount );
+    return new DoubleReduceScanShader<T>( async ( execution: Execution, values: T[] ) => {
+      assert && assert( values.length <= dataCount * dataCount );
 
       const upperDispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
-      const middleDispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.workgroupSize * options.grainSize * options.grainSize ) );
 
       const inputBuffer = execution.createByteEncoderBuffer( new ByteEncoder().encodeValues( values, options.encodeElement ) );
       const reductionBuffer = execution.createBuffer( options.bytesPerElement * upperDispatchSize );
-      const doubleReductionBuffer = execution.createBuffer( options.bytesPerElement * middleDispatchSize );
       const outputBuffer = execution.createBuffer( options.bytesPerElement * values.length );
 
-      // TODO: allow factoring all of this out, without the "read" at the end! We haven't created the best pattern here.
       execution.dispatch( reduceShader, [
         inputBuffer, reductionBuffer
       ], upperDispatchSize );
-      execution.dispatch( middleScanShader, [
-        reductionBuffer, doubleReductionBuffer
-      ], middleDispatchSize );
       execution.dispatch( lowerScanShader, [
-        doubleReductionBuffer
+        reductionBuffer
       ] );
       execution.dispatch( upperScanShader, [
-        inputBuffer, reductionBuffer, doubleReductionBuffer, outputBuffer
+        inputBuffer, reductionBuffer, outputBuffer
       ], upperDispatchSize );
 
       return new ByteEncoder( await execution.arrayBuffer( outputBuffer ) ).decodeValues( options.decodeElement, options.bytesPerElement ).slice( 0, values.length );
@@ -189,4 +168,4 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
   }
 }
 
-alpenglow.register( 'TripleReduceScanShader', TripleReduceScanShader );
+alpenglow.register( 'DoubleReduceScanShader', DoubleReduceScanShader );

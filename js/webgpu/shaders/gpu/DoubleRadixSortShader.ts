@@ -6,10 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_add_2 } from '../../imports.js';
-import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
+import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, getMaxRadixBitsPerInnerPass, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_add_1 } from '../../../imports.js';
+import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { getRadixBitVectorSize } from './TripleRadixSortShader.js';
 
-export type TripleRadixSortShaderOptions<T> = {
+export type DoubleRadixSortShaderOptions<T> = {
   order: BitOrder<T>;
 
   // NOTE: this is specified here, since we may be using FEWER than the maximum number of bits in the order.
@@ -48,33 +49,7 @@ const DEFAULT_OPTIONS = {
   log: false
 } as const;
 
-export const getMaxRadixBitsPerInnerPass = (
-  workgroupSize: number,
-  grainSize: number
-): number => {
-  const maxBitVectorSize = 4;
-
-  const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
-  const countsPerComponent = Math.floor( 32 / countBitQuantity );
-
-  return Math.floor( Math.log2( maxBitVectorSize * countsPerComponent ) );
-};
-
-export const getRadixBitVectorSize = (
-  workgroupSize: number,
-  grainSize: number,
-  bitsPerInnerPass: number
-): number => {
-  const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
-  const countsPerComponent = Math.floor( 32 / countBitQuantity );
-
-  const result = Math.ceil( ( 1 << bitsPerInnerPass ) / countsPerComponent );
-  assert && assert( result <= 4 );
-
-  return result;
-};
-
-export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]> {
+export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]> {
 
   public static getMaximumElementQuantity(
     workgroupSize: number,
@@ -83,15 +58,15 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
   ): number {
     const scanDataCount = workgroupSize * grainSize;
 
-    return scanDataCount * Math.floor( scanDataCount * scanDataCount * scanDataCount / ( 1 << bitsPerPass ) );
+    return scanDataCount * Math.floor( scanDataCount * scanDataCount / ( 1 << bitsPerPass ) );
   }
 
   public static async create<T>(
     deviceContext: DeviceContext,
     name: string,
-    providedOptions: TripleRadixSortShaderOptions<T>
-  ): Promise<TripleRadixSortShader<T>> {
-    const options = optionize3<TripleRadixSortShaderOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+    providedOptions: DoubleRadixSortShaderOptions<T>
+  ): Promise<DoubleRadixSortShader<T>> {
+    const options = optionize3<DoubleRadixSortShaderOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     const order = options.order;
     const type = order.type;
@@ -159,34 +134,17 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     // TODO: yeah, get length statements/expressions handled.
     const scanLength = options.lengthExpression ? `( ( ( ( ${options.lengthExpression} ) + ${u32( options.workgroupSize * options.grainSize - 1 )} ) / ${u32( options.workgroupSize * options.grainSize )} ) << ${u32( options.bitsPerPass )} )` : null;
 
-    // If we have a non-commutative reduction (with a striped access order)
     const reduceShader = await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} reduction`, wgsl_main_reduce, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
-        convergent: true,
-        convergentRemap: false, // TODO: reconsider if we can enable this?
-        inputOrder: 'blocked',
-        inputAccessOrder: 'striped',
         length: scanLength,
-        stripeOutput: false
-      }, reduceSharedOptions )
-    );
-
-    const middleScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} middle scan`, wgsl_main_scan_reduce, [
-        Binding.STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
-        // WGSL "ceil" equivalent
-        length: scanLength ? `( ${scanLength} + ${u32( dataCount - 1 )} ) / ${u32( dataCount )}` : null,
+        convergent: true,
+        convergentRemap: false, // NOTE: could consider trying to enable this, but probably not worth it
         inputOrder: 'blocked',
         inputAccessOrder: 'striped',
-        exclusive: options.isReductionExclusive,
-        getAddedValue: null,
-        stripeReducedOutput: false,
-        inPlace: true
+        stripeOutput: false
       }, reduceSharedOptions )
     );
 
@@ -195,7 +153,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         Binding.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
-        length: scanLength ? `( ${scanLength} + ${u32( dataCount * dataCount - 1 )} ) / ${u32( dataCount * dataCount )}` : null,
+        length: scanLength ? `( ${scanLength} + ${u32( dataCount - 1 )} ) / ${u32( dataCount )}` : null,
         inputOrder: 'blocked',
         inputAccessOrder: 'striped',
         exclusive: options.isReductionExclusive,
@@ -205,8 +163,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     );
 
     const upperScanShader = await ComputeShader.fromSourceAsync(
-      deviceContext.device, `${name} upper scan`, wgsl_main_scan_add_2, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
+      deviceContext.device, `${name} upper scan`, wgsl_main_scan_add_1, [
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.READ_ONLY_STORAGE_BUFFER,
         Binding.STORAGE_BUFFER
@@ -223,15 +180,14 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     // TODO: can we factor this out(!)
     const logShader = options.log ? await ConsoleLogger.getLogBarrierComputeShader( deviceContext ) : null;
 
-    return new TripleRadixSortShader<T>( async ( execution: Execution, values: T[] ) => {
+    return new DoubleRadixSortShader<T>( async ( execution: Execution, values: T[] ) => {
       const upperDispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
-      const histogramElementCount = upperDispatchSize * ( 1 << options.bitsPerPass );
+      const histogramElementCount = upperDispatchSize * ( 2 ** options.bitsPerPass );
 
-      assert && assert( histogramElementCount <= dataCount * dataCount * dataCount );
+      assert && assert( histogramElementCount <= dataCount * dataCount );
 
       const middleDispatchSize = Math.ceil( histogramElementCount / ( options.workgroupSize * options.grainSize ) );
-      const lowerDispatchSize = Math.ceil( histogramElementCount / ( options.workgroupSize * options.workgroupSize * options.grainSize * options.grainSize ) );
 
       // TODO: improve buffer usage patterns(!)
 
@@ -239,7 +195,6 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       const histogramBuffer = execution.createBuffer( 4 * histogramElementCount );
       const scannedHistogramBuffer = execution.createBuffer( 4 * histogramElementCount ); // TODO: just replace
       const reductionBuffer = execution.createBuffer( 4 * middleDispatchSize );
-      const doubleReductionBuffer = execution.createBuffer( 4 * lowerDispatchSize );
       const otherDataBuffer = execution.createBuffer( type.bytesPerElement * values.length );
 
       let inBuffer = inputBuffer;
@@ -259,25 +214,11 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         execution.dispatch( reduceShader, [
           histogramBuffer, reductionBuffer
         ], middleDispatchSize );
-
-        // execution.u32Numbers( reductionBuffer ).then( histogram => console.log( `reduction ${i}`, histogram ) ).catch( e => { throw e; } );
-
-        // TODO: use atomics so this stage isn't needed?
-        execution.dispatch( middleScanShader, [
-          reductionBuffer, doubleReductionBuffer
-        ], lowerDispatchSize );
-
-        // execution.u32Numbers( reductionBuffer ).then( histogram => console.log( `reduction (scanned) ${i}`, histogram ) ).catch( e => { throw e; } );
-        // execution.u32Numbers( doubleReductionBuffer ).then( histogram => console.log( `double reduction ${i}`, histogram ) ).catch( e => { throw e; } );
-
         execution.dispatch( lowerScanShader, [
-          doubleReductionBuffer
+          reductionBuffer
         ] );
-
-        // execution.u32Numbers( doubleReductionBuffer ).then( histogram => console.log( `double reduction (scanned) ${i}`, histogram ) ).catch( e => { throw e; } );
-
         execution.dispatch( upperScanShader, [
-          histogramBuffer, reductionBuffer, doubleReductionBuffer, scannedHistogramBuffer
+          histogramBuffer, reductionBuffer, scannedHistogramBuffer
         ], middleDispatchSize );
 
         // execution.u32Numbers( scannedHistogramBuffer ).then( histogram => console.log( `scanned histogram ${i}`, histogram ) ).catch( e => { throw e; } );
@@ -298,4 +239,4 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
   }
 }
 
-alpenglow.register( 'TripleRadixSortShader', TripleRadixSortShader );
+alpenglow.register( 'DoubleRadixSortShader', DoubleRadixSortShader );

@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_scan } from '../../imports.js';
-import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import { alpenglow, BinaryOp, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_scan } from '../../../imports.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type SingleScanShaderOptions<T> = {
   binaryOp: BinaryOp<T>;

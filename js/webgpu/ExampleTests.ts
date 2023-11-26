@@ -12,7 +12,7 @@ import {
 } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { getRadixBitVectorSize } from './shaders/TripleRadixSortShader.js';
+import { getRadixBitVectorSize } from './shaders/gpu/TripleRadixSortShader.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 
 // eslint-disable-next-line bad-sim-text

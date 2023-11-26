@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, AtomicOperation, AtomicReduceShader, AtomicType, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_atomic_reduce_atomic } from '../../imports.js';
-import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import { alpenglow, AtomicOperation, AtomicReduceShader, AtomicType, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_atomic_reduce_atomic } from '../../../imports.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type FullAtomicReduceShaderOptions = {
   // The type of the data for WGSL, e.g. 'f32'

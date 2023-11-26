@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, mainReduceWGSL, mainReduceWGSLOptions, WGSLContext } from '../../imports.js';
-import { ExecutableShaderExternalOptions } from '../Execution.js';
+import { alpenglow, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, mainReduceWGSL, mainReduceWGSLOptions, WGSLContext } from '../../../imports.js';
+import { ExecutableShaderExternalOptions } from '../../Execution.js';
 
 export type SingleReduceShaderOptions<T> = mainReduceWGSLOptions<T> & ExecutableShaderExternalOptions<T[], T[]>;
 
