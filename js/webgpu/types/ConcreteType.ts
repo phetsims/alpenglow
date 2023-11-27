@@ -137,7 +137,7 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
     },
 
     encode( value: T[], encoder: ByteEncoder ): void {
-      assert && assert( outOfRangeElement || value.length === size );
+      assert && assert( outOfRangeElement !== undefined || value.length === size );
 
       for ( let i = 0; i < size; i++ ) {
         type.encode( i < value.length ? value[ i ] : outOfRangeElement!, encoder );

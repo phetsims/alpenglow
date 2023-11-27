@@ -113,6 +113,7 @@ export default class ComputeShader {
     if ( async ) {
       this.pipelinePromise = device.createComputePipelineAsync( pipelineDescriptor );
 
+      // TODO: order promises better
       this.pipelinePromise.then( pipeline => {
         this.pipeline = pipeline;
       } ).catch( e => { throw e; } );

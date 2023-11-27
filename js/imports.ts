@@ -475,7 +475,12 @@ export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/Time
 export { default as TypedBuffer } from './webgpu/TypedBuffer.js';
 export { default as BindingLocation } from './webgpu/BindingLocation.js';
 export { default as BoundBinding } from './webgpu/BoundBinding.js';
+export { default as BoundResource } from './webgpu/BoundResource.js';
 export { default as BoundBuffer } from './webgpu/BoundBuffer.js';
+export { default as BoundTextureView } from './webgpu/BoundTextureView.js';
+export { default as BindGroupLayout } from './webgpu/BindGroupLayout.js';
+export { default as PipelineLayout } from './webgpu/PipelineLayout.js';
+export { default as BindGroup } from './webgpu/BindGroup.js';
 
 export { partialWGSLBeautify, addLineNumbers } from './webgpu/wgsl/WGSLUtils.js';
 export { default as WGSLContext } from './webgpu/wgsl/WGSLContext.js';
@@ -511,6 +516,9 @@ export type { scanRakedWGSLOptions } from './webgpu/wgsl/gpu/scanRakedWGSL.js';
 export { default as toStripedIndexWGSL } from './webgpu/wgsl/gpu/toStripedIndexWGSL.js';
 export type { toStripedIndexWGSLOptions } from './webgpu/wgsl/gpu/toStripedIndexWGSL.js';
 export { default as unrollWGSL } from './webgpu/wgsl/gpu/unrollWGSL.js';
+
+export { default as SingleReduceModule } from './webgpu/modules/gpu/SingleReduceModule.js';
+export type { SingleReduceModuleOptions } from './webgpu/modules/gpu/SingleReduceModule.js';
 
 export { default as SingleReduceShader } from './webgpu/shaders/gpu/SingleReduceShader.js';
 export type { SingleReduceShaderOptions } from './webgpu/shaders/gpu/SingleReduceShader.js';

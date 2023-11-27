@@ -19,6 +19,10 @@ export default class BoundBinding {
   public getBindGroupLayoutEntry(): GPUBindGroupLayoutEntry {
     return this.binding.getBindGroupLayoutEntry( this.location.bindingIndex );
   }
+
+  public getBindGroupEntry( resource: GPUBuffer | GPUTextureView ): GPUBindGroupEntry {
+    return this.binding.getBindGroupEntry( this.location.bindingIndex, resource );
+  }
 }
 
 alpenglow.register( 'BoundBinding', BoundBinding );
