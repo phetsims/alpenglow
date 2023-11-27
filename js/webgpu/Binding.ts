@@ -12,22 +12,22 @@ import { alpenglow, BindingType, BindingLocation } from '../imports.js';
 
 export default class Binding {
   public constructor(
-    public readonly binding: BindingType, // TODO: rename
+    public readonly type: BindingType,
     public readonly location: BindingLocation
   ) {}
 
   public getBindGroupLayoutEntry(): GPUBindGroupLayoutEntry {
-    return this.binding.getBindGroupLayoutEntry( this.location.bindingIndex );
+    return this.type.getBindGroupLayoutEntry( this.location.bindingIndex );
   }
 
   public getBindGroupEntry( resource: GPUBuffer | GPUTextureView ): GPUBindGroupEntry {
-    return this.binding.getBindGroupEntry( this.location.bindingIndex, resource );
+    return this.type.getBindGroupEntry( this.location.bindingIndex, resource );
   }
 
   public getStorageAccess(): 'read' | 'read_write' {
-    assert && assert( this.binding === BindingType.STORAGE_BUFFER || this.binding === BindingType.READ_ONLY_STORAGE_BUFFER );
+    assert && assert( this.type === BindingType.STORAGE_BUFFER || this.type === BindingType.READ_ONLY_STORAGE_BUFFER );
 
-    return this.binding === BindingType.READ_ONLY_STORAGE_BUFFER ? 'read' : 'read_write';
+    return this.type === BindingType.READ_ONLY_STORAGE_BUFFER ? 'read' : 'read_write';
   }
 }
 

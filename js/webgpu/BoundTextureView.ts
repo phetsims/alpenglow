@@ -11,9 +11,9 @@ import { alpenglow, Binding, BoundResource } from '../imports.js';
 export default class BoundTextureView extends BoundResource {
   public constructor(
     public readonly textureView: GPUTextureView,
-    boundBinding: Binding
+    binding: Binding
   ) {
-    super( textureView, boundBinding );
+    super( textureView, binding );
   }
 }
 

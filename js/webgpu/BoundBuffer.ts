@@ -11,9 +11,9 @@ import { alpenglow, Binding, BoundResource, TypedBuffer } from '../imports.js';
 export default class BoundBuffer<T = unknown> extends BoundResource {
   public constructor(
     public readonly typedBuffer: TypedBuffer<T>,
-    boundBinding: Binding
+    binding: Binding
   ) {
-    super( typedBuffer.buffer, boundBinding );
+    super( typedBuffer.buffer, binding );
   }
 }
 

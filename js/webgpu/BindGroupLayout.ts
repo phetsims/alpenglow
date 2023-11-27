@@ -24,11 +24,11 @@ export default class BindGroupLayout {
     public readonly groupIndex: number,
 
     // TODO: naming of each?
-    public readonly boundBindings: Binding[]
+    public readonly bindings: Binding[]
   ) {
     this.layout = deviceContext.device.createBindGroupLayout( {
       label: `${name} bind group layout`,
-      entries: boundBindings.map( boundBinding => boundBinding.getBindGroupLayoutEntry() )
+      entries: bindings.map( boundBinding => boundBinding.getBindGroupLayoutEntry() )
     } );
   }
 }
