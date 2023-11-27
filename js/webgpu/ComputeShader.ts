@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, Binding, DualSnippet, DualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
+import { addLineNumbers, alpenglow, BindingType, DualSnippet, DualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
 import { combineOptions, optionize3 } from '../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
@@ -61,7 +61,7 @@ export default class ComputeShader {
   public constructor(
     public readonly name: string,
     wgsl: string,
-    public readonly bindings: Binding[],
+    public readonly bindings: BindingType[],
     public readonly device: GPUDevice,
     async: boolean,
     providedOptions?: ComputeShaderOptions
@@ -95,7 +95,7 @@ export default class ComputeShader {
         ...this.bindings.map( ( binding, i ) => binding.getBindGroupLayoutEntry( i ) ),
 
         // Add in an entry for our logging buffer (if we're logging)
-        ...( this.log ? [ Binding.STORAGE_BUFFER.getBindGroupLayoutEntry( LOG_BINDING ) ] : [] )
+        ...( this.log ? [ BindingType.STORAGE_BUFFER.getBindGroupLayoutEntry( LOG_BINDING ) ] : [] )
       ]
     } );
 
@@ -134,7 +134,7 @@ export default class ComputeShader {
       layout: this.bindGroupLayout,
       entries: [
         ...this.bindings.map( ( binding, i ) => binding.getBindGroupEntry( i, resources[ i ] ) ),
-        ...( ( this.log && logBuffer ) ? [ Binding.STORAGE_BUFFER.getBindGroupEntry( LOG_BINDING, logBuffer ) ] : [] )
+        ...( ( this.log && logBuffer ) ? [ BindingType.STORAGE_BUFFER.getBindGroupEntry( LOG_BINDING, logBuffer ) ] : [] )
       ]
     } );
   }
@@ -207,7 +207,7 @@ export default class ComputeShader {
     device: GPUDevice,
     name: string,
     source: DualSnippetSource,
-    bindings: Binding[],
+    bindings: BindingType[],
     providedOptions: ComputeShaderSourceOptions = {}
   ): ComputeShader {
     const options = combineOptions<ComputeShaderSourceOptions>( {
@@ -227,7 +227,7 @@ export default class ComputeShader {
     device: GPUDevice,
     name: string,
     source: DualSnippetSource,
-    bindings: Binding[],
+    bindings: BindingType[],
     providedOptions: ComputeShaderSourceOptions = {}
   ): Promise<ComputeShader> {
     const options = combineOptions<ComputeShaderSourceOptions>( {
@@ -247,7 +247,7 @@ export default class ComputeShader {
     device: GPUDevice,
     name: string,
     context: WGSLContext,
-    bindings: Binding[],
+    bindings: BindingType[],
     providedOptions?: ComputeShaderOptions
   ): Promise<ComputeShader> {
     return ComputeShader.fromWGSLAsync( device, name, context.toString(), bindings, combineOptions<ComputeShaderOptions>( {
@@ -259,7 +259,7 @@ export default class ComputeShader {
     device: GPUDevice,
     name: string,
     wgsl: WGSLModuleDeclarations,
-    bindings: Binding[],
+    bindings: BindingType[],
     providedOptions?: ComputeShaderOptions
   ): Promise<ComputeShader> {
     const options = combineOptions<ComputeShaderOptions>( {}, DEFAULT_OPTIONS, providedOptions );

@@ -1,18 +1,18 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * A binding with a location
+ * A binding (type + location)
  *
- * TODO: Eventually, Binding will just be this?
+ * TODO: Rename to Binding
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BindingLocation } from '../imports.js';
+import { alpenglow, BindingType, BindingLocation } from '../imports.js';
 
 export default class BoundBinding {
   public constructor(
-    public readonly binding: Binding,
+    public readonly binding: BindingType, // TODO: rename
     public readonly location: BindingLocation
   ) {}
 
@@ -25,9 +25,9 @@ export default class BoundBinding {
   }
 
   public getStorageAccess(): 'read' | 'read_write' {
-    assert && assert( this.binding === Binding.STORAGE_BUFFER || this.binding === Binding.READ_ONLY_STORAGE_BUFFER );
+    assert && assert( this.binding === BindingType.STORAGE_BUFFER || this.binding === BindingType.READ_ONLY_STORAGE_BUFFER );
 
-    return this.binding === Binding.READ_ONLY_STORAGE_BUFFER ? 'read' : 'read_write';
+    return this.binding === BindingType.READ_ONLY_STORAGE_BUFFER ? 'read' : 'read_write';
   }
 }
 

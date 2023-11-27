@@ -51,7 +51,7 @@
     gpuTiming
   } from 'thimbleberry';
   import { // eslint-disable-line single-line-import
-    Binding,
+    BindingType,
     ComputeShader,
     DeviceContext,
     wgsl_f32_reduce_simple,
@@ -83,24 +83,24 @@
 
     const shader0 = ComputeShader.fromSource(
       device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], phet.phetCore.merge( {
         inputSize: inputSize
       }, shaderOptions )
     );
     const shader1 = ComputeShader.fromSource(
       device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], phet.phetCore.merge( {
         inputSize: Math.ceil( inputSize / ( workgroupSize ) )
       }, shaderOptions )
     );
     const shader2 = ComputeShader.fromSource(
       device, 'f32_reduce_simple 2', wgsl_f32_reduce_simple, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], phet.phetCore.merge( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) )
       }, shaderOptions )
@@ -152,24 +152,24 @@
 
     const shader0 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked_convergent 0', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], phet.phetCore.merge( {
         inputSize: inputSize
       }, shaderOptions )
     );
     const shader1 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked_convergent 1', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], phet.phetCore.merge( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
     const shader2 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked_convergent 2', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], phet.phetCore.merge( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )
@@ -221,24 +221,24 @@
 
     const shader0 = ComputeShader.fromSource(
       device, 'u32_reduce_raked_striped_blocked_convergent 0', wgsl_u32_reduce_raked_striped_blocked_convergent, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], phet.phetCore.merge( {
         inputSize: inputSize
       }, shaderOptions )
     );
     const shader1 = ComputeShader.fromSource(
       device, 'u32_reduce_raked_striped_blocked_convergent 1', wgsl_u32_reduce_raked_striped_blocked_convergent, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], phet.phetCore.merge( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
     const shader2 = ComputeShader.fromSource(
       device, 'u32_reduce_raked_striped_blocked_convergent 2', wgsl_u32_reduce_raked_striped_blocked_convergent, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], phet.phetCore.merge( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )
@@ -290,8 +290,8 @@
 
     const shader = ComputeShader.fromSource(
       device, 'u32_atomic_reduce_raked_striped_blocked_convergent 0', wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], phet.phetCore.merge( {
         inputSize: inputSize
       }, shaderOptions )

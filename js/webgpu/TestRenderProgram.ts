@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, LinearEdge, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderInstruction, RenderProgram, wgsl_test_render_program } from '../imports.js';
+import { alpenglow, BindingType, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, LinearEdge, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderInstruction, RenderProgram, wgsl_test_render_program } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -34,10 +34,10 @@ export default class TestRenderProgram {
 
     if ( !shaderMap.has( deviceContext ) ) {
       const shader = ComputeShader.fromSource( device, 'test_render_program', wgsl_test_render_program, [
-        Binding.UNIFORM_BUFFER,
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.UNIFORM_BUFFER,
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], merge( merge( {
         // TODO: good sizes? Can get values of these from a RenderProgram
         stackSize: 10,

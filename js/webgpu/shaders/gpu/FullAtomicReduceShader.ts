@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, AtomicOperation, AtomicReduceShader, AtomicType, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_atomic_reduce_atomic } from '../../../imports.js';
+import { alpenglow, AtomicOperation, AtomicReduceShader, AtomicType, BindingType, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_atomic_reduce_atomic } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type FullAtomicReduceShaderOptions = {
@@ -45,8 +45,8 @@ export default class FullAtomicReduceShader extends ExecutableShader<number[], n
 
     const shader = await ComputeShader.fromSourceAsync(
       deviceContext.device, name, wgsl_main_atomic_reduce_atomic, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         valueType: options.valueType,
         atomicOperation: options.atomicOperation,

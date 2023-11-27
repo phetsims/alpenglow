@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_add_2 } from '../../../imports.js';
+import { alpenglow, BindingType, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_add_2 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type TripleRadixSortShaderOptions<T> = {
@@ -123,17 +123,17 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
       histogramShaders.push( await ComputeShader.fromSourceAsync(
         deviceContext.device, `${name} histogram ${i}`, wgsl_main_radix_histogram, [
-          Binding.READ_ONLY_STORAGE_BUFFER,
-          Binding.STORAGE_BUFFER
+          BindingType.READ_ONLY_STORAGE_BUFFER,
+          BindingType.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
 
         }, radixSharedOptions )
       ) );
       scatterShaders.push( await ComputeShader.fromSourceAsync(
         deviceContext.device, `${name} scatter ${i}`, wgsl_main_radix_scatter, [
-          Binding.READ_ONLY_STORAGE_BUFFER,
-          Binding.READ_ONLY_STORAGE_BUFFER,
-          Binding.STORAGE_BUFFER
+          BindingType.READ_ONLY_STORAGE_BUFFER,
+          BindingType.READ_ONLY_STORAGE_BUFFER,
+          BindingType.STORAGE_BUFFER
         ], combineOptions<ComputeShaderSourceOptions>( {
           bitsPerInnerPass: options.bitsPerInnerPass,
           innerBitVectorSize: bitVectorSize,
@@ -162,8 +162,8 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     // If we have a non-commutative reduction (with a striped access order)
     const reduceShader = await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} reduction`, wgsl_main_reduce, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         convergent: true,
         convergentRemap: false, // TODO: reconsider if we can enable this?
@@ -176,8 +176,8 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
     const middleScanShader = await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} middle scan`, wgsl_main_scan_reduce, [
-        Binding.STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
         length: scanLength ? `( ${scanLength} + ${u32( dataCount - 1 )} ) / ${u32( dataCount )}` : null,
@@ -192,7 +192,7 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
     const lowerScanShader = await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} lower scan`, wgsl_main_scan, [
-        Binding.STORAGE_BUFFER
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
         length: scanLength ? `( ${scanLength} + ${u32( dataCount * dataCount - 1 )} ) / ${u32( dataCount * dataCount )}` : null,
@@ -206,10 +206,10 @@ export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
     const upperScanShader = await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} upper scan`, wgsl_main_scan_add_2, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         length: scanLength,
         inputOrder: 'blocked',

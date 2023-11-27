@@ -8,7 +8,7 @@
 
 // eslint-disable-next-line single-line-import
 import {
-  asyncTestWithDevice, AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, Binding, ByteEncoder, compareArrays, ComputeShader, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, getMaxRadixBitsPerInnerPass, Order, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, U32ReverseOrder, Vec2uBic, Vec2uLexicographicalOrder, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
+  asyncTestWithDevice, AtomicOperation, AtomicReduceShader, AtomicType, Bic, BinaryOp, BindingType, ByteEncoder, compareArrays, ComputeShader, DeviceContext, DoubleRadixSortShader, DoubleReduceScanShader, DualSnippetSource, ExampleSimpleF32Reduce, FullAtomicReduceShader, getMaxRadixBitsPerInnerPass, Order, SingleScanShader, TripleRadixSortShader, TripleReduceScanShader, u32, U32Add, U32Order, U32ReverseOrder, Vec2uBic, Vec2uLexicographicalOrder, wgsl_example_load_multiple, wgsl_example_load_reduced, wgsl_example_raked_reduce, wgsl_f32_exclusive_scan_raked_blocked_single, wgsl_f32_exclusive_scan_raked_striped_single, wgsl_f32_exclusive_scan_simple_single, wgsl_f32_inclusive_scan_raked_blocked_single, wgsl_f32_inclusive_scan_raked_striped_single, wgsl_f32_inclusive_scan_simple_single, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_simple, wgsl_i32_merge, wgsl_i32_merge_simple, wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, wgsl_u32_compact_single_radix_sort, wgsl_u32_compact_workgroup_radix_sort, wgsl_u32_flip_convergent, wgsl_u32_from_striped, wgsl_u32_histogram, wgsl_u32_radix_histogram, wgsl_u32_reduce_raked_striped_blocked_convergent, wgsl_u32_single_radix_sort, wgsl_u32_to_striped, wgsl_u32_workgroup_radix_sort
 } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -165,8 +165,8 @@ const testF32RakedReduce = ( combineWithExpression: boolean, convergent: boolean
 
     const shader = ComputeShader.fromSource(
       device, name, wgsl_example_raked_reduce, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -249,8 +249,8 @@ const testBicRakedReduce = ( combineWithExpression: boolean, convergent: boolean
 
     const shader = ComputeShader.fromSource(
       device, name, wgsl_example_raked_reduce, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -332,8 +332,8 @@ asyncTestWithDevice( 'u32_reduce_raked_striped_blocked_convergent', async ( devi
 
   const shader = ComputeShader.fromSource(
     device, 'u32_reduce_raked_striped_blocked_convergent', wgsl_u32_reduce_raked_striped_blocked_convergent, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -372,8 +372,8 @@ asyncTestWithDevice( 'f32_exclusive_scan_simple_single', async ( device, deviceC
 
   const shader = ComputeShader.fromSource(
     device, 'f32_exclusive_scan_simple_single', wgsl_f32_exclusive_scan_simple_single, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize
     }
@@ -410,8 +410,8 @@ asyncTestWithDevice( 'f32_inclusive_scan_simple_single', async ( device, deviceC
 
   const shader = ComputeShader.fromSource(
     device, 'f32_inclusive_scan_simple_single', wgsl_f32_inclusive_scan_simple_single, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize
     }
@@ -449,8 +449,8 @@ asyncTestWithDevice( 'f32_exclusive_scan_raked_blocked_single', async ( device, 
 
   const shader = ComputeShader.fromSource(
     device, 'f32_exclusive_scan_raked_blocked_single', wgsl_f32_exclusive_scan_raked_blocked_single, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize
@@ -489,8 +489,8 @@ asyncTestWithDevice( 'inclusive_scan_raked_blocked_single', async ( device, devi
 
   const shader = ComputeShader.fromSource(
     device, 'inclusive_scan_raked_blocked_single', wgsl_f32_inclusive_scan_raked_blocked_single, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize
@@ -530,8 +530,8 @@ asyncTestWithDevice( 'f32_exclusive_scan_raked_striped_single', async ( device, 
 
   const shader = ComputeShader.fromSource(
     device, 'f32_exclusive_scan_raked_striped_single', wgsl_f32_exclusive_scan_raked_striped_single, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize
@@ -572,8 +572,8 @@ asyncTestWithDevice( 'f32_inclusive_scan_raked_striped_single', async ( device, 
 
   const shader = ComputeShader.fromSource(
     device, 'f32_inclusive_scan_raked_striped_single', wgsl_f32_inclusive_scan_raked_striped_single, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize
@@ -613,8 +613,8 @@ asyncTestWithDevice( 'double f32_reduce_simple', async ( device, deviceContext )
 
   const shader0 = ComputeShader.fromSource(
     device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       inputSize: inputSize, // TODO: more dynamic range checks
@@ -624,8 +624,8 @@ asyncTestWithDevice( 'double f32_reduce_simple', async ( device, deviceContext )
   );
   const shader1 = ComputeShader.fromSource(
     device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       inputSize: Math.ceil( inputSize / workgroupSize ),
@@ -668,8 +668,8 @@ asyncTestWithDevice( 'triple f32_reduce_simple', async ( device, deviceContext )
 
   const shader0 = ComputeShader.fromSource(
     device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       inputSize: inputSize,
@@ -679,8 +679,8 @@ asyncTestWithDevice( 'triple f32_reduce_simple', async ( device, deviceContext )
   );
   const shader1 = ComputeShader.fromSource(
     device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       inputSize: Math.ceil( inputSize / workgroupSize ),
@@ -690,8 +690,8 @@ asyncTestWithDevice( 'triple f32_reduce_simple', async ( device, deviceContext )
   );
   const shader2 = ComputeShader.fromSource(
     device, 'f32_reduce_simple 2', wgsl_f32_reduce_simple, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ),
@@ -739,8 +739,8 @@ asyncTestWithDevice( 'triple f32_reduce_raked_blocked', async ( device, deviceCo
 
   const shader0 = ComputeShader.fromSource(
     device, 'f32_reduce_raked_blocked 0', wgsl_f32_reduce_raked_blocked, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -751,8 +751,8 @@ asyncTestWithDevice( 'triple f32_reduce_raked_blocked', async ( device, deviceCo
   );
   const shader1 = ComputeShader.fromSource(
     device, 'f32_reduce_raked_blocked 1', wgsl_f32_reduce_raked_blocked, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -763,8 +763,8 @@ asyncTestWithDevice( 'triple f32_reduce_raked_blocked', async ( device, deviceCo
   );
   const shader2 = ComputeShader.fromSource(
     device, 'f32_reduce_raked_blocked 2', wgsl_f32_reduce_raked_blocked, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -813,8 +813,8 @@ asyncTestWithDevice( 'triple u32_reduce_raked_striped_blocked_convergent', async
 
   const shader0 = ComputeShader.fromSource(
     device, 'u32_reduce_raked_striped_blocked_convergent 0', wgsl_u32_reduce_raked_striped_blocked_convergent, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -825,8 +825,8 @@ asyncTestWithDevice( 'triple u32_reduce_raked_striped_blocked_convergent', async
   );
   const shader1 = ComputeShader.fromSource(
     device, 'u32_reduce_raked_striped_blocked_convergent 1', wgsl_u32_reduce_raked_striped_blocked_convergent, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -837,8 +837,8 @@ asyncTestWithDevice( 'triple u32_reduce_raked_striped_blocked_convergent', async
   );
   const shader2 = ComputeShader.fromSource(
     device, 'u32_reduce_raked_striped_blocked_convergent 2', wgsl_u32_reduce_raked_striped_blocked_convergent, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -887,8 +887,8 @@ asyncTestWithDevice( 'triple-size u32_atomic_reduce_raked_striped_blocked_conver
 
   const shader = ComputeShader.fromSource(
     device, 'u32_atomic_reduce_raked_striped_blocked_convergent 0', wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -931,9 +931,9 @@ asyncTestWithDevice( 'i32_merge_simple', async ( device, deviceContext ) => {
 
   const shader = ComputeShader.fromSource(
     device, 'i32_merge_simple', wgsl_i32_merge_simple, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       grainSize: grainSize,
@@ -984,9 +984,9 @@ asyncTestWithDevice( 'i32_merge', async ( device, deviceContext ) => {
 
   const shader = ComputeShader.fromSource(
     device, 'i32_merge', wgsl_i32_merge, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], {
       workgroupSize: workgroupSize,
       sharedMemorySize: sharedMemorySize,
@@ -1101,8 +1101,8 @@ const runU32MapShader = (
 
     const shader = ComputeShader.fromSource(
       device, 'u32_workgroup_radix_sort', wgsl_u32_workgroup_radix_sort, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         inputSize: inputSize
@@ -1116,8 +1116,8 @@ const runU32MapShader = (
 
     const shader = ComputeShader.fromSource(
       device, 'u32_compact_workgroup_radix_sort', wgsl_u32_compact_workgroup_radix_sort, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         inputSize: inputSize
@@ -1141,8 +1141,8 @@ const runU32MapShader = (
 
     const shader = ComputeShader.fromSource(
       device, 'u32_single_radix_sort early', wgsl_u32_single_radix_sort, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -1158,8 +1158,8 @@ const runU32MapShader = (
 
     const shader = ComputeShader.fromSource(
       device, 'u32_single_radix_sort late', wgsl_u32_single_radix_sort, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -1176,8 +1176,8 @@ const runU32MapShader = (
 
     const shader = ComputeShader.fromSource(
       device, 'u32_compact_single_radix_sort early', wgsl_u32_compact_single_radix_sort, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -1195,8 +1195,8 @@ const runU32MapShader = (
 
     const shader = ComputeShader.fromSource(
       device, 'u32_compact_single_radix_sort late', wgsl_u32_compact_single_radix_sort, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -1214,8 +1214,8 @@ const runU32MapShader = (
 
     const shader = ComputeShader.fromSource(
       device, 'u32_compact_single_radix_sort late 3-bit vec3u', wgsl_u32_compact_single_radix_sort, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -1246,8 +1246,8 @@ const test_u32_histogram = (
 
     const shader = ComputeShader.fromSource(
       device, name, wgsl_u32_histogram, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -1304,8 +1304,8 @@ const test_u32_radix_histogram = (
 
     const shader = ComputeShader.fromSource(
       device, name, wgsl_u32_radix_histogram, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -1387,8 +1387,8 @@ const test_load_reduced = ( subname: string, options: ReducedLoadOptions ) => {
 
     const shader = ComputeShader.fromSource(
       device, name, wgsl_example_load_reduced, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], options
     );
 
@@ -1696,8 +1696,8 @@ const reorderTest = ( name: string, source: DualSnippetSource, indexMap: ( index
 
     const shader = ComputeShader.fromSource(
       device, name, source, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize
@@ -1759,8 +1759,8 @@ const multipleLoadTest = ( useLoadExpression: boolean, useLength: boolean, input
 
     const shader = ComputeShader.fromSource(
       device, name, wgsl_example_load_multiple, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         length: useLength ? u32( quantity ) : null,
         workgroupSize: workgroupSize,

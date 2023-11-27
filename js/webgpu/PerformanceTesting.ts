@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BlitShader, ComputeShader, DeviceContext, wgsl_copy_storage_operation, wgsl_expensive_operation, wgsl_fake_combine_to_texture } from '../imports.js';
+import { alpenglow, BindingType, BlitShader, ComputeShader, DeviceContext, wgsl_copy_storage_operation, wgsl_expensive_operation, wgsl_fake_combine_to_texture } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -26,16 +26,16 @@ export default class PerformanceTesting {
 
     const copyStorageShader = ComputeShader.fromSource(
       device, 'copy_storage_operation', wgsl_copy_storage_operation, [
-        Binding.STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
       workgroupSize: workgroupSize
     } );
 
     const expensiveShader = ComputeShader.fromSource(
       device, 'expensive_operation', wgsl_expensive_operation, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize
       }
@@ -43,11 +43,11 @@ export default class PerformanceTesting {
 
     const fakeCombineShader = ComputeShader.fromSource(
       device, 'fake_combine_to_texture', wgsl_fake_combine_to_texture, [
-        Binding.STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER,
-        deviceContext.preferredStorageFormat === 'bgra8unorm' ? Binding.TEXTURE_OUTPUT_BGRA8UNORM : Binding.TEXTURE_OUTPUT_RGBA8UNORM
+        BindingType.STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER,
+        deviceContext.preferredStorageFormat === 'bgra8unorm' ? BindingType.TEXTURE_OUTPUT_BGRA8UNORM : BindingType.TEXTURE_OUTPUT_RGBA8UNORM
       ], {
         workgroupSize: 1,
         preferredStorageFormat: deviceContext.preferredStorageFormat

@@ -22,7 +22,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BasicExecution, Binding, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, ComputeShaderSourceOptions, DeviceContext, Execution, TimestampLogger, TimestampLoggerResult, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
+import { alpenglow, BasicExecution, BindingType, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, ComputeShaderSourceOptions, DeviceContext, Execution, TimestampLogger, TimestampLoggerResult, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 
@@ -138,24 +138,24 @@ export default class GPUProfiling {
 
     const shader0 = ComputeShader.fromSource(
       device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
     const shader1 = ComputeShader.fromSource(
       device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize ) )
       }, shaderOptions )
     );
     const shader2 = ComputeShader.fromSource(
       device, 'f32_reduce_simple 2', wgsl_f32_reduce_simple, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) )
       }, shaderOptions )
@@ -242,24 +242,24 @@ export default class GPUProfiling {
 
     const shader0 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_blocked 0', wgsl_f32_reduce_raked_blocked, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
     const shader1 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_blocked 1', wgsl_f32_reduce_raked_blocked, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
     const shader2 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_blocked 2', wgsl_f32_reduce_raked_blocked, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )
@@ -346,24 +346,24 @@ export default class GPUProfiling {
 
     const shader0 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked 0', wgsl_f32_reduce_raked_striped_blocked, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
     const shader1 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked 1', wgsl_f32_reduce_raked_striped_blocked, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
     const shader2 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked 2', wgsl_f32_reduce_raked_striped_blocked, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )
@@ -447,24 +447,24 @@ export default class GPUProfiling {
 
     const shader0 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked_convergent 0', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
     const shader1 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked_convergent 1', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
     const shader2 = ComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked_convergent 2', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )

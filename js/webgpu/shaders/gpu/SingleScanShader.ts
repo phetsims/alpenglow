@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, Binding, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_scan } from '../../../imports.js';
+import { alpenglow, BinaryOp, BindingType, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_scan } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type SingleScanShaderOptions<T> = {
@@ -59,8 +59,8 @@ export default class SingleScanShader<T> extends ExecutableShader<T[], T[]> {
 
     const shader = await ComputeShader.fromSourceAsync(
       deviceContext.device, name, wgsl_main_scan, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         valueType: type.valueType,
         identity: binaryOp.identityWGSL,

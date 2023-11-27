@@ -459,7 +459,7 @@ export type { DeviceContextDeviceOptions } from './webgpu/DeviceContext.js';
 export { BaseExecution, BasicExecution, ExecutableShader } from './webgpu/Execution.js';
 export type { default as Execution, ExecutionOptions, ExecutableShaderTemplate, ExecutableShaderOptions } from './webgpu/Execution.js';
 export type { ExecutionSingleCallback, ExecutionMultipleCallback, Unpromised } from './webgpu/Execution.js';
-export { default as Binding } from './webgpu/Binding.js';
+export { default as BindingType } from './webgpu/BindingType.js';
 export { default as ComputeShader } from './webgpu/ComputeShader.js';
 export type { ComputeShaderOptions, ComputeShaderDispatchOptions, ComputeShaderSourceOptions } from './webgpu/ComputeShader.js';
 export { default as BlitShader } from './webgpu/BlitShader.js';

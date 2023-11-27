@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, PolygonalBoolean, PolygonalFace, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, Rasterize, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
+import { alpenglow, BindingType, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, PolygonalBoolean, PolygonalFace, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, Rasterize, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
@@ -118,110 +118,110 @@ export default class RasterClipper {
     } as const;
 
     this.initialChunksShader = ComputeShader.fromSource( this.device, 'initial_chunks', wgsl_raster_initial_chunk, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], shaderOptions );
 
     this.initialClipShader = ComputeShader.fromSource( this.device, 'initial_clip', wgsl_raster_initial_clip, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      ...( DEBUG_REDUCE_BUFFERS ? [ Binding.STORAGE_BUFFER ] : [] )
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      ...( DEBUG_REDUCE_BUFFERS ? [ BindingType.STORAGE_BUFFER ] : [] )
     ], shaderOptions );
 
     this.chunkReduceShader = ComputeShader.fromSource( this.device, 'chunk_reduce', wgsl_raster_chunk_reduce, [
-      Binding.UNIFORM_BUFFER,
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.UNIFORM_BUFFER,
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], shaderOptions );
 
     this.initialSplitReduceShader = ComputeShader.fromSource( this.device, 'initial_split_reduce', wgsl_raster_initial_split_reduce, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      ...( DEBUG_REDUCE_BUFFERS ? [ Binding.STORAGE_BUFFER ] : [] )
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      ...( DEBUG_REDUCE_BUFFERS ? [ BindingType.STORAGE_BUFFER ] : [] )
     ], shaderOptions );
 
     this.initialEdgeReduceShader = ComputeShader.fromSource( this.device, 'initial_edge_reduce', wgsl_raster_initial_edge_reduce, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      ...( DEBUG_REDUCE_BUFFERS ? [ Binding.STORAGE_BUFFER ] : [] )
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      ...( DEBUG_REDUCE_BUFFERS ? [ BindingType.STORAGE_BUFFER ] : [] )
     ], shaderOptions );
 
     this.splitReduceShader = ComputeShader.fromSource( this.device, 'split_reduce', wgsl_raster_split_reduce, [
-      Binding.UNIFORM_BUFFER,
-      Binding.UNIFORM_BUFFER,
-      Binding.STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.UNIFORM_BUFFER,
+      BindingType.UNIFORM_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], shaderOptions );
 
     this.splitScanShader = ComputeShader.fromSource( this.device, 'split_scan', wgsl_raster_split_scan, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      ...( DEBUG_REDUCE_BUFFERS ? [ Binding.STORAGE_BUFFER ] : [] )
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      ...( DEBUG_REDUCE_BUFFERS ? [ BindingType.STORAGE_BUFFER ] : [] )
     ], shaderOptions );
 
     this.edgeScanShader = ComputeShader.fromSource( this.device, 'edge_scan', wgsl_raster_edge_scan, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], shaderOptions );
 
     this.chunkIndexPatchShader = ComputeShader.fromSource( this.device, 'chunk_index_patch', wgsl_raster_chunk_index_patch, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], shaderOptions );
 
     this.uniformUpdateShader = ComputeShader.fromSource( this.device, 'uniform_update', wgsl_raster_uniform_update, [
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], shaderOptions );
 
     this.edgeIndexPatchShader = ComputeShader.fromSource( this.device, 'edge_index_patch', wgsl_raster_edge_index_patch, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER
     ], shaderOptions );
 
     this.accumulateShader = ComputeShader.fromSource( this.device, 'accumulate', wgsl_raster_accumulate, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      Binding.STORAGE_BUFFER,
-      ...( DEBUG_ACCUMULATION ? [ Binding.STORAGE_BUFFER ] : [] )
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      BindingType.STORAGE_BUFFER,
+      ...( DEBUG_ACCUMULATION ? [ BindingType.STORAGE_BUFFER ] : [] )
     ], shaderOptions );
 
     this.toTextureShader = ComputeShader.fromSource( this.device, 'to_texture', wgsl_raster_to_texture, [
-      Binding.UNIFORM_BUFFER,
-      Binding.READ_ONLY_STORAGE_BUFFER,
-      deviceContext.preferredStorageFormat === 'bgra8unorm' ? Binding.TEXTURE_OUTPUT_BGRA8UNORM : Binding.TEXTURE_OUTPUT_RGBA8UNORM
+      BindingType.UNIFORM_BUFFER,
+      BindingType.READ_ONLY_STORAGE_BUFFER,
+      deviceContext.preferredStorageFormat === 'bgra8unorm' ? BindingType.TEXTURE_OUTPUT_BGRA8UNORM : BindingType.TEXTURE_OUTPUT_RGBA8UNORM
     ], shaderOptions );
 
     this.blitShader = new BlitShader( this.device, deviceContext.preferredCanvasFormat );

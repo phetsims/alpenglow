@@ -8,7 +8,7 @@
 
 import { alpenglow } from '../imports.js';
 
-export default class Binding {
+export default class BindingType {
 
   private constructor(
     private readonly mutateBindGroupLayoutEntry: ( entry: GPUBindGroupLayoutEntry ) => void
@@ -31,28 +31,28 @@ export default class Binding {
     };
   }
 
-  public static readonly STORAGE_BUFFER = new Binding( entry => {
+  public static readonly STORAGE_BUFFER = new BindingType( entry => {
     entry.buffer = {
       type: 'storage',
       hasDynamicOffset: false
     };
   } );
 
-  public static readonly READ_ONLY_STORAGE_BUFFER = new Binding( entry => {
+  public static readonly READ_ONLY_STORAGE_BUFFER = new BindingType( entry => {
     entry.buffer = {
       type: 'read-only-storage',
       hasDynamicOffset: false
     };
   } );
 
-  public static readonly UNIFORM_BUFFER = new Binding( entry => {
+  public static readonly UNIFORM_BUFFER = new BindingType( entry => {
     entry.buffer = {
       type: 'uniform',
       hasDynamicOffset: false
     };
   } );
 
-  public static readonly TEXTURE_OUTPUT_RGBA8UNORM = new Binding( entry => {
+  public static readonly TEXTURE_OUTPUT_RGBA8UNORM = new BindingType( entry => {
     entry.storageTexture = {
       access: 'write-only',
       format: 'rgba8unorm',
@@ -60,7 +60,7 @@ export default class Binding {
     };
   } );
 
-  public static readonly TEXTURE_OUTPUT_BGRA8UNORM = new Binding( entry => {
+  public static readonly TEXTURE_OUTPUT_BGRA8UNORM = new BindingType( entry => {
     entry.storageTexture = {
       access: 'write-only',
       format: 'bgra8unorm',
@@ -68,7 +68,7 @@ export default class Binding {
     };
   } );
 
-  public static readonly TEXTURE_INPUT = new Binding( entry => {
+  public static readonly TEXTURE_INPUT = new BindingType( entry => {
     entry.texture = {
       sampleType: 'float',
       viewDimension: '2d',
@@ -77,4 +77,4 @@ export default class Binding {
   } );
 }
 
-alpenglow.register( 'Binding', Binding );
+alpenglow.register( 'BindingType', BindingType );

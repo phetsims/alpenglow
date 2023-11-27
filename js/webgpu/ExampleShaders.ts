@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_f32_reduce_simple } from '../imports.js';
+import { alpenglow, BindingType, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_f32_reduce_simple } from '../imports.js';
 
 export class ExampleSimpleF32Reduce extends ExecutableShader<number[], number> {
 
@@ -20,8 +20,8 @@ export class ExampleSimpleF32Reduce extends ExecutableShader<number[], number> {
   ): Promise<ExampleSimpleF32Reduce> {
     const shader = await ComputeShader.fromSourceAsync(
       deviceContext.device, name, wgsl_f32_reduce_simple, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], {
         workgroupSize: options.workgroupSize,
         inputSize: options.inputSize,

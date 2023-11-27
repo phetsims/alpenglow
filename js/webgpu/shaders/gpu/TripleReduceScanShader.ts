@@ -13,7 +13,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_reduce, wgsl_main_reduce_non_commutative, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_add_2 } from '../../../imports.js';
+import { alpenglow, BindingType, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, DeviceContext, ExecutableShader, Execution, u32, wgsl_main_reduce, wgsl_main_reduce_non_commutative, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_add_2 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type TripleReduceScanShaderOptions<T> = {
@@ -93,16 +93,16 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
     // If we have a non-commutative reduction (with a striped access order)
     const reduceShader = ( options.inputOrder === 'blocked' && options.inputAccessOrder === 'striped' && !options.isCommutative ) ? await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} reduction (non-commutative)`, wgsl_main_reduce_non_commutative, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         length: options.lengthExpression,
         stripeOutput: false // TODO: experiment with this
       }, sharedOptions )
     ) : await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} reduction`, wgsl_main_reduce, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         convergent: options.isCommutative,
         convergentRemap: false, // TODO: reconsider if we can enable this?
@@ -115,8 +115,8 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
 
     const middleScanShader = await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} middle scan`, wgsl_main_scan_reduce, [
-        Binding.STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
         length: options.lengthExpression ? `( ${options.lengthExpression} + ${u32( dataCount - 1 )} ) / ${u32( dataCount )}` : null,
@@ -131,7 +131,7 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
 
     const lowerScanShader = await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} lower scan`, wgsl_main_scan, [
-        Binding.STORAGE_BUFFER
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
         length: options.lengthExpression ? `( ${options.lengthExpression} + ${u32( dataCount * dataCount - 1 )} ) / ${u32( dataCount * dataCount )}` : null,
@@ -145,10 +145,10 @@ export default class TripleReduceScanShader<T> extends ExecutableShader<T[], T[]
 
     const upperScanShader = await ComputeShader.fromSourceAsync(
       deviceContext.device, `${name} upper scan`, wgsl_main_scan_add_2, [
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.READ_ONLY_STORAGE_BUFFER,
-        Binding.STORAGE_BUFFER
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.READ_ONLY_STORAGE_BUFFER,
+        BindingType.STORAGE_BUFFER
       ], combineOptions<ComputeShaderSourceOptions>( {
         length: options.lengthExpression,
         inputOrder: options.inputOrder,
