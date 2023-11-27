@@ -26,6 +26,10 @@ export default class TypedBuffer<T> {
     return this.type.decode( new ByteEncoder( arrayBuffer ), 0 );
   }
 
+  public dispose(): void {
+    this.buffer.destroy();
+  }
+
   public static createArray<T>(
     deviceContext: DeviceContext,
     type: ConcreteType<T>,

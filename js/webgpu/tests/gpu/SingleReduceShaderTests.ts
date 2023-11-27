@@ -239,6 +239,9 @@ const testBoundSingleReduceShader = <T>(
     }
 
     timestampLogger.dispose();
+    inputTypedBuffer.dispose();
+    outputTypedBuffer.dispose();
+    logTypedBuffer?.dispose();
 
     const actualValues = await outputPromise;
 
