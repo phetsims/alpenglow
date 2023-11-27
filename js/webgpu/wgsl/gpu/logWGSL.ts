@@ -61,7 +61,7 @@ const logWGSL = <T>(
       next_space: atomic<u32>,
       data: array<u32>
     };
-    @group(0) @binding(${context.getLogBinding()})
+    ${context.getLogBindingLocation().getWGSLAnnotation()}
     var<storage, read_write> _log: _Log;
   ` );
 

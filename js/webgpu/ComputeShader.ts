@@ -47,6 +47,7 @@ const DEFAULT_SOURCE_OPTIONS = {
 
 export default class ComputeShader {
 
+  public readonly wgsl: WGSLModuleDeclarations;
   public readonly module: GPUShaderModule;
   public readonly bindGroupLayout: GPUBindGroupLayout;
 
@@ -59,7 +60,7 @@ export default class ComputeShader {
 
   public constructor(
     public readonly name: string,
-    public readonly wgsl: string,
+    wgsl: string,
     public readonly bindings: Binding[],
     public readonly device: GPUDevice,
     async: boolean,
@@ -73,6 +74,8 @@ export default class ComputeShader {
     if ( options.partialBeautify ) {
       wgsl = partialWGSLBeautify( wgsl );
     }
+
+    this.wgsl = wgsl;
 
     if ( LOG_SHADERS ) {
       console.groupCollapsed( `[shader] ${name}` );

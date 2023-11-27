@@ -6,14 +6,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDeviceContext, compareArrays, SingleReduceShader, SingleReduceShaderOptions, u32, U32Add, Vec2uBic } from '../../../imports.js';
-import PickRequired from '../../../../../phet-core/js/types/PickRequired.js';
+import { asyncTestWithDeviceContext, BindingLocation, compareArrays, SingleReduceShader, SingleReduceShaderOptions, u32, U32Add, Vec2uBic } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
+import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 QUnit.module( 'WGSL SingleReduceShader' );
 
+type Options<T> = StrictOmit<WithRequired<SingleReduceShaderOptions<T>, 'binaryOp'>, 'workgroupSize' | 'grainSize' | 'log' | 'bindingLocations'>;
+
 const testSingleReduceShader = <T>(
-  options: Partial<SingleReduceShaderOptions<T>> & PickRequired<SingleReduceShaderOptions<T>, 'binaryOp'>
+  options: Options<T>
 ) => {
   const binaryOp = options.binaryOp;
   const name = `${binaryOp.name} SingleReduceShader ${options.loadReducedOptions?.sequentialReduceStyle}`;
@@ -28,7 +31,12 @@ const testSingleReduceShader = <T>(
       loadReducedOptions: combineOptions<Required<SingleReduceShaderOptions<T>>[ 'loadReducedOptions' ]>( {
         lengthExpression: u32( inputSize )
       }, options.loadReducedOptions ),
-      log: false
+      log: false,
+      bindingLocations: {
+        // TODO: connect these up to our shader handling
+        input: new BindingLocation( 0, 0 ),
+        output: new BindingLocation( 0, 1 )
+      }
     }, options ) );
 
     const inputValues = _.range( 0, inputSize ).map( () => binaryOp.type.generateRandom( false ) );

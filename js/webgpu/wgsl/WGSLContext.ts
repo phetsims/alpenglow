@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WGSLModuleDeclarations } from '../../imports.js';
+import { alpenglow, BindingLocation, WGSLModuleDeclarations } from '../../imports.js';
 
 export default class WGSLContext {
   private readonly declarations: WGSLInternalDeclaration[] = [];
@@ -17,9 +17,9 @@ export default class WGSLContext {
     public readonly log: boolean
   ) {}
 
-  public getLogBinding(): number {
+  public getLogBindingLocation(): BindingLocation {
     // TODO actually improve binding system
-    return 64;
+    return new BindingLocation( 0, 64 );
   }
 
   public add(

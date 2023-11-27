@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
+import { alpenglow, BinaryOp, BindingLocation, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -12,7 +12,14 @@ export type mainReduceWGSLOptions<T> = {
   workgroupSize: number;
   grainSize: number;
 
-  // TODO: add in-place option
+  bindingLocations: {
+    inPlace?: false;
+    input: BindingLocation;
+    output: BindingLocation;
+  } | {
+    inPlace: true;
+    data: BindingLocation;
+  };
 
   binaryOp: BinaryOp<T>;
 
@@ -49,13 +56,23 @@ const mainReduceWGSL = <T>(
   const binaryOp = options.binaryOp;
   const stripeOutput = options.stripeOutput;
   const convergentRemap = options.convergentRemap;
+  const bindingLocations = options.bindingLocations;
+
+  const inputName = bindingLocations.inPlace ? 'data' : 'input';
+  const outputName = bindingLocations.inPlace ? 'data' : 'output';
 
   return `
     
-    @group(0) @binding(0)
-    var<storage> input: array<${binaryOp.type.valueType}>;
-    @group(0) @binding(1)
-    var<storage, read_write> output: array<${binaryOp.type.valueType}>;
+    ${bindingLocations.inPlace ? `
+      ${bindingLocations.data.getWGSLAnnotation()}
+      var<storage, read_write> data: array<${binaryOp.type.valueType}>;
+    ` : `
+      ${bindingLocations.input.getWGSLAnnotation()}
+      var<storage> input: array<${binaryOp.type.valueType}>;
+      
+      ${bindingLocations.output.getWGSLAnnotation()}
+      var<storage, read_write> output: array<${binaryOp.type.valueType}>;
+    `}
     
     var<workgroup> scratch: array<${binaryOp.type.valueType}, ${workgroupSize}>;
     
@@ -70,7 +87,7 @@ const mainReduceWGSL = <T>(
       ${loadReducedWGSL( combineOptions<loadReducedWGSLOptions<T>>( {
         value: 'value',
         binaryOp: binaryOp,
-        loadExpression: i => `input[ ${i} ]`,
+        loadExpression: i => `${inputName}[ ${i} ]`,
         workgroupSize: workgroupSize,
         grainSize: grainSize
       }, options.loadReducedOptions ) )}
@@ -91,7 +108,7 @@ const mainReduceWGSL = <T>(
       }, options.reduceOptions ) )}
     
       if ( local_id.x == 0u ) {
-        output[ ${stripeOutput ? toStripedIndexWGSL( {
+        ${outputName}[ ${stripeOutput ? toStripedIndexWGSL( {
           i: 'workgroup_id.x',
           workgroupSize: workgroupSize,
           grainSize: grainSize

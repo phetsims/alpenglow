@@ -473,6 +473,9 @@ export { default as BufferLogger } from './webgpu/BufferLogger.js';
 export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/BufferLogger.js';
 export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/TimestampLogger.js';
 export { default as TypedBuffer } from './webgpu/TypedBuffer.js';
+export { default as BindingLocation } from './webgpu/BindingLocation.js';
+export { default as BoundBinding } from './webgpu/BoundBinding.js';
+export { default as BoundBuffer } from './webgpu/BoundBuffer.js';
 
 export { partialWGSLBeautify, addLineNumbers } from './webgpu/wgsl/WGSLUtils.js';
 export { default as WGSLContext } from './webgpu/wgsl/WGSLContext.js';
