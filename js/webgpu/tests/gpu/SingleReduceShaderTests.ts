@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, BindingType, BindingLocation, Binding, BoundBuffer, BoundResource, BufferLogger, compareArrays, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, U32Type, Vec2uBic, WGSLContext } from '../../../imports.js';
+import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BoundBuffer, BoundResource, BufferLogger, compareArrays, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
@@ -204,16 +204,11 @@ const testBoundDoubleReduceShader = <T>(
 
     const boundResources: BoundResource[] = [ inputBoundBuffer, middleBoundBuffer, outputBoundBuffer ];
 
-    // TODO: put our log buffer on the DeviceContext
-    let logTypedBuffer: TypedBuffer<number[]> | null = null;
     let logBoundBuffer: BoundBuffer<number[]> | null = null;
     if ( log ) {
-      logTypedBuffer = TypedBuffer.createArray( deviceContext, U32Type, 1 << 22 );
-      logBoundBuffer = new BoundBuffer( logTypedBuffer, logBinding );
+      logBoundBuffer = new BoundBuffer( deviceContext.getLogTypedBuffer(), logBinding );
       boundResources.push( logBoundBuffer );
     }
-
-    // TODO: buffer disposal(!)
 
     const bindGroup = new BindGroup(
       deviceContext,
@@ -302,8 +297,8 @@ const testBoundDoubleReduceShader = <T>(
 
     timestampLogger.dispose();
     inputTypedBuffer.dispose();
+    middleTypedBuffer.dispose();
     outputTypedBuffer.dispose();
-    logTypedBuffer?.dispose();
 
     const actualValues = await outputPromise;
 
