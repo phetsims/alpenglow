@@ -23,6 +23,12 @@ export default class BoundBinding {
   public getBindGroupEntry( resource: GPUBuffer | GPUTextureView ): GPUBindGroupEntry {
     return this.binding.getBindGroupEntry( this.location.bindingIndex, resource );
   }
+
+  public getStorageAccess(): 'read' | 'read_write' {
+    assert && assert( this.binding === Binding.STORAGE_BUFFER || this.binding === Binding.READ_ONLY_STORAGE_BUFFER );
+
+    return this.binding === Binding.READ_ONLY_STORAGE_BUFFER ? 'read' : 'read_write';
+  }
 }
 
 alpenglow.register( 'BoundBinding', BoundBinding );

@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BindingLocation, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
+import { alpenglow, BinaryOp, BoundBinding, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -12,13 +12,14 @@ export type mainReduceWGSLOptions<T> = {
   workgroupSize: number;
   grainSize: number;
 
-  bindingLocations: {
+  // TODO: look into a rename? (Binding => BindingType, then BoundBinding => Binding)
+  bindings: {
     inPlace?: false;
-    input: BindingLocation;
-    output: BindingLocation;
+    input: BoundBinding;
+    output: BoundBinding;
   } | {
     inPlace: true;
-    data: BindingLocation;
+    data: BoundBinding;
   };
 
   binaryOp: BinaryOp<T>;
@@ -56,22 +57,23 @@ const mainReduceWGSL = <T>(
   const binaryOp = options.binaryOp;
   const stripeOutput = options.stripeOutput;
   const convergentRemap = options.convergentRemap;
-  const bindingLocations = options.bindingLocations;
+  const bindings = options.bindings;
 
-  const inputName = bindingLocations.inPlace ? 'data' : 'input';
-  const outputName = bindingLocations.inPlace ? 'data' : 'output';
+  const inputName = bindings.inPlace ? 'data' : 'input';
+  const outputName = bindings.inPlace ? 'data' : 'output';
 
+  // TODO: generate storage binding and variable fully from BoundBinding?
   return `
     
-    ${bindingLocations.inPlace ? `
-      ${bindingLocations.data.getWGSLAnnotation()}
-      var<storage, read_write> data: array<${binaryOp.type.valueType}>;
+    ${bindings.inPlace ? `
+      ${bindings.data.location.getWGSLAnnotation()}
+      var<storage, ${bindings.data.getStorageAccess()}> data: array<${binaryOp.type.valueType}>;
     ` : `
-      ${bindingLocations.input.getWGSLAnnotation()}
-      var<storage> input: array<${binaryOp.type.valueType}>;
+      ${bindings.input.location.getWGSLAnnotation()}
+      var<storage, ${bindings.input.getStorageAccess()}> input: array<${binaryOp.type.valueType}>;
       
-      ${bindingLocations.output.getWGSLAnnotation()}
-      var<storage, read_write> output: array<${binaryOp.type.valueType}>;
+      ${bindings.output.location.getWGSLAnnotation()}
+      var<storage, ${bindings.output.getStorageAccess()}> output: array<${binaryOp.type.valueType}>;
     `}
     
     var<workgroup> scratch: array<${binaryOp.type.valueType}, ${workgroupSize}>;

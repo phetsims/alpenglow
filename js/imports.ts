@@ -505,6 +505,7 @@ export type { logRakedWGSLOptions } from './webgpu/wgsl/gpu/logRakedWGSL.js';
 export { default as logValueWGSL } from './webgpu/wgsl/gpu/logValueWGSL.js';
 export type { logValueWGSLOptions } from './webgpu/wgsl/gpu/logValueWGSL.js';
 export { default as logStringWGSL } from './webgpu/wgsl/gpu/logStringWGSL.js';
+export { default as mainLogBarrier } from './webgpu/wgsl/gpu/mainLogBarrier.js';
 export { default as mainReduceWGSL } from './webgpu/wgsl/gpu/mainReduceWGSL.js';
 export type { mainReduceWGSLOptions } from './webgpu/wgsl/gpu/mainReduceWGSL.js';
 export { default as reduceWGSL } from './webgpu/wgsl/gpu/reduceWGSL.js';

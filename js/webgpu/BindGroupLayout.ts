@@ -27,7 +27,7 @@ export default class BindGroupLayout {
     public readonly boundBindings: BoundBinding[]
   ) {
     this.layout = deviceContext.device.createBindGroupLayout( {
-      label: `${name} bindGroupLayout`,
+      label: `${name} bind group layout`,
       entries: boundBindings.map( boundBinding => boundBinding.getBindGroupLayoutEntry() )
     } );
   }
