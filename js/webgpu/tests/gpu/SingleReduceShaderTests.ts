@@ -87,6 +87,18 @@ const testBoundSingleReduceShader = <T>(
 
     const inputBinding = new BoundBinding( Binding.READ_ONLY_STORAGE_BUFFER, new BindingLocation( 0, 0 ) );
     const outputBinding = new BoundBinding( Binding.STORAGE_BUFFER, new BindingLocation( 0, 1 ) );
+    const logBinding = WGSLContext.getBoundLogBinding();
+
+    const bindGroupLayout = new BindGroupLayout(
+      deviceContext,
+      `${name} bind group layout`,
+      0,
+      [
+        inputBinding,
+        outputBinding,
+        ...( log ? [ logBinding ] : [] )
+      ]
+    );
 
     const wgslContext = new WGSLContext( name, log ).with( context => mainReduceWGSL( context, combineOptions<SingleReduceShaderOptions<T>>( {
       workgroupSize: workgroupSize,
@@ -111,19 +123,6 @@ const testBoundSingleReduceShader = <T>(
       code: wgsl
     } );
 
-    const logBinding = wgslContext.getBoundLogBinding();
-
-    const bindGroupLayout = new BindGroupLayout(
-      deviceContext,
-      `${name} bind group layout`,
-      0,
-      [
-        inputBinding,
-        outputBinding,
-        ...( log ? [ logBinding ] : [] )
-      ]
-    );
-
     const pipelineLayout = new PipelineLayout( deviceContext, [ bindGroupLayout ] );
 
     const pipelineDescriptor: GPUComputePipelineDescriptor = {
@@ -147,6 +146,7 @@ const testBoundSingleReduceShader = <T>(
 
     const boundResources: BoundResource[] = [ inputBoundBuffer, outputBoundBuffer ];
 
+    // TODO: put our log buffer on the DeviceContext
     let logTypedBuffer: TypedBuffer<number[]> | null = null;
     let logBoundBuffer: BoundBuffer<number[]> | null = null;
     if ( log ) {

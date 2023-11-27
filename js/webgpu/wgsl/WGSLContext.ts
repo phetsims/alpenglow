@@ -18,13 +18,12 @@ export default class WGSLContext {
   ) {}
 
   // TODO: cleanup
-  public getLogBindingLocation(): BindingLocation {
-    // TODO actually improve binding system
+  public static getLogBindingLocation(): BindingLocation {
     return new BindingLocation( 0, 64 );
   }
 
-  public getBoundLogBinding(): BoundBinding {
-    return new BoundBinding( Binding.STORAGE_BUFFER, this.getLogBindingLocation() );
+  public static getBoundLogBinding(): BoundBinding {
+    return new BoundBinding( Binding.STORAGE_BUFFER, WGSLContext.getLogBindingLocation() );
   }
 
   public add(
