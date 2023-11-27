@@ -61,7 +61,7 @@ export default class ComputeShader {
   public constructor(
     public readonly name: string,
     wgsl: string,
-    public readonly bindings: BindingType[],
+    public readonly bindingTypes: BindingType[],
     public readonly device: GPUDevice,
     async: boolean,
     providedOptions?: ComputeShaderOptions
@@ -92,7 +92,7 @@ export default class ComputeShader {
     this.bindGroupLayout = device.createBindGroupLayout( {
       label: `${name} bindGroupLayout`,
       entries: [
-        ...this.bindings.map( ( binding, i ) => binding.getBindGroupLayoutEntry( i ) ),
+        ...this.bindingTypes.map( ( binding, i ) => binding.getBindGroupLayoutEntry( i ) ),
 
         // Add in an entry for our logging buffer (if we're logging)
         ...( this.log ? [ BindingType.STORAGE_BUFFER.getBindGroupLayoutEntry( LOG_BINDING ) ] : [] )
@@ -125,7 +125,7 @@ export default class ComputeShader {
   }
 
   private getBindGroup( resources: ( GPUBuffer | GPUTextureView )[], logBuffer: GPUBuffer | null ): GPUBindGroup {
-    assert && assert( this.bindings.length === resources.length );
+    assert && assert( this.bindingTypes.length === resources.length );
     assert && assert( !this.log || logBuffer, 'logBuffer should be provided if we are logging' );
 
     // TODO: can we avoid creating bind groups for EVERY dispatch?
@@ -133,7 +133,7 @@ export default class ComputeShader {
       label: `${this.name} bindGroup`,
       layout: this.bindGroupLayout,
       entries: [
-        ...this.bindings.map( ( binding, i ) => binding.getBindGroupEntry( i, resources[ i ] ) ),
+        ...this.bindingTypes.map( ( binding, i ) => binding.getBindGroupEntry( i, resources[ i ] ) ),
         ...( ( this.log && logBuffer ) ? [ BindingType.STORAGE_BUFFER.getBindGroupEntry( LOG_BINDING, logBuffer ) ] : [] )
       ]
     } );
@@ -207,7 +207,7 @@ export default class ComputeShader {
     device: GPUDevice,
     name: string,
     source: DualSnippetSource,
-    bindings: BindingType[],
+    bindingTypes: BindingType[],
     providedOptions: ComputeShaderSourceOptions = {}
   ): ComputeShader {
     const options = combineOptions<ComputeShaderSourceOptions>( {
@@ -218,7 +218,7 @@ export default class ComputeShader {
     const log = options.log as boolean;
 
     const snippet = DualSnippet.fromSource( source, options );
-    return new ComputeShader( name, snippet.toString(), bindings, device, false, {
+    return new ComputeShader( name, snippet.toString(), bindingTypes, device, false, {
       log: log
     } );
   }
@@ -227,7 +227,7 @@ export default class ComputeShader {
     device: GPUDevice,
     name: string,
     source: DualSnippetSource,
-    bindings: BindingType[],
+    bindingTypes: BindingType[],
     providedOptions: ComputeShaderSourceOptions = {}
   ): Promise<ComputeShader> {
     const options = combineOptions<ComputeShaderSourceOptions>( {
@@ -238,7 +238,7 @@ export default class ComputeShader {
     const log = options.log as boolean;
 
     const snippet = DualSnippet.fromSource( source, options );
-    return ComputeShader.fromWGSLAsync( device, name, snippet.toString(), bindings, {
+    return ComputeShader.fromWGSLAsync( device, name, snippet.toString(), bindingTypes, {
       log: log
     } );
   }
@@ -247,10 +247,10 @@ export default class ComputeShader {
     device: GPUDevice,
     name: string,
     context: WGSLContext,
-    bindings: BindingType[],
+    bindingTypes: BindingType[],
     providedOptions?: ComputeShaderOptions
   ): Promise<ComputeShader> {
-    return ComputeShader.fromWGSLAsync( device, name, context.toString(), bindings, combineOptions<ComputeShaderOptions>( {
+    return ComputeShader.fromWGSLAsync( device, name, context.toString(), bindingTypes, combineOptions<ComputeShaderOptions>( {
       log: context.log
     }, providedOptions ) );
   }
@@ -259,12 +259,12 @@ export default class ComputeShader {
     device: GPUDevice,
     name: string,
     wgsl: WGSLModuleDeclarations,
-    bindings: BindingType[],
+    bindingTypes: BindingType[],
     providedOptions?: ComputeShaderOptions
   ): Promise<ComputeShader> {
     const options = combineOptions<ComputeShaderOptions>( {}, DEFAULT_OPTIONS, providedOptions );
 
-    const computeShader = new ComputeShader( name, wgsl, bindings, device, true, options );
+    const computeShader = new ComputeShader( name, wgsl, bindingTypes, device, true, options );
     await computeShader.pipelinePromise;
     return computeShader;
   }
