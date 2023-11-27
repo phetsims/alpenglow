@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BoundBinding, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
+import { alpenglow, BinaryOp, Binding, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -12,14 +12,14 @@ export type mainReduceWGSLOptions<T> = {
   workgroupSize: number;
   grainSize: number;
 
-  // TODO: look into a rename? (Binding => BindingType, then BoundBinding => Binding)
+  // TODO: maybe don't force TypeScript for this location of inPlace
   bindings: {
     inPlace?: false;
-    input: BoundBinding;
-    output: BoundBinding;
+    input: Binding;
+    output: Binding;
   } | {
     inPlace: true;
-    data: BoundBinding;
+    data: Binding;
   };
 
   binaryOp: BinaryOp<T>;
@@ -62,7 +62,7 @@ const mainReduceWGSL = <T>(
   const inputName = bindings.inPlace ? 'data' : 'input';
   const outputName = bindings.inPlace ? 'data' : 'output';
 
-  // TODO: generate storage binding and variable fully from BoundBinding?
+  // TODO: generate storage binding and variable fully from Binding?
   return `
     
     ${bindings.inPlace ? `

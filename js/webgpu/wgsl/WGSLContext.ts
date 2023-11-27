@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, BindingLocation, BoundBinding, WGSLModuleDeclarations } from '../../imports.js';
+import { alpenglow, BindingType, BindingLocation, Binding, WGSLModuleDeclarations } from '../../imports.js';
 
 export default class WGSLContext {
   private readonly declarations: WGSLInternalDeclaration[] = [];
@@ -22,8 +22,8 @@ export default class WGSLContext {
     return new BindingLocation( 0, 64 );
   }
 
-  public static getBoundLogBinding(): BoundBinding {
-    return new BoundBinding( BindingType.STORAGE_BUFFER, WGSLContext.getLogBindingLocation() );
+  public static getBoundLogBinding(): Binding {
+    return new Binding( BindingType.STORAGE_BUFFER, WGSLContext.getLogBindingLocation() );
   }
 
   public add(

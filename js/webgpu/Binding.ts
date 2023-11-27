@@ -10,7 +10,7 @@
 
 import { alpenglow, BindingType, BindingLocation } from '../imports.js';
 
-export default class BoundBinding {
+export default class Binding {
   public constructor(
     public readonly binding: BindingType, // TODO: rename
     public readonly location: BindingLocation
@@ -31,4 +31,4 @@ export default class BoundBinding {
   }
 }
 
-alpenglow.register( 'BoundBinding', BoundBinding );
+alpenglow.register( 'Binding', Binding );

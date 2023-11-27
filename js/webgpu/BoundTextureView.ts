@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BoundBinding, BoundResource } from '../imports.js';
+import { alpenglow, Binding, BoundResource } from '../imports.js';
 
 export default class BoundTextureView extends BoundResource {
   public constructor(
     public readonly textureView: GPUTextureView,
-    boundBinding: BoundBinding
+    boundBinding: Binding
   ) {
     super( textureView, boundBinding );
   }

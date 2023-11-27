@@ -474,7 +474,7 @@ export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/Buf
 export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/TimestampLogger.js';
 export { default as TypedBuffer } from './webgpu/TypedBuffer.js';
 export { default as BindingLocation } from './webgpu/BindingLocation.js';
-export { default as BoundBinding } from './webgpu/BoundBinding.js';
+export { default as Binding } from './webgpu/Binding.js';
 export { default as BoundResource } from './webgpu/BoundResource.js';
 export { default as BoundBuffer } from './webgpu/BoundBuffer.js';
 export { default as BoundTextureView } from './webgpu/BoundTextureView.js';

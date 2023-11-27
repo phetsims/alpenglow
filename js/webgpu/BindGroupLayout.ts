@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BoundBinding, DeviceContext } from '../imports.js';
+import { alpenglow, Binding, DeviceContext } from '../imports.js';
 
 // TODO: perhaps we can memoize layouts on the DeviceContext?
 export default class BindGroupLayout {
@@ -24,7 +24,7 @@ export default class BindGroupLayout {
     public readonly groupIndex: number,
 
     // TODO: naming of each?
-    public readonly boundBindings: BoundBinding[]
+    public readonly boundBindings: Binding[]
   ) {
     this.layout = deviceContext.device.createBindGroupLayout( {
       label: `${name} bind group layout`,

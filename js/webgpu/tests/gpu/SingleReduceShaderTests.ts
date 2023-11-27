@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, BindingType, BindingLocation, BoundBinding, BoundBuffer, BoundResource, BufferLogger, compareArrays, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, U32Type, Vec2uBic, WGSLContext } from '../../../imports.js';
+import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, BindingType, BindingLocation, Binding, BoundBuffer, BoundResource, BufferLogger, compareArrays, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, U32Type, Vec2uBic, WGSLContext } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
@@ -35,8 +35,8 @@ const testSingleReduceShader = <T>(
       log: false,
       bindings: {
         // TODO: connect these up to our shader handling
-        input: new BoundBinding( BindingType.READ_ONLY_STORAGE_BUFFER, new BindingLocation( 0, 0 ) ),
-        output: new BoundBinding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 1 ) )
+        input: new Binding( BindingType.READ_ONLY_STORAGE_BUFFER, new BindingLocation( 0, 0 ) ),
+        output: new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 1 ) )
       }
     }, options ) );
 
@@ -85,9 +85,9 @@ const testBoundDoubleReduceShader = <T>(
     const maxItemCount = workgroupSize * grainSize * 10; // pretend
     const timestampLog = false;
 
-    const inputBinding = new BoundBinding( BindingType.READ_ONLY_STORAGE_BUFFER, new BindingLocation( 0, 0 ) );
-    const middleBinding = new BoundBinding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 1 ) );
-    const outputBinding = new BoundBinding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 2 ) );
+    const inputBinding = new Binding( BindingType.READ_ONLY_STORAGE_BUFFER, new BindingLocation( 0, 0 ) );
+    const middleBinding = new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 1 ) );
+    const outputBinding = new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 2 ) );
     const logBinding = WGSLContext.getBoundLogBinding();
 
     const bindGroupLayout = new BindGroupLayout(
