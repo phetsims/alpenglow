@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ConcreteType, ConsoleLoggedLine, ConsoleLogger, u32, WGSLContext, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, ConcreteType, ConsoleLoggedLine, ConsoleLogger, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type logWGSLOptions<T> = {
@@ -18,7 +18,7 @@ export type logWGSLOptions<T> = {
 
   type?: ConcreteType<T> | null;
 
-  writeData?: ( ( write: ( tIndex: WGSLExpressionU32, tValue: WGSLExpression ) => WGSLStatements ) => WGSLStatements ) | null;
+  writeData?: ( ( write: ( tIndex: WGSLExpressionU32, tValue: WGSLExpressionT ) => WGSLStatements ) => WGSLStatements ) | null;
 
   // (of # elements) - write into pre-existing variable
   // IF it is a function, it will be treated as a dynamic length, and will be written into the log.

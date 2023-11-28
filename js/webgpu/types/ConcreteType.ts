@@ -19,6 +19,7 @@ export type WGSLExpression = string;
 export type WGSLExpressionU32 = WGSLExpression;
 export type WGSLExpressionI32 = WGSLExpression;
 export type WGSLExpressionBool = WGSLExpression;
+export type WGSLExpressionT = WGSLExpression; // For use when we have a generic type
 export type WGSLStatements = string;
 export type WGSLModuleDeclarations = string;
 export type WGSLVariableName = string;
@@ -364,6 +365,21 @@ export const Vec2uType: ConcreteType<Vector2> = {
 
 alpenglow.register( 'Vec2uType', Vec2uType );
 
+export const Vec2uAdd: BinaryOp<Vector2> = {
+  name: 'vec2u addition',
+  type: Vec2uType,
+  isCommutative: true,
+
+  identity: Vector2.ZERO,
+  apply: ( a: Vector2, b: Vector2 ): Vector2 => a.plus( b ),
+
+  identityWGSL: 'vec2u()',
+  combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
+};
+
+alpenglow.register( 'Vec2uAdd', Vec2uAdd );
+
 export const Vec2uBic: BinaryOp<Vector2> = {
   name: 'vec2u bicyclic semigroup',
   type: Vec2uType,
@@ -475,6 +491,21 @@ export const Vec3uType: ConcreteType<Vector3> = {
 
 alpenglow.register( 'Vec3uType', Vec3uType );
 
+export const Vec3uAdd: BinaryOp<Vector3> = {
+  name: 'vec3u addition',
+  type: Vec3uType,
+  isCommutative: true,
+
+  identity: Vector3.ZERO,
+  apply: ( a: Vector3, b: Vector3 ): Vector3 => a.plus( b ),
+
+  identityWGSL: 'vec3u()',
+  combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
+};
+
+alpenglow.register( 'Vec3uAdd', Vec3uAdd );
+
 export const Vec4uType: ConcreteType<Vector4> = {
   name: 'vec4u',
   bytesPerElement: 16,
@@ -519,3 +550,18 @@ export const Vec4uType: ConcreteType<Vector4> = {
 };
 
 alpenglow.register( 'Vec4uType', Vec4uType );
+
+export const Vec4uAdd: BinaryOp<Vector4> = {
+  name: 'vec4u addition',
+  type: Vec4uType,
+  isCommutative: true,
+
+  identity: Vector4.ZERO,
+  apply: ( a: Vector4, b: Vector4 ): Vector4 => a.plus( b ),
+
+  identityWGSL: 'vec4u()',
+  combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
+};
+
+alpenglow.register( 'Vec4uAdd', Vec4uAdd );

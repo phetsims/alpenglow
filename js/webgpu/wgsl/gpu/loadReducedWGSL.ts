@@ -11,10 +11,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, conditionalIfWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, conditionalIfWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-
-type WGSLExpressionT = WGSLExpression;
 
 // CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
 //       rearranging. We'll use convergent reduce anyway

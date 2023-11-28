@@ -9,10 +9,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, ConcreteType, conditionalIfWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, commentWGSL, ConcreteType, conditionalIfWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-
-type WGSLExpressionT = WGSLExpression;
 
 export type loadMultipleWGSLOptions<T> = {
 
