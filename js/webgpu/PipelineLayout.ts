@@ -32,10 +32,12 @@ export default class PipelineLayout<BindingMap extends BindingMapType> {
   }
 
   public static create<
-    A extends BindingMapType = Record<string, never>,
-    B extends BindingMapType = Record<string, never>,
-    C extends BindingMapType = Record<string, never>,
-    D extends BindingMapType = Record<string, never>
+    // No, those "alternatives" are not actually alternatives.
+    // DO NOT CHANGE {} TO Record<string, never>! It will reduce type safety for uses of this function(!)
+    A extends BindingMapType = {}, // eslint-disable-line @typescript-eslint/ban-types
+    B extends BindingMapType = {}, // eslint-disable-line @typescript-eslint/ban-types
+    C extends BindingMapType = {}, // eslint-disable-line @typescript-eslint/ban-types
+    D extends BindingMapType = {} // eslint-disable-line @typescript-eslint/ban-types
   >(
     deviceContext: DeviceContext,
     bindGroupLayoutA?: BindGroupLayout<A>,
@@ -49,7 +51,7 @@ export default class PipelineLayout<BindingMap extends BindingMapType> {
       bindGroupLayoutB,
       bindGroupLayoutC,
       bindGroupLayoutD
-    ].filter( layout => layout ) );
+    ].filter( _.identity ) );
   }
 }
 

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BufferLogger, compareArrays, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
+import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BufferLogger, compareArrays, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, stripWGSLComments, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
@@ -81,24 +81,19 @@ const testBoundDoubleReduceShader = <T>(
     const grainSize = 8;
     const inputSize = workgroupSize * grainSize * 5 - 27;
 
-    const log = true;
+    const log = false;
     const maxItemCount = workgroupSize * grainSize * 10; // pretend
     const timestampLog = false;
-
-    const inputBinding = new Binding( BindingType.READ_ONLY_STORAGE_BUFFER, new BindingLocation( 0, 0 ) );
-    const middleBinding = new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 1 ) );
-    const outputBinding = new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 2 ) );
-    const logBinding = WGSLContext.getBoundLogBinding();
 
     const bindGroupLayout = new BindGroupLayout(
       deviceContext,
       name,
       0,
       {
-        input: inputBinding,
-        middle: middleBinding,
-        output: outputBinding,
-        log: log ? logBinding : null
+        input: new Binding( BindingType.READ_ONLY_STORAGE_BUFFER, new BindingLocation( 0, 0 ) ),
+        middle: new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 1 ) ),
+        output: new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 2 ) ),
+        log: log ? WGSLContext.getBoundLogBinding() : null
       }
     );
 
@@ -123,11 +118,11 @@ const testBoundDoubleReduceShader = <T>(
       }, options.loadReducedOptions ),
       log: log,
       bindings: {
-        input: inputBinding,
-        output: middleBinding
+        input: pipelineLayout.bindingMap.input,
+        output: pipelineLayout.bindingMap.middle
       }
     }, options ) ) );
-    const firstWGSL = partialWGSLBeautify( firstWgslContext.toString() );
+    const firstWGSL = partialWGSLBeautify( stripWGSLComments( firstWgslContext.toString(), false ) );
 
     console.groupCollapsed( `[shader] ${name} first` );
     console.log( addLineNumbers( firstWGSL ) );
@@ -155,11 +150,11 @@ const testBoundDoubleReduceShader = <T>(
       }, options.loadReducedOptions ),
       log: log,
       bindings: {
-        input: middleBinding,
-        output: outputBinding
+        input: pipelineLayout.bindingMap.middle,
+        output: pipelineLayout.bindingMap.output
       }
     }, options ) ) );
-    const secondWGSL = partialWGSLBeautify( secondWgslContext.toString() );
+    const secondWGSL = partialWGSLBeautify( stripWGSLComments( secondWgslContext.toString(), false ) );
 
     console.groupCollapsed( `[shader] ${name} second` );
     console.log( addLineNumbers( secondWGSL ) );

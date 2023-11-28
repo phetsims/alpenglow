@@ -484,7 +484,7 @@ export { default as PipelineLayout } from './webgpu/PipelineLayout.js';
 export { default as BindGroup } from './webgpu/BindGroup.js';
 export type { ResourceMapType } from './webgpu/BindGroup.js';
 
-export { partialWGSLBeautify, addLineNumbers } from './webgpu/wgsl/WGSLUtils.js';
+export { partialWGSLBeautify, addLineNumbers, stripWGSLComments } from './webgpu/wgsl/WGSLUtils.js';
 export { default as WGSLContext } from './webgpu/wgsl/WGSLContext.js';
 
 export { default as binaryExpressionStatementWGSL } from './webgpu/wgsl/gpu/binaryExpressionStatementWGSL.js';

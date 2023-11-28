@@ -34,3 +34,20 @@ export const addLineNumbers = ( wgsl: WGSLModuleDeclarations ): string => {
 };
 
 alpenglow.register( 'addLineNumbers', addLineNumbers );
+
+/**
+ * Strips comments from a WGSL string (in an opinionated way, to potentially leave some in for help with debugging).
+ *
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ */
+export const stripWGSLComments = (
+  str: WGSLModuleDeclarations,
+  allComments = true // if false, we'll leave things starting with /** and ending with **/ (for our own comments)
+): WGSLModuleDeclarations => {
+  return str.replace( allComments ? /\/\**?\*\//g : /\/\*[^*]*?[^*]\*\//g, '' ).replace( /\r\n/g, '\n' ).split( '\n' ).map( line => {
+    const index = line.indexOf( '//' );
+    return index >= 0 ? line.substring( 0, index ) : line;
+  } ).join( '\n' );
+};
+
+alpenglow.register( 'stripWGSLComments', stripWGSLComments );
