@@ -16,6 +16,11 @@ export type ResourceMapType = Record<string, TypedBuffer<IntentionalAny> | GPUTe
 
 type BindingMapFromResourceMap<ResourceMap extends ResourceMapType> = { [P in keyof ResourceMap]: Binding | null };
 
+// type BindingMapFromResourceMap<ResourceMap extends ResourceMapType> = {
+//   // TODO: extends is not working as anticipated here
+//   [P in keyof ResourceMap]: ResourceMap[ P ] extends null ? Binding | null : Binding
+// };
+
 export default class BindGroup<ResourceMap extends ResourceMapType> {
 
   public readonly bindGroup: GPUBindGroup;

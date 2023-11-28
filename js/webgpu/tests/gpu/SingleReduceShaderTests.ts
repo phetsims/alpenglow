@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, compareArrays, ComputePipeline, Executor, mainReduceWGSL, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
+import { asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, compareArrays, ComputePipeline, Executor, mainReduceWGSL, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TypedBuffer, u32, U32Add, Vec2uBic } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
@@ -84,15 +84,14 @@ const testBoundDoubleReduceShader = <T>(
     const log = false;
     const maxItemCount = workgroupSize * grainSize * 10; // pretend
 
-    const bindGroupLayout = new BindGroupLayout(
+    const bindGroupLayout = BindGroupLayout.createZero(
       deviceContext,
       name,
-      0,
+      log,
       {
-        input: new Binding( BindingType.READ_ONLY_STORAGE_BUFFER, new BindingLocation( 0, 0 ) ),
-        middle: new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 1 ) ),
-        output: new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 0, 2 ) ),
-        log: log ? WGSLContext.getBoundLogBinding() : null
+        input: BindingType.READ_ONLY_STORAGE_BUFFER,
+        middle: BindingType.STORAGE_BUFFER,
+        output: BindingType.STORAGE_BUFFER
       }
     );
 
@@ -160,8 +159,6 @@ const testBoundDoubleReduceShader = <T>(
     const inputValues = _.range( 0, inputSize ).map( () => binaryOp.type.generateRandom( false ) );
     const expectedValues = [ inputValues.reduce( ( a, b ) => binaryOp.apply( a, b ), binaryOp.identity ) ];
 
-    inputTypedBuffer.setValue( deviceContext.device, inputValues );
-
     const firstDispatchSize = Math.ceil( inputValues.length / ( workgroupSize * grainSize ) );
     const secondDispatchSize = Math.ceil( firstDispatchSize / ( workgroupSize * grainSize * workgroupSize * grainSize ) );
 
@@ -169,6 +166,8 @@ const testBoundDoubleReduceShader = <T>(
       deviceContext,
       log, // TODO: in whatever we create, store the log:boolean (duh)
       async executor => {
+        executor.setTypedBufferValue( inputTypedBuffer, inputValues );
+
         executor.getComputePass( 'main' )
           .dispatchPipeline( firstPipeline, [ bindGroup ], firstDispatchSize )
           .dispatchPipeline( secondPipeline, [ bindGroup ], secondDispatchSize )
