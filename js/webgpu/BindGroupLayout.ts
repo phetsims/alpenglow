@@ -10,8 +10,10 @@
 
 import { alpenglow, Binding, DeviceContext } from '../imports.js';
 
+export type BindingMapType = Record<string, Binding | null>;
+
 // TODO: perhaps we can memoize layouts on the DeviceContext?
-export default class BindGroupLayout<BindingMap extends Record<string, Binding | null>> {
+export default class BindGroupLayout<BindingMap extends BindingMapType> {
 
   public readonly layout: GPUBindGroupLayout;
 

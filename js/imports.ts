@@ -479,8 +479,10 @@ export { default as BoundResource } from './webgpu/BoundResource.js';
 export { default as BoundBuffer } from './webgpu/BoundBuffer.js';
 export { default as BoundTextureView } from './webgpu/BoundTextureView.js';
 export { default as BindGroupLayout } from './webgpu/BindGroupLayout.js';
+export type { BindingMapType } from './webgpu/BindGroupLayout.js';
 export { default as PipelineLayout } from './webgpu/PipelineLayout.js';
 export { default as BindGroup } from './webgpu/BindGroup.js';
+export type { ResourceMapType } from './webgpu/BindGroup.js';
 
 export { partialWGSLBeautify, addLineNumbers } from './webgpu/wgsl/WGSLUtils.js';
 export { default as WGSLContext } from './webgpu/wgsl/WGSLContext.js';

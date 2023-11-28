@@ -13,14 +13,18 @@ import { alpenglow, Binding, DeviceContext, TypedBuffer } from '../imports.js';
 import BindGroupLayout from './BindGroupLayout.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
-export default class BindGroup<ResourceMap extends Record<string, TypedBuffer<IntentionalAny> | GPUTextureView | null>> {
+export type ResourceMapType = Record<string, TypedBuffer<IntentionalAny> | GPUTextureView | null>;
+
+type BindingMapFromResourceMap<ResourceMap extends ResourceMapType> = { [P in keyof ResourceMap]: Binding | null };
+
+export default class BindGroup<ResourceMap extends ResourceMapType> {
 
   public readonly bindGroup: GPUBindGroup;
 
   public constructor(
     public readonly deviceContext: DeviceContext,
     public readonly name: string,
-    public readonly layout: BindGroupLayout<{ [P in keyof ResourceMap]: Binding | null }>,
+    public readonly layout: BindGroupLayout<BindingMapFromResourceMap<ResourceMap>>,
     public readonly resourceMap: ResourceMap
   ) {
     this.bindGroup = deviceContext.device.createBindGroup( {

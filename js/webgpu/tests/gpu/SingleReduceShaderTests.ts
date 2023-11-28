@@ -111,9 +111,9 @@ const testBoundDoubleReduceShader = <T>(
     //   }
     // );
     //
-    // const pipelineLayout = PipelineLayout.create2( deviceContext, bindGroupLayout, testLayout );
+    // const pipelineLayout = PipelineLayout.create( deviceContext, bindGroupLayout, testLayout );
 
-    const pipelineLayout = PipelineLayout.create1( deviceContext, bindGroupLayout );
+    const pipelineLayout = PipelineLayout.create( deviceContext, bindGroupLayout );
 
     const firstWgslContext = new WGSLContext( `${name} first`, log ).with( context => mainReduceWGSL( context, combineOptions<SingleReduceShaderOptions<T>>( {
       workgroupSize: workgroupSize,
