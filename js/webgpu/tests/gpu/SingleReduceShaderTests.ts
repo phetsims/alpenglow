@@ -140,17 +140,16 @@ const testBoundDoubleReduceShader = <T>(
     const inputTypedBuffer = TypedBuffer.createArray( deviceContext, binaryOp.type, maxItemCount, binaryOp.identity );
     const middleTypedBuffer = TypedBuffer.createArray( deviceContext, binaryOp.type, Math.ceil( maxItemCount / ( workgroupSize * grainSize ) ), binaryOp.identity );
     const outputTypedBuffer = TypedBuffer.createArray( deviceContext, binaryOp.type, Math.ceil( maxItemCount / ( workgroupSize * grainSize * workgroupSize * grainSize ) ), binaryOp.identity );
-    const logTypedBuffer = log ? deviceContext.getLogTypedBuffer() : null;
 
-    const bindGroup = new BindGroup(
+    const bindGroup = BindGroup.createZero(
       deviceContext,
       name,
       bindGroupLayout,
+      log,
       {
         input: inputTypedBuffer,
         middle: middleTypedBuffer,
-        output: outputTypedBuffer,
-        log: logTypedBuffer
+        output: outputTypedBuffer
       }
     );
 

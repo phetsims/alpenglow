@@ -11,8 +11,10 @@
 
 import { alpenglow, BindGroupLayout, Binding, DeviceContext, TypedBuffer } from '../imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 
 export type ResourceMapType = Record<string, TypedBuffer<IntentionalAny> | GPUTextureView | null>;
+export type ResourceMapTypeWithLog = ResourceMapType & { log: TypedBuffer<number> | null };
 
 type BindingMapFromResourceMap<ResourceMap extends ResourceMapType> = { [P in keyof ResourceMap]: Binding | null };
 
@@ -50,6 +52,22 @@ export default class BindGroup<ResourceMap extends ResourceMapType> {
         // TODO: should we wrap GPUTextureView? Probably not?
         return binding.getBindGroupEntry( resource instanceof TypedBuffer ? resource.buffer : resource );
       } )
+    } );
+  }
+
+  // TODO: why is this... losing the type information?
+  public static createZero<ResourceMap extends ResourceMapTypeWithLog>(
+    deviceContext: DeviceContext,
+    name: string,
+    layout: BindGroupLayout<BindingMapFromResourceMap<ResourceMap>>,
+    log: boolean,
+    resourceMap: StrictOmit<ResourceMap, 'log'>
+  ): BindGroup<ResourceMap> {
+    // @ts-expect-error
+    return new BindGroup<ResourceMap>( deviceContext, name, layout, {
+      // eslint-disable-next-line no-object-spread-on-non-literals
+      ...resourceMap,
+      log: log ? deviceContext.getLogTypedBuffer() : null
     } );
   }
 }
