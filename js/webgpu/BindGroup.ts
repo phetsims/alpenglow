@@ -9,8 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, DeviceContext, TypedBuffer } from '../imports.js';
-import BindGroupLayout from './BindGroupLayout.js';
+import { alpenglow, BindGroupLayout, Binding, DeviceContext, TypedBuffer } from '../imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 export type ResourceMapType = Record<string, TypedBuffer<IntentionalAny> | GPUTextureView | null>;

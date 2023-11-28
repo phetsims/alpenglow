@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BufferLogger, compareArrays, ComputePipeline, ConsoleLogger, mainReduceWGSL, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
+import { asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BufferLogger, compareArrays, ComputePass, ComputePipeline, ConsoleLogger, mainReduceWGSL, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
@@ -200,21 +200,9 @@ const testBoundDoubleReduceShader = <T>(
     //   computePassDescriptor.timestampWrites = timestampWrites;
     // }
 
-    const computePass: GPUComputePassEncoder = encoder.beginComputePass( computePassDescriptor );
-    computePass.setBindGroup( 0, bindGroup.bindGroup );
-
-    computePass.setPipeline( firstPipeline.pipeline );
-    computePass.dispatchWorkgroups( firstDispatchSize, 1, 1 );
-    if ( firstPipeline.logBarrierPipeline ) {
-      computePass.setPipeline( firstPipeline.logBarrierPipeline );
-      computePass.dispatchWorkgroups( 1, 1, 1 );
-    }
-    computePass.setPipeline( secondPipeline.pipeline );
-    computePass.dispatchWorkgroups( secondDispatchSize, 1, 1 );
-    if ( secondPipeline.logBarrierPipeline ) {
-      computePass.setPipeline( secondPipeline.logBarrierPipeline );
-      computePass.dispatchWorkgroups( 1, 1, 1 );
-    }
+    const computePass = new ComputePass( encoder, computePassDescriptor );
+    computePass.dispatchPipeline( firstPipeline, [ bindGroup ], firstDispatchSize );
+    computePass.dispatchPipeline( secondPipeline, [ bindGroup ], secondDispatchSize );
     computePass.end();
 
     const outputPromise = outputTypedBuffer.getValue( encoder, bufferLogger );
