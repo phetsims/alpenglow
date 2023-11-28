@@ -483,6 +483,7 @@ export type { BindingMapType } from './webgpu/BindGroupLayout.js';
 export { default as PipelineLayout } from './webgpu/PipelineLayout.js';
 export { default as BindGroup } from './webgpu/BindGroup.js';
 export type { ResourceMapType } from './webgpu/BindGroup.js';
+export { default as ComputePipeline } from './webgpu/ComputePipeline.js';
 
 export { partialWGSLBeautify, addLineNumbers, stripWGSLComments } from './webgpu/wgsl/WGSLUtils.js';
 export { default as WGSLContext } from './webgpu/wgsl/WGSLContext.js';

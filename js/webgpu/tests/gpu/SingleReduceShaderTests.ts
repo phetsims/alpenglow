@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BufferLogger, compareArrays, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, stripWGSLComments, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
+import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BufferLogger, compareArrays, ComputePipeline, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
@@ -110,69 +110,43 @@ const testBoundDoubleReduceShader = <T>(
 
     const pipelineLayout = PipelineLayout.create( deviceContext, bindGroupLayout );
 
-    const firstWgslContext = new WGSLContext( `${name} first`, log ).with( context => mainReduceWGSL( context, combineOptions<SingleReduceShaderOptions<T>>( {
-      workgroupSize: workgroupSize,
-      grainSize: grainSize,
-      loadReducedOptions: combineOptions<Required<SingleReduceShaderOptions<T>>[ 'loadReducedOptions' ]>( {
-        lengthExpression: u32( inputSize )
-      }, options.loadReducedOptions ),
-      log: log,
-      bindings: {
-        input: pipelineLayout.bindingMap.input,
-        output: pipelineLayout.bindingMap.middle
-      }
-    }, options ) ) );
-    const firstWGSL = partialWGSLBeautify( stripWGSLComments( firstWgslContext.toString(), false ) );
+    const firstPipeline = await ComputePipeline.withContextAsync(
+      deviceContext,
+      `${name} first`,
+      context => mainReduceWGSL( context, combineOptions<SingleReduceShaderOptions<T>>( {
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        loadReducedOptions: combineOptions<Required<SingleReduceShaderOptions<T>>[ 'loadReducedOptions' ]>( {
+          lengthExpression: u32( inputSize )
+        }, options.loadReducedOptions ),
+        log: log,
+        bindings: {
+          input: pipelineLayout.bindingMap.input,
+          output: pipelineLayout.bindingMap.middle
+        }
+      }, options ) ),
+      pipelineLayout,
+      log
+    );
 
-    console.groupCollapsed( `[shader] ${name} first` );
-    console.log( addLineNumbers( firstWGSL ) );
-    console.groupEnd();
-
-    const firstModule = deviceContext.device.createShaderModule( {
-      label: `${name} first`,
-      code: firstWGSL
-    } );
-
-    const firstPipeline = await deviceContext.device.createComputePipelineAsync( {
-      label: `${name} pipeline`,
-      layout: pipelineLayout.layout,
-      compute: {
-        module: firstModule,
-        entryPoint: 'main'
-      }
-    } );
-
-    const secondWgslContext = new WGSLContext( `${name} second`, log ).with( context => mainReduceWGSL( context, combineOptions<SingleReduceShaderOptions<T>>( {
-      workgroupSize: workgroupSize,
-      grainSize: grainSize,
-      loadReducedOptions: combineOptions<Required<SingleReduceShaderOptions<T>>[ 'loadReducedOptions' ]>( {
-        lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
-      }, options.loadReducedOptions ),
-      log: log,
-      bindings: {
-        input: pipelineLayout.bindingMap.middle,
-        output: pipelineLayout.bindingMap.output
-      }
-    }, options ) ) );
-    const secondWGSL = partialWGSLBeautify( stripWGSLComments( secondWgslContext.toString(), false ) );
-
-    console.groupCollapsed( `[shader] ${name} second` );
-    console.log( addLineNumbers( secondWGSL ) );
-    console.groupEnd();
-
-    const secondModule = deviceContext.device.createShaderModule( {
-      label: `${name} second`,
-      code: secondWGSL
-    } );
-
-    const secondPipeline = await deviceContext.device.createComputePipelineAsync( {
-      label: `${name} pipeline`,
-      layout: pipelineLayout.layout,
-      compute: {
-        module: secondModule,
-        entryPoint: 'main'
-      }
-    } );
+    const secondPipeline = await ComputePipeline.withContextAsync(
+      deviceContext,
+      `${name} second`,
+      context => mainReduceWGSL( context, combineOptions<SingleReduceShaderOptions<T>>( {
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        loadReducedOptions: combineOptions<Required<SingleReduceShaderOptions<T>>[ 'loadReducedOptions' ]>( {
+          lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
+        }, options.loadReducedOptions ),
+        log: log,
+        bindings: {
+          input: pipelineLayout.bindingMap.middle,
+          output: pipelineLayout.bindingMap.output
+        }
+      }, options ) ),
+      pipelineLayout,
+      log
+    );
 
     let logBarrierPipeline: GPUComputePipeline | null = null;
     if ( log ) {
@@ -251,13 +225,13 @@ const testBoundDoubleReduceShader = <T>(
 
     const computePass: GPUComputePassEncoder = encoder.beginComputePass( computePassDescriptor );
     computePass.setBindGroup( 0, bindGroup.bindGroup );
-    computePass.setPipeline( firstPipeline );
+    computePass.setPipeline( firstPipeline.pipeline );
     computePass.dispatchWorkgroups( firstDispatchSize, 1, 1 );
     if ( logBarrierPipeline ) {
       computePass.setPipeline( logBarrierPipeline );
       computePass.dispatchWorkgroups( 1, 1, 1 );
     }
-    computePass.setPipeline( secondPipeline );
+    computePass.setPipeline( secondPipeline.pipeline );
     computePass.dispatchWorkgroups( secondDispatchSize, 1, 1 );
     computePass.end();
 
