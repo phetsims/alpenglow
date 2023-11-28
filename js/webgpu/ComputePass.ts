@@ -59,12 +59,15 @@ export default class ComputePass {
     dispatchX = 1,
     dispatchY = 1,
     dispatchZ = 1
-  ): void {
+  ): this {
     this.prepare( computePipeline, bindGroups );
 
     this.computePassEncoder.dispatchWorkgroups( dispatchX, dispatchY, dispatchZ );
 
     this.attemptLogBarrier( computePipeline );
+
+    // allow chaining
+    return this;
   }
 
   public dispatchPipelineIndirect(
@@ -72,12 +75,15 @@ export default class ComputePass {
     bindGroups: BindGroup<IntentionalAny>[],
     indirectBuffer: GPUBuffer,
     indirectOffset: number
-  ): void {
+  ): this {
     this.prepare( computePipeline, bindGroups );
 
     this.computePassEncoder.dispatchWorkgroupsIndirect( indirectBuffer, indirectOffset );
 
     this.attemptLogBarrier( computePipeline );
+
+    // allow chaining
+    return this;
   }
 
   public end(): void {

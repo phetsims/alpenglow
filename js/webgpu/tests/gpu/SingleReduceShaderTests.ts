@@ -6,11 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BufferLogger, compareArrays, ComputePass, ComputePipeline, ConsoleLogger, mainReduceWGSL, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
+import { asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, compareArrays, ComputePipeline, Executor, mainReduceWGSL, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import Utils from '../../../../../dot/js/Utils.js';
 
 QUnit.module( 'WGSL SingleReduceShader' );
 
@@ -84,7 +83,6 @@ const testBoundDoubleReduceShader = <T>(
     // TODO: make sure we're including testing WITH logging(!)
     const log = false;
     const maxItemCount = workgroupSize * grainSize * 10; // pretend
-    const timestampLog = false;
 
     const bindGroupLayout = new BindGroupLayout(
       deviceContext,
@@ -97,17 +95,6 @@ const testBoundDoubleReduceShader = <T>(
         log: log ? WGSLContext.getBoundLogBinding() : null
       }
     );
-
-    // const testLayout = new BindGroupLayout(
-    //   deviceContext,
-    //   'temp',
-    //   1,
-    //   {
-    //     extra: new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 1, 0 ) )
-    //   }
-    // );
-    //
-    // const pipelineLayout = PipelineLayout.create( deviceContext, bindGroupLayout, testLayout );
 
     const pipelineLayout = PipelineLayout.create( deviceContext, bindGroupLayout );
 
@@ -178,73 +165,22 @@ const testBoundDoubleReduceShader = <T>(
     const firstDispatchSize = Math.ceil( inputValues.length / ( workgroupSize * grainSize ) );
     const secondDispatchSize = Math.ceil( firstDispatchSize / ( workgroupSize * grainSize * workgroupSize * grainSize ) );
 
-    const encoder = deviceContext.device.createCommandEncoder( { label: 'the encoder' } );
-    const bufferLogger = new BufferLogger( deviceContext );
-    const timestampLogger = new TimestampLogger(
-      timestampLog ? deviceContext : null,
-      100
+    const actualValues = await Executor.execute(
+      deviceContext,
+      log, // TODO: in whatever we create, store the log:boolean (duh)
+      async executor => {
+        executor.getComputePass( 'main' )
+          .dispatchPipeline( firstPipeline, [ bindGroup ], firstDispatchSize )
+          .dispatchPipeline( secondPipeline, [ bindGroup ], secondDispatchSize )
+          .end();
+
+        return executor.getTypedBufferValue( outputTypedBuffer );
+      }
     );
 
-    const computePassDescriptor: GPUComputePassDescriptor = {
-      label: `${name} compute pass` // TODO: note indirect
-    };
-
-    if ( timestampLogger ) {
-      const timestampWrites = timestampLogger.getGPUComputePassTimestampWrites( name );
-      if ( timestampWrites ) {
-        computePassDescriptor.timestampWrites = timestampWrites;
-      }
-    }
-    // TODO!
-    // else if ( timestampWrites ) {
-    //   computePassDescriptor.timestampWrites = timestampWrites;
-    // }
-
-    const computePass = new ComputePass( encoder, computePassDescriptor );
-    computePass.dispatchPipeline( firstPipeline, [ bindGroup ], firstDispatchSize );
-    computePass.dispatchPipeline( secondPipeline, [ bindGroup ], secondDispatchSize );
-    computePass.end();
-
-    const outputPromise = outputTypedBuffer.getValue( encoder, bufferLogger );
-
-    // TODO: staging ring for our "out" buffers?
-
-    const logPromise = logTypedBuffer ? bufferLogger.arrayBuffer( encoder, logTypedBuffer.buffer ) : Promise.resolve( null );
-
-    const commandBuffer = encoder.finish();
-    deviceContext.device.queue.submit( [ commandBuffer ] );
-
-    await bufferLogger.complete();
-
-    const logResult = await logPromise;
-
-    if ( logResult ) {
-      const data = new Uint32Array( logResult );
-      const length = data[ 0 ];
-      const usedMessage = `logging used ${length} of ${data.length - 1} u32s (${Utils.roundSymmetric( 100 * length / ( data.length - 1 ) )}%)`;
-      console.log( usedMessage );
-
-      const logData = ConsoleLogger.analyze( logResult );
-
-      logData.forEach( shaderData => {
-        shaderData.logLines.forEach( lineData => {
-          console.log(
-            shaderData.shaderName,
-            `>>> ${lineData.info.logName}${lineData.additionalIndex !== null ? ` (${lineData.additionalIndex})` : ''}`,
-            lineData.info.lineToLog( lineData )
-          );
-        } );
-      } );
-
-      console.log( usedMessage );
-    }
-
-    timestampLogger.dispose();
     inputTypedBuffer.dispose();
     middleTypedBuffer.dispose();
     outputTypedBuffer.dispose();
-
-    const actualValues = await outputPromise;
 
     return compareArrays( binaryOp.type, inputValues, expectedValues, actualValues );
   } );

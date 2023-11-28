@@ -485,6 +485,8 @@ export { default as BindGroup } from './webgpu/BindGroup.js';
 export type { ResourceMapType } from './webgpu/BindGroup.js';
 export { default as ComputePipeline } from './webgpu/ComputePipeline.js';
 export { default as ComputePass } from './webgpu/ComputePass.js';
+export { default as Executor } from './webgpu/Executor.js';
+export type { ExecutorOptions } from './webgpu/Executor.js';
 
 export { partialWGSLBeautify, addLineNumbers, stripWGSLComments } from './webgpu/wgsl/WGSLUtils.js';
 export { default as WGSLContext } from './webgpu/wgsl/WGSLContext.js';

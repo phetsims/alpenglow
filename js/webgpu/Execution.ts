@@ -3,6 +3,8 @@
 /**
  * Helper object for common execution patterns. See methods on DeviceContext for details.
  *
+ * @deprecated
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -29,6 +31,7 @@ const DEFAULT_OPTIONS = {
   logBufferSize: 1 << 22
 };
 
+// @deprecated
 type Execution = {
   encoder: GPUCommandEncoder;
   createBuffer: ( size: number ) => GPUBuffer;
@@ -80,6 +83,7 @@ const DEFAULT_EXECUTABLE_SHADER_OPTIONS = {
   dispose: _.noop
 };
 
+// @deprecated
 export abstract class ExecutableShader<In, Out> {
 
   public readonly log: boolean;
@@ -98,6 +102,7 @@ export abstract class ExecutableShader<In, Out> {
 
 export type ExecutableShaderTemplate<In, Out> = ( deviceContext: DeviceContext ) => Promise<ExecutableShader<In, Out>>;
 
+// @deprecated
 export abstract class BaseExecution {
   public readonly bufferLogger: BufferLogger;
 
@@ -220,6 +225,7 @@ export abstract class BaseExecution {
   }
 }
 
+// @deprecated
 export class BasicExecution extends BaseExecution implements Execution {
 
   public readonly timestampLogger: TimestampLogger;
