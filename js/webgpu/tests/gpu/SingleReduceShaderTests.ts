@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BufferLogger, compareArrays, ComputePipeline, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
+import { asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BufferLogger, compareArrays, ComputePipeline, ConsoleLogger, mainReduceWGSL, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
@@ -81,6 +81,7 @@ const testBoundDoubleReduceShader = <T>(
     const grainSize = 8;
     const inputSize = workgroupSize * grainSize * 5 - 27;
 
+    // TODO: make sure we're including testing WITH logging(!)
     const log = false;
     const maxItemCount = workgroupSize * grainSize * 10; // pretend
     const timestampLog = false;
@@ -148,30 +149,6 @@ const testBoundDoubleReduceShader = <T>(
       log
     );
 
-    let logBarrierPipeline: GPUComputePipeline | null = null;
-    if ( log ) {
-      const logBarrierWgslContext = new WGSLContext( `${name} logBarrier`, log ).with( context => mainLogBarrier( context ) );
-      const logBarrierWGSL = partialWGSLBeautify( logBarrierWgslContext.toString() );
-
-      console.groupCollapsed( '[shader] logBarrier' );
-      console.log( addLineNumbers( logBarrierWGSL ) );
-      console.groupEnd();
-
-      const logBarrierModule = deviceContext.device.createShaderModule( {
-        label: 'logBarrier',
-        code: logBarrierWGSL
-      } );
-
-      logBarrierPipeline = await deviceContext.device.createComputePipelineAsync( {
-        label: 'logBarrier pipeline',
-        layout: pipelineLayout.layout, // TODO: use the pipeline layout for every one?
-        compute: {
-          module: logBarrierModule,
-          entryPoint: 'main'
-        }
-      } );
-    }
-
     //////////////////////////////////
 
     const inputTypedBuffer = TypedBuffer.createArray( deviceContext, binaryOp.type, maxItemCount, binaryOp.identity );
@@ -225,14 +202,19 @@ const testBoundDoubleReduceShader = <T>(
 
     const computePass: GPUComputePassEncoder = encoder.beginComputePass( computePassDescriptor );
     computePass.setBindGroup( 0, bindGroup.bindGroup );
+
     computePass.setPipeline( firstPipeline.pipeline );
     computePass.dispatchWorkgroups( firstDispatchSize, 1, 1 );
-    if ( logBarrierPipeline ) {
-      computePass.setPipeline( logBarrierPipeline );
+    if ( firstPipeline.logBarrierPipeline ) {
+      computePass.setPipeline( firstPipeline.logBarrierPipeline );
       computePass.dispatchWorkgroups( 1, 1, 1 );
     }
     computePass.setPipeline( secondPipeline.pipeline );
     computePass.dispatchWorkgroups( secondDispatchSize, 1, 1 );
+    if ( secondPipeline.logBarrierPipeline ) {
+      computePass.setPipeline( secondPipeline.logBarrierPipeline );
+      computePass.dispatchWorkgroups( 1, 1, 1 );
+    }
     computePass.end();
 
     const outputPromise = outputTypedBuffer.getValue( encoder, bufferLogger );
