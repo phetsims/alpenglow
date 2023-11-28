@@ -8,7 +8,7 @@
 
 import { alpenglow, BufferLogger, ByteEncoder, ConcreteType, DeviceContext, getArrayType } from '../imports.js';
 
-export default class TypedBuffer<T> {
+export default class TypedBuffer<T = unknown> {
   public constructor(
     public readonly buffer: GPUBuffer,
     public readonly type: ConcreteType<T>

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BoundBuffer, BoundResource, BufferLogger, compareArrays, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
+import { addLineNumbers, asyncTestWithDeviceContext, BindGroup, BindGroupLayout, Binding, BindingLocation, BindingType, BufferLogger, compareArrays, ConsoleLogger, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, PipelineLayout, SingleReduceShader, SingleReduceShaderOptions, TimestampLogger, TypedBuffer, u32, U32Add, Vec2uBic, WGSLContext } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
@@ -94,15 +94,26 @@ const testBoundDoubleReduceShader = <T>(
       deviceContext,
       name,
       0,
-      [
-        inputBinding,
-        middleBinding,
-        outputBinding,
-        ...( log ? [ logBinding ] : [] )
-      ]
+      {
+        input: inputBinding,
+        middle: middleBinding,
+        output: outputBinding,
+        log: log ? logBinding : null
+      }
     );
 
-    const pipelineLayout = new PipelineLayout( deviceContext, [ bindGroupLayout ] );
+    // const testLayout = new BindGroupLayout(
+    //   deviceContext,
+    //   'temp',
+    //   1,
+    //   {
+    //     extra: new Binding( BindingType.STORAGE_BUFFER, new BindingLocation( 1, 0 ) )
+    //   }
+    // );
+    //
+    // const pipelineLayout = PipelineLayout.create2( deviceContext, bindGroupLayout, testLayout );
+
+    const pipelineLayout = PipelineLayout.create1( deviceContext, bindGroupLayout );
 
     const firstWgslContext = new WGSLContext( `${name} first`, log ).with( context => mainReduceWGSL( context, combineOptions<SingleReduceShaderOptions<T>>( {
       workgroupSize: workgroupSize,
@@ -197,24 +208,18 @@ const testBoundDoubleReduceShader = <T>(
     const inputTypedBuffer = TypedBuffer.createArray( deviceContext, binaryOp.type, maxItemCount, binaryOp.identity );
     const middleTypedBuffer = TypedBuffer.createArray( deviceContext, binaryOp.type, Math.ceil( maxItemCount / ( workgroupSize * grainSize ) ), binaryOp.identity );
     const outputTypedBuffer = TypedBuffer.createArray( deviceContext, binaryOp.type, Math.ceil( maxItemCount / ( workgroupSize * grainSize * workgroupSize * grainSize ) ), binaryOp.identity );
-
-    const inputBoundBuffer = new BoundBuffer( inputTypedBuffer, inputBinding );
-    const middleBoundBuffer = new BoundBuffer( middleTypedBuffer, middleBinding );
-    const outputBoundBuffer = new BoundBuffer( outputTypedBuffer, outputBinding );
-
-    const boundResources: BoundResource[] = [ inputBoundBuffer, middleBoundBuffer, outputBoundBuffer ];
-
-    let logBoundBuffer: BoundBuffer<number[]> | null = null;
-    if ( log ) {
-      logBoundBuffer = new BoundBuffer( deviceContext.getLogTypedBuffer(), logBinding );
-      boundResources.push( logBoundBuffer );
-    }
+    const logTypedBuffer = log ? deviceContext.getLogTypedBuffer() : null;
 
     const bindGroup = new BindGroup(
       deviceContext,
-      `${name} bind group`,
+      name,
       bindGroupLayout,
-      boundResources
+      {
+        input: inputTypedBuffer,
+        middle: middleTypedBuffer,
+        output: outputTypedBuffer,
+        log: logTypedBuffer
+      }
     );
 
     //////////////////////////////////
@@ -265,7 +270,7 @@ const testBoundDoubleReduceShader = <T>(
 
     // TODO: staging ring for our "out" buffers?
 
-    const logPromise = logBoundBuffer ? bufferLogger.arrayBuffer( encoder, logBoundBuffer.typedBuffer.buffer ) : Promise.resolve( null );
+    const logPromise = logTypedBuffer ? bufferLogger.arrayBuffer( encoder, logTypedBuffer.buffer ) : Promise.resolve( null );
 
     const commandBuffer = encoder.finish();
     deviceContext.device.queue.submit( [ commandBuffer ] );
