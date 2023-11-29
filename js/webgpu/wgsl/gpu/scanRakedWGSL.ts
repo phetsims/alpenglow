@@ -38,7 +38,7 @@ export type scanRakedWGSLOptions<T> = {
 
   // null | ( index expr, expr: T ) => statements - Stores out the "fully reduced" value
   storeReduction?: ( ( index: WGSLExpressionU32, expr: WGSLExpression ) => WGSLStatements ) | null;
-  stripeReducedOutput: boolean;
+  stripeReducedOutput?: boolean;
 
   // boolean (whether the scan should be exclusive - otherwise it is inclusive).
   // e.g. an inclusive left scan of [ 1, 2, 3, 4 ] is [ 1, 3, 6, 10 ], whereas an exclusive left scan is [ 0, 1, 3, 6 ]
@@ -47,10 +47,10 @@ export type scanRakedWGSLOptions<T> = {
   // null | ( varName ) => statements - should write a value to be added to everything into the specific variable name
   // This is designed to be used for multi-level scans, where you essentially want to add an "offset" value to
   // everything in the workgroup.
-  getAddedValue: ( ( varName: WGSLVariableName ) => WGSLStatements ) | null;
+  getAddedValue?: ( ( varName: WGSLVariableName ) => WGSLStatements ) | null;
 
   // We can opt out of the extra workgroupBarrier if getAddedValue executes one itself (say, for atomics).
-  addedValueNeedsWorkgroupBarrier: boolean;
+  addedValueNeedsWorkgroupBarrier?: boolean;
 };
 
 const DEFAULT_OPTIONS = {

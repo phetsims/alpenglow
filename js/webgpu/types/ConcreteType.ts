@@ -89,8 +89,8 @@ export type BitOrder<T> = {
   // TS
   getBits: ( value: T, bitOffset: number, bitQuantity: number ) => number;
 
-  // WGSL
-  getBitsWGSL: ( value: string, bitOffset: number, bitQuantity: number ) => string;
+  // WGSL TODO support statements(!) --- or do we need that? Could use function-call overhead
+  getBitsWGSL: ( value: WGSLExpressionT, bitOffset: number, bitQuantity: number ) => WGSLExpressionU32;
 };
 
 export type CompareOrder<T> = {

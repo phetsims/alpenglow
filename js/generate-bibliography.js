@@ -347,6 +347,24 @@ const fs = require( 'fs' );
   }` );
   links[ '10.1111:cgf.12070' ] = 'https://people.engr.tamu.edu/schaefer/research/scanline.pdf';
 
+  await cite.add( `@incollection{BELL2012359,
+    title = {Chapter 26 - Thrust: A Productivity-Oriented Library for CUDA},
+    editor = {Wen-mei W. Hwu},
+    booktitle = {GPU Computing Gems Jade Edition},
+    publisher = {Morgan Kaufmann},
+    address = {Boston},
+    pages = {359-371},
+    year = {2012},
+    series = {Applications of GPU Computing Series},
+    isbn = {978-0-12-385963-1},
+    doi = {https://doi.org/10.1016/B978-0-12-385963-1.00026-5},
+    url = {https://www.sciencedirect.com/science/article/pii/B9780123859631000265},
+    author = {Nathan Bell and Jared Hoberock},
+    abstract = {Publisher Summary
+    This chapter demonstrates how to leverage the Thrust parallel template library to implement high performance applications with minimal programming effort. With the introduction of CUDA C/C++, developers can harness the massive parallelism of the graphics processing unit (GPU) through a standard programming language. CUDA allows developers to make fine-grained decisions about how computations are decomposed into parallel threads and executed on the device. The level of control offered by CUDA C/C++ is an important feature; it facilitates the development of high-performance algorithms for a variety of computationally demanding tasks which merit significant optimization and profit from low-level control of the mapping onto hardware. With Thrust, developers describe their computation using a collection of high-level algorithms and completely delegate the decision of how to implement the computation to the library. Thrust is implemented entirely within CUDA C/C++ and maintains interoperability with the rest of the CUDA ecosystem. Interoperability is an important feature because no single language or library is the best tool for every problem. Thrust presents a style of programming emphasizing genericity and composability. Indeed, the vast majority of Thrust's functionality is derived from four fundamental parallel algorithms—for each, reduce, scan, and sort. Thrust's high-level algorithms enhance programmer productivity by automating the mapping of computational tasks onto the GPU. Thrust also boosts programmer productivity by providing a rich set of algorithms for common patterns.}
+  }` );
+  links.BELL2012359 = 'https://research.nvidia.com/publication/2011-10_thrust-productivity-oriented-library-cuda';
+
   const map = {};
   cite.getIds().forEach( id => {
     map[ id ] = {

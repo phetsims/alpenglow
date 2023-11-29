@@ -537,6 +537,14 @@ export { default as compactSingleRadixSortWGSL } from './webgpu/wgsl/gpu/compact
 export type { compactSingleRadixSortWGSLOptions } from './webgpu/wgsl/gpu/compactSingleRadixSortWGSL.js';
 export { default as getCorankWGSL } from './webgpu/wgsl/gpu/getCorankWGSL.js';
 export type { getCorankWGSLOptions } from './webgpu/wgsl/gpu/getCorankWGSL.js';
+export { default as histogramWGSL } from './webgpu/wgsl/gpu/histogramWGSL.js';
+export type { histogramWGSLOptions } from './webgpu/wgsl/gpu/histogramWGSL.js';
+export { default as radixHistogramWGSL } from './webgpu/wgsl/gpu/radixHistogramWGSL.js';
+export type { radixHistogramWGSLOptions } from './webgpu/wgsl/gpu/radixHistogramWGSL.js';
+export { default as mainRadixHistogramWGSL } from './webgpu/wgsl/gpu/mainRadixHistogramWGSL.js';
+export type { mainRadixHistogramWGSLOptions } from './webgpu/wgsl/gpu/mainRadixHistogramWGSL.js';
+export { default as mainRadixScatterWGSL } from './webgpu/wgsl/gpu/mainRadixScatterWGSL.js';
+export type { mainRadixScatterWGSLOptions } from './webgpu/wgsl/gpu/mainRadixScatterWGSL.js';
 
 export { default as SingleReduceModule } from './webgpu/modules/gpu/SingleReduceModule.js';
 export type { SingleReduceModuleOptions } from './webgpu/modules/gpu/SingleReduceModule.js';

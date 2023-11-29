@@ -17,7 +17,7 @@ export type coalescedLoopWGSLOptions = {
 };
 
 const DEFAULT_OPTIONS = {
-  length: null
+  length: null // TODO: rename to lengthExpression?
 } as const;
 
 const coalescedLoopWGSL = (
