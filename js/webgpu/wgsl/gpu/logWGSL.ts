@@ -28,7 +28,7 @@ export type logWGSLOptions<T> = {
   lineToLog?: ( ( line: ConsoleLoggedLine ) => unknown ) | null;
 };
 
-const DEFAULT_OPTIONS = {
+export const LOG_DEFAULTS = {
   additionalIndex: null,
   type: null,
   writeData: null,
@@ -41,7 +41,7 @@ const logWGSL = <T>(
   providedOptions: logWGSLOptions<T>
 ): WGSLStatements => {
 
-  const options = optionize3<logWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<logWGSLOptions<T>>()( {}, LOG_DEFAULTS, providedOptions );
 
   const name = options.name;
   const additionalIndex = options.additionalIndex;

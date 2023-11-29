@@ -5,7 +5,6 @@
  */
 
 import { alpenglow, Binding, BitOrder, radixHistogramWGSL, WGSLContext, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
-import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mainRadixHistogramWGSLOptions<T> = {
   workgroupSize: number;
@@ -23,18 +22,12 @@ export type mainRadixHistogramWGSLOptions<T> = {
     output: Binding;
   };
 };
-// TODO: options pass-through
-
-const DEFAULT_OPTIONS = {
-} as const;
 
 const mainRadixHistogramWGSL = <T>(
   // TODO: context pass-through for more functions?
   context: WGSLContext,
-  providedOptions: mainRadixHistogramWGSLOptions<T>
+  options: mainRadixHistogramWGSLOptions<T>
 ): WGSLModuleDeclarations => {
-
-  const options = optionize3<mainRadixHistogramWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;
@@ -60,7 +53,7 @@ const mainRadixHistogramWGSL = <T>(
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
-      ${radixHistogramWGSL( {
+      ${radixHistogramWGSL( context, {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
         histogramScratch: 'histogram_scratch',

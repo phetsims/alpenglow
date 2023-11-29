@@ -7,14 +7,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, Binding, loadReducedWGSL, loadReducedWGSLOptions, reduceWGSL, reduceWGSLOptions, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BinaryOp, Binding, loadReducedWGSL, loadReducedWGSLOptions, RakedSizable, reduceWGSL, reduceWGSLOptions, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceAtomicWGSLOptions<T> = {
-  workgroupSize: number;
-  grainSize: number;
-
   binaryOp: BinaryOp<T>;
 
   bindings: {
@@ -26,9 +23,9 @@ export type mainReduceAtomicWGSLOptions<T> = {
   loadReducedOptions?: StrictOmit<loadReducedWGSLOptions<T>, 'value' | 'lengthExpression' | 'binaryOp' | 'loadExpression' | 'loadStatements' | 'workgroupSize' | 'grainSize' | 'globalIndex' | 'workgroupIndex' | 'localIndex'>;
 
   reduceOptions?: StrictOmit<reduceWGSLOptions<T>, 'value' | 'scratch' | 'workgroupSize' | 'binaryOp' | 'localIndex' | 'scratchPreloaded' | 'valuePreloaded' | 'mapScratchIndex'>;
-};
+} & RakedSizable;
 
-const DEFAULT_OPTIONS = {
+export const MAIN_REDUCE_ATOMIC_DEFAULTS = {
   lengthExpression: null,
 
   loadReducedOptions: {
@@ -44,7 +41,7 @@ const mainReduceAtomicWGSL = <T>(
   providedOptions: mainReduceAtomicWGSLOptions<T>
 ): WGSLModuleDeclarations => {
 
-  const options = optionize3<mainReduceAtomicWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<mainReduceAtomicWGSLOptions<T>>()( {}, MAIN_REDUCE_ATOMIC_DEFAULTS, providedOptions );
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;

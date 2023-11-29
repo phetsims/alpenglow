@@ -4,14 +4,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BitOrder, ceilDivideConstantDivisorWGSL, commentWGSL, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, Binding, BitOrder, ceilDivideConstantDivisorWGSL, commentWGSL, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, RakedSizable, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainRadixScatterWGSLOptions<T> = {
-  workgroupSize: number;
-  grainSize: number;
-
   order: BitOrder<T>;
 
   pass: number;
@@ -32,10 +29,10 @@ export type mainRadixScatterWGSLOptions<T> = {
     histogramOffsets: Binding;
     output: Binding;
   };
-};
+} & RakedSizable;
 // TODO: options pass-through
 
-const DEFAULT_OPTIONS = {
+export const MAIN_RADIX_SCATTER_DEFAULTS = {
   loadMultipleOptions: {}
 } as const;
 
@@ -45,7 +42,7 @@ const mainRadixScatterWGSL = <T>(
   providedOptions: mainRadixScatterWGSLOptions<T>
 ): WGSLModuleDeclarations => {
 
-  const options = optionize3<mainRadixScatterWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<mainRadixScatterWGSLOptions<T>>()( {}, MAIN_RADIX_SCATTER_DEFAULTS, providedOptions );
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;
@@ -197,7 +194,7 @@ const mainRadixScatterWGSL = <T>(
 
         workgroupBarrier();
 
-        ${scanRakedWGSL( {
+        ${scanRakedWGSL( context, {
           scratch: 'start_indices',
           binaryOp: U32Add,
           workgroupSize: workgroupSize,

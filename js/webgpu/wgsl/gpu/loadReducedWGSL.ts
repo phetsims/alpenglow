@@ -11,7 +11,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, conditionalIfWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 // CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
@@ -32,27 +32,6 @@ export type loadReducedWGSLOptions<T> = {
   // ( varName: string, index ) => statements setting varName: T,
   loadStatements?: ( ( varName: WGSLVariableName, index: WGSLExpressionU32 ) => WGSLStatements ) | null;
 
-  // the number of threads running this command
-  workgroupSize: number;
-
-  // the number of elements each thread should process
-  grainSize: number;
-
-  // expression: u32 (the global index of the thread) - overrideable so we can run multiple smaller loads in the same
-  // workgroup if ever desired
-  globalIndex?: WGSLExpressionU32;
-
-  // expression: u32 (the index of the workgroup) - overrideable so we can run multiple smaller loads in the same
-  // workgroup if ever desired
-  workgroupIndex?: WGSLExpressionU32;
-
-  // expression: u32 (the index of the thread within the workgroup) - overrideable so we can run multiple smaller loads
-  // in the same workgroup if ever desired
-  localIndex?: WGSLExpressionU32;
-
-  // if provided, it will enable range checks (based on the inputOrder)
-  lengthExpression?: WGSLExpressionU32 | null;
-
   // The actual order of the data in memory (needed for range checks, not required if range checks are disabled)
   inputOrder?: 'blocked' | 'striped';
 
@@ -68,27 +47,27 @@ export type loadReducedWGSLOptions<T> = {
   // (WARNING: only use this if you know what you are doing) If true, we will not check that the binaryOp is commutative
   // if the order does not match.
   orderOverride?: boolean;
-};
+} & RakedSizable & GlobalIndexable & WorkgroupIndexable & LocalIndexable & OptionalLengthExpressionable;
 
-const DEFAULT_OPTIONS = {
+export const LOAD_REDUCED_DEFAULTS = {
   loadExpression: null,
   loadStatements: null,
-  globalIndex: 'global_id.x',
-  workgroupIndex: 'workgroup_id.x',
-  localIndex: 'local_id.x',
-  lengthExpression: null,
   inputOrder: 'blocked',
   inputAccessOrder: 'striped',
   sequentialReduceStyle: 'factored',
   useSelectIfOptional: false,
-  orderOverride: false
+  orderOverride: false,
+  ...GLOBAL_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
+  ...WORKGROUP_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
+  ...LOCAL_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
+  ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
 } as const;
 
 const loadReducedWGSL = <T>(
   providedOptions: loadReducedWGSLOptions<T>
 ): WGSLStatements => {
 
-  const options = optionize3<loadReducedWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<loadReducedWGSLOptions<T>>()( {}, LOAD_REDUCED_DEFAULTS, providedOptions );
 
   const value = options.value;
   const binaryOp = options.binaryOp;

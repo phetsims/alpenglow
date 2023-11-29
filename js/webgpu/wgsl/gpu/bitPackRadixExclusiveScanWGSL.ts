@@ -7,7 +7,6 @@
  */
 
 import { alpenglow, commentWGSL, u32, u32Hex, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
-import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type bitPackRadixExclusiveScanWGSLOptions = {
   // (u32/vec2u/vec3u/vec4u) name
@@ -24,14 +23,9 @@ export type bitPackRadixExclusiveScanWGSLOptions = {
   maxCount: number;
 };
 
-const DEFAULT_OPTIONS = {
-} as const;
-
 const bitPackRadixExclusiveScanWGSL = (
-  providedOptions: bitPackRadixExclusiveScanWGSLOptions
+  options: bitPackRadixExclusiveScanWGSLOptions
 ): WGSLStatements => {
-
-  const options = optionize3<bitPackRadixExclusiveScanWGSLOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
   const bitVector = options.bitVector;
   const bitsPerInnerPass = options.bitsPerInnerPass;

@@ -6,27 +6,25 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, conditionalIfWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, u32, unrollWGSL, WGSLExpressionU32, WGSLStatements, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, conditionalIfWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, WGSLContext, WGSLExpressionU32, WGSLStatements, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type coalescedLoopWGSLOptions = {
-  workgroupSize: number;
-  grainSize: number;
-  lengthExpression?: WGSLExpressionU32 | null;
   callback: ( localIndex: WGSLExpressionU32, dataIndex: WGSLExpressionU32 ) => WGSLStatements;
-} & WorkgroupIndexable & LocalIndexable;
+} & RakedSizable & OptionalLengthExpressionable & WorkgroupIndexable & LocalIndexable;
 
-export const COALESCED_LOOP_DEFAULT_OPTIONS = {
-  lengthExpression: null,
+export const COALESCED_LOOP_DEFAULTS = {
+  ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
   ...WORKGROUP_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
   ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
 } as const;
 
 const coalescedLoopWGSL = (
+  context: WGSLContext,
   providedOptions: coalescedLoopWGSLOptions
 ): WGSLStatements => {
 
-  const options = optionize3<coalescedLoopWGSLOptions>()( {}, COALESCED_LOOP_DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<coalescedLoopWGSLOptions>()( {}, COALESCED_LOOP_DEFAULTS, providedOptions );
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;

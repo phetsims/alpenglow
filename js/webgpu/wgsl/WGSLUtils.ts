@@ -8,6 +8,16 @@
 
 import { alpenglow, WGSLExpressionU32, WGSLModuleDeclarations } from '../../imports.js';
 
+export type WorkgroupSizable = {
+  // the number of threads running this command
+  workgroupSize: number;
+};
+
+export type RakedSizable = {
+  // the number of elements each thread should process
+  grainSize: number;
+} & WorkgroupSizable;
+
 export type GlobalIndexable = {
   // expression: u32 (the global index of the thread) - overrideable so we can run multiple smaller loads in the same
   // workgroup if ever desired
@@ -33,6 +43,14 @@ export type LocalIndexable = {
 };
 export const LOCAL_INDEXABLE_DEFAULTS = {
   localIndex: 'local_id.x'
+} as const;
+
+export type OptionalLengthExpressionable = {
+  // if provided, it will enable range checks (based on whatever input order of the data was given)
+  lengthExpression?: WGSLExpressionU32 | null;
+};
+export const OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS = {
+  lengthExpression: null
 } as const;
 
 export const partialWGSLBeautify = ( wgsl: WGSLModuleDeclarations ): WGSLModuleDeclarations => {

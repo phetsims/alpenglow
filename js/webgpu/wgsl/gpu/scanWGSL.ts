@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
-export type scanWGSLOptions<T> = {
+type SelfOptions<T> = {
   // the "input" and "output" variable name
   value: WGSLVariableName;
 
@@ -21,13 +21,7 @@ export type scanWGSLOptions<T> = {
   // but a right incluive scan is [ 10, 9, 7, 4 ] (just scans in the other direction)
   direction?: 'left' | 'right';
 
-  workgroupSize: number;
-
   binaryOp: BinaryOp<T>;
-
-  // (the index of the thread within the workgroup) - overrideable so we can run multiple smaller loads
-  // in the same workgroup if ever desired
-  localIndex?: WGSLExpressionU32;
 
   // allows overriding the index used for the scratch array, so that we can run multiple smaller loads in the same
   // workgroup
@@ -46,23 +40,26 @@ export type scanWGSLOptions<T> = {
 
   // If true, we won't need to load the value FROM the scratch array
   valuePreloaded?: boolean;
-};
+} & WorkgroupSizable & LocalIndexable;
 
-const DEFAULT_OPTIONS = {
+export type scanWGSLOptions<T> = SelfOptions<T>;
+
+export const SCAN_DEFAULTS = {
   direction: 'left',
   exclusive: false,
-  localIndex: 'local_id.x',
   mapScratchIndex: _.identity,
   needsValidScratch: false, // TODO: think about the best default?
   scratchPreloaded: false,
-  valuePreloaded: true
+  valuePreloaded: true,
+  ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
 } as const;
 
 const scanWGSL = <T>(
+  context: WGSLContext,
   providedOptions: scanWGSLOptions<T>
 ): WGSLStatements => {
 
-  const options = optionize3<scanWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<scanWGSLOptions<T>, SelfOptions<T>>()( {}, SCAN_DEFAULTS, providedOptions );
 
   const value = options.value;
   const scratch = options.scratch;

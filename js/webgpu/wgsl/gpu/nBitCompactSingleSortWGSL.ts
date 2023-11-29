@@ -12,22 +12,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, bitPackRadixAccessWGSL, bitPackRadixExclusiveScanWGSL, bitPackRadixIncrementWGSL, commentWGSL, ConsoleLoggedLine, logStringWGSL, logValueWGSL, logWGSL, scanWGSL, u32, U32Add, U32Type, unrollWGSL, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, BitOrder, bitPackRadixAccessWGSL, bitPackRadixExclusiveScanWGSL, bitPackRadixIncrementWGSL, commentWGSL, ConsoleLoggedLine, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logStringWGSL, logValueWGSL, logWGSL, RakedSizable, scanWGSL, u32, U32Add, U32Type, unrollWGSL, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type nBitCompactSingleSortWGSLOptions<T> = {
   // Currently mostly used for the type, but we might be able to use it for more later. (TODO)
   order: BitOrder<T>;
-
-  // the number of threads running this command
-  workgroupSize: number;
-
-  // the number of elements each thread should process
-  grainSize: number;
-
-  // expression: u32 (the index of the thread within the workgroup) - overrideable so we can run multiple smaller loads
-  // in the same workgroup if ever desired
-  localIndex?: WGSLExpressionU32;
 
   // var<workgroup> array<u32|vec2u|vec3u|vec4u, workgroupSize> TODO: we can pack this more efficiently, no?
   bitsScratch: WGSLVariableName;
@@ -47,11 +37,11 @@ export type nBitCompactSingleSortWGSLOptions<T> = {
 
   // (1/2/3/4) for (u32/vec2u/vec3u/vec4u) e.g. 4 for a vec4u
   bitVectorSize: number;
-};
+} & RakedSizable & LocalIndexable;
 
 const DEFAULT_OPTIONS = {
-  localIndex: 'local_id.x',
-  earlyLoad: false
+  earlyLoad: false,
+  ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
 } as const;
 
 const nBitCompactSingleSortWGSL = <T>(
@@ -167,7 +157,7 @@ const nBitCompactSingleSortWGSL = <T>(
 
       ${logPackedBits( 'n_bit histogram initial', 'tb_bits_vector' )}
 
-      ${scanWGSL( {
+      ${scanWGSL( context, {
         value: 'tb_bits_vector',
         // @ts-expect-error - Hmm, should we actually split this into 4 cases?
         binaryOp: addBinaryOp,

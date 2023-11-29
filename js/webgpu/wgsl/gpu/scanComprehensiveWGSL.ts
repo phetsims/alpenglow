@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, coalescedLoopWGSL, coalescedLoopWGSLOptions, commentWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, scanRakedWGSL, scanRakedWGSLOptions, WGSLContext, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, BinaryOp, coalescedLoopWGSL, commentWGSL, GlobalIndexable, loadMultipleWGSL, loadMultipleWGSLOptions, LocalIndexable, OptionalLengthExpressionable, RakedSizable, scanRakedWGSL, scanRakedWGSLOptions, WGSLContext, WGSLStatements, WGSLVariableName, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
-export type scanComprehensiveWGSLOptions<T> = {
+type SelfOptions<T> = {
   // varname of input var<storage> array<{valueType}>
   input: WGSLVariableName;
 
@@ -21,32 +21,22 @@ export type scanComprehensiveWGSLOptions<T> = {
 
   binaryOp: BinaryOp<T>;
 
-  // the number of threads running this command
-  workgroupSize: number;
-
-  // the number of elements each thread should process
-  grainSize: number;
-
   exclusive?: boolean; // TODO: consider just requiring this everywhere
-
-  // if provided, it will enable range checks (based on the inputOrder)
-  lengthExpression?: WGSLExpressionU32 | null;
 
   // null | ( varName ) => statements - should write a value to be added to everything into the specific variable name
   // This is designed to be used for multi-level scans, where you essentially want to add an "offset" value to
   // everything in the workgroup.
   getAddedValue?: ( ( varName: WGSLVariableName ) => WGSLStatements ) | null;
-} & Pick<scanRakedWGSLOptions<T>, 'storeReduction' | 'stripeReducedOutput' | 'addedValueNeedsWorkgroupBarrier' | 'workgroupIndex' | 'localIndex'>
-  & Pick<loadMultipleWGSLOptions<T>, 'factorOutSubexpressions' | 'inputOrder' | 'inputAccessOrder' | 'globalIndex' | 'workgroupIndex' | 'localIndex'>
-  & Pick<coalescedLoopWGSLOptions, 'workgroupIndex' | 'localIndex'>;
-// TODO: isolate out SelfOptions
+};
 
-type SelfOptions<T> = Pick<scanComprehensiveWGSLOptions<T>, 'input' | 'output' | 'scratch' | 'exclusive' | 'getAddedValue' | 'binaryOp'>;
+export type scanComprehensiveWGSLOptions<T> = SelfOptions<T>
+  & RakedSizable & OptionalLengthExpressionable & GlobalIndexable & WorkgroupIndexable & LocalIndexable
+  & Pick<scanRakedWGSLOptions<T>, 'storeReduction' | 'stripeReducedOutput' | 'addedValueNeedsWorkgroupBarrier'>
+  & Pick<loadMultipleWGSLOptions<T>, 'factorOutSubexpressions' | 'inputOrder' | 'inputAccessOrder'>;
 
-const DEFAULT_OPTIONS = {
+export const SCAN_COMPREHENSIVE_DEFAULTS = {
   exclusive: false,
-  getAddedValue: null,
-  lengthExpression: null
+  getAddedValue: null
 } as const;
 
 const scanComprehensiveWGSL = <T>(
@@ -55,7 +45,7 @@ const scanComprehensiveWGSL = <T>(
 ): WGSLStatements => {
 
   // TODO: how to specify that we don't fill in defaults for things like factorOutSubexpressions?
-  const options = optionize3<scanComprehensiveWGSLOptions<T>, SelfOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<scanComprehensiveWGSLOptions<T>, SelfOptions<T>>()( {}, SCAN_COMPREHENSIVE_DEFAULTS, providedOptions );
 
   const input = options.input;
   const output = options.output;
@@ -86,7 +76,7 @@ const scanComprehensiveWGSL = <T>(
 
     workgroupBarrier();
     
-    ${scanRakedWGSL( {
+    ${scanRakedWGSL( context, {
       // TODO: we're missing error checking here? Use optionize3?
       scratch: scratch,
       binaryOp: binaryOp,
@@ -105,7 +95,7 @@ const scanComprehensiveWGSL = <T>(
 
     // Write our output in a coalesced order.
     ${commentWGSL( 'begin (output write)' )}
-    ${coalescedLoopWGSL( {
+    ${coalescedLoopWGSL( context, {
       workgroupSize: options.workgroupSize,
       grainSize: options.grainSize,
       lengthExpression: options.lengthExpression,

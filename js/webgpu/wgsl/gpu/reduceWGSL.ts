@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, logValueWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logValueWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type reduceWGSLOptions<T> = {
@@ -17,13 +17,7 @@ export type reduceWGSLOptions<T> = {
   // TODO: concurrently
   scratch: WGSLVariableName;
 
-  workgroupSize: number;
-
   binaryOp: BinaryOp<T>;
-
-  // (the index of the thread within the workgroup) - overrideable so we can run multiple smaller loads
-  // in the same workgroup if ever desired
-  localIndex?: WGSLExpressionU32;
 
   // allows overriding the index used for the scratch array, so that we can run multiple smaller loads in the same
   // workgroup
@@ -44,14 +38,14 @@ export type reduceWGSLOptions<T> = {
 
   // If true, we won't need to load the value FROM the scratch array
   valuePreloaded?: boolean;
-};
+} & WorkgroupSizable & LocalIndexable;
 
-const DEFAULT_OPTIONS = {
-  localIndex: 'local_id.x',
+export const REDUCE_DEFAULTS = {
   mapScratchIndex: _.identity,
   convergent: false,
   scratchPreloaded: false,
-  valuePreloaded: true
+  valuePreloaded: true,
+  ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
 } as const;
 
 const reduceWGSL = <T>(
@@ -59,7 +53,7 @@ const reduceWGSL = <T>(
   providedOptions: reduceWGSLOptions<T>
 ): WGSLStatements => {
 
-  const options = optionize3<reduceWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<reduceWGSLOptions<T>>()( {}, REDUCE_DEFAULTS, providedOptions );
 
   const value = options.value;
   const scratch = options.scratch;

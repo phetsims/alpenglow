@@ -6,32 +6,29 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, coalescedLoopWGSL, coalescedLoopWGSLOptions, commentWGSL, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, COALESCED_LOOP_DEFAULTS, coalescedLoopWGSL, coalescedLoopWGSLOptions, commentWGSL, WGSLContext, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
-export type histogramWGSLOptions = {
-  workgroupSize: number;
-  grainSize: number;
-
+type SelfOptions = {
   // var<workgroup> array<atomic<u32>, numBins> // TODO: can we actually get memory-compacted histograms here, instead of using a full u32?
   histogramScratch: WGSLVariableName;
 
   getBin: ( index: WGSLExpressionU32 ) => WGSLExpressionU32;
+};
 
-  lengthExpression?: WGSLExpressionU32 | null;
-} & Pick<coalescedLoopWGSLOptions, 'workgroupIndex' | 'localIndex'>;
+export type histogramWGSLOptions = SelfOptions & StrictOmit<coalescedLoopWGSLOptions, 'callback'>;
 
-type SelfOptions = Pick<histogramWGSLOptions, 'histogramScratch' | 'getBin'>;
-
-const DEFAULT_OPTIONS = {
-  lengthExpression: null
+export const HISTOGRAM_DEFAULTS = {
+  ...COALESCED_LOOP_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
 } as const;
 
 const histogramWGSL = (
+  context: WGSLContext,
   providedOptions: histogramWGSLOptions
 ): WGSLStatements => {
 
-  const options = optionize3<histogramWGSLOptions, SelfOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<histogramWGSLOptions, SelfOptions>()( {}, HISTOGRAM_DEFAULTS, providedOptions );
 
   const histogramScratch = options.histogramScratch;
   const getBin = options.getBin;
@@ -39,7 +36,7 @@ const histogramWGSL = (
   return `
     ${commentWGSL( 'begin histogram' )}
     {
-      ${coalescedLoopWGSL( {
+      ${coalescedLoopWGSL( context, {
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
         lengthExpression: options.lengthExpression,

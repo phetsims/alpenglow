@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, ConcreteType, conditionalIfWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, commentWGSL, ConcreteType, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type loadMultipleWGSLOptions<T> = {
@@ -22,27 +22,6 @@ export type loadMultipleWGSLOptions<T> = {
   storeStatements: ( index: WGSLExpressionU32, value: WGSLExpressionT ) => WGSLStatements;
 
   type: ConcreteType<T>;
-
-  // the number of threads running this command
-  workgroupSize: number;
-
-  // the number of elements each thread should process
-  grainSize: number;
-
-  // expression: u32 (the global index of the thread) - overrideable so we can run multiple smaller loads in the same
-  // workgroup if ever desired
-  globalIndex?: WGSLExpressionU32;
-
-  // expression: u32 (the index of the workgroup) - overrideable so we can run multiple smaller loads in the same
-  // workgroup if ever desired
-  workgroupIndex?: WGSLExpressionU32;
-
-  // expression: u32 (the index of the thread within the workgroup) - overrideable so we can run multiple smaller loads
-  // in the same workgroup if ever desired
-  localIndex?: WGSLExpressionU32;
-
-  // if provided, it will enable range checks (based on the inputOrder)
-  lengthExpression?: WGSLExpressionU32 | null;
 
   // if a length is provided, used to map things out-of-range
   outOfRangeValue?: WGSLExpressionT | null;
@@ -58,25 +37,25 @@ export type loadMultipleWGSLOptions<T> = {
   // Whether local variables should be used to factor out subexpressions (potentially more register usage, but less
   // computation).
   factorOutSubexpressions?: boolean;
-};
+} & RakedSizable & GlobalIndexable & WorkgroupIndexable & LocalIndexable & OptionalLengthExpressionable;
 
-const DEFAULT_OPTIONS = {
+export const LOAD_MULTIPLE_DEFAULTS = {
   loadExpression: null,
   loadStatements: null,
-  globalIndex: 'global_id.x',
-  workgroupIndex: 'workgroup_id.x',
-  localIndex: 'local_id.x',
-  lengthExpression: null,
   outOfRangeValue: null,
   inputAccessOrder: 'striped',
-  factorOutSubexpressions: true
+  factorOutSubexpressions: true,
+  ...GLOBAL_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
+  ...WORKGROUP_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
+  ...LOCAL_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
+  ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
 } as const;
 
 const loadMultipleWGSL = <T>(
   providedOptions: loadMultipleWGSLOptions<T>
 ): WGSLStatements => {
 
-  const options = optionize3<loadMultipleWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<loadMultipleWGSLOptions<T>>()( {}, LOAD_MULTIPLE_DEFAULTS, providedOptions );
 
   const loadExpression = options.loadExpression;
   const loadStatements = options.loadStatements;

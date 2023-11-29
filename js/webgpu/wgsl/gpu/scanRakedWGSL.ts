@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, scanWGSL, toStripedIndexWGSL, u32, unrollWGSL, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, RakedSizable, scanWGSL, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type scanRakedWGSLOptions<T> = {
@@ -17,27 +17,14 @@ export type scanRakedWGSLOptions<T> = {
 
   // The direction of the scan. For instance, a left inclusive scan of [ 1, 2, 3, 4 ] is [ 1, 3, 6, 10 ],
   // but a right incluive scan is [ 10, 9, 7, 4 ] (just scans in the other direction)
-  direction?: 'left' | 'right';
-  // TODO: support direction(!)(!)
+  direction?: 'left' | 'right'; // TODO: support direction(!)(!)
 
   binaryOp: BinaryOp<T>;
 
-  // the number of threads running this command
-  workgroupSize: number;
-
-  // the number of elements each thread should process
-  grainSize: number;
-
-  // expression: u32 (the index of the workgroup) - overrideable so we can run multiple smaller loads in the same
-  // workgroup if ever desired
-  workgroupIndex?: WGSLExpressionU32;
-
-  // expression: u32 (the index of the thread within the workgroup) - overrideable so we can run multiple smaller loads
-  // in the same workgroup if ever desired
-  localIndex?: WGSLExpressionU32;
-
   // null | ( index expr, expr: T ) => statements - Stores out the "fully reduced" value
   storeReduction?: ( ( index: WGSLExpressionU32, expr: WGSLExpression ) => WGSLStatements ) | null;
+
+  // Whether we should stripe the reduced output (so that each workgroup has a reduced value)
   stripeReducedOutput?: boolean;
 
   // boolean (whether the scan should be exclusive - otherwise it is inclusive).
@@ -51,24 +38,25 @@ export type scanRakedWGSLOptions<T> = {
 
   // We can opt out of the extra workgroupBarrier if getAddedValue executes one itself (say, for atomics).
   addedValueNeedsWorkgroupBarrier?: boolean;
-};
+} & RakedSizable & WorkgroupIndexable & LocalIndexable;
 
-const DEFAULT_OPTIONS = {
+export const SCAN_RAKED_DEFAULTS = {
   direction: 'left',
   exclusive: false,
-  workgroupIndex: 'workgroup_id.x',
-  localIndex: 'local_id.x',
   storeReduction: null,
   stripeReducedOutput: false,
   getAddedValue: null,
-  addedValueNeedsWorkgroupBarrier: true
+  addedValueNeedsWorkgroupBarrier: true,
+  ...WORKGROUP_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
+  ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
 } as const;
 
 const scanRakedWGSL = <T>(
+  context: WGSLContext,
   providedOptions: scanRakedWGSLOptions<T>
 ): WGSLStatements => {
 
-  const options = optionize3<scanRakedWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<scanRakedWGSLOptions<T>>()( {}, SCAN_RAKED_DEFAULTS, providedOptions );
 
   const scratch = options.scratch;
   const direction = options.direction;
@@ -111,7 +99,7 @@ const scanRakedWGSL = <T>(
     workgroupBarrier();
 
     // Scan the last-scanned element of each thread's tile (inclusive)
-    ${scanWGSL( {
+    ${scanWGSL( context, {
       value: 'value',
       scratch: scratch,
       workgroupSize: workgroupSize,

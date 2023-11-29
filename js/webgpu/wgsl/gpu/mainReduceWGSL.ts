@@ -4,14 +4,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, Binding, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BinaryOp, Binding, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceWGSLOptions<T> = {
-  workgroupSize: number;
-  grainSize: number;
-
   bindings: {
     input: Binding;
     output: Binding;
@@ -33,9 +30,9 @@ export type mainReduceWGSLOptions<T> = {
 
   // e.g. convergent
   reduceOptions?: StrictOmit<reduceWGSLOptions<T>, 'value' | 'scratch' | 'workgroupSize' | 'binaryOp' | 'localIndex' | 'scratchPreloaded' | 'valuePreloaded' | 'mapScratchIndex'>;
-};
+} & RakedSizable;
 
-const DEFAULT_OPTIONS = {
+export const MAIN_REDUCE_DEFAULTS = {
   stripeOutput: false,
   convergentRemap: false,
   loadReducedOptions: {},
@@ -47,7 +44,7 @@ const mainReduceWGSL = <T>(
   providedOptions: mainReduceWGSLOptions<T>
 ): WGSLModuleDeclarations => {
 
-  const options = optionize3<mainReduceWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<mainReduceWGSLOptions<T>>()( {}, MAIN_REDUCE_DEFAULTS, providedOptions );
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;

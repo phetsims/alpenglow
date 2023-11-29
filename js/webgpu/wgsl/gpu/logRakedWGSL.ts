@@ -6,22 +6,20 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, logWGSLOptions, u32, WGSLContext, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, logWGSL, logWGSLOptions, RakedSizable, u32, WGSLContext, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 import PickRequired from '../../../../../phet-core/js/types/PickRequired.js';
 
 export type logRakedWGSLOptions<T> = {
-  workgroupSize: number;
-  grainSize: number;
   lengthExpression?: WGSLExpressionU32 | null;
   relativeLengthExpression?: WGSLExpressionU32 | null;
   skipBarriers?: boolean;
   accessExpression?: ( ( index: WGSLExpressionU32 ) => WGSLExpression ) | null;
   relativeAccessExpression?: ( ( index: WGSLExpressionU32 ) => WGSLExpression ) | null;
-} & StrictOmit<logWGSLOptions<T>, 'dataCount' | 'writeData'> & PickRequired<logWGSLOptions<T>, 'type'>;
+} & RakedSizable & StrictOmit<logWGSLOptions<T>, 'dataCount' | 'writeData'> & PickRequired<logWGSLOptions<T>, 'type'>;
 
-const DEFAULT_OPTIONS = {
+export const LOG_RAKED_OPTIONS = {
   lengthExpression: null,
   relativeLengthExpression: null,
   skipBarriers: false,
@@ -34,7 +32,7 @@ const logRakedWGSL = <T>(
   providedOptions: logRakedWGSLOptions<T>
 ): WGSLStatements => {
 
-  const options = combineOptions<logRakedWGSLOptions<T>>( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = combineOptions<logRakedWGSLOptions<T>>( {}, LOG_RAKED_OPTIONS, providedOptions );
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;

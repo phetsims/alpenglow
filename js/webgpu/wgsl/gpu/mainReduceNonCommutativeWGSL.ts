@@ -7,14 +7,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, Binding, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, Binding, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceNonCommutativeWGSLOptions<T> = {
-  workgroupSize: number;
-  grainSize: number;
-
   bindings: {
     input: Binding;
     output: Binding;
@@ -29,11 +26,10 @@ export type mainReduceNonCommutativeWGSLOptions<T> = {
 
   // e.g. something in the future?
   reduceOptions?: StrictOmit<reduceWGSLOptions<T>, 'value' | 'scratch' | 'workgroupSize' | 'binaryOp' | 'localIndex' | 'scratchPreloaded' | 'valuePreloaded' | 'mapScratchIndex' | 'convergent'>;
-};
+} & RakedSizable;
 
-const DEFAULT_OPTIONS = {
+export const MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS = {
   stripeOutput: false,
-  convergentRemap: false,
   reduceOptions: {}
 } as const;
 
@@ -42,7 +38,7 @@ const mainReduceNonCommutativeWGSL = <T>(
   providedOptions: mainReduceNonCommutativeWGSLOptions<T>
 ): WGSLModuleDeclarations => {
 
-  const options = optionize3<mainReduceNonCommutativeWGSLOptions<T>>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<mainReduceNonCommutativeWGSLOptions<T>>()( {}, MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS, providedOptions );
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;
