@@ -12,6 +12,13 @@ export type mainReduceWGSLOptions<T> = {
   workgroupSize: number;
   grainSize: number;
 
+  bindings: {
+    input: Binding;
+    output: Binding;
+  };
+
+  // TODO: should we really have lengthExpression in loadReducedOptions? Also inputOrder options?!?
+
   binaryOp: BinaryOp<T>;
 
   // We can stripe the output (so the next layer of reduce can read it as striped)
@@ -21,26 +28,14 @@ export type mainReduceWGSLOptions<T> = {
   // data.
   convergentRemap?: boolean;
 
-  // e.g. length / inputOrder / inputAccessOrder / sequentialReduceStyle
+  // e.g. lengthExpression / inputOrder / inputAccessOrder / sequentialReduceStyle
   loadReducedOptions?: StrictOmit<loadReducedWGSLOptions<T>, 'value' | 'binaryOp' | 'loadExpression' | 'loadStatements' | 'workgroupSize' | 'grainSize' | 'globalIndex' | 'workgroupIndex' | 'localIndex'>;
 
   // e.g. convergent
   reduceOptions?: StrictOmit<reduceWGSLOptions<T>, 'value' | 'scratch' | 'workgroupSize' | 'binaryOp' | 'localIndex' | 'scratchPreloaded' | 'valuePreloaded' | 'mapScratchIndex'>;
-} & ( {
-  inPlace?: false;
-  bindings: {
-    input: Binding;
-    output: Binding;
-  };
-} | {
-  inPlace: true;
-  bindings: {
-    data: Binding;
-  };
-} );
+};
 
 const DEFAULT_OPTIONS = {
-  inPlace: false,
   stripeOutput: false,
   convergentRemap: false,
   loadReducedOptions: {},
@@ -60,22 +55,14 @@ const mainReduceWGSL = <T>(
   const stripeOutput = options.stripeOutput;
   const convergentRemap = options.convergentRemap;
 
-  const inputName = options.inPlace ? 'data' : 'input';
-  const outputName = options.inPlace ? 'data' : 'output';
-
   // TODO: generate storage binding and variable fully from Binding?
   return `
     
-    ${options.inPlace ? `
-      ${options.bindings.data.location.getWGSLAnnotation()}
-      var<storage, ${options.bindings.data.getStorageAccess()}> data: array<${binaryOp.type.valueType}>;
-    ` : `
-      ${options.bindings.input.location.getWGSLAnnotation()}
-      var<storage, ${options.bindings.input.getStorageAccess()}> input: array<${binaryOp.type.valueType}>;
-      
-      ${options.bindings.output.location.getWGSLAnnotation()}
-      var<storage, ${options.bindings.output.getStorageAccess()}> output: array<${binaryOp.type.valueType}>;
-    `}
+    ${options.bindings.input.location.getWGSLAnnotation()}
+    var<storage, ${options.bindings.input.getStorageAccess()}> input: array<${binaryOp.type.valueType}>;
+    
+    ${options.bindings.output.location.getWGSLAnnotation()}
+    var<storage, ${options.bindings.output.getStorageAccess()}> output: array<${binaryOp.type.valueType}>;
     
     var<workgroup> scratch: array<${binaryOp.type.valueType}, ${workgroupSize}>;
     
@@ -90,7 +77,7 @@ const mainReduceWGSL = <T>(
       ${loadReducedWGSL( combineOptions<loadReducedWGSLOptions<T>>( {
         value: 'value',
         binaryOp: binaryOp,
-        loadExpression: i => `${inputName}[ ${i} ]`,
+        loadExpression: i => `input[ ${i} ]`,
         workgroupSize: workgroupSize,
         grainSize: grainSize
       }, options.loadReducedOptions ) )}
@@ -111,7 +98,7 @@ const mainReduceWGSL = <T>(
       }, options.reduceOptions ) )}
     
       if ( local_id.x == 0u ) {
-        ${outputName}[ ${stripeOutput ? toStripedIndexWGSL( {
+        output[ ${stripeOutput ? toStripedIndexWGSL( {
           i: 'workgroup_id.x',
           workgroupSize: workgroupSize,
           grainSize: grainSize

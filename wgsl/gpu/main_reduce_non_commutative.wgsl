@@ -14,7 +14,6 @@
 
 #option workgroupSize
 #option grainSize
-#option length
 #option identity
 #option combineExpression
 #option combineStatements

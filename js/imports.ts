@@ -545,6 +545,10 @@ export { default as mainRadixHistogramWGSL } from './webgpu/wgsl/gpu/mainRadixHi
 export type { mainRadixHistogramWGSLOptions } from './webgpu/wgsl/gpu/mainRadixHistogramWGSL.js';
 export { default as mainRadixScatterWGSL } from './webgpu/wgsl/gpu/mainRadixScatterWGSL.js';
 export type { mainRadixScatterWGSLOptions } from './webgpu/wgsl/gpu/mainRadixScatterWGSL.js';
+export { default as mainReduceAtomicWGSL } from './webgpu/wgsl/gpu/mainReduceAtomicWGSL.js';
+export type { mainReduceAtomicWGSLOptions } from './webgpu/wgsl/gpu/mainReduceAtomicWGSL.js';
+export { default as mainReduceNonCommutativeWGSL } from './webgpu/wgsl/gpu/mainReduceNonCommutativeWGSL.js';
+export type { mainReduceNonCommutativeWGSLOptions } from './webgpu/wgsl/gpu/mainReduceNonCommutativeWGSL.js';
 
 export { default as SingleReduceModule } from './webgpu/modules/gpu/SingleReduceModule.js';
 export type { SingleReduceModuleOptions } from './webgpu/modules/gpu/SingleReduceModule.js';
