@@ -42,7 +42,7 @@ export type loadMultipleWGSLOptions<T> = {
   localIndex?: WGSLExpressionU32;
 
   // if provided, it will enable range checks (based on the inputOrder)
-  length?: WGSLExpressionU32 | null;
+  lengthExpression?: WGSLExpressionU32 | null;
 
   // if a length is provided, used to map things out-of-range
   outOfRangeValue?: WGSLExpressionT | null;
@@ -66,7 +66,7 @@ const DEFAULT_OPTIONS = {
   globalIndex: 'global_id.x',
   workgroupIndex: 'workgroup_id.x',
   localIndex: 'local_id.x',
-  length: null,
+  lengthExpression: null,
   outOfRangeValue: null,
   inputAccessOrder: 'striped',
   factorOutSubexpressions: true
@@ -87,7 +87,7 @@ const loadMultipleWGSL = <T>(
   const globalIndex = options.globalIndex;
   const workgroupIndex = options.workgroupIndex;
   const localIndex = options.localIndex;
-  const length = options.length;
+  const lengthExpression = options.lengthExpression;
   const outOfRangeValue = options.outOfRangeValue;
   const inputOrder = options.inputOrder;
   const inputAccessOrder = options.inputAccessOrder;
@@ -95,10 +95,10 @@ const loadMultipleWGSL = <T>(
 
   // TODO: factor out the range checks based on inputOrder (we're going to share that with load_reduced)
 
-  assert && assert( length !== null || outOfRangeValue !== null );
+  assert && assert( lengthExpression !== null || outOfRangeValue !== null );
   assert && assert( workgroupSize );
   assert && assert( grainSize );
-  assert && assert( !length || ( inputOrder === 'blocked' || inputOrder === 'striped' ),
+  assert && assert( !lengthExpression || ( inputOrder === 'blocked' || inputOrder === 'striped' ),
     'If range checks are enabled, inputOrder is required' );
   assert && assert( inputAccessOrder === 'blocked' || inputAccessOrder === 'striped' );
 
@@ -119,14 +119,14 @@ const loadMultipleWGSL = <T>(
       outerDeclarations.push( `let base_blocked_index = ${u32( grainSize )} * ${globalIndex};` );
       loadDeclarations.push( i => `let blocked_index = base_blocked_index + ${u32( i )};` ); // TODO: simplify i=0?
       loadIndexExpression = i => 'blocked_index';
-      if ( length !== null ) {
+      if ( lengthExpression !== null ) {
         // NOTE: only have to do the 'blocked' case, since for striped data we're not supporting blocked access order
         rangeCheckIndexExpression = loadIndexExpression;
       }
     }
     else {
       loadIndexExpression = i => `${u32( grainSize )} * ${globalIndex} + ${u32( i )}`; // TODO: simplify i=0?
-      if ( length !== null ) {
+      if ( lengthExpression !== null ) {
         // NOTE: only have to do the 'blocked' case, since for striped data we're not supporting blocked access order
         rangeCheckIndexExpression = loadIndexExpression;
       }
@@ -134,7 +134,7 @@ const loadMultipleWGSL = <T>(
   }
   else if ( inputAccessOrder === 'striped' ) {
     if ( factorOutSubexpressions ) {
-      if ( inputOrder === 'striped' && length ) {
+      if ( inputOrder === 'striped' && lengthExpression ) {
         outerDeclarations.push( `let base_workgroup = ${workgroupIndex} * ${u32( workgroupSize * grainSize )};` );
         outerDeclarations.push( `let base_striped_index = base_workgroup + ${localIndex};` );
         outerDeclarations.push( `let base_blocked_index = base_workgroup + ${localIndex} * ${u32( grainSize )};` );
@@ -146,7 +146,7 @@ const loadMultipleWGSL = <T>(
       loadDeclarations.push( i => `let striped_index = base_striped_index + ${u32( i * workgroupSize )};` );
       loadIndexExpression = () => 'striped_index';
 
-      if ( length !== null ) {
+      if ( lengthExpression !== null ) {
         if ( inputOrder === 'striped' ) {
           rangeCheckIndexExpression = i => `base_blocked_index + ${u32( i )}`; // TODO: simplify i=0?
         }
@@ -160,7 +160,7 @@ const loadMultipleWGSL = <T>(
     }
     else {
       loadIndexExpression = i => `${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex} + ${u32( i * workgroupSize )}`;
-      if ( length !== null ) {
+      if ( lengthExpression !== null ) {
         if ( inputOrder === 'striped' ) {
           rangeCheckIndexExpression = i => `${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex} * ${u32( grainSize )} + ${u32( i )}`; // TODO: simplify i=0?
         }
@@ -177,10 +177,10 @@ const loadMultipleWGSL = <T>(
     throw new Error( `Unrecognized inputAccessOrder: ${inputAccessOrder}` );
   }
 
-  assert && assert( !rangeCheckIndexExpression === ( length === null ), 'rangeCheckIndexExpression must be created iff length is provided' );
+  assert && assert( !rangeCheckIndexExpression === ( lengthExpression === null ), 'rangeCheckIndexExpression must be created iff length is provided' );
 
   const ifRangeCheck = ( i: number, trueStatements: WGSLStatements, falseStatements: WGSLStatements | null = null ) => {
-    return conditionalIfWGSL( rangeCheckIndexExpression ? `${rangeCheckIndexExpression( i )} < ${length}` : null, trueStatements, falseStatements );
+    return conditionalIfWGSL( rangeCheckIndexExpression ? `${rangeCheckIndexExpression( i )} < ${lengthExpression}` : null, trueStatements, falseStatements );
   };
 
   const indexedLoadStatements = ( varName: WGSLVariableName, i: number, declaration?: string ) => loadExpression ? `

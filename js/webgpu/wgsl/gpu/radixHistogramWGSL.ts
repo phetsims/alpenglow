@@ -15,7 +15,7 @@ export type radixHistogramWGSLOptions = {
 
   // indices up to numBins * Math.ceil( length / ( workgroupSize * grainSize ) )
   storeHistogram: ( index: WGSLExpressionU32, value: WGSLExpressionU32 ) => WGSLStatements;
-} & WithoutNull<WithRequired<histogramWGSLOptions, 'length'>, 'length'>;
+} & WithoutNull<WithRequired<histogramWGSLOptions, 'lengthExpression'>, 'lengthExpression'>;
 
 const radixHistogramWGSL = (
   options: radixHistogramWGSLOptions
@@ -23,7 +23,7 @@ const radixHistogramWGSL = (
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;
-  const length = options.length;
+  const lengthExpression = options.lengthExpression;
   const numBins = options.numBins;
   const storeHistogram = options.storeHistogram;
 
@@ -33,7 +33,7 @@ const radixHistogramWGSL = (
     {
       ${histogramWGSL( options )}
   
-      let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( length, workgroupSize * grainSize )};
+      let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression, workgroupSize * grainSize )};
       if ( workgroup_id.x < num_valid_workgroups ) {
         // Should be uniform control flow for the workgroup
         workgroupBarrier();

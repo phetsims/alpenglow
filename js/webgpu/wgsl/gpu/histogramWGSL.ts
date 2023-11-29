@@ -18,11 +18,11 @@ export type histogramWGSLOptions = {
 
   getBin: ( index: WGSLExpressionU32 ) => WGSLExpressionU32;
 
-  length?: WGSLExpressionU32 | null; // TODO: rename to lengthExpression
+  lengthExpression?: WGSLExpressionU32 | null;
 };
 
 const DEFAULT_OPTIONS = {
-  length: null
+  lengthExpression: null
 } as const;
 
 const histogramWGSL = (
@@ -35,7 +35,7 @@ const histogramWGSL = (
   const grainSize = options.grainSize;
   const histogramScratch = options.histogramScratch;
   const getBin = options.getBin;
-  const length = options.length;
+  const lengthExpression = options.lengthExpression;
 
   return `
     ${commentWGSL( 'begin histogram' )}
@@ -43,7 +43,7 @@ const histogramWGSL = (
       ${coalescedLoopWGSL( {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
-        length: length,
+        lengthExpression: lengthExpression,
         callback: ( localIndex, dataIndex ) => `
           atomicAdd( &${histogramScratch}[ ${getBin( dataIndex )} ], 1u );
         `

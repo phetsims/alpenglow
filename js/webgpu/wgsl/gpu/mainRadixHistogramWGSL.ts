@@ -16,7 +16,7 @@ export type mainRadixHistogramWGSLOptions<T> = {
   pass: number;
   bitsPerPass: number;
 
-  length: WGSLExpressionU32; // TODO: support optional
+  lengthExpression: WGSLExpressionU32; // TODO: support optional
 
   bindings: {
     input: Binding;
@@ -41,7 +41,7 @@ const mainRadixHistogramWGSL = <T>(
   const order = options.order;
   const pass = options.pass;
   const bitsPerPass = options.bitsPerPass;
-  const length = options.length;
+  const lengthExpression = options.lengthExpression;
   const bindings = options.bindings;
 
   return `
@@ -66,7 +66,7 @@ const mainRadixHistogramWGSL = <T>(
         histogramScratch: 'histogram_scratch',
         getBin: index => order.getBitsWGSL( `input[ ${index} ]`, pass * bitsPerPass, bitsPerPass ), // TODO: consider rename of getBin
         numBins: ( 1 << bitsPerPass ),
-        length: length,
+        lengthExpression: lengthExpression,
         storeHistogram: ( index, value ) => `output[ ${index} ] = ${value};`
       } )}
     }
