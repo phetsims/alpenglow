@@ -488,7 +488,8 @@ export { default as ComputePass } from './webgpu/ComputePass.js';
 export { default as Executor } from './webgpu/Executor.js';
 export type { ExecutorOptions } from './webgpu/Executor.js';
 
-export { partialWGSLBeautify, addLineNumbers, stripWGSLComments } from './webgpu/wgsl/WGSLUtils.js';
+export { partialWGSLBeautify, addLineNumbers, stripWGSLComments, GLOBAL_INDEXABLE_DEFAULTS, WORKGROUP_INDEXABLE_DEFAULTS, LOCAL_INDEXABLE_DEFAULTS } from './webgpu/wgsl/WGSLUtils.js';
+export type { GlobalIndexable, WorkgroupIndexable, LocalIndexable } from './webgpu/wgsl/WGSLUtils.js';
 export { default as WGSLContext } from './webgpu/wgsl/WGSLContext.js';
 
 export { default as binaryExpressionStatementWGSL } from './webgpu/wgsl/gpu/binaryExpressionStatementWGSL.js';
@@ -549,6 +550,8 @@ export { default as mainReduceAtomicWGSL } from './webgpu/wgsl/gpu/mainReduceAto
 export type { mainReduceAtomicWGSLOptions } from './webgpu/wgsl/gpu/mainReduceAtomicWGSL.js';
 export { default as mainReduceNonCommutativeWGSL } from './webgpu/wgsl/gpu/mainReduceNonCommutativeWGSL.js';
 export type { mainReduceNonCommutativeWGSLOptions } from './webgpu/wgsl/gpu/mainReduceNonCommutativeWGSL.js';
+export { default as scanComprehensiveWGSL } from './webgpu/wgsl/gpu/scanComprehensiveWGSL.js';
+export type { scanComprehensiveWGSLOptions } from './webgpu/wgsl/gpu/scanComprehensiveWGSL.js';
 
 export { default as SingleReduceModule } from './webgpu/modules/gpu/SingleReduceModule.js';
 export type { SingleReduceModuleOptions } from './webgpu/modules/gpu/SingleReduceModule.js';

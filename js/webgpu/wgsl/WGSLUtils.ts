@@ -6,7 +6,34 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WGSLModuleDeclarations } from '../../imports.js';
+import { alpenglow, WGSLExpressionU32, WGSLModuleDeclarations } from '../../imports.js';
+
+export type GlobalIndexable = {
+  // expression: u32 (the global index of the thread) - overrideable so we can run multiple smaller loads in the same
+  // workgroup if ever desired
+  globalIndex?: WGSLExpressionU32;
+};
+export const GLOBAL_INDEXABLE_DEFAULTS = {
+  globalIndex: 'global_id.x'
+} as const;
+
+export type WorkgroupIndexable = {
+  // expression: u32 (the index of the workgroup) - overrideable so we can run multiple smaller loads in the same
+  // workgroup if ever desired
+  workgroupIndex?: WGSLExpressionU32;
+};
+export const WORKGROUP_INDEXABLE_DEFAULTS = {
+  workgroupIndex: 'workgroup_id.x'
+} as const;
+
+export type LocalIndexable = {
+  // expression: u32 (the index of the thread within the workgroup) - overrideable so we can run multiple smaller loads
+  // in the same workgroup if ever desired
+  localIndex?: WGSLExpressionU32;
+};
+export const LOCAL_INDEXABLE_DEFAULTS = {
+  localIndex: 'local_id.x'
+} as const;
 
 export const partialWGSLBeautify = ( wgsl: WGSLModuleDeclarations ): WGSLModuleDeclarations => {
   const lines = wgsl.split( '\n' ).filter( s => s.trim().length > 0 );

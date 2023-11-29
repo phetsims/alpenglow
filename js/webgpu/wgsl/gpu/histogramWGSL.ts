@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, coalescedLoopWGSL, commentWGSL, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, coalescedLoopWGSL, coalescedLoopWGSLOptions, commentWGSL, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type histogramWGSLOptions = {
@@ -19,7 +19,9 @@ export type histogramWGSLOptions = {
   getBin: ( index: WGSLExpressionU32 ) => WGSLExpressionU32;
 
   lengthExpression?: WGSLExpressionU32 | null;
-};
+} & Pick<coalescedLoopWGSLOptions, 'workgroupIndex' | 'localIndex'>;
+
+type SelfOptions = Pick<histogramWGSLOptions, 'histogramScratch' | 'getBin'>;
 
 const DEFAULT_OPTIONS = {
   lengthExpression: null
@@ -29,21 +31,20 @@ const histogramWGSL = (
   providedOptions: histogramWGSLOptions
 ): WGSLStatements => {
 
-  const options = optionize3<histogramWGSLOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<histogramWGSLOptions, SelfOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
-  const workgroupSize = options.workgroupSize;
-  const grainSize = options.grainSize;
   const histogramScratch = options.histogramScratch;
   const getBin = options.getBin;
-  const lengthExpression = options.lengthExpression;
 
   return `
     ${commentWGSL( 'begin histogram' )}
     {
       ${coalescedLoopWGSL( {
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
-        lengthExpression: lengthExpression,
+        workgroupSize: options.workgroupSize,
+        grainSize: options.grainSize,
+        lengthExpression: options.lengthExpression,
+        workgroupIndex: options.workgroupIndex,
+        localIndex: options.localIndex,
         callback: ( localIndex, dataIndex ) => `
           atomicAdd( &${histogramScratch}[ ${getBin( dataIndex )} ], 1u );
         `
