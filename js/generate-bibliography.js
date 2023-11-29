@@ -228,6 +228,125 @@ const fs = require( 'fs' );
   }` );
   links.Bader2013 = 'https://link.springer.com/chapter/10.1007/978-3-642-31046-1_8';
 
+  await cite.add( `@article{10.1145/1409060.1409088,
+    author = {Nehab, Diego and Hoppe, Hugues},
+    title = {Random-Access Rendering of General Vector Graphics},
+    year = {2008},
+    issue_date = {December 2008},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {27},
+    number = {5},
+    issn = {0730-0301},
+    url = {https://doi.org/10.1145/1409060.1409088},
+    doi = {10.1145/1409060.1409088},
+    abstract = {We introduce a novel representation for random-access rendering of antialiased vector graphics on the GPU, along with efficient encoding and rendering algorithms. The representation supports a broad class of vector primitives, including multiple layers of semitransparent filled and stroked shapes, with quadratic outlines and color gradients. Our approach is to create a coarse lattice in which each cell contains a variable-length encoding of the graphics primitives it overlaps. These cell-specialized encodings are interpreted at runtime within a pixel shader. Advantages include localized memory access and the ability to map vector graphics onto arbitrary surfaces, or under arbitrary deformations. Most importantly, we perform both prefiltering and supersampling within a single pixel shader invocation, achieving inter-primitive antialiasing at no added memory bandwidth cost. We present an efficient encoding algorithm, and demonstrate high-quality real-time rendering of complex, real-world examples.},
+    journal = {ACM Trans. Graph.},
+    month = {dec},
+    articleno = {135},
+    numpages = {10}
+  }` );
+  links[ '10.1145/1409060.1409088' ] = 'https://hhoppe.com/ravg.pdf';
+
+  await cite.add( `@inproceedings{10.1145/2018323.2018337,
+    author = {Laine, Samuli and Karras, Tero},
+    title = {High-Performance Software Rasterization on GPUs},
+    year = {2011},
+    isbn = {9781450308960},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/2018323.2018337},
+    doi = {10.1145/2018323.2018337},
+    abstract = {In this paper, we implement an efficient, completely software-based graphics pipeline on a GPU. Unlike previous approaches, we obey ordering constraints imposed by current graphics APIs, guarantee hole-free rasterization, and support multisample antialiasing. Our goal is to examine the performance implications of not exploiting the fixed-function graphics pipeline, and to discern which additional hardware support would benefit software-based graphics the most.We present significant improvements over previous work in terms of scalability, performance, and capabilities. Our pipeline is malleable and easy to extend, and we demonstrate that in a wide variety of test cases its performance is within a factor of 2--8x compared to the hardware graphics pipeline on a top of the line GPU.Our implementation is open sourced and available at http://code.google.com/p/cudaraster/},
+    booktitle = {Proceedings of the ACM SIGGRAPH Symposium on High Performance Graphics},
+    pages = {79–88},
+    numpages = {10},
+    location = {Vancouver, British Columbia, Canada},
+    series = {HPG '11}
+  }` );
+  links[ '10.1145/2018323.2018337' ] = 'https://research.nvidia.com/sites/default/files/pubs/2011-08_High-Performance-Software-Rasterization/laine2011hpg_paper.pdf';
+
+  await cite.add( `@article{10.1145/2661229.2661274,
+    author = {Ganacim, Francisco and Lima, Rodolfo S. and de Figueiredo, Luiz Henrique and Nehab, Diego},
+    title = {Massively-Parallel Vector Graphics},
+    year = {2014},
+    issue_date = {November 2014},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {33},
+    number = {6},
+    issn = {0730-0301},
+    url = {https://doi.org/10.1145/2661229.2661274},
+    doi = {10.1145/2661229.2661274},
+    abstract = {We present a massively parallel vector graphics rendering pipeline that is divided into two components. The preprocessing component builds a novel adaptive acceleration data structure, the shortcut tree. Tree construction is efficient and parallel at the segment level, enabling dynamic vector graphics. The tree allows efficient random access to the color of individual samples, so the graphics can be warped for special effects. The rendering component processes all samples and pixels in parallel. It was optimized for wide antialiasing filters and a large number of samples per pixel to generate sharp, noise-free images. Our sample scheduler allows pixels with overlapping antialiasing filters to share samples. It groups together samples that can be computed with the same vector operations using little memory or bandwidth. The pipeline is feature-rich, supporting multiple layers of filled paths, each defined by curved outlines (with linear, rational quadratic, and integral cubic B\\'{e}zier segments), clipped against other paths, and painted with semi-transparent colors, gradients, or textures. We demonstrate renderings of complex vector graphics in state-of-the-art quality and performance. Finally, we provide full source-code for our implementation as well as the input data used in the paper.},
+    journal = {ACM Trans. Graph.},
+    month = {nov},
+    articleno = {229},
+    numpages = {14},
+    keywords = {vector graphics, parallel processing, rendering}
+  }` );
+  links[ '10.1145/2661229.2661274' ] = 'https://w3.impa.br/~diego/publications/GanEtAl14.pdf';
+
+  await cite.add( `@inproceedings{10.1145/800248.807360,
+    author = {Catmull, Edwin},
+    title = {A Hidden-Surface Algorithm with Anti-Aliasing},
+    year = {1978},
+    isbn = {9781450379083},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/800248.807360},
+    doi = {10.1145/800248.807360},
+    abstract = {In recent years we have gained understanding about aliasing in computer generated pictures and about methods for reducing the symptoms of aliasing. The chief symptoms are staircasing along edges and objects that pop on and off in time. The method for reducing these symptoms is to filter the image before sampling at the display resolution. One filter that is easy to understand and that works quite effectively is equivalent to integrating the visible intensities over the area that the pixel covers. There have been several implementations of this method - mostly unpublished - however most algorithms break down when the data for the pixel is complicated. Unfortunately, as the quality of displays and the complexity of pictures increase, the small errors that can occur in a single pixel become quite noticeable. A correct solution for this filter requires a hidden-surface algorithm at each pixel! If the data at the pixel is presented as a depth-ordered list of polygons then the average visible intensity can be found using a polygon clipper in a way similar to that employed by two known hidden-surface algorithms. All of the polygons in a pixel are clipped against some front unclipped edge into two lists of polygons. The algorithm is recursively entered with each new list and halts when the front polygon is clipped on all sides, thereby obscuring the polygons behind. The area weighted colors are then returned as the value to be added to the other pieces in the pixel.},
+    booktitle = {Proceedings of the 5th Annual Conference on Computer Graphics and Interactive Techniques},
+    pages = {6–11},
+    numpages = {6},
+    keywords = {Sampling, Aliasing, Computer graphics, Clipping, Hidden-surface removal, Filtering},
+    series = {SIGGRAPH '78}
+    }
+  }` );
+  links[ '10.1145/800248.807360' ] = 'https://dl.acm.org/doi/abs/10.1145/800248.807360';
+
+  await cite.add( `@article{doi:10.1080/2151237X.2005.10129191,
+    author = {Zhouchen Lin, Hai-Tao Chen, Heung-Yeung Shum and Jian Wang},
+    title = {Optimal Polynomial Filters},
+    journal = {Journal of Graphics Tools},
+    volume = {10},
+    number = {1},
+    pages = {27-38},
+    year = {2005},
+    publisher = {Taylor & Francis},
+    doi = {10.1080/2151237X.2005.10129191},
+    URL = {https://doi.org/10.1080/2151237X.2005.10129191},
+    eprint = {https://doi.org/10.1080/2151237X.2005.10129191}
+  }` );
+  links[ 'doi:10.1080/2151237X.2005.10129191' ] = 'https://zhouchenlin.github.io/Publications/2005-JGT-Filter.pdf';
+
+  await cite.add( `@article{doi:10.1080/2151237X.2005.10129189,
+    author = {Zhouchen Lin, Hai-Tao Chen, Heung-Yeung Shum and Jian Wang},
+    title = {Prefiltering Two-Dimensional Polygons without Clipping},
+    journal = {Journal of Graphics Tools},
+    volume = {10},
+    number = {1},
+    pages = {17-26},
+    year = {2005},
+    publisher = {Taylor & Francis},
+    doi = {10.1080/2151237X.2005.10129189},
+    URL = {https://doi.org/10.1080/2151237X.2005.10129189},
+    eprint = {https://doi.org/10.1080/2151237X.2005.10129189}
+  }` );
+  links[ 'doi:10.1080/2151237X.2005.10129189' ] = 'https://zhouchenlin.github.io/Publications/2005-JGT-Render.pdf';
+
+  await cite.add( `@article {10.1111:cgf.12070,
+    journal = {Computer Graphics Forum},
+    title = {{Analytic Rasterization of Curves with Polynomial Filters}},
+    author = {Manson, Josiah and Schaefer, Scott},
+    year = {2013},
+    publisher = {The Eurographics Association and Blackwell Publishing Ltd.},
+    ISSN = {1467-8659},
+    DOI = {10.1111/cgf.12070}
+  }` );
+  links[ '10.1111:cgf.12070' ] = 'https://people.engr.tamu.edu/schaefer/research/scanline.pdf';
+
   const map = {};
   cite.getIds().forEach( id => {
     map[ id ] = {
