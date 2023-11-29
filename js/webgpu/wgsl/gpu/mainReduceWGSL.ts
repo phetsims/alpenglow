@@ -12,16 +12,6 @@ export type mainReduceWGSLOptions<T> = {
   workgroupSize: number;
   grainSize: number;
 
-  // TODO: maybe don't force TypeScript for this location of inPlace
-  bindings: {
-    inPlace?: false;
-    input: Binding;
-    output: Binding;
-  } | {
-    inPlace: true;
-    data: Binding;
-  };
-
   binaryOp: BinaryOp<T>;
 
   // We can stripe the output (so the next layer of reduce can read it as striped)
@@ -36,9 +26,21 @@ export type mainReduceWGSLOptions<T> = {
 
   // e.g. convergent
   reduceOptions?: StrictOmit<reduceWGSLOptions<T>, 'value' | 'scratch' | 'workgroupSize' | 'binaryOp' | 'localIndex' | 'scratchPreloaded' | 'valuePreloaded' | 'mapScratchIndex'>;
-};
+} & ( {
+  inPlace?: false;
+  bindings: {
+    input: Binding;
+    output: Binding;
+  };
+} | {
+  inPlace: true;
+  bindings: {
+    data: Binding;
+  };
+} );
 
 const DEFAULT_OPTIONS = {
+  inPlace: false,
   stripeOutput: false,
   convergentRemap: false,
   loadReducedOptions: {},
@@ -57,23 +59,22 @@ const mainReduceWGSL = <T>(
   const binaryOp = options.binaryOp;
   const stripeOutput = options.stripeOutput;
   const convergentRemap = options.convergentRemap;
-  const bindings = options.bindings;
 
-  const inputName = bindings.inPlace ? 'data' : 'input';
-  const outputName = bindings.inPlace ? 'data' : 'output';
+  const inputName = options.inPlace ? 'data' : 'input';
+  const outputName = options.inPlace ? 'data' : 'output';
 
   // TODO: generate storage binding and variable fully from Binding?
   return `
     
-    ${bindings.inPlace ? `
-      ${bindings.data.location.getWGSLAnnotation()}
-      var<storage, ${bindings.data.getStorageAccess()}> data: array<${binaryOp.type.valueType}>;
+    ${options.inPlace ? `
+      ${options.bindings.data.location.getWGSLAnnotation()}
+      var<storage, ${options.bindings.data.getStorageAccess()}> data: array<${binaryOp.type.valueType}>;
     ` : `
-      ${bindings.input.location.getWGSLAnnotation()}
-      var<storage, ${bindings.input.getStorageAccess()}> input: array<${binaryOp.type.valueType}>;
+      ${options.bindings.input.location.getWGSLAnnotation()}
+      var<storage, ${options.bindings.input.getStorageAccess()}> input: array<${binaryOp.type.valueType}>;
       
-      ${bindings.output.location.getWGSLAnnotation()}
-      var<storage, ${bindings.output.getStorageAccess()}> output: array<${binaryOp.type.valueType}>;
+      ${options.bindings.output.location.getWGSLAnnotation()}
+      var<storage, ${options.bindings.output.getStorageAccess()}> output: array<${binaryOp.type.valueType}>;
     `}
     
     var<workgroup> scratch: array<${binaryOp.type.valueType}, ${workgroupSize}>;
