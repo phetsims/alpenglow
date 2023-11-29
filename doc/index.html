@@ -64,6 +64,8 @@
 
   <script src="../../scenery/doc/extractFunctionJS.js"></script>
 
+  <script src="./citations.js"></script>
+
   <script src="./teapotObj.js"></script>
 
   <style>
@@ -120,6 +122,15 @@
 
     pre.mermaid span {
       text-shadow: none;
+    }
+
+    body {
+      margin-bottom: 30px;
+    }
+
+    #references-container {
+      padding-left: 1.5em;
+      text-indent:-1.5em;
     }
   </style>
 </head>
@@ -542,6 +553,7 @@
               <li><a href="#WGSL-scan">Scan</a></li>
               <li><a href="#WGSL-radixSort">Radix Sort</a></li>
               <li><a href="#WGSL-mergeSort">Merge Sort</a></li>
+              <li><a href="#WGSL-stackMonoid">Stack Monoid</a></li>
               <li><a href="#WGSL-memory">Memory</a></li>
               <li><a href="#WGSL-rationals">Rationals</a></li>
               <li><a href="#WGSL-profiling">Profiling</a></li>
@@ -574,6 +586,7 @@
           <li><a href="#stage-rasterize">Rasterize</a></li>
         </ul>
       </li>
+      <li><a href="#references">References</a></li>
     </ul>
   </div>
   <div class="span8">
@@ -1129,8 +1142,7 @@
     <h4>Line Clipping</h4>
 
     The first primitive we'll need is the ability to find the part of a line segment that is within an axis-aligned
-    bounding rectangle (referred to as bounds). Alpenglow primarily uses <a href="https://aircconline.com/ijcga/V9N3/9319ijcga01.pdf">Another Simple but Faster Method for 2D Line Clipping</a> by
-    Matthes and Drakopoulos (2019).
+    bounding rectangle (referred to as bounds). Alpenglow primarily uses <span class="citation" data-citation-id="Matthes_2019"></span>.
 
     <div class="example">
       <div id="clipping-line-example"></div>
@@ -1227,6 +1239,10 @@
 
     <p class="TODO">
       Stripe clipping gets messed up with fake edges. Vaguely? Investigate.
+    </p>
+
+    <p>
+      Maillot clipping ideas <span class="citation" data-citation-id="10.1145/130881.130894"></span> referenced in <span class="citation" data-citation-id="agoston2005computer"></span>.
     </p>
 
     <h3 id="booleanOperations">Boolean Operations</h3>
@@ -1421,8 +1437,7 @@
       \iint_Px^my^n\,dx\,dy=\frac{m!n!}{(m+n+2)!}\sum_{i}\left[ (x_iy_{i+1}-x_{i+1}y_i) \sum_{p=0}^m\sum_{q=0}^n \binom{p+q}{q}\binom{m+n-p-q}{n-q}x_i^{m-p}x_{i+1}^py_i^{n-q}y_{i+1}^q \right]
       $$
 
-      This was first discovered by Soerjadi (1968) in
-      <a href="https://repository.tudelft.nl/islandora/object/uuid:963296a1-8940-4439-9404-eca1bd2f8638/datastream/OBJ/download">On the Computation of the Moments of a Polygon, with some Applications</a>.
+      This was first discovered by <span class="citation" data-citation-id="Soerjadi1968OnTC"></span>.
       The contributions of each term can be summed up individually to integrate arbitrary polynomials.
     </p>
 
@@ -1508,7 +1523,7 @@
     <h5>Numerical Stability (addendum)</h5>
 
     <p>
-      The above formulas (from <a href="https://leancrew.com/all-this/2018/01/greens-theorem-and-section-properties/">this reference</a>)
+      The above formulas (from <span class="citation" data-citation-id="DrangGreens"></span>)
       seem to magnify floating-point error significantly. It's highly recommended that either of the following methods
       be used for computation:
     </p>
@@ -3336,6 +3351,10 @@
       Organize this section!
     </p>
 
+    <p>
+      Many algorithmic details from <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span>.
+    </p>
+
     <h5>Known bugs</h5>
 
     <p class="TODO">
@@ -3414,10 +3433,6 @@
     </ol>
 
     <h5>Miscellaneous</h5>
-
-    <p class="TODO">
-      Check <a href="https://usegpu.live/">https://usegpu.live/</a> for patterns.
-    </p>
 
     <p class="TODO">
       Unrelated, but get light/dark background changing based on OS setting (auto-dark at night)
@@ -3522,6 +3537,10 @@
     <h4 id="WGSL-reduce">Reduce</h4>
 
     <p>
+      Referenced <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span> and <span class="citation" data-citation-id="KieberEmmonsReduce"></span> in the implementations.
+    </p>
+
+    <p>
       Commutative and non-commutative monoids have to be handled differently. For commutative cases, we can load it
       in a striped memory-access pattern regardless of the original ordering (although we need to know the original
       ordering to do range-based checks). For non-commutative cases, a raked reduce doesn't work well unless we're
@@ -3593,11 +3612,17 @@
       <a href="https://simonbyrne.github.io/notes/fastmath/">Beware fast-math</a>
     </p>
 
+    <h4 id="WGSL-scan">Scan</h4>
+
     <p>
-      <a href="https://kieber-emmons.medium.com/optimizing-parallel-reduction-in-metal-for-apple-m1-8e8677b49b01">Metal Reduce</a>.
+      Referenced <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span> and <span class="citation" data-citation-id="KieberEmmonsPrefixSum"></span> in the implementations.
     </p>
 
-    <h4 id="WGSL-scan">Scan</h4>
+    <p>
+      We're using Hillis-Steele approaches <span class="citation" data-citation-id="10.1145/7902.7903"></span>, but with
+      raking <span class="citation" data-citation-id="223009"></span> approaches from
+      <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span>, with notes from <span class="citation" data-citation-id="LevienPrefixSumVulkan"></span>.
+    </p>
 
     <p class="TODO">
       DOCUMENT TEMPLATES HERE
@@ -3636,12 +3661,11 @@
       comparison might be doing memory loads (or other expensive work), we can get better work efficiency.
     </p>
 
-    <p>
-      <a href="https://kieber-emmons.medium.com/efficient-parallel-prefix-sum-in-metal-for-apple-m1-9e60b974d62">Metal Scan</a>.
-      Levien links: <a href="https://raphlinus.github.io/gpu/2021/11/17/prefix-sum-portable.html">newer</a>, <a href="https://raphlinus.github.io/gpu/2020/04/30/prefix-sum.html">older</a>.
-    </p>
-
     <h4 id="WGSL-radixSort">Radix Sort</h4>
+
+    <p>
+      Referenced <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span> and <span class="citation" data-citation-id="KieberEmmonsRadixSort"></span> in the implementations.
+    </p>
 
     <p class="TODO">
       Scan code for TODOs
@@ -3670,15 +3694,15 @@
     </p>
 
     <p>
-      <a href="https://kieber-emmons.medium.com/memory-bandwidth-optimized-parallel-radix-sort-in-metal-for-apple-m1-and-beyond-4f4590cfd5d3">Metal Radix Sort</a>.
-    </p>
-
-    <p>
       See <a href="https://github.com/fynv/webgpu_math/blob/master/client/radix_sort.js">example</a>, or
       <a href="https://www.reddit.com/r/GraphicsProgramming/comments/14c7gok/parallel_radix_sort_confusions_options/">reddit note</a>.
     </p>
 
     <h4 id="WGSL-mergeSort">Merge Sort</h4>
+
+    <p>
+      Raked merge code from <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span>.
+    </p>
 
     <p class="TODO">
       Implement this, and figure out a way to sort a workgroup's raked worth! We could radix-sort it if we can get bits.
@@ -3690,6 +3714,12 @@
 
     <p>
       Might be possible, see <a href="https://moderngpu.github.io/mergesort.html">ModernGPU merge sort</a>.
+    </p>
+
+    <h4 id="WGSL-stackMonoid">Stack Monoid</h4>
+
+    <p class="TODO">
+      Implement <span class="citation" data-citation-id="levien2022fast"></span>
     </p>
 
     <h4 id="WGSL-memory">Memory</h4>
@@ -4267,7 +4297,8 @@
     </p>
 
     <p>
-      This is inspired by the bulk loading of R-Trees (see <a href="https://dl.acm.org/doi/abs/10.1145/1963190.2025380">Four-dimensional hilbert curves for R-trees</a>, Haverkort et al. 2008).
+      This is inspired by the bulk loading of R-Trees (see <span class="citation" data-citation-id="10.1145/1963190.2025380"></span>),
+      using Hilbert Curve concepts noted in <span class="citation" data-citation-id="Bader2013"></span>.
     </p>
 
     <p>
@@ -4304,6 +4335,11 @@
 
     <p>
       Potentially plan to use bump allocation on the GPU, with a linked list for each edge (with atomic operations).
+    </p>
+
+    <p>
+      NOTE: A great synchronous algorithm for this type of thing is <span class="citation" data-citation-id="10.1145/129902.129906"></span>,
+      but it's very serial.
     </p>
 
     <p class="TODO">
@@ -4965,6 +5001,30 @@ flowchart TD
     <p class="DEFERRED">
       Use frames to split this left side!
     </p>
+
+    <h2 id="references">References</h2>
+
+    <div id="references-container"></div>
+
+    <script>
+      const citationData = citations; // eslint-disable-line no-undef
+
+      document.querySelector( '#references-container' ).innerHTML = citationData.bibliography;
+
+      document.querySelectorAll( '.citation' ).forEach( citation => {
+        const id = citation.getAttribute( 'data-citation-id' );
+        const data = citationData.map[ id ];
+        if ( data ) {
+          const citationText = data.citation;
+          // const citationLink = data.link;
+
+          citation.innerHTML = `<a href="#reference-${id}">${citationText}</a>`;
+        }
+        else {
+          throw new Error( 'missing citation' );
+        }
+      } );
+    </script>
 
     <!-- DO NOT PLACE THINGS UNDER HERE -->
 
