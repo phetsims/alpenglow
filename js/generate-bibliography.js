@@ -365,6 +365,18 @@ const fs = require( 'fs' );
   }` );
   links.BELL2012359 = 'https://research.nvidia.com/publication/2011-10_thrust-productivity-oriented-library-cuda';
 
+  await cite.add( `@article{KilgardBolz2012,
+    author  = {Mark Kilgard and Jeff Bolz},
+    title   = {GPU-accelerated Path Rendering},
+    journal = {ACM Transactions on Graphics (Proceedings of SIGGRAPH Asia 2012)},
+    year    = {2012},
+    volume  = {31},
+    number  = {6},
+    month   = {Nov.},
+    pages   = {to appear},
+  }` );
+  links.KilgardBolz2012 = 'https://developer.nvidia.com/gpu-accelerated-path-rendering';
+
   const map = {};
   cite.getIds().forEach( id => {
     map[ id ] = {

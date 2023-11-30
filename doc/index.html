@@ -88,6 +88,7 @@
 
     .TODO {
       color: red;
+      display: none;
     }
 
     .DEFERRED::before {
@@ -97,6 +98,7 @@
 
     .DEFERRED {
       color: green;
+      display: none;
     }
 
     .example {
@@ -133,6 +135,26 @@
       text-indent:-1.5em;
     }
   </style>
+
+  <script>
+    ( () => {
+      const urlParams = new URLSearchParams( window.location.search );
+      const showTODOs = urlParams.get( 'TODO' ) !== null;
+      if ( showTODOs ) {
+        const style = document.createElement( 'style' );
+        style.type = 'text/css';
+        style.innerHTML = `
+          .TODO {
+            display: inherit !important;
+          }
+          .DEFERRED {
+            display: inherit !important;
+          }
+        `;
+        document.getElementsByTagName( 'head' )[ 0 ].appendChild( style );
+      }
+    } )();
+  </script>
 </head>
 
 <body>
@@ -544,6 +566,7 @@
           <li>
             <a href="#WGSL">WGSL</a>
             <ul class="nav nav-list">
+              <li><a href="#WGSL-newSystem">New System</a></li>
               <li><a href="#WGSL-snippets">Snippets</a></li>
               <li><a href="#WGSL-preprocessing">Preprocessing</a></li>
               <li><a href="#WGSL-minification">Minification</a></li>
@@ -593,9 +616,25 @@
     <h2 id="overview">Overview</h2>
 
     <p>
-      Alpenglow is an experimental rasterizer. It is meant to take in a scene description and efficiently output the
-      corresponding image.
+      Alpenglow is an experimental rasterizer (that takes a scene description and efficiently produces a corresponding
+      high-quality image).
     </p>
+
+    <p>
+      The goal is to have:
+    </p>
+
+    <ul>
+      <li>
+        A high-performance WebGPU rasterizer (<span class="text-info">in progress</span>)
+      </li>
+      <li>
+        A software reference implementation (<span class="text-success">implemented</span>)
+      </li>
+      <li>
+        A potential WebGL 2 fallback (<span class="text-error">not started</span>)
+      </li>
+    </ul>
 
     <p>
       <strong>
@@ -604,7 +643,19 @@
     </p>
 
     <p class="TODO">
-      Get this built and running on GitHub pages
+      Get this built and running on GitHub pages.
+    </p>
+
+    <p class="TODO">
+      Demos should load a placeholder (with a loading indicator?) that has the correct size, so we don't trigger reflows.
+    </p>
+
+    <p class="TODO">
+      Run demos lazily (either when they are close to the scrolled viewport) or on other threads (web workers).
+    </p>
+
+    <p class="TODO">
+      Get light/dark background changing based on OS setting (auto-dark at night)
     </p>
 
     <p class="TODO">
@@ -616,7 +667,11 @@
     </p>
 
     <p class="TODO">
-      Add "loading" indicators for the diagrams, so we don't trigger reflows.
+      Left panel independently scrollable?
+    </p>
+
+    <p class="TODO">
+      Isolate the JS out(!), and move this doc to the top level.
     </p>
 
     <p class="TODO">
@@ -629,29 +684,35 @@
       Improve styling, see <a href="https://getbootstrap.com/2.3.2/scaffolding.html">Old Bootstrap docs</a>.
     </p>
 
-    <h3>Technology: Primarily WebGPU</h3>
+    <h3 id="overview-problems">Problems We're Trying To Solve</h3>
+
+    <ol>
+      <li>
+        Missing the existence of a high-quality and high-performance way to display vector graphics (in the browser,
+        and natively). In particular, we'd like to avoid <a href="#overview-conflation">conflation artifacts</a> and
+        <a href="#overview-aliasingGamma">anti-aliasing and gamma-blending issues</a>
+        without having to resort to expensive multisampling.
+      </li>
+      <li>
+        WebGPU/WGSL is missing a library with reusable generic parallel computation primitives (e.g. reduce/scan/sort),
+        and doesn't have the abstractions built-in to easily support this.
+      </li>
+      <li>
+        Improving the processing of vector graphics primitives to efficiently solve the occlusion/overlapping problem.
+      </li>
+    </ol>
+
+    <h4 id="overview-conflation">Conflation Artifacts</h4>
 
     <p>
-      The goal is to primarily use WebGPU for rendering, but to also support WebGL 2 as much as possible, with software
-      fallback (and for testing/development). In addition to a normal software route, there is a async/await
-      parallelized form that can execute with the same execution model that WebGPU would use (with workgroups, storage
-      buffers, etc.), that is used for validation, testing, and debugging.
-    </p>
-
-    <p class="TODO">
-      Consider WebWorkers, and whether we can use them efficiently for any of the initial steps (instead of putting
-      all the work on the GPU).
-    </p>
-
-    <h3>Methods: Solve the Occlusion Problem First</h3>
-
-    <p>
-      The goal is to solve the problem quickly and with high quality by using polygonal boolean-operation
-      approaches where we can get a list of polygonal faces where each input path is either fully contained or fully
-      excluded in each face. We can then use high-performance approaches to rasterize each face independently, then
-      accumulate while avoiding multisampling and conflation artifacts. Often these faces will be of constant color,
-      which can very efficiently be displayed (we skip the per-pixel blending with the completely-occluded background
-      contents).
+      Many common approaches run into conflation artifacts (from
+      <span class="citation" data-citation-id="KilgardBolz2012"></span>, see
+      <a href="https://github.com/linebender/vello/issues/49">discussion</a> and
+      <a href="https://w3.impa.br/~diego/projects/GanEtAl14/sample.html?contour">examples</a>). These are graphical
+      glitches that occur when coverage is conflated with opacity, and happens in many common approaches (especially
+      with compositing). The source is treating the cases "a red path at 50% opacity fully covers the area" and
+      "a fully-opaque red path covers 50% of the area" as equivalent in later stages, and cases where multiple paths
+      precisely join along a curve may incorrectly show the background in those pixels.
     </p>
 
     <div class="row-fluid">
@@ -751,7 +812,60 @@
     </script>
 
     <p>
-      Also see <a href="https://w3.impa.br/~diego/projects/GanEtAl14/sample.html?contour">more conflation examples</a>.
+      We're able to solve this problem by using a different approach based on polygonal boolean operations, where
+      we can get a list of polygonal faces where each input path is either fully contained or fully
+      excluded in each face. We can then use high-performance approaches to rasterize each face independently, then
+      accumulate while avoiding multisampling and conflation artifacts. Often these faces will be of constant color,
+      which can very efficiently be displayed (we skip the per-pixel blending with the completely-occluded background
+      contents).
+    </p>
+
+    <h4 id="overview-aliasingGamma">Aliasing &amp; Gamma-Incorrect Blending</h4>
+
+    <p>
+      Aliasing is the low-frequency pattern that spuriously appears when we're displaying high-frequency content
+      in a lower-resolution way. In general, we want to reduce these low-frequency patterns without overly introducing
+      blurring. Basic anti-aliasing can help "smooth" things like the jagged edges of lines (e.g. with text), but
+      some approaches aren't general enough to help with other types of aliasing.
+    </p>
+
+    <p>
+      To be correct, blending should be done in the correct color spaces. Many applications choose to blend in
+      non-linear color spaces (e.g. sRGB), which can cause blended colors to look incorrect (usually darker).
+    </p>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span2"></div>
+      <div class="span4 example">
+        <div id="checkerboard-canvas"></div>
+        Canvas
+      </div>
+      <div class="span4 example">
+        <div id="checkerboard-svg"></div>
+        SVG
+      </div>
+      <div class="span2"></div>
+    </div>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span4 example">
+        <div id="checkerboard-box"></div>
+        Alpenglow CPU (Box Filter)
+      </div>
+      <div class="span4 example">
+        <div id="checkerboard-bilinear"></div>
+        Alpenglow CPU (Bilinear Filter)
+      </div>
+      <div class="span4 example">
+        <div id="checkerboard-mitchell-netravali"></div>
+        Alpenglow CPU (Mitchell-Netravali Filter)
+      </div>
+    </div>
+
+    <p>
+      For instance, the following checkerboards (with 3d perspective) have smooth transitions from low to high frequency.
+      Note the pattern should blur to a light gray as it fades in the distance. Visible patterns are a sign of aliasing,
+      and darkening of the pattern is a sign of gamma-incorrect blending.
     </p>
 
     <h2 id="concepts">Concepts</h2>
@@ -1303,8 +1417,6 @@
       scene.addChild( new Path( LinearEdge.polygonsToShape( polygonsB ), {
         stroke: 'green'
       } ) );
-
-      console.log( scene.bounds );
 
       window.addDiagram( 'boolean-operations-example', () => window.createSceneryDiagram(
         scene,
@@ -2426,41 +2538,6 @@
       without overly introducing blurring.
     </p>
 
-    <h5>Checkerboards</h5>
-
-    <p>
-      Checkerboard with 3d perspective has a smooth transition from low to high frequency. Note that the pattern
-      should blur to gray as it fades in the distance. Visible patterns are a sign of aliasing.
-    </p>
-
-    <div class="row-fluid" style="margin-bottom: 15px;">
-      <div class="span2"></div>
-      <div class="span4 example">
-        <div id="checkerboard-canvas"></div>
-        Canvas
-      </div>
-      <div class="span4 example">
-        <div id="checkerboard-svg"></div>
-        SVG
-      </div>
-      <div class="span2"></div>
-    </div>
-
-    <div class="row-fluid" style="margin-bottom: 15px;">
-      <div class="span4 example">
-        <div id="checkerboard-box"></div>
-        Box Filter
-      </div>
-      <div class="span4 example">
-        <div id="checkerboard-bilinear"></div>
-        Bilinear Filter
-      </div>
-      <div class="span4 example">
-        <div id="checkerboard-mitchell-netravali"></div>
-        Mitchell-Netravali Filter
-      </div>
-    </div>
-
     <h5>Siemens Stars</h5>
 
     <p>
@@ -3278,7 +3355,7 @@
     </p>
 
     <p class="TODO">
-      Complete TypeScript switch.
+      Complete TypeScript switch (e.g. testing, raster-clipper, etc.)
     </p>
 
     <p class="TODO">
@@ -3316,6 +3393,68 @@
     <p>
       In WGSL, prefer CamelCase for types, but snake_case for variables/functions. This helps differentiate (a bit)
       the template variables (camcelCase).
+    </p>
+
+    <p class="TODO">
+      Use <code>clearBuffer</code> to zero out buffers (potentially when new), will that flag Dawn to not add barriers
+      and usage switches? (For the parallel execution of dispatches).
+    </p>
+
+    <h5>Notes about WebGPU/WGSL</h5>
+
+    <p>
+      Synchronization notes: onSubmittedWorkDone() are settled in order, and mapAsync() settles before the corresponding
+      onSubmittedWorkDone().
+    </p>
+
+    <h4 id="WGSL-newSystem">New System</h4>
+
+    <h5>Linking/WebGPU System</h5>
+
+    <p>
+      NOTE: We can split up render passes however we want near the end. It should really be about how we structure
+      BindGroupLayout (and thus BindGroups). Ideally we share PipelineLayouts (will guarantee no rebinding).
+    </p>
+
+    <p>
+      Input size =&gt; "abstract" chain. Decide on bind group/pipeline layouts =&gt; "concrete" chain. Pass buffers
+      =&gt; "bound" chain. Can execute that.
+    </p>
+
+    <p>
+      Need to handle use cases where certain resources get swapped out (e.g. the Canvas swap chain).
+    </p>
+
+    <p>
+      NOTE: Changing a bind group of a specific index will trigger a rebind for all higher indices (for performance).
+    </p>
+
+    <p class="TODO">
+      Use (conditionally, based on a boolean) <code>GPUCommandEncoder</code>'s <code>pushDebugGroup</code>,
+      <code>popDebugGroup</code> and <code>insertDebugMarker</code>. Hopefully this will show up in things like
+      RenderDoc/PIX.
+    </p>
+
+    <p class="TODO">
+      Abstract out buffer resource? (especially if we're doing ... dynamic offsets?) - For dynamic offsets, provided
+      in setBindGroup, noted in buffer binding types (BindGroupLayout).
+    </p>
+
+    <p class="TODO">
+      Get an example with "render to Canvas texture" working with the new approach.
+    </p>
+
+    <p>
+      We'll allow a setting at the end of "put every dispatch in its own render pass, so we can get timestamps out
+      for each thing separately".
+    </p>
+
+    <h5>TypeScript system</h5>
+
+    <p class="TODO">
+      Factored out way of handling the "expression or statement" facility, so that things can be specified in a
+      generic way (WGSLContext CAN turn these into function calls, but we would like to do this in places where we
+      do not want function call overhead.
     </p>
 
     <h4 id="WGSL-snippets">Snippets</h4>
@@ -3441,10 +3580,6 @@
     </ol>
 
     <h5>Miscellaneous</h5>
-
-    <p class="TODO">
-      Unrelated, but get light/dark background changing based on OS setting (auto-dark at night)
-    </p>
 
     <p class="TODO">
       Templates should be able to create variable names that are unique.
