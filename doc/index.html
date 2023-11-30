@@ -701,8 +701,9 @@
     <ol>
       <li>
         Need a high-quality and high-performance way to display vector graphics (in the browser,
-        and natively). In particular, we'd like to avoid <a href="#overview-conflation">conflation artifacts</a> and
-        <a href="#overview-aliasingGamma">anti-aliasing/gamma-blending issues</a>
+        and natively). In particular, we'd like to avoid <a href="#overview-conflation">conflation artifacts</a>,
+        <a href="#overview-aliasingGamma">anti-aliasing/gamma-blending issues</a>, and
+        <a href="#overview-gradients">gradient aliasing issues</a>
         without having to resort to expensive techniques like multisampling.
       </li>
       <li>
@@ -874,6 +875,89 @@
       </div>
     </div>
 
+    <script type="module">
+      import { Node, Path } from '../../chipper/dist/js/scenery/js/imports.js';
+      import { RenderStack, RenderPathBoolean, RenderPath, RenderFromNode, PolygonFilterType, RenderDepthSort } from '../../chipper/dist/js/alpenglow/js/imports.js';
+      import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
+      import dot from '../../chipper/dist/js/dot/js/dot.js';
+      const v3 = dot.v3;
+      const v4 = dot.v4;
+      const Matrix3 = dot.Matrix3;
+
+      const getCheckerboard = type => {
+        const width = 128;
+        const height = width / 2;
+
+        const dl = 10;
+
+        const projectionMatrix = RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
+        const rotationMatrix = Matrix3.rotationY( 0.1 ).timesMatrix( Matrix3.rotationX( 0 ) );
+        const project = p => {
+
+          // a rotation, for testing
+          p = rotationMatrix.timesVector3( p.minus( v3( 0, 0, dl ) ) ).plus( v3( 0, 0, dl ) );
+
+          const clip = projectionMatrix.timesVector4( v4( p.x, p.y, p.z, 1 ) );
+          return v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
+        };
+
+        const polygons = [];
+
+        const matrix = Matrix3.scaling( height ).timesMatrix( Matrix3.translation( 1, 0, 0 ) );
+
+        const xSpan = 40;
+        const y = -5;
+        const zMax = 100;
+
+        for ( let x = -xSpan; x < xSpan; x++ ) {
+          for ( let z = 4; z < zMax; z++ ) {
+            if ( ( x + z ) % 2 === 0 ) {
+              continue;
+            }
+            const p0 = matrix.timesVector2( project( v3( x, y, z ) ).toVector2() );
+            const p1 = matrix.timesVector2( project( v3( x + 1, y, z ) ).toVector2() );
+            const p2 = matrix.timesVector2( project( v3( x + 1, y, z + 1 ) ).toVector2() );
+            const p3 = matrix.timesVector2( project( v3( x, y, z + 1 ) ).toVector2() );
+
+            polygons.push( [ p0, p1, p2, p3 ] );
+          }
+        }
+
+        if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+          return window.getSceneryElement(
+            new Node( {
+              renderer: type,
+              children: polygons.map( polygon => new Path( Shape.polygon( polygon ), { fill: 'black' } ) )
+            } ),
+            width, height, 'white', type
+          );
+        }
+        else {
+          const program = new RenderStack( [
+            new RenderPathBoolean(
+              new RenderPath( 'nonzero', polygons ),
+              RenderFromNode.colorFrom( 'black' ),
+              RenderFromNode.colorFrom( 'white' )
+            )
+          ] );
+
+          return window.getRasterizedElement( program, width, height, {
+            polygonFiltering: {
+              box: PolygonFilterType.Box,
+              bilinear: PolygonFilterType.Bilinear,
+              mitchellNetravali: PolygonFilterType.MitchellNetravali
+            }[ type ]
+          } );
+        }
+      };
+
+      window.addDiagram( 'checkerboard-canvas', () => getCheckerboard( 'canvas' ) );
+      window.addDiagram( 'checkerboard-svg', () => getCheckerboard( 'svg' ) );
+      window.addDiagram( 'checkerboard-box', () => getCheckerboard( 'box' ) );
+      window.addDiagram( 'checkerboard-bilinear', () => getCheckerboard( 'bilinear' ) );
+      window.addDiagram( 'checkerboard-mitchell-netravali', () => getCheckerboard( 'mitchellNetravali' ) );
+    </script>
+
     <p>
       For instance, the above checkerboards (with 3d perspective) have smooth transitions from low to high frequency.
       Note the pattern should blur to a light gray as it fades in the distance. Visible patterns are a sign of aliasing,
@@ -881,7 +965,176 @@
     </p>
 
     <p class="TODO">
+      Move the "Filtered Polygons" example somewhere?
+    </p>
+
+    <h4 id="overview-gradients">Gradient Aliasing</h4>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span2"></div>
+      <div class="span4 example">
+        <div id="gradients-canvas"></div>
+        Canvas
+      </div>
+      <div class="span4 example">
+        <div id="gradients-svg"></div>
+        SVG
+      </div>
+      <div class="span2"></div>
+    </div>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span4 example">
+        <div id="gradients-box"></div>
+        Alpenglow CPU (Box Filter)
+      </div>
+      <div class="span4 example">
+        <div id="gradients-bilinear"></div>
+        Alpenglow CPU (Bilinear Filter)
+      </div>
+      <div class="span4 example">
+        <div id="gradients-mitchell-netravali"></div>
+        Alpenglow CPU (Mitchell-Netravali Filter)
+      </div>
+    </div>
+
+    <script type="module">
+      import { Node, Path, LinearGradient, RadialGradient, Color } from '../../chipper/dist/js/scenery/js/imports.js';
+      import { RenderFromNode, PolygonFilterType } from '../../chipper/dist/js/alpenglow/js/imports.js';
+      import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
+      import dot from '../../chipper/dist/js/dot/js/dot.js';
+      const v2 = dot.v2;
+
+      const getGradientAliasing = type => {
+        const width = 128;
+        const height = 128;
+
+        const addColorStops = gradient => {
+          gradient.addColorStop( 0, 'black' );
+
+          for ( let i = 0.2; i < 0.3; i += 0.05 ) {
+            gradient.addColorStop( i, 'white' );
+            gradient.addColorStop( i + 0.0001, 'black' );
+          }
+          for ( let i = 0.3; i < 0.4; i += 0.025269 ) {
+            gradient.addColorStop( i, 'white' );
+            gradient.addColorStop( i + 0.0001, 'blue' );
+          }
+          for ( let i = 0.4; i < 0.5; i += 0.01 ) {
+            gradient.addColorStop( i, 'white' );
+            gradient.addColorStop( i + 0.0001, 'black' );
+          }
+          for ( let i = 0.5; i < 0.6; i += 0.005 ) {
+            gradient.addColorStop( i, 'white' );
+            gradient.addColorStop( i + 0.0001, 'red' );
+          }
+          gradient.addColorStop( 0.6, 'white' );
+          gradient.addColorStop( 0.7, 'black' );
+          gradient.addColorStop( 0.7001, 'white' );
+          gradient.addColorStop( 0.8, 'black' );
+          gradient.addColorStop( 0.8001, 'white' );
+          gradient.addColorStop( 0.81, 'black' );
+          gradient.addColorStop( 0.95, 'white' );
+          gradient.addColorStop( 0.951, 'black' );
+          gradient.addColorStop( 0.952, 'white' );
+          gradient.addColorStop( 0.96, 'white' );
+          gradient.addColorStop( 0.962, 'black' );
+          gradient.addColorStop( 0.964, 'white' );
+          gradient.addColorStop( 0.97, 'white' );
+          gradient.addColorStop( 0.973, 'black' );
+          gradient.addColorStop( 0.976, 'white' );
+          gradient.addColorStop( 0.98, 'white' );
+          gradient.addColorStop( 0.984, 'black' );
+          gradient.addColorStop( 0.988, 'white' );
+          gradient.addColorStop( 1, 'black' );
+        };
+
+        const linear = new LinearGradient( 10, 10, 118, 20 );
+        addColorStops( linear );
+
+        // Oops, tricky to get these to match up exactly.
+        const delta = v2( 108, 10 );
+        const center = phet.dot.Utils.lineLineIntersection( v2( 10, 10 ), v2( 10, 10 ).plus( delta.perpendicular ), v2( 0, 64 ), v2( 128, 64 ) );
+        const radius = delta.magnitude;
+        const rightPoint = phet.dot.Utils.lineLineIntersection( center, center.plus( delta ), v2( 128, 0 ), v2( 128, 128 ) );
+
+        const radial = new RadialGradient( center.x, center.y, 0, center.x, center.y, radius );
+        addColorStops( radial );
+
+        const scene = new Node( {
+          children: [
+            new Path( Shape.polygon( [
+              v2( 0, 0 ),
+              v2( 128, 0 ),
+              rightPoint,
+              center,
+              v2( 0, 64 )
+            ] ), { fill: linear } ),
+            new Path( Shape.polygon( [
+              center,
+              rightPoint,
+              v2( 128, 128 ),
+              v2( 0, 128 ),
+              v2( 0, 64 )
+            ] ), { fill: radial } )
+          ]
+        } );
+
+        if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+          return window.getSceneryElement(
+            scene, width, height, 'white', type
+          );
+        }
+        else {
+          const program = RenderFromNode.addBackgroundColor( RenderFromNode.nodeToRenderProgram( scene ), Color.WHITE );
+
+          return window.getRasterizedElement( program, width, height, {
+            polygonFiltering: {
+              box: PolygonFilterType.Box,
+              bilinear: PolygonFilterType.Bilinear,
+              mitchellNetravali: PolygonFilterType.MitchellNetravali
+            }[ type ]
+          } );
+        }
+      };
+
+      window.addDiagram( 'gradients-canvas', () => getGradientAliasing( 'canvas' ) );
+      window.addDiagram( 'gradients-svg', () => getGradientAliasing( 'svg' ) );
+      window.addDiagram( 'gradients-box', () => getGradientAliasing( 'box' ) );
+      window.addDiagram( 'gradients-bilinear', () => getGradientAliasing( 'bilinear' ) );
+      window.addDiagram( 'gradients-mitchell-netravali', () => getGradientAliasing( 'mitchellNetravali' ) );
+    </script>
+
+    <p>
+      Gradients with color stops close together (e.g. when zoomed out in a user interface) can also create many aliasing patterns.
+      Alpenglow is able to compute exact analytic gradient contributions (based on the exact pixel converage), and with
+      filtering added is able to produce high-quality gradients.
+    </p>
+
+    <p class="TODO">
+      Move the gradient precision example here(!)
+    </p>
+
+    <h4 id="overview-color">Color and Wide-Gamut Support</h4>
+
+    <p class="TODO">
       NOTE that color space handling is a major feature.
+    </p>
+
+    <p class="TODO">
+      NOTE the color blending example, move it here(!)
+    </p>
+
+    <h4 id="overview-upscaling">Image Upscaling</h4>
+
+    <p class="TODO">
+      TODO
+    </p>
+
+    <h4 id="overview-downscaling">Image Downscaling</h4>
+
+    <p class="TODO">
+      TODO
     </p>
 
     <h3 id="overview-relatedWork">Related Work</h3>
@@ -988,6 +1241,7 @@
         New approach to anti-aliasing with filters (evaluating arbitrary polynomial integrals over polygons, based on
         Green's Theorem). It's efficient (allows bilinear filtering with minimal performance burden), and compatible
         with other future segment types (quadratic/cubic Bezier curves, elliptical arcs, etc.).
+        This also allows <a href="#antialiasing-examples">computing exact blurs</a>.
       </li>
       <li>
         New approach to <a href="#depthSort">3D graphics (using the above)</a>, where we compute (exact vector)
@@ -2815,81 +3069,12 @@
     </p>
 
     <script type="module">
-      import { Node, Path } from '../../chipper/dist/js/scenery/js/imports.js';
-      import { RenderStack, RenderPathBoolean, RenderPath, RenderFromNode, PolygonFilterType, RenderDepthSort, RenderColor } from '../../chipper/dist/js/alpenglow/js/imports.js';
+      import { Path } from '../../chipper/dist/js/scenery/js/imports.js';
+      import { RenderStack, RenderPathBoolean, RenderPath, RenderFromNode, PolygonFilterType, RenderColor } from '../../chipper/dist/js/alpenglow/js/imports.js';
       import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
       import dot from '../../chipper/dist/js/dot/js/dot.js';
       const v2 = dot.v2;
-      const v3 = dot.v3;
-      const v4 = dot.v4;
       const Matrix3 = dot.Matrix3;
-
-      const getCheckerboard = type => {
-        const width = 128;
-        const height = width / 2;
-
-        const dl = 10;
-
-        const projectionMatrix = RenderDepthSort.getProjectionMatrix( 1, 100, -1, -1, 1, 1 );
-        const rotationMatrix = Matrix3.rotationY( 0.1 ).timesMatrix( Matrix3.rotationX( 0 ) );
-        const project = p => {
-
-          // a rotation, for testing
-          p = rotationMatrix.timesVector3( p.minus( v3( 0, 0, dl ) ) ).plus( v3( 0, 0, dl ) );
-
-          const clip = projectionMatrix.timesVector4( v4( p.x, p.y, p.z, 1 ) );
-          return v3( clip.x / clip.w, -clip.y / clip.w, clip.z / clip.w );
-        };
-
-        const polygons = [];
-
-        const matrix = Matrix3.scaling( height ).timesMatrix( Matrix3.translation( 1, 0, 0 ) );
-
-        const xSpan = 40;
-        const y = -5;
-        const zMax = 100;
-
-        for ( let x = -xSpan; x < xSpan; x++ ) {
-          for ( let z = 4; z < zMax; z++ ) {
-            if ( ( x + z ) % 2 === 0 ) {
-              continue;
-            }
-            const p0 = matrix.timesVector2( project( v3( x, y, z ) ).toVector2() );
-            const p1 = matrix.timesVector2( project( v3( x + 1, y, z ) ).toVector2() );
-            const p2 = matrix.timesVector2( project( v3( x + 1, y, z + 1 ) ).toVector2() );
-            const p3 = matrix.timesVector2( project( v3( x, y, z + 1 ) ).toVector2() );
-
-            polygons.push( [ p0, p1, p2, p3 ] );
-          }
-        }
-
-        if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
-          return window.getSceneryElement(
-            new Node( {
-              renderer: type,
-              children: polygons.map( polygon => new Path( Shape.polygon( polygon ), { fill: 'black' } ) )
-            } ),
-            width, height, 'white', type
-          );
-        }
-        else {
-          const program = new RenderStack( [
-            new RenderPathBoolean(
-              new RenderPath( 'nonzero', polygons ),
-              RenderFromNode.colorFrom( 'black' ),
-              RenderFromNode.colorFrom( 'white' )
-            )
-          ] );
-
-          return window.getRasterizedElement( program, width, height, {
-            polygonFiltering: {
-              box: PolygonFilterType.Box,
-              bilinear: PolygonFilterType.Bilinear,
-              mitchellNetravali: PolygonFilterType.MitchellNetravali
-            }[ type ]
-          } );
-        }
-      };
 
       const getSiemensStar = ( type, pointCount ) => {
         const width = 128;
@@ -2982,12 +3167,6 @@
           polygonFilterWindowMultiplier: multiplier * window.devicePixelRatio
         } );
       };
-
-      window.addDiagram( 'checkerboard-canvas', () => getCheckerboard( 'canvas' ) );
-      window.addDiagram( 'checkerboard-svg', () => getCheckerboard( 'svg' ) );
-      window.addDiagram( 'checkerboard-box', () => getCheckerboard( 'box' ) );
-      window.addDiagram( 'checkerboard-bilinear', () => getCheckerboard( 'bilinear' ) );
-      window.addDiagram( 'checkerboard-mitchell-netravali', () => getCheckerboard( 'mitchellNetravali' ) );
 
       window.addDiagram( 'siemens-canvas', () => getSiemensStar( 'canvas', 200 ) );
       window.addDiagram( 'siemens-svg', () => getSiemensStar( 'svg', 200 ) );
