@@ -33,7 +33,15 @@ export default class ComputePipeline<BindingMap extends BindingMapType> {
 
     const module = deviceContext.device.createShaderModule( {
       label: name,
-      code: wgsl
+      code: wgsl,
+
+      // Can potentially increase performance, see https://www.w3.org/TR/webgpu/#shader-module-compilation-hints
+      compilationHints: [
+        {
+          entryPoint: 'main',
+          layout: pipelineLayout.layout
+        }
+      ]
     } );
 
     const pipelineDescriptor: GPUComputePipelineDescriptor = {
