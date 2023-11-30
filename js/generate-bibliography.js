@@ -377,6 +377,16 @@ const fs = require( 'fs' );
   }` );
   links.KilgardBolz2012 = 'https://developer.nvidia.com/gpu-accelerated-path-rendering';
 
+  await cite.add( `@book{Wildberger2005,
+    author = {Wildberger, Norman},
+    year = {2005},
+    month = {10},
+    pages = {},
+    title = {Divine Proportions: Rational Trigonometry to Universal geometry},
+    isbn = {0-9757492-0-X}
+  }` );
+  links.Wildberger2005 = 'http://www.ms.lt/derlius/WildbergerDivineProportions.pdf';
+
   const map = {};
   cite.getIds().forEach( id => {
     map[ id ] = {

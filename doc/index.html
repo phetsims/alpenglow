@@ -530,7 +530,15 @@
 <div class="row-fluid">
   <div class="span2 hidden-phone">
     <ul class="nav nav-list">
-      <li><a href="#overview">Overview</a></li>
+      <li>
+        <a href="#overview">Overview</a>
+        <ul class="nav nav-list">
+          <li><a href="#overview-mainChallenges">Main Challenges</a></li>
+          <li><a href="#overview-relatedWork">Related Work</a></li>
+          <li><a href="#overview-contributions">Contributions</a></li>
+          <li><a href="#overview-impact">Desired Impact</a></li>
+        </ul>
+      </li>
       <li>
         <a href="#concepts">Concepts</a>
         <ul class="nav nav-list">
@@ -684,14 +692,18 @@
       Improve styling, see <a href="https://getbootstrap.com/2.3.2/scaffolding.html">Old Bootstrap docs</a>.
     </p>
 
-    <h3 id="overview-problems">Problems We're Trying To Solve</h3>
+    <h3 id="overview-mainChallenges">Main Challenges</h3>
+
+    <p>
+      We're trying to solve the following problems:
+    </p>
 
     <ol>
       <li>
-        Missing the existence of a high-quality and high-performance way to display vector graphics (in the browser,
+        Need a high-quality and high-performance way to display vector graphics (in the browser,
         and natively). In particular, we'd like to avoid <a href="#overview-conflation">conflation artifacts</a> and
-        <a href="#overview-aliasingGamma">anti-aliasing and gamma-blending issues</a>
-        without having to resort to expensive multisampling.
+        <a href="#overview-aliasingGamma">anti-aliasing/gamma-blending issues</a>
+        without having to resort to expensive techniques like multisampling.
       </li>
       <li>
         WebGPU/WGSL is missing a library with reusable generic parallel computation primitives (e.g. reduce/scan/sort),
@@ -863,9 +875,139 @@
     </div>
 
     <p>
-      For instance, the following checkerboards (with 3d perspective) have smooth transitions from low to high frequency.
+      For instance, the above checkerboards (with 3d perspective) have smooth transitions from low to high frequency.
       Note the pattern should blur to a light gray as it fades in the distance. Visible patterns are a sign of aliasing,
       and darkening of the pattern is a sign of gamma-incorrect blending.
+    </p>
+
+    <h3 id="overview-relatedWork">Related Work</h3>
+
+    <h4>GPU Vector Graphics</h4>
+
+    <p>
+      <a href="https://github.com/linebender/vello">Vello</a> is the most similar project, and we've tested integration
+      of it <a href="https://github.com/phetsims/scenery/tree/vello">into Scenery</a>. It's the main inspiration for
+      this project, and we plan to use many components from it. However, it was tricky getting it to work on the web
+      (compiling it for WASM creates a bundle in excess of 5MB), and thus required rewriting the Rust code into TypeScript.
+      At the time it didn't have support for avoiding conflation artifacts, and now (as of writing) it's using a more
+      expensive multisampling approach to reduce the effects of conflation. Additionally, it runs into gamma blending
+      problems, and doesn't support additional color spaces currently. The approach we're using is different enough
+      that it unfortunately can't be integrated into Vello.
+    </p>
+
+    <p>
+      Other libraries that target the GPU for similar rendering include
+      <a href="https://github.com/servo/pathfinder">Pathfinder</a> (discontinued),
+      <a href="https://github.com/google/forma">Forma</a> (not under active development),
+      <a href="https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/src/graphics/lib/compute/spinel/">Spinel</a>,
+      and <a href="https://github.com/flutter/engine/tree/main/impeller">Flutter's Impeller</a>
+    </p>
+
+    <p>
+      Additionally, browsers have some built-in support for GPU-accelerated vector graphics, most notably with
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API">Canvas</a> and
+      <a href="https://developer.mozilla.org/en-US/docs/Web/SVG">SVG</a>. These approaches have decent performance,
+      but performance can be improved with the WebGPU/WebGL solutions above. Additionally, they run into the
+      conflation/gamma/aliasing artifacts previously described (in order to improve their performance).
+    </p>
+
+    <h4>Anti-Aliased Vector Graphics</h4>
+
+    <p class="TODO">
+      TODO
+    </p>
+
+    <h4>WebGPU</h4>
+
+    <p class="TODO">
+      TODO, e.g. Thrust/ModernGPU. Note WebGPU differences, and why we can't use things.
+    </p>
+
+    <h3 id="overview-contributions">Contributions</h3>
+
+    <p>
+      Current contributions:
+    </p>
+
+    <ul>
+      <li>
+        New approach to solving 2D occlusion/overlapping with computational geometry at the start of the rasterization
+        process. Based on our previous work for PhET's <a href="https://github.com/phetsims/kite">computational geometry library</a>,
+        we're able to compute the overlap for many general regions at the same time (but using line segments with
+        rational values for exact intersections and robustness).
+      </li>
+      <li>
+        New approach to anti-aliasing with filters (evaluating arbitrary polynomial integrals over polygons, based on
+        Green's Theorem). It's efficient (allows bilinear filtering with minimal performance burden), and compatible
+        with other future segment types (quadratic/cubic Bezier curves, elliptical arcs, etc.).
+      </li>
+      <li>
+        New approach to 3D graphics (using the above), where we compute (exact vector) occlusion and some perspective-corrected
+        exact integrals (for barycentric-based coordinates on triangular meshes).
+      </li>
+      <li>
+        Initial work for generating WGSL for high-performance computational primitives in generic form (reduce,
+        prefix sum, radix sort, merge sort, stream compaction, etc.).
+      </li>
+    </ul>
+
+    <p>
+      Planned contributions:
+    </p>
+
+    <ul>
+      <li>
+        High-performance WebGPU implementation of the Alpenglow strategy, including the preceding stages (for
+        transformation, conversion to line segments, etc.)
+      </li>
+      <li>
+        Library for generic parallel computation primitives (using code generation/templating with WGSL, or potentially
+        extending WGSL to a new language with templating support).
+      </li>
+      <li>
+        Full integration of Alpenglow WebGPU into <a href="https://github.com/phetsims/scenery">Scenery</a> (as a renderer) and
+        PhET simulations.
+      </li>
+      <li>
+        Further exploration of 3D rasterization using this approach, including general (exact!) perspective-corrected
+        integrals across triangles when displayed.
+      </li>
+      <li>
+        Canvas API replacement that supports a fully vector-based description of the current Canvas state (same
+        drawing commands, but can be resized/queried and has an underling vector representation). Should be able to do
+        this in a high-performance way where we will have the quality of Alpenglow. Drawing over parts of the Canvas
+        will "merge" vector regions into one where appropriate, so we can have a finite-memory representation of the
+        state after an arbitrary number of drawing commands.
+      </li>
+      <li>
+        Static SVG to Alpenglow converter, which will transform SVG files into Alpenglow render programs for display.
+      </li>
+      <li>
+        Extension of the Alpenglow approach to additional curve types (hopefully in a robust way). Intersections for
+        quadratic/cubic Bezier curves and elliptical arcs present some robustness problems. I'd LOVE to investigate
+        rationally-based curves with rational sections (looking into
+        <span class="citation" data-citation-id="Wildberger2005"></span>) to see if we can extend the robust approach.
+      </li>
+    </ul>
+
+    <h3 id="overview-impact">Desired Impact</h3>
+
+    <p>
+      Ideally, Alpenglow would be able to replace the usage of Canvas/SVG (and some WebGL) for the purpose of displaying
+      interactive graphics and UI, both in <a href="https://phet.colorado.edu/">PhET Interactive Simulations</a> and in other projects.
+      Canvas API integration could be a drop-in replacement for existing Canvas usage, with higher-quality output.
+    </p>
+
+    <p>
+      In addition, since the target is to rely on WebGPU, it would be possible to run the same code in native applications
+      (using <a href="https://dawn.googlesource.com/dawn">Dawn</a> or <a href="https://wgpu.rs/">WGPU</a>),
+      or possibly at the OS level. This could be potentially useful for rendering native UIs, or anything that needs
+      scale-independent high-quality graphics.
+    </p>
+
+    <p>
+      It would also allow <a href="https://github.com/phetsims/scenery">Scenery</a> to be a higher-performance solution
+      for interactive graphics and user interfaces on the web, especially in an accessibility-compatible way.
     </p>
 
     <h2 id="concepts">Concepts</h2>
