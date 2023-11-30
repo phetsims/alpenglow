@@ -387,6 +387,84 @@ const fs = require( 'fs' );
   }` );
   links.Wildberger2005 = 'http://www.ms.lt/derlius/WildbergerDivineProportions.pdf';
 
+  await cite.add( `@article {GPUpathtracingSA16,
+    title = {Efficient GPU Path Rendering Using Scanline Rasterization},
+    author = {Rui Li and Qiming Hou and Kun Zhou},
+    journal = {ACM Transactions on Graphics},
+    volume = {35},
+    number = {6},
+    year = {2016}
+  }` );
+  links.GPUpathtracingSA16 = 'http://kunzhou.net/zjugaps/pathrendering/';
+
+  await cite.add( `@inproceedings{loop2005resolution,
+    author = {Loop, Charles and Blinn, Jim},
+    title = {Resolution Independent Curve Rendering using Programmable Graphics Hardware},
+    booktitle = {July 2005 Transactions on Graphics (TOG) - (Siggraph 2005)},
+    year = {2005},
+    month = {January},
+    abstract = {We present a method for resolution independent rendering of paths and bounded regions, defined by quadratic and cubic spline curves, that leverages the parallelism of programmable graphics hardware to achieve high performance. A simple implicit equation for a parametric curve is found in a space that can be thought of as an analog to texture space. The image of a curve’s B'ezier control points are found in this space and assigned to the control points as texture coordinates. When the triangle(s) corresponding to the B'ezier curve control hull are rendered, a pixel shader program evaluates the implicit equation for a pixel’s interpolated texture coordinates to determine an inside/outside test for the curve. We extend our technique to handle anti-aliasing of boundaries. We also construct a vector image from mosaics of triangulated B'ezier control points and show how to deform such images to create resolution independent texture on three dimensional objects.},
+    publisher = {Association for Computing Machinery, Inc.},
+    url = {https://www.microsoft.com/en-us/research/publication/resolution-independent-curve-rendering-using-programmable-graphics-hardware/},
+    journal = {24/3},
+    edition = {July 2005 Transactions on Graphics (TOG) - (Siggraph 2005)}
+  }` );
+  links.loop2005resolution = 'https://www.microsoft.com/en-us/research/wp-content/uploads/2005/01/p1000-loop.pdf';
+
+  await cite.add( `@article{Lengyel2017FontRendering,
+    author =       {Eric Lengyel},
+    title =        {GPU-Centered Font Rendering Directly from Glyph
+                    Outlines},
+    year =         2017,
+    month =        {June},
+    day =          14,
+    journal =      {Journal of Computer Graphics Techniques (JCGT)},
+    volume =       6,
+    number =       2,
+    pages =        {31--47},
+    url =          {http://jcgt.org/published/0006/02/02/},
+    issn =         {2331-7418}
+  }` );
+  links.Lengyel2017FontRendering = 'https://jcgt.org/published/0006/02/02/';
+
+  await cite.add( `@inproceedings{10.1145/1281500.1281665,
+    author = {Green, Chris},
+    title = {Improved Alpha-Tested Magnification for Vector Textures and Special Effects},
+    year = {2007},
+    isbn = {9781450318235},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/1281500.1281665},
+    doi = {10.1145/1281500.1281665},
+    abstract = {A simple and efficient method is presented which allows improved rendering of glyphs composed of curved and linear elements. A distance field is generated from a high resolution image, and then stored into a channel of a lower-resolution texture. In the simplest case, this texture can then be rendered simply by using the alpha-testing and alpha-thresholding feature of modern GPUs, without a custom shader. This allows the technique to be used on even the lowest-end 3D graphics hardware.With the use of programmable shading, the technique is extended to perform various special effect renderings, including soft edges, outlining, drop shadows, multi-colored images, and sharp corners.},
+    booktitle = {ACM SIGGRAPH 2007 Courses},
+    pages = {9–18},
+    numpages = {10},
+    location = {San Diego, California},
+    series = {SIGGRAPH '07}
+  }` );
+  links[ '10.1145/1281500.1281665' ] = 'https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf';
+
+  // eslint-disable-next-line bad-text
+  await cite.add( `@mastersthesis{MCDF,
+    author = {Viktor Chlumský},
+    title = {Shape Decomposition for Multi-channel Distance Fields},
+    year = {2015}
+  }` );
+  links.MCDF = 'https://dspace.cvut.cz/bitstream/handle/10467/62770/F8-DP-2015-Chlumsky-Viktor-thesis.pdf';
+
+  await cite.add( `@book{boissonnat1998algorithmic,
+    title={Algorithmic Geometry},
+    author={Boissonnat, J.D. and Yvinec, M.},
+    isbn={9780521565295},
+    lccn={97019739},
+    url={https://books.google.com/books?id=Ax50ccq_kFAC},
+    year={1998},
+    publisher={Cambridge University Press}
+  }
+  ` );
+  links.boissonnat1998algorithmic = 'https://www.amazon.com/Algorithmic-Geometry-Jean-Daniel-Boissonnat/dp/0521565294';
+
   const map = {};
   cite.getIds().forEach( id => {
     map[ id ] = {

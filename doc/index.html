@@ -880,6 +880,10 @@
       and darkening of the pattern is a sign of gamma-incorrect blending.
     </p>
 
+    <p class="TODO">
+      NOTE that color space handling is a major feature.
+    </p>
+
     <h3 id="overview-relatedWork">Related Work</h3>
 
     <h4>GPU Vector Graphics</h4>
@@ -913,8 +917,35 @@
 
     <h4>Anti-Aliased Vector Graphics</h4>
 
-    <p class="TODO">
-      TODO
+    <p>
+      For filtering-based analytic rasterization, we've explored other recent approaches, including
+      <span class="citation" data-citation-id="doi:10.1080/2151237X.2005.10129191"></span>,
+      <span class="citation" data-citation-id="doi:10.1080/2151237X.2005.10129189"></span>,
+      <span class="citation" data-citation-id="10.1111:cgf.12070"></span>, which could also be included/implemented.
+    </p>
+
+    <p>
+      For the general GPU processing, relevant literature is in
+      <span class="citation" data-citation-id="10.1145/1409060.1409088"></span>,
+      <span class="citation" data-citation-id="10.1145/2018323.2018337"></span>, and
+      <span class="citation" data-citation-id="10.1145/2661229.2661274"></span> are particularly promising, as the
+      inspiring approaches behind Vello.
+      <span class="citation" data-citation-id="GPUpathtracingSA16"></span> could also be explored.
+    </p>
+
+    <p>
+      Especially for text, many approaches look to be patent/license encumbered, most notably the Loop-Blinn approach
+      <span class="citation" data-citation-id="loop2005resolution"></span> (with <a href="https://developer.nvidia.com/gpugems/gpugems3/part-iv-image-effects/chapter-25-rendering-vector-art-gpu">notes</a>).
+      The <a href="https://sluglibrary.com/">Slug</a> library seems like the go-to solution for games, backed by
+      <span class="citation" data-citation-id="Lengyel2017FontRendering"></span>.
+      Signed distance fields like in
+      <span class="citation" data-citation-id="10.1145/1281500.1281665"></span> and
+      <span class="citation" data-citation-id="MCDF"></span> lose too much accuracy for our purposes,
+      however there are examples of <a href="https://www.shadertoy.com/view/4sKyzW">exact Cubic beziers</a> with SDFs
+      which can <a href="https://www.shadertoy.com/view/4sySDK">render text</a>. There are also a few approaches using
+      circular window approaches:
+      <a href="https://wdobbie.com/post/gpu-text-rendering-with-vector-textures/">A</a> and
+      <a href="https://gasiulis.name/vector-graphics-on-gpu/">B</a>.
     </p>
 
     <h4>WebGPU</h4>
@@ -942,12 +973,20 @@
         with other future segment types (quadratic/cubic Bezier curves, elliptical arcs, etc.).
       </li>
       <li>
-        New approach to 3D graphics (using the above), where we compute (exact vector) occlusion and some perspective-corrected
-        exact integrals (for barycentric-based coordinates on triangular meshes).
+        New approach to <a href="#depthSort">3D graphics (using the above)</a>, where we compute (exact vector)
+        occlusion and some perspective-corrected exact integrals (for barycentric-based coordinates on triangular meshes).
+      </li>
+      <li>
+        New approach to recursive clipping of polygons, particularly with the ability to handle degenerate cases
+        in a compact fashion on a GPU.
       </li>
       <li>
         Initial work for generating WGSL for high-performance computational primitives in generic form (reduce,
         prefix sum, radix sort, merge sort, stream compaction, etc.).
+      </li>
+      <li>
+        New approach to <a href="#asyncSimulation">simulating the WebGPU execution model</a> with TypeScript async/await
+        patterns (for evaluation of race conditions, uniformity, indeterminate behavior, etc.).
       </li>
     </ul>
 
