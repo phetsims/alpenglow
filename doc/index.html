@@ -704,7 +704,9 @@
         and natively). In particular, we'd like to avoid <a href="#overview-conflation">conflation artifacts</a>,
         <a href="#overview-aliasingGamma">anti-aliasing/gamma-blending issues</a>, and
         <a href="#overview-gradients">gradient aliasing issues</a>
-        without having to resort to expensive techniques like multisampling.
+        without having to resort to expensive techniques like multisampling. We'd also prefer to
+        <a href="#overview-color">support wide gamut display</a>, and have finer-grained control over image
+        <a href="#overview-upsampling">upsampling</a> and <a href="#overview-downsampling">downsampling</a>.
       </li>
       <li>
         WebGPU/WGSL is missing a library with reusable generic parallel computation primitives (e.g. reduce/scan/sort),
@@ -964,11 +966,7 @@
       and darkening of the pattern is a sign of gamma-incorrect blending.
     </p>
 
-    <p class="TODO">
-      Move the "Filtered Polygons" example somewhere?
-    </p>
-
-    <h4 id="overview-gradients">Gradient Aliasing</h4>
+    <h4 id="overview-gradients">Gradient Aliasing &amp; Precision</h4>
 
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span2"></div>
@@ -1107,31 +1105,146 @@
 
     <p>
       Gradients with color stops close together (e.g. when zoomed out in a user interface) can also create many aliasing patterns.
-      Alpenglow is able to compute exact analytic gradient contributions (based on the exact pixel converage), and with
+      Alpenglow is able to compute exact analytic gradient contributions (based on the exact pixel coverage), and with
       filtering added is able to produce high-quality gradients.
     </p>
 
-    <p class="TODO">
-      Move the gradient precision example here(!)
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span4 example">
+        <div id="gradientPrecision-canvas"></div>
+        Canvas
+      </div>
+      <div class="span4 example">
+        <div id="gradientPrecision-svg"></div>
+        SVG
+      </div>
+      <div class="span4 example">
+        <div id="gradientPrecision-box"></div>
+        Alpenglow CPU (Box Filter)
+      </div>
+    </div>
+
+    <p>
+      Many gradient implementations also have issues with gradients when zoomed in, and may drop or distort gradients
+      in these cases:
     </p>
 
-    <h4 id="overview-color">Color and Wide-Gamut Support</h4>
+    <script type="module">
+      import { Node, Path, LinearGradient, RadialGradient, Color } from '../../chipper/dist/js/scenery/js/imports.js';
+      import { RenderFromNode, PolygonFilterType } from '../../chipper/dist/js/alpenglow/js/imports.js';
+      import { Shape } from '../../chipper/dist/js/kite/js/imports.js';
+      import dot from '../../chipper/dist/js/dot/js/dot.js';
+      const v2 = dot.v2;
+
+      const getGradientPrecision = type => {
+        const width = 128;
+        const height = 128;
+
+        // const left = -3000;
+        // const right = 3000;
+
+        const left = 0;
+        const right = 6000;
+
+        const ratioLeft = ( 0 - left ) / ( right - left );
+        const ratioRight = ( width - left ) / ( right - left );
+
+        const newRatio = ratio => ratioLeft + ratio * ( ratioRight - ratioLeft );
+
+        const addColorStops = gradient => {
+          gradient.addColorStop( 0, 'black' );
+
+          gradient.addColorStop( newRatio( 0 ), 'white' );
+          gradient.addColorStop( newRatio( 0.5 ), 'black' );
+          gradient.addColorStop( newRatio( 0.70 ), 'white' );
+          gradient.addColorStop( newRatio( 0.74 ), 'black' );
+          gradient.addColorStop( newRatio( 0.78 ), 'white' );
+          gradient.addColorStop( newRatio( 0.80 ), 'white' );
+          gradient.addColorStop( newRatio( 0.82 ), 'black' );
+          gradient.addColorStop( newRatio( 0.84 ), 'white' );
+          gradient.addColorStop( newRatio( 0.86 ), 'white' );
+          gradient.addColorStop( newRatio( 0.87 ), 'black' );
+          gradient.addColorStop( newRatio( 0.88 ), 'white' );
+          gradient.addColorStop( newRatio( 0.9 ), 'white' );
+          gradient.addColorStop( newRatio( 0.905 ), 'black' );
+          gradient.addColorStop( newRatio( 0.91 ), 'white' );
+          gradient.addColorStop( newRatio( 0.93 ), 'white' );
+          gradient.addColorStop( newRatio( 0.9325 ), 'black' );
+          gradient.addColorStop( newRatio( 0.935 ), 'white' );
+          gradient.addColorStop( newRatio( 0.95 ), 'white' );
+          gradient.addColorStop( newRatio( 0.951 ), 'black' );
+          gradient.addColorStop( newRatio( 0.952 ), 'white' );
+
+          gradient.addColorStop( 1, 'black' );
+        };
+
+        const linear = new LinearGradient( left, 0, right, 0 );
+        addColorStops( linear );
+
+        const radial = new RadialGradient( left, 64, 0, left, 64, right - left );
+        addColorStops( radial );
+
+        const scene = new Node( {
+          children: [
+            new Path( Shape.polygon( [
+              v2( 0, 0 ),
+              v2( 128, 0 ),
+              v2( 128, 64 ),
+              v2( 0, 64 )
+            ] ), { fill: linear } ),
+            new Path( Shape.polygon( [
+              v2( 0, 64 ),
+              v2( 128, 64 ),
+              v2( 128, 128 ),
+              v2( 0, 128 )
+            ] ), { fill: radial } )
+          ]
+        } );
+
+        if ( type === 'svg' || type === 'canvas' || type === 'vello' ) {
+          return window.getSceneryElement(
+            scene, width, height, 'white', type
+          );
+        }
+        else {
+          const program = RenderFromNode.addBackgroundColor( RenderFromNode.nodeToRenderProgram( scene ), Color.WHITE );
+
+          return window.getRasterizedElement( program, width, height, {
+            polygonFiltering: {
+              box: PolygonFilterType.Box,
+              bilinear: PolygonFilterType.Bilinear,
+              mitchellNetravali: PolygonFilterType.MitchellNetravali
+            }[ type ]
+          } );
+        }
+      };
+
+      window.addDiagram( 'gradientPrecision-canvas', () => getGradientPrecision( 'canvas' ) );
+      window.addDiagram( 'gradientPrecision-svg', () => getGradientPrecision( 'svg' ) );
+      window.addDiagram( 'gradientPrecision-box', () => getGradientPrecision( 'box' ) );
+    </script>
+
+    <h4 id="overview-color">Color Spaces and Wide-Gamut Support</h4>
 
     <p class="TODO">
       NOTE that color space handling is a major feature.
     </p>
 
     <p class="TODO">
-      NOTE the color blending example, move it here(!)
+      Color gamut examples here.
     </p>
 
-    <h4 id="overview-upscaling">Image Upscaling</h4>
+    <p class="TODO">
+      Color blending (gradient) example, move it here(!)
+    </p>
+
+    <h4 id="overview-upsampling">Image Upsampling</h4>
 
     <p class="TODO">
       TODO
     </p>
 
-    <h4 id="overview-downscaling">Image Downscaling</h4>
+    <h4 id="overview-downsampling">Image Downsampling</h4>
 
     <p class="TODO">
       TODO
