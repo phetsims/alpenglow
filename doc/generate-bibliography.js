@@ -483,7 +483,7 @@ const fs = require( 'fs' );
       template: 'apa',
       lang: 'en-US',
       prepend: entry => {
-        return `<div id="${entry.id}">${links[ entry.id ] ? `<a href="reference-${links[ entry.id ]}">` : ''}`;
+        return `<div id="${entry.id}">${links[ entry.id ] ? `<a href="${links[ entry.id ]}">` : ''}`;
       },
       append: entry => {
         return `${links[ entry.id ] ? '</a>' : ''}</div>`;
