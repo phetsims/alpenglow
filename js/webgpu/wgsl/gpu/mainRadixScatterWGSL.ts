@@ -73,8 +73,6 @@ const mainRadixScatterWGSL = <T>(
     var<workgroup> local_histogram_offsets: array<u32, ${u32( 1 << bitsPerPass )}>;
     var<workgroup> start_indices: array<u32, ${workgroupSize * grainSize}>;
     
-    #bindings
-    
     @compute @workgroup_size(${workgroupSize})
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,

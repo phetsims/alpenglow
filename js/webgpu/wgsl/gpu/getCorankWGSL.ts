@@ -14,7 +14,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, commentWGSL, WGSLContext, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type getCorankWGSLOptions = {
@@ -28,23 +28,24 @@ export type getCorankWGSLOptions = {
   // TODO: can we rewrite this as a custom ORDER type?
 
   // => {-1, 0, 1} (i32)
-  compare: ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
+  compare: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32 ) | null;
 
   // used (sometimes) instead of compare if provided
   greaterThan?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
   lessThanOrEqual?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
 };
 
-const DEFAULT_OPTIONS = {
+export const GET_CORANK_DEFAULTS = {
   greaterThan: null,
   lessThanOrEqual: null
 } as const;
 
 const getCorankWGSL = (
+  context: WGSLContext,
   providedOptions: getCorankWGSLOptions
 ): WGSLStatements => {
 
-  const options = optionize3<getCorankWGSLOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+  const options = optionize3<getCorankWGSLOptions>()( {}, GET_CORANK_DEFAULTS, providedOptions );
 
   const value = options.value;
   const outputIndex = options.outputIndex;
@@ -53,6 +54,9 @@ const getCorankWGSL = (
   const compare = options.compare;
   const greaterThan = options.greaterThan;
   const lessThanOrEqual = options.lessThanOrEqual;
+
+  assert && assert( compare || greaterThan, 'One of these should be defined' );
+  assert && assert( compare || lessThanOrEqual, 'One of these should be defined' );
 
   return `
     // TODO: add assertions
@@ -79,13 +83,13 @@ const getCorankWGSL = (
           break;
         }
   
-        if ( ${value} > 0u && gc_j < ${lengthB} && ${greaterThan ? greaterThan( `${value} - 1u`, 'gc_j' ) : `${compare( `${value} - 1u`, 'gc_j' )} > 0i`} ) {
+        if ( ${value} > 0u && gc_j < ${lengthB} && ${greaterThan ? greaterThan( `${value} - 1u`, 'gc_j' ) : `${compare!( `${value} - 1u`, 'gc_j' )} > 0i`} ) {
           gc_delta = ( ${value} - gc_i_low + 1u ) >> 1u;
           gc_j_low = gc_j;
           gc_j = gc_j + gc_delta;
           ${value} = ${value} - gc_delta;
         }
-        else if ( gc_j > 0u && ${value} < ${lengthA} && ${lessThanOrEqual ? lessThanOrEqual( value, 'gc_j - 1u' ) : `${compare( value, 'gc_j - 1u' )} <= 0i`} ) {
+        else if ( gc_j > 0u && ${value} < ${lengthA} && ${lessThanOrEqual ? lessThanOrEqual( value, 'gc_j - 1u' ) : `${compare!( value, 'gc_j - 1u' )} <= 0i`} ) {
           gc_delta = ( gc_j - gc_j_low + 1u ) >> 1u;
           gc_i_low = ${value};
           ${value} = ${value} + gc_delta;

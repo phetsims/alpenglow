@@ -13,10 +13,12 @@ export type WorkgroupSizable = {
   workgroupSize: number;
 };
 
-export type RakedSizable = {
+export type GrainSizable = {
   // the number of elements each thread should process
   grainSize: number;
-} & WorkgroupSizable;
+};
+
+export type RakedSizable = WorkgroupSizable & GrainSizable;
 
 export type GlobalIndexable = {
   // expression: u32 (the global index of the thread) - overrideable so we can run multiple smaller loads in the same

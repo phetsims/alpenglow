@@ -489,7 +489,7 @@ export { default as Executor } from './webgpu/Executor.js';
 export type { ExecutorOptions } from './webgpu/Executor.js';
 
 export { partialWGSLBeautify, addLineNumbers, stripWGSLComments, GLOBAL_INDEXABLE_DEFAULTS, WORKGROUP_INDEXABLE_DEFAULTS, LOCAL_INDEXABLE_DEFAULTS, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS } from './webgpu/wgsl/WGSLUtils.js';
-export type { GlobalIndexable, WorkgroupIndexable, LocalIndexable, WorkgroupSizable, RakedSizable, OptionalLengthExpressionable } from './webgpu/wgsl/WGSLUtils.js';
+export type { GlobalIndexable, WorkgroupIndexable, LocalIndexable, WorkgroupSizable, RakedSizable, OptionalLengthExpressionable, GrainSizable } from './webgpu/wgsl/WGSLUtils.js';
 export { default as WGSLContext } from './webgpu/wgsl/WGSLContext.js';
 
 export { default as binaryExpressionStatementWGSL } from './webgpu/wgsl/gpu/binaryExpressionStatementWGSL.js';
@@ -536,7 +536,7 @@ export { default as nBitCompactSingleSortWGSL } from './webgpu/wgsl/gpu/nBitComp
 export type { nBitCompactSingleSortWGSLOptions } from './webgpu/wgsl/gpu/nBitCompactSingleSortWGSL.js';
 export { default as compactSingleRadixSortWGSL } from './webgpu/wgsl/gpu/compactSingleRadixSortWGSL.js';
 export type { compactSingleRadixSortWGSLOptions } from './webgpu/wgsl/gpu/compactSingleRadixSortWGSL.js';
-export { default as getCorankWGSL } from './webgpu/wgsl/gpu/getCorankWGSL.js';
+export { default as getCorankWGSL, GET_CORANK_DEFAULTS } from './webgpu/wgsl/gpu/getCorankWGSL.js';
 export type { getCorankWGSLOptions } from './webgpu/wgsl/gpu/getCorankWGSL.js';
 export { default as histogramWGSL, HISTOGRAM_DEFAULTS } from './webgpu/wgsl/gpu/histogramWGSL.js';
 export type { histogramWGSLOptions } from './webgpu/wgsl/gpu/histogramWGSL.js';
@@ -552,6 +552,14 @@ export { default as mainReduceNonCommutativeWGSL, MAIN_REDUCE_NON_COMMUTATIVE_DE
 export type { mainReduceNonCommutativeWGSLOptions } from './webgpu/wgsl/gpu/mainReduceNonCommutativeWGSL.js';
 export { default as scanComprehensiveWGSL, SCAN_COMPREHENSIVE_DEFAULTS } from './webgpu/wgsl/gpu/scanComprehensiveWGSL.js';
 export type { scanComprehensiveWGSLOptions } from './webgpu/wgsl/gpu/scanComprehensiveWGSL.js';
+export { default as mergeSequentialWGSL, MERGE_SEQUENTIAL_DEFAULTS } from './webgpu/wgsl/gpu/mergeSequentialWGSL.js';
+export type { mergeSequentialWGSLOptions } from './webgpu/wgsl/gpu/mergeSequentialWGSL.js';
+export { default as mergeSimpleWGSL, MERGE_SIMPLE_DEFAULTS } from './webgpu/wgsl/gpu/mergeSimpleWGSL.js';
+export type { mergeSimpleWGSLOptions } from './webgpu/wgsl/gpu/mergeSimpleWGSL.js';
+export { default as mergeWGSL, MERGE_DEFAULTS } from './webgpu/wgsl/gpu/mergeWGSL.js';
+export type { mergeWGSLOptions } from './webgpu/wgsl/gpu/mergeWGSL.js';
+export { default as mainScanWGSL, MAIN_SCAN_DEFAULTS } from './webgpu/wgsl/gpu/mainScanWGSL.js';
+export type { mainScanWGSLOptions } from './webgpu/wgsl/gpu/mainScanWGSL.js';
 
 export { default as SingleReduceModule } from './webgpu/modules/gpu/SingleReduceModule.js';
 export type { SingleReduceModuleOptions } from './webgpu/modules/gpu/SingleReduceModule.js';

@@ -45,8 +45,6 @@ const mainRadixHistogramWGSL = <T>(
     
     var<workgroup> histogram_scratch: array<atomic<u32>, ${1 << bitsPerPass}>;
     
-    #bindings
-    
     @compute @workgroup_size(${workgroupSize})
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
