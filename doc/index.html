@@ -950,8 +950,25 @@
 
     <h4>WebGPU</h4>
 
-    <p class="TODO">
-      TODO, e.g. Thrust/ModernGPU. Note WebGPU differences, and why we can't use things.
+    <p>
+      High quality libraries for the CUDA interface to GPUs exist, and this work is inspired by
+      <a href="https://github.com/NVIDIA/cccl">Thrust</a> <span class="citation" data-citation-id="BELL2012359"></span>
+      and <a href="https://github.com/moderngpu/moderngpu/wiki">moderngpu</a>
+      <span class="citation" data-citation-id="Baxter:2016:M2"></span>. They serve as prime examples of useful patterns,
+      but can't target WebGPU. In addition, many algorithms rely in forward progress or workgroup communication that
+      WebGPU doesn't offer (in an effort for portability), so we'll need to explore new approaches.
+    </p>
+
+    <p>
+      There are also good shader generation systems, but which don't target WebGPU. Notably
+      <a href="https://github.com/shader-slang/slang">Slang</a>
+      <span class="citation" data-citation-id="10.1145/3197517.3201380"></span>
+      <span class="citation" data-citation-id="bangaru2023slangd"></span>.
+    </p>
+
+    <p>
+      <a href="https://usegpu.live/">Use.GPU</a> takes a novel approach with WebGPU, but focuses on rendering instead of
+      the compute primitives.
     </p>
 
     <h3 id="overview-contributions">Contributions</h3>

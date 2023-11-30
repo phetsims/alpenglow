@@ -465,6 +465,48 @@ const fs = require( 'fs' );
   ` );
   links.boissonnat1998algorithmic = 'https://www.amazon.com/Algorithmic-Geometry-Jean-Daniel-Boissonnat/dp/0521565294';
 
+  await cite.add( `@Unpublished{Baxter:2016:M2,
+    author        = {Baxter, Sean},
+    title         = {moderngpu 2.0},
+    note          = {\\url{https://github.com/moderngpu/moderngpu/wiki}},
+    year          = {2016}
+  }` );
+  links[ 'Baxter:2016:M2' ] = 'https://github.com/moderngpu/moderngpu/wiki';
+
+  await cite.add( `@article{10.1145/3197517.3201380,
+    author = {He, Yong and Fatahalian, Kayvon and Foley, Tim},
+    title = {Slang: Language Mechanisms for Extensible Real-Time Shading Systems},
+    year = {2018},
+    issue_date = {August 2018},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {37},
+    number = {4},
+    issn = {0730-0301},
+    url = {https://doi.org/10.1145/3197517.3201380},
+    doi = {10.1145/3197517.3201380},
+    abstract = {Designers of real-time rendering engines must balance the conflicting goals of maintaining clear, extensible shading systems and achieving high rendering performance. In response, engine architects have established effective design patterns for authoring shading systems, and developed engine-specific code synthesis tools, ranging from preprocessor hacking to domain-specific shading languages, to productively implement these patterns. The problem is that proprietary tools add significant complexity to modern engines, lack advanced language features, and create additional challenges for learning and adoption. We argue that the advantages of engine-specific code generation tools can be achieved using the underlying GPU shading language directly, provided the shading language is extended with a small number of best-practice principles from modern, well-established programming languages. We identify that adding generics with interface constraints, associated types, and interface/structure extensions to existing C-like GPU shading languages enables real-time Tenderer developers to build shading systems that are extensible, maintainable, and execute efficiently on modern GPUs without the need for additional domain-specific tools. We embody these ideas in an extension of HLSL called Slang, and provide a reference design for a large, extensible shader library implemented using Slang's features. We rearchitect an open source Tenderer to use this library and Slang's compiler services, and demonstrate the resulting shading system is substantially simpler, easier to extend with new features, and achieves higher rendering performance than the original HLSL-based implementation.},
+    journal = {ACM Trans. Graph.},
+    month = {jul},
+    articleno = {141},
+    numpages = {13},
+    keywords = {real-time rendering, shading languages}
+  }` );
+  links[ '10.1145/3197517.3201380' ] = 'http://graphics.cs.cmu.edu/projects/slang/he18_slang.pdf';
+
+  await cite.add( `@article{bangaru2023slangd,
+    title       = {SLANG.D: Fast, Modular and Differentiable Shader Programming},
+    author      = {Bangaru, Sai and Wu, Lifan and Li, Tzu-Mao and Munkberg, Jacob and Bernstein, Gilbert and Ragan-Kelley, Jonathan and Durand, Fredo and Lefohn, Aaron and He, Yong},
+    month       = {December},
+    journal     = {ACM Transactions on Graphics (SIGGRAPH Asia)},
+    year        = {2023},
+    volume      = {42},
+    number      = {6},
+    pages       = {1--28},
+    doi         = {10.1145/3618353},
+  }` );
+  links.bangaru2023slangd = 'https://research.nvidia.com/labs/rtr/publication/bangaru2023slangd/';
+
   const map = {};
   cite.getIds().forEach( id => {
     map[ id ] = {
