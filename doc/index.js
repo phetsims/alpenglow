@@ -393,7 +393,7 @@ setTimeout( () => {
   window.pendingDiagrams.forEach( diagram => setTimeout( () => addDiagram( diagram.id, diagram.callback ), 0 ) );
 }, 0 );
 
-window.createSceneryDiagram = ( scene, width, height ) => {
+window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = false ) => {
   const div = document.createElement( 'div' );
   div.style.margin = '0 auto';
   const display = new Display( scene, {
@@ -403,6 +403,9 @@ window.createSceneryDiagram = ( scene, width, height ) => {
     container: div,
     allowCSSHacks: false
   } );
+  if ( needsWhiteBackground ) {
+    display.backgroundColor = '#fff';
+  }
   display.updateDisplay();
   return div;
 };
@@ -916,7 +919,7 @@ window.createSceneryDiagram = ( scene, width, height ) => {
         coordinateLabelsNode
       ]
     } ),
-    outputSize, outputSize
+    outputSize, outputSize, true
   ) );
 
   window.addDiagram( 'polygonal-face-canceling', () => window.createSceneryDiagram(
@@ -928,7 +931,7 @@ window.createSceneryDiagram = ( scene, width, height ) => {
         extraArrowsNode
       ]
     } ),
-    outputSize, outputSize
+    outputSize, outputSize, true
   ) );
 
   window.addDiagram( 'polygonal-face-edge-clips', () => window.createSceneryDiagram(
@@ -940,7 +943,7 @@ window.createSceneryDiagram = ( scene, width, height ) => {
         edgeClipArrowLabelsNode
       ]
     } ),
-    outputSize, outputSize
+    outputSize, outputSize, true
   ) );
 
   window.addDiagram( 'polygonal-face-edge-clipped', () => window.createSceneryDiagram(
@@ -953,7 +956,7 @@ window.createSceneryDiagram = ( scene, width, height ) => {
         edgeClippedArrowLabelsNode
       ]
     } ),
-    outputSize, outputSize
+    outputSize, outputSize, true
   ) );
 }
 
@@ -1031,7 +1034,7 @@ window.createSceneryDiagram = ( scene, width, height ) => {
         interiorNode
       ]
     } ),
-    outputSize, outputSize
+    outputSize, outputSize, true
   ) );
 }
 
@@ -1085,504 +1088,552 @@ window.createSceneryDiagram = ( scene, width, height ) => {
   // TODO: right diagram shows the box-filtered version (for each pixel)
 
   const size = 200;
-  const padding = 4;
 
-  const scale3 = ( size - 2 * padding ) / 3;
-  const scale5 = ( size - 2 * padding ) / 5;
+  const createNodes = () => {
 
-  const matrix3 = Matrix3.translation( padding + scale3, padding + scale3 ).timesMatrix( Matrix3.scaling( scale3 ) );
-  const matrix5 = Matrix3.translation( padding + 2 * scale5, padding + 2 * scale5 ).timesMatrix( Matrix3.scaling( scale5 ) );
+    const padding = 4;
 
-  const shape = new Shape()
-    .moveTo( -2, -1 )
-    .lineTo( -0.7, -0.5 )
-    .lineTo( 0.8, 1.4 )
-    .lineTo( 0.3, -0.7 )
-    .lineTo( 2.4, 0.5 )
-    .lineTo( 3, 2 )
-    .lineTo( 3, 3 )
-    .lineTo( -2, 3 )
-    .close();
-  const shape3 = shape.shapeIntersection( Shape.bounds( new Bounds2( -1, -1, 2, 2 ) ) );
-  const shape5 = shape.shapeIntersection( Shape.bounds( new Bounds2( -2, -2, 3, 3 ) ) );
+    const scale3 = ( size - 2 * padding ) / 3;
+    const scale5 = ( size - 2 * padding ) / 5;
 
-  const createGridShape = ( minX, minY, maxX, maxY ) => {
-    const gridShape = new Shape();
-    for ( let i = minX; i <= maxX; i++ ) {
-      gridShape.moveToPoint( v2( i, minY ) );
-      gridShape.lineToPoint( v2( i, maxY ) );
+    const matrix3 = Matrix3.translation( padding + scale3, padding + scale3 ).timesMatrix( Matrix3.scaling( scale3 ) );
+    const matrix5 = Matrix3.translation( padding + 2 * scale5, padding + 2 * scale5 ).timesMatrix( Matrix3.scaling( scale5 ) );
+
+    const shape = new Shape()
+      .moveTo( -2, -1 )
+      .lineTo( -0.7, -0.5 )
+      .lineTo( 0.8, 1.4 )
+      .lineTo( 0.3, -0.7 )
+      .lineTo( 2.4, 0.5 )
+      .lineTo( 3, 2 )
+      .lineTo( 3, 3 )
+      .lineTo( -2, 3 )
+      .close();
+    const shape3 = shape.shapeIntersection( Shape.bounds( new Bounds2( -1, -1, 2, 2 ) ) );
+    const shape5 = shape.shapeIntersection( Shape.bounds( new Bounds2( -2, -2, 3, 3 ) ) );
+
+    const createGridShape = ( minX, minY, maxX, maxY ) => {
+      const gridShape = new Shape();
+      for ( let i = minX; i <= maxX; i++ ) {
+        gridShape.moveToPoint( v2( i, minY ) );
+        gridShape.lineToPoint( v2( i, maxY ) );
+      }
+      for ( let i = minY; i <= maxY; i++ ) {
+        gridShape.moveToPoint( v2( minX, i ) );
+        gridShape.lineToPoint( v2( maxX, i ) );
+      }
+      return gridShape;
+    };
+
+    const grid3Node = new Path( createGridShape( -1, -1, 2, 2 ).transformed( matrix3 ), {
+      stroke: 'black',
+      lineWidth: 0.5,
+      lineDash: [ 2, 2 ]
+    } );
+    const grid5Node = new Path( createGridShape( -2, -2, 3, 3 ).transformed( matrix5 ), {
+      stroke: 'black',
+      lineWidth: 0.5,
+      lineDash: [ 2, 2 ]
+    } );
+
+    const fill3Node = new Path( shape3.transformed( matrix3 ), {
+      fill: 'rgba(255,0,0,0.7)'
+    } );
+
+    const fill5Node = new Path( shape5.transformed( matrix5 ), {
+      fill: 'rgba(255,0,0,0.7)'
+    } );
+
+    const stroke3Node = new Path( shape3.transformed( matrix3 ), {
+      stroke: 'rgba(60,0,0,0.3)'
+    } );
+
+    const stroke5Node = new Path( shape5.transformed( matrix5 ), {
+      stroke: 'rgba(60,0,0,0.3)'
+    } );
+
+    const samples3Node = new Node( {
+      children: [
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( -0.5, -0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 0.5, -0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 1.5, -0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( -0.5, 0.5 ) ) } ),
+        new Circle( 2, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 0.5, 0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 1.5, 0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( -0.5, 1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 0.5, 1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 1.5, 1.5 ) ) } )
+      ]
+    } );
+
+    const samples5Node = new Node( {
+      children: [
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -1.5, -1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -0.5, -1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 0.5, -1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 1.5, -1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 2.5, -1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -1.5, -0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -0.5, -0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 0.5, -0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 1.5, -0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 2.5, -0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -1.5, 0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -0.5, 0.5 ) ) } ),
+        new Circle( 2, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 0.5, 0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 1.5, 0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 2.5, 0.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -1.5, 1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -0.5, 1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 0.5, 1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 1.5, 1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 2.5, 1.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -1.5, 2.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -0.5, 2.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 0.5, 2.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 1.5, 2.5 ) ) } ),
+        new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 2.5, 2.5 ) ) } )
+      ]
+    } );
+
+    const boxFilter3Node = new Path( Shape.bounds( new Bounds2( 0, 0, 1, 1 ) ).transformed( matrix3 ), {
+      fill: 'rgba(0,100,100,0.7)',
+      stroke: 'black',
+      lineWidth: 1
+    } );
+
+    const boxFilterIntersection3Node = new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0, 0, 1, 1 ) ) ).transformed( matrix3 ), {
+      fill: 'rgba(255,0,0,1)',
+      stroke: 'black'
+    } );
+
+    const bilinearResolution = 256;
+    const bilinearFilterImageData = new ImageData( bilinearResolution, bilinearResolution );
+    const bilinearFilterIntersectionImageData = new ImageData( bilinearResolution, bilinearResolution );
+    for ( let i = 0; i < bilinearResolution; i++ ) {
+      const y = 2 * ( i - ( bilinearResolution - 1 ) / 2 ) / bilinearResolution;
+      for ( let j = 0; j < bilinearResolution; j++ ) {
+        const x = 2 * ( j - ( bilinearResolution - 1 ) / 2 ) / bilinearResolution;
+
+        const value = ( 1 - Math.abs( x ) ) * ( 1 - Math.abs( y ) );
+        bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) ] = 0;
+        bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 1 ] = 100;
+        bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 2 ] = 100;
+        bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 3 ] = 255 * Math.pow( value, 1 / 1.5 );
+
+        const intersects = shape.containsPoint( v2( x + 0.5, y + 0.5 ) );
+        const intersectedValue = intersects ? value : 0;
+        bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) ] = 255;
+        bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) + 1 ] = 0;
+        bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) + 2 ] = 0;
+        bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) + 3 ] = 255 * Math.pow( intersectedValue, 1 / 1.5 );
+      }
     }
-    for ( let i = minY; i <= maxY; i++ ) {
-      gridShape.moveToPoint( v2( minX, i ) );
-      gridShape.lineToPoint( v2( maxX, i ) );
+    const bilinearFilterCanvas = document.createElement( 'canvas' );
+    bilinearFilterCanvas.width = bilinearResolution;
+    bilinearFilterCanvas.height = bilinearResolution;
+    bilinearFilterCanvas.getContext( '2d' ).putImageData( bilinearFilterImageData, 0, 0 );
+    const bilinearFilterIntersectionCanvas = document.createElement( 'canvas' );
+    bilinearFilterIntersectionCanvas.width = bilinearResolution;
+    bilinearFilterIntersectionCanvas.height = bilinearResolution;
+    bilinearFilterIntersectionCanvas.getContext( '2d' ).putImageData( bilinearFilterIntersectionImageData, 0, 0 );
+
+    const cubicResolution = 512;
+    const cubicFilterImageData = new ImageData( cubicResolution, cubicResolution );
+    const cubicFilterIntersectionImageData = new ImageData( cubicResolution, cubicResolution );
+    for ( let i = 0; i < cubicResolution; i++ ) {
+      const y = 4 * ( i - ( cubicResolution - 1 ) / 2 ) / cubicResolution;
+      for ( let j = 0; j < cubicResolution; j++ ) {
+        const x = 4 * ( j - ( cubicResolution - 1 ) / 2 ) / cubicResolution;
+
+        // within 1: (1/6)*((12 - 9*b - 6*c)*t^3 + (-18 + 12*b + 6*c)*t^2 + (6 - 2*b))
+        // outside 1: (1/6)*((-b - 6*c)*t^3 + (6*b + 30*c)*t^2 + (-12*b - 48*c)*t + (8*b + 24*c))
+
+        const absX = Math.abs( x );
+        const absY = Math.abs( y );
+
+        let value = 1;
+        value *= absX < 1 ? ( 7 / 6 * absX * absX * absX - 2 * absX * absX + 8 / 9 ) : ( -7 / 18 * absX * absX * absX + 2 * absX * absX - 10 / 3 * absX + 16 / 9 );
+        value *= absY < 1 ? ( 7 / 6 * absY * absY * absY - 2 * absY * absY + 8 / 9 ) : ( -7 / 18 * absY * absY * absY + 2 * absY * absY - 10 / 3 * absY + 16 / 9 );
+
+        cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) ] = value > 0 ? 0 : 255;
+        cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 1 ] = value > 0 ? 100 : 0;
+        cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 2 ] = value > 0 ? 100 : 0;
+        cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 3 ] = 255 * Math.pow( Math.abs( value ), 1 / 1.5 );
+
+        const intersects = shape.containsPoint( v2( x + 0.5, y + 0.5 ) );
+        const intersectedValue = intersects ? value : 0;
+        cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) ] = intersectedValue > 0 ? 255 : 0;
+        cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) + 1 ] = intersectedValue > 0 ? 0 : 255;
+        cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) + 2 ] = intersectedValue > 0 ? 0 : 255;
+        cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) + 3 ] = 255 * Math.pow( Math.abs( intersectedValue ), 1 / 1.5 );
+      }
     }
-    return gridShape;
+    const cubicFilterCanvas = document.createElement( 'canvas' );
+    cubicFilterCanvas.width = cubicResolution;
+    cubicFilterCanvas.height = cubicResolution;
+    cubicFilterCanvas.getContext( '2d' ).putImageData( cubicFilterImageData, 0, 0 );
+    const cubicFilterIntersectionCanvas = document.createElement( 'canvas' );
+    cubicFilterIntersectionCanvas.width = cubicResolution;
+    cubicFilterIntersectionCanvas.height = cubicResolution;
+    cubicFilterIntersectionCanvas.getContext( '2d' ).putImageData( cubicFilterIntersectionImageData, 0, 0 );
+
+    const bilinearFilter3Node = new Node( {
+      children: [
+        new Path( createGridShape( -0.5, -0.5, 1.5, 1.5 ).transformed( matrix3 ), {
+          stroke: 'black',
+          lineWidth: 0.5
+        } ),
+        new Node( {
+          matrix: matrix3,
+          children: [
+            new Node( {
+              x: 0.5,
+              y: 0.5,
+              scale: 2 / bilinearResolution,
+              children: [
+                new Image( bilinearFilterCanvas, {
+                  x: -bilinearResolution / 2,
+                  y: -bilinearResolution / 2
+                } )
+              ]
+            } )
+          ]
+        } )
+      ]
+    } );
+
+    const bilinearFilterIntersection3Node = new Node( {
+      children: [
+        new Path( createGridShape( -0.5, -0.5, 1.5, 1.5 ).transformed( matrix3 ), {
+          stroke: 'black',
+          lineWidth: 0.5,
+          opacity: 0.3
+        } ),
+        new Node( {
+          matrix: matrix3,
+          children: [
+            new Node( {
+              x: 0.5,
+              y: 0.5,
+              scale: 2 / bilinearResolution,
+              children: [
+                new Image( bilinearFilterIntersectionCanvas, {
+                  x: -bilinearResolution / 2,
+                  y: -bilinearResolution / 2
+                } )
+              ]
+            } )
+          ]
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, -0.5, 0.5, 0.5 ) ) ).transformed( matrix3 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, -0.5, 1.5, 0.5 ) ) ).transformed( matrix3 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, 0.5, 0.5, 1.5 ) ) ).transformed( matrix3 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, 0.5, 1.5, 1.5 ) ) ).transformed( matrix3 ), {
+          stroke: 'black'
+        } )
+      ]
+    } );
+
+    const cubicFilter5Node = new Node( {
+      children: [
+        new Path( createGridShape( -1.5, -1.5, 2.5, 2.5 ).transformed( matrix5 ), {
+          stroke: 'black',
+          lineWidth: 0.5
+        } ),
+        new Node( {
+          matrix: matrix5,
+          children: [
+            new Node( {
+              x: 0.5,
+              y: 0.5,
+              scale: 4 / cubicResolution,
+              children: [
+                new Image( cubicFilterCanvas, {
+                  x: -cubicResolution / 2,
+                  y: -cubicResolution / 2
+                } )
+              ]
+            } )
+          ]
+        } )
+      ]
+    } );
+
+    const cubicFilterIntersection5Node = new Node( {
+      children: [
+        new Path( createGridShape( -1.5, -1.5, 2.5, 2.5 ).transformed( matrix5 ), {
+          stroke: 'black',
+          lineWidth: 0.5,
+          opacity: 0.3
+        } ),
+        new Node( {
+          matrix: matrix5,
+          children: [
+            new Node( {
+              x: 0.5,
+              y: 0.5,
+              scale: 4 / cubicResolution,
+              children: [
+                new Image( cubicFilterIntersectionCanvas, {
+                  x: -cubicResolution / 2,
+                  y: -cubicResolution / 2
+                } )
+              ]
+            } )
+          ]
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, -1.5, -0.5, -0.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, -1.5, 0.5, -0.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, -1.5, 1.5, -0.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, -1.5, 2.5, -0.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, -0.5, -0.5, 0.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, -0.5, 0.5, 0.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, -0.5, 1.5, 0.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, -0.5, 2.5, 0.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, 0.5, -0.5, 1.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, 0.5, 0.5, 1.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, 0.5, 1.5, 1.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, 0.5, 2.5, 1.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, 1.5, -0.5, 2.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, 1.5, 0.5, 2.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, 1.5, 1.5, 2.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } ),
+        new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, 1.5, 2.5, 2.5 ) ) ).transformed( matrix5 ), {
+          stroke: 'black'
+        } )
+      ]
+    } );
+
+    const pixelsLabelNode = new Text( 'Pixel Grid', {
+      font: '10px sans-serif',
+      right: size - 5,
+      top: 3,
+      fill: '#666'
+    } );
+
+    const boxFilterLabel = new Text( 'Box Filter', {
+      font: '12px sans-serif',
+      centerX: size / 2,
+      bottom: size - 5,
+      fill: '#333'
+    } );
+
+    const bilinearFilterLabel = new Text( 'Bilinear Filter', {
+      font: '12px sans-serif',
+      centerX: size / 2,
+      bottom: size - 5,
+      fill: '#333'
+    } );
+
+    const cubicFilterLabel = new Text( 'Mitchell-Netravali Filter', {
+      font: '12px sans-serif',
+      centerX: size / 2,
+      bottom: size - 5,
+      fill: '#333'
+    } );
+
+    const contributionLabel = new Text( 'Contribution (product of both)', {
+      font: '12px sans-serif',
+      centerX: size / 2,
+      bottom: size - 5,
+      fill: '#333'
+    } );
+
+    const polygonLabel = new Text( 'Input Polygon', {
+      font: '12px sans-serif',
+      centerX: size / 2,
+      bottom: size - 5,
+      fill: '#333'
+    } );
+
+    return {
+      samples3Node: samples3Node,
+      fill3Node: fill3Node,
+      grid3Node: grid3Node,
+      pixelsLabelNode: pixelsLabelNode,
+      polygonLabel: polygonLabel,
+      boxFilter3Node: boxFilter3Node,
+      boxFilterLabel: boxFilterLabel,
+      stroke3Node: stroke3Node,
+      boxFilterIntersection3Node: boxFilterIntersection3Node,
+      contributionLabel: contributionLabel,
+      bilinearFilter3Node: bilinearFilter3Node,
+      bilinearFilterLabel: bilinearFilterLabel,
+      bilinearFilterIntersection3Node: bilinearFilterIntersection3Node,
+      samples5Node: samples5Node,
+      fill5Node: fill5Node,
+      grid5Node: grid5Node,
+      cubicFilter5Node: cubicFilter5Node,
+      cubicFilterLabel: cubicFilterLabel,
+      stroke5Node: stroke5Node,
+      cubicFilterIntersection5Node: cubicFilterIntersection5Node
+    };
   };
 
-  const grid3Node = new Path( createGridShape( -1, -1, 2, 2 ).transformed( matrix3 ), {
-    stroke: 'black',
-    lineWidth: 0.5,
-    lineDash: [ 2, 2 ]
-  } );
-  const grid5Node = new Path( createGridShape( -2, -2, 3, 3 ).transformed( matrix5 ), {
-    stroke: 'black',
-    lineWidth: 0.5,
-    lineDash: [ 2, 2 ]
-  } );
-
-  const fill3Node = new Path( shape3.transformed( matrix3 ), {
-    fill: 'rgba(255,0,0,0.7)'
-  } );
-
-  const fill5Node = new Path( shape5.transformed( matrix5 ), {
-    fill: 'rgba(255,0,0,0.7)'
-  } );
-
-  const stroke3Node = new Path( shape3.transformed( matrix3 ), {
-    stroke: 'rgba(60,0,0,0.3)'
-  } );
-
-  const stroke5Node = new Path( shape5.transformed( matrix5 ), {
-    stroke: 'rgba(60,0,0,0.3)'
-  } );
-
-  const samples3Node = new Node( {
-    children: [
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( -0.5, -0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 0.5, -0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 1.5, -0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( -0.5, 0.5 ) ) } ),
-      new Circle( 2, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 0.5, 0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 1.5, 0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( -0.5, 1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 0.5, 1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix3.timesVector2( v2( 1.5, 1.5 ) ) } )
-    ]
-  } );
-
-  const samples5Node = new Node( {
-    children: [
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -1.5, -1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -0.5, -1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 0.5, -1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 1.5, -1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 2.5, -1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -1.5, -0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -0.5, -0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 0.5, -0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 1.5, -0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 2.5, -0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -1.5, 0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -0.5, 0.5 ) ) } ),
-      new Circle( 2, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 0.5, 0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 1.5, 0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 2.5, 0.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -1.5, 1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -0.5, 1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 0.5, 1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 1.5, 1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 2.5, 1.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -1.5, 2.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( -0.5, 2.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 0.5, 2.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 1.5, 2.5 ) ) } ),
-      new Circle( 1, { fill: 'rgb(0,100,100)', translation: matrix5.timesVector2( v2( 2.5, 2.5 ) ) } )
-    ]
-  } );
-
-  const boxFilter3Node = new Path( Shape.bounds( new Bounds2( 0, 0, 1, 1 ) ).transformed( matrix3 ), {
-    fill: 'rgba(0,100,100,0.7)',
-    stroke: 'black',
-    lineWidth: 1
-  } );
-
-  const boxFilterIntersection3Node = new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0, 0, 1, 1 ) ) ).transformed( matrix3 ), {
-    fill: 'rgba(255,0,0,1)',
-    stroke: 'black'
-  } );
-
-  const bilinearResolution = 256;
-  const bilinearFilterImageData = new ImageData( bilinearResolution, bilinearResolution );
-  const bilinearFilterIntersectionImageData = new ImageData( bilinearResolution, bilinearResolution );
-  for ( let i = 0; i < bilinearResolution; i++ ) {
-    const y = 2 * ( i - ( bilinearResolution - 1 ) / 2 ) / bilinearResolution;
-    for ( let j = 0; j < bilinearResolution; j++ ) {
-      const x = 2 * ( j - ( bilinearResolution - 1 ) / 2 ) / bilinearResolution;
-
-      const value = ( 1 - Math.abs( x ) ) * ( 1 - Math.abs( y ) );
-      bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) ] = 0;
-      bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 1 ] = 100;
-      bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 2 ] = 100;
-      bilinearFilterImageData.data[ 4 * ( i * bilinearResolution + j ) + 3 ] = 255 * Math.pow( value, 1 / 1.5 );
-
-      const intersects = shape.containsPoint( v2( x + 0.5, y + 0.5 ) );
-      const intersectedValue = intersects ? value : 0;
-      bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) ] = 255;
-      bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) + 1 ] = 0;
-      bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) + 2 ] = 0;
-      bilinearFilterIntersectionImageData.data[ 4 * ( i * bilinearResolution + j ) + 3 ] = 255 * Math.pow( intersectedValue, 1 / 1.5 );
+  // Lazily create this, since it is slow
+  let createdNodes = null;
+  const getLazyNodes = () => {
+    if ( !createdNodes ) {
+      createdNodes = createNodes();
     }
-  }
-  const bilinearFilterCanvas = document.createElement( 'canvas' );
-  bilinearFilterCanvas.width = bilinearResolution;
-  bilinearFilterCanvas.height = bilinearResolution;
-  bilinearFilterCanvas.getContext( '2d' ).putImageData( bilinearFilterImageData, 0, 0 );
-  const bilinearFilterIntersectionCanvas = document.createElement( 'canvas' );
-  bilinearFilterIntersectionCanvas.width = bilinearResolution;
-  bilinearFilterIntersectionCanvas.height = bilinearResolution;
-  bilinearFilterIntersectionCanvas.getContext( '2d' ).putImageData( bilinearFilterIntersectionImageData, 0, 0 );
+    return createdNodes;
+  };
 
-  const cubicResolution = 512;
-  const cubicFilterImageData = new ImageData( cubicResolution, cubicResolution );
-  const cubicFilterIntersectionImageData = new ImageData( cubicResolution, cubicResolution );
-  for ( let i = 0; i < cubicResolution; i++ ) {
-    const y = 4 * ( i - ( cubicResolution - 1 ) / 2 ) / cubicResolution;
-    for ( let j = 0; j < cubicResolution; j++ ) {
-      const x = 4 * ( j - ( cubicResolution - 1 ) / 2 ) / cubicResolution;
+  window.addDiagram( 'box-diagram', () => {
+    const nodes = getLazyNodes();
 
-      // within 1: (1/6)*((12 - 9*b - 6*c)*t^3 + (-18 + 12*b + 6*c)*t^2 + (6 - 2*b))
-      // outside 1: (1/6)*((-b - 6*c)*t^3 + (6*b + 30*c)*t^2 + (-12*b - 48*c)*t + (8*b + 24*c))
-
-      const absX = Math.abs( x );
-      const absY = Math.abs( y );
-
-      let value = 1;
-      value *= absX < 1 ? ( 7 / 6 * absX * absX * absX - 2 * absX * absX + 8 / 9 ) : ( -7 / 18 * absX * absX * absX + 2 * absX * absX - 10 / 3 * absX + 16 / 9 );
-      value *= absY < 1 ? ( 7 / 6 * absY * absY * absY - 2 * absY * absY + 8 / 9 ) : ( -7 / 18 * absY * absY * absY + 2 * absY * absY - 10 / 3 * absY + 16 / 9 );
-
-      cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) ] = value > 0 ? 0 : 255;
-      cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 1 ] = value > 0 ? 100 : 0;
-      cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 2 ] = value > 0 ? 100 : 0;
-      cubicFilterImageData.data[ 4 * ( i * cubicResolution + j ) + 3 ] = 255 * Math.pow( Math.abs( value ), 1 / 1.5 );
-
-      const intersects = shape.containsPoint( v2( x + 0.5, y + 0.5 ) );
-      const intersectedValue = intersects ? value : 0;
-      cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) ] = intersectedValue > 0 ? 255 : 0;
-      cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) + 1 ] = intersectedValue > 0 ? 0 : 255;
-      cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) + 2 ] = intersectedValue > 0 ? 0 : 255;
-      cubicFilterIntersectionImageData.data[ 4 * ( i * cubicResolution + j ) + 3 ] = 255 * Math.pow( Math.abs( intersectedValue ), 1 / 1.5 );
-    }
-  }
-  const cubicFilterCanvas = document.createElement( 'canvas' );
-  cubicFilterCanvas.width = cubicResolution;
-  cubicFilterCanvas.height = cubicResolution;
-  cubicFilterCanvas.getContext( '2d' ).putImageData( cubicFilterImageData, 0, 0 );
-  const cubicFilterIntersectionCanvas = document.createElement( 'canvas' );
-  cubicFilterIntersectionCanvas.width = cubicResolution;
-  cubicFilterIntersectionCanvas.height = cubicResolution;
-  cubicFilterIntersectionCanvas.getContext( '2d' ).putImageData( cubicFilterIntersectionImageData, 0, 0 );
-
-  const bilinearFilter3Node = new Node( {
-    children: [
-      new Path( createGridShape( -0.5, -0.5, 1.5, 1.5 ).transformed( matrix3 ), {
-        stroke: 'black',
-        lineWidth: 0.5
-      } ),
+    return window.createSceneryDiagram(
       new Node( {
-        matrix: matrix3,
         children: [
           new Node( {
-            x: 0.5,
-            y: 0.5,
-            scale: 2 / bilinearResolution,
             children: [
-              new Image( bilinearFilterCanvas, {
-                x: -bilinearResolution / 2,
-                y: -bilinearResolution / 2
-              } )
+              nodes.samples3Node,
+              nodes.fill3Node,
+              nodes.grid3Node,
+              nodes.pixelsLabelNode,
+              nodes.polygonLabel
             ]
-          } )
-        ]
-      } )
-    ]
-  } );
-
-  const bilinearFilterIntersection3Node = new Node( {
-    children: [
-      new Path( createGridShape( -0.5, -0.5, 1.5, 1.5 ).transformed( matrix3 ), {
-        stroke: 'black',
-        lineWidth: 0.5,
-        opacity: 0.3
-      } ),
-      new Node( {
-        matrix: matrix3,
-        children: [
+          } ),
           new Node( {
-            x: 0.5,
-            y: 0.5,
-            scale: 2 / bilinearResolution,
+            x: size,
             children: [
-              new Image( bilinearFilterIntersectionCanvas, {
-                x: -bilinearResolution / 2,
-                y: -bilinearResolution / 2
-              } )
+              nodes.grid3Node,
+              nodes.boxFilter3Node,
+              nodes.pixelsLabelNode,
+              nodes.boxFilterLabel
+            ]
+          } ),
+          new Node( {
+            x: 2 * size,
+            children: [
+              nodes.grid3Node,
+              nodes.stroke3Node,
+              nodes.boxFilterIntersection3Node,
+              nodes.pixelsLabelNode,
+              nodes.contributionLabel
             ]
           } )
         ]
       } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, -0.5, 0.5, 0.5 ) ) ).transformed( matrix3 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, -0.5, 1.5, 0.5 ) ) ).transformed( matrix3 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, 0.5, 0.5, 1.5 ) ) ).transformed( matrix3 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, 0.5, 1.5, 1.5 ) ) ).transformed( matrix3 ), {
-        stroke: 'black'
-      } )
-    ]
+      3 * size, size, true
+    );
   } );
 
-  const cubicFilter5Node = new Node( {
-    children: [
-      new Path( createGridShape( -1.5, -1.5, 2.5, 2.5 ).transformed( matrix5 ), {
-        stroke: 'black',
-        lineWidth: 0.5
-      } ),
+  window.addDiagram( 'bilinear-diagram', () => {
+    const nodes = getLazyNodes();
+
+    return window.createSceneryDiagram(
       new Node( {
-        matrix: matrix5,
         children: [
           new Node( {
-            x: 0.5,
-            y: 0.5,
-            scale: 4 / cubicResolution,
             children: [
-              new Image( cubicFilterCanvas, {
-                x: -cubicResolution / 2,
-                y: -cubicResolution / 2
-              } )
+              nodes.samples3Node,
+              nodes.fill3Node,
+              nodes.grid3Node,
+              nodes.pixelsLabelNode,
+              nodes.polygonLabel
             ]
-          } )
-        ]
-      } )
-    ]
-  } );
-
-  const cubicFilterIntersection5Node = new Node( {
-    children: [
-      new Path( createGridShape( -1.5, -1.5, 2.5, 2.5 ).transformed( matrix5 ), {
-        stroke: 'black',
-        lineWidth: 0.5,
-        opacity: 0.3
-      } ),
-      new Node( {
-        matrix: matrix5,
-        children: [
+          } ),
           new Node( {
-            x: 0.5,
-            y: 0.5,
-            scale: 4 / cubicResolution,
+            x: size,
             children: [
-              new Image( cubicFilterIntersectionCanvas, {
-                x: -cubicResolution / 2,
-                y: -cubicResolution / 2
-              } )
+              nodes.grid3Node,
+              nodes.bilinearFilter3Node,
+              nodes.pixelsLabelNode,
+              nodes.bilinearFilterLabel
+            ]
+          } ),
+          new Node( {
+            x: 2 * size,
+            children: [
+              nodes.grid3Node,
+              nodes.stroke3Node,
+              nodes.bilinearFilterIntersection3Node,
+              nodes.pixelsLabelNode,
+              nodes.contributionLabel
             ]
           } )
         ]
       } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, -1.5, -0.5, -0.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, -1.5, 0.5, -0.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, -1.5, 1.5, -0.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, -1.5, 2.5, -0.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, -0.5, -0.5, 0.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, -0.5, 0.5, 0.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, -0.5, 1.5, 0.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, -0.5, 2.5, 0.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, 0.5, -0.5, 1.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, 0.5, 0.5, 1.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, 0.5, 1.5, 1.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, 0.5, 2.5, 1.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -1.5, 1.5, -0.5, 2.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( -0.5, 1.5, 0.5, 2.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 0.5, 1.5, 1.5, 2.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } ),
-      new Path( shape.shapeIntersection( Shape.bounds( new Bounds2( 1.5, 1.5, 2.5, 2.5 ) ) ).transformed( matrix5 ), {
-        stroke: 'black'
-      } )
-    ]
+      3 * size, size, true
+    );
   } );
 
-  const pixelsLabelNode = new Text( 'Pixel Grid', {
-    font: '10px sans-serif',
-    right: size - 5,
-    top: 3,
-    fill: '#666'
+  window.addDiagram( 'mitchell-netravali-diagram', () => {
+    const nodes = getLazyNodes();
+
+    return window.createSceneryDiagram(
+      new Node( {
+        children: [
+          new Node( {
+            children: [
+              nodes.samples5Node,
+              nodes.fill5Node,
+              nodes.grid5Node,
+              nodes.pixelsLabelNode,
+              nodes.polygonLabel
+            ]
+          } ),
+          new Node( {
+            x: size,
+            children: [
+              nodes.grid5Node,
+              nodes.cubicFilter5Node,
+              nodes.pixelsLabelNode,
+              nodes.cubicFilterLabel
+            ]
+          } ),
+          new Node( {
+            x: 2 * size,
+            children: [
+              nodes.grid5Node,
+              nodes.stroke5Node,
+              nodes.cubicFilterIntersection5Node,
+              nodes.pixelsLabelNode,
+              nodes.contributionLabel
+            ]
+          } )
+        ]
+      } ),
+      3 * size, size, true
+    );
   } );
-
-  const boxFilterLabel = new Text( 'Box Filter', {
-    font: '12px sans-serif',
-    centerX: size / 2,
-    bottom: size - 5,
-    fill: '#333'
-  } );
-
-  const bilinearFilterLabel = new Text( 'Bilinear Filter', {
-    font: '12px sans-serif',
-    centerX: size / 2,
-    bottom: size - 5,
-    fill: '#333'
-  } );
-
-  const cubicFilterLabel = new Text( 'Mitchell-Netravali Filter', {
-    font: '12px sans-serif',
-    centerX: size / 2,
-    bottom: size - 5,
-    fill: '#333'
-  } );
-
-  const contributionLabel = new Text( 'Contribution (product of both)', {
-    font: '12px sans-serif',
-    centerX: size / 2,
-    bottom: size - 5,
-    fill: '#333'
-  } );
-
-  const polygonLabel = new Text( 'Input Polygon', {
-    font: '12px sans-serif',
-    centerX: size / 2,
-    bottom: size - 5,
-    fill: '#333'
-  } );
-
-  window.addDiagram( 'box-diagram', () => window.createSceneryDiagram(
-    new Node( {
-      children: [
-        new Node( {
-          children: [
-            samples3Node,
-            fill3Node,
-            grid3Node,
-            pixelsLabelNode,
-            polygonLabel
-          ]
-        } ),
-        new Node( {
-          x: size,
-          children: [
-            grid3Node,
-            boxFilter3Node,
-            pixelsLabelNode,
-            boxFilterLabel
-          ]
-        } ),
-        new Node( {
-          x: 2 * size,
-          children: [
-            grid3Node,
-            stroke3Node,
-            boxFilterIntersection3Node,
-            pixelsLabelNode,
-            contributionLabel
-          ]
-        } )
-      ]
-    } ),
-    3 * size, size
-  ) );
-
-  window.addDiagram( 'bilinear-diagram', () => window.createSceneryDiagram(
-    new Node( {
-      children: [
-        new Node( {
-          children: [
-            samples3Node,
-            fill3Node,
-            grid3Node,
-            pixelsLabelNode,
-            polygonLabel
-          ]
-        } ),
-        new Node( {
-          x: size,
-          children: [
-            grid3Node,
-            bilinearFilter3Node,
-            pixelsLabelNode,
-            bilinearFilterLabel
-          ]
-        } ),
-        new Node( {
-          x: 2 * size,
-          children: [
-            grid3Node,
-            stroke3Node,
-            bilinearFilterIntersection3Node,
-            pixelsLabelNode,
-            contributionLabel
-          ]
-        } )
-      ]
-    } ),
-    3 * size, size
-  ) );
-
-  window.addDiagram( 'mitchell-netravali-diagram', () => window.createSceneryDiagram(
-    new Node( {
-      children: [
-        new Node( {
-          children: [
-            samples5Node,
-            fill5Node,
-            grid5Node,
-            pixelsLabelNode,
-            polygonLabel
-          ]
-        } ),
-        new Node( {
-          x: size,
-          children: [
-            grid5Node,
-            cubicFilter5Node,
-            pixelsLabelNode,
-            cubicFilterLabel
-          ]
-        } ),
-        new Node( {
-          x: 2 * size,
-          children: [
-            grid5Node,
-            stroke5Node,
-            cubicFilterIntersection5Node,
-            pixelsLabelNode,
-            contributionLabel
-          ]
-        } )
-      ]
-    } ),
-    3 * size, size
-  ) );
 }
 
 {

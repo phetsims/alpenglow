@@ -77,6 +77,30 @@ body {
   margin-bottom: 30px;
 }
 
+@media (prefers-color-scheme: light) {
+  body {
+    color: #333;
+    background-color: #fff;
+  }
+
+  code, pre {
+    color: #333;
+    background-color: #eee;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #eee;
+    background-color: #222;
+  }
+
+  code, pre {
+    color: #eee;
+    background-color: #333;
+  }
+}
+
 #references-container {
   padding-left: 1.5em;
   text-indent:-1.5em;
