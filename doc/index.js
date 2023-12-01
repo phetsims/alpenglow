@@ -165,6 +165,11 @@ window.createRenderProgramSandbox = ( id, func, width, height, providedOptions )
 
   const parentElement = document.getElementById( id );
 
+  // remove all children
+  while ( parentElement.firstChild ) {
+    parentElement.removeChild( parentElement.firstChild );
+  }
+
   const displayContainerElement = document.createElement( 'div' );
   !options.showInstructions && parentElement.appendChild( displayContainerElement );
 
@@ -374,6 +379,12 @@ setTimeout( () => {
     const container = document.getElementById( id );
     if ( container ) {
       const diagram = callback();
+
+      // Remove all children (especially any placeholders)
+      while ( container.firstChild ) {
+        container.removeChild( container.firstChild );
+      }
+
       container.appendChild( diagram );
     }
   };
@@ -2172,9 +2183,15 @@ window.createSceneryDiagram = ( scene, width, height ) => {
         return canvas;
       };
 
-      document.getElementById( 'rasterize-initial-demo' ).appendChild( await createCanvas( 16 ) );
+      // remove all children
+      const demoElement = document.getElementById( 'rasterize-initial-demo' );
+      while ( demoElement.firstChild ) {
+        demoElement.removeChild( demoElement.firstChild );
+      }
 
-      document.getElementById( 'rasterize-initial-demo' ).appendChild( document.createElement( 'br' ) );
+      demoElement.appendChild( await createCanvas( 16 ) );
+
+      demoElement.appendChild( document.createElement( 'br' ) );
 
       const transparencyDemoContainer = document.createElement( 'div' );
       transparencyDemoContainer.style.margin = '10px 20px';
@@ -2182,7 +2199,7 @@ window.createSceneryDiagram = ( scene, width, height ) => {
       transparencyDemoContainer.style.position = 'relative';
       transparencyDemoContainer.style.width = `${outputSize}px`;
       transparencyDemoContainer.style.height = `${outputSize}px`;
-      document.getElementById( 'rasterize-initial-demo' ).appendChild( transparencyDemoContainer );
+      demoElement.appendChild( transparencyDemoContainer );
       for ( let i = 16; i > 0; i-- ) {
         const canvas = await createCanvas( i );
         canvas.style.position = 'absolute';
@@ -2198,7 +2215,7 @@ window.createSceneryDiagram = ( scene, width, height ) => {
       brightnessDemoContainer.style.position = 'relative';
       brightnessDemoContainer.style.width = `${outputSize}px`;
       brightnessDemoContainer.style.height = `${outputSize}px`;
-      document.getElementById( 'rasterize-initial-demo' ).appendChild( brightnessDemoContainer );
+      demoElement.appendChild( brightnessDemoContainer );
       for ( let i = 16; i > 0; i-- ) {
         const canvas = await createCanvas( i );
         canvas.style.position = 'absolute';

@@ -227,11 +227,7 @@
     </p>
 
     <p class="TODO">
-      Get this built and running on GitHub pages.
-    </p>
-
-    <p class="TODO">
-      Demos should load a placeholder (with a loading indicator?) that has the correct size, so we don't trigger reflows.
+      Get the clipping diagrams actually lazily executing (they are doing the work before anything else).
     </p>
 
     <p class="TODO">
@@ -252,10 +248,6 @@
 
     <p class="TODO">
       Left panel independently scrollable?
-    </p>
-
-    <p class="TODO">
-      Isolate the JS out(!), and move this doc to the top level.
     </p>
 
     <p class="TODO">
@@ -308,15 +300,15 @@
 
     <div class="row-fluid">
       <div class="span4 example">
-        <div id="conflation-canvas"></div>
+        <div id="conflation-canvas"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Conflation artifacts (Canvas)
       </div>
       <div class="span4 example">
-        <div id="conflation-svg"></div>
+        <div id="conflation-svg"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Conflation artifacts (SVG)
       </div>
       <div class="span4 example">
-        <div id="conflation-default"></div>
+        <div id="conflation-default"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         No artifacts (Alpenglow CPU)
       </div>
     </div>
@@ -347,11 +339,11 @@
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span2"></div>
       <div class="span4 example">
-        <div id="checkerboard-canvas"></div>
+        <div id="checkerboard-canvas"><div class="example placeholder" style="width: 128px; height: 64px;"></div></div>
         Canvas
       </div>
       <div class="span4 example">
-        <div id="checkerboard-svg"></div>
+        <div id="checkerboard-svg"><div class="example placeholder" style="width: 128px; height: 64px;"></div></div>
         SVG
       </div>
       <div class="span2"></div>
@@ -359,15 +351,15 @@
 
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span4 example">
-        <div id="checkerboard-box"></div>
+        <div id="checkerboard-box"><div class="example placeholder" style="width: 128px; height: 64px;"></div></div>
         Alpenglow CPU (Box Filter)
       </div>
       <div class="span4 example">
-        <div id="checkerboard-bilinear"></div>
+        <div id="checkerboard-bilinear"><div class="example placeholder" style="width: 128px; height: 64px;"></div></div>
         Alpenglow CPU (Bilinear Filter)
       </div>
       <div class="span4 example">
-        <div id="checkerboard-mitchell-netravali"></div>
+        <div id="checkerboard-mitchell-netravali"><div class="example placeholder" style="width: 128px; height: 64px;"></div></div>
         Alpenglow CPU (Mitchell-Netravali Filter)
       </div>
     </div>
@@ -383,11 +375,11 @@
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span2"></div>
       <div class="span4 example">
-        <div id="gradients-canvas"></div>
+        <div id="gradients-canvas"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Canvas
       </div>
       <div class="span4 example">
-        <div id="gradients-svg"></div>
+        <div id="gradients-svg"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         SVG
       </div>
       <div class="span2"></div>
@@ -395,15 +387,15 @@
 
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span4 example">
-        <div id="gradients-box"></div>
+        <div id="gradients-box"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Alpenglow CPU (Box Filter)
       </div>
       <div class="span4 example">
-        <div id="gradients-bilinear"></div>
+        <div id="gradients-bilinear"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Alpenglow CPU (Bilinear Filter)
       </div>
       <div class="span4 example">
-        <div id="gradients-mitchell-netravali"></div>
+        <div id="gradients-mitchell-netravali"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Alpenglow CPU (Mitchell-Netravali Filter)
       </div>
     </div>
@@ -416,15 +408,15 @@
 
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span4 example">
-        <div id="gradientPrecision-canvas"></div>
+        <div id="gradientPrecision-canvas"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Canvas
       </div>
       <div class="span4 example">
-        <div id="gradientPrecision-svg"></div>
+        <div id="gradientPrecision-svg"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         SVG
       </div>
       <div class="span4 example">
-        <div id="gradientPrecision-box"></div>
+        <div id="gradientPrecision-box"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Alpenglow CPU (Box Filter)
       </div>
     </div>
@@ -654,7 +646,7 @@
     </p>
 
     <div class="example">
-      <div id="polygonal-face-example"></div>
+      <div id="polygonal-face-example"><div class="example placeholder" style="width: 256px; height: 256px;"></div></div>
     </div>
 
     <p>
@@ -729,7 +721,7 @@
     </p>
 
     <div class="example">
-      <div id="polygonal-face-canceling"></div>
+      <div id="polygonal-face-canceling"><div class="example placeholder" style="width: 256px; height: 256px;"></div></div>
     </div>
 
     <p>
@@ -769,7 +761,7 @@
     </p>
 
     <div class="example">
-      <div id="polygonal-face-edge-clips"></div>
+      <div id="polygonal-face-edge-clips"><div class="example placeholder" style="width: 256px; height: 256px;"></div></div>
     </div>
 
     <p>
@@ -777,7 +769,7 @@
     </p>
 
     <div class="example">
-      <div id="polygonal-face-edge-clipped"></div>
+      <div id="polygonal-face-edge-clipped"><div class="example placeholder" style="width: 256px; height: 256px;"></div></div>
     </div>
 
     <p>
@@ -820,7 +812,7 @@
     bounding rectangle (referred to as bounds). Alpenglow primarily uses <span class="citation" data-citation-id="Matthes_2019"></span>.
 
     <div class="example">
-      <div id="clipping-line-example"></div>
+      <div id="clipping-line-example"><div class="example placeholder" style="width: 256px; height: 256px;"></div></div>
     </div>
 
     <p class="TODO">Documentation</p>
@@ -861,7 +853,7 @@
     </p>
 
     <div class="example">
-      <div id="boolean-operations-example"></div>
+      <div id="boolean-operations-example"><div class="example placeholder" style="width: 340px; height: 300px;"></div></div>
       Example boolean operation, intersection shown in blue, differences shown in red and green.
     </div>
 
@@ -1397,7 +1389,7 @@
     <h5>Box Filter</h5>
 
     <div class="example">
-      <div id="box-diagram"></div>
+      <div id="box-diagram"><div class="example placeholder" style="width: 600px; height: 200px;"></div></div>
     </div>
 
     <p>
@@ -1408,7 +1400,7 @@
     <h5>Bilinear Filter</h5>
 
     <div class="example">
-      <div id="bilinear-diagram"></div>
+      <div id="bilinear-diagram"><div class="example placeholder" style="width: 600px; height: 200px;"></div></div>
     </div>
 
     <p>
@@ -1428,7 +1420,7 @@
     <h5>Mitchell-Netravali Filter</h5>
 
     <div class="example">
-      <div id="mitchell-netravali-diagram"></div>
+      <div id="mitchell-netravali-diagram"><div class="example placeholder" style="width: 600px; height: 200px;"></div></div>
     </div>
 
     <p>
@@ -1475,11 +1467,11 @@
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span2"></div>
       <div class="span4 example">
-        <div id="siemens-canvas"></div>
+        <div id="siemens-canvas"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Canvas
       </div>
       <div class="span4 example">
-        <div id="siemens-svg"></div>
+        <div id="siemens-svg"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         SVG
       </div>
       <div class="span2"></div>
@@ -1487,15 +1479,15 @@
 
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span4 example">
-        <div id="siemens-box"></div>
+        <div id="siemens-box"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Box Filter
       </div>
       <div class="span4 example">
-        <div id="siemens-bilinear"></div>
+        <div id="siemens-bilinear"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Bilinear Filter
       </div>
       <div class="span4 example">
-        <div id="siemens-mitchell-netravali"></div>
+        <div id="siemens-mitchell-netravali"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
         Mitchell-Netravali Filter
       </div>
     </div>
@@ -1510,22 +1502,22 @@
 
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span6 example">
-        <div id="blur-reference"></div>
+        <div id="blur-reference"><div class="example placeholder" style="width: 150px; height: 150px;"></div></div>
         Reference (Dirac Delta)
       </div>
       <div class="span6 example">
-        <div id="blur-box"></div>
+        <div id="blur-box"><div class="example placeholder" style="width: 150px; height: 150px;"></div></div>
         Box Filter
       </div>
     </div>
 
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span6 example">
-        <div id="blur-bilinear"></div>
+        <div id="blur-bilinear"><div class="example placeholder" style="width: 150px; height: 150px;"></div></div>
         Bilinear Filter
       </div>
       <div class="span6 example">
-        <div id="blur-mitchell-netravali"></div>
+        <div id="blur-mitchell-netravali"><div class="example placeholder" style="width: 150px; height: 150px;"></div></div>
         Mitchell-Netravali Filter
       </div>
     </div>
@@ -1613,7 +1605,7 @@
     </p>
 
     <div class="example">
-      <div id="RenderColor-example"></div>
+      <div id="RenderColor-example"><div class="example placeholder" style="width: 512px; height: 128px;"></div></div>
     </div>
 
     <p>
@@ -1630,7 +1622,7 @@
     </p>
 
     <div class="example">
-      <div id="RenderPathBoolean-example"></div>
+      <div id="RenderPathBoolean-example"><div class="example placeholder" style="width: 512px; height: 128px;"></div></div>
     </div>
 
     <h4 id="RenderStack">RenderStack</h4>
@@ -1641,7 +1633,7 @@
     </p>
 
     <div class="example">
-      <div id="RenderStack-example"></div>
+      <div id="RenderStack-example"><div class="example placeholder" style="width: 512px; height: 128px;"></div></div>
     </div>
 
     <h4 id="RenderLinearBlend">RenderLinearBlend</h4>
@@ -1658,7 +1650,7 @@
     </p>
 
     <div class="example">
-      <div id="RenderLinearBlend-example"></div>
+      <div id="RenderLinearBlend-example"><div class="example placeholder" style="width: 512px; height: 128px;"></div></div>
     </div>
 
     <h4 id="RenderLinearGradient">RenderLinearGradient</h4>
@@ -1668,7 +1660,7 @@
     </p>
 
     <div class="example">
-      <div id="RenderLinearGradient-example"></div>
+      <div id="RenderLinearGradient-example"><div class="example placeholder" style="width: 512px; height: 128px;"></div></div>
     </div>
 
     <p class="TODO">
@@ -1689,7 +1681,7 @@
     </p>
 
     <div class="example">
-      <div id="RenderRadialBlend-example"></div>
+      <div id="RenderRadialBlend-example"><div class="example placeholder" style="width: 512px; height: 128px;"></div></div>
     </div>
 
     <h4 id="RenderRadialGradient">RenderRadialGradient</h4>
@@ -1699,7 +1691,7 @@
     </p>
 
     <div class="example">
-      <div id="RenderRadialGradient-example"></div>
+      <div id="RenderRadialGradient-example"><div class="example placeholder" style="width: 512px; height: 128px;"></div></div>
     </div>
 
     <p class="TODO">The split "Reflect" extend type seems to be reversed from the desired behavior!</p>
@@ -1715,7 +1707,7 @@
     </p>
 
     <div class="example">
-      <div id="RenderBlendCompose-example"></div>
+      <div id="RenderBlendCompose-example"><div class="example placeholder" style="width: 512px; height: 128px;"></div></div>
     </div>
 
     <p class="TODO">Add blend type example, once text is easier, like https://learn.microsoft.com/en-us/windows/win32/direct2d/blend</p>
@@ -1827,7 +1819,7 @@
     </p>
 
     <div class="example">
-      <div id="execution-instructions-example"></div>
+      <div id="execution-instructions-example"><div class="example placeholder" style="width: 512px; height: 128px;"></div></div>
     </div>
 
     <p class="TODO">
@@ -2544,15 +2536,15 @@
 
     <div class="row-fluid" style="margin-bottom: 15px;">
       <div class="span4 example">
-        <div id="teapot-faces"></div>
+        <div id="teapot-faces"><div class="example placeholder" style="width: 200px; height: 200px;"></div></div>
         Faces
       </div>
       <div class="span4 example">
-        <div id="teapot-normals"></div>
+        <div id="teapot-normals"><div class="example placeholder" style="width: 200px; height: 200px;"></div></div>
         Interpolated Normals
       </div>
       <div class="span4 example">
-        <div id="teapot-phong"></div>
+        <div id="teapot-phong"><div class="example placeholder" style="width: 200px; height: 200px;"></div></div>
         Phong
       </div>
     </div>
@@ -2563,7 +2555,7 @@
     </p>
 
     <div class="example">
-      <div id="transparent-3d"></div>
+      <div id="transparent-3d"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
     </div>
 
     <p class="TODO">
@@ -3009,7 +3001,7 @@
         while the other images adjust the transparency/brightness of the pixels by which stage they were rasterized in
         (showing the binary subdivision of the rasterization, and the early-exit for parts of paths that are fully included).
       </p>
-      <div id="rasterize-initial-demo"></div>
+      <div id="rasterize-initial-demo"><div class="example placeholder" style="width: 512px; height: 512px;"></div></div>
     </div>
 
     <p>

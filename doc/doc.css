@@ -36,6 +36,23 @@
   text-align: center;
 }
 
+.placeholder {
+  background-color: #eee;
+  position: relative;
+}
+
+.placeholder::before {
+  content: "loading...";
+  color: #aaa;
+
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
 .nav-list {
   padding-left: 8px;
   padding-right: 0px;
