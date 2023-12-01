@@ -1,0 +1,66 @@
+
+.CodeMirror {
+  height: auto;
+  border-radius: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.errors {
+  border: 1px solid red;
+}
+
+.TODO::before {
+  content: "TODO: ";
+  font-weight: bold;
+}
+
+.TODO {
+  color: red;
+  display: none;
+}
+
+.DEFERRED::before {
+  content: "Deferred: ";
+  font-weight: bold;
+}
+
+.DEFERRED {
+  color: green;
+  display: none;
+}
+
+.example {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.nav-list {
+  padding-left: 8px;
+  padding-right: 0px;
+}
+
+.nav-list li {
+  line-height: 10px;
+  font-size: 90%;
+}
+
+pre.mermaid {
+  margin: 0 auto;
+  background-color: transparent;
+  border: none;
+}
+
+pre.mermaid span {
+  text-shadow: none;
+}
+
+body {
+  margin-bottom: 30px;
+}
+
+#references-container {
+  padding-left: 1.5em;
+  text-indent:-1.5em;
+}
