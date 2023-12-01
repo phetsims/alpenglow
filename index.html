@@ -415,7 +415,7 @@
 
     <p>
       Many gradient implementations also have issues with gradients when zoomed in, and may drop or distort gradients
-      in these cases:
+      in the above cases. Gradient bands should get thinner and thinner until they look like lines.
     </p>
 
     <h4 id="overview-color">Color Spaces and Wide-Gamut Support</h4>
@@ -434,14 +434,78 @@
 
     <h4 id="overview-upsampling">Image Upsampling</h4>
 
-    <p class="TODO">
-      TODO
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span2"></div>
+      <div class="span4 example">
+        <div id="upsampling-canvas"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
+        Canvas
+      </div>
+      <div class="span4 example">
+        <div id="upsampling-svg"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
+        SVG
+      </div>
+      <div class="span2"></div>
+    </div>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span2"></div>
+      <div class="span4 example">
+        <div id="upsampling-analytic-box"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
+        Alpenglow CPU Analytic Box Filter
+      </div>
+      <div class="span4 example">
+        <div id="upsampling-mitchell-netravali"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
+        Alpenglow CPU Mitchell-Netravali Filter
+      </div>
+      <div class="span2"></div>
+    </div>
+
+    <p>
+      Most Canvas/SVG implementations do not support upsampling with the Mitchell-Netravali ("cubic") filter, and will
+      blend in a gamma-incorrect way. Additionally, we are able to represent images with exact analytic filters, so
+      that a box filter upsampling will have nicely anti-aliased edges.
     </p>
 
     <h4 id="overview-downsampling">Image Downsampling</h4>
 
-    <p class="TODO">
-      TODO
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span2"></div>
+      <div class="span4 example">
+        <div id="downsampling-canvas"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
+        Canvas
+      </div>
+      <div class="span4 example">
+        <div id="downsampling-svg"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
+        SVG
+      </div>
+      <div class="span2"></div>
+    </div>
+
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span4 example">
+        <div id="downsampling-analytic-box"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
+        Alpenglow CPU (Analytic Box Filter)
+      </div>
+      <div class="span4 example">
+        <div id="downsampling-analytic-bilinear"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
+        Alpenglow CPU (Analytic Bilinear Filter)
+      </div>
+      <div class="span4 example">
+        <div id="downsampling-analytic-mitchell-netravali"><div class="example placeholder" style="width: 128px; height: 128px;"></div></div>
+        Alpenglow CPU (Analytic Mitchell-Netravali Filter)
+      </div>
+    </div>
+
+    <p>
+      Image downsampling is also prone to both aliasing arifacts and gamma-incorrect blending. Many Canvas implementations
+      will quickly sample an image, leading to serious ringing patterns on these example images. There are many cases
+      where we will want to use a higher-quality downsampling algorithm, and we can compute an exact analytic filtered
+      result.
+    </p>
+
+    <p>
+      It is recommended to see the <a href="./doc/downscale.png">image</a> at full (1:1) size, to see how the above methods
+      scale the image down.
     </p>
 
     <h3 id="overview-relatedWork">Related Work</h3>
@@ -1124,11 +1188,11 @@
     <h5>Evaluation of Distance over Polygons</h5>
 
     <p>
-      Above, we saw the centroid is useful to compute exact linear gradient contributions. For purely-circular radial gradients, the equivalent is also possible to compute! We'll need to instead integrate $r=\sqrt{x^2+y^2}$ (we can determine the average by dividing by the area).
+      Above, we saw the centroid is useful to compute exact linear gradient contributions. For purely-circular radial gradients, the equivalent is also possible to compute! We will need to instead integrate $r=\sqrt{x^2+y^2}$ (we can determine the average by dividing by the area).
     </p>
 
     <p>
-      We'll need to transform to polar coordinates first:
+      We will need to transform to polar coordinates first:
 
       $$
       r=\sqrt{x^2+y^2}
@@ -1138,7 +1202,7 @@
       \theta=\tan^{-1}\frac{y}{x}
       $$
 
-      We'll want to evaluate with Green's Theorem in polar coordinates:
+      We will want to evaluate with Green's Theorem in polar coordinates:
 
       $$
       \oint_P\left(L\,\frac{dr}{dt}+M\,\frac{d\theta}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial r}-\frac{\partial L}{\partial \theta} \right)\,dA
@@ -1361,7 +1425,7 @@
     </p>
 
     <p>
-      For each filter, we're going to evaluate it at a pixel's "center" to get a single sample. We'll do this by
+      For each filter, we're going to evaluate it at a pixel's "center" to get a single sample. We will do this by
       evaluating the integral of the filter's value over the area included in the polygon within the filter's range of
       support.
     </p>
@@ -1385,7 +1449,7 @@
     </div>
 
     <p>
-      We'll take our filter (which is a constant function of 1 in a unit-square centered on the origin), and evaluate
+      We will take our filter (which is a constant function of 1 in a unit-square centered on the origin), and evaluate
       it just for the square area around it. This is equivalent to finding the area of the polygon within this square area.
     </p>
 
@@ -1428,8 +1492,8 @@
 
       $$
 
-      We'll use the above polynomial filtering techniques to evaluate the integral. The resulting formulas are not
-      terribly pretty. We'll have 3 cases to handle after symmetry (we can use the absolute value to get down to 4
+      We will use the above polynomial filtering techniques to evaluate the integral. The resulting formulas are not
+      terribly pretty. We will have 3 cases to handle after symmetry (we can use the absolute value to get down to 4
       cases, and then reflection to get down to 3).
     </p>
 
@@ -1716,9 +1780,9 @@
     <p class="TODO">
       Mipmapping! Blend between adjacent mipmap levels (especially for perspective). Anisotropic for 3d, like
       <a href="https://en.wikipedia.org/wiki/Anisotropic_filtering#/media/File:MipMap_Example_STS101_Anisotropic.png">this example</a>.
-      We'll want to mipmap "based on the area" if we aren't doing the "analytic" bits. So isotropic mipmap can look at the scale.
-      We'll want to "bias" presumably, adjustably?
-      We'll want to mipmap-blend the "extended" version (in each mipmap level computed, if non-power-of-2, it should be "padded" with the extended version for correct results)
+      We will want to mipmap "based on the area" if we aren't doing the "analytic" bits. So isotropic mipmap can look at the scale.
+      We will want to "bias" presumably, adjustably?
+      We will want to mipmap-blend the "extended" version (in each mipmap level computed, if non-power-of-2, it should be "padded" with the extended version for correct results)
       Mipmaps should work for any filter type
     </p>
 
@@ -1747,7 +1811,7 @@
 
     <p>
       We're able to output instructions (both in software as types, and on the GPU in a binary format) that operate in
-      a simple stack-based fashion. We'll have a main stack, where vec4 values are pushed and popped. Instructions
+      a simple stack-based fashion. We will have a main stack, where vec4 values are pushed and popped. Instructions
       primarily either push content, or pop content then push more content (processing existing values). We're able to
       determine a bound on the stack size by analyzing the RenderProgram (normal visual blending won't cause stack
       issues, since we're able to blend each pair of colors before computing the next color).
@@ -1949,7 +2013,7 @@
     </p>
 
     <p>
-      We'll allow a setting at the end of "put every dispatch in its own render pass, so we can get timestamps out
+      We will allow a setting at the end of "put every dispatch in its own render pass, so we can get timestamps out
       for each thing separately".
     </p>
 
@@ -2054,7 +2118,7 @@
     </p>
 
     <p class="TODO">
-      For ConcreteType, add in structured types (structs), and the ability to BETTER BIT PACK(!). We'll be able to
+      For ConcreteType, add in structured types (structs), and the ability to BETTER BIT PACK(!). We will be able to
       serialize/deserialize. We could actually write code that does NOT read in the whole structure (e.g. structure of
       arrays type).
     </p>
@@ -2515,7 +2579,7 @@
       If we store data about what 3D plane each face is on (essentially assigning a depth to each 2d point), it is
       possible to analytically determine the exact divisions between sections where one face is in front of the other.
       For any given pair of planes, there is a 2d line in screen space that delineates the boundary between the two
-      areas (the "depth sort line"). We'll use this to further split our polygons into disjoint sections where we have
+      areas (the "depth sort line"). We will use this to further split our polygons into disjoint sections where we have
       a total ordering of the planar faces (recall, Alpenglow stages will already have found us a section that is fully
       contained within the faces).
     </p>
@@ -2611,7 +2675,7 @@
     <p class="TODO">
       Partially implemented in <code>VectorCanvas</code>. Basically it is possible to create a vector-accurate representation
       with our boolean operations. Any drawing operation will affect a (split) region, and it will update the RenderProgram in
-      that region. We'll simplify all of those, then can consolidate areas with the same RenderProgram back together.
+      that region. We will simplify all of those, then can consolidate areas with the same RenderProgram back together.
       For this to fully work nicely, we would want to store the rational half edges permanently, and work in the rational
       space.
     </p>
@@ -2649,7 +2713,7 @@
     <h3 id="stage-subdivision">Subdivision</h3>
 
     <p>
-      We'll want to convert our paths to polygons (a piecewise linear form). This could come before or after the
+      We will want to convert our paths to polygons (a piecewise linear form). This could come before or after the
       transform step. Might need more code to do it after the transforms (logic needed to transform elliptical arcs,
       etc., but it would be more efficient.
     </p>
@@ -2657,13 +2721,13 @@
     <h3 id="stage-bounds">Bounds</h3>
 
     <p>
-      We'll want the bounds of each path for later stages.
+      We will want the bounds of each path for later stages.
     </p>
 
     <h3 id="stage-tiling">Tiling</h3>
 
     <p>
-      We'll subdivide the rendered area into tiles, and for each path we will either skip it, fully include it, or clip it
+      We will subdivide the rendered area into tiles, and for each path we will either skip it, fully include it, or clip it
       to the size of the tile.
     </p>
 
@@ -2685,7 +2749,7 @@
     <h3 id="stage-integerTransform">Integer Transform</h3>
 
     <p>
-      We'll scale up and transform our coordinate frame (for each tile) to integer coordinates, spaced out so that we're
+      We will scale up and transform our coordinate frame (for each tile) to integer coordinates, spaced out so that we're
       keeping about 20 bits of information for each coordinate. This will allow us to use rational numbers to compute
       the intersections between line segments (and to sort edges around each vertex) in an exact robust way, keeping our
       numerator and denominator within 64 bits each. Since the outputs will be signed, we will want to put the origin
@@ -2700,7 +2764,7 @@
     <h3 id="stage-hilbertSort">Hilbert Sort</h3>
 
     <p>
-      We'll sort the the edges using a higher-dimensional
+      We will sort the the edges using a higher-dimensional
       <a href="https://en.wikipedia.org/wiki/Hilbert_curve">Hilbert space-filling curve</a>, so that edges are somewhat
       spatially coherent (edges in a similar part of the list will likely have similar positions or sizes). This helps
       reduce the workload on the next step (intersection), since it would have theoretical O(n^2) performance.
@@ -2731,7 +2795,7 @@
     <h3 id="stage-intersection">Intersection</h3>
 
     <p>
-      We'll need to find all of the pairwise intersections between edges. In software, this is done by computing a
+      We will need to find all of the pairwise intersections between edges. In software, this is done by computing a
       binary tree of bounding boxes (where the Hilbert sort helps significantly). We can ignore the intersection between
       two subtrees whose bounding boxes do not intersect. Furthermore, if there are no horizontal lines in either
       subtree, we can allow the bounding boxes to "touch" horizontally (sharing a single line of intersection) without
@@ -2740,7 +2804,7 @@
     </p>
 
     <p>
-      We'll store the intersections with their rational coordinates AND parametric value of intersection (also an
+      We will store the intersections with their rational coordinates AND parametric value of intersection (also an
       exact rational) for each internal intersection within each of the edges.
     </p>
 
@@ -2785,13 +2849,13 @@
     <h3 id="stage-split">Split</h3>
 
     <p>
-      Each integer edge will have a list of internal intersections. We'll sort those intersections by their parametric
+      Each integer edge will have a list of internal intersections. We will sort those intersections by their parametric
       value, and then we will output a list of "rational" edges (using `RationalHalfEdge`) that make up each
       non-intersected interval of the original edge.
     </p>
 
     <p>
-      We'll store the winding information for each path in this information. So if our edge in path X goes from A to B,
+      We will store the winding information for each path in this information. So if our edge in path X goes from A to B,
       we will create two half-edges: A -> B (winding +1) and B -> A (winding -1), both marked for path X.
     </p>
 
@@ -2807,7 +2871,7 @@
     <h3 id="stage-edgeSort">Edge Sort</h3>
 
     <p>
-      We'll sort our rational half-edges for the next stage (first by their starting point, then by their angle, then
+      We will sort our rational half-edges for the next stage (first by their starting point, then by their angle, then
       by their ID).
     </p>
 
@@ -2825,9 +2889,9 @@
     <ul>
       <li>
         Combine otherwise identical overlapping half-edges together. Before this, each directional edge has one path
-        that it is from, but now each half-edge will be from potentially multiple paths. We'll combine the winding
+        that it is from, but now each half-edge will be from potentially multiple paths. We will combine the winding
         contributions into a winding map (path => winding) for these cases. (NOTE: we're currently duplicating effort
-        for the reverse edges here). We'll want to filter out duplicates (stream compaction on GPU).
+        for the reverse edges here). We will want to filter out duplicates (stream compaction on GPU).
       </li>
       <li>
         Connecting our half-edge structure together. Each half-edge already had a link to its "opposite" edge. However
@@ -2845,7 +2909,7 @@
     <h3 id="stage-boundaryTrace">Boundary Trace</h3>
 
     <p>
-      We'll follow each half-edge until it loops back on itself. This will give us a boundary. It might be an
+      We will follow each half-edge until it loops back on itself. This will give us a boundary. It might be an
       "inner" or "outer" boundary. We can determine which it is by looking at the total signed area of the boundary
       (using the shoelace method). If it is positive, it is an inner boundary (is counter-clockwise), and if it is
       negative, it is an outer boundary (is clockwise). Outer boundaries are either (a) the outside of the bounding box
@@ -2869,7 +2933,7 @@
     </p>
 
     <p>
-      We'll first sort faces by their signed area. Then for each outer boundary, we will take the point on it with the
+      We will first sort faces by their signed area. Then for each outer boundary, we will take the point on it with the
       smallest x value (compatible with our edge sort above), and we will scan for the smallest face that contains the
       point. We can filter a lot, ignoring faces smaller than the hole, faces whose bounding boxes don't fully
       (strictly) contain our hole, and we can take the smallest face that contains the point. Point-in-polygon testing
@@ -2952,7 +3016,7 @@
         Fully combine all equivalent faces
       </dt>
       <dd>
-        This could be done with "unsorted edges" or traced. We'll get a full path for each RenderProgram, however
+        This could be done with "unsorted edges" or traced. We will get a full path for each RenderProgram, however
         depending on the rasterization method used, having two far-away small items in the same face could hurt
         performance.
       </dd>
@@ -2997,7 +3061,7 @@
     </div>
 
     <p>
-      We'll want to take the path representation for each RenderableFace, and determine the coverage of each pixel.
+      We will want to take the path representation for each RenderableFace, and determine the coverage of each pixel.
     </p>
 
     <p class="TODO">
