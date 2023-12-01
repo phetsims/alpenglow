@@ -454,7 +454,7 @@
       of it <a href="https://github.com/phetsims/scenery/tree/vello">into Scenery</a>. It's the main inspiration for
       this project, and we plan to use many components from it. However, it was tricky getting it to work on the web
       (compiling it for WASM creates a bundle in excess of 5MB), and thus required rewriting the Rust code into TypeScript.
-      At the time it didn't have support for avoiding conflation artifacts, and now (as of writing) it's using a more
+      At the time it didn't have support for avoiding conflation artifacts, and now (as of writing) it is using a more
       expensive multisampling approach to reduce the effects of conflation. Additionally, it runs into gamma blending
       problems, and doesn't support additional color spaces currently. The approach we're using is different enough
       that it unfortunately can't be integrated into Vello.
@@ -517,7 +517,7 @@
       and <a href="https://github.com/moderngpu/moderngpu/wiki">moderngpu</a>
       <span class="citation" data-citation-id="Baxter:2016:M2"></span>. They serve as prime examples of useful patterns,
       but can't target WebGPU. In addition, many algorithms rely in forward progress or workgroup communication that
-      WebGPU doesn't offer (in an effort for portability), so we'll need to explore new approaches.
+      WebGPU doesn't offer (in an effort for portability), so we will need to explore new approaches.
     </p>
 
     <p>
@@ -786,7 +786,7 @@
     <p class="TODO">
       Create "Bounds Pyramid" immutable data structure. It's a binary tree, leaves are edges. Each level stores the
       bounding box. PIP-tests are VERY accelerated on this. Clipping also potentially will be (if a node is fully within
-      one side of a binary clip, we can just INCLUDE that node). Thus we'll have a linked list way of describing how
+      one side of a binary clip, we can just INCLUDE that node). Thus we will have a linked list way of describing how
       the nodes connect (so we can reuse parts of the source within the result). At a certain point, this will be less
       beneficial, but high-up it might be very helpful? Test PIP and clipping with this. (each section has bounds and
       children). Linked list so we can store "sequences" immutably, that don't get changed.
@@ -801,7 +801,7 @@
 
     <h4>Line Clipping</h4>
 
-    The first primitive we'll need is the ability to find the part of a line segment that is within an axis-aligned
+    The first primitive we will need is the ability to find the part of a line segment that is within an axis-aligned
     bounding rectangle (referred to as bounds). Alpenglow primarily uses <span class="citation" data-citation-id="Matthes_2019"></span>.
 
     <div class="example">
@@ -1010,7 +1010,7 @@
     <h5>Area of Polygons</h5>
 
     <p>
-      For $x^0y^0=1$, with adding some canceling terms to better factor, we'll obtain the
+      For $x^0y^0=1$, with adding some canceling terms to better factor, we will obtain the
       <a href="https://en.wikipedia.org/wiki/Shoelace_formula">Shoelace formula</a> for finding the area of a polygon:
 
       $$
@@ -1145,7 +1145,7 @@
       \oint_P\left(L\,\frac{dr}{dt}+M\,\frac{d\theta}{dt}\right)dt=\iint_P \left( \frac{\partial M}{\partial r}-\frac{\partial L}{\partial \theta} \right)\,dA
       $$
 
-      but we'll want to evaluate $r^2$ due to the coordinate change.
+      but we will want to evaluate $r^2$ due to the coordinate change.
     </p>
 
     <p>
@@ -1307,7 +1307,7 @@
       (x_i+x_{i+1})(y_{i+1}-y_i)
       $$
 
-      For our edge-clipped polygons, we'll want to add in the contribution of the counts:
+      For our edge-clipped polygons, we will want to add in the contribution of the counts:
 
       $$
       area_{clip} = ( y_{max} - y_{min} )( count_{x_{min}} x_{min} + count_{x_{max}} x_{max} )
@@ -1336,7 +1336,7 @@
       \end{bmatrix}
       $$
 
-      Additionally for our edge-clipped polygons, we'll want to add the contribution based on the counts:
+      Additionally for our edge-clipped polygons, we will want to add the contribution based on the counts:
 
       $$
       centroid_{clip} =
@@ -1375,7 +1375,7 @@
     </p>
 
     <p>
-      NOTE: When using a non-box filter, we'll need to examine/process a larger area than just the resulting bounds.
+      NOTE: When using a non-box filter, we will need to examine/process a larger area than just the resulting bounds.
       In the code, this is called the <code>contributionBounds</code>.
     </p>
 
@@ -1488,7 +1488,7 @@
     <h5>Blurs</h5>
 
     <p>
-      If we artificially scale the filter (possible in Alpenglow software, but not planned for GPU), it's possible to
+      If we artificially scale the filter (possible in Alpenglow software, but not planned for GPU), it is possible to
       generate blurs.
     </p>
 
@@ -1742,7 +1742,7 @@
     <h4 id="renderProgram-execution">Execution</h4>
 
     <p>
-      The software tree form of RenderPrograms can be directly executed. However it's better if we turn our RenderProgram
+      The software tree form of RenderPrograms can be directly executed. However it is better if we turn our RenderProgram
       into a series of instructions that can be executed in a more efficient way.
     </p>
 
@@ -2015,7 +2015,7 @@
     </p>
 
     <p class="TODO">
-      Check the radix sort, and make sure it's not requesting more bitVector size than it is using.
+      Check the radix sort, and make sure it is not requesting more bitVector size than it is using.
     </p>
 
     <h5>Unit tests</h5>
@@ -2196,13 +2196,13 @@
     </p>
 
     <p>
-      Both can be run as a "convergent" reduce, but for non-commutative cases we'll need to transform it within shared
+      Both can be run as a "convergent" reduce, but for non-commutative cases we will need to transform it within shared
       memory for this to work.
     </p>
 
     <p>
       For any atomic-combinable type, we should always just do one level of reduction, which stores the result to a
-      single atomic. For other types, we'll need to run a multi-level reduce if the input size is potentially large
+      single atomic. For other types, we will need to run a multi-level reduce if the input size is potentially large
       enough to require it.
     </p>
 
@@ -2227,7 +2227,7 @@
     </p>
 
     <p class="TODO">
-      Get index_mapped_loop working nicely (it's created, but not really used yet). load_multiple and load_reduced.
+      Get index_mapped_loop working nicely (it is created, but not really used yet). load_multiple and load_reduced.
     </p>
 
     <p class="TODO">
@@ -2277,7 +2277,7 @@
     </p>
 
     <p class="TODO">
-      Remember for 3-level atomic-able, we can single-reduce and distribute atomics. For others, we'll need
+      Remember for 3-level atomic-able, we can single-reduce and distribute atomics. For others, we will need
       multi-step reduce (if we are doing reduce-scan+add strategies). If we do the atomic-able, we can start with the
       scan on the bottom level.
     </p>
@@ -2513,7 +2513,7 @@
     <h3 id="depthSort">Depth Sort</h3>
 
     <p>
-      If we store data about what 3D plane each face is on (essentially assigning a depth to each 2d point), it's
+      If we store data about what 3D plane each face is on (essentially assigning a depth to each 2d point), it is
       possible to analytically determine the exact divisions between sections where one face is in front of the other.
       For any given pair of planes, there is a 2d line in screen space that delineates the boundary between the two
       areas (the "depth sort line"). We'll use this to further split our polygons into disjoint sections where we have
@@ -2566,7 +2566,7 @@
 
     <p class="TODO">
       Show arbitrary graphics with 3d perspective:
-      Quads in 3D (and putting vector graphics in them!) we'll just transform our graphics with perspective too?
+      Quads in 3D (and putting vector graphics in them!) we will just transform our graphics with perspective too?
       RenderPlanar with 3 points will work for quads just fine.
       Needs normal interpolation for quads.
       We can store the projective transform, to get exact gradients (in fact, we just need to do perspective correction).
@@ -2614,7 +2614,7 @@
     <h3 id="vectorCanvas">Vector Canvas</h3>
 
     <p class="TODO">
-      Partially implemented in <code>VectorCanvas</code>. Basically it's possible to create a vector-accurate representation
+      Partially implemented in <code>VectorCanvas</code>. Basically it is possible to create a vector-accurate representation
       with our boolean operations. Any drawing operation will affect a (split) region, and it will update the RenderProgram in
       that region. We'll simplify all of those, then can consolidate areas with the same RenderProgram back together.
       For this to fully work nicely, we'd want to store the rational half edges permanently, and work in the rational
@@ -2641,7 +2641,7 @@
     <h3 id="stage-transforms">Transforms</h3>
 
     <p>
-      Use a stack monoid setup to compute the nested transforms for every path. This isn't particularly required from
+      Use a stack monoid setup to compute the nested transforms for every path. This is not particularly required from
       Scenery (we CAN compute them CPU-side, but it uses up a lot of CPU time). However, we can ship over paths in an
       instanced fashion (e.g. font glyphs), and this stage would convert from the DAG to effectively a flat array of
       paths.
@@ -2668,7 +2668,7 @@
     <h3 id="stage-tiling">Tiling</h3>
 
     <p>
-      We'll subdivide the rendered area into tiles, and for each path we'll either skip it, fully include it, or clip it
+      We'll subdivide the rendered area into tiles, and for each path we will either skip it, fully include it, or clip it
       to the size of the tile.
     </p>
 
@@ -2679,7 +2679,7 @@
 
     <p>
       Tiling is also helpful to reduce the potential amount of cases for the later intersection step, AND with our
-      integer transform, we'll be able to keep more precision for the CAG steps.
+      integer transform, we will be able to keep more precision for the CAG steps.
     </p>
 
     <p class="TODO">
@@ -2693,7 +2693,7 @@
       We'll scale up and transform our coordinate frame (for each tile) to integer coordinates, spaced out so that we're
       keeping about 20 bits of information for each coordinate. This will allow us to use rational numbers to compute
       the intersections between line segments (and to sort edges around each vertex) in an exact robust way, keeping our
-      numerator and denominator within 64 bits each. Since the outputs will be signed, we'll want to put the origin
+      numerator and denominator within 64 bits each. Since the outputs will be signed, we will want to put the origin
       approximately in the center of our "integer" coordinate frame.
     </p>
 
@@ -2714,7 +2714,7 @@
 
     <p>
       This may be unnecessary for some workloads (where the edges provided are in a spatially coherent order due to
-      the scene graph), however it's absolutely necessary for others (e.g. 3d meshes).
+      the scene graph), however it is absolutely necessary for others (e.g. 3d meshes).
     </p>
 
     <p>
@@ -2724,7 +2724,7 @@
 
     <p>
       Planned to use a radix sort on GPU. Software is currently using a 6-dimensional Hilbert sort
-      (centerX, centerY, minX, minY, maxX, maxY), but it's probably best to reduce that to a 4-dimensional sort.
+      (centerX, centerY, minX, minY, maxX, maxY), but it is probably best to reduce that to a 4-dimensional sort.
     </p>
 
     <p class="TODO">
@@ -2760,7 +2760,7 @@
 
     <p>
       NOTE: A great synchronous algorithm for this type of thing is <span class="citation" data-citation-id="10.1145/129902.129906"></span>,
-      but it's very serial.
+      but it is very serial.
     </p>
 
     <p class="TODO">
@@ -2779,7 +2779,7 @@
 
     <p class="TODO">
       Can we store information about contiguous lists of segments with no intersections? Like, from guaranteed inputs,
-      or from the same curved segment (when it's split into line segments) where we can guarantee no self-intersection?
+      or from the same curved segment (when it is split into line segments) where we can guarantee no self-intersection?
     </p>
 
     <p class="TODO">
@@ -2791,13 +2791,13 @@
 
     <p>
       Each integer edge will have a list of internal intersections. We'll sort those intersections by their parametric
-      value, and then we'll output a list of "rational" edges (using `RationalHalfEdge`) that make up each
+      value, and then we will output a list of "rational" edges (using `RationalHalfEdge`) that make up each
       non-intersected interval of the original edge.
     </p>
 
     <p>
       We'll store the winding information for each path in this information. So if our edge in path X goes from A to B,
-      we'll create two half-edges: A -> B (winding +1) and B -> A (winding -1), both marked for path X.
+      we will create two half-edges: A -> B (winding +1) and B -> A (winding -1), both marked for path X.
     </p>
 
     <p class="TODO">
@@ -2806,7 +2806,7 @@
 
     <p class="TODO">
       If we don't sort them, is it quadratic time? However, hopefully we won't have too many intersections, and that
-      could potentially be acceptable? (Sort only if it's more than N splits in an edge?)
+      could potentially be acceptable? (Sort only if it is more than N splits in an edge?)
     </p>
 
     <h3 id="stage-edgeSort">Edge Sort</h3>
@@ -2830,7 +2830,7 @@
     <ul>
       <li>
         Combine otherwise identical overlapping half-edges together. Before this, each directional edge has one path
-        that it's from, but now each half-edge will be from potentially multiple paths. We'll combine the winding
+        that it is from, but now each half-edge will be from potentially multiple paths. We'll combine the winding
         contributions into a winding map (path => winding) for these cases. (NOTE: we're currently duplicating effort
         for the reverse edges here). We'll want to filter out duplicates (stream compaction on GPU).
       </li>
@@ -2852,8 +2852,8 @@
     <p>
       We'll follow each half-edge until it loops back on itself. This will give us a boundary. It might be an
       "inner" or "outer" boundary. We can determine which it is by looking at the total signed area of the boundary
-      (using the shoelace method). If it's positive, it's an inner boundary (is counter-clockwise), and if it's
-      negative, it's an outer boundary (is clockwise). Outer boundaries are either (a) the outside of the bounding box
+      (using the shoelace method). If it is positive, it is an inner boundary (is counter-clockwise), and if it is
+      negative, it is an outer boundary (is clockwise). Outer boundaries are either (a) the outside of the bounding box
       or whatever region we have, or (b) a hole.
     </p>
 
@@ -2862,7 +2862,7 @@
     </p>
 
     <p>
-      On the GPU, we'll be able to use reduction techniques to make this efficient (like the linked list traversal).
+      On the GPU, we will be able to use reduction techniques to make this efficient (like the linked list traversal).
     </p>
 
     <h3 id="stage-faceHoles">Face Holes</h3>
@@ -2874,8 +2874,8 @@
     </p>
 
     <p>
-      We'll first sort faces by their signed area. Then for each outer boundary, we'll take the point on it with the
-      smallest x value (compatible with our edge sort above), and we'll scan for the smallest face that contains the
+      We'll first sort faces by their signed area. Then for each outer boundary, we will take the point on it with the
+      smallest x value (compatible with our edge sort above), and we will scan for the smallest face that contains the
       point. We can filter a lot, ignoring faces smaller than the hole, faces whose bounding boxes don't fully
       (strictly) contain our hole, and we can take the smallest face that contains the point. Point-in-polygon testing
       is done with Dan Sunday's algorithm.
@@ -2886,7 +2886,7 @@
     </p>
 
     <p>
-      As part of this, we'll determine the "unbounded" outer face (the one that effectively contains the content OUTSIDE
+      As part of this, we will determine the "unbounded" outer face (the one that effectively contains the content OUTSIDE
       of the region we're rendering).
     </p>
 
@@ -2910,7 +2910,7 @@
     </p>
 
     <p>
-      We will precompute (possibly on the CPU) a replacement acceleration structure, since we'll have many primitives
+      We will precompute (possibly on the CPU) a replacement acceleration structure, since we will have many primitives
       that will simplify sparse path inclusion significantly. Thus if we have 1000 paths, and 3 of them are included
       in a face, we can create a simplified version of that RenderProgram without having to do a full scan of the 1000
       items. See <code>RenderPathReplacer</code> for more details.
@@ -2937,7 +2937,7 @@
         Keep the faces separate
       </dt>
       <dd>
-        Straightforward, but we'll process more edges than needed.
+        Straightforward, but we will process more edges than needed.
       </dd>
       <dt>
         Combine adjacent equivalent faces (just delete edges)
@@ -2950,7 +2950,7 @@
         Combine adjacent equivalent faces (trace edges, skip equivalent)
       </dt>
       <dd>
-        If we instead trace edges, and while traversing we skip over edges that have equivalent faces, we'll generate
+        If we instead trace edges, and while traversing we skip over edges that have equivalent faces, we will generate
         polygonal data for each face. This will leave us with the best end-result, but might be more costly.
       </dd>
       <dt>
@@ -3184,7 +3184,7 @@ flowchart TD
     </p>
 
     <p class="TODO">
-      Try different workgroup sizes, see if it's better (especially when we can rake things)
+      Try different workgroup sizes, see if it is better (especially when we can rake things)
     </p>
 
     <p>
@@ -3267,7 +3267,7 @@ flowchart TD
       Alternative approaches, e.g. workgroup-per-initial-chunk? RenderProgram evaluation needs accurate edges
       unfortunately, and can use them in a linear way. NOTE: Maybe we can do a more efficient approach for the constant
       faces? (For instance, if we take the signed area of each edge, and accumulate that times the color, we do not
-      have to do any cross-workgroup computation, and it's even more parallel). That does NOT work for RenderImage,
+      have to do any cross-workgroup computation, and it is even more parallel). That does NOT work for RenderImage,
       or things where we really need the concept of "centroid" or face. We can't split up the centroid with that, since
       we need the full area in the first place to compute with (so we'd have to have the input area for faces?) - that
       is technically possible.
