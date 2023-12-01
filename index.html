@@ -39,15 +39,6 @@
   <script src="../sherpa/lib/jquery-2.1.0.min.js"></script>
   <script src="../sherpa/lib/lodash-4.17.4.min.js"></script>
 
-  <script src="../assert/js/assert.js"></script>
-  <script src="../tandem/js/PhetioIDUtils.js"></script>
-  <script src="../sherpa/lib/linebreak-1.1.0.js"></script>
-  <script src="../sherpa/lib/flatqueue-1.2.1.js"></script>
-  <script src="../sherpa/lib/paper-js-0.12.17.js"></script>
-  <script src="../sherpa/lib/he-1.1.1.js"></script>
-  <script src="../sherpa/lib/TextEncoderLite-3c9f6f0.js"></script>
-  <script src="../sherpa/lib/base64-js-1.2.0.js"></script>
-
   <!-- For the styling -->
   <script src="../sherpa/lib/bootstrap-2.2.2.js"></script>
 
@@ -57,22 +48,50 @@
   <script src="../sherpa/lib/codemirror-5.52.2.min.js"></script>
   <script src="../sherpa/lib/codemirror-5.52.2.javascript.min.js"></script>
 
-  <script src="../scenery/doc/extractFunctionJS.js"></script>
-
   <script src="./doc/citations.js"></script>
-
-  <script src="./doc/teapotObj.js"></script>
 
   <link rel="stylesheet" href="./doc/doc.css">
 
   <script src="./doc/todo.js"></script>
+
+  <script>
+    // Loads a synchronously-executed asynchronously-downloaded script tag, with optional data-main parameter.
+    // See http://www.html5rocks.com/en/tutorials/speed/script-loading/ for more about script loading. It helps to
+    // load all of the scripts with this method, so they are treated the same (and placed in the correct execution
+    // order).
+    const loadURL = ( preloadURL, type = 'text/javascript', async = false ) => {
+      const script = document.createElement( 'script' );
+      script.type = type;
+      script.src = preloadURL;
+      script.async = async;
+      script.setAttribute( 'crossorigin', 'use-credentials' );
+      document.head.appendChild( script );
+    };
+
+    window.usePhetLib = true;
+
+    loadURL( '../scenery/doc/extractFunctionJS.js' );
+    loadURL( './doc/teapotObj.js' );
+    loadURL( './doc/load-citations.js' );
+    if ( window.usePhetLib ) {
+      loadURL( './doc/lib/phet-lib.min.js' ); // TODO: consider using plain alpenglow (smaller)?
+    }
+    else {
+      loadURL( '../assert/js/assert.js' );
+      loadURL( '../tandem/js/PhetioIDUtils.js' );
+      loadURL( '../sherpa/lib/linebreak-1.1.0.js' );
+      loadURL( '../sherpa/lib/flatqueue-1.2.1.js' );
+      loadURL( '../sherpa/lib/paper-js-0.12.17.js' );
+      loadURL( '../sherpa/lib/he-1.1.1.js' );
+      loadURL( '../sherpa/lib/TextEncoderLite-3c9f6f0.js' );
+      loadURL( '../sherpa/lib/base64-js-1.2.0.js' );
+    }
+    loadURL( './doc/index.js', 'module' );
+    loadURL( './doc/load-mermaid.js', 'module' );
+  </script>
 </head>
 
 <body>
-
-<!--  <script src="./doc/lib/phet-lib.min.js"></script>-->
-
-<script type="module" src="./doc/index.js"></script>
 
 <div class="row-fluid">
   <div class="span2"></div>
@@ -388,10 +407,6 @@
         Alpenglow CPU (Mitchell-Netravali Filter)
       </div>
     </div>
-
-    <script type="module">
-
-    </script>
 
     <p>
       Gradients with color stops close together (e.g. when zoomed out in a user interface) can also create many aliasing patterns.
@@ -2551,10 +2566,6 @@
       <div id="transparent-3d"></div>
     </div>
 
-    <script type="module">
-
-    </script>
-
     <p class="TODO">
       Something wrong with normals in teapot example, set to 256x256 in demo.
     </p>
@@ -3328,34 +3339,6 @@ flowchart TD
     <h2 id="references">References</h2>
 
     <div id="references-container"></div>
-
-    <script>
-      const citationData = citations; // eslint-disable-line no-undef
-
-      document.querySelector( '#references-container' ).innerHTML = citationData.bibliography;
-
-      document.querySelectorAll( '.citation' ).forEach( citation => {
-        const id = citation.getAttribute( 'data-citation-id' );
-        const data = citationData.map[ id ];
-        if ( data ) {
-          const citationText = data.citation;
-          // const citationLink = data.link;
-
-          citation.innerHTML = `<a href="#reference-${id}">${citationText}</a>`;
-        }
-        else {
-          throw new Error( 'missing citation' );
-        }
-      } );
-    </script>
-
-    <!-- DO NOT PLACE THINGS UNDER HERE -->
-
-    <script type="module">
-      import mermaid from '../sherpa/mermaid/mermaid.esm.min.mjs'; // eslint-disable-line default-import-match-filename
-      mermaid.initialize( { startOnLoad: true } );
-    </script>
-
   </div>
   <div class="span2"></div>
 </div>

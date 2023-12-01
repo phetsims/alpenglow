@@ -1,49 +1,85 @@
 // Copyright 2023, University of Colorado Boulder
 
-// eslint-disable-next-line bad-sim-text
-// window.importBase = '../chipper/dist/js/';
-// const {
-//   Node, Display
-// } = await import( `${window.importBase}scenery/js/imports.js` );
-// console.log( `${window.importBase}scenery/js/imports.js` );
+let alpenglow;
+let ArrowNode;
+let scenery;
+let kite;
+let dot;
 
-// window.assertions.enableAssert();
-// window.assertions.enableAssertSlow();
+// If we loaded phet-lib, use that copy
+if ( window.usePhetLib ) {
+  alpenglow = window.phet.alpenglow;
+  ArrowNode = window.phet.sceneryPhet.ArrowNode;
+  scenery = window.phet.scenery;
+  kite = window.phet.kite;
+  dot = window.phet.dot;
+}
+// Otherwise, load from our transpilation (assuming for development mode)
+else {
+  alpenglow = ( await import( '../../chipper/dist/js/alpenglow/js/main.js' ) ).default; // eslint-disable-line bad-sim-text
+  ArrowNode = ( await import( '../../chipper/dist/js/scenery-phet/js/ArrowNode.js' ) ).default; // eslint-disable-line bad-sim-text
+  scenery = ( await import( '../../chipper/dist/js/scenery/js/main.js' ) ).default; // eslint-disable-line bad-sim-text
+  kite = ( await import( '../../chipper/dist/js/kite/js/main.js' ) ).default; // eslint-disable-line bad-sim-text
+  dot = ( await import( '../../chipper/dist/js/dot/js/main.js' ) ).default; // eslint-disable-line bad-sim-text
+}
 
-import '../../chipper/dist/js/scenery/js/main.js'; // eslint-disable-line bad-sim-text
-import '../../chipper/dist/js/alpenglow/js/main.js'; // eslint-disable-line bad-sim-text
-import '../../chipper/dist/js/phet-core/js/main.js'; // eslint-disable-line bad-sim-text
-import '../../chipper/dist/js/axon/js/main.js'; // eslint-disable-line bad-sim-text
-import '../../chipper/dist/js/dot/js/main.js'; // eslint-disable-line bad-sim-text
-import '../../chipper/dist/js/kite/js/main.js'; // eslint-disable-line bad-sim-text
-import '../../chipper/dist/js/utterance-queue/js/main.js'; // eslint-disable-line bad-sim-text
+const Node = scenery.Node;
+const Display = scenery.Display;
+const Color = scenery.Color;
+const Rectangle = scenery.Rectangle;
+const Path = scenery.Path;
+const LinearGradient = scenery.LinearGradient;
+const RadialGradient = scenery.RadialGradient;
+const Text = scenery.Text;
+const Image = scenery.Image;
+const Circle = scenery.Circle;
 
-import { Node, Display, Color, Rectangle, Path, LinearGradient, RadialGradient, Text, Image, Circle } from '../../chipper/dist/js/scenery/js/imports.js'; // eslint-disable-line bad-sim-text
-import { Shape } from '../../chipper/dist/js/kite/js/imports.js'; // eslint-disable-line bad-sim-text
-import { RenderLinearGradientAccuracy, RenderRadialBlend, RenderRadialBlendAccuracy, RenderBlendType, RenderRadialGradientAccuracy, RenderRadialGradient, RenderGradientStop, RenderExtend, RenderDepthSort, RenderPlanar, Mesh, RenderStack, RenderLinearGradient, RenderPathBoolean, RenderPath, RenderFromNode, RenderComposeType, RenderBlendCompose, PolygonFilterType, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderPhong, RenderLight, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderNormalize, RenderColor, CombinedRaster, Rasterize, LinearEdge, PolygonalBoolean, RenderColorSpace, TestToCanvas, RenderLinearBlend, RenderLinearBlendAccuracy } from '../../chipper/dist/js/alpenglow/js/imports.js'; // eslint-disable-line bad-sim-text
-import Bounds2 from '../../chipper/dist/js/dot/js/Bounds2.js'; // eslint-disable-line bad-sim-text
-import Matrix3 from '../../chipper/dist/js/dot/js/Matrix3.js'; // eslint-disable-line bad-sim-text
-import Matrix4 from '../../chipper/dist/js/dot/js/Matrix4.js'; // eslint-disable-line bad-sim-text
-import Vector2 from '../../chipper/dist/js/dot/js/Vector2.js'; // eslint-disable-line bad-sim-text
-import Vector4 from '../../chipper/dist/js/dot/js/Vector4.js'; // eslint-disable-line bad-sim-text
-import dot from '../../chipper/dist/js/dot/js/dot.js'; // eslint-disable-line bad-sim-text
-import ArrowNode from '../../chipper/dist/js/scenery-phet/js/ArrowNode.js'; // eslint-disable-line bad-sim-text
+const Shape = kite.Shape;
+
+const RenderLinearGradientAccuracy = alpenglow.RenderLinearGradientAccuracy;
+const RenderRadialBlend = alpenglow.RenderRadialBlend;
+const RenderRadialBlendAccuracy = alpenglow.RenderRadialBlendAccuracy;
+const RenderBlendType = alpenglow.RenderBlendType;
+const RenderRadialGradientAccuracy = alpenglow.RenderRadialGradientAccuracy;
+const RenderRadialGradient = alpenglow.RenderRadialGradient;
+const RenderGradientStop = alpenglow.RenderGradientStop;
+const RenderExtend = alpenglow.RenderExtend;
+const RenderDepthSort = alpenglow.RenderDepthSort;
+const RenderPlanar = alpenglow.RenderPlanar;
+const Mesh = alpenglow.Mesh;
+const RenderStack = alpenglow.RenderStack;
+const RenderLinearGradient = alpenglow.RenderLinearGradient;
+const RenderPathBoolean = alpenglow.RenderPathBoolean;
+const RenderPath = alpenglow.RenderPath;
+const RenderFromNode = alpenglow.RenderFromNode;
+const RenderComposeType = alpenglow.RenderComposeType;
+const RenderBlendCompose = alpenglow.RenderBlendCompose;
+const PolygonFilterType = alpenglow.PolygonFilterType;
+const RenderLinearSRGBToSRGB = alpenglow.RenderLinearSRGBToSRGB;
+const RenderNormalDebug = alpenglow.RenderNormalDebug;
+const RenderPhong = alpenglow.RenderPhong;
+const RenderLight = alpenglow.RenderLight;
+const RenderBarycentricPerspectiveBlend = alpenglow.RenderBarycentricPerspectiveBlend;
+const RenderBarycentricPerspectiveBlendAccuracy = alpenglow.RenderBarycentricPerspectiveBlendAccuracy;
+const RenderNormalize = alpenglow.RenderNormalize;
+const RenderColor = alpenglow.RenderColor;
+const CombinedRaster = alpenglow.CombinedRaster;
+const Rasterize = alpenglow.Rasterize;
+const LinearEdge = alpenglow.LinearEdge;
+const PolygonalBoolean = alpenglow.PolygonalBoolean;
+const RenderColorSpace = alpenglow.RenderColorSpace;
+const TestToCanvas = alpenglow.TestToCanvas;
+const RenderLinearBlend = alpenglow.RenderLinearBlend;
+const RenderLinearBlendAccuracy = alpenglow.RenderLinearBlendAccuracy;
+
+const Bounds2 = dot.Bounds2;
+const Matrix3 = dot.Matrix3;
+const Matrix4 = dot.Matrix4;
+const Vector2 = dot.Vector2;
+const Vector4 = dot.Vector4;
 const v2 = dot.v2;
 const v3 = dot.v3;
 const v4 = dot.v4;
-
-// const colors = [
-//   new Color( 62, 171, 3 ),
-//   new Color( 23, 180, 77 ),
-//   new Color( 24, 183, 138 ),
-//   new Color( 23, 178, 194 ),
-//   new Color( 20, 163, 238 ),
-//   new Color( 71, 136, 255 ),
-//   new Color( 171, 101, 255 ),
-//   new Color( 228, 72, 235 ),
-//   new Color( 252, 66, 186 ),
-//   new Color( 252, 82, 127 )
-// ];
 
 window.deviceContextPromise = phet.alpenglow.DeviceContext.getDevice().then( device => {
   if ( device ) {
@@ -1029,6 +1065,9 @@ window.createSceneryDiagram = ( scene, width, height ) => {
 }
 
 {
+  // TODO: lazily evaluate these pieces, since it is slowing down our "startup" time
+
+
   // TODO: show shape of filter
   // TODO: left diagram shows the polygon over a pixel grid. shows the clipped versions of it (strokes)
   // TODO: arrow between
