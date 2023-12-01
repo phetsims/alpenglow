@@ -258,7 +258,7 @@
     <ol>
       <li>
         Need a high-quality and high-performance way to display vector graphics (in the browser,
-        and natively). In particular, we'd like to avoid <a href="#overview-conflation">conflation artifacts</a>,
+        and natively). In particular, we would like to avoid <a href="#overview-conflation">conflation artifacts</a>,
         <a href="#overview-aliasingGamma">anti-aliasing/gamma-blending issues</a>, and
         <a href="#overview-gradients">gradient aliasing issues</a>
         without having to resort to expensive techniques like multisampling. We'd also prefer to
@@ -602,7 +602,7 @@
       </li>
       <li>
         Extension of the Alpenglow approach to additional curve types (hopefully in a robust way). Intersections for
-        quadratic/cubic Bezier curves and elliptical arcs present some robustness problems. I'd LOVE to investigate
+        quadratic/cubic Bezier curves and elliptical arcs present some robustness problems. I would like to investigate
         rationally-based curves with rational sections (looking into
         <span class="citation" data-citation-id="Wildberger2005"></span>) to see if we can extend the robust approach.
       </li>
@@ -2617,7 +2617,7 @@
       Partially implemented in <code>VectorCanvas</code>. Basically it is possible to create a vector-accurate representation
       with our boolean operations. Any drawing operation will affect a (split) region, and it will update the RenderProgram in
       that region. We'll simplify all of those, then can consolidate areas with the same RenderProgram back together.
-      For this to fully work nicely, we'd want to store the rational half edges permanently, and work in the rational
+      For this to fully work nicely, we would want to store the rational half edges permanently, and work in the rational
       space.
     </p>
 
@@ -2817,7 +2817,7 @@
     </p>
 
     <p class="TODO">
-      Perhaps use MergeSort instead of RadixSort on GPU? Radix sort might need a lot of bits, and it seems like we'd be
+      Perhaps use MergeSort instead of RadixSort on GPU? Radix sort might need a lot of bits, and it seems like we would be
       doing 8 bits per pass?
     </p>
 
@@ -3269,7 +3269,7 @@ flowchart TD
       faces? (For instance, if we take the signed area of each edge, and accumulate that times the color, we do not
       have to do any cross-workgroup computation, and it is even more parallel). That does NOT work for RenderImage,
       or things where we really need the concept of "centroid" or face. We can't split up the centroid with that, since
-      we need the full area in the first place to compute with (so we'd have to have the input area for faces?) - that
+      we need the full area in the first place to compute with (so we would have to have the input area for faces?) - that
       is technically possible.
     </p>
 

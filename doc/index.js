@@ -18,7 +18,6 @@ import '../../chipper/dist/js/dot/js/main.js'; // eslint-disable-line bad-sim-te
 import '../../chipper/dist/js/kite/js/main.js'; // eslint-disable-line bad-sim-text
 import '../../chipper/dist/js/utterance-queue/js/main.js'; // eslint-disable-line bad-sim-text
 
-
 import { Node, Display, Color, Rectangle, Path, LinearGradient, RadialGradient, Text, Image, Circle } from '../../chipper/dist/js/scenery/js/imports.js'; // eslint-disable-line bad-sim-text
 import { Shape } from '../../chipper/dist/js/kite/js/imports.js'; // eslint-disable-line bad-sim-text
 import { RenderLinearGradientAccuracy, RenderRadialBlend, RenderRadialBlendAccuracy, RenderBlendType, RenderRadialGradientAccuracy, RenderRadialGradient, RenderGradientStop, RenderExtend, RenderDepthSort, RenderPlanar, Mesh, RenderStack, RenderLinearGradient, RenderPathBoolean, RenderPath, RenderFromNode, RenderComposeType, RenderBlendCompose, PolygonFilterType, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderPhong, RenderLight, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderNormalize, RenderColor, CombinedRaster, Rasterize, LinearEdge, PolygonalBoolean, RenderColorSpace, TestToCanvas, RenderLinearBlend, RenderLinearBlendAccuracy } from '../../chipper/dist/js/alpenglow/js/imports.js'; // eslint-disable-line bad-sim-text
