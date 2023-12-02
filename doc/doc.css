@@ -91,13 +91,13 @@ body {
 
 @media (prefers-color-scheme: dark) {
   body {
-    color: #eee;
-    background-color: #222;
+    color: rgb(230, 237, 243);
+    background-color: rgb(14, 17, 23);
   }
 
   code, pre {
     color: #eee;
-    background-color: #333;
+    background-color: #222;
   }
 
   .nav-list > li > a, .nav-list .nav-header {
