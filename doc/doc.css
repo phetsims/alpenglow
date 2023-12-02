@@ -99,6 +99,10 @@ body {
     color: #eee;
     background-color: #333;
   }
+
+  .nav-list > li > a, .nav-list .nav-header {
+    text-shadow: none;
+  }
 }
 
 #references-container {
