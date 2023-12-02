@@ -259,7 +259,7 @@
       <h3 id="overview-mainChallenges">Main Challenges</h3>
 
       <p>
-        We're trying to solve the following problems:
+        We are trying to solve the following problems:
       </p>
 
       <ol>
@@ -310,7 +310,7 @@
       </div>
 
       <p>
-        We're able to solve this problem by using a different approach based on polygonal boolean operations, where
+        We are able to solve this problem by using a different approach based on polygonal boolean operations, where
         we can get a list of polygonal faces where each input path is either fully contained or fully
         excluded in each face. We can then use high-performance approaches to rasterize each face independently, then
         accumulate while avoiding multisampling and conflation artifacts. Often these faces will be of constant color,
@@ -321,7 +321,7 @@
       <h4 id="overview-aliasingGamma">Aliasing &amp; Gamma-Incorrect Blending</h4>
 
       <p>
-        Aliasing is the low-frequency pattern that spuriously appears when we're displaying high-frequency content
+        Aliasing is the low-frequency pattern that spuriously appears when we are displaying high-frequency content
         in a lower-resolution way. In general, we want to reduce these low-frequency patterns without overly introducing
         blurring. Basic anti-aliasing can help "smooth" things like the jagged edges of lines (e.g. with text), but
         some approaches aren't general enough to help with other types of aliasing.
@@ -580,7 +580,7 @@
         (compiling it for WASM creates a bundle in excess of 5MB), and thus required rewriting the Rust code into TypeScript.
         At the time it didn't have support for avoiding conflation artifacts, and now (as of writing) it is using a more
         expensive multisampling approach to reduce the effects of conflation. Additionally, it runs into gamma blending
-        problems, and doesn't support additional color spaces currently. The approach we're using is different enough
+        problems, and doesn't support additional color spaces currently. The approach we are using is different enough
         that it unfortunately can't be integrated into Vello.
       </p>
 
@@ -666,7 +666,7 @@
         <li>
           New approach to solving 2D occlusion/overlapping with computational geometry at the start of the rasterization
           process. Based on our previous work for PhET's <a href="https://github.com/phetsims/kite">computational geometry library</a>,
-          we're able to compute the overlap for many general regions at the same time (but using line segments with
+          we are able to compute the overlap for many general regions at the same time (but using line segments with
           rational values for exact intersections and robustness).
         </li>
         <li>
@@ -1420,7 +1420,7 @@
       <h5>Alpenglow Area Formulas</h5>
 
       <p>
-        We're best served by the Shoelace formula. It is fast and has good numerical performance:
+        We are best served by the Shoelace formula. It is fast and has good numerical performance:
       </p>
 
       <p>
@@ -1444,7 +1444,7 @@
       <h5>Alpenglow Centroid Formulas</h5>
 
       <p>
-        As noted above, some of the more common formulas have terrible numerical performance. We're using the following
+        As noted above, some of the more common formulas have terrible numerical performance. We are using the following
         one, since it results in simple formulas for the normal and edge-clipped cases, AND it shares a good amount of
         the computation between the $x$ and $y$ formulas:
       </p>
@@ -1486,13 +1486,13 @@
       </p>
 
       <p>
-        For each filter, we're going to evaluate it at a pixel's "center" to get a single sample. We will do this by
+        For each filter, we are going to evaluate it at a pixel's "center" to get a single sample. We will do this by
         evaluating the integral of the filter's value over the area included in the polygon within the filter's range of
         support.
       </p>
 
       <p>
-        Below, we're able to evaluate piecewise-polynomial filters with an exact analytical solution. While the box filter
+        Below, we are able to evaluate piecewise-polynomial filters with an exact analytical solution. While the box filter
         has one piecewise-polynomial section (the constant function), the others are split up into gridded sections,
         each of which is a polynomial. We will essentially determine the clipped part of the polygon for each section,
         and evaluate the integral with the formula for that section.
@@ -1570,7 +1570,7 @@
       <h4 id="antialiasing-examples">Examples</h4>
 
       <p>
-        Aliasing (what we're trying to avoid) is the low-frequency pattern that spuriously appears when we display
+        Aliasing (what we are trying to avoid) is the low-frequency pattern that spuriously appears when we display
         high-frequency content in a low-resolution way. In general, we want to reduce these low-frequency patterns
         without overly introducing blurring.
       </p>
@@ -1871,11 +1871,11 @@
       </p>
 
       <p>
-        We're able to output instructions (both in software as types, and on the GPU in a binary format) that operate in
+        We are able to output instructions (both in software as types, and on the GPU in a binary format) that operate in
         a simple stack-based fashion. We will have a main stack, where vec4 values are pushed and popped. Instructions
-        primarily either push content, or pop content then push more content (processing existing values). We're able to
+        primarily either push content, or pop content then push more content (processing existing values). We are able to
         determine a bound on the stack size by analyzing the RenderProgram (normal visual blending won't cause stack
-        issues, since we're able to blend each pair of colors before computing the next color).
+        issues, since we are able to blend each pair of colors before computing the next color).
       </p>
 
       <p>
@@ -2065,7 +2065,7 @@
       </p>
 
       <p class="TODO">
-        Abstract out buffer resource? (especially if we're doing ... dynamic offsets?) - For dynamic offsets, provided
+        Abstract out buffer resource? (especially if we are doing ... dynamic offsets?) - For dynamic offsets, provided
         in setBindGroup, noted in buffer binding types (BindGroupLayout).
       </p>
 
@@ -2135,7 +2135,7 @@
 
       <p class="TODO">
         Overflows on left-shifts are a problem! <code>&lt;&lt; 32</code> was causing all sorts of issues in the radix
-        sort. Investigate full overflow handling for u32/i32. Make sure we're not overflowing (or at least shifting by 32).
+        sort. Investigate full overflow handling for u32/i32. Make sure we are not overflowing (or at least shifting by 32).
       </p>
 
       <p class="TODO">
@@ -2237,7 +2237,7 @@
       </p>
 
       <p class="TODO">
-        Can we get a pattern with BufferLogger/TimestampLogger that abstracts over how we're calling things? This would
+        Can we get a pattern with BufferLogger/TimestampLogger that abstracts over how we are calling things? This would
         be nice, ESPECIALLY if we can factor in some of the "abstract things out" that Stoneberry can do.
       </p>
 
@@ -2315,7 +2315,7 @@
       <p>
         Commutative and non-commutative monoids have to be handled differently. For commutative cases, we can load it
         in a striped memory-access pattern regardless of the original ordering (although we need to know the original
-        ordering to do range-based checks). For non-commutative cases, a raked reduce doesn't work well unless we're
+        ordering to do range-based checks). For non-commutative cases, a raked reduce doesn't work well unless we are
         loading in the normal (blocked) order.
       </p>
 
@@ -2391,7 +2391,7 @@
       </p>
 
       <p>
-        We're using Hillis-Steele approaches <span class="citation" data-citation-id="10.1145/7902.7903"></span>, but with
+        We are using Hillis-Steele approaches <span class="citation" data-citation-id="10.1145/7902.7903"></span>, but with
         raking <span class="citation" data-citation-id="223009"></span> approaches from
         <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span>, with notes from <span class="citation" data-citation-id="LevienPrefixSumVulkan"></span>.
       </p>
@@ -2552,7 +2552,7 @@
       </p>
 
       <p>
-        Note: <code>--enable-dawn-features=allow_unsafe_apis --enable-webgpu-developer-features</code> for when we're profiling. Or
+        Note: <code>--enable-dawn-features=allow_unsafe_apis --enable-webgpu-developer-features</code> for when we are profiling. Or
         <code>open -a "Google Chrome Canary" --args --enable-dawn-features=allow_unsafe_apis --enable-webgpu-developer-features</code> on macOS.
       </p>
 
@@ -2697,7 +2697,7 @@
       </p>
 
       <p class="TODO">
-        Need to do breadth-first for our splitting in DepthSort, otherwise we're doing a lot of unnecessary splitting.
+        Need to do breadth-first for our splitting in DepthSort, otherwise we are doing a lot of unnecessary splitting.
       </p>
 
       <p class="TODO">
@@ -2727,7 +2727,7 @@
       <p class="TODO">
         Once we have RenderableFaces, we could split things up based on whatever shaders need to run - for instance, if
         we only can have certain shaders loaded, we can find the faces that use it? (multiple passes, for the different shaders?).
-        If we're combining later anyway, why not skip the first (traced) consolidation?
+        If we are combining later anyway, why not skip the first (traced) consolidation?
         (Also for rasterization, we probably should NOT combine from separate tiles).
       </p>
 
@@ -2793,7 +2793,7 @@
       </p>
 
       <p>
-        Certain potential final rasterization steps benefit from a guaranteed maximum tile size of path (e.g. if we're
+        Certain potential final rasterization steps benefit from a guaranteed maximum tile size of path (e.g. if we are
         256x256, it would take 16 steps of binary subdivision to reach the pixel level).
       </p>
 
@@ -2810,7 +2810,7 @@
       <h3 id="stage-integerTransform">Integer Transform</h3>
 
       <p>
-        We will scale up and transform our coordinate frame (for each tile) to integer coordinates, spaced out so that we're
+        We will scale up and transform our coordinate frame (for each tile) to integer coordinates, spaced out so that we are
         keeping about 20 bits of information for each coordinate. This will allow us to use rational numbers to compute
         the intersections between line segments (and to sort edges around each vertex) in an exact robust way, keeping our
         numerator and denominator within 64 bits each. Since the outputs will be signed, we will want to put the origin
@@ -2951,7 +2951,7 @@
         <li>
           Combine otherwise identical overlapping half-edges together. Before this, each directional edge has one path
           that it is from, but now each half-edge will be from potentially multiple paths. We will combine the winding
-          contributions into a winding map (path => winding) for these cases. (NOTE: we're currently duplicating effort
+          contributions into a winding map (path => winding) for these cases. (NOTE: we are currently duplicating effort
           for the reverse edges here). We will want to filter out duplicates (stream compaction on GPU).
         </li>
         <li>
@@ -3007,7 +3007,7 @@
 
       <p>
         As part of this, we will determine the "unbounded" outer face (the one that effectively contains the content OUTSIDE
-        of the region we're rendering).
+        of the region we are rendering).
       </p>
 
       <h3 id="stage-windingMaps">Winding Maps</h3>
@@ -3347,7 +3347,7 @@
       <p class="TODO">
         IMPORTANT! Our resulting edge-clipped counts should be cyclic, right? Only use 2 bits per count!!
         They should wrap around or accumulate as long as we do arithmetic mod 4.
-        Right now we're taking up 4x i32 for this, and that's (a) excessive, (b) killing performance, and (c) reducing
+        Right now we are taking up 4x i32 for this, and that's (a) excessive, (b) killing performance, and (c) reducing
         the size of our potential workgroups.
       </p>
 
@@ -3377,7 +3377,7 @@
       </p>
 
       <p class="TODO">
-        Performance seems to be very affected by the buffer sizes. Modify things so that we're working within the same
+        Performance seems to be very affected by the buffer sizes. Modify things so that we are working within the same
         buffer? I recall seeing a source saying they handle their own memory within a large buffer, instead of multiple
         buffers? See <a href="https://developer.nvidia.com/vulkan-memory-management">info</a>. Sub-allocation
         could be really efficient? How can we make sure our reads/writes are to the same area? Examine Vello approaches.
