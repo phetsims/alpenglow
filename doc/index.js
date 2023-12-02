@@ -35,6 +35,7 @@ const Image = scenery.Image;
 const Circle = scenery.Circle;
 
 const Shape = kite.Shape;
+const LineStyles = kite.LineStyles;
 
 const RenderLinearGradientAccuracy = alpenglow.RenderLinearGradientAccuracy;
 const RenderRadialBlend = alpenglow.RenderRadialBlend;
@@ -73,6 +74,8 @@ const TestToCanvas = alpenglow.TestToCanvas;
 const RenderLinearBlend = alpenglow.RenderLinearBlend;
 const RenderLinearBlendAccuracy = alpenglow.RenderLinearBlendAccuracy;
 const RenderResampleType = alpenglow.RenderResampleType;
+const RenderBarycentricBlend = alpenglow.RenderBarycentricBlend;
+const RenderBarycentricBlendAccuracy = alpenglow.RenderBarycentricBlendAccuracy;
 
 const Bounds2 = dot.Bounds2;
 const Matrix3 = dot.Matrix3;
@@ -108,6 +111,19 @@ window.shapeToPolygons = shape => shape.subpaths.map( subpath => {
 window.diagramFont = new phet.scenery.Font( {
   size: 12,
   family: 'Arial, sans-serif'
+} );
+
+const piecewiseOptions = {
+  minLevels: 1,
+  maxLevels: 10,
+  // distanceEpsilon: 0.02,
+  distanceEpsilon: 0.0002,
+  curveEpsilon: 0.2
+};
+const shapeToPolygons = shape => shape.subpaths.map( subpath => {
+  return subpath.toPiecewiseLinear( piecewiseOptions ).segments.map( line => {
+    return line.start;
+  } );
 } );
 
 window.sizeCanvas = canvas => {
@@ -752,6 +768,171 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
   window.addDiagram( 'gradientPrecision-canvas', () => getGradientPrecision( 'canvas' ) );
   window.addDiagram( 'gradientPrecision-svg', () => getGradientPrecision( 'svg' ) );
   window.addDiagram( 'gradientPrecision-box', () => getGradientPrecision( 'box' ) );
+}
+
+{
+  const getColorSpaceGradients = ( a, b ) => {
+    const width = 256;
+    const height = 96;
+
+    const clientSpace = RenderColorSpace.premultipliedSRGB;
+
+    const colorSpaces = [
+      RenderColorSpace.premultipliedOklab,
+      RenderColorSpace.premultipliedLinearSRGB,
+      RenderColorSpace.premultipliedSRGB
+    ];
+
+    const getTwoStop = ( minY, maxY, color1, color2, colorSpace ) => {
+      return new RenderPathBoolean(
+        new RenderPath( 'nonzero', [ [
+          phet.dot.v2( 0, minY ),
+          phet.dot.v2( width, minY ),
+          phet.dot.v2( width, maxY ),
+          phet.dot.v2( 0, maxY )
+        ] ] ),
+        new RenderLinearGradient(
+          Matrix3.IDENTITY,
+          v2( 0, 0 ),
+          v2( width, 0 ),
+          [
+            new RenderGradientStop( 0, RenderFromNode.colorFrom( color1 ).colorConverted( clientSpace, colorSpace ) ),
+            new RenderGradientStop( 1, RenderFromNode.colorFrom( color2 ).colorConverted( clientSpace, colorSpace ) )
+          ],
+          RenderExtend.Pad,
+          RenderLinearGradientAccuracy.SplitAccurate
+        ).colorConverted( colorSpace, clientSpace ),
+        RenderColor.TRANSPARENT
+      );
+    };
+
+    const program = new RenderStack( [
+      RenderFromNode.colorFrom( 'black' ),
+      getTwoStop( 0, 32, a, b, colorSpaces[ 0 ] ),
+      getTwoStop( 32, 64, a, b, colorSpaces[ 1 ] ),
+      getTwoStop( 64, 96, a, b, colorSpaces[ 2 ] )
+    ] );
+    return window.getRasterizedElement( program, width, height );
+  };
+
+  window.addDiagram( 'redGreenGradients-example', () => getColorSpaceGradients( 'red', 'rgba(0,255,0,1)' ) );
+  window.addDiagram( 'blueWhiteGradients-example', () => getColorSpaceGradients( 'blue', 'white' ) );
+}
+
+{
+  const getGamut = ( renderType, displayType, blendType, showOutOfGamut = false ) => {
+    const sideLength = 200;
+    const triangleHeight = Math.sqrt( 3 ) / 2 * sideLength;
+
+    const padding = 3;
+
+    const width = sideLength + padding * 2;
+    const height = Math.ceil( triangleHeight ) + padding * 2;
+
+    const redPoint = v2( 0, triangleHeight ).plusScalar( padding );
+    const greenPoint = v2( sideLength, triangleHeight ).plusScalar( padding );
+    const bluePoint = v2( sideLength / 2, 0 ).plusScalar( padding );
+
+    const rawRedColor = v4( 1, 0, 0, 1 );
+    const rawGreenColor = v4( 0, 1, 0, 1 );
+    const rawBlueColor = v4( 0, 0, 1, 1 );
+
+    const sRGB = RenderColorSpace.premultipliedSRGB;
+    const displayP3 = RenderColorSpace.premultipliedDisplayP3;
+    const oklab = RenderColorSpace.premultipliedOklab;
+
+    const rawRedSRGBColor = RenderColor.convert( rawRedColor.copy(), sRGB, displayP3 );
+    const rawGreenSRGBColor = RenderColor.convert( rawGreenColor.copy(), sRGB, displayP3 );
+    const rawBlueSRGBColor = RenderColor.convert( rawBlueColor.copy(), sRGB, displayP3 );
+
+    const clientSpace = displayType === 'srgb' ? sRGB : displayP3;
+    const blendSpace = blendType === 'srgb' ? sRGB : ( blendType === 'display-p3' ? displayP3 : oklab );
+
+    const program = new RenderStack( [
+      new RenderPathBoolean(
+        new RenderPath( 'nonzero', [ [
+          redPoint, greenPoint, bluePoint
+        ] ] ),
+        new RenderBarycentricBlend(
+          redPoint, greenPoint, bluePoint,
+          RenderBarycentricBlendAccuracy.Accurate,
+          new RenderColor( renderType === 'srgb' ? rawRedSRGBColor : rawRedColor ).colorConverted( displayP3, blendSpace ),
+          new RenderColor( renderType === 'srgb' ? rawGreenSRGBColor : rawGreenColor ).colorConverted( displayP3, blendSpace ),
+          new RenderColor( renderType === 'srgb' ? rawBlueSRGBColor : rawBlueColor ).colorConverted( displayP3, blendSpace )
+        ).colorConverted( blendSpace, clientSpace ),
+        RenderColor.TRANSPARENT
+      ),
+      new RenderPathBoolean(
+        new RenderPath( 'nonzero', shapeToPolygons( Shape.polygon( [ redPoint, greenPoint, bluePoint ] ).getStrokedShape( new LineStyles( { lineWidth: 0.5 } ) ) ) ),
+        RenderFromNode.colorFrom( 'black' ).colorConverted( sRGB, clientSpace ),
+        RenderColor.TRANSPARENT
+      )
+    ] );
+    return window.getRasterizedElement( program, width, height, {
+      colorSpace: displayType,
+      showOutOfGamut: showOutOfGamut
+    } );
+  };
+
+  window.addDiagram( 'sRGBGamutMap-example', () => getGamut( 'srgb', 'srgb', 'oklab' ) );
+  window.addDiagram( 'sRGBNoGamutMap-example', () => getGamut( 'srgb', 'srgb', 'oklab', true ) );
+  if ( window.matchMedia( '(color-gamut: p3)' ).matches ) {
+    window.addDiagram( 'displayP3GamutMap-example', () => getGamut( 'display-p3', 'display-p3', 'oklab' ) );
+  }
+}
+
+{
+  const getColorSpaceComparison = ( isWideGamut, colorSpace ) => {
+    const width = 206;
+    const height = 32;
+
+    const clientSpace = isWideGamut ? RenderColorSpace.premultipliedDisplayP3 : RenderColorSpace.premultipliedSRGB;
+    const blendSpace = RenderColorSpace.premultipliedOklab;
+
+    const getTwoStop = ( minY, maxY ) => {
+      return new RenderPathBoolean(
+        new RenderPath( 'nonzero', [ [
+          phet.dot.v2( 0, minY ),
+          phet.dot.v2( width, minY ),
+          phet.dot.v2( width, maxY ),
+          phet.dot.v2( 0, maxY )
+        ] ] ),
+        new RenderLinearGradient(
+          Matrix3.IDENTITY,
+          v2( 0, 0 ),
+          v2( width, 0 ),
+          [
+            new RenderGradientStop( 0, RenderFromNode.colorFrom( 'rgba(255,0,0,1)' ).colorConverted( colorSpace, blendSpace ) ),
+            new RenderGradientStop( 1, RenderFromNode.colorFrom( 'rgba(0,255,0,1)' ).colorConverted( colorSpace, blendSpace ) )
+          ],
+          RenderExtend.Pad,
+          RenderLinearGradientAccuracy.SplitAccurate
+        ).colorConverted( blendSpace, clientSpace ),
+        RenderColor.TRANSPARENT
+      );
+    };
+
+    const program = getTwoStop( 0, height );
+    return window.getRasterizedElement( program, width, height, {
+      colorSpace: isWideGamut ? 'display-p3' : 'srgb'
+    } );
+  };
+
+  window.addDiagram( 'displayP3Comparison-example', () => {
+    const sRGB = getColorSpaceComparison( false, RenderColorSpace.premultipliedSRGB );
+    const displayP3 = getColorSpaceComparison( true, RenderColorSpace.premultipliedDisplayP3 );
+    const sRGBMapped = getColorSpaceComparison( false, RenderColorSpace.premultipliedDisplayP3 );
+    const div = document.createElement( 'div' );
+
+    div.appendChild( sRGB );
+    div.appendChild( displayP3 );
+    div.appendChild( sRGBMapped );
+
+    const margin = ( 180 - 32 * 3 ) / 2;
+    sRGB.style.marginTop = `${margin}px`;
+    div.style.height = `${180 - margin}px`;
+    return div;
+  } );
 }
 
 {

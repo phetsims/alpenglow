@@ -326,6 +326,8 @@
     <p>
       To be correct, blending should be done in the correct color spaces. Many applications choose to blend in
       non-linear color spaces (e.g. sRGB), which can cause blended colors to look incorrect (usually darker).
+      For more information, see
+      <a href="https://blog.johnnovak.net/2016/09/21/what-every-coder-should-know-about-gamma/">this reference</a>.
     </p>
 
     <div class="row-fluid" style="margin-bottom: 15px;">
@@ -420,16 +422,71 @@
 
     <h4 id="overview-color">Color Spaces and Wide-Gamut Support</h4>
 
-    <p class="TODO">
-      NOTE that color space handling is a major feature.
+    <p>
+      While gamma is critical, blending in the correct color space is also important. Blending in sRGB does not produce
+      perceptually uniform colors. Colors should be converted to/from a color space meant for this purpose when
+      perceptual gradients are required. <a href="https://bottosson.github.io/posts/oklab/">Oklab</a> is great for this,
+      and while not yet supported in Canvas/SVG, it can be
+      <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/oklab">used in CSS</a>.
     </p>
 
-    <p class="TODO">
-      Color gamut examples here.
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span6 example">
+        <div id="redGreenGradients-example"><div class="example placeholder" style="width: 256px; height: 96px;"></div></div>
+        Oklab, linear sRGB, and sRGB (top to bottom). Note the green bias in linear sRGB and darkening in sRGB. Oklab is perpectually uniform.
+      </div>
+      <div class="span6 example">
+        <div id="blueWhiteGradients-example"><div class="example placeholder" style="width: 256px; height: 96px;"></div></div>
+        Oklab, linear sRGB, and sRGB (top to bottom). Note the hue shift toward purple in the blue-white gradient for sRGB varieties. Oklab is perpectually uniform, without a hue shift.
+      </div>
+    </div>
+
+    <p>
+      However, when we use other color spaces like Oklab, even blends from colors inside the sRGB gamut can produce
+      out-of-gamut colors. To compensate for this, we'll need to use gamut mapping:
     </p>
 
-    <p class="TODO">
-      Color blending (gradient) example, move it here(!)
+    <div class="row-fluid" style="margin-bottom: 15px;">
+      <div class="span2"></div>
+      <div class="span4 example">
+        <div id="sRGBGamutMap-example"><div class="example placeholder" style="width: 206px; height: 180px;"></div></div>
+        sRGB triangle with (relative colorimetric) gamut mapping
+      </div>
+      <div class="span4 example">
+        <div id="sRGBNoGamutMap-example"><div class="example placeholder" style="width: 206px; height: 180px;"></div></div>
+        sRGB triangle without gamut mapping (gray to white shows how far outside of gamut the colors are)
+      </div>
+      <div class="span2"></div>
+    </div>
+
+    <p>
+      Additionally, many monitors are now capable of displaying a wider gamut of colors than sRGB. Chrome and Safari
+      support the extended colors inside the <a href="https://en.wikipedia.org/wiki/DCI-P3">Display P3</a> color space.
+      As seen, this can be helpful even if most elements are in sRGB, however it can also be impactful to use the
+      bolder colors in the extended gamut. Many GPU rasterization solutions do not yet support this.
+    </p>
+
+    <div class="row-fluid" style="margin-bottom: 15px;" id="display-p3-container">
+      <div class="span2"></div>
+      <div class="span4 example">
+        <div id="displayP3GamutMap-example"><div class="example placeholder" style="width: 206px; height: 180px;"></div></div>
+        Display P3 triangle
+      </div>
+      <div class="span4 example">
+        <div id="displayP3Comparison-example"><div class="example placeholder" style="width: 206px; height: 180px;"></div></div>
+        sRGB (top), Display P3 (middle) and Display P3 gamut mapped to sRGB (bottom).
+      </div>
+      <div class="span2"></div>
+    </div>
+    <script>
+      if ( !window.matchMedia( '(color-gamut: p3)' ).matches ) {
+        document.querySelector( '#display-p3-container' ).style.display = 'none';
+      }
+    </script>
+
+    <p>
+      Hopefully soon, we'll have a convenient interface to show high dynamic range (HDR) content, but Alpenglow will be able
+      to support it when it is available.
     </p>
 
     <h4 id="overview-upsampling">Image Upsampling</h4>
