@@ -1065,7 +1065,7 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
             } )
           ]
         } ),
-        width, height, 'white', type
+        width, height, 'transparent', type
       );
     }
     else {
