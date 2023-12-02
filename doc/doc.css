@@ -109,3 +109,8 @@ body {
   padding-left: 1.5em;
   text-indent:-1.5em;
 }
+
+.give-max-width {
+  max-width: 825px;
+  margin: 0 auto;
+}
