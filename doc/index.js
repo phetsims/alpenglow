@@ -173,6 +173,10 @@ window.getRasterizedElement = ( renderProgram, width, height, options ) => {
 
 window.createRenderProgramSandbox = ( id, func, width, height, providedOptions ) => {
 
+  if ( !showDiagrams ) {
+    return;
+  }
+
   const { js, jsBefore, jsAfter } = window.extractFunctionJS( func );
 
   const options = phet.phetCore.merge( {
@@ -392,10 +396,10 @@ window.createRenderProgramSandbox = ( id, func, width, height, providedOptions )
   run();
 };
 
-setTimeout( () => {
-  const urlParams = new URLSearchParams( window.location.search );
-  const showDiagrams = urlParams.get( 'diagrams' ) !== 'hide';
+const urlParams = new URLSearchParams( window.location.search );
+const showDiagrams = urlParams.get( 'diagrams' ) !== 'hide';
 
+setTimeout( () => {
   if ( !showDiagrams ) {
     return;
   }
@@ -2527,6 +2531,10 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
 
 {
   window.deviceContextPromise.then( async deviceContext => {
+    if ( !showDiagrams ) {
+      return;
+    }
+
     const outputSize = 256;
     const rasterSize = Math.ceil( outputSize * window.devicePixelRatio );
 

@@ -5,6 +5,14 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!--
+  Query parameters:
+  ?TODO  - show TODOs
+  ?diagrams=hide    - hide diagrams (for faster loading)
+
+  "edit" link: http://localhost/alpenglow/?TODO&diagrams=hide#WGSL
+-->
+
   <title>Alpenglow Plan &amp; Documentation</title>
 
   <link rel="shortcut icon" type="image/x-icon" href="../scenery/assets/logo-v1.svg">
@@ -105,9 +113,9 @@
   <div class="span2"></div>
 </div>
 
-<div class="row-fluid">
-  <div class="span2 hidden-phone">
-    <ul class="nav nav-list">
+<div class="nav-container">
+  <div class="nav-root">
+    <ul class="nav nav-list nav-main">
       <li>
         <a href="#overview">Overview</a>
         <ul class="nav nav-list">
@@ -198,6 +206,10 @@
       <li><a href="#references">References</a></li>
     </ul>
   </div>
+</div>
+
+<div class="row-fluid">
+  <div class="span2 hidden-phone"></div>
   <div class="span8">
     <div class="give-max-width">
 
@@ -236,10 +248,6 @@
 
       <p class="TODO">
         Add TODO levels here, so we can flag critical/important ones. Also, make them searchable?
-      </p>
-
-      <p class="TODO">
-        Left panel independently scrollable?
       </p>
 
       <p class="TODO">

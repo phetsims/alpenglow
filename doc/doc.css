@@ -114,3 +114,23 @@ body {
   max-width: 825px;
   margin: 0 auto;
 }
+
+.nav-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.nav-root {
+  position: fixed;
+  overflow-x: visible;
+  overflow-y: scroll;
+  height: 100vh;
+  left: 0;
+  width: 150px;
+}
+
+.nav-main {
+  margin-top: 120px;
+  margin-bottom: 120px;
+}
