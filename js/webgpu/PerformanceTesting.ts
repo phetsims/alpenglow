@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * Assorted WGSL example tests
+ * For testing overlapping (parallel) execution of shader stages that don't write to the same memory.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

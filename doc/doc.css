@@ -101,7 +101,14 @@ body {
   }
 
   .nav-list > li > a, .nav-list .nav-header {
+    color: #8cf;
     text-shadow: none;
+  }
+
+  .nav > li > a:hover {
+    color: #eee;
+    text-decoration: none;
+    background-color: inherit;
   }
 }
 

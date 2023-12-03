@@ -160,10 +160,10 @@
           <li>
             <a href="#WGSL">WGSL</a>
             <ul class="nav nav-list">
-              <li><a href="#WGSL-newSystem">New System</a></li>
-              <li><a href="#WGSL-snippets">Snippets</a></li>
-              <li><a href="#WGSL-preprocessing">Preprocessing</a></li>
-              <li><a href="#WGSL-minification">Minification</a></li>
+              <li><a href="#WGSL-templating">Templating</a></li>
+              <li><a href="#WGSL-types">Types</a></li>
+              <li><a href="#WGSL-linking">Linking</a></li>
+              <li><a href="#WGSL-logging">Logging</a></li>
               <li><a href="#WGSL-mangling">Mangling</a></li>
               <li><a href="#WGSL-algorithms">Algorithms</a></li>
               <li><a href="#WGSL-reduce">Reduce</a></li>
@@ -174,6 +174,12 @@
               <li><a href="#WGSL-memory">Memory</a></li>
               <li><a href="#WGSL-rationals">Rationals</a></li>
               <li><a href="#WGSL-profiling">Profiling</a></li>
+              <li><a href="#WGSL-unitTesting">Unit Testing</a></li>
+              <li><a href="#WGSL-knownBugs">Known Bugs</a></li>
+              <li><a href="#WGSL-notes">Notes</a></li>
+              <li><a href="#WGSL-newLanguage">New Language</a></li>
+              <li><a href="#WGSL-overlap">Overlap</a></li>
+              <li><a href="#WGSL-deprecated">Deprecated</a></li>
             </ul>
           </li>
           <li><a href="#asyncSimulation">Async Simulation</a></li>
@@ -2031,7 +2037,8 @@
       </p>
 
       <p class="TODO">
-        Live WGSL sandbox with compute input/output (and all our existing WGSL included?)
+        Live WGSL sandbox with compute input/output (and all our existing WGSL included?) -- use our templates in this,
+        would be powerful. Have it work like ShaderToy a bit.
       </p>
 
       <p>
@@ -2044,38 +2051,46 @@
         and usage switches? (For the parallel execution of dispatches).
       </p>
 
-      <h5>Notes about WebGPU/WGSL and Parallel</h5>
+      <h4 id="WGSL-templating">Templating</h4>
 
-      <p>
-        Synchronization notes: onSubmittedWorkDone() are settled in order, and mapAsync() settles before the corresponding
-        onSubmittedWorkDone().
-      </p>
-
-      <p>
-        BindGroupLayout "group-equivalent" means "essentially equal bind group layouts are interchangeable".
-      </p>
-
-      <p>
-        Think about memorybank conflict patterns (with grains, etc.). Interleaved banks/channels for memory, with
-        coalesced memory.
-      </p>
-
-      <p>
-        Batch/aggregate atomic updates (with privatization).
+      <p class="TODO">
+        Factored out way of handling the "expression or statement" facility, so that things can be specified in a
+        generic way (WGSLContext CAN turn these into function calls, but we would like to do this in places where we
+        do not want function call overhead.
       </p>
 
       <p class="TODO">
-        Double-buffering works around write-after-read race conditions, we should use that more.
+        Better way of guaranteeing unique local variable names. For now, try to add prefixes? This will be hard to
+        notice if we're silently shadowing variables.
       </p>
 
       <p class="TODO">
-        Try dynamic block index assignment (with an atomic), so that we can process data in order. Can we cheat, and
-        use that for forward progress and workgroup communication?
+        A templating function multiply (for constants), that can replace with bit shifts where helpful?
       </p>
 
-      <h4 id="WGSL-newSystem">New System</h4>
+      <h4 id="WGSL-types">Types</h4>
 
-      <h5>Linking/WebGPU System</h5>
+      <p class="TODO">
+        Create a structure-like creator for ConcreteTypes. We'll want bit-packing (combine booleans, finite-precision types, etc.)
+        For this, we'll presumably actually want variable bit-length values (e.g. like a u8, u16), and handle similar
+        packing for booleans.
+      </p>
+
+      <p class="TODO">
+        Structures that potentially allow structure-of-arrays handling.
+      </p>
+
+      <h4 id="WGSL-linking">Linking</h4>
+
+      <p class="TODO">
+        How can we support Thrust-like fusing of shader stages transparently/effortlessly? Do we not need this (say,
+        everything is factored out where we don't have to create things as much)?
+      </p>
+
+      <p class="TODO">
+        It's a pain for fusing right now, with workgroup memory, bindings, etc. We'd want to deduplicate bindings when
+        fusing.
+      </p>
 
       <ol>
         <li>
@@ -2093,6 +2108,10 @@
           Bound + dynamically-bound buffers/resources =&gt; execution.
         </li>
       </ol>
+
+      <p class="TODO">
+        Get it to work with vertex/fragment shaders too (e.g. BlitShader)
+      </p>
 
       <p>
         BindSlot&lt;ConcreteType&gt;: typed - it will (a) hold a certain type of data, and (b) have a length, so that
@@ -2147,10 +2166,6 @@
       </p>
 
       <p class="TODO">
-        Profile different bind group setups.
-      </p>
-
-      <p class="TODO">
         Use (conditionally, based on a boolean) <code>GPUCommandEncoder</code>'s <code>pushDebugGroup</code>,
         <code>popDebugGroup</code> and <code>insertDebugMarker</code>. Hopefully this will show up in things like
         RenderDoc/PIX.
@@ -2170,85 +2185,19 @@
         for each thing separately".
       </p>
 
-      <h5>TypeScript system</h5>
-
       <p class="TODO">
-        Factored out way of handling the "expression or statement" facility, so that things can be specified in a
-        generic way (WGSLContext CAN turn these into function calls, but we would like to do this in places where we
-        do not want function call overhead.
-      </p>
-
-      <h5>Concrete Types</h5>
-
-      <p class="TODO">
-        Create a structure-like creator for ConcreteTypes. We'll want bit-packing (combine booleans, finite-precision types, etc.)
-        For this, we'll presumably actually want variable bit-length values (e.g. like a u8, u16), and handle similar
-        packing for booleans.
-      </p>
-
-      <h4 id="WGSL-snippets">Snippets</h4>
-
-      <p class="TODO">
-        Get rid of DualSnippet, since we don't need the "dual" nature.
-      </p>
-
-      <p class="TODO">Doc things like ComputeShader and things once stabilized</p>
-
-      <h4 id="WGSL-preprocessing">Preprocessing</h4>
-
-      <p class="TODO">NOTE #ifdef/#ifndef/#else/#endif #import #option #bindings</p>
-
-      <h4 id="WGSL-minification">Minification</h4>
-
-      <p class="TODO">Note progress on minification. TEST WITH IT ON</p>
-
-      <p class="TODO">Note chipper <code>node js/scripts/transpile.js --watch --skipMinifyWGSL</code></p>
-
-      <p class="TODO">
-        Investigate <a href="https://github.com/LucentFlux/wgsl-minifier">https://github.com/LucentFlux/wgsl-minifier</a>
-        and <a href="https://github.com/mgnauck/wgslminify">https://github.com/mgnauck/wgslminify</a>
-      </p>
-
-      <h4 id="WGSL-mangling">Mangling</h4>
-
-      <p class="TODO">
-        Mangling needs to run on all of the shader code at once. We've implemented mangling for the Vello setup, but we
-        need to implement it in the chipper transpiler.
+        Profile different bind group setups.
       </p>
 
       <p class="TODO">
-        How do we get this running with our more templated solution? Is mangling that required for our setup?
-      </p>
-
-      <h4 id="WGSL-algorithms">Algorithms</h4>
-
-      <p class="TODO">
-        Organize this section!
-      </p>
-
-      <p>
-        Many algorithmic details from <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span>.
-        Inspiration on patterns partially from <span class="citation" data-citation-id="BELL2012359"></span>.
-      </p>
-
-      <h5>Known bugs</h5>
-
-      <p class="TODO">
-        Overflows on left-shifts are a problem! <code>&lt;&lt; 32</code> was causing all sorts of issues in the radix
-        sort. Investigate full overflow handling for u32/i32. Make sure we are not overflowing (or at least shifting by 32).
+        Doc once it's stabilized.
       </p>
 
       <p class="TODO">
-        Check the radix sort, and make sure it is not requesting more bitVector size than it is using.
+        Factor out all of the associated code to render things to a Canvas texture (e.g. blitshader).
       </p>
 
-      <h5>Unit tests</h5>
-
-      <p class="TODO">
-        Minimize duplication in unit tests (and get more of our "shaders" up to speed, like the radix ones).
-      </p>
-
-      <h5>Logging/debugging</h5>
+      <h4 id="WGSL-logging">Logging</h4>
 
       <p class="TODO">
         Add log levels or features
@@ -2272,46 +2221,26 @@
         "log every thread that gets it" approach, BUT it _IS_ collapsed.
       </p>
 
-      <h5>Types</h5>
+      <h4 id="WGSL-mangling">Mangling</h4>
 
       <p class="TODO">
-        For the binary-op based things, use the isCommutative flag for all sorts of things.
+        Mangling needs to run on all of the shader code at once. We've implemented mangling for the Vello setup, but we
+        need to implement it in the chipper transpiler.
       </p>
 
       <p class="TODO">
-        For ConcreteType, add in structured types (structs), and the ability to BETTER BIT PACK(!). We will be able to
-        serialize/deserialize. We could actually write code that does NOT read in the whole structure (e.g. structure of
-        arrays type).
+        How do we get this running with our more templated solution? Is mangling that required for our setup?
       </p>
 
-      <h5>Linking</h5>
+      <h4 id="WGSL-algorithms">Algorithms</h4>
+
+      <p class="TODO">
+        Double-buffering works around write-after-read race conditions, we should use that more.
+      </p>
 
       <p>
-        How can we get more reusable/combinable shader patterns? HOW TO FUSE, and how to reuse (e.g. scans in radix sort).
-        Notably, we DO NOT want the final READ, we might want to control how the buffers are handled (a big part of
-        how to design composition), but we really want to create composable pieces! Higher-level language would help a lot.
-        Templating with sections for each shader part would be amazing(!)? - where we have "shaderBarrier()" in-between.
-      </p>
-
-      <h5>Overlap (multiple shaders running at the same time)</h5>
-
-      <p>
-        For overlap:
-      </p>
-
-      <ol>
-        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-1-whats-a-barrier/">What’s a Barrier?</a></li>
-        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-2-synchronizing-gpu-threads/">Synchronizing GPU Threads</a></li>
-        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-3-multiple-command-processors/">https://therealmjp.github.io/posts/breaking-down-barriers-part-3-multiple-command-processors/</a></li>
-        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-4-gpu-preemption/">https://therealmjp.github.io/posts/breaking-down-barriers-part-4-gpu-preemption/</a></li>
-        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-5-back-to-the-real-world/">https://therealmjp.github.io/posts/breaking-down-barriers-part-5-back-to-the-real-world/</a></li>
-        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-6-experimenting-with-overlap-and-preemption/">https://therealmjp.github.io/posts/breaking-down-barriers-part-6-experimenting-with-overlap-and-preemption/</a></li>
-      </ol>
-
-      <h5>Miscellaneous</h5>
-
-      <p class="TODO">
-        Templates should be able to create variable names that are unique.
+        Many algorithmic details from <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span>.
+        Inspiration on patterns partially from <span class="citation" data-citation-id="BELL2012359"></span>.
       </p>
 
       <p class="TODO">
@@ -2324,42 +2253,11 @@
       </p>
 
       <p class="TODO">
-        Test and see if having one big buffer that we use for everything is more performant.
-      </p>
-
-      <p class="TODO">
         Read papers and books! - Notably Levien one with the scan patterns.
       </p>
 
       <p class="TODO">
-        Omit mappable reads from performance tests
-      </p>
-
-      <p>
-        Examples, see <a href="https://stoneberry.dev/docs/api/">Stoneberry API</a>, <a href="https://github.com/moderngpu/moderngpu">modernGPU</a>.
-      </p>
-
-      <p class="TODO">
-        IMPORTANT: uniform probably not helping us for the storage config case. Just use it as a storage buffer(!?)
-      </p>
-
-      <p class="TODO">
-        TEST with the overlap case WITH my performance profiling. See if it reports "parallel" handling.
-        PerformanceTesting.loopExpensiveMultiple().
-        THEN profile it with PIX to see if our profiling matches PIX.
-      </p>
-
-      <p class="TODO">
-        Note whether we "run out of memory" (arrayLength on buffers), and flag a condition!
-      </p>
-
-      <p class="TODO">
-        Can we get a pattern with BufferLogger/TimestampLogger that abstracts over how we are calling things? This would
-        be nice, ESPECIALLY if we can factor in some of the "abstract things out" that Stoneberry can do.
-      </p>
-
-      <p class="TODO">
-        A templating function multiply (for constants), that can replace with bit shifts where helpful?
+        Review <a href="https://github.com/moderngpu/moderngpu">modernGPU</a> for other algorithms.
       </p>
 
       <p class="TODO">
@@ -2374,27 +2272,6 @@
 
       <p class="DEFERRED">
         Create parallel TS version of templates.
-      </p>
-
-      <p class="TODO">
-        Higher-level language(!)<br>
-        Notably, we can support striped objects (across different buffer locations). We can support split-up bitcasted
-        objects (pack things into u32 arrays, that is handled by the language). Treat WGSL as our "assembly language".
-        Use "structure of arrays" (SoA) instead of "array of structures" (AoS) for better memory access patterns
-        (where possible).
-      </p>
-
-      <p class="TODO">
-        PIX didn't show occupancy information on my OS/GPU. Find a way where we can inspect occupancy directly.
-      </p>
-
-      <p class="TODO">
-        Create a map of what in WGSL are abstract/concrete/structure/composite/constructible/fixed-footprint/plain/atomic/storable types
-      </p>
-
-      <p class="TODO">
-        Use <code>arrayLength</code> builtin, perhaps we can use it to range check more efficiently? This only sometimes
-        works, if we have filled the buffer fully?
       </p>
 
       <p class="DEFERRED">
@@ -2413,14 +2290,6 @@
 
       <p>
         Some demos: <a href="https://tellusim.com/webgpu/">https://tellusim.com/webgpu/</a>.
-      </p>
-
-      <p class="TODO">
-        Factor out all of the associated code to render things to a Canvas texture (e.g. blitshader).
-      </p>
-
-      <p class="TODO">
-        Figure out buffer reuse to avoid zero-init cost and those issues.
       </p>
 
       <h4 id="WGSL-reduce">Reduce</h4>
@@ -2491,10 +2360,6 @@
 
       <p>
         ModernGPU notes on grain size: By choosing an odd number for VT we avoid bank conflicts that would otherwise be incurred when re-ordering data between strided and thread orders. Within a warp, all banks (VT * tid + i) % 32 are accessed exactly once for each step i when VT is odd. If VT is a power-of-two, you can expect VT-way conflicts at each step.
-      </p>
-
-      <p>
-        Check <a href="https://compute.toys/">https://compute.toys/</a> (ShaderToy for WebGPU) for potential examples.
       </p>
 
       <p>
@@ -2631,8 +2496,7 @@
       </p>
 
       <p class="TODO">
-        Have a buffer that gets flags set if we run out of memory, or run into various problematic issues. (Or unrelated
-        things like intersection hit rate).
+        Recird when bump allocation runs out of memory (use <code>arrayLength</code> on buffers).
       </p>
 
       <h4 id="WGSL-rationals">Rationals</h4>
@@ -2660,6 +2524,14 @@
 
       <h4 id="WGSL-profiling">Profiling</h4>
 
+      <p class="TODO">
+        Omit mappable reads from performance tests
+      </p>
+
+      <p class="TODO">
+        Test and see if having one big buffer that we use for everything is more performant.
+      </p>
+
       <p>
         Using PIX on Windows. See <a href="https://gist.github.com/Popov72/41f71cbf8d55f2cb8cae93f439eee347">https://gist.github.com/Popov72/41f71cbf8d55f2cb8cae93f439eee347</a>
       </p>
@@ -2670,6 +2542,10 @@
 
       <p>
         Try <a href="https://renderdoc.org/">RenderDoc</a>.
+      </p>
+
+      <p class="TODO">
+        PIX didn't show occupancy information on my OS/GPU. Find a way where we can inspect occupancy directly.
       </p>
 
       <p>
@@ -2713,6 +2589,136 @@
 
       <p class="TODO">
         Test out a bunch of performance hypotheses.
+      </p>
+
+      <h4 id="WGSL-unitTesting">Unit Testing</h4>
+
+      <p class="TODO">
+        Minimize duplication in unit tests (and get more of our "shaders" up to speed, like the radix ones).
+      </p>
+
+      <h4 id="WGSL-knownBugs">Known Bugs</h4>
+
+      <p class="TODO">
+        Overflows on left-shifts are a problem! <code>&lt;&lt; 32</code> was causing all sorts of issues in the radix
+        sort. Investigate full overflow handling for u32/i32. Make sure we are not overflowing (or at least shifting by 32).
+      </p>
+
+      <p class="TODO">
+        Check the radix sort, and make sure it is not requesting more bitVector size than it is using.
+      </p>
+
+      <h4 id="WGSL-notes">Notes</h4>
+
+      <p>
+        Synchronization notes: onSubmittedWorkDone() are settled in order, and mapAsync() settles before the corresponding
+        onSubmittedWorkDone().
+      </p>
+
+      <p>
+        BindGroupLayout "group-equivalent" means "essentially equal bind group layouts are interchangeable".
+      </p>
+
+      <p>
+        Think about memory bank conflict patterns (with grains, etc.). Interleaved banks/channels for memory, with
+        coalesced memory.
+      </p>
+
+      <p>
+        Batch/aggregate atomic updates (with privatization).
+      </p>
+
+      <p>
+        Use <code>arrayLength()</code> more.
+      </p>
+
+      <p class="TODO">
+        Try dynamic block index assignment (with an atomic), so that we can process data in order. Can we cheat, and
+        use that for forward progress and workgroup communication?
+      </p>
+
+      <p class="TODO">
+        Create a map of what in WGSL are abstract/concrete/structure/composite/constructible/fixed-footprint/plain/atomic/storable types
+      </p>
+
+      <h4 id="WGSL-newLanguage">New Language</h4>
+
+      <p>
+        A new language should potentially:
+      </p>
+
+      <ul>
+        <li>
+          Include the full chain of operations in a single file (with each section importable).
+          Have <code>shaderBarrier()</code> for things that create a split between shaders.
+        </li>
+        <li>
+          Support everything in ConcreteType (bit packed structures, structure-of-array representations, etc.)
+        </li>
+        <li>
+          Potentially include a language (JS/TS?) for templating inside, for when we need it? Maybe not.
+        </li>
+        <li>
+          Include the same syntax/handling for most operations, so we can parse the WGSL part and directly include it.
+        </li>
+      </ul>
+
+      <h4 id="WGSL-overlap">Overlap</h4>
+
+      <p>
+        Overlap is for when we have multiple shader stages that run concurrently (because they don't write to the same
+        place, and other constraints).
+      </p>
+
+      <p>
+        This was extremely painful to get working. Dawn's zero-copy buffers and stages messed up the "usage" flags,
+        so we had to use a ton of workarounds. We'll eventually want to get this working in general.
+        See <code>PerformanceTesting.ts</code> for the working example (as verified by PIX).
+      </p>
+
+      <p>
+        For overlap:
+      </p>
+
+      <ol>
+        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-1-whats-a-barrier/">What’s a Barrier?</a></li>
+        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-2-synchronizing-gpu-threads/">Synchronizing GPU Threads</a></li>
+        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-3-multiple-command-processors/">https://therealmjp.github.io/posts/breaking-down-barriers-part-3-multiple-command-processors/</a></li>
+        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-4-gpu-preemption/">https://therealmjp.github.io/posts/breaking-down-barriers-part-4-gpu-preemption/</a></li>
+        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-5-back-to-the-real-world/">https://therealmjp.github.io/posts/breaking-down-barriers-part-5-back-to-the-real-world/</a></li>
+        <li><a href="https://therealmjp.github.io/posts/breaking-down-barriers-part-6-experimenting-with-overlap-and-preemption/">https://therealmjp.github.io/posts/breaking-down-barriers-part-6-experimenting-with-overlap-and-preemption/</a></li>
+      </ol>
+
+      <p class="TODO">
+        Test with the overlap case with my performance profiling. See if it reports "parallel" handling.
+        <code>PerformanceTesting.loopExpensiveMultiple()</code>.
+        Then profile it with PIX to see if our profiling matches PIX.
+      </p>
+
+      <h4 id="WGSL-deprecated">Deprecated</h4>
+
+      <p class="TODO">
+        Entire .wgsl file system. Port over tests for /gpu/, then we can remove a lot of "newer but deprecated" items.
+      </p>
+
+      <p>
+        DualSnippet (we don't need the "dual" nature, and we're not using snippets for templating).
+      </p>
+
+      <p>
+        Preprocessing system (all the #ifdef #bindings #import #option stuff). Including the chipper transpilation.
+        Move the minification/mangling code elsewhere (might be useful).
+      </p>
+
+      <p>
+        Execution/BasicExecution/BaseExecution, and the DeviceContext calls. See what we can remove.
+      </p>
+
+      <p class="TODO">Note chipper <code>node js/scripts/transpile.js --watch --skipMinifyWGSL</code></p>
+
+      <p>
+        For minification, investigate <a href="https://github.com/LucentFlux/wgsl-minifier">https://github.com/LucentFlux/wgsl-minifier</a>
+        and <a href="https://github.com/mgnauck/wgslminify">https://github.com/mgnauck/wgslminify</a>
       </p>
 
       <h3 id="asyncSimulation">Async Simulation</h3>
@@ -2890,7 +2896,7 @@
 
       <p class="TODO">
         IMPORTANT! Separate buffer for uniform configs. Storage configs copies to it. Can probably have these in a
-        separate bind group.
+        separate bind group. Also could just leave it as a storage buffer.
       </p>
 
       <p class="TODO">
