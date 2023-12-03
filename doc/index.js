@@ -393,6 +393,13 @@ window.createRenderProgramSandbox = ( id, func, width, height, providedOptions )
 };
 
 setTimeout( () => {
+  const urlParams = new URLSearchParams( window.location.search );
+  const showDiagrams = urlParams.get( 'diagrams' ) !== 'hide';
+
+  if ( !showDiagrams ) {
+    return;
+  }
+
   const addDiagram = async ( id, callback ) => {
     const container = document.getElementById( id );
     if ( container ) {
