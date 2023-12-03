@@ -113,7 +113,7 @@
   <div class="span2"></div>
 </div>
 
-<div class="nav-container">
+<div class="nav-container hidden-phone">
   <div class="nav-root">
     <ul class="nav nav-list nav-main">
       <li>
@@ -209,7 +209,7 @@
 </div>
 
 <div class="row-fluid">
-  <div class="span2 hidden-phone"></div>
+  <div class="span2"></div>
   <div class="span8">
     <div class="give-max-width">
 
@@ -2012,6 +2012,10 @@
       </p>
 
       <p class="TODO">
+        Read <a href="https://gpuopen.com/learn/optimizing-gpu-occupancy-resource-usage-large-thread-groups/">this</a> for performance notes.
+      </p>
+
+      <p class="TODO">
         Bake in support for context loss handling.
       </p>
 
@@ -2040,11 +2044,33 @@
         and usage switches? (For the parallel execution of dispatches).
       </p>
 
-      <h5>Notes about WebGPU/WGSL</h5>
+      <h5>Notes about WebGPU/WGSL and Parallel</h5>
 
       <p>
         Synchronization notes: onSubmittedWorkDone() are settled in order, and mapAsync() settles before the corresponding
         onSubmittedWorkDone().
+      </p>
+
+      <p>
+        BindGroupLayout "group-equivalent" means "essentially equal bind group layouts are interchangeable".
+      </p>
+
+      <p>
+        Think about memorybank conflict patterns (with grains, etc.). Interleaved banks/channels for memory, with
+        coalesced memory.
+      </p>
+
+      <p>
+        Batch/aggregate atomic updates (with privatization).
+      </p>
+
+      <p class="TODO">
+        Double-buffering works around write-after-read race conditions, we should use that more.
+      </p>
+
+      <p class="TODO">
+        Try dynamic block index assignment (with an atomic), so that we can process data in order. Can we cheat, and
+        use that for forward progress and workgroup communication?
       </p>
 
       <h4 id="WGSL-newSystem">New System</h4>
@@ -2098,6 +2124,11 @@
       </p>
 
       <p>
+        Split up compute passes when we want to profile individual shader sections. Otherwise probably prefer one big
+        compute pass.
+      </p>
+
+      <p>
         Input size =&gt; "abstract" chain. Decide on bind group/pipeline layouts =&gt; "concrete" chain. Pass buffers
         =&gt; "bound" chain. Can execute that.
       </p>
@@ -2108,6 +2139,15 @@
 
       <p>
         NOTE: Changing a bind group of a specific index will trigger a rebind for all higher indices (for performance).
+      </p>
+
+      <p>
+        Consider splitting uniforms into "ones that change during calls" and "ones that do not". Performance cost
+        potentially.
+      </p>
+
+      <p class="TODO">
+        Profile different bind group setups.
       </p>
 
       <p class="TODO">
@@ -2136,6 +2176,14 @@
         Factored out way of handling the "expression or statement" facility, so that things can be specified in a
         generic way (WGSLContext CAN turn these into function calls, but we would like to do this in places where we
         do not want function call overhead.
+      </p>
+
+      <h5>Concrete Types</h5>
+
+      <p class="TODO">
+        Create a structure-like creator for ConcreteTypes. We'll want bit-packing (combine booleans, finite-precision types, etc.)
+        For this, we'll presumably actually want variable bit-length values (e.g. like a u8, u16), and handle similar
+        packing for booleans.
       </p>
 
       <h4 id="WGSL-snippets">Snippets</h4>
@@ -2504,6 +2552,15 @@
 
       <h4 id="WGSL-radixSort">Radix Sort</h4>
 
+      <p class="TODO">
+        Look into a <a href="https://arxiv.org/ftp/arxiv/papers/2206/2206.01784.pdf">potentially faster radix sort implementation</a>
+        with less memory access!
+      </p>
+
+      <p class="TODO">
+        Look into <a href="https://arxiv.org/pdf/1611.01137.pdf">A memory-bandwidth efficient radix sort</a>.
+      </p>
+
       <p>
         Referenced <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span> and <span class="citation" data-citation-id="KieberEmmonsRadixSort"></span> in the implementations.
       </p>
@@ -2613,6 +2670,10 @@
 
       <p>
         Try <a href="https://renderdoc.org/">RenderDoc</a>.
+      </p>
+
+      <p>
+        Use median for profiling.
       </p>
 
       <p class="TODO">
@@ -2827,6 +2888,28 @@
 
       <h2 id="stages">Stages</h2>
 
+      <p class="TODO">
+        IMPORTANT! Separate buffer for uniform configs. Storage configs copies to it. Can probably have these in a
+        separate bind group.
+      </p>
+
+      <p class="TODO">
+        See if we can inverleave CPU/GPU work better. Can we record scene, kick it off on the GPU, then record
+        render programs and then kick THAT off on the GPU? Might reduce latency that way.
+      </p>
+
+      <p class="TODO">
+        Create a visual debugger for this setup - visualize the RenderChunks, etc.
+      </p>
+
+      <p class="TODO">
+        Tile things in raster clipper. Load data together, then operate together.
+      </p>
+
+      <p class="TODO">
+        Batch our atomic updates (especially in rasterization).
+      </p>
+
       <h3 id="stage-transforms">Transforms</h3>
 
       <p>
@@ -2877,6 +2960,10 @@
       </p>
 
       <h3 id="stage-integerTransform">Integer Transform</h3>
+
+      <p class="TODO">
+        Can we cut precision here further to get better edge sorting? Radix sort on the rationals might be expensive.
+      </p>
 
       <p>
         We will scale up and transform our coordinate frame (for each tile) to integer coordinates, spaced out so that we are
@@ -3173,6 +3260,14 @@
       </p>
 
       <h3 id="stage-rasterize">Rasterize</h3>
+
+      <p class="TODO">
+        Can we get our workgroups somehow doing coarse and fine grid splits?
+      </p>
+
+      <p class="TODO">
+        Can we include things into one buffer, and just... append to arrays of edges/chunks/etc.?
+      </p>
 
       <p>
         Other approaches include <span class="citation" data-citation-id="10.1145/1409060.1409088"></span> and
