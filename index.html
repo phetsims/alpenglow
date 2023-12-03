@@ -243,6 +243,7 @@
       </p>
 
       <p class="TODO">
+        Get non-crashing on phones -
         Prioritize demos lazily (either when they are close to the scrolled viewport) or on other threads (web workers).
       </p>
 
@@ -451,7 +452,7 @@
 
       <p>
         However, when we use other color spaces like Oklab, even blends from colors inside the sRGB gamut can produce
-        out-of-gamut colors. To compensate for this, we'll need to use gamut mapping:
+        out-of-gamut colors. To compensate for this, we will need to use gamut mapping:
       </p>
 
       <div class="row-fluid" style="margin-bottom: 15px;">
@@ -493,7 +494,7 @@
       </script>
 
       <p>
-        Hopefully soon, we'll have a convenient interface to show high dynamic range (HDR) content, but Alpenglow will be able
+        Hopefully soon, we will have a convenient interface to show high dynamic range (HDR) content, but Alpenglow will be able
         to support it when it is available.
       </p>
 
@@ -1992,6 +1993,12 @@
       </p>
 
       <p class="TODO">
+        Use <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/change_event">media query change event</a>
+        to potentially detect (a) display-p3 availability, (b) devicePixelRatio, (c) light-dark mode changes,
+        (d) possibly WebGPU support changes?
+      </p>
+
+      <p class="TODO">
         Lint with  <a href="https://github.com/wgsl-analyzer/wgsl-analyzer">wgsl-analyzer</a> on generated output, in an
         automated way.
       </p>
@@ -2043,6 +2050,47 @@
       <h4 id="WGSL-newSystem">New System</h4>
 
       <h5>Linking/WebGPU System</h5>
+
+      <ol>
+        <li>
+          Input size data (typed) + options + log =&gt; "blueprint". Essentially namedShaders{name =&gt; BindSlot} +
+          internalBindSlots: BindSlot[] ---- but wait, need a way to expose all of the shader stages.
+        </li>
+        <li>
+          Blueprint + bind layout data (bind group layouts, pipeline layouts) =&gt; "unbound". Intelligently scan to decide
+          on bind group layouts.
+        </li>
+        <li>
+          Unbound + buffers/resources to bind (to most slots) =&gt; "bound". -- partial bind acceptable
+        </li>
+        <li>
+          Bound + dynamically-bound buffers/resources =&gt; execution.
+        </li>
+      </ol>
+
+      <p>
+        BindSlot&lt;ConcreteType&gt;: typed - it will (a) hold a certain type of data, and (b) have a length, so that
+        we will know how much space to create.
+      </p>
+
+      <p>
+        When do we need to know when resources will be "dynamically" bound? Sometimes we will need to create
+        bind groups on the fly (in the execute step). Example: Canvas swap chain texture.
+      </p>
+
+      <p>
+        BindSlot can potentially connect to others "sub-parts of the blueprint". -- Need to decide on how blueprint
+        code should look. When composing, we will want to connect the BindSlots together.
+      </p>
+
+      <p>
+        Map{BindSlot, Resource} is how we get the "bound" state.
+      </p>
+
+      <p>
+        To create blueprints, we will need input data size/structure (e.g. we will need to know how many reduce levels to
+        create, etc.).
+      </p>
 
       <p>
         NOTE: We can split up render passes however we want near the end. It should really be about how we structure
@@ -2219,7 +2267,24 @@
       </p>
 
       <p class="TODO">
+        Factor out "main_" type code so that it is reusable in other places (that might use different types of buffer
+        reads, etc.)
+      </p>
+
+      <p class="TODO">
+        Write main operations so they can operate at arbitrary buffer offsets - could included all reduces into a single buffer.
+      </p>
+
+      <p class="TODO">
+        Test and see if having one big buffer that we use for everything is more performant.
+      </p>
+
+      <p class="TODO">
         Read papers and books! - Notably Levien one with the scan patterns.
+      </p>
+
+      <p class="TODO">
+        Omit mappable reads from performance tests
       </p>
 
       <p>
