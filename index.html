@@ -179,6 +179,7 @@
               <li><a href="#WGSL-notes">Notes</a></li>
               <li><a href="#WGSL-newLanguage">New Language</a></li>
               <li><a href="#WGSL-overlap">Overlap</a></li>
+              <li><a href="#WGSL-documentation">Documentation</a></li>
               <li><a href="#WGSL-deprecated">Deprecated</a></li>
             </ul>
           </li>
@@ -1999,9 +2000,13 @@
       </p>
 
       <p class="TODO">
+        We are <em>very broken</em> with non-integral devicePixelRatio (browser zoom in).
         Use <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList/change_event">media query change event</a>
         to potentially detect (a) display-p3 availability, (b) devicePixelRatio, (c) light-dark mode changes,
         (d) possibly WebGPU support changes?
+        <a href="https://github.com/phetsims/scenery/issues/1585">https://github.com/phetsims/scenery/issues/1585</a>.
+        <a href="https://stackoverflow.com/questions/28905420/window-devicepixelratio-change-listener">Alternative ref 1</a>,
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio">MDN ref</a>.
       </p>
 
       <p class="TODO">
@@ -2066,6 +2071,12 @@
 
       <p class="TODO">
         A templating function multiply (for constants), that can replace with bit shifts where helpful?
+      </p>
+
+      <p class="TODO">
+        Sometimes parsing the WGSL of a parameter (to tell if it's doing something, and possibly optimizing it) could be
+        useful. Getting to work with the WGSL AST would be great. For instance, knowing "hey, is this a statement or
+        an expression?" would be great.
       </p>
 
       <h4 id="WGSL-types">Types</h4>
@@ -2197,6 +2208,12 @@
         Factor out all of the associated code to render things to a Canvas texture (e.g. blitshader).
       </p>
 
+      <p class="TODO">
+        Use staging buffer ring like in
+        <a href="https://toji.dev/webgpu-best-practices/buffer-uploads.html#:~:text=Buffer%20data%20flow,-Before%20we%20get%20into%20the">WebGPU Buffer Uploads</a>.
+        Actually, find the other (WGPU) example of a buffer "belt" and implement that!
+      </p>
+
       <h4 id="WGSL-logging">Logging</h4>
 
       <p class="TODO">
@@ -2270,6 +2287,10 @@
         compute (if that's allowed).
       </p>
 
+      <p class="TODO">
+        Implement our "matching reduce" (used for our chunk reduction) as a general thing.
+      </p>
+
       <p class="DEFERRED">
         Create parallel TS version of templates.
       </p>
@@ -2290,6 +2311,25 @@
 
       <p>
         Some demos: <a href="https://tellusim.com/webgpu/">https://tellusim.com/webgpu/</a>.
+      </p>
+
+      <p class="TODO">
+        Install and play with CUDA so I have more general knowledge/familiarity.
+        <a href="https://journal.hexmos.com/gpu-survival-toolkit/">intro notes</a>.
+        <a href="https://developer.nvidia.com/cuda-downloads">CUDA downloads</a>
+      </p>
+
+      <p class="TODO">
+        <a href="https://docs.nvidia.com/cuda/thrust/index.html#algorithms">Review Thrust algorithms</a>, and
+        <a href="https://github.com/STEllAR-GROUP/hpx">HPX</a>.
+      </p>
+
+      <p class="TODO">
+        Review this <a href="https://safari.ethz.ch/projects_and_seminars/fall2022/doku.php?id=heterogeneous_systems">Heterogeneou systems class</a>.
+      </p>
+
+      <p class="TODO">
+        Create explicit stream compaction. Or also "prefix max" with index of first occurrance.
       </p>
 
       <h4 id="WGSL-reduce">Reduce</h4>
@@ -2333,20 +2373,8 @@
       </ol>
 
       <p class="TODO">
-        DOCUMENT TEMPLATES HERE
-      </p>
-
-      <p class="TODO">
         Get index_mapped_loop working nicely (it is created, but not really used yet). load_multiple and load_reduced.
-      </p>
-
-      <p class="TODO">
-        Unrelated, but we should handle the devicePixelRatio switch (here, but mainly in common code).
-        <a href="https://github.com/phetsims/scenery/issues/1585">https://github.com/phetsims/scenery/issues/1585</a>
-      </p>
-
-      <p class="TODO">
-        Alpenglow is VERY BROKEN with a non-integral devicePixelRatio! (browser zoom in)
+        We should do this for the newer TypeScript-based templates. Do it on a high-performance day.
       </p>
 
       <p class="TODO">
@@ -2379,10 +2407,6 @@
       </p>
 
       <p class="TODO">
-        DOCUMENT TEMPLATES HERE
-      </p>
-
-      <p class="TODO">
         Remember for 3-level atomic-able, we can single-reduce and distribute atomics. For others, we will need
         multi-step reduce (if we are doing reduce-scan+add strategies). If we do the atomic-able, we can start with the
         scan on the bottom level.
@@ -2390,6 +2414,14 @@
 
       <p class="TODO">
         After we get blocked non-commutative better reduce, do 3-level scans next. Get an optimized u32 scan (consider u16 packed scan?)
+      </p>
+
+      <p class="TODO">
+        Get "right" direction scans working for everything.
+      </p>
+
+      <p class="TODO">
+        Use the terminology "scan block" pervasively.
       </p>
 
       <p>
@@ -2454,6 +2486,11 @@
       <p class="TODO">
         Handle "lightweight" sorting for cases where there is a ton of associated data, but we only
         need a fraction of that to get the keys for sorting (or for comparisons).
+      </p>
+
+      <p class="TODO">
+        Can we pack the radix sort histogram into u32 atomics (multiples)? Essentially apply our n-bit packing to the
+        histogram (since we have a decent number of bits of potential counts).
       </p>
 
       <p>
@@ -2525,6 +2562,15 @@
       <h4 id="WGSL-profiling">Profiling</h4>
 
       <p class="TODO">
+        Profile all of the things! Especially those small settings that we might want to get rid of.
+      </p>
+
+      <p>
+        Remember to put a "copy" like shader in front of something we're profiling, if we want to fully test the entire
+        "memory overhead" of the main operation. Or find some other way of ejecting the content from the cache.
+      </p>
+
+      <p class="TODO">
         Omit mappable reads from performance tests
       </p>
 
@@ -2541,6 +2587,13 @@
       </p>
 
       <p>
+        Note that we really want to separately examine a "single" vs "parallel" execution in benchmarks. Sometimes we care
+        if we're running just a single workgroup (how can we make that workgroup as fast as possible on its own - occupancy
+        doesn't matter as much). Sometimes we care about a huge number of workgroups (occupancy matters a lot more, and
+        can be the cliff-limiting factor).
+      </p>
+
+      <p>
         Try <a href="https://renderdoc.org/">RenderDoc</a>.
       </p>
 
@@ -2550,6 +2603,10 @@
 
       <p>
         Use median for profiling.
+      </p>
+
+      <p>
+        <a href="https://github.com/mighdoll/thimbleberry/blob/main/doc/Utilities.md#gpu-performance-reports">Thimbleberry usage notes</a>
       </p>
 
       <p class="TODO">
@@ -2621,8 +2678,21 @@
 
       <p>
         Think about memory bank conflict patterns (with grains, etc.). Interleaved banks/channels for memory, with
-        coalesced memory.
+        coalesced memory. Remember for coalescing we can potentially do one of the following:
       </p>
+
+      <ul>
+        <li>
+          Rearrange threads
+        </li>
+        <li>
+          Rearrange data that the threads access
+        </li>
+        <li>
+          Perform uncoalesceable accesses on shared memory, then transform the data from shared to global in a coalesced
+          way
+        </li>
+      </ul>
 
       <p>
         Batch/aggregate atomic updates (with privatization).
@@ -2630,6 +2700,14 @@
 
       <p>
         Use <code>arrayLength()</code> more.
+      </p>
+
+      <p>
+        Buffers must be unmapped while any in-flight submission or queue operation may be using them.
+      </p>
+
+      <p>
+        Really reduce registers because having more workgroups concurrently hides latency.
       </p>
 
       <p class="TODO">
@@ -2693,6 +2771,12 @@
         Test with the overlap case with my performance profiling. See if it reports "parallel" handling.
         <code>PerformanceTesting.loopExpensiveMultiple()</code>.
         Then profile it with PIX to see if our profiling matches PIX.
+      </p>
+
+      <h4 id="WGSL-documentation">Documentation</h4>
+
+      <p class="TODO">
+        Better document all of our existing base templates.
       </p>
 
       <h4 id="WGSL-deprecated">Deprecated</h4>
