@@ -474,19 +474,17 @@ export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/Buf
 export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/TimestampLogger.js';
 export { default as TypedBuffer } from './webgpu/TypedBuffer.js';
 export { default as BindingLocation } from './webgpu/BindingLocation.js';
-export { default as Binding } from './webgpu/Binding.js';
 export { default as BoundResource } from './webgpu/BoundResource.js';
 export { default as BoundBuffer } from './webgpu/BoundBuffer.js';
 export { default as BoundTextureView } from './webgpu/BoundTextureView.js';
 export { default as BindGroupLayout } from './webgpu/BindGroupLayout.js';
-export type { BindingMapType, BindingTypeMapType } from './webgpu/BindGroupLayout.js';
 export { default as PipelineLayout } from './webgpu/PipelineLayout.js';
 export { default as BindGroup } from './webgpu/BindGroup.js';
-export type { ResourceMapType } from './webgpu/BindGroup.js';
 export { default as ComputePipeline } from './webgpu/ComputePipeline.js';
 export { default as ComputePass } from './webgpu/ComputePass.js';
 export { default as Executor } from './webgpu/Executor.js';
 export type { ExecutorOptions } from './webgpu/Executor.js';
+export { BlueprintTests, Binding, TypedBindingType, BindingBlueprint, BufferSlot, PipelineBlueprint, RoutineBlueprint, UnboundPipeline, UnboundRoutine, BoundPipeline, BoundRoutine } from './webgpu/Blueprint.js';
 
 export { partialWGSLBeautify, addLineNumbers, stripWGSLComments, GLOBAL_INDEXABLE_DEFAULTS, WORKGROUP_INDEXABLE_DEFAULTS, LOCAL_INDEXABLE_DEFAULTS, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS } from './webgpu/wgsl/WGSLUtils.js';
 export type { GlobalIndexable, WorkgroupIndexable, LocalIndexable, WorkgroupSizable, RakedSizable, OptionalLengthExpressionable, GrainSizable } from './webgpu/wgsl/WGSLUtils.js';
@@ -563,7 +561,6 @@ export type { mainScanWGSLOptions } from './webgpu/wgsl/gpu/mainScanWGSL.js';
 
 export { default as SingleReduceModule } from './webgpu/modules/gpu/SingleReduceModule.js';
 export type { SingleReduceModuleOptions } from './webgpu/modules/gpu/SingleReduceModule.js';
-
 export { default as SingleReduceShader } from './webgpu/shaders/gpu/SingleReduceShader.js';
 export type { SingleReduceShaderOptions } from './webgpu/shaders/gpu/SingleReduceShader.js';
 export { default as AtomicReduceShader, u32AtomicIdentities, i32AtomicIdentities } from './webgpu/shaders/gpu/AtomicReduceShader.js';

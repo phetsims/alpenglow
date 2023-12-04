@@ -18,8 +18,8 @@ export type mainRadixHistogramWGSLOptions<T> = {
   lengthExpression: WGSLExpressionU32; // TODO: support optional
 
   bindings: {
-    input: Binding;
-    output: Binding;
+    input: Binding<T>;
+    output: Binding<T>;
   };
 };
 

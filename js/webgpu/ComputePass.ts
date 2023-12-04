@@ -7,14 +7,13 @@
  */
 
 import { alpenglow, BindGroup, ComputePipeline } from '../imports.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 
 export default class ComputePass {
 
   public readonly computePassEncoder: GPUComputePassEncoder;
 
-  private currentPipeline: ComputePipeline<IntentionalAny> | null = null;
-  private currentBindGroups = new Map<number, BindGroup<IntentionalAny>>();
+  private currentPipeline: ComputePipeline | null = null;
+  private currentBindGroups = new Map<number, BindGroup>();
 
   public constructor(
     encoder: GPUCommandEncoder,
@@ -24,8 +23,8 @@ export default class ComputePass {
   }
 
   private prepare(
-    computePipeline: ComputePipeline<IntentionalAny>,
-    bindGroups: BindGroup<IntentionalAny>[]
+    computePipeline: ComputePipeline,
+    bindGroups: BindGroup[]
   ): void {
     if ( this.currentPipeline !== computePipeline ) {
       this.computePassEncoder.setPipeline( computePipeline.pipeline );
@@ -44,7 +43,7 @@ export default class ComputePass {
   }
 
   private attemptLogBarrier(
-    computePipeline: ComputePipeline<IntentionalAny>
+    computePipeline: ComputePipeline
   ): void {
     if ( computePipeline.logBarrierPipeline ) {
       this.currentPipeline = null;
@@ -54,8 +53,8 @@ export default class ComputePass {
   }
 
   public dispatchPipeline(
-    computePipeline: ComputePipeline<IntentionalAny>,
-    bindGroups: BindGroup<IntentionalAny>[],
+    computePipeline: ComputePipeline,
+    bindGroups: BindGroup[],
     dispatchX = 1,
     dispatchY = 1,
     dispatchZ = 1
@@ -71,8 +70,8 @@ export default class ComputePass {
   }
 
   public dispatchPipelineIndirect(
-    computePipeline: ComputePipeline<IntentionalAny>,
-    bindGroups: BindGroup<IntentionalAny>[],
+    computePipeline: ComputePipeline,
+    bindGroups: BindGroup[],
     indirectBuffer: GPUBuffer,
     indirectOffset: number
   ): this {

@@ -164,7 +164,6 @@
               <li><a href="#WGSL-types">Types</a></li>
               <li><a href="#WGSL-linking">Linking</a></li>
               <li><a href="#WGSL-logging">Logging</a></li>
-              <li><a href="#WGSL-mangling">Mangling</a></li>
               <li><a href="#WGSL-algorithms">Algorithms</a></li>
               <li><a href="#WGSL-reduce">Reduce</a></li>
               <li><a href="#WGSL-scan">Scan</a></li>
@@ -2094,6 +2093,64 @@
       <h4 id="WGSL-linking">Linking</h4>
 
       <p class="TODO">
+        Improve naming ... TypedBindingType is a mouthful.
+      </p>
+
+      <ul>
+        <li>
+          <strong>BindingType</strong>: Enum with bind/bindlayout entry generation TODO: dynamic buffer offsets
+        </li>
+        <li>
+          <strong>BindingLocation</strong>: ( groupIndex: number, bindingIndex: number )
+        </li>
+        <li>
+          <strong>TypedBindingType</strong>{T}: ( bindingType: BindingType, type: ConcreteType{T} )
+        </li>
+        <li>
+          <strong>BindGroupLayout</strong>: ( bindGroupLayoutName: string, groupIndex: number, map: Map{name, Binding} ) - has GPUBindGroupLayout
+        </li>
+        <li>
+          <strong>PipelineLayout</strong>: ( bindGroupLayouts: BindGroupLayouts ) - has GPUPipelineLayout, Map{name, Binding}
+        </li>
+        <li>
+          <strong>TypedBuffer</strong>{T}: ( buffer: GPUBuffer, type: ConcreteType{T} )
+        </li>
+        <li>
+          <strong>BindingResource</strong>{T}: TypedBuffer{T} | GPUTextureView
+        </li>
+        <li>
+          <strong>BindGroup</strong>: ( layout: BindGroupLayout, resourceMap: Map{name, BindingResource} ) - has GPUBindGroup
+        </li>
+        <li>
+          <strong>BindingBlueprint</strong>{T}: ( layoutName: string, typedBindingType: TypedBindingType{T}  )
+        </li>
+        <li>
+          <strong>PipelineBlueprint</strong>: ( pipelineName: string, bindingMap: Map{name, BindingBlueprint}, toComputePipeline: async bindingMap,pipelineLayout =&gt; ComputePipeline )
+        </li>
+        <li>
+          <strong>BufferSlot</strong>{T}: ( bindingBlueprints: BindingBlueprint{T}[] )
+        </li>
+        <li>
+          <strong>Binding</strong>{T}: ( bufferSlot: BufferSlot{T}, location: BindingLocation )
+        </li>
+        <li>
+          <strong>RoutineBlueprint</strong>: ( pipelineBlueprints: PipelineBlueprint[], bufferSlotMap: Map{name, BufferSlot}, internalBufferSlots: BufferSlot[] )
+        </li>
+        <li>
+          <strong>UnboundPipeline</strong>: ( computePipeline: ComputePipeline )
+        </li>
+        <li>
+          <strong>UnboundRoutine</strong>: ( routineBlueprint: RoutineBlueprint, unboundPipelines: UnboundPipeline )
+        </li>
+        <li>
+          <strong>BoundPipeline</strong>
+        </li>
+        <li>
+          <strong>BoundRoutine</strong>
+        </li>
+      </ul>
+
+      <p class="TODO">
         How can we support Thrust-like fusing of shader stages transparently/effortlessly? Do we not need this (say,
         everything is factored out where we don't have to create things as much)?
       </p>
@@ -2201,10 +2258,6 @@
       </p>
 
       <p class="TODO">
-        Doc once it's stabilized.
-      </p>
-
-      <p class="TODO">
         Factor out all of the associated code to render things to a Canvas texture (e.g. blitshader).
       </p>
 
@@ -2236,17 +2289,6 @@
       <p class="TODO">
         How to handle only a workgroup-level log? (would we just do that for local_id === 0?) - Currently better than our
         "log every thread that gets it" approach, BUT it _IS_ collapsed.
-      </p>
-
-      <h4 id="WGSL-mangling">Mangling</h4>
-
-      <p class="TODO">
-        Mangling needs to run on all of the shader code at once. We've implemented mangling for the Vello setup, but we
-        need to implement it in the chipper transpiler.
-      </p>
-
-      <p class="TODO">
-        How do we get this running with our more templated solution? Is mangling that required for our setup?
       </p>
 
       <h4 id="WGSL-algorithms">Algorithms</h4>

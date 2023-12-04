@@ -8,9 +8,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, BindingMapType, DeviceContext, mainLogBarrier, partialWGSLBeautify, PipelineLayout, stripWGSLComments, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
+import { addLineNumbers, alpenglow, DeviceContext, mainLogBarrier, partialWGSLBeautify, PipelineLayout, stripWGSLComments, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
 
-export default class ComputePipeline<BindingMap extends BindingMapType> {
+export default class ComputePipeline {
   // This will be available by the time it can be accessed publicly
   public pipeline!: GPUComputePipeline;
   public logBarrierPipeline: GPUComputePipeline | null = null;
@@ -23,7 +23,7 @@ export default class ComputePipeline<BindingMap extends BindingMapType> {
     public readonly deviceContext: DeviceContext,
     public readonly name: string,
     public readonly wgsl: string,
-    public readonly pipelineLayout: PipelineLayout<BindingMap>,
+    public readonly pipelineLayout: PipelineLayout,
     public readonly log: boolean,
     async: boolean
   ) {
@@ -90,13 +90,13 @@ export default class ComputePipeline<BindingMap extends BindingMapType> {
     return partialWGSLBeautify( stripWGSLComments( logBarrierWgslContext.toString() ) );
   }
 
-  public static withContext<BindingMap extends BindingMapType>(
+  public static withContext(
     deviceContext: DeviceContext,
     name: string,
     toWGSL: ( context: WGSLContext ) => WGSLModuleDeclarations,
-    pipelineLayout: PipelineLayout<BindingMap>,
+    pipelineLayout: PipelineLayout,
     log: boolean
-  ): ComputePipeline<BindingMap> {
+  ): ComputePipeline {
     const wgslContext = new WGSLContext( name, log ).with( toWGSL );
 
     const wgsl = partialWGSLBeautify( stripWGSLComments( wgslContext.toString(), false ) );
@@ -104,13 +104,13 @@ export default class ComputePipeline<BindingMap extends BindingMapType> {
     return new ComputePipeline( deviceContext, name, wgsl, pipelineLayout, log, false );
   }
 
-  public static async withContextAsync<BindingMap extends BindingMapType>(
+  public static async withContextAsync(
     deviceContext: DeviceContext,
     name: string,
     toWGSL: ( context: WGSLContext ) => WGSLModuleDeclarations,
-    pipelineLayout: PipelineLayout<BindingMap>,
+    pipelineLayout: PipelineLayout,
     log: boolean
-  ): Promise<ComputePipeline<BindingMap>> {
+  ): Promise<ComputePipeline> {
     const wgslContext = new WGSLContext( name, log ).with( toWGSL );
 
     const wgsl = partialWGSLBeautify( stripWGSLComments( wgslContext.toString(), false ) );

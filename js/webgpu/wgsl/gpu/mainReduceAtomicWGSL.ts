@@ -15,8 +15,8 @@ export type mainReduceAtomicWGSLOptions<T> = {
   binaryOp: BinaryOp<T>;
 
   bindings: {
-    input: Binding;
-    output: Binding;
+    input: Binding<T>;
+    output: Binding<T>;
   };
 
   // e.g. length / inputOrder / inputAccessOrder / sequentialReduceStyle

@@ -9,29 +9,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroupLayout, Binding, DeviceContext, TypedBuffer } from '../imports.js';
+import { alpenglow, BindGroupLayout, DeviceContext, TypedBuffer } from '../imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 
-export type ResourceMapType = Record<string, TypedBuffer<IntentionalAny> | GPUTextureView | null>;
-export type ResourceMapTypeWithLog = ResourceMapType & { log: TypedBuffer<number> | null };
-
-type BindingMapFromResourceMap<ResourceMap extends ResourceMapType> = { [P in keyof ResourceMap]: Binding | null };
-
-// type BindingMapFromResourceMap<ResourceMap extends ResourceMapType> = {
-//   // TODO: extends is not working as anticipated here
-//   [P in keyof ResourceMap]: ResourceMap[ P ] extends null ? Binding | null : Binding
-// };
-
-export default class BindGroup<ResourceMap extends ResourceMapType> {
+export default class BindGroup {
 
   public readonly bindGroup: GPUBindGroup;
 
   public constructor(
     public readonly deviceContext: DeviceContext,
     public readonly name: string,
-    public readonly layout: BindGroupLayout<BindingMapFromResourceMap<ResourceMap>>,
-    public readonly resourceMap: ResourceMap
+    public readonly layout: BindGroupLayout,
+    public readonly resourceMap: Record<string, TypedBuffer<IntentionalAny> | GPUTextureView>
   ) {
     this.bindGroup = deviceContext.device.createBindGroup( {
       label: `${this.name} bind group`,
@@ -42,7 +31,7 @@ export default class BindGroup<ResourceMap extends ResourceMapType> {
 
         assert && assert( hasBinding === hasResource, 'Binding/resource mismatch' );
         return hasBinding && hasResource;
-      } ).map( ( name: keyof ResourceMap ) => {
+      } ).map( name => {
         const binding = layout.bindingMap[ name ]!;
         const resource = resourceMap[ name ]!;
 
@@ -55,21 +44,21 @@ export default class BindGroup<ResourceMap extends ResourceMapType> {
     } );
   }
 
-  // TODO: why is this... losing the type information?
-  public static createZero<ResourceMap extends ResourceMapTypeWithLog>(
-    deviceContext: DeviceContext,
-    name: string,
-    layout: BindGroupLayout<BindingMapFromResourceMap<ResourceMap>>,
-    log: boolean,
-    resourceMap: StrictOmit<ResourceMap, 'log'>
-  ): BindGroup<ResourceMap> {
-    // @ts-expect-error
-    return new BindGroup<ResourceMap>( deviceContext, name, layout, {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...resourceMap,
-      log: log ? deviceContext.getLogTypedBuffer() : null
-    } );
-  }
+  // // TODO: why is this... losing the type information?
+  // public static createZero<ResourceMap extends ResourceMapTypeWithLog>(
+  //   deviceContext: DeviceContext,
+  //   name: string,
+  //   layout: BindGroupLayout<BindingMapFromResourceMap<ResourceMap>>,
+  //   log: boolean,
+  //   resourceMap: StrictOmit<ResourceMap, 'log'>
+  // ): BindGroup<ResourceMap> {
+  //   // @ts-expect-error
+  //   return new BindGroup<ResourceMap>( deviceContext, name, layout, {
+  //     // eslint-disable-next-line no-object-spread-on-non-literals
+  //     ...resourceMap,
+  //     log: log ? deviceContext.getLogTypedBuffer() : null
+  //   } );
+  // }
 }
 
 alpenglow.register( 'BindGroup', BindGroup );

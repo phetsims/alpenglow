@@ -25,9 +25,9 @@ export type mainRadixScatterWGSLOptions<T> = {
   loadMultipleOptions?: StrictOmit<loadMultipleWGSLOptions<T>, 'loadExpression' | 'loadStatements' | 'storeStatements' | 'type' | 'workgroupSize' | 'grainSize' | 'lengthExpression' | 'outOfRangeValue' | 'inputOrder' | 'inputAccessOrder'>;
 
   bindings: {
-    input: Binding;
-    histogramOffsets: Binding;
-    output: Binding;
+    input: Binding<T>;
+    histogramOffsets: Binding<T>;
+    output: Binding<T>;
   };
 } & RakedSizable;
 // TODO: options pass-through

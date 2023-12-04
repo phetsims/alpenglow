@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, BindingLocation, Binding, WGSLModuleDeclarations } from '../../imports.js';
+import { alpenglow, BindingLocation, BindingType, getArrayType, TypedBindingType, U32Type, WGSLModuleDeclarations } from '../../imports.js';
 
 export default class WGSLContext {
   private readonly declarations: WGSLInternalDeclaration[] = [];
@@ -22,8 +22,9 @@ export default class WGSLContext {
     return new BindingLocation( 0, 64 );
   }
 
-  public static getBoundLogBinding(): Binding {
-    return new Binding( BindingType.STORAGE_BUFFER, WGSLContext.getLogBindingLocation() );
+  public static getLogTypedBindingType(): TypedBindingType<number[]> {
+    // TODO: factor out the 1 << 22
+    return new TypedBindingType( BindingType.STORAGE_BUFFER, getArrayType( U32Type, 1 << 22 ) );
   }
 
   public add(

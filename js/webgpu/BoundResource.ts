@@ -8,10 +8,11 @@
 
 import { alpenglow, Binding } from '../imports.js';
 
-export default class BoundResource {
+export default class BoundResource<T> {
   public constructor(
+    // TODO This seems off!
     public readonly resource: GPUBuffer | GPUTextureView,
-    public readonly binding: Binding
+    public readonly binding: Binding<T>
   ) {}
 
   public getBindGroupEntry(): GPUBindGroupEntry {

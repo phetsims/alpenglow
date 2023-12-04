@@ -31,34 +31,34 @@ type SelfOptions<T> = {
 } & RakedSizable & ( {
   inPlace?: false;
   bindings: {
-    input: Binding;
-    output: Binding;
+    input: Binding<T>;
+    output: Binding<T>;
   };
 } | {
   inPlace: true;
   bindings: {
-    data: Binding;
+    data: Binding<T>;
   };
 } ) & ( {
   storeReduction?: false;
 } | {
   storeReduction: true;
   bindings: {
-    reduction: Binding;
+    reduction: Binding<T>;
   };
 } ) & ( ( {
   addScannedReduction?: false;
 } & Pick<scanComprehensiveWGSLOptions<T>, 'getAddedValue'> ) | ( {
   addScannedReduction: true;
   bindings: {
-    scannedReduction: Binding;
+    scannedReduction: Binding<T>;
   };
 } & ( {
   addScannedDoubleReduction?: false;
 } | {
   addScannedDoubleReduction: true;
   bindings: {
-    scannedDoubleReduction: Binding;
+    scannedDoubleReduction: Binding<T>;
   };
 } ) ) );
 

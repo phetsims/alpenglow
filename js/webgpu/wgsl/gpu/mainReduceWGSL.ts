@@ -10,8 +10,8 @@ import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceWGSLOptions<T> = {
   bindings: {
-    input: Binding;
-    output: Binding;
+    input: Binding<T>;
+    output: Binding<T>;
   };
 
   // TODO: should we really have lengthExpression in loadReducedOptions? Also inputOrder options?!?
