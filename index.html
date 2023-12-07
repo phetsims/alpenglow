@@ -2151,6 +2151,72 @@
         </li>
       </ul>
 
+      <pre><code>
+        // For the reduce
+        const reduceBlueprint = // ...
+        const middleScanBlueprint = // ...
+        const lowerScanBlueprint = // ...
+        const upperScanBlueprint = // ...
+
+        // TODO: We might want to bind the same buffer to the initial and end here
+        // We'll want to use the same blueprint for multiple combinations of buffers (e.g. the ping-ponging)
+
+        const tripleReduceBlueprint = Blueprint.combine( [
+          reduceBlueprint,
+          middleScanBlueprint,
+          lowerScanBlueprint,
+          upperScanBlueprint
+        ], {
+          input: BufferSlot.from( [
+            reduceBlueprint.bufferSlotMap.input,
+            upperScanBlueprint.bufferSlotMap.input
+          ] ),
+          output: BufferSlot.from( [
+            upperScanBlueprint.bufferSlotMap.output
+          ] )
+        }, [
+          // reduction
+          BufferSlot.from( [
+            reduceBlueprint.bufferSlotMap.output,
+            middleScanBlueprint.bufferSlotMap.input,
+            upperScanBlueprint.bufferSlotMap.reduction
+          ] ),
+
+          // double reduction
+          BufferSlot.from( [
+            middleScanBlueprint.bufferSlotMap.output,
+            lowerScanBlueprint.bufferSlotMap.data,
+            upperScanBlueprint.bufferSlotMap.doubleReduction
+          ] )
+        ] );
+
+        // TODO: how to share here
+
+        const
+
+        const tripleRadixSort = BluePrint.combine(
+        );
+
+        // Direct execution
+
+        execution.dispatch( reduceShader, [
+          histogramBuffer, reductionBuffer
+        ], middleDispatchSize );
+
+        execution.dispatch( middleScanShader, [
+          reductionBuffer, doubleReductionBuffer
+        ], lowerDispatchSize );
+
+        execution.dispatch( lowerScanShader, [
+          doubleReductionBuffer
+        ] );
+
+        execution.dispatch( upperScanShader, [
+          histogramBuffer, reductionBuffer, doubleReductionBuffer, scannedHistogramBuffer
+        ], middleDispatchSize );
+
+      </code></pre>
+
       <p class="TODO">
         How can we support Thrust-like fusing of shader stages transparently/effortlessly? Do we not need this (say,
         everything is factored out where we don't have to create things as much)?
