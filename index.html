@@ -2019,7 +2019,7 @@
       </p>
 
       <p class="TODO">
-        Add a JS WGSL parser, so we can do AST manipulations and checks. Lots of assertions possible.
+        Add a JS WGSL parser, so we can do AST manipulations and checks. Lots of assertions possible. Look into peggy.js
       </p>
 
       <p class="TODO">
@@ -2091,10 +2091,96 @@
         Structures that potentially allow structure-of-arrays handling.
       </p>
 
+      <p class="TODO">
+        Subset of a structure type (or... array?): Load this subset so it can be sorted, then move the original object.
+      </p>
+
       <h4 id="WGSL-linking">Linking</h4>
 
       <p class="TODO">
         Improve naming ... TypedBindingType is a mouthful.
+      </p>
+
+      <p class="TODO">
+        toString() all of our objects when prototyping, so we can better understand the structures we are playing with.
+      </p>
+
+      <p>
+        Pipeline info/responsibility:
+      </p>
+
+      <ul>
+        <li>
+          Named buffer slots (name =&gt; TypedBindingType, i.e. BindingType + ConcreteType) - including one for indirect dispatch if applicable?
+        </li>
+        <li>
+          Ability to create a ComputePipeline (from DeviceContext, PipelineLayout)
+        </li>
+        <li>
+          Information on (or ability to do) execution (from typed info that it needs =&gt; dispatch sizes OR indirect dispatch buffer/offset).
+          e.g. <code>( context: SomeContext, inputLength: number ) =&gt; context.dispatch( Math.ceil( inputLength / someSize ) )</code>
+          for T = number, or <code>( context: SomeContext, inputLength: number ) =&gt; context.dispatchIndirect( 0 )</code>
+          (... we can specify an arbitrary buffer, but we probably want to typically use one from a slot?)
+        </li>
+        <li>
+          Name
+        </li>
+      </ul>
+
+      <p class="TODO">
+        How to pass through dispatch sizes? We also have indirect dispatch, and want to handle both. Mappings?
+        NOTE: We do NOT want to run too much garbage-creating code during runtime, so we want to minimize the amount
+        of code that is run during dispatch.
+      </p>
+
+      <p>
+        Component ("routine"?) info/responsibility:
+      </p>
+
+      <ul>
+        <li>
+          List of pipelines
+        </li>
+        <li>
+          Which buffer slots from different pipelines will refer to the same buffer
+        </li>
+        <li>
+          Named buffer slots (inputs/outputs/both)
+        </li>
+      </ul>
+
+      <p>
+        In radix example, we would have two different reduction pipelines (one for each direction of the ping-pong).
+        But... how can we get them to "share" their internals?
+      </p>
+
+      <p class="TODO">
+        How can we "compose" uniform types, into one "read-only" uniform that could be left the entire pass? Provide
+        a way to get things out of it that can be included in shader templates(!). Pipelines might need to register
+        uniforms (with a type).
+      </p>
+
+      <p class="TODO">
+        Use dynamic buffer offsets for easy uniform use (for radix passes). The "blueprint" will specify the dynamic
+        nature, the bind group setup will provide the dynamic offset (GPUBufferBinding offset,size). Provide minBindingSize
+        in the blueprint setup.
+      </p>
+
+      <p>
+        How to handle generated "combined" uniforms? (Radix sort will want to set a uniform that changes for each pass?)
+        Should we minimize bind groups OR pipelines? (We should performance test that).
+      </p>
+
+      <p class="TODO">
+        Where to provide the "buffer" bindings for the late-bound resources?
+      </p>
+
+      <p class="TODO">
+        How to use the word blueprint?
+      </p>
+
+      <p class="TODO">
+        It is easier to read <code>reduceShader.dispatch( context )</code> than <code>context.dispatch( reduceShader )</code>
       </p>
 
       <ul>
@@ -2819,6 +2905,10 @@
         Really reduce registers because having more workgroups concurrently hides latency.
       </p>
 
+      <p>
+        Out-of-gamut premultiplied RGBA provided to a Canvas (rendered on the screen) has undefined behavior!
+      </p>
+
       <p class="TODO">
         Try dynamic block index assignment (with an atomic), so that we can process data in order. Can we cheat, and
         use that for forward progress and workgroup communication?
@@ -2840,7 +2930,8 @@
           Have <code>shaderBarrier()</code> for things that create a split between shaders.
         </li>
         <li>
-          Support everything in ConcreteType (bit packed structures, structure-of-array representations, etc.)
+          Support everything in ConcreteType (bit packed structures, structure-of-array representations, etc.).
+          Also should be able to "subset" types automatically, for those parts that are actually used.
         </li>
         <li>
           Potentially include a language (JS/TS?) for templating inside, for when we need it? Maybe not.
@@ -3086,6 +3177,10 @@
       </p>
 
       <h2 id="stages">Stages</h2>
+
+      <p class="TODO">
+        Figure out importing Canvas/SVG APIs (we should be able to do all of SVG natively, no?)
+      </p>
 
       <p class="TODO">
         IMPORTANT! Separate buffer for uniform configs. Storage configs copies to it. Can probably have these in a
