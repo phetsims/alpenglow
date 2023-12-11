@@ -2149,6 +2149,17 @@
         </li>
       </ul>
 
+      <pre><code>
+        execute: ( context: SomeContext, inputLength: number ) =&gt; {
+          const numWorkgroups = Math.ceil( inputLength / someSize );
+          subStage.execute( context, numWorkgroups );
+
+          somePipeline.dispatch( context, numWorkgroups );
+
+          someOtherPipeline.dispatchIndirect( context, 0 );
+        }
+      </code></pre>
+
       <p>
         In radix example, we would have two different reduction pipelines (one for each direction of the ping-pong).
         But... how can we get them to "share" their internals?
