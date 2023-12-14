@@ -2095,10 +2095,60 @@
         Subset of a structure type (or... array?): Load this subset so it can be sorted, then move the original object.
       </p>
 
+      <p class="TODO">
+        Have "casting" of ConcreteTypes to other types (e.g. reinterpretation as u32 array, or something using
+        atomics in one pass, and not in another). This allows us to strongly type BufferSlots in varying contexts.
+      </p>
+
       <h4 id="WGSL-linking">Linking</h4>
 
+      <p>
+        ResourceSlot: { TextureViewSlot, BufferSlot (offset/size?), ?SamplerSlot, ?ExternalTextureSlot }. Pass these through
+      </p>
+
+      <p>
+        Do the BufferSlots keep references to their... uses? Each use might have different types (e.g. atomic or not),
+        or access (read-only, read-write), and some uses might use dynamic offsets.
+      </p>
+
       <p class="TODO">
-        Improve naming ... TypedBindingType is a mouthful.
+        How to handle dynamic offsets... will we want cases where we "split" the buffer into multiple slots? Presumably
+        yes, think of <code>slice()</code> on a BufferSlot.
+      </p>
+
+      <p>
+        Keep the "blueprint" architecture, so we can analyze and auto-create bind group layouts BASED on the resulting
+        flow.
+      </p>
+
+      <p class="TODO">
+        How can we have different "flows" with the same blueprint? (e.g. differing levels of reduce). How can we
+        get bind group layouts to work nicely for all of these approaches? Write down an example (e.g. scans in radix sort).
+      </p>
+
+      <p class="TODO">
+        Flows: we can actually just construct multiple different "routines" (e.g. reduce), and pick the one based on
+        the constraint. How can we provide notes about the possible configurations to the bind group layout strategy?
+        Really need to nail down bind group layout examples.
+      </p>
+
+      <p>
+        What if flows are branching (e.g. any node can have multiple pathways that can share things).
+      </p>
+
+      <p>
+        IMPORTANT: We can potentially have different bind groups provided for different flow cases. Even if they are
+        using the same buffers. This would allow full optimization(!) for each different flow used. At runtime, we
+        would need to know which flow is picked.
+      </p>
+
+      <p class="TODO">
+        Think about how we would set up bind groups for varying flows. Most importantly, will it affect bind groups
+        or layouts OUTSIDE of the branch?
+      </p>
+
+      <p class="TODO">
+        How do we partially-bind and give those resources? (most notably, things that affect buffer sizes?)
       </p>
 
       <p class="TODO">
@@ -2111,7 +2161,7 @@
 
       <ul>
         <li>
-          Named buffer slots (name =&gt; TypedBindingType, i.e. BindingType + ConcreteType) - including one for indirect dispatch if applicable?
+          Named buffer slots (name =&gt; TypedBindingType (eek rename), i.e. BindingType + ConcreteType) - including one for indirect dispatch if applicable?
         </li>
         <li>
           Ability to create a ComputePipeline (from DeviceContext, PipelineLayout)
@@ -2202,7 +2252,7 @@
           <strong>BindingLocation</strong>: ( groupIndex: number, bindingIndex: number )
         </li>
         <li>
-          <strong>TypedBindingType</strong>{T}: ( bindingType: BindingType, type: ConcreteType{T} )
+          <strong>TypedBindingType</strong>{T}: ( bindingType: BindingType, type: ConcreteType{T} ) -- eeek rename
         </li>
         <li>
           <strong>BindGroupLayout</strong>: ( bindGroupLayoutName: string, groupIndex: number, map: Map{name, Binding} ) - has GPUBindGroupLayout
