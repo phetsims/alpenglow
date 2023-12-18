@@ -2109,11 +2109,19 @@
       <p>
         Do the BufferSlots keep references to their... uses? Each use might have different types (e.g. atomic or not),
         or access (read-only, read-write), and some uses might use dynamic offsets.
+        NOTE: If we are tracking usages (we should), how does that affect having a global "log" BufferSlot?
+        If we are not, pipelines could track which BufferSlots they use (and with what type/access/dynamic-offsets).
+      </p>
+
+      <p>
+        ResourceUsage: { TextureViewUsage, BufferUsage }? - we'll need access (read-only / read-write) and whether it
+        has dynamic offsets. References a ResourceSlot.
       </p>
 
       <p class="TODO">
         How to handle dynamic offsets... will we want cases where we "split" the buffer into multiple slots? Presumably
-        yes, think of <code>slice()</code> on a BufferSlot.
+        yes, think of <code>slice()</code> on a BufferSlot. NOTE: dynamic offsets need to be a multiple of 256
+        or https://www.w3.org/TR/webgpu/#dom-supported-limits-minstoragebufferoffsetalignment
       </p>
 
       <p>
@@ -2956,6 +2964,12 @@
 
       <p>
         Use <code>arrayLength()</code> more.
+      </p>
+
+      <p>
+        Dynamic offset alignment restricted to 256 by default (https://www.w3.org/TR/webgpu/#dom-supported-limits-minstoragebufferoffsetalignment).
+        Default 8 storage buffers max per pipeline layout, 12 uniform buffers max per pipeline layout. 256MiB for buffer size.
+        16384 bytes for workgroup storage
       </p>
 
       <p>
