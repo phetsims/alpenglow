@@ -18,6 +18,7 @@ export const shaderTestDevicePromise: Promise<GPUDevice | null> = ( async () => 
   }
 } )();
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 alpenglow.register( 'shaderTestDevicePromise', shaderTestDevicePromise );
 
 export const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, deviceContext: DeviceContext ) => Promise<string | null> ): void => {
