@@ -28,7 +28,7 @@ export type WGSLBinaryStatements = ( value: WGSLVariableName, a: WGSLExpression,
 
 type StoreStatementCallback = ( offset: WGSLExpressionU32, u32expr: WGSLExpressionU32 ) => WGSLStatements;
 
-type ConcreteType<T> = {
+type ConcreteType<T = unknown> = {
   name: string;
 
   bytesPerElement: number;

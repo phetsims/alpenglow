@@ -485,6 +485,8 @@ export { default as ComputePass } from './webgpu/ComputePass.js';
 export { default as Executor } from './webgpu/Executor.js';
 export type { ExecutorOptions } from './webgpu/Executor.js';
 export { BlueprintTests, Binding, TypedBindingType, BindingBlueprint, BufferSlot, PipelineBlueprint, RoutineBlueprint, UnboundPipeline, UnboundRoutine, BoundPipeline, BoundRoutine } from './webgpu/Blueprint.js';
+export { default as XPrototype } from './webgpu/XPrototype.js';
+export type { BindingCompatibilityType } from './webgpu/XPrototype.js';
 
 export { partialWGSLBeautify, addLineNumbers, stripWGSLComments, GLOBAL_INDEXABLE_DEFAULTS, WORKGROUP_INDEXABLE_DEFAULTS, LOCAL_INDEXABLE_DEFAULTS, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS } from './webgpu/wgsl/WGSLUtils.js';
 export type { GlobalIndexable, WorkgroupIndexable, LocalIndexable, WorkgroupSizable, RakedSizable, OptionalLengthExpressionable, GrainSizable } from './webgpu/wgsl/WGSLUtils.js';
