@@ -344,7 +344,7 @@ export abstract class XResourceUsage {
     public readonly resourceSlot: XResourceSlot
   ) {}
 }
-alpenglow.register( 'XTextureViewSlot', XTextureViewSlot );
+alpenglow.register( 'XResourceUsage', XResourceUsage );
 
 export class XBufferUsage<T> extends XResourceUsage {
   public constructor(
