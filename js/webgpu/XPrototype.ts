@@ -6,27 +6,73 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, BindingLocation, BufferSlot, ConcreteType, DeviceContext, mainLogBarrier, partialWGSLBeautify, stripWGSLComments, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
+import { addLineNumbers, alpenglow, BindingLocation, BufferSlot, ConcreteType, DeviceContext, getArrayType, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, stripWGSLComments, u32, U32Add, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
 
 export default class XPrototype {
   public test(): string | null {
-    // const binaryOp = U32Add;
-    //
-    // const workgroupSize = 256;
-    // const grainSize = 8;
-    // const inputSize = workgroupSize * grainSize * 5 - 27;
-    //
-    // // TODO: make sure we're including testing WITH logging(!)
-    // const log = false;
-    // const maxItemCount = workgroupSize * grainSize * 10; // pretend
-    //
-    // const inputType = getArrayType( binaryOp.type, maxItemCount, binaryOp.identity );
-    // const middleType = getArrayType( binaryOp.type, Math.ceil( maxItemCount / ( workgroupSize * grainSize ) ), binaryOp.identity );
-    // const outputType = binaryOp.type;
-    //
-    // const inputSlot = new XConcreteBufferSlot( inputType );
-    // const middleSlot = new XConcreteBufferSlot( middleType );
-    // const outputSlot = new XConcreteBufferSlot( outputType );
+    const binaryOp = U32Add;
+
+    const workgroupSize = 256;
+    const grainSize = 8;
+    const inputSize = workgroupSize * grainSize * 5 - 27;
+
+    // TODO: make sure we're including testing WITH logging(!)
+    const log = false;
+    const maxItemCount = workgroupSize * grainSize * 10; // pretend
+
+    const inputType = getArrayType( binaryOp.type, maxItemCount, binaryOp.identity );
+    const middleType = getArrayType( binaryOp.type, Math.ceil( maxItemCount / ( workgroupSize * grainSize ) ), binaryOp.identity );
+    const outputType = getArrayType( binaryOp.type, 1 ); // TODO
+
+    const inputSlot = new XConcreteBufferSlot( inputType );
+    const middleSlot = new XConcreteBufferSlot( middleType );
+    const outputSlot = new XConcreteBufferSlot( outputType );
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const firstPipelineBlueprint = new XPipelineBlueprint( 'first', async ( deviceContext, name, pipelineLayout ) => {
+      return XComputePipeline.withContextAsync(
+        deviceContext,
+        name,
+        context => mainReduceWGSL<number>( context, {
+          binaryOp: binaryOp,
+          workgroupSize: workgroupSize,
+          grainSize: grainSize,
+          loadReducedOptions: {
+            lengthExpression: u32( inputSize )
+          },
+          bindings: {
+            input: pipelineLayout.getConcreteBindingFromSlot( inputSlot ),
+            output: pipelineLayout.getConcreteBindingFromSlot( middleSlot )
+          }
+        } ),
+        pipelineLayout,
+        log
+      );
+    } );
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const secondPipelineBlueprint = new XPipelineBlueprint( 'second', async ( deviceContext, name, pipelineLayout ) => {
+      return XComputePipeline.withContextAsync(
+        deviceContext,
+        name,
+        context => mainReduceWGSL<number>( context, {
+          binaryOp: binaryOp,
+          workgroupSize: workgroupSize,
+          grainSize: grainSize,
+          loadReducedOptions: {
+            lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
+          },
+          bindings: {
+            input: pipelineLayout.getConcreteBindingFromSlot( middleSlot ),
+            output: pipelineLayout.getConcreteBindingFromSlot( outputSlot )
+          }
+        } ),
+        pipelineLayout,
+        log
+      );
+    } );
+
+    // TODO: Create routine blueprints - do we have a type to wrap a single pipeline blueprint (either T=>dispatchSizes, or indirectBufferSlot+T=>indirectOffset? and then a composite type?
 
     // const firstBlueprint = RoutineBlueprint.create( `${name} first`, {
     //   input: new TypedBindingType( BindingType.READ_ONLY_STORAGE_BUFFER, inputType ),
@@ -424,6 +470,15 @@ export class XBindGroupLayout {
       new BindingLocation( groupIndex, binding.bindingIndex ), binding.concreteBindingType, binding.slot
     ) );
   }
+
+  public getBindingFromSlot( slot: XResourceSlot ): XBinding | null {
+    return this.bindings.find( binding => binding.slot === slot ) || null;
+  }
+
+  public getConcreteBindingFromSlot<T>( slot: XConcreteBufferSlot<T> ): XBinding<T> | null {
+    // TODO: better typing?
+    return this.getBindingFromSlot( slot ) as ( XBinding<T> | null );
+  }
 }
 alpenglow.register( 'XBindGroupLayout', XBindGroupLayout );
 
@@ -438,6 +493,24 @@ export class XPipelineLayout {
       bindGroupLayouts: bindGroupLayouts.map( bindGroupLayout => bindGroupLayout.layout )
     } );
   }
+
+  public getBindingFromSlot( slot: XResourceSlot ): XBinding {
+    let binding: XBinding | null = null;
+    for ( let i = 0; i < this.bindGroupLayouts.length; i++ ) {
+      binding = this.bindGroupLayouts[ i ].getBindingFromSlot( slot );
+      if ( binding ) {
+        break;
+      }
+    }
+
+    assert && assert( binding );
+    return binding!;
+  }
+
+  public getConcreteBindingFromSlot<T>( slot: XConcreteBufferSlot<T> ): XBinding<T> {
+    // TODO: better typing?
+    return this.getBindingFromSlot( slot ) as ( XBinding<T> );
+  }
 }
 alpenglow.register( 'XPipelineLayout', XPipelineLayout );
 
@@ -445,7 +518,7 @@ export class XPipelineBlueprint {
   public constructor(
     public readonly name: string,
     public readonly toComputePipeline: (
-      context: DeviceContext, pipelineLayout: XPipelineLayout
+      context: DeviceContext, name: string, pipelineLayout: XPipelineLayout
     ) => Promise<XComputePipeline>
   ) {}
 }

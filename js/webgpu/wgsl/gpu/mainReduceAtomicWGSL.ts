@@ -15,7 +15,7 @@ export type mainReduceAtomicWGSLOptions<T> = {
   binaryOp: BinaryOp<T>;
 
   bindings: {
-    input: BindingCompatibilityType<T>;
+    input: BindingCompatibilityType<T[]>;
     output: BindingCompatibilityType<T>;
   };
 

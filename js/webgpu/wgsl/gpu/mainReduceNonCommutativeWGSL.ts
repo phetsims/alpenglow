@@ -13,8 +13,8 @@ import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceNonCommutativeWGSLOptions<T> = {
   bindings: {
-    input: BindingCompatibilityType<T>;
-    output: BindingCompatibilityType<T>;
+    input: BindingCompatibilityType<T[]>;
+    output: BindingCompatibilityType<T[]>;
   };
 
   // TODO: length handling?!?
