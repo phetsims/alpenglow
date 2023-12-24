@@ -28,7 +28,6 @@ export default class XPrototype {
     const middleSlot = new XConcreteBufferSlot( middleType );
     const outputSlot = new XConcreteBufferSlot( outputType );
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const firstPipelineBlueprint = new XPipelineBlueprint( 'first', async ( deviceContext, name, pipelineLayout ) => {
       return XComputePipeline.withContextAsync(
         deviceContext,
@@ -50,7 +49,7 @@ export default class XPrototype {
       );
     } );
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const secondPipelineBlueprint = new XPipelineBlueprint( 'second', async ( deviceContext, name, pipelineLayout ) => {
       return XComputePipeline.withContextAsync(
         deviceContext,
@@ -72,76 +71,25 @@ export default class XPrototype {
       );
     } );
 
-    // TODO: Create routine blueprints - do we have a type to wrap a single pipeline blueprint (either T=>dispatchSizes, or indirectBufferSlot+T=>indirectOffset? and then a composite type?
+        // const firstDispatchSize = Math.ceil( inputValues.length / ( workgroupSize * grainSize ) );
+    // const secondDispatchSize = Math.ceil( firstDispatchSize / ( workgroupSize * grainSize * workgroupSize * grainSize ) );
 
-    // const firstBlueprint = RoutineBlueprint.create( `${name} first`, {
-    //   input: new TypedBindingType( BindingType.READ_ONLY_STORAGE_BUFFER, inputType ),
-    //   output: new TypedBindingType( BindingType.STORAGE_BUFFER, middleType )
-    // }, log, async ( deviceContext, pipelineLayout ) => {
-    //   return ComputePipeline.withContextAsync(
-    //     deviceContext,
-    //     `${name} first`,
-    //     context => mainReduceWGSL( context, combineOptions<SingleReduceShaderOptions<T>>( {
-    //       workgroupSize: workgroupSize,
-    //       grainSize: grainSize,
-    //       loadReducedOptions: combineOptions<Required<SingleReduceShaderOptions<T>>[ 'loadReducedOptions' ]>( {
-    //         lengthExpression: u32( inputSize )
-    //       }, options.loadReducedOptions ),
-    //       log: log,
-    //       // TODO: naming mismatch
-    //       bindings: pipelineLayout.bindingMap as IntentionalAny // TODO! Can we get back typing?
-    //     }, options ) ),
-    //     pipelineLayout,
-    //     log
-    //   );
-    // } );
+    const firstRoutineBlueprint = new XRoutineBlueprint( [ firstPipelineBlueprint ], ( context, stageInputSize: number ) => {
+      context.dispatch( firstPipelineBlueprint, Math.ceil( stageInputSize / ( workgroupSize * grainSize ) ) );
+    } );
 
-    // const secondBlueprint = RoutineBlueprint.create( `${name} second`, {
-    //   input: new TypedBindingType( BindingType.READ_ONLY_STORAGE_BUFFER, middleType ),
-    //   output: new TypedBindingType( BindingType.STORAGE_BUFFER, outputType )
-    // }, log, async ( deviceContext, pipelineLayout ) => {
-    //   return ComputePipeline.withContextAsync(
-    //     deviceContext,
-    //     `${name} second`,
-    //     context => mainReduceWGSL( context, combineOptions<SingleReduceShaderOptions<T>>( {
-    //       workgroupSize: workgroupSize,
-    //       grainSize: grainSize,
-    //       loadReducedOptions: combineOptions<Required<SingleReduceShaderOptions<T>>[ 'loadReducedOptions' ]>( {
-    //         lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
-    //       }, options.loadReducedOptions ),
-    //       log: log,
-    //       bindings: pipelineLayout.bindingMap as IntentionalAny // TODO! Can we get back typing?
-    //     }, options ) ),
-    //     pipelineLayout,
-    //     log
-    //   );
-    // } );
+    const secondRoutineBlueprint = new XRoutineBlueprint( [ secondPipelineBlueprint ], ( context, stageInputSize: number ) => {
+      context.dispatch( secondPipelineBlueprint, Math.ceil( stageInputSize / ( workgroupSize * grainSize ) ) );
+    } );
 
-    // const combinedBlueprint = new RoutineBlueprint(
-    //   [
-    //     ...firstBlueprint.pipelineBlueprints,
-    //     ...secondBlueprint.pipelineBlueprints
-    //   ],
-    //   {
-    //     input: firstBlueprint.bufferSlotMap.input,
-    //     output: secondBlueprint.bufferSlotMap.output
-    //   },
-    //   [
-    //     BufferSlot.from( [
-    //       firstBlueprint.bufferSlotMap.output,
-    //       secondBlueprint.bufferSlotMap.input
-    //     ] )
-    //   ],
-    //   firstBlueprint.log || secondBlueprint.log // TODO: factor out(!)
-    // );
-    //
-    // // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // const unboundRoutine = await UnboundRoutine.toUnbound( deviceContext, combinedBlueprint, UnboundRoutine.separateGroupsStrategy );
-
-    // TODO: oh no, we need to handle dispatch sizes
-    // TODO: presumably... the RoutineBlueprint could have a function to get the dispatch size?
-
-    // TODO: we either "bind" each "named" resource, we "default" it (have it created), or "defer" it (will be swapped later).
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const combinedBlueprint = new XRoutineBlueprint( [
+      ...firstRoutineBlueprint.pipelineBlueprints,
+      ...secondRoutineBlueprint.pipelineBlueprints
+    ], ( context, inputSize: number ) => {
+      firstRoutineBlueprint.execute( context, inputSize );
+      secondRoutineBlueprint.execute( context, Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+    } );
 
     // debugger;
     //
@@ -385,6 +333,59 @@ export class XConcreteBufferSlot<T> extends XBufferSlot {
 }
 alpenglow.register( 'XConcreteBufferSlot', XConcreteBufferSlot );
 
+export abstract class XResource {
+  public constructor(
+    public readonly resource: GPUBuffer | GPUTextureView
+  ) {}
+
+  // TODO: consider modifying to just BufferLocation or bindingIndex
+  public abstract getBindGroupEntry( binding: XBinding ): GPUBindGroupEntry;
+}
+alpenglow.register( 'XResource', XResource );
+
+export class XBufferResource extends XResource {
+  public constructor(
+    public readonly buffer: GPUBuffer,
+    public readonly offset = 0,
+    public readonly size = 0
+  ) {
+    super( buffer );
+  }
+
+  public getBindGroupEntry( binding: XBinding ): GPUBindGroupEntry {
+    const bufferBinding: GPUBufferBinding = {
+      buffer: this.buffer
+    };
+    if ( this.offset !== 0 ) {
+      bufferBinding.offset = this.offset;
+    }
+    if ( this.size !== 0 ) {
+      bufferBinding.size = this.size;
+    }
+    return {
+      binding: binding.location.bindingIndex,
+      resource: bufferBinding
+    };
+  }
+}
+alpenglow.register( 'XBufferResource', XBufferResource );
+
+export class XTextureViewResource extends XResource {
+  public constructor(
+    public readonly textureView: GPUTextureView
+  ) {
+    super( textureView );
+  }
+
+  public getBindGroupEntry( binding: XBinding ): GPUBindGroupEntry {
+    return {
+      binding: binding.location.bindingIndex,
+      resource: this.textureView
+    };
+  }
+}
+alpenglow.register( 'XTextureViewResource', XTextureViewResource );
+
 export abstract class XResourceUsage {
   public constructor(
     public readonly resourceSlot: XResourceSlot
@@ -524,6 +525,65 @@ export class XPipelineBlueprint {
 }
 alpenglow.register( 'XPipelineBlueprint', XPipelineBlueprint );
 
+export class XRoutineBlueprint<T> {
+  public constructor(
+    public readonly pipelineBlueprints: XPipelineBlueprint[],
+    public readonly execute: ( context: XExecutionContext, data: T ) => void
+  ) {}
+}
+alpenglow.register( 'XRoutineBlueprint', XRoutineBlueprint );
+
+export class XBindGroup {
+
+  public readonly bindGroup: GPUBindGroup;
+
+  public constructor(
+    public readonly deviceContext: DeviceContext,
+    public readonly name: string,
+    public readonly layout: XBindGroupLayout,
+    resourceMap: Map<XResourceSlot, XResource>
+  ) {
+    this.bindGroup = deviceContext.device.createBindGroup( {
+      label: `${this.name} bind group`,
+      layout: layout.layout,
+      entries: Object.keys( resourceMap ).map( slot => {
+        const binding = layout.getBindingFromSlot( slot )!;
+        assert && assert( binding, 'Missing binding when creating BindGroup' );
+
+        const resource = resourceMap.get( slot )!;
+
+        return resource.getBindGroupEntry( binding );
+      } )
+    } );
+  }
+}
+alpenglow.register( 'XBindGroup', XBindGroup );
+
+export class XExecutionContext {
+  // TODO: We might use one compute pass, we might split each into one
+  public constructor(
+    public readonly computePass: XComputePass
+  ) {}
+
+  public dispatch(
+    pipelineBlueprint: XPipelineBlueprint,
+    dispatchX = 1,
+    dispatchY = 1,
+    dispatchZ = 1
+    ): void {
+    // TODO
+  }
+
+  public dispatchIndirect(
+    pipelineBlueprint: XPipelineBlueprint,
+    indirectBuffer: GPUBuffer,
+    indirectOffset: number
+  ): void {
+    // TODO
+  }
+}
+alpenglow.register( 'XExecutionContext', XExecutionContext );
+
 export class XComputePipeline {
   // This will be available by the time it can be accessed publicly
   public pipeline!: GPUComputePipeline;
@@ -633,3 +693,86 @@ export class XComputePipeline {
   }
 }
 alpenglow.register( 'XComputePipeline', XComputePipeline );
+
+export class XComputePass {
+
+  public readonly computePassEncoder: GPUComputePassEncoder;
+
+  private currentPipeline: XComputePipeline | null = null;
+  private currentBindGroups = new Map<number, XBindGroup>();
+
+  public constructor(
+    encoder: GPUCommandEncoder,
+    computePassDescriptor: GPUComputePassDescriptor
+  ) {
+    this.computePassEncoder = encoder.beginComputePass( computePassDescriptor );
+  }
+
+  private prepare(
+    computePipeline: XComputePipeline,
+    bindGroups: XBindGroup[]
+  ): void {
+    if ( this.currentPipeline !== computePipeline ) {
+      this.computePassEncoder.setPipeline( computePipeline.pipeline );
+      this.currentPipeline = computePipeline;
+    }
+
+    for ( let i = 0; i < bindGroups.length; i++ ) {
+      const bindGroup = bindGroups[ i ];
+      const currentBindGroup = this.currentBindGroups.get( i );
+
+      if ( currentBindGroup !== bindGroup ) {
+        this.computePassEncoder.setBindGroup( i, bindGroup.bindGroup );
+        this.currentBindGroups.set( i, bindGroup );
+      }
+    }
+  }
+
+  private attemptLogBarrier(
+    computePipeline: XComputePipeline
+  ): void {
+    if ( computePipeline.logBarrierPipeline ) {
+      this.currentPipeline = null;
+      this.computePassEncoder.setPipeline( computePipeline.logBarrierPipeline );
+      this.computePassEncoder.dispatchWorkgroups( 1, 1, 1 );
+    }
+  }
+
+  public dispatchPipeline(
+    computePipeline: XComputePipeline,
+    bindGroups: XBindGroup[],
+    dispatchX = 1,
+    dispatchY = 1,
+    dispatchZ = 1
+  ): this {
+    this.prepare( computePipeline, bindGroups );
+
+    this.computePassEncoder.dispatchWorkgroups( dispatchX, dispatchY, dispatchZ );
+
+    this.attemptLogBarrier( computePipeline );
+
+    // allow chaining
+    return this;
+  }
+
+  public dispatchPipelineIndirect(
+    computePipeline: XComputePipeline,
+    bindGroups: XBindGroup[],
+    indirectBuffer: GPUBuffer,
+    indirectOffset: number
+  ): this {
+    this.prepare( computePipeline, bindGroups );
+
+    this.computePassEncoder.dispatchWorkgroupsIndirect( indirectBuffer, indirectOffset );
+
+    this.attemptLogBarrier( computePipeline );
+
+    // allow chaining
+    return this;
+  }
+
+  public end(): void {
+    this.computePassEncoder.end();
+  }
+}
+alpenglow.register( 'XComputePass', XComputePass );
