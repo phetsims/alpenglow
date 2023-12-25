@@ -9,7 +9,7 @@
 import { addLineNumbers, alpenglow, BindingLocation, BufferSlot, ConcreteType, DeviceContext, getArrayType, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, stripWGSLComments, u32, U32Add, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
 
 export default class XPrototype {
-  public test(): string | null {
+  public static async test(): Promise<string | null> {
     const binaryOp = U32Add;
 
     const workgroupSize = 256;
@@ -82,11 +82,14 @@ export default class XPrototype {
       context.dispatch( secondPipelineBlueprint, Math.ceil( stageInputSize / ( workgroupSize * grainSize ) ) );
     } );
 
+    // TODO: really refine all of the types here
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const combinedBlueprint = new XRoutineBlueprint( [
       ...firstRoutineBlueprint.pipelineBlueprints,
       ...secondRoutineBlueprint.pipelineBlueprints
     ], ( context, inputSize: number ) => {
+      // TODO: Is there a way we can set up these combinations so that we specify a list of child blueprints AND the inputs?
       firstRoutineBlueprint.execute( context, inputSize );
       secondRoutineBlueprint.execute( context, Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
     } );
@@ -532,6 +535,40 @@ export class XRoutineBlueprint<T> {
   ) {}
 }
 alpenglow.register( 'XRoutineBlueprint', XRoutineBlueprint );
+
+export class XProcedure<T> {
+
+  public readonly pipelineBlueprints: XPipelineBlueprint[];
+  public readonly computePipelineMap: Map<XPipelineBlueprint, XComputePipeline> = new Map<XPipelineBlueprint, XComputePipeline>();
+
+  private constructor(
+    public readonly deviceContext: DeviceContext,
+    public readonly routineBlueprint: XRoutineBlueprint<T>,
+    public readonly pipelineLayoutMap: Map<XPipelineBlueprint, XPipelineLayout>
+  ) {
+    this.pipelineBlueprints = routineBlueprint.pipelineBlueprints;
+
+    // TODO: top-level slots
+  }
+
+  public static async create<T>(
+    deviceContext: DeviceContext,
+    routineBlueprint: XRoutineBlueprint<T>,
+    pipelineLayoutMap: Map<XPipelineBlueprint, XPipelineLayout>
+  ): Promise<XProcedure<T>> {
+    const procedure = new XProcedure( deviceContext, routineBlueprint, pipelineLayoutMap );
+    for ( const pipelineBlueprint of procedure.pipelineBlueprints ) {
+      const pipelineLayout = pipelineLayoutMap.get( pipelineBlueprint )!;
+      assert && assert( pipelineLayout, 'Missing pipeline layout' );
+
+      procedure.computePipelineMap.set( pipelineBlueprint, await pipelineBlueprint.toComputePipeline(
+        deviceContext, pipelineBlueprint.name, pipelineLayout
+      ) );
+    }
+    return procedure;
+  }
+}
+alpenglow.register( 'XProcedure', XProcedure );
 
 export class XBindGroup {
 
