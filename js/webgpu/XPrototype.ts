@@ -8,6 +8,15 @@
 
 import { addLineNumbers, alpenglow, BindingLocation, BufferSlot, ConcreteType, DeviceContext, getArrayType, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, stripWGSLComments, u32, U32Add, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
 
+/*
+We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer
+sharing (for profiling or optimization), while providing a convenient interface for writing shaders.
+
+TODO: describe the API we're working with
+
+TODO: flesh out this description and current work
+ */
+
 export default class XPrototype {
   public static async test(): Promise<string | null> {
     const binaryOp = U32Add;
@@ -28,48 +37,66 @@ export default class XPrototype {
     const middleSlot = new XConcreteBufferSlot( middleType );
     const outputSlot = new XConcreteBufferSlot( outputType );
 
-    const firstPipelineBlueprint = new XPipelineBlueprint( 'first', async ( deviceContext, name, pipelineLayout ) => {
-      return XComputePipeline.withContextAsync(
-        deviceContext,
-        name,
-        context => mainReduceWGSL<number>( context, {
-          binaryOp: binaryOp,
-          workgroupSize: workgroupSize,
-          grainSize: grainSize,
-          loadReducedOptions: {
-            lengthExpression: u32( inputSize )
-          },
-          bindings: {
-            input: pipelineLayout.getConcreteBindingFromSlot( inputSlot ),
-            output: pipelineLayout.getConcreteBindingFromSlot( middleSlot )
-          }
-        } ),
-        pipelineLayout,
-        log
-      );
-    } );
+    // TODO: inspect all usages of everything, look for simplification opportunities
 
+    const firstPipelineBlueprint = new XPipelineBlueprint(
+      'first',
+      // TODO: get from the WGSLContext(!)
+      // TODO: Why are we specifying potential buffer offset stuff in XBufferBindingTypes here? Do we NEED the concreteType for some reason?
+      // TODO: optimize these
+      [
+        new XBufferUsage( inputSlot, new XConcreteBindingType( new XBufferBindingType( 'read-only-storage' ), inputSlot.concreteType ) ),
+        new XBufferUsage( middleSlot, new XConcreteBindingType( new XBufferBindingType( 'storage' ), middleSlot.concreteType ) )
+      ],
+      async ( deviceContext, name, pipelineLayout ) => {
+        return XComputePipeline.withContextAsync(
+          deviceContext,
+          name,
+          context => mainReduceWGSL<number>( context, {
+            binaryOp: binaryOp,
+            workgroupSize: workgroupSize,
+            grainSize: grainSize,
+            loadReducedOptions: {
+              lengthExpression: u32( inputSize )
+            },
+            bindings: {
+              input: pipelineLayout.getConcreteBindingFromSlot( inputSlot ),
+              output: pipelineLayout.getConcreteBindingFromSlot( middleSlot )
+            }
+          } ),
+          pipelineLayout,
+          log
+        );
+      }
+    );
 
-    const secondPipelineBlueprint = new XPipelineBlueprint( 'second', async ( deviceContext, name, pipelineLayout ) => {
-      return XComputePipeline.withContextAsync(
-        deviceContext,
-        name,
-        context => mainReduceWGSL<number>( context, {
-          binaryOp: binaryOp,
-          workgroupSize: workgroupSize,
-          grainSize: grainSize,
-          loadReducedOptions: {
-            lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
-          },
-          bindings: {
-            input: pipelineLayout.getConcreteBindingFromSlot( middleSlot ),
-            output: pipelineLayout.getConcreteBindingFromSlot( outputSlot )
-          }
-        } ),
-        pipelineLayout,
-        log
-      );
-    } );
+    const secondPipelineBlueprint = new XPipelineBlueprint(
+      'second',
+      [
+        new XBufferUsage( middleSlot, new XConcreteBindingType( new XBufferBindingType( 'read-only-storage' ), middleSlot.concreteType ) ),
+        new XBufferUsage( outputSlot, new XConcreteBindingType( new XBufferBindingType( 'storage' ), outputSlot.concreteType ) )
+      ],
+      async ( deviceContext, name, pipelineLayout ) => {
+        return XComputePipeline.withContextAsync(
+          deviceContext,
+          name,
+          context => mainReduceWGSL<number>( context, {
+            binaryOp: binaryOp,
+            workgroupSize: workgroupSize,
+            grainSize: grainSize,
+            loadReducedOptions: {
+              lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
+            },
+            bindings: {
+              input: pipelineLayout.getConcreteBindingFromSlot( middleSlot ),
+              output: pipelineLayout.getConcreteBindingFromSlot( outputSlot )
+            }
+          } ),
+          pipelineLayout,
+          log
+        );
+      }
+    );
 
         // const firstDispatchSize = Math.ceil( inputValues.length / ( workgroupSize * grainSize ) );
     // const secondDispatchSize = Math.ceil( firstDispatchSize / ( workgroupSize * grainSize * workgroupSize * grainSize ) );
@@ -349,8 +376,8 @@ alpenglow.register( 'XResource', XResource );
 export class XBufferResource extends XResource {
   public constructor(
     public readonly buffer: GPUBuffer,
-    public readonly offset = 0,
-    public readonly size = 0
+    public readonly offset = 0, // TODO: remove offset, since our BufferSlotSlices should handle it
+    public readonly size = 0 // TODO: remove size, since our buffer already has a size
   ) {
     super( buffer );
   }
@@ -521,6 +548,7 @@ alpenglow.register( 'XPipelineLayout', XPipelineLayout );
 export class XPipelineBlueprint {
   public constructor(
     public readonly name: string,
+    public readonly usages: XResourceUsage[],
     public readonly toComputePipeline: (
       context: DeviceContext, name: string, pipelineLayout: XPipelineLayout
     ) => Promise<XComputePipeline>
