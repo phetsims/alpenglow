@@ -466,7 +466,7 @@ export { default as BlitShader } from './webgpu/BlitShader.js';
 export { default as ByteEncoder } from './webgpu/ByteEncoder.js';
 export type { F32, U32, I32, U8 } from './webgpu/ByteEncoder.js';
 export { U32Type, U32Add, U32Order, U32ReverseOrder, I32Type, Vec2uType, Vec2uBic, Vec3uType, Vec4uType, Vec2uLexicographicalOrder, getArrayType, Vec2uAdd, Vec3uAdd, Vec4uAdd } from './webgpu/types/ConcreteType.js';
-export type { default as ConcreteType, BinaryOp, BitOrder, CompareOrder, Order, WGSLExpression, WGSLStatements, WGSLVariableName, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionBool, WGSLModuleDeclarations, WGSLExpressionT } from './webgpu/types/ConcreteType.js';
+export type { default as ConcreteType, ConcreteArrayType, BinaryOp, BitOrder, CompareOrder, Order, WGSLExpression, WGSLStatements, WGSLVariableName, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionBool, WGSLModuleDeclarations, WGSLExpressionT } from './webgpu/types/ConcreteType.js';
 export { default as ConsoleLogger, ConsoleLoggedEntry, ConsoleLoggedThread, ConsoleLoggedLine, ConsoleLoggedShader } from './webgpu/ConsoleLogger.js';
 export type { ConsoleLogInfo } from './webgpu/ConsoleLogger.js';
 export { default as BufferLogger } from './webgpu/BufferLogger.js';

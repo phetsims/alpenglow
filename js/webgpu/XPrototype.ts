@@ -125,10 +125,25 @@ export default class XPrototype {
       secondRoutineBlueprint.execute( context, Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
     } );
 
+    // TODO: better combinations
+    // TODO: ... should we parameterize the output type?
+    let promise: Promise<number[]>;
+    const testBlueprint = new XRoutineBlueprint( combinedBlueprint.pipelineBlueprints, ( context, input: number[] ) => {
+
+      // TODO: slice it?
+      context.setTypedBufferValue( inputSlot, input );
+
+      combinedBlueprint.execute( context, input.length );
+
+      promise = context.getTypedBufferValue( outputSlot );
+
+      // context.getTypedBufferValue( outputSlot ).then( output => console.log( output ) ).catch( err => console.error( err ) );
+    } );
+
     const routine = await XRoutine.create(
       deviceContext,
-      combinedBlueprint,
-      [ inputSlot, middleSlot, outputSlot ],
+      testBlueprint,
+      [],
       XRoutine.INDIVIDUAL_LAYOUT_STRATEGY
     );
 
@@ -136,30 +151,25 @@ export default class XPrototype {
 
     procedure.bindAllBuffers();
 
-    // const inputValues = _.range( 0, inputSize ).map( () => binaryOp.type.generateRandom( false ) );
-    // const expectedValues = [ inputValues.reduce( ( a, b ) => binaryOp.apply( a, b ), binaryOp.identity ) ];
-    //
-    // const firstDispatchSize = Math.ceil( inputValues.length / ( workgroupSize * grainSize ) );
-    // const secondDispatchSize = Math.ceil( firstDispatchSize / ( workgroupSize * grainSize * workgroupSize * grainSize ) );
-    //
-    // const actualValues = await Executor.execute(
-    //   deviceContext,
-    //   log, // TODO: in whatever we create, store the log:boolean (duh)
-    //   async executor => {
-    //     executor.setTypedBufferValue( inputTypedBuffer, inputValues );
-    //
-    //     executor.getComputePass( 'main' )
-    //       .dispatchPipeline( firstPipeline, [ bindGroup ], firstDispatchSize )
-    //       .dispatchPipeline( secondPipeline, [ bindGroup ], secondDispatchSize )
-    //       .end();
-    //
-    //     return executor.getTypedBufferValue( outputTypedBuffer );
-    //   }
-    // );
-    //
-    // inputTypedBuffer.dispose();
-    // middleTypedBuffer.dispose();
-    // outputTypedBuffer.dispose();
+    const inputValues = _.range( 0, inputSize ).map( () => binaryOp.type.generateRandom( false ) );
+    const expectedValues = [ inputValues.reduce( ( a, b ) => binaryOp.apply( a, b ), binaryOp.identity ) ];
+
+    const actualValues = await XExecutor.execute( deviceContext, log, async executor => {
+      const separateComputePasses = false;
+
+      // TODO: parameterize things?
+      procedure.execute( executor, inputValues, {
+        separateComputePasses: separateComputePasses
+      } );
+
+      return promise;
+    } );
+
+    procedure.dispose();
+
+    console.log( 'inputValues', inputValues );
+    console.log( 'expectedValues', expectedValues );
+    console.log( 'actualValues', actualValues );
 
     return null;
   }
@@ -685,6 +695,10 @@ export class XRoutine<T> {
 }
 alpenglow.register( 'XRoutine', XRoutine );
 
+export type XProcedureExecuteOptions = {
+  separateComputePasses?: boolean;
+};
+
 export class XProcedure<T> {
 
   private readonly selfBuffers: GPUBuffer[] = [];
@@ -749,6 +763,16 @@ export class XProcedure<T> {
       new Map( this.resourceMap ),
       new Map( this.bindGroupMap )
     );
+  }
+
+  public execute( executor: XExecutor, data: T, options?: XProcedureExecuteOptions ): void {
+    const separateComputePasses = ( options && options.separateComputePasses ) || false;
+
+    const context = new XExecutionContext( executor, this.routine.computePipelineMap, this.bindGroupMap, this.resourceMap, separateComputePasses );
+
+    this.routine.routineBlueprint.execute( context, data );
+
+    context.finish();
   }
 
   public dispose(): void {
@@ -977,9 +1001,18 @@ export class XComputePass {
 alpenglow.register( 'XComputePass', XComputePass );
 
 export class XExecutionContext {
+
+  private computePass: XComputePass | null = null;
+
   // TODO: We might use one compute pass, we might split each into one
   public constructor(
-    public readonly computePass: XComputePass
+    public readonly executor: XExecutor,
+
+    // TODO: consider just referencing the Procedure
+    public readonly computePipelineMap: Map<XPipelineBlueprint, XComputePipeline>,
+    public readonly bindGroupMap: Map<XBindGroupLayout, XBindGroup>,
+    public readonly resourceMap: Map<XResourceSlot, XResource>,
+    public readonly separateComputePasses: boolean
   ) {}
 
   public dispatch(
@@ -987,8 +1020,17 @@ export class XExecutionContext {
     dispatchX = 1,
     dispatchY = 1,
     dispatchZ = 1
-    ): void {
-    // TODO
+  ): void {
+    this.ensureComputePass( pipelineBlueprint.name );
+
+    const computePipeline = this.computePipelineMap.get( pipelineBlueprint )!;
+    assert && assert( computePipeline, 'Missing compute pipeline' );
+
+    this.computePass!.dispatchPipeline( computePipeline, this.getBindGroups( computePipeline ), dispatchX, dispatchY, dispatchZ );
+
+    if ( this.separateComputePasses ) {
+      this.releaseComputePass();
+    }
   }
 
   public dispatchIndirect(
@@ -996,7 +1038,108 @@ export class XExecutionContext {
     indirectBuffer: GPUBuffer,
     indirectOffset: number
   ): void {
-    // TODO
+    this.ensureComputePass( pipelineBlueprint.name );
+
+    const computePipeline = this.computePipelineMap.get( pipelineBlueprint )!;
+    assert && assert( computePipeline, 'Missing compute pipeline' );
+
+    this.computePass!.dispatchPipelineIndirect( computePipeline, this.getBindGroups( computePipeline ), indirectBuffer, indirectOffset );
+
+    if ( this.separateComputePasses ) {
+      this.releaseComputePass();
+    }
+  }
+
+  public setTypedBufferValue<T>( concreteBufferSlot: XConcreteBufferSlot<T>, value: T ): void {
+    this.executor.setTypedBufferValue( this.getTypedBuffer( concreteBufferSlot ), value );
+  }
+
+  public async getTypedBufferValue<T>( concreteBufferSlot: XConcreteBufferSlot<T> ): Promise<T> {
+    return this.executor.getTypedBufferValue( this.getTypedBuffer( concreteBufferSlot ) );
+  }
+
+  public async arrayBuffer(
+    bufferSlot: XBufferSlot
+  ): Promise<ArrayBuffer> {
+    return this.executor.arrayBuffer( this.getBuffer( bufferSlot ) );
+  }
+
+  public async u32(
+    bufferSlot: XBufferSlot
+  ): Promise<Uint32Array> {
+    return this.executor.u32( this.getBuffer( bufferSlot ) );
+  }
+
+  public async i32(
+    bufferSlot: XBufferSlot
+  ): Promise<Int32Array> {
+    return this.executor.i32( this.getBuffer( bufferSlot ) );
+  }
+
+  public async f32(
+    bufferSlot: XBufferSlot
+  ): Promise<Float32Array> {
+    return this.executor.f32( this.getBuffer( bufferSlot ) );
+  }
+
+  public async u32Numbers(
+    bufferSlot: XBufferSlot
+  ): Promise<number[]> {
+    return this.executor.u32Numbers( this.getBuffer( bufferSlot ) );
+  }
+
+  public async i32Numbers(
+    bufferSlot: XBufferSlot
+  ): Promise<number[]> {
+    return this.executor.i32Numbers( this.getBuffer( bufferSlot ) );
+  }
+
+  public async f32Numbers(
+    bufferSlot: XBufferSlot
+  ): Promise<number[]> {
+    return this.executor.f32Numbers( this.getBuffer( bufferSlot ) );
+  }
+
+  public finish(): void {
+    if ( this.computePass ) {
+      this.releaseComputePass();
+    }
+  }
+
+  private getBuffer( bufferSlot: XBufferSlot ): GPUBuffer {
+    const resource = this.resourceMap.get( bufferSlot )!;
+    assert && assert( resource, 'Missing resource' );
+
+    return resource.resource as GPUBuffer;
+  }
+
+  private getTypedBuffer<T>( concreteBufferSlot: XConcreteBufferSlot<T> ): TypedBuffer<T> {
+    const buffer = this.getBuffer( concreteBufferSlot );
+
+    return new TypedBuffer<T>( buffer, concreteBufferSlot.concreteType );
+  }
+
+  private getBindGroups( computePipeline: XComputePipeline ): XBindGroup[] {
+    const bindGroups: XBindGroup[] = [];
+    for ( const bindGroupLayout of computePipeline.pipelineLayout.bindGroupLayouts ) {
+      const bindGroup = this.bindGroupMap.get( bindGroupLayout )!;
+      assert && assert( bindGroup, 'Missing bind group' );
+
+      bindGroups.push( bindGroup );
+    }
+    return bindGroups;
+  }
+
+  private ensureComputePass( name: string ): XComputePass {
+    if ( this.computePass === null ) {
+      this.computePass = this.executor.getComputePass( this.separateComputePasses ? name : 'compute pass' );
+    }
+    return this.computePass;
+  }
+
+  private releaseComputePass(): void {
+    this.computePass?.end();
+    this.computePass = null;
   }
 }
 alpenglow.register( 'XExecutionContext', XExecutionContext );

@@ -66,6 +66,10 @@ type ConcreteType<T = unknown> = {
 
 export default ConcreteType;
 
+export type ConcreteArrayType<T = unknown> = ConcreteType<T[]> & {
+  slice( start: number, end: number ): ConcreteArrayType<T>;
+};
+
 export type BinaryOp<T> = {
   name: string;
   type: ConcreteType<T>;
@@ -111,12 +115,18 @@ export type CompareOrder<T> = {
 
 export type Order<T> = BitOrder<T> & CompareOrder<T>;
 
-export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRangeElement?: T ): ConcreteType<T[]> => {
+export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRangeElement?: T ): ConcreteArrayType<T> => {
   const u32sPerElement = type.bytesPerElement / 4;
 
   return {
     name: `${type.name}[${size}]`,
     bytesPerElement: type.bytesPerElement * size,
+
+    slice( start: number, end: number ): ConcreteArrayType<T> {
+      assert && assert( start === 0, 'We will need more logic to handle offsets' );
+
+      return getArrayType( type, end, outOfRangeElement );
+    },
 
     equals( a: T[], b: T[] ): boolean {
       assert && assert( a.length === size );
