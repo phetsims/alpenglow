@@ -104,6 +104,7 @@ export default class DeviceContext {
 
   // in bytes
   public createBuffer( size: number ): GPUBuffer {
+    // TODO: label!!!
     return this.device.createBuffer( {
       size: Math.max( size, 16 ), // Min of 16 bytes used
       usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE
