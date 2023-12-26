@@ -2102,131 +2102,55 @@
 
       <h4 id="WGSL-linking">Linking</h4>
 
-      <p>
-        ResourceSlot: { TextureViewSlot, BufferSlot (offset/size?), ?SamplerSlot, ?ExternalTextureSlot }. Pass these through
-      </p>
-
-      <p>
-        Do the BufferSlots keep references to their... uses? Each use might have different types (e.g. atomic or not),
-        or access (read-only, read-write), and some uses might use dynamic offsets.
-        NOTE: If we are tracking usages (we should), how does that affect having a global "log" BufferSlot?
-        If we are not, pipelines could track which BufferSlots they use (and with what type/access/dynamic-offsets).
-      </p>
-
-      <p>
-        ResourceUsage: { TextureViewUsage, BufferUsage }? - we'll need access (read-only / read-write) and whether it
-        has dynamic offsets. References a ResourceSlot.
+      <p class="TODO">
+        Logging broken - put Usages on WGSLContext (keep global BlufferSlot). Just "toss" our other things that use WGSLContext?
+        Break out data sources. Explicitly model data sources (input/output)
       </p>
 
       <p class="TODO">
-        How to handle dynamic offsets... will we want cases where we "split" the buffer into multiple slots? Presumably
-        yes, think of <code>slice()</code> on a BufferSlot. NOTE: dynamic offsets need to be a multiple of 256
-        or https://www.w3.org/TR/webgpu/#dom-supported-limits-minstoragebufferoffsetalignment
+        Casting of ConcreteTypes to other types (e.g. reinterpretation as u32 array, or something using atomics in one)
+      </p>
+
+      <p class="TODO">
+        Set up example of stored "slots" potentially on routines as fields, so they can be accessed. Figure out bind group
+        optimization with this.
+      </p>
+
+      <p class="TODO">
+        Parameterize the output of routines. Actually figure out our "wrapper" that we can provide input/output as a
+        unit. Get this so we can unit test, BUT ALSO work with the Canvas swap chain.
+      </p>
+
+      <p class="TODO">
+        Test "aliased" buffer slots.
+      </p>
+
+      <p class="TODO">
+        Get writeup for AI analysis.
       </p>
 
       <p>
-        Keep the "blueprint" architecture, so we can analyze and auto-create bind group layouts BASED on the resulting
-        flow.
+        Current approach uses slots (that are passed through or cast as needed). Sizes/offsets defined at blueprints.
+        Blueprints can have hints for bind groups - but we expose fields recursively for full buffer control.
+        We support partial binding (with Procedure), and "sharing" of buffers.
       </p>
 
       <p class="TODO">
-        How can we have different "flows" with the same blueprint? (e.g. differing levels of reduce). How can we
-        get bind group layouts to work nicely for all of these approaches? Write down an example (e.g. scans in radix sort).
+        Performance test: bind groups, buffer sharing, buffer offsets (one big buffer?)
       </p>
 
       <p class="TODO">
-        Flows: we can actually just construct multiple different "routines" (e.g. reduce), and pick the one based on
-        the constraint. How can we provide notes about the possible configurations to the bind group layout strategy?
-        Really need to nail down bind group layout examples.
-      </p>
-
-      <p>
-        What if flows are branching (e.g. any node can have multiple pathways that can share things).
-      </p>
-
-      <p>
-        IMPORTANT: We can potentially have different bind groups provided for different flow cases. Even if they are
-        using the same buffers. This would allow full optimization(!) for each different flow used. At runtime, we
-        would need to know which flow is picked.
-      </p>
-
-      <p class="TODO">
-        Think about how we would set up bind groups for varying flows. Most importantly, will it affect bind groups
-        or layouts OUTSIDE of the branch?
-      </p>
-
-      <p class="TODO">
-        How do we partially-bind and give those resources? (most notably, things that affect buffer sizes?)
+        NOTE dynamic offsets need to be a multiple of 256:
+        https://www.w3.org/TR/webgpu/#dom-supported-limits-minstoragebufferoffsetalignment
       </p>
 
       <p class="TODO">
         toString() all of our objects when prototyping, so we can better understand the structures we are playing with.
       </p>
 
-      <p>
-        Pipeline info/responsibility:
-      </p>
-
-      <ul>
-        <li>
-          Named buffer slots (name =&gt; TypedBindingType (eek rename), i.e. BindingType + ConcreteType) - including one for indirect dispatch if applicable?
-        </li>
-        <li>
-          Ability to create a ComputePipeline (from DeviceContext, PipelineLayout)
-        </li>
-        <li>
-          Information on (or ability to do) execution (from typed info that it needs =&gt; dispatch sizes OR indirect dispatch buffer/offset).
-          e.g. <code>( context: SomeContext, inputLength: number ) =&gt; context.dispatch( Math.ceil( inputLength / someSize ) )</code>
-          for T = number, or <code>( context: SomeContext, inputLength: number ) =&gt; context.dispatchIndirect( 0 )</code>
-          (... we can specify an arbitrary buffer, but we probably want to typically use one from a slot?)
-        </li>
-        <li>
-          Name
-        </li>
-      </ul>
-
       <p class="TODO">
-        How to pass through dispatch sizes? We also have indirect dispatch, and want to handle both. Mappings?
-        NOTE: We do NOT want to run too much garbage-creating code during runtime, so we want to minimize the amount
-        of code that is run during dispatch.
-      </p>
-
-      <p>
-        Component ("routine"?) info/responsibility:
-      </p>
-
-      <ul>
-        <li>
-          List of pipelines
-        </li>
-        <li>
-          Which buffer slots from different pipelines will refer to the same buffer
-        </li>
-        <li>
-          Named buffer slots (inputs/outputs/both)
-        </li>
-      </ul>
-
-      <pre><code>
-        execute: ( context: SomeContext, inputLength: number ) =&gt; {
-          const numWorkgroups = Math.ceil( inputLength / someSize );
-          subStage.execute( context, numWorkgroups );
-
-          somePipeline.dispatch( context, numWorkgroups );
-
-          someOtherPipeline.dispatchIndirect( context, 0 );
-        }
-      </code></pre>
-
-      <p>
         In radix example, we would have two different reduction pipelines (one for each direction of the ping-pong).
         But... how can we get them to "share" their internals?
-      </p>
-
-      <p class="TODO">
-        How can we "compose" uniform types, into one "read-only" uniform that could be left the entire pass? Provide
-        a way to get things out of it that can be included in shader templates(!). Pipelines might need to register
-        uniforms (with a type).
       </p>
 
       <p class="TODO">
@@ -2234,143 +2158,6 @@
         nature, the bind group setup will provide the dynamic offset (GPUBufferBinding offset,size). Provide minBindingSize
         in the blueprint setup.
       </p>
-
-      <p>
-        How to handle generated "combined" uniforms? (Radix sort will want to set a uniform that changes for each pass?)
-        Should we minimize bind groups OR pipelines? (We should performance test that).
-      </p>
-
-      <p class="TODO">
-        Where to provide the "buffer" bindings for the late-bound resources?
-      </p>
-
-      <p class="TODO">
-        How to use the word blueprint?
-      </p>
-
-      <p class="TODO">
-        It is easier to read <code>reduceShader.dispatch( context )</code> than <code>context.dispatch( reduceShader )</code>
-      </p>
-
-      <ul>
-        <li>
-          <strong>BindingType</strong>: Enum with bind/bindlayout entry generation TODO: dynamic buffer offsets
-        </li>
-        <li>
-          <strong>BindingLocation</strong>: ( groupIndex: number, bindingIndex: number )
-        </li>
-        <li>
-          <strong>TypedBindingType</strong>{T}: ( bindingType: BindingType, type: ConcreteType{T} ) -- eeek rename
-        </li>
-        <li>
-          <strong>BindGroupLayout</strong>: ( bindGroupLayoutName: string, groupIndex: number, map: Map{name, Binding} ) - has GPUBindGroupLayout
-        </li>
-        <li>
-          <strong>PipelineLayout</strong>: ( bindGroupLayouts: BindGroupLayouts ) - has GPUPipelineLayout, Map{name, Binding}
-        </li>
-        <li>
-          <strong>TypedBuffer</strong>{T}: ( buffer: GPUBuffer, type: ConcreteType{T} )
-        </li>
-        <li>
-          <strong>BindingResource</strong>{T}: TypedBuffer{T} | GPUTextureView
-        </li>
-        <li>
-          <strong>BindGroup</strong>: ( layout: BindGroupLayout, resourceMap: Map{name, BindingResource} ) - has GPUBindGroup
-        </li>
-        <li>
-          <strong>BindingBlueprint</strong>{T}: ( layoutName: string, typedBindingType: TypedBindingType{T}  )
-        </li>
-        <li>
-          <strong>PipelineBlueprint</strong>: ( pipelineName: string, bindingMap: Map{name, BindingBlueprint}, toComputePipeline: async bindingMap,pipelineLayout =&gt; ComputePipeline )
-        </li>
-        <li>
-          <strong>BufferSlot</strong>{T}: ( bindingBlueprints: BindingBlueprint{T}[] )
-        </li>
-        <li>
-          <strong>Binding</strong>{T}: ( bufferSlot: BufferSlot{T}, location: BindingLocation )
-        </li>
-        <li>
-          <strong>RoutineBlueprint</strong>: ( pipelineBlueprints: PipelineBlueprint[], bufferSlotMap: Map{name, BufferSlot}, internalBufferSlots: BufferSlot[] )
-        </li>
-        <li>
-          <strong>UnboundPipeline</strong>: ( computePipeline: ComputePipeline )
-        </li>
-        <li>
-          <strong>UnboundRoutine</strong>: ( routineBlueprint: RoutineBlueprint, unboundPipelines: UnboundPipeline )
-        </li>
-        <li>
-          <strong>BoundPipeline</strong>
-        </li>
-        <li>
-          <strong>BoundRoutine</strong>
-        </li>
-      </ul>
-
-      <pre><code>
-        // For the reduce
-        const reduceBlueprint = // ...
-        const middleScanBlueprint = // ...
-        const lowerScanBlueprint = // ...
-        const upperScanBlueprint = // ...
-
-        // TODO: We might want to bind the same buffer to the initial and end here
-        // We'll want to use the same blueprint for multiple combinations of buffers (e.g. the ping-ponging)
-
-        const tripleReduceBlueprint = Blueprint.combine( [
-          reduceBlueprint,
-          middleScanBlueprint,
-          lowerScanBlueprint,
-          upperScanBlueprint
-        ], {
-          input: BufferSlot.from( [
-            reduceBlueprint.bufferSlotMap.input,
-            upperScanBlueprint.bufferSlotMap.input
-          ] ),
-          output: BufferSlot.from( [
-            upperScanBlueprint.bufferSlotMap.output
-          ] )
-        }, [
-          // reduction
-          BufferSlot.from( [
-            reduceBlueprint.bufferSlotMap.output,
-            middleScanBlueprint.bufferSlotMap.input,
-            upperScanBlueprint.bufferSlotMap.reduction
-          ] ),
-
-          // double reduction
-          BufferSlot.from( [
-            middleScanBlueprint.bufferSlotMap.output,
-            lowerScanBlueprint.bufferSlotMap.data,
-            upperScanBlueprint.bufferSlotMap.doubleReduction
-          ] )
-        ] );
-
-        // TODO: how to share here
-
-        const
-
-        const tripleRadixSort = BluePrint.combine(
-        );
-
-        // Direct execution
-
-        execution.dispatch( reduceShader, [
-          histogramBuffer, reductionBuffer
-        ], middleDispatchSize );
-
-        execution.dispatch( middleScanShader, [
-          reductionBuffer, doubleReductionBuffer
-        ], lowerDispatchSize );
-
-        execution.dispatch( lowerScanShader, [
-          doubleReductionBuffer
-        ] );
-
-        execution.dispatch( upperScanShader, [
-          histogramBuffer, reductionBuffer, doubleReductionBuffer, scannedHistogramBuffer
-        ], middleDispatchSize );
-
-      </code></pre>
 
       <p class="TODO">
         How can we support Thrust-like fusing of shader stages transparently/effortlessly? Do we not need this (say,
@@ -2382,75 +2169,7 @@
         fusing.
       </p>
 
-      <ol>
-        <li>
-          Input size data (typed) + options + log =&gt; "blueprint". Essentially namedShaders{name =&gt; BindSlot} +
-          internalBindSlots: BindSlot[] ---- but wait, need a way to expose all of the shader stages.
-        </li>
-        <li>
-          Blueprint + bind layout data (bind group layouts, pipeline layouts) =&gt; "unbound". Intelligently scan to decide
-          on bind group layouts.
-        </li>
-        <li>
-          Unbound + buffers/resources to bind (to most slots) =&gt; "bound". -- partial bind acceptable
-        </li>
-        <li>
-          Bound + dynamically-bound buffers/resources =&gt; execution.
-        </li>
-      </ol>
-
       <p class="TODO">
-        Get it to work with vertex/fragment shaders too (e.g. BlitShader)
-      </p>
-
-      <p>
-        BindSlot&lt;ConcreteType&gt;: typed - it will (a) hold a certain type of data, and (b) have a length, so that
-        we will know how much space to create.
-      </p>
-
-      <p>
-        When do we need to know when resources will be "dynamically" bound? Sometimes we will need to create
-        bind groups on the fly (in the execute step). Example: Canvas swap chain texture.
-      </p>
-
-      <p>
-        BindSlot can potentially connect to others "sub-parts of the blueprint". -- Need to decide on how blueprint
-        code should look. When composing, we will want to connect the BindSlots together.
-      </p>
-
-      <p>
-        Map{BindSlot, Resource} is how we get the "bound" state.
-      </p>
-
-      <p>
-        To create blueprints, we will need input data size/structure (e.g. we will need to know how many reduce levels to
-        create, etc.).
-      </p>
-
-      <p>
-        NOTE: We can split up render passes however we want near the end. It should really be about how we structure
-        BindGroupLayout (and thus BindGroups). Ideally we share PipelineLayouts (will guarantee no rebinding).
-      </p>
-
-      <p>
-        Split up compute passes when we want to profile individual shader sections. Otherwise probably prefer one big
-        compute pass.
-      </p>
-
-      <p>
-        Input size =&gt; "abstract" chain. Decide on bind group/pipeline layouts =&gt; "concrete" chain. Pass buffers
-        =&gt; "bound" chain. Can execute that.
-      </p>
-
-      <p>
-        Need to handle use cases where certain resources get swapped out (e.g. the Canvas swap chain).
-      </p>
-
-      <p>
-        NOTE: Changing a bind group of a specific index will trigger a rebind for all higher indices (for performance).
-      </p>
-
-      <p>
         Consider splitting uniforms into "ones that change during calls" and "ones that do not". Performance cost
         potentially.
       </p>
@@ -2462,21 +2181,12 @@
       </p>
 
       <p class="TODO">
-        Abstract out buffer resource? (especially if we are doing ... dynamic offsets?) - For dynamic offsets, provided
-        in setBindGroup, noted in buffer binding types (BindGroupLayout).
-      </p>
-
-      <p class="TODO">
         Get an example with "render to Canvas texture" working with the new approach.
       </p>
 
-      <p>
-        We will allow a setting at the end of "put every dispatch in its own render pass, so we can get timestamps out
-        for each thing separately".
-      </p>
-
       <p class="TODO">
-        Profile different bind group setups.
+        Rename "primary" compute pass into better naming (for when we are profiling but not separating). Test separated
+        and profiled.
       </p>
 
       <p class="TODO">
@@ -2487,6 +2197,61 @@
         Use staging buffer ring like in
         <a href="https://toji.dev/webgpu-best-practices/buffer-uploads.html#:~:text=Buffer%20data%20flow,-Before%20we%20get%20into%20the">WebGPU Buffer Uploads</a>.
         Actually, find the other (WGPU) example of a buffer "belt" and implement that!
+      </p>
+
+      <p class="DEFERRED">
+        Dynamic buffer sizing (For the same blueprint / compiled version)
+      </p>
+
+      <p class="DEFERRED">
+        Dynamic buffer offsets (for the same blueprint / compiled)
+      </p>
+
+      <p class="DEFERRED">
+        Multiple flows (e.g. 1/2/3 level scan/reduce in the same pipeline) - tricky for bind group questions.
+        How can we have different "flows" with the same blueprint? (e.g. differing levels of reduce). How can we
+        get bind group layouts to work nicely for all of these approaches? Write down an example (e.g. scans in radix sort).
+        Flows: we can actually just construct multiple different "routines" (e.g. reduce), and pick the one based on
+        the constraint. How can we provide notes about the possible configurations to the bind group layout strategy?
+        Really need to nail down bind group layout examples. What if flows are branching (e.g. any node can have multiple
+        pathways that can share things).
+        IMPORTANT: We can potentially have different bind groups provided for different flow cases. Even if they are
+        using the same buffers. This would allow full optimization(!) for each different flow used. At runtime, we
+        would need to know which flow is picked. Think about how we would set up bind groups for varying flows.
+        Most importantly, will it affect bind groups
+        or layouts OUTSIDE of the branch?
+      </p>
+
+      <p class="DEFERRED">
+        Automated buffer sharing based on the "usage scope" of the subroutines - share "unrelated" buffers if scopes do
+        not overlap - NOTE what do we need for zero-init atomic reduce?
+      </p>
+
+      <p class="DEFERRED">
+        Automated combined uniforms. How can we "compose" uniform types, into one "read-only" uniform that could be left the entire pass? Provide
+        a way to get things out of it that can be included in shader templates(!). Pipelines might need to register
+        uniforms (with a type).
+      </p>
+
+      <p class="DEFERRED">
+        "per compilation" memoizing of routines (for shared buffers, etc.)
+      </p>
+
+      <p class="DEFERRED">
+        Pack multiple "slots" into one buffer, for buffer quantity limits (so we'll index into a big u32 buffer, and
+        cast/extract contents).
+      </p>
+
+      <p class="DEFERRED">
+        "per compilation" memoizing of routines (for shared buffers, etc.)
+      </p>
+
+      <p class="DEFERRED">
+        Optimize buffer usage flags.
+      </p>
+
+      <p class="DEFERRED">
+        Get it to work with vertex/fragment shaders too (e.g. BlitShader)
       </p>
 
       <h4 id="WGSL-logging">Logging</h4>
