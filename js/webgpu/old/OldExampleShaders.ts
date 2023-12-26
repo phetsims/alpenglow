@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_f32_reduce_simple } from '../../imports.js';
+import { alpenglow, OldBindingType, OldComputeShader, DeviceContext, ExecutableShader, OldExecution, wgsl_f32_reduce_simple } from '../../imports.js';
 
-export class ExampleSimpleF32Reduce extends ExecutableShader<number[], number> {
+export class OldExampleSimpleF32Reduce extends ExecutableShader<number[], number> {
 
   public static async create(
     deviceContext: DeviceContext,
@@ -17,11 +17,11 @@ export class ExampleSimpleF32Reduce extends ExecutableShader<number[], number> {
       workgroupSize: number;
       inputSize: number;
     }
-  ): Promise<ExampleSimpleF32Reduce> {
-    const shader = await ComputeShader.fromSourceAsync(
+  ): Promise<OldExampleSimpleF32Reduce> {
+    const shader = await OldComputeShader.fromSourceAsync(
       deviceContext.device, name, wgsl_f32_reduce_simple, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
       ], {
         workgroupSize: options.workgroupSize,
         inputSize: options.inputSize,
@@ -30,7 +30,7 @@ export class ExampleSimpleF32Reduce extends ExecutableShader<number[], number> {
       }
     );
 
-    return new ExampleSimpleF32Reduce( async ( execution: Execution, numbers: number[] ) => {
+    return new OldExampleSimpleF32Reduce( async ( execution: OldExecution, numbers: number[] ) => {
       assert && assert( numbers.length >= options.inputSize );
 
       const inputBuffer = execution.createF32Buffer( numbers );
@@ -45,10 +45,10 @@ export class ExampleSimpleF32Reduce extends ExecutableShader<number[], number> {
   }
 }
 
-alpenglow.register( 'ExampleSimpleF32Reduce', ExampleSimpleF32Reduce );
+alpenglow.register( 'OldExampleSimpleF32Reduce', OldExampleSimpleF32Reduce );
 
 // Bicyclic semigroup object, a good example of a non-commutative operation
-export class Bic {
+export class OldBic {
   public constructor(
     public readonly x: number,
     public readonly y: number
@@ -58,7 +58,7 @@ export class Bic {
     return [ this.x, this.y ];
   }
 
-  public equals( other: Bic ): boolean {
+  public equals( other: OldBic ): boolean {
     return this.x === other.x && this.y === other.y;
   }
 
@@ -66,20 +66,20 @@ export class Bic {
     return `Bic( ${this.x}, ${this.y} )`;
   }
 
-  public static combine( a: Bic, b: Bic ): Bic {
+  public static combine( a: OldBic, b: OldBic ): OldBic {
     const min = Math.min( a.y, b.x );
-    return new Bic(
+    return new OldBic(
       a.x + b.x - min,
       a.y + b.y - min
     );
   }
 
-  public static readonly IDENTITY = new Bic( 0, 0 );
+  public static readonly IDENTITY = new OldBic( 0, 0 );
 
-  public static combineMultiple( ...values: Bic[] ): Bic {
-    let bic = Bic.IDENTITY;
+  public static combineMultiple( ...values: OldBic[] ): OldBic {
+    let bic = OldBic.IDENTITY;
     values.forEach( value => {
-      bic = Bic.combine( bic, value );
+      bic = OldBic.combine( bic, value );
     } );
     return bic;
   }
@@ -87,4 +87,4 @@ export class Bic {
   public static readonly BYTES = 8;
 }
 
-alpenglow.register( 'Bic', Bic );
+alpenglow.register( 'OldBic', OldBic );

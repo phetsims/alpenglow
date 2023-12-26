@@ -10,16 +10,16 @@
 
 import { alpenglow } from '../../imports.js';
 
-export type DualSnippetSource = ( includesMap: Record<string, unknown> ) => {
+export type OldDualSnippetSource = ( includesMap: Record<string, unknown> ) => {
   before: string;
   after: string;
-  imports: DualSnippetSource[];
+  imports: OldDualSnippetSource[];
   // TODO: add bindings here!
 };
 
 let globalSnippetIdCounter = 0;
 
-export default class DualSnippet {
+export default class OldDualSnippet {
 
   private readonly id: number = globalSnippetIdCounter++;
 
@@ -30,23 +30,23 @@ export default class DualSnippet {
   public constructor(
     private readonly beforeSource: string,
     private readonly afterSource: string,
-    private readonly dependencies: DualSnippet[] = []
+    private readonly dependencies: OldDualSnippet[] = []
   ) {}
 
   public static fromSource(
-    source: DualSnippetSource,
+    source: OldDualSnippetSource,
     options: Record<string, unknown> = {},
-    sourceToSnippetMap: Map<DualSnippetSource, DualSnippet> = new Map<DualSnippetSource, DualSnippet>()
-  ): DualSnippet {
+    sourceToSnippetMap: Map<OldDualSnippetSource, OldDualSnippet> = new Map<OldDualSnippetSource, OldDualSnippet>()
+  ): OldDualSnippet {
     if ( sourceToSnippetMap.has( source ) ) {
       return sourceToSnippetMap.get( source )!;
     }
 
     const resolvedSource = source( options );
 
-    const dependencies = resolvedSource.imports.map( importSource => DualSnippet.fromSource( importSource, options, sourceToSnippetMap ) );
+    const dependencies = resolvedSource.imports.map( importSource => OldDualSnippet.fromSource( importSource, options, sourceToSnippetMap ) );
 
-    const snippet = new DualSnippet( resolvedSource.before, resolvedSource.after, dependencies );
+    const snippet = new OldDualSnippet( resolvedSource.before, resolvedSource.after, dependencies );
     sourceToSnippetMap.set( source, snippet );
 
     return snippet;
@@ -89,4 +89,4 @@ export default class DualSnippet {
   }
 }
 
-alpenglow.register( 'DualSnippet', DualSnippet );
+alpenglow.register( 'OldDualSnippet', OldDualSnippet );

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, i32, u32, wgsl_main_reduce_atomic } from '../../../imports.js';
+import { alpenglow, OldBindingType, ByteEncoder, OldComputeShader, DeviceContext, ExecutableShader, OldExecution, i32, u32, wgsl_main_reduce_atomic } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type AtomicType = 'u32' | 'i32';
@@ -83,10 +83,10 @@ export default class AtomicReduceShader extends ExecutableShader<number[], numbe
   ): Promise<AtomicReduceShader> {
     const options = optionize3<AtomicReduceShaderOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
-    const shader = await ComputeShader.fromSourceAsync(
+    const shader = await OldComputeShader.fromSourceAsync(
       deviceContext.device, name, wgsl_main_reduce_atomic, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
       ], {
         valueType: options.valueType,
         atomicOperation: options.atomicOperation,
@@ -101,7 +101,7 @@ export default class AtomicReduceShader extends ExecutableShader<number[], numbe
       }
     );
 
-    return new AtomicReduceShader( async ( execution: Execution, values: number[] ) => {
+    return new AtomicReduceShader( async ( execution: OldExecution, values: number[] ) => {
       const dispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
       const byteEncoder = new ByteEncoder().encodeValues( values, ( element, encoder ) => {

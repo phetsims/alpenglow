@@ -14,11 +14,10 @@ import './cag/PolygonalBooleanTests.js';
 import './clip/PolygonClippingTests.js';
 import './parallel/ParallelTests.js';
 import './raster/RasterizeTests.js';
-import './webgpu/old/SnippetTests.js';
-import './webgpu/old/ExampleTests.js';
+import './webgpu/old/OldSnippetTests.js';
+import './webgpu/old/OldExampleTests.js';
 import './render-program/RenderProgramTests.js';
 import './webgpu/RenderProgramWebGPUTests.js';
-import './webgpu/tests/gpu/SingleReduceShaderTests.js';
 
 // Since our tests are loaded asynchronously, we must direct QUnit to begin the tests
 qunitStart();

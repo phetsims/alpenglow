@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, BindingLocation, BufferLogger, BufferSlot, ConcreteType, ConsoleLogger, DeviceContext, getArrayType, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, stripWGSLComments, TypedBuffer, u32, U32Add, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
+import { addLineNumbers, alpenglow, BindingLocation, BufferLogger, ConcreteType, ConsoleLogger, DeviceContext, getArrayType, mainLogBarrier, mainReduceWGSL, partialWGSLBeautify, stripWGSLComments, TypedBuffer, u32, U32Add, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
 import Utils from '../../../dot/js/Utils.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 
@@ -485,11 +485,11 @@ export class XBinding {
 }
 alpenglow.register( 'XBinding', XBinding );
 
+// TODO: get rid of this
 export type BindingCompatibilityType<T> = {
   location: BindingLocation;
   getStorageAccess: () => 'read' | 'read_write';
   concreteBindingType?: XConcreteBindingType<T>; // our style
-  bufferSlot?: BufferSlot<T>; // their style
 };
 
 export class XBindGroupLayout {

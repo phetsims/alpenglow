@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, BlitShader, ComputeShader, DeviceContext, wgsl_copy_storage_operation, wgsl_expensive_operation, wgsl_fake_combine_to_texture } from '../imports.js';
+import { alpenglow, OldBindingType, BlitShader, OldComputeShader, DeviceContext, wgsl_copy_storage_operation, wgsl_expensive_operation, wgsl_fake_combine_to_texture } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -24,30 +24,30 @@ export default class PerformanceTesting {
 
     const deviceContext = new DeviceContext( device );
 
-    const copyStorageShader = ComputeShader.fromSource(
+    const copyStorageShader = OldComputeShader.fromSource(
       device, 'copy_storage_operation', wgsl_copy_storage_operation, [
-        BindingType.STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
+        OldBindingType.STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
       ], {
       workgroupSize: workgroupSize
     } );
 
-    const expensiveShader = ComputeShader.fromSource(
+    const expensiveShader = OldComputeShader.fromSource(
       device, 'expensive_operation', wgsl_expensive_operation, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize
       }
     );
 
-    const fakeCombineShader = ComputeShader.fromSource(
+    const fakeCombineShader = OldComputeShader.fromSource(
       device, 'fake_combine_to_texture', wgsl_fake_combine_to_texture, [
-        BindingType.STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER,
-        deviceContext.preferredStorageFormat === 'bgra8unorm' ? BindingType.TEXTURE_OUTPUT_BGRA8UNORM : BindingType.TEXTURE_OUTPUT_RGBA8UNORM
+        OldBindingType.STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER,
+        deviceContext.preferredStorageFormat === 'bgra8unorm' ? OldBindingType.TEXTURE_OUTPUT_BGRA8UNORM : OldBindingType.TEXTURE_OUTPUT_RGBA8UNORM
       ], {
         workgroupSize: 1,
         preferredStorageFormat: deviceContext.preferredStorageFormat

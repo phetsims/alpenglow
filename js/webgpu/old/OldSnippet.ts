@@ -10,7 +10,7 @@ import { alpenglow } from '../../imports.js';
 
 let globalSnippetIdCounter = 0;
 
-export default class Snippet {
+export default class OldSnippet {
 
   private readonly id: number = globalSnippetIdCounter++;
 
@@ -26,7 +26,7 @@ export default class Snippet {
    * b.toString() => "AB"
    * c.toString() => "AC"
    */
-  public constructor( private readonly source: string, private readonly dependencies: Snippet[] = [] ) {}
+  public constructor( private readonly source: string, private readonly dependencies: OldSnippet[] = [] ) {}
 
   /**
    * Assuming no circular dependencies, this returns the entire required subprogram as a string.
@@ -58,9 +58,9 @@ export default class Snippet {
   /**
    * Creates a snippet for a numeric constant from a given large-precision string.
    */
-  public static numericConstant( name: string, value: string ): Snippet {
+  public static numericConstant( name: string, value: string ): OldSnippet {
     // Match WebGL handling
-    return new Snippet( `#define ${name} ${value.substring( 0, 33 )}\n` );
+    return new OldSnippet( `#define ${name} ${value.substring( 0, 33 )}\n` );
   }
 
   /**
@@ -72,4 +72,4 @@ export default class Snippet {
   }
 }
 
-alpenglow.register( 'Snippet', Snippet );
+alpenglow.register( 'OldSnippet', OldSnippet );

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BoundsClipping, DualSnippet, DualSnippetSource, LinearEdge, LineClipping, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_bounds_clip_edge, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gamut_map_linear_displayP3, wgsl_gamut_map_linear_sRGB, wgsl_gamut_map_premul_displayP3, wgsl_gamut_map_premul_sRGB, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_displayP3_to_linear_sRGB, wgsl_linear_sRGB_to_linear_displayP3, wgsl_linear_sRGB_to_oklab, wgsl_linear_sRGB_to_sRGB, wgsl_matthes_drakopoulos_clip, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_oklab_to_linear_sRGB, wgsl_premultiply, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64, wgsl_unpremultiply } from '../../imports.js';
+import { BoundsClipping, OldDualSnippet, OldDualSnippetSource, LinearEdge, LineClipping, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_bounds_clip_edge, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gamut_map_linear_displayP3, wgsl_gamut_map_linear_sRGB, wgsl_gamut_map_premul_displayP3, wgsl_gamut_map_premul_sRGB, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_displayP3_to_linear_sRGB, wgsl_linear_sRGB_to_linear_displayP3, wgsl_linear_sRGB_to_oklab, wgsl_linear_sRGB_to_sRGB, wgsl_matthes_drakopoulos_clip, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_oklab_to_linear_sRGB, wgsl_premultiply, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64, wgsl_unpremultiply } from '../../imports.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
@@ -18,7 +18,7 @@ QUnit.test( 'wgsl_mul_u32_u32_to_u64 exists', assert => {
 } );
 
 QUnit.test( 'intersect_line_segments snippet', assert => {
-  const snippet = DualSnippet.fromSource( wgsl_intersect_line_segments );
+  const snippet = OldDualSnippet.fromSource( wgsl_intersect_line_segments );
   assert.ok( snippet );
 } );
 
@@ -70,12 +70,12 @@ const nToU32s = ( n: bigint ) => {
 const runInOut = async (
   device: GPUDevice,
   mainCode: string,
-  dependencies: DualSnippet[],
+  dependencies: OldDualSnippet[],
   dispatchSize: number,
   inputArrayBuffer: ArrayBuffer,
   outputArrayBuffer: ArrayBuffer
 ) => {
-  const code = new DualSnippet( `
+  const code = new OldDualSnippet( `
 @group(0) @binding(0) var<storage, read_write> input: array<u32>;
 @group(0) @binding(1) var<storage, read_write> output: array<u32>;
 `, `
@@ -186,7 +186,7 @@ const runInOut = async (
 const expectInOut = async (
   device: GPUDevice,
   mainCode: string,
-  dependencies: DualSnippet[],
+  dependencies: OldDualSnippet[],
   dispatchSize: number,
   inputArrayBuffer: ArrayBuffer,
   expectedOutputArrayBuffer: ArrayBuffer,
@@ -247,7 +247,7 @@ const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice ) => Promi
 const expectInOutTest = (
   name: string,
   mainCode: string,
-  sources: DualSnippetSource[],
+  sources: OldDualSnippetSource[],
   dispatchSize: number,
   inputArrayBuffer: ArrayBuffer,
   expectedOutputArrayBuffer: ArrayBuffer,
@@ -265,7 +265,7 @@ const expectInOutTest = (
       assert.ok( await expectInOut(
         device,
         mainCode,
-        sources.map( source => DualSnippet.fromSource( source ) ),
+        sources.map( source => OldDualSnippet.fromSource( source ) ),
         dispatchSize,
         inputArrayBuffer,
         expectedOutputArrayBuffer,
@@ -1030,7 +1030,7 @@ expectInOutTest(
   ] ).buffer
 );
 
-const vec3Test = ( name: string, source: DualSnippetSource, f: ( v: Vector3 ) => Vector3, inputVectors: Vector3[] ) => {
+const vec3Test = ( name: string, source: OldDualSnippetSource, f: ( v: Vector3 ) => Vector3, inputVectors: Vector3[] ) => {
   asyncTestWithDevice( name, async device => {
     const dispatchSize = inputVectors.length;
 
@@ -1047,7 +1047,7 @@ const vec3Test = ( name: string, source: DualSnippetSource, f: ( v: Vector3 ) =>
         output[ out + 1u ] = c.y;
         output[ out + 2u ] = c.z;
       `,
-      [ DualSnippet.fromSource( source ) ],
+      [ OldDualSnippet.fromSource( source ) ],
       dispatchSize,
       new Float32Array( inputVectors.flatMap( v => [ v.x, v.y, v.z ] ) ).buffer,
       outputArray.buffer
@@ -1073,7 +1073,7 @@ const vec3Test = ( name: string, source: DualSnippetSource, f: ( v: Vector3 ) =>
   } );
 };
 
-const vec4Test = ( name: string, source: DualSnippetSource, f: ( v: Vector4 ) => Vector4, inputVectors: Vector4[] ) => {
+const vec4Test = ( name: string, source: OldDualSnippetSource, f: ( v: Vector4 ) => Vector4, inputVectors: Vector4[] ) => {
   asyncTestWithDevice( name, async device => {
     const dispatchSize = inputVectors.length;
 
@@ -1091,7 +1091,7 @@ const vec4Test = ( name: string, source: DualSnippetSource, f: ( v: Vector4 ) =>
         output[ out + 2u ] = c.z;
         output[ out + 3u ] = c.w;
       `,
-      [ DualSnippet.fromSource( source ) ],
+      [ OldDualSnippet.fromSource( source ) ],
       dispatchSize,
       new Float32Array( inputVectors.flatMap( v => [ v.x, v.y, v.z, v.w ] ) ).buffer,
       outputArray.buffer
@@ -1575,7 +1575,7 @@ const matthesDrakopoulosTest = ( name: string, extractSlope: boolean ) => {
         output[ out + 3u ] = p1out.y;
         output[ out + 4u ] = select( 0u, 1u, clipped );
       `,
-      [ DualSnippet.fromSource( wgsl_matthes_drakopoulos_clip, {
+      [ OldDualSnippet.fromSource( wgsl_matthes_drakopoulos_clip, {
         matthes_drakopoulos_extract_slope: extractSlope
       } ) ],
       dispatchSize,
@@ -1664,7 +1664,7 @@ asyncTestWithDevice( 'bounds_clip_edge', async device => {
       output[ out + 11u ] = e2p1.y;
       output[ out + 12u ] = count;
     `,
-    [ DualSnippet.fromSource( wgsl_bounds_clip_edge ) ],
+    [ OldDualSnippet.fromSource( wgsl_bounds_clip_edge ) ],
     dispatchSize,
     new Float32Array( inputEdges.flatMap( entry => [
       entry[ 0 ].x,

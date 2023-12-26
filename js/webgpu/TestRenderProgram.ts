@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, LinearEdge, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderInstruction, RenderProgram, wgsl_test_render_program } from '../imports.js';
+import { alpenglow, OldBindingType, BufferLogger, ByteEncoder, OldComputeShader, DeviceContext, LinearEdge, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderInstruction, RenderProgram, wgsl_test_render_program } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
 
-const shaderMap = new WeakMap<DeviceContext, ComputeShader>();
+const shaderMap = new WeakMap<DeviceContext, OldComputeShader>();
 
 export default class TestRenderProgram {
 
@@ -33,11 +33,11 @@ export default class TestRenderProgram {
     const device = deviceContext.device;
 
     if ( !shaderMap.has( deviceContext ) ) {
-      const shader = ComputeShader.fromSource( device, 'test_render_program', wgsl_test_render_program, [
-        BindingType.UNIFORM_BUFFER,
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
+      const shader = OldComputeShader.fromSource( device, 'test_render_program', wgsl_test_render_program, [
+        OldBindingType.UNIFORM_BUFFER,
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
       ], merge( merge( {
         // TODO: good sizes? Can get values of these from a RenderProgram
         stackSize: 10,

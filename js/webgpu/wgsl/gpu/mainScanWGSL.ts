@@ -17,7 +17,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, Binding, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BindingCompatibilityType, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 // TODO: use multiple named types to simplify this boolean "mess"
@@ -31,34 +31,34 @@ type SelfOptions<T> = {
 } & RakedSizable & ( {
   inPlace?: false;
   bindings: {
-    input: Binding<T>;
-    output: Binding<T>;
+    input: BindingCompatibilityType<T[]>;
+    output: BindingCompatibilityType<T[]>;
   };
 } | {
   inPlace: true;
   bindings: {
-    data: Binding<T>;
+    data: BindingCompatibilityType<T[]>;
   };
 } ) & ( {
   storeReduction?: false;
 } | {
   storeReduction: true;
   bindings: {
-    reduction: Binding<T>;
+    reduction: BindingCompatibilityType<T[]>;
   };
 } ) & ( ( {
   addScannedReduction?: false;
 } & Pick<scanComprehensiveWGSLOptions<T>, 'getAddedValue'> ) | ( {
   addScannedReduction: true;
   bindings: {
-    scannedReduction: Binding<T>;
+    scannedReduction: BindingCompatibilityType<T[]>;
   };
 } & ( {
   addScannedDoubleReduction?: false;
 } | {
   addScannedDoubleReduction: true;
   bindings: {
-    scannedDoubleReduction: Binding<T>;
+    scannedDoubleReduction: BindingCompatibilityType<T[]>;
   };
 } ) ) );
 

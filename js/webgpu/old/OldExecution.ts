@@ -8,13 +8,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ByteEncoder, ComputeShader, ComputeShaderDispatchOptions, ConsoleLogger, DeviceContext, TimestampLogger, TimestampLoggerResult } from '../../imports.js';
+import { alpenglow, BufferLogger, ByteEncoder, OldComputeShader, OldComputeShaderDispatchOptions, ConsoleLogger, DeviceContext, TimestampLogger, TimestampLoggerResult } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 import Utils from '../../../../dot/js/Utils.js';
 
-export type ExecutionAnyCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => T;
-export type ExecutionSingleCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => Promise<T>;
-export type ExecutionMultipleCallback<T extends Record<string, Promise<unknown>>> = ( encoder: GPUCommandEncoder, execution: Execution ) => T;
+export type ExecutionAnyCallback<T> = ( encoder: GPUCommandEncoder, execution: OldExecution ) => T;
+export type ExecutionSingleCallback<T> = ( encoder: GPUCommandEncoder, execution: OldExecution ) => Promise<T>;
+export type ExecutionMultipleCallback<T extends Record<string, Promise<unknown>>> = ( encoder: GPUCommandEncoder, execution: OldExecution ) => T;
 export type Unpromised<T extends Record<string, Promise<unknown>>> = { [ K in keyof T ]: T[ K ] extends Promise<infer U> ? U : T[ K ] };
 
 export type ExecutionOptions = {
@@ -32,7 +32,7 @@ const DEFAULT_OPTIONS = {
 };
 
 // @deprecated
-type Execution = {
+type OldExecution = {
   encoder: GPUCommandEncoder;
   createBuffer: ( size: number ) => GPUBuffer;
   createDataBuffer: ( data: ArrayBufferView ) => GPUBuffer;
@@ -47,23 +47,23 @@ type Execution = {
   u32Numbers: ( buffer: GPUBuffer ) => Promise<number[]>;
   i32Numbers: ( buffer: GPUBuffer ) => Promise<number[]>;
   f32Numbers: ( buffer: GPUBuffer ) => Promise<number[]>;
-  getDispatchOptions: () => ComputeShaderDispatchOptions;
+  getDispatchOptions: () => OldComputeShaderDispatchOptions;
   dispatch: (
-    shader: ComputeShader,
+    shader: OldComputeShader,
     resources: ( GPUBuffer | GPUTextureView )[],
     dispatchX?: number,
     dispatchY?: number,
     dispatchZ?: number
   ) => void;
   dispatchIndirect: (
-    shader: ComputeShader,
+    shader: OldComputeShader,
     resources: ( GPUBuffer | GPUTextureView )[],
     indirectBuffer: GPUBuffer,
     indirectOffset: number
   ) => void;
-  setLogBarrierShader: ( shader: ComputeShader ) => void;
+  setLogBarrierShader: ( shader: OldComputeShader ) => void;
 };
-export default Execution;
+export default OldExecution;
 
 // We'll likely want this typed in the future, so disabling the linter so we don't have to modify a ton of places.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -90,7 +90,7 @@ export abstract class ExecutableShader<In, Out> {
   public readonly dispose: () => void;
 
   public constructor(
-    public readonly execute: ( execution: Execution, input: In ) => Promise<Out>,
+    public readonly execute: ( execution: OldExecution, input: In ) => Promise<Out>,
     providedOptions?: ExecutableShaderOptions<In, Out>
   ) {
     const options = optionize3<ExecutableShaderOptions<In, Out>>()( {}, DEFAULT_EXECUTABLE_SHADER_OPTIONS, providedOptions );
@@ -108,7 +108,7 @@ export abstract class BaseExecution {
 
   protected readonly buffersToCleanup: GPUBuffer[] = [];
 
-  private logBarrierShader: ComputeShader | null = null;
+  private logBarrierShader: OldComputeShader | null = null;
 
   public constructor(
     public readonly deviceContext: DeviceContext,
@@ -117,7 +117,7 @@ export abstract class BaseExecution {
     this.bufferLogger = new BufferLogger( deviceContext );
   }
 
-  public abstract getDispatchOptions(): ComputeShaderDispatchOptions;
+  public abstract getDispatchOptions(): OldComputeShaderDispatchOptions;
 
   public createBuffer( size: number ): GPUBuffer {
     const buffer = this.deviceContext.createBuffer( size );
@@ -197,12 +197,12 @@ export abstract class BaseExecution {
     return this.bufferLogger.f32Numbers( this.encoder, buffer );
   }
 
-  public setLogBarrierShader( shader: ComputeShader ): void {
+  public setLogBarrierShader( shader: OldComputeShader ): void {
     this.logBarrierShader = shader;
   }
 
   public dispatch(
-    shader: ComputeShader,
+    shader: OldComputeShader,
     resources: ( GPUBuffer | GPUTextureView )[],
     dispatchX = 1,
     dispatchY = 1,
@@ -214,7 +214,7 @@ export abstract class BaseExecution {
   }
 
   public dispatchIndirect(
-    shader: ComputeShader,
+    shader: OldComputeShader,
     resources: ( GPUBuffer | GPUTextureView )[],
     indirectBuffer: GPUBuffer,
     indirectOffset: number
@@ -226,7 +226,7 @@ export abstract class BaseExecution {
 }
 
 // @deprecated
-export class BasicExecution extends BaseExecution implements Execution {
+export class BasicExecution extends BaseExecution implements OldExecution {
 
   public readonly timestampLogger: TimestampLogger;
   public readonly timestampResultPromise: Promise<TimestampLoggerResult | null>;
@@ -260,7 +260,7 @@ export class BasicExecution extends BaseExecution implements Execution {
     this.logBufferSize = options.logBufferSize;
   }
 
-  public getDispatchOptions(): ComputeShaderDispatchOptions {
+  public getDispatchOptions(): OldComputeShaderDispatchOptions {
     return {
       timestampLogger: this.timestampLogger,
       logBuffer: this.logBuffer

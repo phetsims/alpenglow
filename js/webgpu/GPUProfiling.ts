@@ -22,7 +22,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BasicExecution, BindingType, BufferLogger, ComputeShader, ComputeShaderDispatchOptions, ComputeShaderSourceOptions, DeviceContext, Execution, TimestampLogger, TimestampLoggerResult, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
+import { alpenglow, BasicExecution, OldBindingType, BufferLogger, OldComputeShader, OldComputeShaderDispatchOptions, OldComputeShaderSourceOptions, DeviceContext, OldExecution, TimestampLogger, TimestampLoggerResult, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
 
@@ -136,34 +136,34 @@ export default class GPUProfiling {
       combine: ( a: string, b: string ) => `${a} + ${b}`
     };
 
-    const shader0 = ComputeShader.fromSource(
+    const shader0 = OldComputeShader.fromSource(
       device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
-    const shader1 = ComputeShader.fromSource(
+    const shader1 = OldComputeShader.fromSource(
       device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize ) )
       }, shaderOptions )
     );
-    const shader2 = ComputeShader.fromSource(
+    const shader2 = OldComputeShader.fromSource(
       device, 'f32_reduce_simple 2', wgsl_f32_reduce_simple, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) )
       }, shaderOptions )
     );
 
     return new GPUProfiler( 'f32_reduce_simple', async () => {
       const timestampLogger = new TimestampLogger( deviceContext, 100 ); // capacity is probably overkill
-      const dispatchOptions: ComputeShaderDispatchOptions = {
+      const dispatchOptions: OldComputeShaderDispatchOptions = {
         timestampLogger: timestampLogger
       };
 
@@ -240,34 +240,34 @@ export default class GPUProfiling {
       combine: ( a: string, b: string ) => `${a} + ${b}`
     };
 
-    const shader0 = ComputeShader.fromSource(
+    const shader0 = OldComputeShader.fromSource(
       device, 'f32_reduce_raked_blocked 0', wgsl_f32_reduce_raked_blocked, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
-    const shader1 = ComputeShader.fromSource(
+    const shader1 = OldComputeShader.fromSource(
       device, 'f32_reduce_raked_blocked 1', wgsl_f32_reduce_raked_blocked, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
-    const shader2 = ComputeShader.fromSource(
+    const shader2 = OldComputeShader.fromSource(
       device, 'f32_reduce_raked_blocked 2', wgsl_f32_reduce_raked_blocked, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )
     );
 
     return new GPUProfiler( `f32_reduce_raked_blocked ${grainSize}`, async () => {
       const timestampLogger = new TimestampLogger( deviceContext, 100 ); // capacity is probably overkill
-      const dispatchOptions: ComputeShaderDispatchOptions = {
+      const dispatchOptions: OldComputeShaderDispatchOptions = {
         timestampLogger: timestampLogger
       };
 
@@ -344,34 +344,34 @@ export default class GPUProfiling {
       combine: ( a: string, b: string ) => `${a} + ${b}`
     } as const;
 
-    const shader0 = ComputeShader.fromSource(
+    const shader0 = OldComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked 0', wgsl_f32_reduce_raked_striped_blocked, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
-    const shader1 = ComputeShader.fromSource(
+    const shader1 = OldComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked 1', wgsl_f32_reduce_raked_striped_blocked, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
-    const shader2 = ComputeShader.fromSource(
+    const shader2 = OldComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked 2', wgsl_f32_reduce_raked_striped_blocked, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )
     );
 
     return new GPUProfiler( `f32_reduce_raked_striped_blocked ${grainSize}`, async () => {
       const timestampLogger = new TimestampLogger( deviceContext, 100 ); // capacity is probably overkill
-      const dispatchOptions: ComputeShaderDispatchOptions = {
+      const dispatchOptions: OldComputeShaderDispatchOptions = {
         timestampLogger: timestampLogger
       };
 
@@ -445,27 +445,27 @@ export default class GPUProfiling {
       combine: ( a: string, b: string ) => `${a} + ${b}`
     } as const;
 
-    const shader0 = ComputeShader.fromSource(
+    const shader0 = OldComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked_convergent 0', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: inputSize
       }, shaderOptions )
     );
-    const shader1 = ComputeShader.fromSource(
+    const shader1 = OldComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked_convergent 1', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
       }, shaderOptions )
     );
-    const shader2 = ComputeShader.fromSource(
+    const shader2 = OldComputeShader.fromSource(
       device, 'f32_reduce_raked_striped_blocked_convergent 2', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
       }, shaderOptions )
     );
@@ -474,7 +474,7 @@ export default class GPUProfiling {
     return new GPUProfiler( `f32_reduce_raked_striped_blocked_convergent ${grainSize}`, async () => {
       const execution = new BasicExecution( deviceContext );
 
-      const outputArray = await execution.executeSingle( async ( encoder: GPUCommandEncoder, execution: Execution ) => {
+      const outputArray = await execution.executeSingle( async ( encoder: GPUCommandEncoder, execution: OldExecution ) => {
         const inputBuffer = execution.createBuffer( 4 * inputSize );
         device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
 

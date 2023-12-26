@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, ComputeShader, DeviceContext, wgsl_i32_merge_simple } from '../imports.js';
+import { alpenglow, OldBindingType, OldComputeShader, DeviceContext, wgsl_i32_merge_simple } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -29,11 +29,11 @@ export default class BrokenTesting {
 
     const context = new DeviceContext( device );
 
-    const shader = ComputeShader.fromSource(
+    const shader = OldComputeShader.fromSource(
       device, 'i32_merge_simple', wgsl_i32_merge_simple, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
       ], {
         workgroupSize: workgroupSize,
         grainSize: grainSize,

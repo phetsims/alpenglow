@@ -6,17 +6,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, BindingType, DualSnippet, DualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLContext, WGSLModuleDeclarations } from '../../imports.js';
+import { addLineNumbers, alpenglow, OldBindingType, OldDualSnippet, OldDualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLContext, WGSLModuleDeclarations } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
 
-export type ComputeShaderOptions = {
+export type OldComputeShaderOptions = {
   partialBeautify?: boolean;
   log?: boolean;
 };
 
-export type ComputeShaderDispatchOptions = {
+export type OldComputeShaderDispatchOptions = {
   // Mutually exclusive options
   timestampLogger?: TimestampLogger | null;
   timestampWrites?: GPUComputePassTimestampWrites | null;
@@ -24,7 +24,7 @@ export type ComputeShaderDispatchOptions = {
   logBuffer?: GPUBuffer | null;
 };
 
-export type ComputeShaderSourceOptions = Record<string, unknown>;
+export type OldComputeShaderSourceOptions = Record<string, unknown>;
 
 // Our logging buffer will be at @group(0) @binding(${LOG_BINDING})
 const LOG_BINDING = 64;
@@ -45,7 +45,7 @@ const DEFAULT_SOURCE_OPTIONS = {
   logBinding: LOG_BINDING
 };
 
-export default class ComputeShader {
+export default class OldComputeShader {
 
   public readonly wgsl: WGSLModuleDeclarations;
   public readonly module: GPUShaderModule;
@@ -61,13 +61,13 @@ export default class ComputeShader {
   public constructor(
     public readonly name: string,
     wgsl: string,
-    public readonly bindingTypes: BindingType[],
+    public readonly bindingTypes: OldBindingType[],
     public readonly device: GPUDevice,
     async: boolean,
-    providedOptions?: ComputeShaderOptions
+    providedOptions?: OldComputeShaderOptions
   ) {
 
-    const options = optionize3<ComputeShaderOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
+    const options = optionize3<OldComputeShaderOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     this.log = options.log;
 
@@ -95,7 +95,7 @@ export default class ComputeShader {
         ...this.bindingTypes.map( ( binding, i ) => binding.getBindGroupLayoutEntry( i ) ),
 
         // Add in an entry for our logging buffer (if we're logging)
-        ...( this.log ? [ BindingType.STORAGE_BUFFER.getBindGroupLayoutEntry( LOG_BINDING ) ] : [] )
+        ...( this.log ? [ OldBindingType.STORAGE_BUFFER.getBindGroupLayoutEntry( LOG_BINDING ) ] : [] )
       ]
     } );
 
@@ -134,7 +134,7 @@ export default class ComputeShader {
       layout: this.bindGroupLayout,
       entries: [
         ...this.bindingTypes.map( ( binding, i ) => binding.getBindGroupEntry( i, resources[ i ] ) ),
-        ...( ( this.log && logBuffer ) ? [ BindingType.STORAGE_BUFFER.getBindGroupEntry( LOG_BINDING, logBuffer ) ] : [] )
+        ...( ( this.log && logBuffer ) ? [ OldBindingType.STORAGE_BUFFER.getBindGroupEntry( LOG_BINDING, logBuffer ) ] : [] )
       ]
     } );
   }
@@ -145,10 +145,10 @@ export default class ComputeShader {
     dispatchX = 1,
     dispatchY = 1,
     dispatchZ = 1,
-    providedOptions?: ComputeShaderDispatchOptions
+    providedOptions?: OldComputeShaderDispatchOptions
   ): void {
 
-    const options = optionize3<ComputeShaderDispatchOptions>()( {}, DEFAULT_DISPATCH_OPTIONS, providedOptions );
+    const options = optionize3<OldComputeShaderDispatchOptions>()( {}, DEFAULT_DISPATCH_OPTIONS, providedOptions );
 
     const computePass = encoder.beginComputePass( this.getComputePassDescriptor(
       false, options.timestampLogger, options.timestampWrites
@@ -164,10 +164,10 @@ export default class ComputeShader {
     resources: ( GPUBuffer | GPUTextureView )[],
     indirectBuffer: GPUBuffer,
     indirectOffset: number,
-    providedOptions?: ComputeShaderDispatchOptions
+    providedOptions?: OldComputeShaderDispatchOptions
   ): void {
 
-    const options = optionize3<ComputeShaderDispatchOptions>()( {}, DEFAULT_DISPATCH_OPTIONS, providedOptions );
+    const options = optionize3<OldComputeShaderDispatchOptions>()( {}, DEFAULT_DISPATCH_OPTIONS, providedOptions );
 
     const computePass = encoder.beginComputePass( this.getComputePassDescriptor(
       true, options.timestampLogger, options.timestampWrites
@@ -206,19 +206,19 @@ export default class ComputeShader {
   public static fromSource(
     device: GPUDevice,
     name: string,
-    source: DualSnippetSource,
-    bindingTypes: BindingType[],
-    providedOptions: ComputeShaderSourceOptions = {}
-  ): ComputeShader {
-    const options = combineOptions<ComputeShaderSourceOptions>( {
+    source: OldDualSnippetSource,
+    bindingTypes: OldBindingType[],
+    providedOptions: OldComputeShaderSourceOptions = {}
+  ): OldComputeShader {
+    const options = combineOptions<OldComputeShaderSourceOptions>( {
       shaderName: name
     }, DEFAULT_SOURCE_OPTIONS, providedOptions );
 
     assert && assert( typeof options.log === 'boolean' );
     const log = options.log as boolean;
 
-    const snippet = DualSnippet.fromSource( source, options );
-    return new ComputeShader( name, snippet.toString(), bindingTypes, device, false, {
+    const snippet = OldDualSnippet.fromSource( source, options );
+    return new OldComputeShader( name, snippet.toString(), bindingTypes, device, false, {
       log: log
     } );
   }
@@ -226,19 +226,19 @@ export default class ComputeShader {
   public static async fromSourceAsync(
     device: GPUDevice,
     name: string,
-    source: DualSnippetSource,
-    bindingTypes: BindingType[],
-    providedOptions: ComputeShaderSourceOptions = {}
-  ): Promise<ComputeShader> {
-    const options = combineOptions<ComputeShaderSourceOptions>( {
+    source: OldDualSnippetSource,
+    bindingTypes: OldBindingType[],
+    providedOptions: OldComputeShaderSourceOptions = {}
+  ): Promise<OldComputeShader> {
+    const options = combineOptions<OldComputeShaderSourceOptions>( {
       shaderName: name
     }, DEFAULT_SOURCE_OPTIONS, providedOptions );
 
     assert && assert( typeof options.log === 'boolean' );
     const log = options.log as boolean;
 
-    const snippet = DualSnippet.fromSource( source, options );
-    return ComputeShader.fromWGSLAsync( device, name, snippet.toString(), bindingTypes, {
+    const snippet = OldDualSnippet.fromSource( source, options );
+    return OldComputeShader.fromWGSLAsync( device, name, snippet.toString(), bindingTypes, {
       log: log
     } );
   }
@@ -247,10 +247,10 @@ export default class ComputeShader {
     device: GPUDevice,
     name: string,
     context: WGSLContext,
-    bindingTypes: BindingType[],
-    providedOptions?: ComputeShaderOptions
-  ): Promise<ComputeShader> {
-    return ComputeShader.fromWGSLAsync( device, name, context.toString(), bindingTypes, combineOptions<ComputeShaderOptions>( {
+    bindingTypes: OldBindingType[],
+    providedOptions?: OldComputeShaderOptions
+  ): Promise<OldComputeShader> {
+    return OldComputeShader.fromWGSLAsync( device, name, context.toString(), bindingTypes, combineOptions<OldComputeShaderOptions>( {
       log: context.log
     }, providedOptions ) );
   }
@@ -259,15 +259,15 @@ export default class ComputeShader {
     device: GPUDevice,
     name: string,
     wgsl: WGSLModuleDeclarations,
-    bindingTypes: BindingType[],
-    providedOptions?: ComputeShaderOptions
-  ): Promise<ComputeShader> {
-    const options = combineOptions<ComputeShaderOptions>( {}, DEFAULT_OPTIONS, providedOptions );
+    bindingTypes: OldBindingType[],
+    providedOptions?: OldComputeShaderOptions
+  ): Promise<OldComputeShader> {
+    const options = combineOptions<OldComputeShaderOptions>( {}, DEFAULT_OPTIONS, providedOptions );
 
-    const computeShader = new ComputeShader( name, wgsl, bindingTypes, device, true, options );
+    const computeShader = new OldComputeShader( name, wgsl, bindingTypes, device, true, options );
     await computeShader.pipelinePromise;
     return computeShader;
   }
 }
 
-alpenglow.register( 'ComputeShader', ComputeShader );
+alpenglow.register( 'OldComputeShader', OldComputeShader );

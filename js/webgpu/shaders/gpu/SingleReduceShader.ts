@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, ExecutableShaderExternalOptions, Execution, mainReduceWGSL, mainReduceWGSLOptions, WGSLContext } from '../../../imports.js';
+import { alpenglow, OldBindingType, ByteEncoder, OldComputeShader, DeviceContext, ExecutableShader, ExecutableShaderExternalOptions, OldExecution, mainReduceWGSL, mainReduceWGSLOptions, WGSLContext } from '../../../imports.js';
 
 export type SingleReduceShaderOptions<T> = mainReduceWGSLOptions<T> & ExecutableShaderExternalOptions<T[], T[]>;
 
@@ -18,19 +18,19 @@ export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
     options: SingleReduceShaderOptions<T>
   ): Promise<SingleReduceShader<T>> {
 
-    const shader = await ComputeShader.fromContextAsync(
+    const shader = await OldComputeShader.fromContextAsync(
       deviceContext.device,
       name,
       new WGSLContext( name, !!options.log ).with( context => mainReduceWGSL( context, options ) ),
       [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
       ]
     );
 
     const type = options.binaryOp.type;
 
-    return new SingleReduceShader<T>( async ( execution: Execution, values: T[] ) => {
+    return new SingleReduceShader<T>( async ( execution: OldExecution, values: T[] ) => {
       const dispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
       const inputBuffer = execution.createByteEncoderBuffer( new ByteEncoder().encodeValues( values, type.encode ) );

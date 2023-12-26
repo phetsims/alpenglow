@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, AtomicOperation, AtomicReduceShader, AtomicType, BindingType, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_atomic_reduce_atomic } from '../../../imports.js';
+import { alpenglow, AtomicOperation, AtomicReduceShader, AtomicType, OldBindingType, ByteEncoder, OldComputeShader, DeviceContext, ExecutableShader, OldExecution, wgsl_main_atomic_reduce_atomic } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type FullAtomicReduceShaderOptions = {
@@ -43,10 +43,10 @@ export default class FullAtomicReduceShader extends ExecutableShader<number[], n
   ): Promise<FullAtomicReduceShader> {
     const options = optionize3<FullAtomicReduceShaderOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
-    const shader = await ComputeShader.fromSourceAsync(
+    const shader = await OldComputeShader.fromSourceAsync(
       deviceContext.device, name, wgsl_main_atomic_reduce_atomic, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
       ], {
         valueType: options.valueType,
         atomicOperation: options.atomicOperation,
@@ -59,7 +59,7 @@ export default class FullAtomicReduceShader extends ExecutableShader<number[], n
       }
     );
 
-    return new FullAtomicReduceShader( async ( execution: Execution, values: number[] ) => {
+    return new FullAtomicReduceShader( async ( execution: OldExecution, values: number[] ) => {
       const dispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
       const byteEncoder = new ByteEncoder().encodeValues( values, ( element, encoder ) => {

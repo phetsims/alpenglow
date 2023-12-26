@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, BitOrder, ByteEncoder, ComputeShader, ComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, Execution, getMaxRadixBitsPerInnerPass, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_add_1 } from '../../../imports.js';
+import { alpenglow, OldBindingType, BitOrder, ByteEncoder, OldComputeShader, OldComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, OldExecution, getMaxRadixBitsPerInnerPass, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_add_1 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import { getRadixBitVectorSize } from './TripleRadixSortShader.js';
 
@@ -80,8 +80,8 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
 
     const bitVectorSize = getRadixBitVectorSize( options.workgroupSize, options.grainSize, options.bitsPerInnerPass );
 
-    const histogramShaders: ComputeShader[] = [];
-    const scatterShaders: ComputeShader[] = [];
+    const histogramShaders: OldComputeShader[] = [];
+    const scatterShaders: OldComputeShader[] = [];
 
     for ( let i = 0; i < iterationCount; i++ ) {
       const radixSharedOptions: Record<string, unknown> = {
@@ -96,20 +96,20 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
         log: options.log
       };
 
-      histogramShaders.push( await ComputeShader.fromSourceAsync(
+      histogramShaders.push( await OldComputeShader.fromSourceAsync(
         deviceContext.device, `${name} histogram ${i}`, wgsl_main_radix_histogram, [
-          BindingType.READ_ONLY_STORAGE_BUFFER,
-          BindingType.STORAGE_BUFFER
-        ], combineOptions<ComputeShaderSourceOptions>( {
+          OldBindingType.READ_ONLY_STORAGE_BUFFER,
+          OldBindingType.STORAGE_BUFFER
+        ], combineOptions<OldComputeShaderSourceOptions>( {
 
         }, radixSharedOptions )
       ) );
-      scatterShaders.push( await ComputeShader.fromSourceAsync(
+      scatterShaders.push( await OldComputeShader.fromSourceAsync(
         deviceContext.device, `${name} scatter ${i}`, wgsl_main_radix_scatter, [
-          BindingType.READ_ONLY_STORAGE_BUFFER,
-          BindingType.READ_ONLY_STORAGE_BUFFER,
-          BindingType.STORAGE_BUFFER
-        ], combineOptions<ComputeShaderSourceOptions>( {
+          OldBindingType.READ_ONLY_STORAGE_BUFFER,
+          OldBindingType.READ_ONLY_STORAGE_BUFFER,
+          OldBindingType.STORAGE_BUFFER
+        ], combineOptions<OldComputeShaderSourceOptions>( {
           bitsPerInnerPass: options.bitsPerInnerPass,
           innerBitVectorSize: bitVectorSize,
           factorOutSubexpressions: options.factorOutSubexpressions,
@@ -134,11 +134,11 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     // TODO: yeah, get length statements/expressions handled.
     const scanLength = options.lengthExpression ? `( ( ( ( ${options.lengthExpression} ) + ${u32( options.workgroupSize * options.grainSize - 1 )} ) / ${u32( options.workgroupSize * options.grainSize )} ) << ${u32( options.bitsPerPass )} )` : null;
 
-    const reduceShader = await ComputeShader.fromSourceAsync(
+    const reduceShader = await OldComputeShader.fromSourceAsync(
       deviceContext.device, `${name} reduction`, wgsl_main_reduce, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         length: scanLength,
         convergent: true,
         convergentRemap: false, // NOTE: could consider trying to enable this, but probably not worth it
@@ -148,10 +148,10 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       }, reduceSharedOptions )
     );
 
-    const lowerScanShader = await ComputeShader.fromSourceAsync(
+    const lowerScanShader = await OldComputeShader.fromSourceAsync(
       deviceContext.device, `${name} lower scan`, wgsl_main_scan, [
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         // WGSL "ceil" equivalent
         length: scanLength ? `( ${scanLength} + ${u32( dataCount - 1 )} ) / ${u32( dataCount )}` : null,
         inputOrder: 'blocked',
@@ -162,12 +162,12 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
       }, reduceSharedOptions )
     );
 
-    const upperScanShader = await ComputeShader.fromSourceAsync(
+    const upperScanShader = await OldComputeShader.fromSourceAsync(
       deviceContext.device, `${name} upper scan`, wgsl_main_scan_add_1, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], combineOptions<ComputeShaderSourceOptions>( {
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
+      ], combineOptions<OldComputeShaderSourceOptions>( {
         length: scanLength,
         inputOrder: 'blocked',
         inputAccessOrder: 'striped',
@@ -180,7 +180,7 @@ export default class DoubleRadixSortShader<T> extends ExecutableShader<T[], T[]>
     // TODO: can we factor this out(!)
     const logShader = options.log ? await ConsoleLogger.getLogBarrierComputeShader( deviceContext ) : null;
 
-    return new DoubleRadixSortShader<T>( async ( execution: Execution, values: T[] ) => {
+    return new DoubleRadixSortShader<T>( async ( execution: OldExecution, values: T[] ) => {
       const upperDispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
       const histogramElementCount = upperDispatchSize * ( 2 ** options.bitsPerPass );

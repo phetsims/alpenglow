@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BindingType, ByteEncoder, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_main_scan } from '../../../imports.js';
+import { alpenglow, BinaryOp, OldBindingType, ByteEncoder, OldComputeShader, DeviceContext, ExecutableShader, OldExecution, wgsl_main_scan } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type SingleScanShaderOptions<T> = {
@@ -57,10 +57,10 @@ export default class SingleScanShader<T> extends ExecutableShader<T[], T[]> {
     const binaryOp = options.binaryOp;
     const type = binaryOp.type;
 
-    const shader = await ComputeShader.fromSourceAsync(
+    const shader = await OldComputeShader.fromSourceAsync(
       deviceContext.device, name, wgsl_main_scan, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
+        OldBindingType.READ_ONLY_STORAGE_BUFFER,
+        OldBindingType.STORAGE_BUFFER
       ], {
         valueType: type.valueType,
         identity: binaryOp.identityWGSL,
@@ -79,7 +79,7 @@ export default class SingleScanShader<T> extends ExecutableShader<T[], T[]> {
       }
     );
 
-    return new SingleScanShader<T>( async ( execution: Execution, values: T[] ) => {
+    return new SingleScanShader<T>( async ( execution: OldExecution, values: T[] ) => {
       const dispatchSize = Math.ceil( values.length / ( options.workgroupSize * options.grainSize ) );
 
       const inputBuffer = execution.createByteEncoderBuffer( new ByteEncoder().encodeValues( values, type.encode ) );
