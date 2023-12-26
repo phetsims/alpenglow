@@ -6,10 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionOptions, ExecutionSingleCallback, TypedBuffer, U32Type } from '../imports.js';
+import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionOptions, ExecutionSingleCallback, TypedBuffer, U32Type, Unpromised } from '../imports.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import optionize, { combineOptions } from '../../../phet-core/js/optionize.js';
-import { Unpromised } from './Execution.js';
 
 export type PreferredCanvasFormat = 'bgra8unorm' | 'rgba8unorm';
 

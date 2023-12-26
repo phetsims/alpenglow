@@ -8,9 +8,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroupLayout, Binding, DeviceContext } from '../imports.js';
-import { combineOptions } from '../../../phet-core/js/optionize.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow, BindGroupLayout, Binding, DeviceContext } from '../../imports.js';
+import { combineOptions } from '../../../../phet-core/js/optionize.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 // TODO: perhaps we can memoize layouts on the DeviceContext?
 export default class PipelineLayout {

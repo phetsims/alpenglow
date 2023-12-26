@@ -9,8 +9,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroupLayout, DeviceContext, TypedBuffer } from '../imports.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow, BindGroupLayout, DeviceContext, TypedBuffer } from '../../imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export default class BindGroup {
 

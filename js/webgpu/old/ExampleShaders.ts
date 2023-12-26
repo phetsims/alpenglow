@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_f32_reduce_simple } from '../imports.js';
+import { alpenglow, BindingType, ComputeShader, DeviceContext, ExecutableShader, Execution, wgsl_f32_reduce_simple } from '../../imports.js';
 
 export class ExampleSimpleF32Reduce extends ExecutableShader<number[], number> {
 

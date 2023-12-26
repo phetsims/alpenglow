@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../../imports.js';
 
 let globalSnippetIdCounter = 0;
 

@@ -8,8 +8,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, DeviceContext } from '../imports.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow, Binding, DeviceContext } from '../../imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 // TODO: perhaps we can memoize layouts on the DeviceContext?
 export default class BindGroupLayout {

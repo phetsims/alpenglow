@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, BindingType, DualSnippet, DualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
-import { combineOptions, optionize3 } from '../../../phet-core/js/optionize.js';
+import { addLineNumbers, alpenglow, BindingType, DualSnippet, DualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLContext, WGSLModuleDeclarations } from '../../imports.js';
+import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
 

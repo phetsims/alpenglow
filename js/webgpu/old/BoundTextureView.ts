@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BoundResource } from '../imports.js';
+import { alpenglow, Binding, BoundResource } from '../../imports.js';
 
 export default class BoundTextureView extends BoundResource<never> {
   public constructor(

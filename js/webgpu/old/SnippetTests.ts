@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BoundsClipping, DualSnippet, DualSnippetSource, LinearEdge, LineClipping, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_bounds_clip_edge, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gamut_map_linear_displayP3, wgsl_gamut_map_linear_sRGB, wgsl_gamut_map_premul_displayP3, wgsl_gamut_map_premul_sRGB, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_displayP3_to_linear_sRGB, wgsl_linear_sRGB_to_linear_displayP3, wgsl_linear_sRGB_to_oklab, wgsl_linear_sRGB_to_sRGB, wgsl_matthes_drakopoulos_clip, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_oklab_to_linear_sRGB, wgsl_premultiply, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64, wgsl_unpremultiply } from '../imports.js';
-import Vector3 from '../../../dot/js/Vector3.js';
-import Vector4 from '../../../dot/js/Vector4.js';
-import Vector2 from '../../../dot/js/Vector2.js';
+import { BoundsClipping, DualSnippet, DualSnippetSource, LinearEdge, LineClipping, RenderColor, wgsl_add_i64_i64, wgsl_add_u64_u64, wgsl_bounds_clip_edge, wgsl_cmp_i64_i64, wgsl_cmp_u64_u64, wgsl_div_u64_u64, wgsl_gamut_map_linear_displayP3, wgsl_gamut_map_linear_sRGB, wgsl_gamut_map_premul_displayP3, wgsl_gamut_map_premul_sRGB, wgsl_gcd_u64_u64, wgsl_i32_to_i64, wgsl_intersect_line_segments, wgsl_is_negative_i64, wgsl_left_shift_u64, wgsl_linear_displayP3_to_linear_sRGB, wgsl_linear_sRGB_to_linear_displayP3, wgsl_linear_sRGB_to_oklab, wgsl_linear_sRGB_to_sRGB, wgsl_matthes_drakopoulos_clip, wgsl_mul_i64_i64, wgsl_mul_u32_u32_to_u64, wgsl_mul_u64_u64, wgsl_negate_i64, wgsl_oklab_to_linear_sRGB, wgsl_premultiply, wgsl_reduce_q128, wgsl_right_shift_u64, wgsl_sRGB_to_linear_sRGB, wgsl_subtract_i64_i64, wgsl_unpremultiply } from '../../imports.js';
+import Vector3 from '../../../../dot/js/Vector3.js';
+import Vector4 from '../../../../dot/js/Vector4.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
 
 QUnit.module( 'Snippet' );
 

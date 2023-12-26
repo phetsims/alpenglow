@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, PolygonalBoolean, PolygonalFace, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, Rasterize, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../imports.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import Vector4 from '../../../dot/js/Vector4.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import { optionize3 } from '../../../phet-core/js/optionize.js';
+import { alpenglow, BindingType, BlitShader, BufferLogger, ByteEncoder, ComputeShader, DeviceContext, PolygonalBoolean, PolygonalFace, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, Rasterize, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../../imports.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
+import Vector4 from '../../../../dot/js/Vector4.js';
+import Matrix3 from '../../../../dot/js/Matrix3.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import { optionize3 } from '../../../../phet-core/js/optionize.js';
 
 const WORKGROUP_SIZE = 128;
 const BOUNDS_REDUCE = false;

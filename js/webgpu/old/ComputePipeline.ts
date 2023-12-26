@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, DeviceContext, mainLogBarrier, partialWGSLBeautify, PipelineLayout, stripWGSLComments, WGSLContext, WGSLModuleDeclarations } from '../imports.js';
+import { addLineNumbers, alpenglow, DeviceContext, mainLogBarrier, partialWGSLBeautify, PipelineLayout, stripWGSLComments, WGSLContext, WGSLModuleDeclarations } from '../../imports.js';
 
 export default class ComputePipeline {
   // This will be available by the time it can be accessed publicly

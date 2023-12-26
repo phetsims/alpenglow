@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BoundResource, TypedBuffer } from '../imports.js';
+import { alpenglow, Binding, BoundResource, TypedBuffer } from '../../imports.js';
 
 export default class BoundBuffer<T = unknown> extends BoundResource<T> {
   public constructor(

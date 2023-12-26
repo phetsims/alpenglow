@@ -8,9 +8,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ByteEncoder, ComputeShader, ComputeShaderDispatchOptions, ConsoleLogger, DeviceContext, TimestampLogger, TimestampLoggerResult } from '../imports.js';
-import { optionize3 } from '../../../phet-core/js/optionize.js';
-import Utils from '../../../dot/js/Utils.js';
+import { alpenglow, BufferLogger, ByteEncoder, ComputeShader, ComputeShaderDispatchOptions, ConsoleLogger, DeviceContext, TimestampLogger, TimestampLoggerResult } from '../../imports.js';
+import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import Utils from '../../../../dot/js/Utils.js';
 
 export type ExecutionAnyCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => T;
 export type ExecutionSingleCallback<T> = ( encoder: GPUCommandEncoder, execution: Execution ) => Promise<T>;

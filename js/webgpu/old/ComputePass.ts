@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroup, ComputePipeline } from '../imports.js';
+import { alpenglow, BindGroup, ComputePipeline } from '../../imports.js';
 
 export default class ComputePass {
 

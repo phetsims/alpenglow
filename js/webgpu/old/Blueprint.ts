@@ -6,11 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroup, BindGroupLayout, BindingLocation, BindingType, ComputePipeline, ConcreteType, DeviceContext, getArrayType, mainReduceWGSL, PipelineLayout, SingleReduceShaderOptions, TypedBuffer, u32, WGSLContext } from '../imports.js';
-import WithRequired from '../../../phet-core/js/types/WithRequired.js';
-import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { combineOptions } from '../../../phet-core/js/optionize.js';
+import { alpenglow, BindGroup, BindGroupLayout, BindingLocation, BindingType, ComputePipeline, ConcreteType, DeviceContext, getArrayType, mainReduceWGSL, PipelineLayout, SingleReduceShaderOptions, TypedBuffer, u32, WGSLContext } from '../../imports.js';
+import WithRequired from '../../../../phet-core/js/types/WithRequired.js';
+import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import { combineOptions } from '../../../../phet-core/js/optionize.js';
 
 export type BufferSlotMapType = Record<string, BufferSlot>;
 export type TypedBindingTypeMapType = Record<string, TypedBindingType>;
