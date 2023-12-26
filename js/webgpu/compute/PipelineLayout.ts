@@ -33,6 +33,7 @@ export default class PipelineLayout {
     return binding!;
   }
 
+  // TODO: re-evaluate whether this is needed
   public getConcreteBindingFromSlot<T>( slot: ConcreteBufferSlot<T> ): BufferBinding<T> {
     // TODO: can we avoid the cast here? Perhaps a check? Should be consistent with how we're using it.
     return this.getBindingFromSlot( slot ) as BufferBinding<T>;

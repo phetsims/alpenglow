@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BindingLocation, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
+import { alpenglow, Binding, BindingLocation, ConcreteBufferSlot, getArrayType, PipelineLayout, ResourceSlot, U32Type, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
 
 export default class WGSLContext {
   private readonly declarations: WGSLInternalDeclaration[] = [];
@@ -15,6 +15,7 @@ export default class WGSLContext {
 
   public constructor(
     public readonly shaderName: string,
+    public readonly pipelineLayout: PipelineLayout,
     public readonly log: boolean
   ) {}
 
@@ -23,6 +24,10 @@ export default class WGSLContext {
     return new BindingLocation( 0, 64 );
   }
 
+  // TODO: oh no, we need to put the atomic in here(!)
+  // TODO: Or actually, just an ability to put structs of arbitrary types in ConcreteTypes
+  public static readonly LOG_BUFFER_SLOT = new ConcreteBufferSlot( getArrayType( U32Type, 2 << 22, 0 ) );
+
   public add(
     name: string,
     declarations: WGSLModuleDeclarations
@@ -30,6 +35,10 @@ export default class WGSLContext {
     if ( !this.declarations.some( declaration => declaration.name === name ) ) {
       this.declarations.push( new WGSLInternalDeclaration( name, declarations ) );
     }
+  }
+
+  public addSlot( name: WGSLVariableName, slot: ResourceSlot ): void {
+    this.addBinding( name, this.pipelineLayout.getBindingFromSlot( slot ) );
   }
 
   public addBinding( name: WGSLVariableName, binding: Binding ): void {

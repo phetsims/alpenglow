@@ -55,7 +55,7 @@ export default class ComputePipeline {
       compute: {
         module: deviceContext.device.createShaderModule( {
           label: 'logBarrier',
-          code: ComputePipeline.getLogBarrierWGSL()
+          code: ComputePipeline.getLogBarrierWGSL( pipelineLayout )
         } ),
         entryPoint: 'main'
       }
@@ -81,8 +81,10 @@ export default class ComputePipeline {
     }
   }
 
-  public static getLogBarrierWGSL(): WGSLModuleDeclarations {
-    const logBarrierWgslContext = new WGSLContext( 'log barrier', true ).with( context => mainLogBarrier( context ) );
+  public static getLogBarrierWGSL(
+    pipelineLayout: PipelineLayout
+  ): WGSLModuleDeclarations {
+    const logBarrierWgslContext = new WGSLContext( 'log barrier', pipelineLayout, true ).with( context => mainLogBarrier( context ) );
     return partialWGSLBeautify( stripWGSLComments( logBarrierWgslContext.toString() ) );
   }
 
@@ -93,7 +95,7 @@ export default class ComputePipeline {
     pipelineLayout: PipelineLayout,
     log: boolean
   ): ComputePipeline {
-    const wgslContext = new WGSLContext( name, log ).with( toWGSL );
+    const wgslContext = new WGSLContext( name, pipelineLayout, log ).with( toWGSL );
 
     const wgsl = partialWGSLBeautify( stripWGSLComments( wgslContext.toString(), false ) );
 
@@ -107,7 +109,7 @@ export default class ComputePipeline {
     pipelineLayout: PipelineLayout,
     log: boolean
   ): Promise<ComputePipeline> {
-    const wgslContext = new WGSLContext( name, log ).with( toWGSL );
+    const wgslContext = new WGSLContext( name, pipelineLayout, log ).with( toWGSL );
 
     const wgsl = partialWGSLBeautify( stripWGSLComments( wgslContext.toString(), false ) );
 

@@ -2103,12 +2103,16 @@
       <h4 id="WGSL-linking">Linking</h4>
 
       <p class="TODO">
+        Logging broken, need to get a ConcreteType that is provided a WGSLContext, so we can stuff structs there. Use
+        WGSLContext.LOG_BUFFER_SLOT once we have it.
+      </p>
+
+      <p class="TODO">
         Get rid of BufferSlot (replace with ConcreteBufferSlot things, we need the typing in WGSLContext). Verify BufferSlot usages?
       </p>
 
       <p class="TODO">
-        Logging broken - put Usages on WGSLContext (keep global BlufferSlot). Just "toss" our other things that use WGSLContext?
-        Break out data sources. Explicitly model data sources (input/output). Fully generate bindings? (Usage has concrete binding, with type declaration).
+        Break out data sources. Explicitly model data sources (input/output).
       </p>
 
       <p class="TODO">

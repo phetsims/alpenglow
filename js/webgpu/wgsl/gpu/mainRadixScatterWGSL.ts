@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferBinding, ceilDivideConstantDivisorWGSL, commentWGSL, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, RakedSizable, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BitOrder, ceilDivideConstantDivisorWGSL, commentWGSL, ConcreteBufferSlot, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, RakedSizable, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -25,9 +25,9 @@ export type mainRadixScatterWGSLOptions<T> = {
   loadMultipleOptions?: StrictOmit<loadMultipleWGSLOptions<T>, 'loadExpression' | 'loadStatements' | 'storeStatements' | 'type' | 'workgroupSize' | 'grainSize' | 'lengthExpression' | 'outOfRangeValue' | 'inputOrder' | 'inputAccessOrder'>;
 
   bindings: {
-    input: BufferBinding<T[]>;
-    histogramOffsets: BufferBinding<T[]>;
-    output: BufferBinding<T[]>;
+    input: ConcreteBufferSlot<T[]>;
+    histogramOffsets: ConcreteBufferSlot<T[]>;
+    output: ConcreteBufferSlot<T[]>;
   };
 } & RakedSizable;
 // TODO: options pass-through
@@ -59,9 +59,9 @@ const mainRadixScatterWGSL = <T>(
   const getBits = ( value: WGSLExpressionT ) => order.getBitsWGSL( value, pass * bitsPerPass, bitsPerPass );
 
   // TODO: we should have type assertions to make sure these match?
-  context.addBinding( 'input', bindings.input );
-  context.addBinding( 'histogramOffsets', bindings.histogramOffsets ); // make sure this is u32?
-  context.addBinding( 'output', bindings.output );
+  context.addSlot( 'input', bindings.input );
+  context.addSlot( 'histogramOffsets', bindings.histogramOffsets ); // make sure this is u32?
+  context.addSlot( 'output', bindings.output );
 
   // TODO: generate more of the bindings
   return `

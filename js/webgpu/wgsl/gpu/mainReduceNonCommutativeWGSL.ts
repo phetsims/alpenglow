@@ -7,14 +7,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBinding, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, ConcreteBufferSlot, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceNonCommutativeWGSLOptions<T> = {
   bindings: {
-    input: BufferBinding<T[]>;
-    output: BufferBinding<T[]>;
+    input: ConcreteBufferSlot<T[]>;
+    output: ConcreteBufferSlot<T[]>;
   };
 
   // TODO: length handling?!?
@@ -45,8 +45,8 @@ const mainReduceNonCommutativeWGSL = <T>(
   const binaryOp = options.binaryOp;
   const stripeOutput = options.stripeOutput;
 
-  context.addBinding( 'input', options.bindings.input );
-  context.addBinding( 'output', options.bindings.output );
+  context.addSlot( 'input', options.bindings.input );
+  context.addSlot( 'output', options.bindings.output );
 
   // TODO: generate storage binding and variable fully from Binding?
   return `

@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferBinding, loadReducedWGSL, loadReducedWGSLOptions, RakedSizable, reduceWGSL, reduceWGSLOptions, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BinaryOp, ConcreteBufferSlot, loadReducedWGSL, loadReducedWGSLOptions, RakedSizable, reduceWGSL, reduceWGSLOptions, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -15,8 +15,8 @@ export type mainReduceAtomicWGSLOptions<T> = {
   binaryOp: BinaryOp<T>;
 
   bindings: {
-    input: BufferBinding<T[]>;
-    output: BufferBinding<T>;
+    input: ConcreteBufferSlot<T[]>;
+    output: ConcreteBufferSlot<T>;
   };
 
   // e.g. length / inputOrder / inputAccessOrder / sequentialReduceStyle
@@ -49,8 +49,8 @@ const mainReduceAtomicWGSL = <T>(
 
   assert && assert( binaryOp.atomicName );
 
-  context.addBinding( 'input', options.bindings.input );
-  context.addBinding( 'output', options.bindings.output ); // TODO: assert that this is an atomic(!)
+  context.addSlot( 'input', options.bindings.input );
+  context.addSlot( 'output', options.bindings.output ); // TODO: assert that this is an atomic(!)
 
   // TODO: generate storage binding and variable fully from Binding?
   return `

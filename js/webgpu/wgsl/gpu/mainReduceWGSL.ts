@@ -4,14 +4,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferBinding, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BinaryOp, ConcreteBufferSlot, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceWGSLOptions<T> = {
   bindings: {
-    input: BufferBinding<T[]>;
-    output: BufferBinding<T[]>;
+    input: ConcreteBufferSlot<T[]>;
+    output: ConcreteBufferSlot<T[]>;
   };
 
   // TODO: should we really have lengthExpression in loadReducedOptions? Also inputOrder options?!?
@@ -52,8 +52,8 @@ const mainReduceWGSL = <T>(
   const stripeOutput = options.stripeOutput;
   const convergentRemap = options.convergentRemap;
 
-  context.addBinding( 'input', options.bindings.input );
-  context.addBinding( 'output', options.bindings.output );
+  context.addSlot( 'input', options.bindings.input );
+  context.addSlot( 'output', options.bindings.output );
 
   // TODO: generate storage binding and variable fully from Binding?
   return `

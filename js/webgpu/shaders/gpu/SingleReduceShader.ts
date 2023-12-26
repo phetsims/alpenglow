@@ -6,10 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, OldBindingType, ByteEncoder, OldComputeShader, DeviceContext, ExecutableShader, ExecutableShaderExternalOptions, OldExecution, mainReduceWGSL, mainReduceWGSLOptions, WGSLContext } from '../../../imports.js';
+import { alpenglow, OldBindingType, ByteEncoder, OldComputeShader, DeviceContext, ExecutableShader, ExecutableShaderExternalOptions, OldExecution, mainReduceWGSL, mainReduceWGSLOptions, WGSLContext, PipelineLayout } from '../../../imports.js';
 
 export type SingleReduceShaderOptions<T> = mainReduceWGSLOptions<T> & ExecutableShaderExternalOptions<T[], T[]>;
 
+// @deprecated
 export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
 
   public static async create<T>(
@@ -21,7 +22,8 @@ export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
     const shader = await OldComputeShader.fromContextAsync(
       deviceContext.device,
       name,
-      new WGSLContext( name, !!options.log ).with( context => mainReduceWGSL( context, options ) ),
+      // TODO: eeek! (also deprecate)
+      new WGSLContext( name, null as unknown as PipelineLayout, !!options.log ).with( context => mainReduceWGSL( context, options ) ),
       [
         OldBindingType.READ_ONLY_STORAGE_BUFFER,
         OldBindingType.STORAGE_BUFFER

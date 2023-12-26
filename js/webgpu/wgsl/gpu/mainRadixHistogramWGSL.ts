@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferBinding, radixHistogramWGSL, WGSLContext, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BitOrder, ConcreteBufferSlot, radixHistogramWGSL, WGSLContext, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
 
 export type mainRadixHistogramWGSLOptions<T> = {
   workgroupSize: number;
@@ -18,8 +18,8 @@ export type mainRadixHistogramWGSLOptions<T> = {
   lengthExpression: WGSLExpressionU32; // TODO: support optional
 
   bindings: {
-    input: BufferBinding<T[]>;
-    output: BufferBinding<T[]>;
+    input: ConcreteBufferSlot<T[]>;
+    output: ConcreteBufferSlot<T[]>;
   };
 };
 
@@ -37,8 +37,8 @@ const mainRadixHistogramWGSL = <T>(
   const lengthExpression = options.lengthExpression;
   const bindings = options.bindings;
 
-  context.addBinding( 'input', bindings.input );
-  context.addBinding( 'output', bindings.output ); // TODO: make sure this is u32
+  context.addSlot( 'input', bindings.input );
+  context.addSlot( 'output', bindings.output ); // TODO: make sure this is u32
 
   return `
     var<workgroup> histogram_scratch: array<atomic<u32>, ${1 << bitsPerPass}>;

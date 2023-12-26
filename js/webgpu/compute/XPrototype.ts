@@ -63,8 +63,8 @@ export default class XPrototype {
               lengthExpression: u32( inputSize )
             },
             bindings: {
-              input: pipelineLayout.getConcreteBindingFromSlot( inputSlot ),
-              output: pipelineLayout.getConcreteBindingFromSlot( middleSlot )
+              input: inputSlot,
+              output: middleSlot
             }
           } ),
           pipelineLayout,
@@ -91,8 +91,8 @@ export default class XPrototype {
               lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
             },
             bindings: {
-              input: pipelineLayout.getConcreteBindingFromSlot( middleSlot ),
-              output: pipelineLayout.getConcreteBindingFromSlot( outputSlot )
+              input: middleSlot,
+              output: outputSlot
             }
           } ),
           pipelineLayout,

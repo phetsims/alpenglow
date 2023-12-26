@@ -17,7 +17,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBinding, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, ConcreteBufferSlot, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 // TODO: use multiple named types to simplify this boolean "mess"
@@ -31,34 +31,34 @@ type SelfOptions<T> = {
 } & RakedSizable & ( {
   inPlace?: false;
   bindings: {
-    input: BufferBinding<T[]>;
-    output: BufferBinding<T[]>;
+    input: ConcreteBufferSlot<T[]>;
+    output: ConcreteBufferSlot<T[]>;
   };
 } | {
   inPlace: true;
   bindings: {
-    data: BufferBinding<T[]>;
+    data: ConcreteBufferSlot<T[]>;
   };
 } ) & ( {
   storeReduction?: false;
 } | {
   storeReduction: true;
   bindings: {
-    reduction: BufferBinding<T[]>;
+    reduction: ConcreteBufferSlot<T[]>;
   };
 } ) & ( ( {
   addScannedReduction?: false;
 } & Pick<scanComprehensiveWGSLOptions<T>, 'getAddedValue'> ) | ( {
   addScannedReduction: true;
   bindings: {
-    scannedReduction: BufferBinding<T[]>;
+    scannedReduction: ConcreteBufferSlot<T[]>;
   };
 } & ( {
   addScannedDoubleReduction?: false;
 } | {
   addScannedDoubleReduction: true;
   bindings: {
-    scannedDoubleReduction: BufferBinding<T[]>;
+    scannedDoubleReduction: ConcreteBufferSlot<T[]>;
   };
 } ) ) );
 
@@ -87,20 +87,20 @@ const mainScanWGSL = <T>(
   const grainSize = options.grainSize;
 
   if ( options.inPlace ) {
-    context.addBinding( 'data', options.bindings.data );
+    context.addSlot( 'data', options.bindings.data );
   }
   else {
-    context.addBinding( 'input', options.bindings.input );
-    context.addBinding( 'output', options.bindings.output );
+    context.addSlot( 'input', options.bindings.input );
+    context.addSlot( 'output', options.bindings.output );
   }
   if ( options.storeReduction ) {
-    context.addBinding( 'reduction', options.bindings.reduction );
+    context.addSlot( 'reduction', options.bindings.reduction );
   }
   if ( options.addScannedReduction ) {
-    context.addBinding( 'scanned_reduction', options.bindings.scannedReduction );
+    context.addSlot( 'scanned_reduction', options.bindings.scannedReduction );
 
     if ( options.addScannedDoubleReduction ) {
-      context.addBinding( 'scanned_double_reduction', options.bindings.scannedDoubleReduction );
+      context.addSlot( 'scanned_double_reduction', options.bindings.scannedDoubleReduction );
     }
   }
 
