@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BindingDescriptor, BindingLocation, BufferBinding, ConcreteBufferSlot, DeviceContext, ResourceSlot } from '../../imports.js';
+import { alpenglow, Binding, BindingDescriptor, BindingLocation, BufferBinding, BufferSlot, DeviceContext, ResourceSlot } from '../../imports.js';
 
 export default class BindGroupLayout {
   public readonly layout: GPUBindGroupLayout;
@@ -26,7 +26,7 @@ export default class BindGroupLayout {
     this.bindings = bindingDescriptors.map( bindingDescriptor => {
       const location = new BindingLocation( groupIndex, bindingDescriptor.bindingIndex );
 
-      if ( bindingDescriptor.slot instanceof ConcreteBufferSlot ) {
+      if ( bindingDescriptor.slot instanceof BufferSlot ) {
         return new BufferBinding(
           location, bindingDescriptor.bindingType, bindingDescriptor.slot
         );
@@ -41,10 +41,6 @@ export default class BindGroupLayout {
 
   public getBindingFromSlot( slot: ResourceSlot ): Binding | null {
     return this.bindings.find( binding => binding.slot === slot ) || null;
-  }
-
-  public getConcreteBindingFromSlot<T>( slot: ConcreteBufferSlot<T> ): Binding | null {
-    return this.getBindingFromSlot( slot );
   }
 }
 alpenglow.register( 'BindGroupLayout', BindGroupLayout );

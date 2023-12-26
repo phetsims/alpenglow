@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, BufferUsage, ComputePipeline, ConcreteBufferSlot, DeviceContext, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add } from '../../imports.js';
+import { alpenglow, BufferBindingType, BufferSlot, BufferUsage, ComputePipeline, DeviceContext, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add } from '../../imports.js';
 
 /*
 We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer
@@ -38,9 +38,9 @@ export default class XPrototype {
     const middleType = getArrayType( binaryOp.type, Math.ceil( maxItemCount / ( workgroupSize * grainSize ) ), binaryOp.identity );
     const outputType = getArrayType( binaryOp.type, 1 ); // TODO
 
-    const inputSlot = new ConcreteBufferSlot( inputType );
-    const middleSlot = new ConcreteBufferSlot( middleType );
-    const outputSlot = new ConcreteBufferSlot( outputType );
+    const inputSlot = new BufferSlot( inputType );
+    const middleSlot = new BufferSlot( middleType );
+    const outputSlot = new BufferSlot( outputType );
 
     // TODO: inspect all usages of everything, look for simplification opportunities
 

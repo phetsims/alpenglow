@@ -4,14 +4,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, ConcreteBufferSlot, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferSlot, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceWGSLOptions<T> = {
   bindings: {
-    input: ConcreteBufferSlot<T[]>;
-    output: ConcreteBufferSlot<T[]>;
+    input: BufferSlot<T[]>;
+    output: BufferSlot<T[]>;
   };
 
   // TODO: should we really have lengthExpression in loadReducedOptions? Also inputOrder options?!?

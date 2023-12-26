@@ -6,16 +6,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferSlotSlice, ResourceSlot } from '../../imports.js';
+import { alpenglow, BufferSlotSlice, ConcreteType, ResourceSlot } from '../../imports.js';
 
-// TODO: Is BufferSlot worth the separation? Just have ConcreteBufferSlot?  YEAH just move BufferSlot things into here, we need the types in the WGSLContext
-export default class BufferSlot extends ResourceSlot {
+export default class BufferSlot<T = unknown> extends ResourceSlot {
   public readonly bufferSlotSlices: BufferSlotSlice[] = [];
+  public readonly size: number;
 
   public constructor(
-    public readonly size: number // bytes
+    public readonly concreteType: ConcreteType<T>
   ) {
     super();
+
+    this.size = concreteType.bytesPerElement;
   }
 
   public hasChildSlot( slot: BufferSlot ): boolean {

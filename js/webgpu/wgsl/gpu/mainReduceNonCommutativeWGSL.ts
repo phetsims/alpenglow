@@ -7,14 +7,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, ConcreteBufferSlot, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferSlot, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceNonCommutativeWGSLOptions<T> = {
   bindings: {
-    input: ConcreteBufferSlot<T[]>;
-    output: ConcreteBufferSlot<T[]>;
+    input: BufferSlot<T[]>;
+    output: BufferSlot<T[]>;
   };
 
   // TODO: length handling?!?

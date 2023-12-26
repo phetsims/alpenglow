@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingLocation, BindingType, BufferBindingType, ConcreteBufferSlot, ResourceSlot, StorageTextureBindingType, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
+import { alpenglow, BindingLocation, BindingType, BufferBindingType, BufferSlot, ResourceSlot, StorageTextureBindingType, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
 
 export default class Binding {
   public constructor(
@@ -15,19 +15,9 @@ export default class Binding {
     public readonly slot: ResourceSlot
   ) {}
 
-  // @deprecated - from the old version TODO remove
-  public getStorageAccess(): 'read' | 'read_write' {
-    if ( this.bindingType instanceof BufferBindingType ) {
-      return this.bindingType.type === 'read-only-storage' ? 'read' : 'read_write';
-    }
-    else {
-      throw new Error( 'bad binding type' );
-    }
-  }
-
   public getWGSLDeclaration( name: WGSLVariableName ): WGSLModuleDeclarations {
     // TODO: typing improvements here? This isn't the best code
-    if ( this.bindingType instanceof BufferBindingType && this.slot instanceof ConcreteBufferSlot ) {
+    if ( this.bindingType instanceof BufferBindingType && this.slot instanceof BufferSlot ) {
       const varType = this.bindingType.type === 'uniform' ? 'uniform' : `storage, ${this.bindingType.type === 'read-only-storage' ? 'read' : 'read_write'}`;
       return `
         ${this.location.getWGSLAnnotation()}

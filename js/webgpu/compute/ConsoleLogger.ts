@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, OldComputeShader, ConcreteType, DeviceContext, wgsl_main_log_barrier } from '../../imports.js';
+import { alpenglow, ByteEncoder, ConcreteType, DeviceContext, OldComputeShader, wgsl_main_log_barrier } from '../../imports.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 

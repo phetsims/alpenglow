@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, ConcreteBufferSlot, loadReducedWGSL, loadReducedWGSLOptions, RakedSizable, reduceWGSL, reduceWGSLOptions, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferSlot, loadReducedWGSL, loadReducedWGSLOptions, RakedSizable, reduceWGSL, reduceWGSLOptions, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -15,8 +15,8 @@ export type mainReduceAtomicWGSLOptions<T> = {
   binaryOp: BinaryOp<T>;
 
   bindings: {
-    input: ConcreteBufferSlot<T[]>;
-    output: ConcreteBufferSlot<T>;
+    input: BufferSlot<T[]>;
+    output: BufferSlot<T>;
   };
 
   // e.g. length / inputOrder / inputAccessOrder / sequentialReduceStyle

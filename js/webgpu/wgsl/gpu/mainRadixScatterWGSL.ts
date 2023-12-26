@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, ceilDivideConstantDivisorWGSL, commentWGSL, ConcreteBufferSlot, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, RakedSizable, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BitOrder, ceilDivideConstantDivisorWGSL, commentWGSL, BufferSlot, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, RakedSizable, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -25,9 +25,9 @@ export type mainRadixScatterWGSLOptions<T> = {
   loadMultipleOptions?: StrictOmit<loadMultipleWGSLOptions<T>, 'loadExpression' | 'loadStatements' | 'storeStatements' | 'type' | 'workgroupSize' | 'grainSize' | 'lengthExpression' | 'outOfRangeValue' | 'inputOrder' | 'inputAccessOrder'>;
 
   bindings: {
-    input: ConcreteBufferSlot<T[]>;
-    histogramOffsets: ConcreteBufferSlot<T[]>;
-    output: ConcreteBufferSlot<T[]>;
+    input: BufferSlot<T[]>;
+    histogramOffsets: BufferSlot<T[]>;
+    output: BufferSlot<T[]>;
   };
 } & RakedSizable;
 // TODO: options pass-through

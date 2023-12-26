@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BindingLocation, ConcreteBufferSlot, getArrayType, PipelineLayout, ResourceSlot, U32Type, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
+import { alpenglow, Binding, BindingLocation, BufferSlot, getArrayType, PipelineLayout, ResourceSlot, U32Type, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
 
 export default class WGSLContext {
   private readonly declarations: WGSLInternalDeclaration[] = [];
@@ -26,7 +26,7 @@ export default class WGSLContext {
 
   // TODO: oh no, we need to put the atomic in here(!)
   // TODO: Or actually, just an ability to put structs of arbitrary types in ConcreteTypes
-  public static readonly LOG_BUFFER_SLOT = new ConcreteBufferSlot( getArrayType( U32Type, 2 << 22, 0 ) );
+  public static readonly LOG_BUFFER_SLOT = new BufferSlot( getArrayType( U32Type, 2 << 22, 0 ) );
 
   public add(
     name: string,

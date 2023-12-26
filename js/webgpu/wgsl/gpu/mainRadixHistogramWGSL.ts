@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, ConcreteBufferSlot, radixHistogramWGSL, WGSLContext, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BitOrder, BufferSlot, radixHistogramWGSL, WGSLContext, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
 
 export type mainRadixHistogramWGSLOptions<T> = {
   workgroupSize: number;
@@ -18,8 +18,8 @@ export type mainRadixHistogramWGSLOptions<T> = {
   lengthExpression: WGSLExpressionU32; // TODO: support optional
 
   bindings: {
-    input: ConcreteBufferSlot<T[]>;
-    output: ConcreteBufferSlot<T[]>;
+    input: BufferSlot<T[]>;
+    output: BufferSlot<T[]>;
   };
 };
 

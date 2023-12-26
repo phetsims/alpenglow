@@ -483,7 +483,6 @@ export { default as ResourceSlot } from './webgpu/compute/ResourceSlot.js';
 export { default as BufferSlotSlice } from './webgpu/compute/BufferSlotSlice.js';
 export { default as BufferSlot } from './webgpu/compute/BufferSlot.js';
 export { default as TextureViewSlot } from './webgpu/compute/TextureViewSlot.js';
-export { default as ConcreteBufferSlot } from './webgpu/compute/ConcreteBufferSlot.js';
 export { default as Resource } from './webgpu/compute/Resource.js';
 export { default as BufferResource } from './webgpu/compute/BufferResource.js';
 export { default as TextureViewResource } from './webgpu/compute/TextureViewResource.js';

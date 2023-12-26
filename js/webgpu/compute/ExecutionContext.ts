@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroup, BindGroupLayout, BufferSlot, ComputePass, ComputePipeline, ConcreteBufferSlot, Executor, PipelineBlueprint, Resource, ResourceSlot, TypedBuffer } from '../../imports.js';
+import { alpenglow, BindGroup, BindGroupLayout, BufferSlot, ComputePass, ComputePipeline, Executor, PipelineBlueprint, Resource, ResourceSlot, TypedBuffer } from '../../imports.js';
 
 export default class ExecutionContext {
 
@@ -58,16 +58,16 @@ export default class ExecutionContext {
     }
   }
 
-  public setTypedBufferValue<T>( concreteBufferSlot: ConcreteBufferSlot<T>, value: T ): void {
+  public setTypedBufferValue<T>( bufferSlot: BufferSlot<T>, value: T ): void {
     this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
 
-    this.executor.setTypedBufferValue( this.getTypedBuffer( concreteBufferSlot ), value );
+    this.executor.setTypedBufferValue( this.getTypedBuffer( bufferSlot ), value );
   }
 
-  public async getTypedBufferValue<T>( concreteBufferSlot: ConcreteBufferSlot<T> ): Promise<T> {
+  public async getTypedBufferValue<T>( bufferSlot: BufferSlot<T> ): Promise<T> {
     this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
 
-    return this.executor.getTypedBufferValue( this.getTypedBuffer( concreteBufferSlot ) );
+    return this.executor.getTypedBufferValue( this.getTypedBuffer( bufferSlot ) );
   }
 
   public async arrayBuffer(
@@ -132,17 +132,17 @@ export default class ExecutionContext {
     }
   }
 
-  private getBuffer( bufferSlot: BufferSlot ): GPUBuffer {
+  private getBuffer<T>( bufferSlot: BufferSlot<T> ): GPUBuffer {
     const resource = this.resourceMap.get( bufferSlot )!;
     assert && assert( resource, 'Missing resource' );
 
     return resource.resource as GPUBuffer;
   }
 
-  private getTypedBuffer<T>( concreteBufferSlot: ConcreteBufferSlot<T> ): TypedBuffer<T> {
-    const buffer = this.getBuffer( concreteBufferSlot );
+  private getTypedBuffer<T>( bufferSlot: BufferSlot<T> ): TypedBuffer<T> {
+    const buffer = this.getBuffer( bufferSlot );
 
-    return new TypedBuffer<T>( buffer, concreteBufferSlot.concreteType );
+    return new TypedBuffer<T>( buffer, bufferSlot.concreteType );
   }
 
   private getBindGroups( computePipeline: ComputePipeline ): BindGroup[] {
