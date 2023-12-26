@@ -13,11 +13,11 @@
 
 export { default as alpenglow } from './alpenglow.js';
 
-export { default as u32 } from './webgpu/u32.js';
-export { default as u32Hex } from './webgpu/u32Hex.js';
-export { default as i32 } from './webgpu/i32.js';
-export { default as i32Hex } from './webgpu/i32Hex.js';
-export { default as f32 } from './webgpu/f32.js';
+export { default as u32 } from './webgpu/compute/u32.js';
+export { default as u32Hex } from './webgpu/compute/u32Hex.js';
+export { default as i32 } from './webgpu/compute/i32.js';
+export { default as i32Hex } from './webgpu/compute/i32Hex.js';
+export { default as f32 } from './webgpu/compute/f32.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u64 } from '../wgsl/math/u64.js';
@@ -454,25 +454,25 @@ export { default as ParallelRaster } from './parallel/raster-clip/ParallelRaster
 export { default as OldSnippet } from './webgpu/old/OldSnippet.js';
 export { default as OldDualSnippet } from './webgpu/old/OldDualSnippet.js';
 export type { OldDualSnippetSource } from './webgpu/old/OldDualSnippet.js';
-export { default as DeviceContext } from './webgpu/DeviceContext.js';
-export type { DeviceContextDeviceOptions } from './webgpu/DeviceContext.js';
+export { default as DeviceContext } from './webgpu/compute/DeviceContext.js';
+export type { DeviceContextDeviceOptions } from './webgpu/compute/DeviceContext.js';
 export { BaseExecution, BasicExecution, ExecutableShader } from './webgpu/old/OldExecution.js';
 export type { default as OldExecution, ExecutionOptions, ExecutableShaderTemplate, ExecutableShaderOptions, ExecutionSingleCallback, ExecutionMultipleCallback, Unpromised, ExecutableShaderExternalOptions } from './webgpu/old/OldExecution.js';
 export { default as OldBindingType } from './webgpu/old/OldBindingType.js';
 export { default as OldComputeShader } from './webgpu/old/OldComputeShader.js';
 export type { OldComputeShaderOptions, OldComputeShaderDispatchOptions, OldComputeShaderSourceOptions } from './webgpu/old/OldComputeShader.js';
 export { default as BlitShader } from './webgpu/BlitShader.js';
-export { default as ByteEncoder } from './webgpu/ByteEncoder.js';
-export type { F32, U32, I32, U8 } from './webgpu/ByteEncoder.js';
-export { U32Type, U32Add, U32Order, U32ReverseOrder, I32Type, Vec2uType, Vec2uBic, Vec3uType, Vec4uType, Vec2uLexicographicalOrder, getArrayType, Vec2uAdd, Vec3uAdd, Vec4uAdd } from './webgpu/types/ConcreteType.js';
-export type { default as ConcreteType, ConcreteArrayType, BinaryOp, BitOrder, CompareOrder, Order, WGSLExpression, WGSLStatements, WGSLVariableName, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionBool, WGSLModuleDeclarations, WGSLExpressionT } from './webgpu/types/ConcreteType.js';
-export { default as ConsoleLogger, ConsoleLoggedEntry, ConsoleLoggedThread, ConsoleLoggedLine, ConsoleLoggedShader } from './webgpu/ConsoleLogger.js';
-export type { ConsoleLogInfo } from './webgpu/ConsoleLogger.js';
-export { default as BufferLogger } from './webgpu/BufferLogger.js';
-export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/BufferLogger.js';
-export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/TimestampLogger.js';
-export { default as TypedBuffer } from './webgpu/TypedBuffer.js';
-export { default as BindingLocation } from './webgpu/BindingLocation.js';
+export { default as ByteEncoder } from './webgpu/compute/ByteEncoder.js';
+export type { F32, U32, I32, U8 } from './webgpu/compute/ByteEncoder.js';
+export { U32Type, U32Add, U32Order, U32ReverseOrder, I32Type, Vec2uType, Vec2uBic, Vec3uType, Vec4uType, Vec2uLexicographicalOrder, getArrayType, Vec2uAdd, Vec3uAdd, Vec4uAdd } from './webgpu/compute/ConcreteType.js';
+export type { default as ConcreteType, ConcreteArrayType, BinaryOp, BitOrder, CompareOrder, Order, WGSLExpression, WGSLStatements, WGSLVariableName, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionBool, WGSLModuleDeclarations, WGSLExpressionT } from './webgpu/compute/ConcreteType.js';
+export { default as ConsoleLogger, ConsoleLoggedEntry, ConsoleLoggedThread, ConsoleLoggedLine, ConsoleLoggedShader } from './webgpu/compute/ConsoleLogger.js';
+export type { ConsoleLogInfo } from './webgpu/compute/ConsoleLogger.js';
+export { default as BufferLogger } from './webgpu/compute/BufferLogger.js';
+export type { FromArrayBufferable, FromMultiArrayBufferable } from './webgpu/compute/BufferLogger.js';
+export { default as TimestampLogger, TimestampLoggerResult } from './webgpu/compute/TimestampLogger.js';
+export { default as TypedBuffer } from './webgpu/compute/TypedBuffer.js';
+export { default as BindingLocation } from './webgpu/compute/BindingLocation.js';
 export { default as XPrototype } from './webgpu/XPrototype.js';
 export type { BindingCompatibilityType } from './webgpu/XPrototype.js';
 

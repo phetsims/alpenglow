@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../../imports.js';
 
 const f32 = ( n: number ): string => {
   assert && assert( Number.isFinite( n ), `Invalid f32 value: ${n}` );

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, DeviceContext } from '../imports.js';
+import { alpenglow, DeviceContext } from '../../imports.js';
 
 const COLLAPSE_LOGS = true;
 

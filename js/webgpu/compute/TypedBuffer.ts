@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ByteEncoder, ConcreteType, DeviceContext, getArrayType } from '../imports.js';
+import { alpenglow, BufferLogger, ByteEncoder, ConcreteType, DeviceContext, getArrayType } from '../../imports.js';
 
 export default class TypedBuffer<T = unknown> {
   public constructor(
