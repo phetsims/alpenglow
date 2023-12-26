@@ -86,29 +86,27 @@ const mainScanWGSL = <T>(
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;
 
+  if ( options.inPlace ) {
+    context.addBinding( 'data', options.bindings.data );
+  }
+  else {
+    context.addBinding( 'input', options.bindings.input );
+    context.addBinding( 'output', options.bindings.output );
+  }
+  if ( options.storeReduction ) {
+    context.addBinding( 'reduction', options.bindings.reduction );
+  }
+  if ( options.addScannedReduction ) {
+    context.addBinding( 'scanned_reduction', options.bindings.scannedReduction );
+
+    if ( options.addScannedDoubleReduction ) {
+      context.addBinding( 'scanned_double_reduction', options.bindings.scannedDoubleReduction );
+    }
+  }
+
   return `
     
-    ${options.inPlace ? `
-      ${options.bindings.data.location.getWGSLAnnotation()}
-      var<storage, ${options.bindings.data.getStorageAccess()}> data: array<${binaryOp.type.valueType}>;
-    ` : `
-      ${options.bindings.input.location.getWGSLAnnotation()}
-      var<storage, ${options.bindings.input.getStorageAccess()}> input: array<${binaryOp.type.valueType}>;
-      ${options.bindings.output.location.getWGSLAnnotation()}
-      var<storage, ${options.bindings.output.getStorageAccess()}> output: array<${binaryOp.type.valueType}>;
-    `}
-    ${options.storeReduction ? `
-      ${options.bindings.reduction.location.getWGSLAnnotation()}
-      var<storage, ${options.bindings.reduction.getStorageAccess()}> reduction: array<${binaryOp.type.valueType}>;
-    ` : ''}
     ${options.addScannedReduction ? `
-      ${options.bindings.scannedReduction.location.getWGSLAnnotation()}
-      var<storage, ${options.bindings.scannedReduction.getStorageAccess()}> scanned_reduction: array<${binaryOp.type.valueType}>;
-      ${options.addScannedDoubleReduction ? `
-        ${options.bindings.scannedDoubleReduction.location.getWGSLAnnotation()}
-        var<storage, ${options.bindings.scannedDoubleReduction.getStorageAccess()}> scanned_double_reduction: array<${binaryOp.type.valueType}>;
-      ` : ''}
-      
       var<workgroup> reduction_value: ${binaryOp.type.valueType};
     ` : ''}
     

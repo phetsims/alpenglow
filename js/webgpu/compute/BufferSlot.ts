@@ -8,7 +8,7 @@
 
 import { alpenglow, BufferSlotSlice, ResourceSlot } from '../../imports.js';
 
-// TODO: Is BufferSlot worth the separation? Just have ConcreteBufferSlot?
+// TODO: Is BufferSlot worth the separation? Just have ConcreteBufferSlot?  YEAH just move BufferSlot things into here, we need the types in the WGSLContext
 export default class BufferSlot extends ResourceSlot {
   public readonly bufferSlotSlices: BufferSlotSlice[] = [];
 

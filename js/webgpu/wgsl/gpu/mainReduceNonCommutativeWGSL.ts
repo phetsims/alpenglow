@@ -45,14 +45,11 @@ const mainReduceNonCommutativeWGSL = <T>(
   const binaryOp = options.binaryOp;
   const stripeOutput = options.stripeOutput;
 
+  context.addBinding( 'input', options.bindings.input );
+  context.addBinding( 'output', options.bindings.output );
+
   // TODO: generate storage binding and variable fully from Binding?
   return `
-    
-    ${options.bindings.input.location.getWGSLAnnotation()}
-    var<storage, ${options.bindings.input.getStorageAccess()}> input: array<${binaryOp.type.valueType}>;
-    
-    ${options.bindings.output.location.getWGSLAnnotation()}
-    var<storage, ${options.bindings.output.getStorageAccess()}> output: array<${binaryOp.type.valueType}>;
     
     var<workgroup> scratch: array<${binaryOp.type.valueType}, ${workgroupSize}>;
 

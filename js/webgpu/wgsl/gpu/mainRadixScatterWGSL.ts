@@ -58,14 +58,13 @@ const mainRadixScatterWGSL = <T>(
 
   const getBits = ( value: WGSLExpressionT ) => order.getBitsWGSL( value, pass * bitsPerPass, bitsPerPass );
 
+  // TODO: we should have type assertions to make sure these match?
+  context.addBinding( 'input', bindings.input );
+  context.addBinding( 'histogramOffsets', bindings.histogramOffsets ); // make sure this is u32?
+  context.addBinding( 'output', bindings.output );
+
   // TODO: generate more of the bindings
   return `
-    ${bindings.input.location.getWGSLAnnotation()}
-    var<storage, ${bindings.input.getStorageAccess()}> input: array<${order.type.valueType}>;
-    ${bindings.histogramOffsets.location.getWGSLAnnotation()}
-    var<storage, ${bindings.histogramOffsets.getStorageAccess()}> histogram_offsets: array<u32>;
-    ${bindings.output.location.getWGSLAnnotation()}
-    var<storage, ${bindings.output.getStorageAccess()}> output: array<${order.type.valueType}>;
     
     // TODO: see how we can potentially reuse some memory?
     var<workgroup> bits_scratch: array<${{ 1: 'u32', 2: 'vec2u', 3: 'vec3u', 4: 'vec4u' }[ innerBitVectorSize ]}, ${workgroupSize}>;

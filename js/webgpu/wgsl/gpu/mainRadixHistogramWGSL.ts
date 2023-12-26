@@ -37,12 +37,10 @@ const mainRadixHistogramWGSL = <T>(
   const lengthExpression = options.lengthExpression;
   const bindings = options.bindings;
 
+  context.addBinding( 'input', bindings.input );
+  context.addBinding( 'output', bindings.output ); // TODO: make sure this is u32
+
   return `
-    ${bindings.input.location.getWGSLAnnotation()}
-    var<storage, ${bindings.input.getStorageAccess()}> input: array<${order.type.valueType}>;
-    ${bindings.output.location.getWGSLAnnotation()}
-    var<storage, ${bindings.output.getStorageAccess()}> output: array<u32>;
-    
     var<workgroup> histogram_scratch: array<atomic<u32>, ${1 << bitsPerPass}>;
     
     @compute @workgroup_size(${workgroupSize})

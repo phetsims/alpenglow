@@ -7,10 +7,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingLocation, WGSLModuleDeclarations } from '../../imports.js';
+import { alpenglow, Binding, BindingLocation, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
 
 export default class WGSLContext {
   private readonly declarations: WGSLInternalDeclaration[] = [];
+  private readonly bindings: Binding[] = [];
 
   public constructor(
     public readonly shaderName: string,
@@ -28,6 +29,19 @@ export default class WGSLContext {
   ): void {
     if ( !this.declarations.some( declaration => declaration.name === name ) ) {
       this.declarations.push( new WGSLInternalDeclaration( name, declarations ) );
+    }
+  }
+
+  public addBinding( name: WGSLVariableName, binding: Binding ): void {
+    const hasBinding = this.bindings.includes( binding );
+    const hasName = this.declarations.some( declaration => declaration.name === name );
+
+    assert && assert( hasBinding === hasName );
+
+    if ( !hasBinding ) {
+      this.bindings.push( binding );
+
+      this.add( name, binding.getWGSLDeclaration( name ) );
     }
   }
 

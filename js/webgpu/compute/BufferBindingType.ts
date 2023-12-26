@@ -40,7 +40,6 @@ export default class BufferBindingType extends BindingType {
     // return `BufferBindingType(${this.type}, ${this.hasDynamicOffset}, ${this.minBindingSize})`;
   }
 
-  // TODO: fix?
   protected override mutateBindGroupLayoutEntry( entry: GPUBindGroupLayoutEntry ): void {
     entry.buffer = {
       type: this.type
