@@ -869,6 +869,14 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.brokenTest2 = function() {
+    setTimeout( async function() {
+      const recorder = new WebGPURecorder();
+      await phet.alpenglow.XPrototype.test();
+      window.recordWebGPU = () => recorder._generateOutput();
+    } );
+  };
+
   window.rasterTest = function() {
     setTimeout( async function() {
       const boundsRect = bounds => [

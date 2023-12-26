@@ -791,17 +791,16 @@ export class XBindGroup {
     public readonly layout: XBindGroupLayout,
     resourceMap: Map<XResourceSlot, XResource>
   ) {
+    const entries = layout.bindings.map( binding => {
+      const resource = resourceMap.get( binding.slot )!;
+
+      return resource.getBindGroupEntry( binding );
+    } );
+
     this.bindGroup = deviceContext.device.createBindGroup( {
       label: `${this.name} bind group`,
       layout: layout.layout,
-      entries: Object.keys( resourceMap ).map( slot => {
-        const binding = layout.getBindingFromSlot( slot )!;
-        assert && assert( binding, 'Missing binding when creating BindGroup' );
-
-        const resource = resourceMap.get( slot )!;
-
-        return resource.getBindGroupEntry( binding );
-      } )
+      entries: entries
     } );
   }
 }
@@ -929,6 +928,7 @@ export class XComputePass {
     computePassDescriptor: GPUComputePassDescriptor
   ) {
     this.computePassEncoder = encoder.beginComputePass( computePassDescriptor );
+    console.log( 'begin compute pass' );
   }
 
   private prepare(
@@ -995,6 +995,7 @@ export class XComputePass {
   }
 
   public end(): void {
+    console.log( 'end compute pass' );
     this.computePassEncoder.end();
   }
 }
@@ -1051,52 +1052,70 @@ export class XExecutionContext {
   }
 
   public setTypedBufferValue<T>( concreteBufferSlot: XConcreteBufferSlot<T>, value: T ): void {
+    this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
+
     this.executor.setTypedBufferValue( this.getTypedBuffer( concreteBufferSlot ), value );
   }
 
   public async getTypedBufferValue<T>( concreteBufferSlot: XConcreteBufferSlot<T> ): Promise<T> {
+    this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
+
     return this.executor.getTypedBufferValue( this.getTypedBuffer( concreteBufferSlot ) );
   }
 
   public async arrayBuffer(
     bufferSlot: XBufferSlot
   ): Promise<ArrayBuffer> {
+    this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
+
     return this.executor.arrayBuffer( this.getBuffer( bufferSlot ) );
   }
 
   public async u32(
     bufferSlot: XBufferSlot
   ): Promise<Uint32Array> {
+    this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
+
     return this.executor.u32( this.getBuffer( bufferSlot ) );
   }
 
   public async i32(
     bufferSlot: XBufferSlot
   ): Promise<Int32Array> {
+    this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
+
     return this.executor.i32( this.getBuffer( bufferSlot ) );
   }
 
   public async f32(
     bufferSlot: XBufferSlot
   ): Promise<Float32Array> {
+    this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
+
     return this.executor.f32( this.getBuffer( bufferSlot ) );
   }
 
   public async u32Numbers(
     bufferSlot: XBufferSlot
   ): Promise<number[]> {
+    this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
+
     return this.executor.u32Numbers( this.getBuffer( bufferSlot ) );
   }
 
   public async i32Numbers(
     bufferSlot: XBufferSlot
   ): Promise<number[]> {
+    this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
+
     return this.executor.i32Numbers( this.getBuffer( bufferSlot ) );
   }
 
   public async f32Numbers(
     bufferSlot: XBufferSlot
   ): Promise<number[]> {
+    this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
+
     return this.executor.f32Numbers( this.getBuffer( bufferSlot ) );
   }
 
@@ -1132,7 +1151,7 @@ export class XExecutionContext {
 
   private ensureComputePass( name: string ): XComputePass {
     if ( this.computePass === null ) {
-      this.computePass = this.executor.getComputePass( this.separateComputePasses ? name : 'compute pass' );
+      this.computePass = this.executor.getComputePass( this.separateComputePasses ? name : 'primary' );
     }
     return this.computePass;
   }
@@ -1252,6 +1271,7 @@ export class XExecutor {
 
     const logPromise = log ? executor.arrayBuffer( deviceContext.getLogTypedBuffer().buffer ) : Promise.resolve( null );
 
+    console.log( 'finish' );
     const commandBuffer = encoder.finish();
     deviceContext.device.queue.submit( [ commandBuffer ] );
 
