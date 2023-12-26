@@ -2104,11 +2104,11 @@
 
       <p class="TODO">
         Logging broken - put Usages on WGSLContext (keep global BlufferSlot). Just "toss" our other things that use WGSLContext?
-        Break out data sources. Explicitly model data sources (input/output)
+        Break out data sources. Explicitly model data sources (input/output). Fully generate bindings? (Usage has concrete binding, with type declaration).
       </p>
 
       <p class="TODO">
-        Casting of ConcreteTypes to other types (e.g. reinterpretation as u32 array, or something using atomics in one)
+        Working Mermaid diagram for the linking process.
       </p>
 
       <p class="TODO">
@@ -2117,12 +2117,17 @@
       </p>
 
       <p class="TODO">
-        Parameterize the output of routines. Actually figure out our "wrapper" that we can provide input/output as a
-        unit. Get this so we can unit test, BUT ALSO work with the Canvas swap chain.
+        Parameterize the output of routines (... RoutineBlueprint can have parameterized input/output).
+        Actually figure out our "wrapper" that we can provide input/output as a unit. Get this so we can unit test,
+        BUT ALSO work with the Canvas swap chain.
       </p>
 
       <p class="TODO">
-        Test "aliased" buffer slots.
+        Casting of ConcreteTypes to other types (e.g. reinterpretation as u32 array, or something using atomics in one)
+      </p>
+
+      <p class="TODO">
+        ConcreteBufferSlot aliasing
       </p>
 
       <p class="TODO">
@@ -2136,7 +2141,7 @@
       </p>
 
       <p class="TODO">
-        Performance test: bind groups, buffer sharing, buffer offsets (one big buffer?)
+        Performance test: bind groups, buffer sharing/aliasing, buffer offsets (one big buffer?).
       </p>
 
       <p class="TODO">
