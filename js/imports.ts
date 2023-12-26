@@ -492,7 +492,7 @@ export { default as BufferUsage } from './webgpu/compute/BufferUsage.js';
 export { default as TextureViewUsage } from './webgpu/compute/TextureViewUsage.js';
 export { default as BindingDescriptor } from './webgpu/compute/BindingDescriptor.js';
 export { default as Binding } from './webgpu/compute/Binding.js';
-export type { BindingCompatibilityType } from './webgpu/compute/Binding.js';
+export { default as BufferBinding } from './webgpu/compute/BufferBinding.js';
 export { default as BindGroupLayout } from './webgpu/compute/BindGroupLayout.js';
 export { default as PipelineLayout } from './webgpu/compute/PipelineLayout.js';
 export { default as PipelineBlueprint } from './webgpu/compute/PipelineBlueprint.js';

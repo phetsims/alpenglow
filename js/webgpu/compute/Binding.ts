@@ -6,14 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingLocation, BindingType, BufferBindingType, ConcreteBindingType, ResourceSlot } from '../../imports.js';
-
-// TODO: get rid of this
-export type BindingCompatibilityType<T> = {
-  location: BindingLocation;
-  getStorageAccess: () => 'read' | 'read_write';
-  concreteBindingType?: ConcreteBindingType<T>; // our style
-};
+import { alpenglow, BindingLocation, BindingType, BufferBindingType, ResourceSlot } from '../../imports.js';
 
 export default class Binding {
   public constructor(

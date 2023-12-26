@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroupLayout, Binding, ConcreteBufferSlot, DeviceContext, ResourceSlot } from '../../imports.js';
+import { alpenglow, BindGroupLayout, Binding, BufferBinding, ConcreteBufferSlot, DeviceContext, ResourceSlot } from '../../imports.js';
 
 export default class PipelineLayout {
   public readonly layout: GPUPipelineLayout;
@@ -33,8 +33,9 @@ export default class PipelineLayout {
     return binding!;
   }
 
-  public getConcreteBindingFromSlot<T>( slot: ConcreteBufferSlot<T> ): Binding {
-    return this.getBindingFromSlot( slot );
+  public getConcreteBindingFromSlot<T>( slot: ConcreteBufferSlot<T> ): BufferBinding<T> {
+    // TODO: can we avoid the cast here? Perhaps a check? Should be consistent with how we're using it.
+    return this.getBindingFromSlot( slot ) as BufferBinding<T>;
   }
 }
 alpenglow.register( 'PipelineLayout', PipelineLayout );
