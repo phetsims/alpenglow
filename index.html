@@ -2104,7 +2104,8 @@
 
       <p class="TODO">
         Logging broken, need to get a ConcreteType that is provided a WGSLContext, so we can stuff structs there. Use
-        WGSLContext.LOG_BUFFER_SLOT once we have it.
+        WGSLContext.LOG_BUFFER_SLOT once we have it. Allow nested structs (e.g. ones with multiple WGSLContext
+        declarations).
       </p>
 
       <p class="TODO">
@@ -2113,6 +2114,12 @@
 
       <p class="TODO">
         Working Mermaid diagram for the linking process.
+      </p>
+
+      <p class="TODO">
+        Use size/alignment of structures for getArrayType and the structure equivalent. Create more of a typed (class)
+        structure for types? - Note that storage and uniform address spaces have different layout constraints:
+        <a href="https://www.w3.org/TR/WGSL/#address-space-layout-constraints">https://www.w3.org/TR/WGSL/#address-space-layout-constraints</a>
       </p>
 
       <p class="TODO">
@@ -2131,7 +2138,7 @@
       </p>
 
       <p class="TODO">
-        ConcreteBufferSlot aliasing
+        ConcreteBufferSlot aliasing - we'll want these to be classed as BufferSlotSlices (so things will pass through).
       </p>
 
       <p class="TODO">

@@ -50,7 +50,7 @@ export default class WGSLContext {
     if ( !hasBinding ) {
       this.bindings.push( binding );
 
-      this.add( name, binding.getWGSLDeclaration( name ) );
+      this.add( name, binding.getWGSLDeclaration( this, name ) );
     }
   }
 

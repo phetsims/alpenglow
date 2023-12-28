@@ -139,7 +139,7 @@ const scanRakedWGSL = <T>(
       ${commentWGSL( 'begin (get global added values)' )}
 
       // Get the value we'll add to everything
-      var workgroup_added_value: ${binaryOp.type.valueType};
+      var workgroup_added_value: ${binaryOp.type.valueType( context )};
       ${getAddedValue( 'workgroup_added_value' )}
 
       // We need to LOAD the value before anything writes to it, since we'll be modifying those values
@@ -151,7 +151,7 @@ const scanRakedWGSL = <T>(
       {
         let last_value = ${scratch}[ ${localIndex} * ${u32( grainSize )} + ${u32( grainSize - 1 )} ];
 
-        var new_last_value: ${binaryOp.type.valueType};
+        var new_last_value: ${binaryOp.type.valueType( context )};
         ${combineToValue( 'new_last_value', 'workgroup_added_value', 'last_value' )}
 
         ${scratch}[ ${localIndex} * ${u32( grainSize )} + ${u32( grainSize - 1 )} ] = new_last_value;
@@ -166,7 +166,7 @@ const scanRakedWGSL = <T>(
     ${unrollWGSL( 0, grainSize - 1, i => `
       {
         let index = ${localIndex} * ${u32( grainSize )} + ${u32( i )};
-        var current_value: ${binaryOp.type.valueType};
+        var current_value: ${binaryOp.type.valueType( context )};
         ${combineToValue( 'current_value', 'added_value', `${scratch}[ index ]` )}
         ${scratch}[ index ] = current_value;
       }

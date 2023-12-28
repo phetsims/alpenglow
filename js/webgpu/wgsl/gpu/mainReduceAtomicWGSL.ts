@@ -55,7 +55,7 @@ const mainReduceAtomicWGSL = <T>(
   // TODO: generate storage binding and variable fully from Binding?
   return `
     
-    var<workgroup> scratch: array<${binaryOp.type.valueType}, ${workgroupSize}>;
+    var<workgroup> scratch: array<${binaryOp.type.valueType( context )}, ${workgroupSize}>;
     
     @compute @workgroup_size(${workgroupSize})
     fn main(
@@ -64,7 +64,7 @@ const mainReduceAtomicWGSL = <T>(
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
     
-      ${loadReducedWGSL( combineOptions<loadReducedWGSLOptions<T>>( {
+      ${loadReducedWGSL( context, combineOptions<loadReducedWGSLOptions<T>>( {
         value: 'value',
         binaryOp: binaryOp,
         loadExpression: i => `input[ ${i} ]`,

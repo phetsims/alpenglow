@@ -58,7 +58,7 @@ const scanComprehensiveWGSL = <T>(
     ${commentWGSL( 'begin scan_comprehensive' )}
 
     // Load into workgroup memory
-    ${loadMultipleWGSL( {
+    ${loadMultipleWGSL( context, {
       loadExpression: index => `${input}[ ${index} ]`,
       storeStatements: ( index, value ) => `${scratch}[ ${index} ] = ${value};`,
       workgroupSize: options.workgroupSize,

@@ -107,10 +107,10 @@ const mainScanWGSL = <T>(
   return `
     
     ${options.addScannedReduction ? `
-      var<workgroup> reduction_value: ${binaryOp.type.valueType};
+      var<workgroup> reduction_value: ${binaryOp.type.valueType( context )};
     ` : ''}
     
-    var<workgroup> scratch: array<${binaryOp.type.valueType}, ${workgroupSize * grainSize}>;
+    var<workgroup> scratch: array<${binaryOp.type.valueType( context )}, ${workgroupSize * grainSize}>;
     
     @compute @workgroup_size(${workgroupSize})
     fn main(
@@ -138,8 +138,8 @@ const mainScanWGSL = <T>(
               let middle_value = scanned_reduction[ workgroup_id.x ];
               let lower_value = double_scanned_reduction[ workgroup_id.x / ${u32( workgroupSize * grainSize )} ];
             ` : `
-              var middle_value: ${binaryOp.type.valueType};
-              var lower_value: ${binaryOp.type.valueType};
+              var middle_value: ${binaryOp.type.valueType( context )};
+              var lower_value: ${binaryOp.type.valueType( context )};
               // NOTE: assumes the same workgroup/grain size for each level
               // This should work for any level of workgroup handling
               if ( workgroup_id.x % ${u32( workgroupSize * grainSize )} == 0u ) {

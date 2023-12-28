@@ -191,6 +191,7 @@ export default class ByteEncoder {
     return this;
   }
 
+  // TODO: Note the stride of each value might be larger, based on the alignment of the type for WGSL
   public decodeValues<T>( decode: ( encoder: ByteEncoder, offset: number ) => T, bytesPerElement: number ): T[] {
     const result: T[] = [];
     const numElements = Math.floor( this.byteLength / bytesPerElement );

@@ -27,15 +27,15 @@
 #option earlyLoad
 
 @group(0) @binding(0)
-var<storage> input: array<${order.type.valueType}>;
+var<storage> input: array<${order.type.valueType()}>;
 @group(0) @binding(1)
 var<storage> histogram_offsets: array<u32>;
 @group(0) @binding(2)
-var<storage, read_write> output: array<${order.type.valueType}>;
+var<storage, read_write> output: array<${order.type.valueType()}>;
 
 // TODO: see how we can potentially reuse some memory?
 var<workgroup> bits_scratch: array<${{ 1: 'u32', 2: 'vec2u', 3: 'vec3u', 4: 'vec4u' }[ innerBitVectorSize ]}, ${workgroupSize}>;
-var<workgroup> value_scratch: array<${order.type.valueType}, ${workgroupSize * grainSize}>;
+var<workgroup> value_scratch: array<${order.type.valueType()}, ${workgroupSize * grainSize}>;
 var<workgroup> local_histogram_offsets: array<u32, ${u32( 1 << bitsPerPass )}>;
 var<workgroup> start_indices: array<u32, ${workgroupSize * grainSize}>;
 
@@ -64,7 +64,7 @@ fn main(
         ${load_multiple( {
           loadExpression: index => `input[ ${index} ]`,
           storeStatements: ( index, value ) => `value_scratch[ ${index} ] = ${value};`,
-          valueType: order.type.valueType,
+          valueType: order.type.valueType(),
           workgroupSize: workgroupSize,
           grainSize: grainSize,
           length: length,
@@ -123,7 +123,7 @@ fn main(
 
           ${n_bit_compact_single_sort( {
             order: order,
-            valueType: order.type.valueType,
+            valueType: order.type.valueType(),
             workgroupSize: workgroupSize,
             grainSize: grainSize,
             bitsPerInnerPass: bitsPerInnerPass,

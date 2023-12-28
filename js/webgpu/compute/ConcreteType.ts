@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, u32 } from '../../imports.js';
+import { alpenglow, ByteEncoder, u32, WGSLContext } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Random from '../../../../dot/js/Random.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
@@ -31,14 +31,14 @@ type StoreStatementCallback = ( offset: WGSLExpressionU32, u32expr: WGSLExpressi
 type ConcreteType<T = unknown> = {
   name: string;
 
+  // TODO: deduplicate with wgslSize/wgslAlign. This is the size of the ENTIRE type, drop the "element" bit
   bytesPerElement: number;
 
   // TS
   equals: ( a: T, b: T ) => boolean;
 
-  // WGSL
-  // ( a: expr:T, b: expr:T ) => expr:bool
-  equalsWGSL: ( a: string, b: string ) => string;
+  // WGSL TODO: allow statements
+  equalsWGSL: ( context: WGSLContext, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
 
   // Encodes a given value into the end of the encoder
   encode( value: T, encoder: ByteEncoder ): void;
@@ -47,7 +47,8 @@ type ConcreteType<T = unknown> = {
   decode( encoder: ByteEncoder, offset: number ): T;
 
   // WGSL representation
-  valueType: string;
+  // TODO: consider rename to getValueType?
+  valueType: ( context: WGSLContext ) => string;
   writeU32s(
     // given an expr:u32 offset and expr:u32 value, it will store the value at the offset
     storeStatement: StoreStatementCallback,
@@ -56,6 +57,10 @@ type ConcreteType<T = unknown> = {
     value: WGSLExpression
   ): WGSLStatements;
 
+  // See https://www.w3.org/TR/WGSL/#alignment-and-size
+  wgslAlign: number;
+  wgslSize: number; // TODO: how to represent variable-length items?
+
   // Helper for testing
   generateRandom( fullSize?: boolean ): T;
 
@@ -63,10 +68,19 @@ type ConcreteType<T = unknown> = {
 
   // TODO: reading? (e.g. from structure-of-arrays, but also from just... other types and generic u32 buffers?)
 };
-
 export default ConcreteType;
 
+// TODO: potential separation of "WGSLType" - and the way to read the "raw" data out, is different than ConcreteType (which includes the JS representation)
+
+// From the WGSL spec, https://www.w3.org/TR/WGSL/#roundup
+const roundUp = ( k: number, n: number ) => Math.ceil( n / k ) * k;
+// const strideOfArrayOf = ( elementType: ConcreteType ): number => roundUp( elementType.wgslAlign, elementType.wgslSize );
+
+// TODO: Have ConcreteType and things be classes? The Array type should contain more info, etc. But we also want to
+// TODO: allow full flexibility...? Structure types we'll want to get things out of.
+
 export type ConcreteArrayType<T = unknown> = ConcreteType<T[]> & {
+  elementType: ConcreteType<T>;
   slice( start: number, end: number ): ConcreteArrayType<T>;
 };
 
@@ -122,6 +136,8 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
     name: `${type.name}[${size}]`,
     bytesPerElement: type.bytesPerElement * size,
 
+    elementType: type,
+
     slice( start: number, end: number ): ConcreteArrayType<T> {
       assert && assert( start === 0, 'We will need more logic to handle offsets' );
 
@@ -141,9 +157,9 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
       return true;
     },
 
-    equalsWGSL( a: string, b: string ): string {
+    equalsWGSL( context: WGSLContext, a: string, b: string ): string {
       return `( ${_.range( 0, size ).map( i => {
-        return type.equalsWGSL( `${a}[ ${u32( i )} ]`, `${b}[ ${u32( i )} ]` );
+        return type.equalsWGSL( context, `${a}[ ${u32( i )} ]`, `${b}[ ${u32( i )} ]` );
       } ).join( ' && ' )} )`;
     },
 
@@ -165,7 +181,7 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
       return array;
     },
 
-    valueType: `array<${type.valueType}, ${size}>`,
+    valueType: ( context: WGSLContext ) => `array<${type.valueType( context )}, ${size}>`,
     writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
       return _.range( 0, size ).map( i => {
         return type.writeU32s(
@@ -174,6 +190,9 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
         );
       } ).join( '\n' );
     },
+
+    wgslAlign: type.wgslAlign,
+    wgslSize: size * roundUp( type.wgslAlign, type.wgslSize ),
 
     generateRandom( fullSize = false ): T[] {
       return _.range( 0, size ).map( () => type.generateRandom( fullSize ) );
@@ -184,8 +203,15 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
     }
   };
 };
-
 alpenglow.register( 'getArrayType', getArrayType );
+
+export const getCastedType = <T>( type: ConcreteType<T>, valueType: ( context: WGSLContext ) => string ): ConcreteType<T> => {
+  return {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...type,
+    valueType: valueType
+  };
+};
 
 export const U32Type: ConcreteType<number> = {
   name: 'u32',
@@ -195,7 +221,7 @@ export const U32Type: ConcreteType<number> = {
     return a === b;
   },
 
-  equalsWGSL: ( a: string, b: string ): string => {
+  equalsWGSL: ( context: WGSLContext, a: string, b: string ): string => {
     return `( ${a} == ${b} )`;
   },
 
@@ -206,18 +232,19 @@ export const U32Type: ConcreteType<number> = {
     return encoder.fullU32Array[ offset ];
   },
 
-  valueType: 'u32',
+  valueType: () => 'u32',
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
     return `
        ${storeStatement( '0u', value )}
     `;
   },
+  wgslAlign: 4,
+  wgslSize: 4,
 
   generateRandom: ( fullSize = false ) => random.nextIntBetween( 0, fullSize ? 0xffffffff : 0xff ),
 
   toDebugString: ( value: number ) => value.toString()
 };
-
 alpenglow.register( 'U32Type', U32Type );
 
 export const U32Add: BinaryOp<number> = {
@@ -233,8 +260,7 @@ export const U32Add: BinaryOp<number> = {
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
-// TODO: add other atomic types
-
+// TODO: add other atomic types (and specifically atomic types)
 alpenglow.register( 'U32Add', U32Add );
 
 export const U32Order: Order<number> = {
@@ -268,7 +294,6 @@ export const U32Order: Order<number> = {
     return `( ( ${value} >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
   }
 };
-
 alpenglow.register( 'U32Order', U32Order );
 
 export const U32ReverseOrder: Order<number> = {
@@ -300,7 +325,6 @@ export const U32ReverseOrder: Order<number> = {
     return `( ( ( 0xffffffffu - ${value} ) >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
   }
 };
-
 alpenglow.register( 'U32ReverseOrder', U32ReverseOrder );
 
 export const I32Type: ConcreteType<number> = {
@@ -311,7 +335,7 @@ export const I32Type: ConcreteType<number> = {
     return a === b;
   },
 
-  equalsWGSL: ( a: string, b: string ): string => {
+  equalsWGSL: ( context: WGSLContext, a: string, b: string ): string => {
     return `( ${a} == ${b} )`;
   },
 
@@ -322,18 +346,19 @@ export const I32Type: ConcreteType<number> = {
     return encoder.fullI32Array[ offset ];
   },
 
-  valueType: 'i32',
+  valueType: () => 'i32',
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
     return `
        ${storeStatement( '0u', `bitcast<u32>( ${value} )` )}
     `;
   },
+  wgslAlign: 4,
+  wgslSize: 4,
 
   generateRandom: ( fullSize = false ) => random.nextIntBetween( 0, fullSize ? -0x7fffffff : -0x7f, fullSize ? 0x7fffffff : 0x7f ),
 
   toDebugString: ( value: number ) => value.toString()
 };
-
 alpenglow.register( 'I32Type', I32Type );
 
 export const Vec2uType: ConcreteType<Vector2> = {
@@ -344,7 +369,7 @@ export const Vec2uType: ConcreteType<Vector2> = {
     return a.equals( b );
   },
 
-  equalsWGSL: ( a: string, b: string ): string => {
+  equalsWGSL: ( context: WGSLContext, a: string, b: string ): string => {
     // TODO: test
     return `all( ${a} == ${b} )`;
   },
@@ -357,13 +382,15 @@ export const Vec2uType: ConcreteType<Vector2> = {
     return new Vector2( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ] );
   },
 
-  valueType: 'vec2u',
+  valueType: () => 'vec2u',
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
     return `
        ${storeStatement( '0u', `${value}.x` )}
        ${storeStatement( '1u', `${value}.y` )}
     `;
   },
+  wgslAlign: 8,
+  wgslSize: 8,
 
   generateRandom: ( fullSize = false ) => new Vector2(
     U32Type.generateRandom( fullSize ),
@@ -372,7 +399,6 @@ export const Vec2uType: ConcreteType<Vector2> = {
 
   toDebugString: ( value: Vector2 ) => `vec2u(${value.x}, ${value.y})`
 };
-
 alpenglow.register( 'Vec2uType', Vec2uType );
 
 export const Vec2uAdd: BinaryOp<Vector2> = {
@@ -387,7 +413,6 @@ export const Vec2uAdd: BinaryOp<Vector2> = {
   combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
 };
-
 alpenglow.register( 'Vec2uAdd', Vec2uAdd );
 
 export const Vec2uBic: BinaryOp<Vector2> = {
@@ -408,7 +433,6 @@ export const Vec2uBic: BinaryOp<Vector2> = {
   combineExpression: ( a: string, b: string ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b} - min( ${a}.y, ${b}.x );`
 };
-
 alpenglow.register( 'Vec2uBic', Vec2uBic );
 
 export const Vec2uLexicographicalOrder: Order<Vector2> = {
@@ -456,7 +480,6 @@ export const Vec2uLexicographicalOrder: Order<Vector2> = {
     }
   }
 };
-
 alpenglow.register( 'Vec2uLexicographicalOrder', Vec2uLexicographicalOrder );
 
 export const Vec3uType: ConcreteType<Vector3> = {
@@ -467,7 +490,7 @@ export const Vec3uType: ConcreteType<Vector3> = {
     return a.equals( b );
   },
 
-  equalsWGSL: ( a: string, b: string ): string => {
+  equalsWGSL: ( context: WGSLContext, a: string, b: string ): string => {
     // TODO: test
     return `all( ${a} == ${b} )`;
   },
@@ -481,7 +504,7 @@ export const Vec3uType: ConcreteType<Vector3> = {
     return new Vector3( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ], encoder.fullU32Array[ offset + 2 ] );
   },
 
-  valueType: 'vec3u',
+  valueType: () => 'vec3u',
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
     return `
        ${storeStatement( '0u', `${value}.x` )}
@@ -489,6 +512,8 @@ export const Vec3uType: ConcreteType<Vector3> = {
        ${storeStatement( '2u', `${value}.z` )}
     `;
   },
+  wgslAlign: 16,
+  wgslSize: 12,
 
   generateRandom: ( fullSize = false ) => new Vector3(
     U32Type.generateRandom( fullSize ),
@@ -498,7 +523,6 @@ export const Vec3uType: ConcreteType<Vector3> = {
 
   toDebugString: ( value: Vector3 ) => `vec3u(${value.x}, ${value.y}, ${value.z})`
 };
-
 alpenglow.register( 'Vec3uType', Vec3uType );
 
 export const Vec3uAdd: BinaryOp<Vector3> = {
@@ -513,7 +537,6 @@ export const Vec3uAdd: BinaryOp<Vector3> = {
   combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
 };
-
 alpenglow.register( 'Vec3uAdd', Vec3uAdd );
 
 export const Vec4uType: ConcreteType<Vector4> = {
@@ -524,7 +547,7 @@ export const Vec4uType: ConcreteType<Vector4> = {
     return a.equals( b );
   },
 
-  equalsWGSL: ( a: string, b: string ): string => {
+  equalsWGSL: ( context: WGSLContext, a: string, b: string ): string => {
     // TODO: test
     return `all( ${a} == ${b} )`;
   },
@@ -539,7 +562,7 @@ export const Vec4uType: ConcreteType<Vector4> = {
     return new Vector4( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ], encoder.fullU32Array[ offset + 2 ], encoder.fullU32Array[ offset + 3 ] );
   },
 
-  valueType: 'vec4u',
+  valueType: () => 'vec4u',
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
     return `
        ${storeStatement( '0u', `${value}.x` )}
@@ -548,6 +571,9 @@ export const Vec4uType: ConcreteType<Vector4> = {
        ${storeStatement( '3u', `${value}.w` )}
     `;
   },
+
+  wgslAlign: 16,
+  wgslSize: 16,
 
   generateRandom: ( fullSize = false ) => new Vector4(
     U32Type.generateRandom( fullSize ),
@@ -558,7 +584,6 @@ export const Vec4uType: ConcreteType<Vector4> = {
 
   toDebugString: ( value: Vector4 ) => `vec4u(${value.x}, ${value.y}, ${value.z}, ${value.w})`
 };
-
 alpenglow.register( 'Vec4uType', Vec4uType );
 
 export const Vec4uAdd: BinaryOp<Vector4> = {
@@ -573,5 +598,4 @@ export const Vec4uAdd: BinaryOp<Vector4> = {
   combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
 };
-
 alpenglow.register( 'Vec4uAdd', Vec4uAdd );

@@ -119,7 +119,7 @@ const nBitCompactSingleSortWGSL = <T>(
       }[ bitVectorSize ]};
 
       ${earlyLoad ? `
-        var tb_values: array<${order.type.valueType}, ${grainSize}>;
+        var tb_values: array<${order.type.valueType( context )}, ${grainSize}>;
       ` : ''}
 
       // Store our thread's "raked" values histogram into tb_bits_vector
@@ -180,7 +180,7 @@ const nBitCompactSingleSortWGSL = <T>(
       } )}
 
       ${!earlyLoad ? `
-        var tb_values: array<${order.type.valueType}, ${grainSize}>;
+        var tb_values: array<${order.type.valueType( context )}, ${grainSize}>;
 
         ${unrollWGSL( 0, grainSize, i => `
           // TODO: see if factoring out constants doesn't kill registers

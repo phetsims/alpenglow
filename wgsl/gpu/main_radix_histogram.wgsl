@@ -14,7 +14,7 @@
 #option bitsPerPass
 
 @group(0) @binding(0)
-var<storage> input: array<${order.type.valueType}>;
+var<storage> input: array<${order.type.valueType()}>;
 @group(0) @binding(1)
 var<storage, read_write> output: array<u32>;
 

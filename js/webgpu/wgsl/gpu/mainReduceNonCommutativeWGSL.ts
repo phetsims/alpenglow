@@ -51,7 +51,7 @@ const mainReduceNonCommutativeWGSL = <T>(
   // TODO: generate storage binding and variable fully from Binding?
   return `
     
-    var<workgroup> scratch: array<${binaryOp.type.valueType}, ${workgroupSize}>;
+    var<workgroup> scratch: array<${binaryOp.type.valueType( context )}, ${workgroupSize}>;
 
     @compute @workgroup_size(${workgroupSize})
     fn main(
@@ -64,7 +64,7 @@ const mainReduceNonCommutativeWGSL = <T>(
         scratch[ 0u ] = ${binaryOp.identityWGSL};
       }
     
-      var value: ${binaryOp.type.valueType};
+      var value: ${binaryOp.type.valueType( context )};
       ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => {
         // TODO: factor out combineToValue handling
         const combineToValue = ( varName: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => {
