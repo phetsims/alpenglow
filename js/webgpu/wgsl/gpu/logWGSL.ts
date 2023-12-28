@@ -56,14 +56,7 @@ const logWGSL = <T>(
 
   assert && assert( type || dataCount === 0 );
 
-  context.add( 'log', `
-    struct _Log {
-      next_space: atomic<u32>,
-      data: array<u32>
-    };
-    ${WGSLContext.getLogBindingLocation().getWGSLAnnotation()}
-    var<storage, read_write> _log: _Log;
-  ` );
+  context.addSlot( '_log', WGSLContext.LOG_BUFFER_SLOT );
 
   // defaults for lineToLog
   if ( !lineToLog ) {

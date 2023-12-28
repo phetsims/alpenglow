@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionOptions, ExecutionSingleCallback, TypedBuffer, U32Type, Unpromised } from '../../imports.js';
+import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionOptions, ExecutionSingleCallback, Unpromised } from '../../imports.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import optionize, { combineOptions } from '../../../../phet-core/js/optionize.js';
 
@@ -59,8 +59,6 @@ export default class DeviceContext {
   public readonly preferredStorageFormat: 'bgra8unorm' | 'rgba8unorm';
   public readonly lostEmitter = new TinyEmitter();
 
-  private _logTypedBuffer: TypedBuffer<number[]> | null = null;
-
   // NOTE: Not readonly, we'll handle context losses. Perhaps have a Property for the device?
   public constructor( public device: GPUDevice ) {
 
@@ -91,14 +89,6 @@ export default class DeviceContext {
     } );
 
     // TODO: We need to listen to leaks, DeviceContext is adding a listener!!!
-  }
-
-  public getLogTypedBuffer(): TypedBuffer<number[]> {
-    if ( !this._logTypedBuffer ) {
-      // TODO: consider ways to increase the size?
-      this._logTypedBuffer = TypedBuffer.createArray( this, U32Type, 1 << 22 );
-    }
-    return this._logTypedBuffer;
   }
 
   // in bytes

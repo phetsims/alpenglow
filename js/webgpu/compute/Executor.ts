@@ -12,10 +12,12 @@ import { optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type ExecutorOptions = {
   getTimestampWrites?: ( name: string ) => GPUComputePassTimestampWrites | null;
+  logBuffer?: GPUBuffer | null;
 };
 
 const EXECUTOR_DEFAULT_OPTIONS = {
-  getTimestampWrites: _.constant( null )
+  getTimestampWrites: _.constant( null ),
+  logBuffer: null
 } as const;
 
 export default class Executor {
@@ -113,10 +115,13 @@ export default class Executor {
       options
     );
 
+    const logBuffer = options?.logBuffer || null;
+    assert && assert( !log || logBuffer );
+
     // TODO: staging ring for our "out" buffers?
     const outputPromise = task( executor );
 
-    const logPromise = log ? executor.arrayBuffer( deviceContext.getLogTypedBuffer().buffer ) : Promise.resolve( null );
+    const logPromise = logBuffer ? executor.arrayBuffer( logBuffer ) : Promise.resolve( null );
 
     console.log( 'finish' );
     const commandBuffer = encoder.finish();

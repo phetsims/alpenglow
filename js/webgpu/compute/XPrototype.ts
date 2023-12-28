@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, BufferSlot, BufferUsage, ComputePipeline, DeviceContext, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add } from '../../imports.js';
+import { alpenglow, BufferBindingType, BufferResource, BufferSlot, BufferUsage, ComputePipeline, DeviceContext, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add, WGSLContext } from '../../imports.js';
 
 /*
 We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer
@@ -49,7 +49,8 @@ export default class XPrototype {
       [
         // TODO: deduplications with this?
         new BufferUsage( inputSlot, BufferBindingType.READ_ONLY_STORAGE ),
-        new BufferUsage( middleSlot, BufferBindingType.STORAGE )
+        new BufferUsage( middleSlot, BufferBindingType.STORAGE ),
+        ...( log ? [ new BufferUsage( WGSLContext.LOG_BUFFER_SLOT, BufferBindingType.STORAGE ) ] : [] )
       ],
       async ( deviceContext, name, pipelineLayout ) => {
         return ComputePipeline.withContextAsync(
@@ -77,7 +78,8 @@ export default class XPrototype {
       'second',
       [
         new BufferUsage( middleSlot, BufferBindingType.READ_ONLY_STORAGE ),
-        new BufferUsage( outputSlot, BufferBindingType.STORAGE )
+        new BufferUsage( outputSlot, BufferBindingType.STORAGE ),
+        ...( log ? [ new BufferUsage( WGSLContext.LOG_BUFFER_SLOT, BufferBindingType.STORAGE ) ] : [] )
       ],
       async ( deviceContext, name, pipelineLayout ) => {
         return ComputePipeline.withContextAsync(
@@ -161,6 +163,8 @@ export default class XPrototype {
       } );
 
       return promise;
+    }, {
+      logBuffer: log ? ( procedure.resourceMap.get( WGSLContext.LOG_BUFFER_SLOT )! as BufferResource ).buffer : null
     } );
 
     procedure.dispose();

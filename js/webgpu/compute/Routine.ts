@@ -7,6 +7,7 @@
  */
 
 import { alpenglow, BindGroupLayout, BindingDescriptor, BufferSlot, BufferSlotSlice, ComputePipeline, DeviceContext, PipelineBlueprint, PipelineLayout, ResourceSlot, RoutineBlueprint } from '../../imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export default class Routine<T> {
 
@@ -19,7 +20,7 @@ export default class Routine<T> {
     public readonly routineBlueprint: RoutineBlueprint<T>,
     public readonly nonBufferSlots: ResourceSlot[],
     public readonly rootBufferSlots: BufferSlot[],
-    public readonly bufferSliceMap: Map<BufferSlot, BufferSlotSlice>,
+    public readonly bufferSliceMap: Map<BufferSlot<IntentionalAny>, BufferSlotSlice>,
     public readonly pipelineLayoutMap: Map<PipelineBlueprint, PipelineLayout>,
     public readonly computePipelineMap: Map<PipelineBlueprint, ComputePipeline>
   ) {
