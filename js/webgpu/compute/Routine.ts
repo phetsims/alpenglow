@@ -68,7 +68,7 @@ export default class Routine<T> {
       assert && assert( pipelineLayout, 'Missing pipeline layout' );
 
       computePipelineMap.set( pipelineBlueprint, await pipelineBlueprint.toComputePipeline(
-        deviceContext, pipelineBlueprint.name, pipelineLayout
+        deviceContext, pipelineLayout
       ) );
     }
 

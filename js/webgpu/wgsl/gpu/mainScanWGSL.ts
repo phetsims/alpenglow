@@ -17,7 +17,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferSlot, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 // TODO: use multiple named types to simplify this boolean "mess"
@@ -87,20 +87,20 @@ const mainScanWGSL = <T>(
   const grainSize = options.grainSize;
 
   if ( options.inPlace ) {
-    context.addSlot( 'data', options.bindings.data );
+    context.addSlot( 'data', options.bindings.data, BufferBindingType.STORAGE );
   }
   else {
-    context.addSlot( 'input', options.bindings.input );
-    context.addSlot( 'output', options.bindings.output );
+    context.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
+    context.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
   }
   if ( options.storeReduction ) {
-    context.addSlot( 'reduction', options.bindings.reduction );
+    context.addSlot( 'reduction', options.bindings.reduction, BufferBindingType.STORAGE );
   }
   if ( options.addScannedReduction ) {
-    context.addSlot( 'scanned_reduction', options.bindings.scannedReduction );
+    context.addSlot( 'scanned_reduction', options.bindings.scannedReduction, BufferBindingType.READ_ONLY_STORAGE );
 
     if ( options.addScannedDoubleReduction ) {
-      context.addSlot( 'scanned_double_reduction', options.bindings.scannedDoubleReduction );
+      context.addSlot( 'scanned_double_reduction', options.bindings.scannedDoubleReduction, BufferBindingType.READ_ONLY_STORAGE );
     }
   }
 

@@ -2103,8 +2103,20 @@
       <h4 id="WGSL-linking">Linking</h4>
 
       <p class="TODO">
-        How should we get usages of things BEFORE creating the WGSL? Perhaps we have a class of things that "generate"
-        WGSL, that based on the input values can also generate the Usages?
+        See if we can remove the usage type-specific types?
+      </p>
+
+      <p class="TODO">
+        We have bindings: {} in our main shaders. Replace those with direct "slots" options (e.g. inputSlot, outputSlot)
+        or (e.g. input: InputSlot, output: OutputSlot).
+      </p>
+
+      <p class="TODO">
+        Put context.add( 'main', ... ) directly in the main shaders.
+      </p>
+
+      <p class="TODO">
+        Combine the WGSLContext and PipelineBlueprint. Good name for it?
       </p>
 
       <p class="TODO">

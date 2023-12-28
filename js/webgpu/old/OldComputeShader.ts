@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, OldBindingType, OldDualSnippet, OldDualSnippetSource, partialWGSLBeautify, TimestampLogger, WGSLContext, WGSLModuleDeclarations } from '../../imports.js';
+import { addLineNumbers, alpenglow, OldBindingType, OldDualSnippet, OldDualSnippetSource, partialWGSLBeautify, PipelineLayout, TimestampLogger, WGSLContext, WGSLModuleDeclarations } from '../../imports.js';
 import { combineOptions, optionize3 } from '../../../../phet-core/js/optionize.js';
 
 const LOG_SHADERS = true;
@@ -250,7 +250,8 @@ export default class OldComputeShader {
     bindingTypes: OldBindingType[],
     providedOptions?: OldComputeShaderOptions
   ): Promise<OldComputeShader> {
-    return OldComputeShader.fromWGSLAsync( device, name, context.toString(), bindingTypes, combineOptions<OldComputeShaderOptions>( {
+    // Hacked deprecated
+    return OldComputeShader.fromWGSLAsync( device, name, context.toString( null as unknown as PipelineLayout ), bindingTypes, combineOptions<OldComputeShaderOptions>( {
       log: context.log
     }, providedOptions ) );
   }

@@ -7,15 +7,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BufferSlot, getArrayType, getCastedType, PipelineLayout, ResourceSlot, U32Type, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
+import { alpenglow, BindingType, BufferSlot, getArrayType, getCastedType, PipelineLayout, ResourceSlot, ResourceUsage, U32Type, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
 
+// TODO: potential rename?
 export default class WGSLContext {
   private readonly declarations: WGSLInternalDeclaration[] = [];
-  private readonly bindings: Binding[] = [];
+  private readonly usageMap: Map<WGSLVariableName, ResourceUsage> = new Map<WGSLVariableName, ResourceUsage>();
 
   public constructor(
     public readonly shaderName: string,
-    public readonly pipelineLayout: PipelineLayout,
     public readonly log: boolean
   ) {}
 
@@ -41,25 +41,35 @@ export default class WGSLContext {
     }
   }
 
-  public addSlot( name: WGSLVariableName, slot: ResourceSlot ): void {
-    this.addBinding( name, this.pipelineLayout.getBindingFromSlot( slot ) );
-  }
+  public addSlot( name: WGSLVariableName, slot: ResourceSlot, bindingType: BindingType ): void {
+    // If it already exists, we'll do some checks and "combine" types (might switch read-only to read-write, etc.)
+    if ( this.usageMap.has( name ) ) {
+      const usage = this.usageMap.get( name )!;
+      assert && assert( usage.resourceSlot === slot );
 
-  public addBinding( name: WGSLVariableName, binding: Binding ): void {
-    const hasBinding = this.bindings.includes( binding );
-    const hasName = this.declarations.some( declaration => declaration.name === name );
+      const combinedType = bindingType.combined( usage.bindingType )!;
+      assert && assert( combinedType );
 
-    assert && assert( hasBinding === hasName );
-
-    if ( !hasBinding ) {
-      this.bindings.push( binding );
-
-      this.add( name, binding.getWGSLDeclaration( this, name ) );
+      this.usageMap.set( name, new ResourceUsage( slot, combinedType ) );
+    }
+    else {
+      // TODO: can we get rid of ResourceUsage typed subtypes?
+      this.usageMap.set( name, new ResourceUsage( slot, bindingType ) );
     }
   }
 
-  public toString(): string {
-    return this.declarations.map( declaration => declaration.declarations ).join( '\n' );
+  public toString( pipelineLayout: PipelineLayout ): string {
+    return [
+      ...Array.from( this.usageMap.keys() ).map( name => {
+        const usage = this.usageMap.get( name )!;
+        const binding = pipelineLayout.getBindingFromSlot( usage.resourceSlot );
+
+        // NOTE: type declaration should NOT create another usage. We will already have created bind group layouts
+        // based on the usages at this point, so referencing ANOTHER slot would cause major issues.
+        return binding.getWGSLDeclaration( this, name );
+      } ),
+      ...this.declarations.map( declaration => declaration.declarations )
+    ].join( '\n' );
   }
 
   public with( callback: ( context: WGSLContext ) => WGSLModuleDeclarations ): this {
@@ -69,6 +79,11 @@ export default class WGSLContext {
 
     // for chaining
     return this;
+  }
+
+  public getUsages(): ResourceUsage[] {
+    // TODO: get rid of this
+    return Array.from( this.usageMap.values() );
   }
 }
 alpenglow.register( 'WGSLContext', WGSLContext );

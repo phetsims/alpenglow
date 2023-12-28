@@ -8,7 +8,7 @@
 
 import { alpenglow, BindingType, ResourceSlot } from '../../imports.js';
 
-export default abstract class ResourceUsage {
+export default class ResourceUsage {
   public constructor(
     public readonly resourceSlot: ResourceSlot,
     public readonly bindingType: BindingType

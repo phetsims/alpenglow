@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferSlot, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -45,8 +45,8 @@ const mainReduceNonCommutativeWGSL = <T>(
   const binaryOp = options.binaryOp;
   const stripeOutput = options.stripeOutput;
 
-  context.addSlot( 'input', options.bindings.input );
-  context.addSlot( 'output', options.bindings.output );
+  context.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
+  context.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
 
   // TODO: generate storage binding and variable fully from Binding?
   return `

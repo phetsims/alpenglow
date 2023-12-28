@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ConcreteType, ConsoleLoggedLine, ConsoleLogger, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, BufferBindingType, ConcreteType, ConsoleLoggedLine, ConsoleLogger, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type logWGSLOptions<T> = {
@@ -56,7 +56,7 @@ const logWGSL = <T>(
 
   assert && assert( type || dataCount === 0 );
 
-  context.addSlot( '_log', WGSLContext.LOG_BUFFER_SLOT );
+  context.addSlot( '_log', WGSLContext.LOG_BUFFER_SLOT, BufferBindingType.STORAGE );
 
   // defaults for lineToLog
   if ( !lineToLog ) {

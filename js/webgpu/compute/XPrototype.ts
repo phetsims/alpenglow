@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, BufferResource, BufferSlot, BufferUsage, ComputePipeline, DeviceContext, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add, WGSLContext } from '../../imports.js';
+import { alpenglow, BufferResource, BufferSlot, DeviceContext, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add, WGSLContext } from '../../imports.js';
 
 /*
 We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer
@@ -46,65 +46,40 @@ export default class XPrototype {
 
     const firstPipelineBlueprint = new PipelineBlueprint(
       'first',
-      [
-        // TODO: deduplications with this?
-        new BufferUsage( inputSlot, BufferBindingType.READ_ONLY_STORAGE ),
-        new BufferUsage( middleSlot, BufferBindingType.STORAGE ),
-        ...( log ? [ new BufferUsage( WGSLContext.LOG_BUFFER_SLOT, BufferBindingType.STORAGE ) ] : [] )
-      ],
-      async ( deviceContext, name, pipelineLayout ) => {
-        return ComputePipeline.withContextAsync(
-          deviceContext,
-          name,
-          context => mainReduceWGSL<number>( context, {
-            binaryOp: binaryOp,
-            workgroupSize: workgroupSize,
-            grainSize: grainSize,
-            loadReducedOptions: {
-              lengthExpression: u32( inputSize )
-            },
-            bindings: {
-              input: inputSlot,
-              output: middleSlot
-            }
-          } ),
-          pipelineLayout,
-          log
-        );
-      }
+      // TODO: have the 'main' ones directly do this context add.
+      context => context.add( 'main', mainReduceWGSL<number>( context, {
+        binaryOp: binaryOp,
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        loadReducedOptions: {
+          lengthExpression: u32( inputSize )
+        },
+        // TODO: rename bindings to... slots?
+        // TODO: actually, just have 'inputSlot', 'outputSlot'.
+        bindings: {
+          input: inputSlot,
+          output: middleSlot
+        }
+      } ) ),
+      log
     );
 
     const secondPipelineBlueprint = new PipelineBlueprint(
       'second',
-      [
-        new BufferUsage( middleSlot, BufferBindingType.READ_ONLY_STORAGE ),
-        new BufferUsage( outputSlot, BufferBindingType.STORAGE ),
-        ...( log ? [ new BufferUsage( WGSLContext.LOG_BUFFER_SLOT, BufferBindingType.STORAGE ) ] : [] )
-      ],
-      async ( deviceContext, name, pipelineLayout ) => {
-        return ComputePipeline.withContextAsync(
-          deviceContext,
-          name,
-          context => mainReduceWGSL<number>( context, {
-            binaryOp: binaryOp,
-            workgroupSize: workgroupSize,
-            grainSize: grainSize,
-            loadReducedOptions: {
-              lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
-            },
-            bindings: {
-              input: middleSlot,
-              output: outputSlot
-            }
-          } ),
-          pipelineLayout,
-          log
-        );
-      }
+      context => context.add( 'main', mainReduceWGSL<number>( context, {
+        binaryOp: binaryOp,
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        loadReducedOptions: {
+          lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
+        },
+        bindings: {
+          input: middleSlot,
+          output: outputSlot
+        }
+      } ) ),
+      log
     );
-
-        // const firstDispatchSize = Math.ceil( inputValues.length / ( workgroupSize * grainSize ) );
-    // const secondDispatchSize = Math.ceil( firstDispatchSize / ( workgroupSize * grainSize * workgroupSize * grainSize ) );
 
     const firstRoutineBlueprint = new RoutineBlueprint( [ firstPipelineBlueprint ], ( context, stageInputSize: number ) => {
       context.dispatch( firstPipelineBlueprint, Math.ceil( stageInputSize / ( workgroupSize * grainSize ) ) );

@@ -84,36 +84,21 @@ export default class ComputePipeline {
   public static getLogBarrierWGSL(
     pipelineLayout: PipelineLayout
   ): WGSLModuleDeclarations {
-    const logBarrierWgslContext = new WGSLContext( 'log barrier', pipelineLayout, true ).with( context => mainLogBarrier( context ) );
-    return partialWGSLBeautify( stripWGSLComments( logBarrierWgslContext.toString() ) );
+    const logBarrierWgslContext = new WGSLContext( 'log barrier', true ).with( context => mainLogBarrier( context ) );
+    return partialWGSLBeautify( stripWGSLComments( logBarrierWgslContext.toString( pipelineLayout ) ) );
   }
 
-  public static withContext(
-    deviceContext: DeviceContext,
-    name: string,
-    toWGSL: ( context: WGSLContext ) => WGSLModuleDeclarations,
-    pipelineLayout: PipelineLayout,
-    log: boolean
-  ): ComputePipeline {
-    const wgslContext = new WGSLContext( name, pipelineLayout, log ).with( toWGSL );
-
-    const wgsl = partialWGSLBeautify( stripWGSLComments( wgslContext.toString(), false ) );
-
-    return new ComputePipeline( deviceContext, name, wgsl, pipelineLayout, log, false );
-  }
-
+  // NOTE: Create the non-async version if we ever REALLY want it.
   public static async withContextAsync(
     deviceContext: DeviceContext,
     name: string,
-    toWGSL: ( context: WGSLContext ) => WGSLModuleDeclarations,
+    wgsl: WGSLModuleDeclarations,
     pipelineLayout: PipelineLayout,
     log: boolean
   ): Promise<ComputePipeline> {
-    const wgslContext = new WGSLContext( name, pipelineLayout, log ).with( toWGSL );
+    const actualWGSL = partialWGSLBeautify( stripWGSLComments( wgsl, false ) );
 
-    const wgsl = partialWGSLBeautify( stripWGSLComments( wgslContext.toString(), false ) );
-
-    const computePipeline = new ComputePipeline( deviceContext, name, wgsl, pipelineLayout, log, true );
+    const computePipeline = new ComputePipeline( deviceContext, name, actualWGSL, pipelineLayout, log, true );
     await computePipeline.pipelinePromise;
     return computePipeline;
   }

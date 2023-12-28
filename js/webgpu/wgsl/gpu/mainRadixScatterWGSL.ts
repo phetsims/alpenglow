@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, ceilDivideConstantDivisorWGSL, commentWGSL, BufferSlot, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, RakedSizable, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BitOrder, ceilDivideConstantDivisorWGSL, commentWGSL, BufferSlot, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, RakedSizable, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLModuleDeclarations, BufferBindingType } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -59,9 +59,9 @@ const mainRadixScatterWGSL = <T>(
   const getBits = ( value: WGSLExpressionT ) => order.getBitsWGSL( value, pass * bitsPerPass, bitsPerPass );
 
   // TODO: we should have type assertions to make sure these match?
-  context.addSlot( 'input', bindings.input );
-  context.addSlot( 'histogramOffsets', bindings.histogramOffsets ); // make sure this is u32?
-  context.addSlot( 'output', bindings.output );
+  context.addSlot( 'input', bindings.input, BufferBindingType.READ_ONLY_STORAGE );
+  context.addSlot( 'histogramOffsets', bindings.histogramOffsets, BufferBindingType.READ_ONLY_STORAGE ); // make sure this is u32?
+  context.addSlot( 'output', bindings.output, BufferBindingType.STORAGE );
 
   // TODO: generate more of the bindings
   return `
