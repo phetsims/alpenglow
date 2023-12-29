@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferResource, BufferSlot, DeviceContext, DirectModule, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, Module, u32, U32Add } from '../../imports.js';
+import { alpenglow, BufferResource, BufferSlot, CompositeModule, DeviceContext, DirectModule, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, u32, U32Add } from '../../imports.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 
 /*
@@ -79,9 +79,8 @@ export default class XPrototype {
 
     // TODO: really refine all of the types here
 
-    const compositeModule = new Module( [
-      ...firstModule.pipelineBlueprints,
-      ...secondModule.pipelineBlueprints
+    const compositeModule = new CompositeModule( [
+      firstModule, secondModule
     ], ( context, inputSize: number ) => {
       // TODO: Is there a way we can set up these combinations so that we specify a list of child blueprints AND the inputs?
       firstModule.execute( context, inputSize );

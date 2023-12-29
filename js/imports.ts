@@ -499,6 +499,7 @@ export { default as DirectModule, DIRECT_MODULE_DEFAULTS } from './webgpu/comput
 export type { DirectModuleOptions } from './webgpu/compute/DirectModule.js';
 export { default as IndirectModule, INDIRECT_MODULE_DEFAULTS } from './webgpu/compute/IndirectModule.js';
 export type { IndirectModuleOptions } from './webgpu/compute/IndirectModule.js';
+export { default as CompositeModule } from './webgpu/compute/CompositeModule.js';
 export { default as Routine } from './webgpu/compute/Routine.js';
 export { default as Procedure } from './webgpu/compute/Procedure.js';
 export type { ProcedureExecuteOptions } from './webgpu/compute/Procedure.js';
