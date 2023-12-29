@@ -103,7 +103,7 @@ export default class XPrototype {
 
     const procedure = new Procedure( routine );
 
-    procedure.bindAllBuffers();
+    procedure.bindRemainingBuffers();
 
     const inputValues = _.range( 0, inputSize ).map( () => binaryOp.type.generateRandom( false ) );
     const expectedValues = [ inputValues.reduce( ( a, b ) => binaryOp.apply( a, b ), binaryOp.identity ) ];

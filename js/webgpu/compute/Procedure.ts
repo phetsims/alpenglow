@@ -43,9 +43,12 @@ export default class Procedure<In, Out> {
     } );
   }
 
-  // TODO: bind all UNBOUND buffers would be better
-  public bindAllBuffers(): void {
+  public bindRemainingBuffers(): void {
     for ( const slot of this.routine.rootBufferSlots ) {
+      if ( this.resourceMap.has( slot ) ) {
+        continue;
+      }
+
       let storageUsage = false;
       let uniformUsage = false;
       this.routine.pipelineBlueprints.forEach( pipelineBlueprint => {
