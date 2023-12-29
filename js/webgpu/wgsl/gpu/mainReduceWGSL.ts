@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, WGSLContext, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, PipelineBlueprint, WGSLModuleDeclarations } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -40,7 +40,7 @@ export const MAIN_REDUCE_DEFAULTS = {
 } as const;
 
 const mainReduceWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: mainReduceWGSLOptions<T>
 ): WGSLModuleDeclarations => {
 
@@ -52,12 +52,12 @@ const mainReduceWGSL = <T>(
   const stripeOutput = options.stripeOutput;
   const convergentRemap = options.convergentRemap;
 
-  context.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
-  context.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
+  blueprint.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
+  blueprint.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
 
   // TODO: generate storage binding and variable fully from Binding?
   return `
-    var<workgroup> scratch: array<${binaryOp.type.valueType( context )}, ${workgroupSize}>;
+    var<workgroup> scratch: array<${binaryOp.type.valueType( blueprint )}, ${workgroupSize}>;
     
     @compute @workgroup_size(${workgroupSize})
     fn main(
@@ -65,9 +65,9 @@ const mainReduceWGSL = <T>(
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
-      ${logStringWGSL( context, `mainReduceWGSL start ${binaryOp.name}` )}
+      ${logStringWGSL( blueprint, `mainReduceWGSL start ${binaryOp.name}` )}
     
-      ${loadReducedWGSL( context, combineOptions<loadReducedWGSLOptions<T>>( {
+      ${loadReducedWGSL( blueprint, combineOptions<loadReducedWGSLOptions<T>>( {
         value: 'value',
         binaryOp: binaryOp,
         loadExpression: i => `input[ ${i} ]`,
@@ -81,7 +81,7 @@ const mainReduceWGSL = <T>(
         workgroupBarrier();
       ` : ''}
     
-      ${reduceWGSL( context, combineOptions<reduceWGSLOptions<T>>( {
+      ${reduceWGSL( blueprint, combineOptions<reduceWGSLOptions<T>>( {
         value: 'value',
         binaryOp: binaryOp,
         scratch: 'scratch',

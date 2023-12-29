@@ -14,7 +14,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, WGSLContext, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, commentWGSL, PipelineBlueprint, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type getCorankWGSLOptions = {
@@ -41,7 +41,7 @@ export const GET_CORANK_DEFAULTS = {
 } as const;
 
 const getCorankWGSL = (
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: getCorankWGSLOptions
 ): WGSLStatements => {
 

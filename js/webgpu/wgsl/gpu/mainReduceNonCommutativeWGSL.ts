@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -34,7 +34,7 @@ export const MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS = {
 } as const;
 
 const mainReduceNonCommutativeWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: mainReduceNonCommutativeWGSLOptions<T>
 ): WGSLModuleDeclarations => {
 
@@ -45,13 +45,13 @@ const mainReduceNonCommutativeWGSL = <T>(
   const binaryOp = options.binaryOp;
   const stripeOutput = options.stripeOutput;
 
-  context.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
-  context.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
+  blueprint.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
+  blueprint.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
 
   // TODO: generate storage binding and variable fully from Binding?
   return `
     
-    var<workgroup> scratch: array<${binaryOp.type.valueType( context )}, ${workgroupSize}>;
+    var<workgroup> scratch: array<${binaryOp.type.valueType( blueprint )}, ${workgroupSize}>;
 
     @compute @workgroup_size(${workgroupSize})
     fn main(
@@ -64,7 +64,7 @@ const mainReduceNonCommutativeWGSL = <T>(
         scratch[ 0u ] = ${binaryOp.identityWGSL};
       }
     
-      var value: ${binaryOp.type.valueType( context )};
+      var value: ${binaryOp.type.valueType( blueprint )};
       ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => {
         // TODO: factor out combineToValue handling
         const combineToValue = ( varName: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => {
@@ -78,7 +78,7 @@ const mainReduceNonCommutativeWGSL = <T>(
               ${combineToValue( 'value', 'scratch[ 0u ]', 'value' )}
             }
     
-            ${reduceWGSL( context, combineOptions<reduceWGSLOptions<T>>( {
+            ${reduceWGSL( blueprint, combineOptions<reduceWGSLOptions<T>>( {
               value: 'value',
               scratch: 'scratch',
               binaryOp: binaryOp,

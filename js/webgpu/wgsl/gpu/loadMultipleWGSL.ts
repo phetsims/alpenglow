@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, ConcreteType, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, commentWGSL, ConcreteType, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type loadMultipleWGSLOptions<T> = {
@@ -52,7 +52,7 @@ export const LOAD_MULTIPLE_DEFAULTS = {
 } as const;
 
 const loadMultipleWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: loadMultipleWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -167,7 +167,7 @@ const loadMultipleWGSL = <T>(
     ${declaration ? `${declaration} ` : ''}${varName} = ${loadExpression( loadIndexExpression!( i ) )};
   ` : `
     ${declaration ? `
-      var ${varName}: ${type.valueType( context )};
+      var ${varName}: ${type.valueType( blueprint )};
     ` : ''}
     ${loadStatements!( varName, loadIndexExpression!( i ) )}
   `;
@@ -182,7 +182,7 @@ const loadMultipleWGSL = <T>(
           ${loadDeclarations.map( declaration => declaration( i ) ).join( '\n' )}
 
           ${outOfRangeValue ? `
-            var lm_val: ${type.valueType( context )};
+            var lm_val: ${type.valueType( blueprint )};
             ${ifRangeCheck( i, `
               ${indexedLoadStatements( 'lm_val', i )}
             `, `
@@ -193,7 +193,7 @@ const loadMultipleWGSL = <T>(
             ${storeStatements( `${loadIndexExpression!( i )} - ${workgroupIndex} * ${u32( workgroupSize * grainSize )}`, 'lm_val' )}
           ` : `
             ${ifRangeCheck( i, `
-              var lm_val: ${type.valueType( context )};
+              var lm_val: ${type.valueType( blueprint )};
               ${indexedLoadStatements( 'lm_val', i )}
 
               ${storeStatements( `${loadIndexExpression!( i )} - ${workgroupIndex} * ${u32( workgroupSize * grainSize )}`, 'lm_val' )}

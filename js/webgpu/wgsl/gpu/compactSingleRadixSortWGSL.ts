@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, nBitCompactSingleSortWGSL, nBitCompactSingleSortWGSLOptions, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, commentWGSL, nBitCompactSingleSortWGSL, nBitCompactSingleSortWGSLOptions, u32, PipelineBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import optionize from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -23,7 +23,7 @@ export type compactSingleRadixSortWGSLOptions<T> = {
 type SelfOptions<T> = Pick<compactSingleRadixSortWGSLOptions<T>, 'totalBits' | 'bitsPerInnerPass'>;
 
 const compactSingleRadixSortWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: compactSingleRadixSortWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -35,7 +35,7 @@ const compactSingleRadixSortWGSL = <T>(
     ${commentWGSL( 'begin compact_single_radix_sort' )}
   
     for ( var wrs_i = 0u; wrs_i < ${u32( options.totalBits )}; wrs_i += ${u32( options.bitsPerInnerPass )} ) {
-      ${nBitCompactSingleSortWGSL( context, options )}
+      ${nBitCompactSingleSortWGSL( blueprint, options )}
   
       // NOTE: no workgroupBarrier here, we already have it in the function
     }

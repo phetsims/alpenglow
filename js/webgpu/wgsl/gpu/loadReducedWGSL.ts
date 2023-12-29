@@ -11,7 +11,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 // CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
@@ -64,7 +64,7 @@ export const LOAD_REDUCED_DEFAULTS = {
 } as const;
 
 const loadReducedWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: loadReducedWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -181,7 +181,7 @@ const loadReducedWGSL = <T>(
     ${declaration ? `${declaration} ` : ''}${varName} = ${loadExpression( loadIndexExpression!( i ) )};
   ` : `
     ${declaration ? `
-      var ${varName}: ${binaryOp.type.valueType( context )};
+      var ${varName}: ${binaryOp.type.valueType( blueprint )};
     ` : ''}
     ${loadStatements!( varName, loadIndexExpression!( i ) )}
   `;
@@ -205,7 +205,7 @@ const loadReducedWGSL = <T>(
     var ${value} = ${getNestedExpression( grainSize - 1 )};
   ` : `
     ${commentWGSL( 'begin load_reduced' )}
-    var ${value}: ${binaryOp.type.valueType( context )};
+    var ${value}: ${binaryOp.type.valueType( blueprint )};
     {
       ${outerDeclarations.join( '\n' )}
       {

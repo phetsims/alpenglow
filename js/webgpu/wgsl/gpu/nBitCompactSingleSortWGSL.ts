@@ -12,7 +12,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, bitPackRadixAccessWGSL, bitPackRadixExclusiveScanWGSL, bitPackRadixIncrementWGSL, commentWGSL, ConsoleLoggedLine, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logStringWGSL, logValueWGSL, logWGSL, RakedSizable, scanWGSL, u32, U32Add, U32Type, unrollWGSL, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, BitOrder, bitPackRadixAccessWGSL, bitPackRadixExclusiveScanWGSL, bitPackRadixIncrementWGSL, commentWGSL, ConsoleLoggedLine, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logStringWGSL, logValueWGSL, logWGSL, RakedSizable, scanWGSL, u32, U32Add, U32Type, unrollWGSL, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType, PipelineBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type nBitCompactSingleSortWGSLOptions<T> = {
@@ -45,7 +45,7 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 const nBitCompactSingleSortWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: nBitCompactSingleSortWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -79,7 +79,7 @@ const nBitCompactSingleSortWGSL = <T>(
     4: Vec4uAdd
   }[ bitVectorSize ];
 
-  const logPackedBits = <T>( name: string, varName: WGSLVariableName ) => logWGSL<T>( context, {
+  const logPackedBits = <T>( name: string, varName: WGSLVariableName ) => logWGSL<T>( blueprint, {
     name: `${name} (countBitQuantity: ${Math.ceil( Math.log2( workgroupSize * grainSize ) )})`,
     // @ts-expect-error - Should we get 4 different cases to get the typing to work nicely?
     type: bitType,
@@ -108,7 +108,7 @@ const nBitCompactSingleSortWGSL = <T>(
   return `
     ${commentWGSL( 'begin n_bit_compact_single_sort' )}
 
-    ${logStringWGSL( context, `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${lengthExpression}" earlyLoad:${earlyLoad}` )}
+    ${logStringWGSL( blueprint, `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${lengthExpression}" earlyLoad:${earlyLoad}` )}
 
     {
       var tb_bits_vector = ${{
@@ -119,7 +119,7 @@ const nBitCompactSingleSortWGSL = <T>(
       }[ bitVectorSize ]};
 
       ${earlyLoad ? `
-        var tb_values: array<${order.type.valueType( context )}, ${grainSize}>;
+        var tb_values: array<${order.type.valueType( blueprint )}, ${grainSize}>;
       ` : ''}
 
       // Store our thread's "raked" values histogram into tb_bits_vector
@@ -129,13 +129,13 @@ const nBitCompactSingleSortWGSL = <T>(
           let tb_value = ${valueScratch}[ ${u32( grainSize )} * ${localIndex}.x + ${u32( i )} ];
           let tb_bits = ${getBits( 'tb_value' )};
 
-          ${logValueWGSL( context, {
+          ${logValueWGSL( blueprint, {
             value: 'tb_value',
             name: `tb_value (raked index ${i})`,
             type: order.type
           } )}
 
-          ${logValueWGSL( context, {
+          ${logValueWGSL( blueprint, {
             value: 'tb_bits',
             name: `tb_bits (raked index ${i})`,
             type: U32Type
@@ -157,7 +157,7 @@ const nBitCompactSingleSortWGSL = <T>(
 
       ${logPackedBits( 'n_bit histogram initial', 'tb_bits_vector' )}
 
-      ${scanWGSL( context, {
+      ${scanWGSL( blueprint, {
         value: 'tb_bits_vector',
         // @ts-expect-error - Hmm, should we actually split this into 4 cases?
         binaryOp: addBinaryOp,
@@ -180,7 +180,7 @@ const nBitCompactSingleSortWGSL = <T>(
       } )}
 
       ${!earlyLoad ? `
-        var tb_values: array<${order.type.valueType( context )}, ${grainSize}>;
+        var tb_values: array<${order.type.valueType( blueprint )}, ${grainSize}>;
 
         ${unrollWGSL( 0, grainSize, i => `
           // TODO: see if factoring out constants doesn't kill registers

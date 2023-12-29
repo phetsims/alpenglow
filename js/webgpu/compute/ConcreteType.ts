@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, u32, WGSLContext } from '../../imports.js';
+import { alpenglow, ByteEncoder, u32, PipelineBlueprint } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Random from '../../../../dot/js/Random.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
@@ -38,7 +38,7 @@ type ConcreteType<T = unknown> = {
   equals: ( a: T, b: T ) => boolean;
 
   // WGSL TODO: allow statements
-  equalsWGSL: ( context: WGSLContext, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
+  equalsWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
 
   // Encodes a given value into the end of the encoder
   encode( value: T, encoder: ByteEncoder ): void;
@@ -48,7 +48,7 @@ type ConcreteType<T = unknown> = {
 
   // WGSL representation
   // TODO: consider rename to getValueType?
-  valueType: ( context: WGSLContext ) => string;
+  valueType: ( blueprint: PipelineBlueprint ) => string;
   writeU32s(
     // given an expr:u32 offset and expr:u32 value, it will store the value at the offset
     storeStatement: StoreStatementCallback,
@@ -157,9 +157,9 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
       return true;
     },
 
-    equalsWGSL( context: WGSLContext, a: string, b: string ): string {
+    equalsWGSL( blueprint: PipelineBlueprint, a: string, b: string ): string {
       return `( ${_.range( 0, size ).map( i => {
-        return type.equalsWGSL( context, `${a}[ ${u32( i )} ]`, `${b}[ ${u32( i )} ]` );
+        return type.equalsWGSL( blueprint, `${a}[ ${u32( i )} ]`, `${b}[ ${u32( i )} ]` );
       } ).join( ' && ' )} )`;
     },
 
@@ -181,7 +181,7 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
       return array;
     },
 
-    valueType: ( context: WGSLContext ) => `array<${type.valueType( context )}, ${size}>`,
+    valueType: ( blueprint: PipelineBlueprint ) => `array<${type.valueType( blueprint )}, ${size}>`,
     writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
       return _.range( 0, size ).map( i => {
         return type.writeU32s(
@@ -205,7 +205,7 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
 };
 alpenglow.register( 'getArrayType', getArrayType );
 
-export const getCastedType = <T>( type: ConcreteType<T>, valueType: ( context: WGSLContext ) => string ): ConcreteType<T> => {
+export const getCastedType = <T>( type: ConcreteType<T>, valueType: ( blueprint: PipelineBlueprint ) => string ): ConcreteType<T> => {
   return {
     // eslint-disable-next-line no-object-spread-on-non-literals
     ...type,
@@ -221,7 +221,7 @@ export const U32Type: ConcreteType<number> = {
     return a === b;
   },
 
-  equalsWGSL: ( context: WGSLContext, a: string, b: string ): string => {
+  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
     return `( ${a} == ${b} )`;
   },
 
@@ -335,7 +335,7 @@ export const I32Type: ConcreteType<number> = {
     return a === b;
   },
 
-  equalsWGSL: ( context: WGSLContext, a: string, b: string ): string => {
+  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
     return `( ${a} == ${b} )`;
   },
 
@@ -369,7 +369,7 @@ export const Vec2uType: ConcreteType<Vector2> = {
     return a.equals( b );
   },
 
-  equalsWGSL: ( context: WGSLContext, a: string, b: string ): string => {
+  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
     // TODO: test
     return `all( ${a} == ${b} )`;
   },
@@ -490,7 +490,7 @@ export const Vec3uType: ConcreteType<Vector3> = {
     return a.equals( b );
   },
 
-  equalsWGSL: ( context: WGSLContext, a: string, b: string ): string => {
+  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
     // TODO: test
     return `all( ${a} == ${b} )`;
   },
@@ -547,7 +547,7 @@ export const Vec4uType: ConcreteType<Vector4> = {
     return a.equals( b );
   },
 
-  equalsWGSL: ( context: WGSLContext, a: string, b: string ): string => {
+  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
     // TODO: test
     return `all( ${a} == ${b} )`;
   },

@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferBindingType, BufferSlot, radixHistogramWGSL, WGSLContext, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BitOrder, BufferBindingType, BufferSlot, radixHistogramWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
 
 export type mainRadixHistogramWGSLOptions<T> = {
   workgroupSize: number;
@@ -24,8 +24,7 @@ export type mainRadixHistogramWGSLOptions<T> = {
 };
 
 const mainRadixHistogramWGSL = <T>(
-  // TODO: context pass-through for more functions?
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   options: mainRadixHistogramWGSLOptions<T>
 ): WGSLModuleDeclarations => {
 
@@ -37,8 +36,8 @@ const mainRadixHistogramWGSL = <T>(
   const lengthExpression = options.lengthExpression;
   const bindings = options.bindings;
 
-  context.addSlot( 'input', bindings.input, BufferBindingType.READ_ONLY_STORAGE );
-  context.addSlot( 'output', bindings.output, BufferBindingType.STORAGE ); // TODO: make sure this is u32
+  blueprint.addSlot( 'input', bindings.input, BufferBindingType.READ_ONLY_STORAGE );
+  blueprint.addSlot( 'output', bindings.output, BufferBindingType.STORAGE ); // TODO: make sure this is u32
 
   return `
     var<workgroup> histogram_scratch: array<atomic<u32>, ${1 << bitsPerPass}>;
@@ -49,7 +48,7 @@ const mainRadixHistogramWGSL = <T>(
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
-      ${radixHistogramWGSL( context, {
+      ${radixHistogramWGSL( blueprint, {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
         histogramScratch: 'histogram_scratch',

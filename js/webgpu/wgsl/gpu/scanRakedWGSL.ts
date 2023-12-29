@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, RakedSizable, scanWGSL, toStripedIndexWGSL, u32, unrollWGSL, WGSLContext, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, RakedSizable, scanWGSL, toStripedIndexWGSL, u32, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type scanRakedWGSLOptions<T> = {
@@ -52,7 +52,7 @@ export const SCAN_RAKED_DEFAULTS = {
 } as const;
 
 const scanRakedWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: scanRakedWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -99,7 +99,7 @@ const scanRakedWGSL = <T>(
     workgroupBarrier();
 
     // Scan the last-scanned element of each thread's tile (inclusive)
-    ${scanWGSL( context, {
+    ${scanWGSL( blueprint, {
       value: 'value',
       scratch: scratch,
       workgroupSize: workgroupSize,
@@ -139,7 +139,7 @@ const scanRakedWGSL = <T>(
       ${commentWGSL( 'begin (get global added values)' )}
 
       // Get the value we'll add to everything
-      var workgroup_added_value: ${binaryOp.type.valueType( context )};
+      var workgroup_added_value: ${binaryOp.type.valueType( blueprint )};
       ${getAddedValue( 'workgroup_added_value' )}
 
       // We need to LOAD the value before anything writes to it, since we'll be modifying those values
@@ -151,7 +151,7 @@ const scanRakedWGSL = <T>(
       {
         let last_value = ${scratch}[ ${localIndex} * ${u32( grainSize )} + ${u32( grainSize - 1 )} ];
 
-        var new_last_value: ${binaryOp.type.valueType( context )};
+        var new_last_value: ${binaryOp.type.valueType( blueprint )};
         ${combineToValue( 'new_last_value', 'workgroup_added_value', 'last_value' )}
 
         ${scratch}[ ${localIndex} * ${u32( grainSize )} + ${u32( grainSize - 1 )} ] = new_last_value;
@@ -166,7 +166,7 @@ const scanRakedWGSL = <T>(
     ${unrollWGSL( 0, grainSize - 1, i => `
       {
         let index = ${localIndex} * ${u32( grainSize )} + ${u32( i )};
-        var current_value: ${binaryOp.type.valueType( context )};
+        var current_value: ${binaryOp.type.valueType( blueprint )};
         ${combineToValue( 'current_value', 'added_value', `${scratch}[ index ]` )}
         ${scratch}[ index ] = current_value;
       }

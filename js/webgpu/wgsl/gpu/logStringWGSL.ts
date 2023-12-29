@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
+import { alpenglow, logWGSL, PipelineBlueprint, WGSLStatements } from '../../../imports.js';
 
 const logStringWGSL = (
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   str: string
-): WGSLStatements => logWGSL( context, {
+): WGSLStatements => logWGSL( blueprint, {
   name: str
 } );
 

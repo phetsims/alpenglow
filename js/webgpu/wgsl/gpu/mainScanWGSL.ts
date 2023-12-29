@@ -17,7 +17,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, PipelineBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 // TODO: use multiple named types to simplify this boolean "mess"
@@ -75,7 +75,7 @@ export const MAIN_SCAN_DEFAULTS = {
 } as const;
 
 const mainScanWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: mainScanWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -87,30 +87,30 @@ const mainScanWGSL = <T>(
   const grainSize = options.grainSize;
 
   if ( options.inPlace ) {
-    context.addSlot( 'data', options.bindings.data, BufferBindingType.STORAGE );
+    blueprint.addSlot( 'data', options.bindings.data, BufferBindingType.STORAGE );
   }
   else {
-    context.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
-    context.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
+    blueprint.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
+    blueprint.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
   }
   if ( options.storeReduction ) {
-    context.addSlot( 'reduction', options.bindings.reduction, BufferBindingType.STORAGE );
+    blueprint.addSlot( 'reduction', options.bindings.reduction, BufferBindingType.STORAGE );
   }
   if ( options.addScannedReduction ) {
-    context.addSlot( 'scanned_reduction', options.bindings.scannedReduction, BufferBindingType.READ_ONLY_STORAGE );
+    blueprint.addSlot( 'scanned_reduction', options.bindings.scannedReduction, BufferBindingType.READ_ONLY_STORAGE );
 
     if ( options.addScannedDoubleReduction ) {
-      context.addSlot( 'scanned_double_reduction', options.bindings.scannedDoubleReduction, BufferBindingType.READ_ONLY_STORAGE );
+      blueprint.addSlot( 'scanned_double_reduction', options.bindings.scannedDoubleReduction, BufferBindingType.READ_ONLY_STORAGE );
     }
   }
 
   return `
     
     ${options.addScannedReduction ? `
-      var<workgroup> reduction_value: ${binaryOp.type.valueType( context )};
+      var<workgroup> reduction_value: ${binaryOp.type.valueType( blueprint )};
     ` : ''}
     
-    var<workgroup> scratch: array<${binaryOp.type.valueType( context )}, ${workgroupSize * grainSize}>;
+    var<workgroup> scratch: array<${binaryOp.type.valueType( blueprint )}, ${workgroupSize * grainSize}>;
     
     @compute @workgroup_size(${workgroupSize})
     fn main(
@@ -118,7 +118,7 @@ const mainScanWGSL = <T>(
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
-      ${scanComprehensiveWGSL( context, {
+      ${scanComprehensiveWGSL( blueprint, {
         input: options.inPlace ? 'data' : 'input',
         output: options.inPlace ? 'data' : 'output',
         scratch: 'scratch',
@@ -138,8 +138,8 @@ const mainScanWGSL = <T>(
               let middle_value = scanned_reduction[ workgroup_id.x ];
               let lower_value = double_scanned_reduction[ workgroup_id.x / ${u32( workgroupSize * grainSize )} ];
             ` : `
-              var middle_value: ${binaryOp.type.valueType( context )};
-              var lower_value: ${binaryOp.type.valueType( context )};
+              var middle_value: ${binaryOp.type.valueType( blueprint )};
+              var lower_value: ${binaryOp.type.valueType( blueprint )};
               // NOTE: assumes the same workgroup/grain size for each level
               // This should work for any level of workgroup handling
               if ( workgroup_id.x % ${u32( workgroupSize * grainSize )} == 0u ) {

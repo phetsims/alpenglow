@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, ConcreteType, ConsoleLoggedLine, ConsoleLogger, u32, WGSLContext, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, BufferBindingType, ConcreteType, ConsoleLoggedLine, ConsoleLogger, u32, PipelineBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type logWGSLOptions<T> = {
@@ -37,7 +37,7 @@ export const LOG_DEFAULTS = {
 } as const;
 
 const logWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: logWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -50,13 +50,13 @@ const logWGSL = <T>(
   const dataCount = options.dataCount;
   let lineToLog = options.lineToLog;
 
-  if ( !context.log ) {
+  if ( !blueprint.log ) {
     return '';
   }
 
   assert && assert( type || dataCount === 0 );
 
-  context.addSlot( '_log', WGSLContext.LOG_BUFFER_SLOT, BufferBindingType.STORAGE );
+  blueprint.addSlot( '_log', PipelineBlueprint.LOG_BUFFER_SLOT, BufferBindingType.STORAGE );
 
   // defaults for lineToLog
   if ( !lineToLog ) {
@@ -75,7 +75,7 @@ const logWGSL = <T>(
     const id = ConsoleLogger.register( {
       type: type,
       logName: name,
-      shaderName: context.shaderName,
+      shaderName: blueprint.name,
       dataCount: typeof dataCount === 'number' ? dataCount : null,
       hasAdditionalIndex: additionalIndex !== null,
       lineToLog: lineToLog

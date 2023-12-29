@@ -507,7 +507,6 @@ export { default as XPrototype } from './webgpu/compute/XPrototype.js';
 
 export { partialWGSLBeautify, addLineNumbers, stripWGSLComments, GLOBAL_INDEXABLE_DEFAULTS, WORKGROUP_INDEXABLE_DEFAULTS, LOCAL_INDEXABLE_DEFAULTS, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS } from './webgpu/wgsl/WGSLUtils.js';
 export type { GlobalIndexable, WorkgroupIndexable, LocalIndexable, WorkgroupSizable, RakedSizable, OptionalLengthExpressionable, GrainSizable } from './webgpu/wgsl/WGSLUtils.js';
-export { default as WGSLContext } from './webgpu/wgsl/WGSLContext.js';
 
 export { default as binaryExpressionStatementWGSL } from './webgpu/wgsl/gpu/binaryExpressionStatementWGSL.js';
 export { default as coalescedLoopWGSL, COALESCED_LOOP_DEFAULTS } from './webgpu/wgsl/gpu/coalescedLoopWGSL.js';

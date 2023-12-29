@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, WGSLContext, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, commentWGSL, PipelineBlueprint, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mergeSequentialWGSLOptions = {
@@ -26,7 +26,7 @@ export const MERGE_SEQUENTIAL_DEFAULTS = {
 } as const;
 
 const mergeSequentialWGSL = (
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: mergeSequentialWGSLOptions
 ): WGSLStatements => {
 

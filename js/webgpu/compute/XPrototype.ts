@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferResource, BufferSlot, DeviceContext, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add, WGSLContext } from '../../imports.js';
+import { alpenglow, BufferResource, BufferSlot, DeviceContext, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add } from '../../imports.js';
 
 /*
 We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer
@@ -139,7 +139,7 @@ export default class XPrototype {
 
       return promise;
     }, {
-      logBuffer: log ? ( procedure.resourceMap.get( WGSLContext.LOG_BUFFER_SLOT )! as BufferResource ).buffer : null
+      logBuffer: log ? ( procedure.resourceMap.get( PipelineBlueprint.LOG_BUFFER_SLOT )! as BufferResource ).buffer : null
     } );
 
     procedure.dispose();

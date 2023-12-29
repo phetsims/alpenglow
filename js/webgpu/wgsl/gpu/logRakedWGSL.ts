@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, logWGSLOptions, RakedSizable, u32, WGSLContext, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, logWGSL, logWGSLOptions, RakedSizable, u32, PipelineBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 import PickRequired from '../../../../../phet-core/js/types/PickRequired.js';
@@ -28,7 +28,7 @@ export const LOG_RAKED_OPTIONS = {
 } as const;
 
 const logRakedWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: logRakedWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -46,7 +46,7 @@ const logRakedWGSL = <T>(
   assert && assert( lengthExpression || relativeLengthExpression );
   assert && assert( accessExpression || relativeAccessExpression );
 
-  if ( context.log ) {
+  if ( blueprint.log ) {
     return `
       {
         ${!skipBarriers ? `
@@ -73,7 +73,7 @@ const logRakedWGSL = <T>(
           log_length = min( log_length, ${relativeLengthExpression} - base_local_log_index );
         ` : ''}
 
-        ${logWGSL( context, combineOptions<logWGSLOptions<T>>( {
+        ${logWGSL( blueprint, combineOptions<logWGSLOptions<T>>( {
           dataCount: 'log_length',
           writeData: ( write: ( tIndex: WGSLExpressionU32, tValue: WGSLExpression ) => WGSLStatements ) => `
             for ( var _i = 0u; _i < log_length; _i++ ) {

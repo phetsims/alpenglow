@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, COALESCED_LOOP_DEFAULTS, coalescedLoopWGSL, coalescedLoopWGSLOptions, commentWGSL, WGSLContext, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, COALESCED_LOOP_DEFAULTS, coalescedLoopWGSL, coalescedLoopWGSLOptions, commentWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -24,7 +24,7 @@ export const HISTOGRAM_DEFAULTS = {
 } as const;
 
 const histogramWGSL = (
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: histogramWGSLOptions
 ): WGSLStatements => {
 
@@ -36,7 +36,7 @@ const histogramWGSL = (
   return `
     ${commentWGSL( 'begin histogram' )}
     {
-      ${coalescedLoopWGSL( context, {
+      ${coalescedLoopWGSL( blueprint, {
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
         lengthExpression: options.lengthExpression,

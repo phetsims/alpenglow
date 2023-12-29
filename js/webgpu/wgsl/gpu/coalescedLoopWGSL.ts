@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, conditionalIfWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, WGSLContext, WGSLExpressionU32, WGSLStatements, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, conditionalIfWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLStatements, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type coalescedLoopWGSLOptions = {
@@ -20,7 +20,7 @@ export const COALESCED_LOOP_DEFAULTS = {
 } as const;
 
 const coalescedLoopWGSL = (
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: coalescedLoopWGSLOptions
 ): WGSLStatements => {
 

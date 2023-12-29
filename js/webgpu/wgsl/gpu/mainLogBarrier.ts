@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, WGSLContext, WGSLStatements } from '../../../imports.js';
+import { alpenglow, logWGSL, PipelineBlueprint, WGSLStatements } from '../../../imports.js';
 
 const mainLogBarrier = (
-  context: WGSLContext
+  blueprint: PipelineBlueprint
 ): WGSLStatements => {
   return `
     @compute @workgroup_size(1)
@@ -18,7 +18,7 @@ const mainLogBarrier = (
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
-      ${logWGSL( context, {
+      ${logWGSL( blueprint, {
         name: null
       } )}
     }

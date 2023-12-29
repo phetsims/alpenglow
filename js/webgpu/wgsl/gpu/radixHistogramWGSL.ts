@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ceilDivideConstantDivisorWGSL, commentWGSL, histogramWGSL, histogramWGSLOptions, u32, unrollWGSL, WGSLContext, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, ceilDivideConstantDivisorWGSL, commentWGSL, histogramWGSL, histogramWGSLOptions, u32, unrollWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import WithoutNull from '../../../../../phet-core/js/types/WithoutNull.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 
@@ -18,7 +18,7 @@ export type radixHistogramWGSLOptions = {
 } & WithoutNull<WithRequired<histogramWGSLOptions, 'lengthExpression'>, 'lengthExpression'>;
 
 const radixHistogramWGSL = (
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   options: radixHistogramWGSLOptions
 ): WGSLStatements => {
 
@@ -32,7 +32,7 @@ const radixHistogramWGSL = (
     ${commentWGSL( 'begin radix_histogram' )}
   
     {
-      ${histogramWGSL( context, options )}
+      ${histogramWGSL( blueprint, options )}
   
       let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression, workgroupSize * grainSize )};
       if ( workgroup_id.x < num_valid_workgroups ) {

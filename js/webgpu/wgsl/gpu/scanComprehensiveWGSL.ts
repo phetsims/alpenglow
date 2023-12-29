@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, coalescedLoopWGSL, commentWGSL, GlobalIndexable, loadMultipleWGSL, loadMultipleWGSLOptions, LocalIndexable, OptionalLengthExpressionable, RakedSizable, scanRakedWGSL, scanRakedWGSLOptions, WGSLContext, WGSLStatements, WGSLVariableName, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, BinaryOp, coalescedLoopWGSL, commentWGSL, GlobalIndexable, loadMultipleWGSL, loadMultipleWGSLOptions, LocalIndexable, OptionalLengthExpressionable, RakedSizable, scanRakedWGSL, scanRakedWGSLOptions, PipelineBlueprint, WGSLStatements, WGSLVariableName, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -40,7 +40,7 @@ export const SCAN_COMPREHENSIVE_DEFAULTS = {
 } as const;
 
 const scanComprehensiveWGSL = <T>(
-  context: WGSLContext,
+  blueprint: PipelineBlueprint,
   providedOptions: scanComprehensiveWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -58,7 +58,7 @@ const scanComprehensiveWGSL = <T>(
     ${commentWGSL( 'begin scan_comprehensive' )}
 
     // Load into workgroup memory
-    ${loadMultipleWGSL( context, {
+    ${loadMultipleWGSL( blueprint, {
       loadExpression: index => `${input}[ ${index} ]`,
       storeStatements: ( index, value ) => `${scratch}[ ${index} ] = ${value};`,
       workgroupSize: options.workgroupSize,
@@ -76,7 +76,7 @@ const scanComprehensiveWGSL = <T>(
 
     workgroupBarrier();
     
-    ${scanRakedWGSL( context, {
+    ${scanRakedWGSL( blueprint, {
       // TODO: we're missing error checking here? Use optionize3?
       scratch: scratch,
       binaryOp: binaryOp,
@@ -95,7 +95,7 @@ const scanComprehensiveWGSL = <T>(
 
     // Write our output in a coalesced order.
     ${commentWGSL( 'begin (output write)' )}
-    ${coalescedLoopWGSL( context, {
+    ${coalescedLoopWGSL( blueprint, {
       workgroupSize: options.workgroupSize,
       grainSize: options.grainSize,
       lengthExpression: options.lengthExpression,

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingLocation, BindingType, BufferBindingType, BufferSlot, ResourceSlot, StorageTextureBindingType, WGSLContext, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
+import { alpenglow, BindingLocation, BindingType, BufferBindingType, BufferSlot, ResourceSlot, StorageTextureBindingType, PipelineBlueprint, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
 
 export default class Binding {
   public constructor(
@@ -15,13 +15,13 @@ export default class Binding {
     public readonly slot: ResourceSlot
   ) {}
 
-  public getWGSLDeclaration( context: WGSLContext, name: WGSLVariableName ): WGSLModuleDeclarations {
+  public getWGSLDeclaration( blueprint: PipelineBlueprint, name: WGSLVariableName ): WGSLModuleDeclarations {
     // TODO: typing improvements here? This isn't the best code
     if ( this.bindingType instanceof BufferBindingType && this.slot instanceof BufferSlot ) {
       const varType = this.bindingType.type === 'uniform' ? 'uniform' : `storage, ${this.bindingType.type === 'read-only-storage' ? 'read' : 'read_write'}`;
       return `
         ${this.location.getWGSLAnnotation()}
-        var<${varType}> ${name}: ${this.slot.concreteType.valueType( context )};
+        var<${varType}> ${name}: ${this.slot.concreteType.valueType( blueprint )};
       `;
     }
     else if ( this.bindingType instanceof StorageTextureBindingType ) {
