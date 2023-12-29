@@ -34,19 +34,14 @@ export default class XPrototype {
     const log = false;
     const maxItemCount = workgroupSize * grainSize * 10; // pretend
 
-    const inputType = getArrayType( binaryOp.type, maxItemCount, binaryOp.identity );
-    const middleType = getArrayType( binaryOp.type, Math.ceil( maxItemCount / ( workgroupSize * grainSize ) ), binaryOp.identity );
-    const outputType = getArrayType( binaryOp.type, 1 ); // TODO
-
-    const inputSlot = new BufferSlot( inputType );
-    const middleSlot = new BufferSlot( middleType );
-    const outputSlot = new BufferSlot( outputType );
+    const inputSlot = new BufferSlot( getArrayType( binaryOp.type, maxItemCount, binaryOp.identity ) );
+    const middleSlot = new BufferSlot( getArrayType( binaryOp.type, Math.ceil( maxItemCount / ( workgroupSize * grainSize ) ), binaryOp.identity ) );
+    const outputSlot = new BufferSlot( getArrayType( binaryOp.type, 1 ) ); // TODO
 
     // TODO: inspect all usages of everything, look for simplification opportunities
 
     const firstPipelineBlueprint = new PipelineBlueprint(
       'first',
-      // TODO: have the 'main' ones directly do this context add.
       blueprint => mainReduceWGSL<number>( blueprint, {
         input: inputSlot,
         output: middleSlot,
@@ -105,8 +100,6 @@ export default class XPrototype {
       combinedBlueprint.execute( context, input.length );
 
       promise = context.getTypedBufferValue( outputSlot );
-
-      // context.getTypedBufferValue( outputSlot ).then( output => console.log( output ) ).catch( err => console.error( err ) );
     } );
 
     const routine = await Routine.create(

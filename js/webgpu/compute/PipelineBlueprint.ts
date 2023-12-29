@@ -22,7 +22,7 @@ export default class PipelineBlueprint {
   ) {
     withBlueprint( this );
 
-    this.usages = Array.from( this.usageMap.values() ); // TODO: get rid of this forwarding
+    this.usages = Array.from( this.usageMap.values() );
   }
 
   public async toComputePipeline(
