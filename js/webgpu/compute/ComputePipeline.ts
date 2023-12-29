@@ -85,7 +85,7 @@ export default class ComputePipeline {
     pipelineLayout: PipelineLayout
   ): WGSLModuleDeclarations {
     // TODO: remove the superfluous main add
-    const logBarrierWgslContext = new PipelineBlueprint( 'log barrier', context => mainLogBarrier( context ), true );
+    const logBarrierWgslContext = new PipelineBlueprint( 'log barrier', blueprint => mainLogBarrier( blueprint ), true );
     return partialWGSLBeautify( stripWGSLComments( logBarrierWgslContext.toString( pipelineLayout ) ) );
   }
 

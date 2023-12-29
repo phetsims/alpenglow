@@ -40,8 +40,8 @@ export default class PipelineBlueprint {
 
   // TODO: oh no, we need to put the atomic in here(!)
   // TODO: Or actually, just an ability to put structs of arbitrary types in ConcreteTypes
-  public static readonly LOG_BUFFER_SLOT = new BufferSlot( getCastedType( getArrayType( U32Type, 2 << 22, 0 ), context => {
-    context.add( '_Log', `
+  public static readonly LOG_BUFFER_SLOT = new BufferSlot( getCastedType( getArrayType( U32Type, 2 << 22, 0 ), blueprint => {
+    blueprint.add( '_Log', `
       struct _Log {
         next_space: atomic<u32>,
         data: array<u32>

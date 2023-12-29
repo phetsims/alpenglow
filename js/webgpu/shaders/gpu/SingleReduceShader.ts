@@ -23,7 +23,7 @@ export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
       deviceContext.device,
       name,
       // TODO: eeek! (also deprecate)
-      new PipelineBlueprint( name, context => mainReduceWGSL( context, options ), !!options.log ),
+      new PipelineBlueprint( name, blueprint => mainReduceWGSL( blueprint, options ), !!options.log ),
       [
         OldBindingType.READ_ONLY_STORAGE_BUFFER,
         OldBindingType.STORAGE_BUFFER
