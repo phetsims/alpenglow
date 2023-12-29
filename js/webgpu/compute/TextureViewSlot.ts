@@ -9,8 +9,8 @@
 import { alpenglow, ResourceSlot } from '../../imports.js';
 
 export default class TextureViewSlot extends ResourceSlot {
-  public toString(): string {
-    return 'TextureViewSlot()';
+  public toDebugString(): string {
+    return `TextureViewSlot[#${this.id}]`;
   }
 }
 alpenglow.register( 'TextureViewSlot', TextureViewSlot );

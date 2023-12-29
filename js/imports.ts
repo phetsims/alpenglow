@@ -482,6 +482,7 @@ export { default as ConcreteBindingType } from './webgpu/compute/ConcreteBinding
 export { default as ResourceSlot } from './webgpu/compute/ResourceSlot.js';
 export { default as BufferSlotSlice } from './webgpu/compute/BufferSlotSlice.js';
 export { default as BufferSlot } from './webgpu/compute/BufferSlot.js';
+export { default as BufferArraySlot } from './webgpu/compute/BufferArraySlot.js';
 export { default as TextureViewSlot } from './webgpu/compute/TextureViewSlot.js';
 export { default as Resource } from './webgpu/compute/Resource.js';
 export { default as BufferResource } from './webgpu/compute/BufferResource.js';
@@ -583,8 +584,12 @@ export type { mergeWGSLOptions } from './webgpu/wgsl/gpu/mergeWGSL.js';
 export { default as mainScanWGSL, MAIN_SCAN_DEFAULTS } from './webgpu/wgsl/gpu/mainScanWGSL.js';
 export type { mainScanWGSLOptions } from './webgpu/wgsl/gpu/mainScanWGSL.js';
 
-export { default as SingleReduceModule } from './webgpu/modules/gpu/SingleReduceModule.js';
+export { default as SingleReduceModule, SINGLE_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/SingleReduceModule.js';
 export type { SingleReduceModuleOptions } from './webgpu/modules/gpu/SingleReduceModule.js';
+export { default as ReduceModule, REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/ReduceModule.js';
+export type { ReduceModuleOptions } from './webgpu/modules/gpu/ReduceModule.js';
+
+// TODO: deprecate and remove these
 export { default as SingleReduceShader } from './webgpu/shaders/gpu/SingleReduceShader.js';
 export type { SingleReduceShaderOptions } from './webgpu/shaders/gpu/SingleReduceShader.js';
 export { default as AtomicReduceShader, u32AtomicIdentities, i32AtomicIdentities } from './webgpu/shaders/gpu/AtomicReduceShader.js';

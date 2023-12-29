@@ -13,7 +13,12 @@ const ceilDivideConstantDivisorWGSL = (
   x: WGSLExpressionU32,
   y: number
 ): string => {
-  return `( ( ( ${x} ) + ${u32( y - 1 )} ) / ${u32( y )} )`;
+  if ( y === 1 ) {
+    return x;
+  }
+  else {
+    return `( ( ( ${x} ) + ${u32( y - 1 )} ) / ${u32( y )} )`;
+  }
 };
 
 export default ceilDivideConstantDivisorWGSL;

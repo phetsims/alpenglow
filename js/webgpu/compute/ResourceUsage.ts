@@ -13,5 +13,9 @@ export default class ResourceUsage {
     public readonly resourceSlot: ResourceSlot,
     public readonly bindingType: BindingType
   ) {}
+
+  public toDebugString(): string {
+    return `ResourceUsage[slot:${this.resourceSlot.toDebugString()} type:${this.bindingType.toDebugString()}]`;
+  }
 }
 alpenglow.register( 'ResourceUsage', ResourceUsage );

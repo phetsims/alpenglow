@@ -35,8 +35,8 @@ export default class BufferBindingType extends BindingType {
     }
   }
 
-  public toString(): string {
-    return `BufferBindingType(${this.type})`;
+  public toDebugString(): string {
+    return `BufferBindingType[${this.type}]`;
     // return `BufferBindingType(${this.type}, ${this.hasDynamicOffset}, ${this.minBindingSize})`;
   }
 

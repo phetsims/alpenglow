@@ -15,7 +15,7 @@ export default abstract class BindingType {
   // null if they can't be combined
   public abstract combined( other: BindingType ): BindingType | null;
 
-  public abstract toString(): string;
+  public abstract toDebugString(): string;
 
   public getBindGroupLayoutEntry( index: number ): GPUBindGroupLayoutEntry {
     const entry: GPUBindGroupLayoutEntry = {

@@ -32,5 +32,9 @@ export default class BufferResource extends Resource {
       resource: bufferBinding
     };
   }
+
+  public toDebugString(): string {
+    return `BufferResource[#${this.id}${this.buffer.label ? ` label:${this.buffer.label}` : ''} bufsize:${this.buffer.size}${this.offset !== 0 ? ` offset:${this.offset}` : ''}${this.size !== 0 ? ` size:${this.size}` : ''}]`;
+  }
 }
 alpenglow.register( 'BufferResource', BufferResource );

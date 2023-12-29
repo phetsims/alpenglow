@@ -17,8 +17,8 @@ export default class StorageTextureBindingType extends BindingType {
     super();
   }
 
-  public toString(): string {
-    return `StorageTextureBindingType(${this.access}, ${this.format}, ${this.viewDimension})`;
+  public toDebugString(): string {
+    return `StorageTextureBindingType[${this.access}, ${this.format}, ${this.viewDimension}]`;
   }
 
   public combined( other: BindingType ): BindingType | null {

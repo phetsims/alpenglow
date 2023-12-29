@@ -107,6 +107,13 @@ export default class PipelineBlueprint {
       ...this.declarations.map( declaration => declaration.declarations )
     ].join( '\n' );
   }
+
+  public toDebugString(): string {
+    return `PipelineBlueprint["${this.name}" log:${this.log}]\n${Array.from( this.usageMap.keys() ).map( name => {
+      const usage = this.usageMap.get( name )!;
+      return `  ${name}: ${usage.toDebugString()}`;
+    } ).join( '\n' )}`;
+  }
 }
 alpenglow.register( 'PipelineBlueprint', PipelineBlueprint );
 

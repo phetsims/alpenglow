@@ -21,5 +21,9 @@ export default class TextureViewResource extends Resource {
       resource: this.textureView
     };
   }
+
+  public toDebugString(): string {
+    return `TextureViewResource[#${this.id}${this.textureView.label ? ` label:${this.textureView.label}` : ''}]`;
+  }
 }
 alpenglow.register( 'TextureViewResource', TextureViewResource );

@@ -24,8 +24,8 @@ export default class BufferSlot<T = unknown> extends ResourceSlot {
     return this.bufferSlotSlices.some( slice => slice.bufferSlot === slot );
   }
 
-  public toString(): string {
-    return `BufferSlot(${this.size})`;
+  public toDebugString(): string {
+    return `BufferSlot[#${this.id} size:${this.size} type:${this.concreteType.name}]`;
   }
 }
 alpenglow.register( 'BufferSlot', BufferSlot );

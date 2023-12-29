@@ -17,8 +17,8 @@ export default class TextureBindingType extends BindingType {
     super();
   }
 
-  public toString(): string {
-    return `TextureBindingType(${this.sampleType}, ${this.viewDimension}, ${this.multisampled})`;
+  public toDebugString(): string {
+    return `TextureBindingType[${this.sampleType}, ${this.viewDimension}, ${this.multisampled}]`;
   }
 
   public combined( other: BindingType ): BindingType | null {

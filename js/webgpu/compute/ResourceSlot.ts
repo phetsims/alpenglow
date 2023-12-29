@@ -8,7 +8,11 @@
 
 import { alpenglow } from '../../imports.js';
 
+let globalId = 1;
+
 export default abstract class ResourceSlot {
-  public abstract toString(): string;
+  public readonly id: number = globalId++;
+
+  public abstract toDebugString(): string;
 }
 alpenglow.register( 'ResourceSlot', ResourceSlot );

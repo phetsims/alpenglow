@@ -81,6 +81,7 @@ const roundUp = ( k: number, n: number ) => Math.ceil( n / k ) * k;
 
 export type ConcreteArrayType<T = unknown> = ConcreteType<T[]> & {
   elementType: ConcreteType<T>;
+  length: number;
   slice( start: number, end: number ): ConcreteArrayType<T>;
 };
 
@@ -135,6 +136,7 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
   return {
     name: `${type.name}[${size}]`,
     bytesPerElement: type.bytesPerElement * size,
+    length: size,
 
     elementType: type,
 

@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferResource, BufferSlot, CompositeModule, DeviceContext, DirectModule, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, u32, U32Add } from '../../imports.js';
-import Vector3 from '../../../../dot/js/Vector3.js';
+import { alpenglow, BufferArraySlot, BufferResource, DeviceContext, Executor, getArrayType, PipelineBlueprint, Procedure, ReduceModule, Routine, u32, U32Add } from '../../imports.js';
 
 /*
 We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer
@@ -32,64 +31,28 @@ export default class XPrototype {
     const inputSize = workgroupSize * grainSize * 5 - 27;
 
     // TODO: make sure we're including testing WITH logging(!)
-    const log = false;
+    const log = true;
     const maxItemCount = workgroupSize * grainSize * 10; // pretend
 
-    const inputSlot = new BufferSlot( getArrayType( binaryOp.type, maxItemCount, binaryOp.identity ) );
-    const middleSlot = new BufferSlot( getArrayType( binaryOp.type, Math.ceil( maxItemCount / ( workgroupSize * grainSize ) ), binaryOp.identity ) );
-    const outputSlot = new BufferSlot( getArrayType( binaryOp.type, 1 ) ); // TODO
+    const inputSlot = new BufferArraySlot( getArrayType( binaryOp.type, maxItemCount, binaryOp.identity ) );
+    const outputSlot = new BufferArraySlot( getArrayType( binaryOp.type, 1 ) ); // TODO
 
     // TODO: inspect all usages of everything, look for simplification opportunities
 
-    const firstModule = new DirectModule( {
-      name: 'first',
+    const reduceModule = new ReduceModule( {
+      name: 'reduce',
       log: log,
-      setup: blueprint => mainReduceWGSL<number>( blueprint, {
-        input: inputSlot,
-        output: middleSlot,
-        binaryOp: binaryOp,
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
-        loadReducedOptions: {
-          lengthExpression: u32( inputSize )
-        }
-      } ),
-      setDispatchSize: ( dispatchSize: Vector3, stageInputSize: number ) => {
-        dispatchSize.x = Math.ceil( stageInputSize / ( workgroupSize * grainSize ) );
-      }
-    } );
-
-    const secondModule = new DirectModule( {
-      name: 'second',
-      log: log,
-      setup: blueprint => mainReduceWGSL<number>( blueprint, {
-        input: middleSlot,
-        output: outputSlot,
-        binaryOp: binaryOp,
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
-        loadReducedOptions: {
-          lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
-        }
-      } ),
-      setDispatchSize: ( dispatchSize: Vector3, stageInputSize: number ) => {
-        dispatchSize.x = Math.ceil( stageInputSize / ( workgroupSize * grainSize ) );
-      }
-    } );
-
-    // TODO: really refine all of the types here
-
-    const compositeModule = new CompositeModule( [
-      firstModule, secondModule
-    ], ( context, inputSize: number ) => {
-      // TODO: Is there a way we can set up these combinations so that we specify a list of child blueprints AND the inputs?
-      firstModule.execute( context, inputSize );
-      secondModule.execute( context, Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+      input: inputSlot,
+      output: outputSlot,
+      binaryOp: binaryOp,
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      lengthExpression: u32( inputSize )
     } );
 
     const routine = await Routine.create(
       deviceContext,
-      compositeModule,
+      reduceModule,
       [],
       Routine.INDIVIDUAL_LAYOUT_STRATEGY,
       ( context, execute, input: number[] ) => {
