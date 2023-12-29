@@ -7,6 +7,7 @@
  */
 
 import { alpenglow, BufferResource, BufferSlot, DeviceContext, DirectRoutineBlueprint, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add } from '../../imports.js';
+import Vector3 from '../../../../dot/js/Vector3.js';
 
 /*
 We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer
@@ -43,7 +44,7 @@ export default class XPrototype {
     const firstRoutineBlueprint = new DirectRoutineBlueprint( {
       name: 'first',
       log: log,
-      create: blueprint => mainReduceWGSL<number>( blueprint, {
+      setup: blueprint => mainReduceWGSL<number>( blueprint, {
         input: inputSlot,
         output: middleSlot,
         binaryOp: binaryOp,
@@ -53,15 +54,15 @@ export default class XPrototype {
           lengthExpression: u32( inputSize )
         }
       } ),
-      execute: ( context, dispatch, stageInputSize: number ) => {
-        dispatch( context, Math.ceil( stageInputSize / ( workgroupSize * grainSize ) ) );
+      setDispatchSize: ( dispatchSize: Vector3, stageInputSize: number ) => {
+        dispatchSize.x = Math.ceil( stageInputSize / ( workgroupSize * grainSize ) );
       }
     } );
 
     const secondRoutineBlueprint = new DirectRoutineBlueprint( {
       name: 'second',
       log: log,
-      create: blueprint => mainReduceWGSL<number>( blueprint, {
+      setup: blueprint => mainReduceWGSL<number>( blueprint, {
         input: middleSlot,
         output: outputSlot,
         binaryOp: binaryOp,
@@ -71,8 +72,8 @@ export default class XPrototype {
           lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
         }
       } ),
-      execute: ( context, dispatch, stageInputSize: number ) => {
-        dispatch( context, Math.ceil( stageInputSize / ( workgroupSize * grainSize ) ) );
+      setDispatchSize: ( dispatchSize: Vector3, stageInputSize: number ) => {
+        dispatchSize.x = Math.ceil( stageInputSize / ( workgroupSize * grainSize ) );
       }
     } );
 

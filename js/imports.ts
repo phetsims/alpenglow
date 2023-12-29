@@ -497,6 +497,8 @@ export type { PipelineBlueprintOptions } from './webgpu/compute/PipelineBlueprin
 export { default as RoutineBlueprint } from './webgpu/compute/RoutineBlueprint.js';
 export { default as DirectRoutineBlueprint } from './webgpu/compute/DirectRoutineBlueprint.js';
 export type { DirectRoutineBlueprintOptions } from './webgpu/compute/DirectRoutineBlueprint.js';
+export { default as IndirectRoutineBlueprint } from './webgpu/compute/IndirectRoutineBlueprint.js';
+export type { IndirectRoutineBlueprintOptions } from './webgpu/compute/IndirectRoutineBlueprint.js';
 export { default as Routine } from './webgpu/compute/Routine.js';
 export { default as Procedure } from './webgpu/compute/Procedure.js';
 export type { ProcedureExecuteOptions } from './webgpu/compute/Procedure.js';

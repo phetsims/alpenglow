@@ -6,18 +6,21 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ExecutionContext, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, RoutineBlueprint } from '../../imports.js';
+import { alpenglow, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, RoutineBlueprint } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import Vector3 from '../../../../dot/js/Vector3.js';
 
 export type DirectRoutineBlueprintOptions<T> = {
-  create: ( blueprint: PipelineBlueprint ) => void;
-  execute: ( context: ExecutionContext, dispatch: ( context: ExecutionContext, dispatchX?: number, dispatchY?: number, dispatchZ?: number ) => void, data: T ) => void;
+  setup: ( blueprint: PipelineBlueprint ) => void;
+  setDispatchSize: ( dispatchSize: Vector3, data: T ) => void;
 } & PipelineBlueprintOptions;
 
 const DIRECT_ROUTINE_BLUEPRINT_DEFAULTS = {
   // eslint-disable-next-line no-object-spread-on-non-literals
   ...PIPELINE_BLUEPRINT_DEFAULTS
 } as const;
+
+const scratchVector3 = Vector3.ZERO.copy();
 
 export default class DirectRoutineBlueprint<T> extends RoutineBlueprint<T> {
   public constructor(
@@ -26,14 +29,14 @@ export default class DirectRoutineBlueprint<T> extends RoutineBlueprint<T> {
     const options = optionize3<DirectRoutineBlueprintOptions<T>>()( {}, DIRECT_ROUTINE_BLUEPRINT_DEFAULTS, providedOptions );
 
     const pipelineBlueprint = new PipelineBlueprint( options );
-    options.create( pipelineBlueprint );
-
-    const dispatch = ( context: ExecutionContext, dispatchX = 1, dispatchY = 1, dispatchZ = 1 ) => {
-      context.dispatch( pipelineBlueprint, dispatchX, dispatchY, dispatchZ );
-    };
+    options.setup( pipelineBlueprint );
 
     super( [ pipelineBlueprint ], ( context, data ) => {
-      options.execute( context, dispatch, data );
+      const dispatchSize = scratchVector3.setXYZ( 1, 1, 1 );
+
+      options.setDispatchSize( dispatchSize, data );
+
+      context.dispatch( pipelineBlueprint, dispatchSize.x, dispatchSize.y, dispatchSize.z );
     } );
   }
 }
