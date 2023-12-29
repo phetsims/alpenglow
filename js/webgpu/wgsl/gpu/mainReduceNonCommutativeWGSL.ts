@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLModuleDeclarations, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLExpression, WGSLVariableName } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -36,7 +36,7 @@ export const MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS = {
 const mainReduceNonCommutativeWGSL = <T>(
   blueprint: PipelineBlueprint,
   providedOptions: mainReduceNonCommutativeWGSLOptions<T>
-): WGSLModuleDeclarations => {
+): void => {
 
   const options = optionize3<mainReduceNonCommutativeWGSLOptions<T>>()( {}, MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS, providedOptions );
 
@@ -49,7 +49,7 @@ const mainReduceNonCommutativeWGSL = <T>(
   blueprint.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
 
   // TODO: generate storage binding and variable fully from Binding?
-  return `
+  blueprint.add( 'main', `
     
     var<workgroup> scratch: array<${binaryOp.type.valueType( blueprint )}, ${workgroupSize}>;
 
@@ -102,8 +102,7 @@ const mainReduceNonCommutativeWGSL = <T>(
         } ) : 'workgroup_id.x'} ] = value;
       }
     }
-
-  `;
+  ` );
 };
 
 export default mainReduceNonCommutativeWGSL;

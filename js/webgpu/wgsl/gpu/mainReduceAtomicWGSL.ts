@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, loadReducedWGSL, loadReducedWGSLOptions, RakedSizable, reduceWGSL, reduceWGSLOptions, PipelineBlueprint, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, loadReducedWGSL, loadReducedWGSLOptions, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -39,7 +39,7 @@ export const MAIN_REDUCE_ATOMIC_DEFAULTS = {
 const mainReduceAtomicWGSL = <T>(
   blueprint: PipelineBlueprint,
   providedOptions: mainReduceAtomicWGSLOptions<T>
-): WGSLModuleDeclarations => {
+): void => {
 
   const options = optionize3<mainReduceAtomicWGSLOptions<T>>()( {}, MAIN_REDUCE_ATOMIC_DEFAULTS, providedOptions );
 
@@ -53,7 +53,7 @@ const mainReduceAtomicWGSL = <T>(
   blueprint.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE ); // TODO: assert that this is an atomic(!)
 
   // TODO: generate storage binding and variable fully from Binding?
-  return `
+  blueprint.add( 'main', `
     
     var<workgroup> scratch: array<${binaryOp.type.valueType( blueprint )}, ${workgroupSize}>;
     
@@ -83,7 +83,7 @@ const mainReduceAtomicWGSL = <T>(
         ${binaryOp.atomicName}( &output, value );
       }
     }
-  `;
+  ` );
 };
 
 export default mainReduceAtomicWGSL;

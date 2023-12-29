@@ -72,7 +72,6 @@ export default class PipelineBlueprint {
       this.usageMap.set( name, new ResourceUsage( slot, combinedType ) );
     }
     else {
-      // TODO: can we get rid of ResourceUsage typed subtypes?
       this.usageMap.set( name, new ResourceUsage( slot, bindingType ) );
     }
   }
@@ -89,16 +88,6 @@ export default class PipelineBlueprint {
       } ),
       ...this.declarations.map( declaration => declaration.declarations )
     ].join( '\n' );
-  }
-
-  // TODO: can we get rid of this?
-  public with( callback: ( context: PipelineBlueprint ) => WGSLModuleDeclarations ): this {
-    const declarations = callback( this );
-
-    this.add( 'main', declarations );
-
-    // for chaining
-    return this;
   }
 }
 alpenglow.register( 'PipelineBlueprint', PipelineBlueprint );

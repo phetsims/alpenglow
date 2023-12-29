@@ -47,7 +47,7 @@ export default class XPrototype {
     const firstPipelineBlueprint = new PipelineBlueprint(
       'first',
       // TODO: have the 'main' ones directly do this context add.
-      context => context.add( 'main', mainReduceWGSL<number>( context, {
+      context => mainReduceWGSL<number>( context, {
         binaryOp: binaryOp,
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -60,13 +60,13 @@ export default class XPrototype {
           input: inputSlot,
           output: middleSlot
         }
-      } ) ),
+      } ),
       log
     );
 
     const secondPipelineBlueprint = new PipelineBlueprint(
       'second',
-      context => context.add( 'main', mainReduceWGSL<number>( context, {
+      context => mainReduceWGSL<number>( context, {
         binaryOp: binaryOp,
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -77,7 +77,7 @@ export default class XPrototype {
           input: middleSlot,
           output: outputSlot
         }
-      } ) ),
+      } ),
       log
     );
 

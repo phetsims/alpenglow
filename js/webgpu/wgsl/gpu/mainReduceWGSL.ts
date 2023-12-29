@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, PipelineBlueprint, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -42,7 +42,7 @@ export const MAIN_REDUCE_DEFAULTS = {
 const mainReduceWGSL = <T>(
   blueprint: PipelineBlueprint,
   providedOptions: mainReduceWGSLOptions<T>
-): WGSLModuleDeclarations => {
+): void => {
 
   const options = optionize3<mainReduceWGSLOptions<T>>()( {}, MAIN_REDUCE_DEFAULTS, providedOptions );
 
@@ -56,7 +56,7 @@ const mainReduceWGSL = <T>(
   blueprint.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
 
   // TODO: generate storage binding and variable fully from Binding?
-  return `
+  blueprint.add( 'main', `
     var<workgroup> scratch: array<${binaryOp.type.valueType( blueprint )}, ${workgroupSize}>;
     
     @compute @workgroup_size(${workgroupSize})
@@ -98,7 +98,7 @@ const mainReduceWGSL = <T>(
         } ) : 'workgroup_id.x'} ] = value;
       }
     }
-  `;
+  ` );
 };
 
 export default mainReduceWGSL;

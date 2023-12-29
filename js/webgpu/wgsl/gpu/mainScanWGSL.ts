@@ -17,7 +17,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, PipelineBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, PipelineBlueprint, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 // TODO: use multiple named types to simplify this boolean "mess"
@@ -77,7 +77,7 @@ export const MAIN_SCAN_DEFAULTS = {
 const mainScanWGSL = <T>(
   blueprint: PipelineBlueprint,
   providedOptions: mainScanWGSLOptions<T>
-): WGSLStatements => {
+): void => {
 
   // TODO: how to specify that we don't fill in defaults for things like factorOutSubexpressions?
   const options = optionize3<mainScanWGSLOptions<T>, SelfOptions<T>>()( {}, MAIN_SCAN_DEFAULTS, providedOptions );
@@ -104,7 +104,7 @@ const mainScanWGSL = <T>(
     }
   }
 
-  return `
+  blueprint.add( 'main', `
     
     ${options.addScannedReduction ? `
       var<workgroup> reduction_value: ${binaryOp.type.valueType( blueprint )};
@@ -187,8 +187,7 @@ const mainScanWGSL = <T>(
         storeReduction: options.storeReduction ? ( index: WGSLExpressionU32, value: WGSLExpressionT ) => `reduction[ ${index} ] = ${value};` : null
       } )}
     }
-
-  `;
+  ` );
 };
 
 export default mainScanWGSL;

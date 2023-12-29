@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, PipelineBlueprint, WGSLStatements } from '../../../imports.js';
+import { alpenglow, logWGSL, PipelineBlueprint } from '../../../imports.js';
 
 const mainLogBarrier = (
   blueprint: PipelineBlueprint
-): WGSLStatements => {
-  return `
+): void => {
+  blueprint.add( 'main', `
     @compute @workgroup_size(1)
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
@@ -22,7 +22,7 @@ const mainLogBarrier = (
         name: null
       } )}
     }
-  `;
+  ` );
 };
 
 export default mainLogBarrier;

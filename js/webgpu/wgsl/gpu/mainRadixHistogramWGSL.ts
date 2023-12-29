@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferBindingType, BufferSlot, radixHistogramWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLModuleDeclarations } from '../../../imports.js';
+import { alpenglow, BitOrder, BufferBindingType, BufferSlot, PipelineBlueprint, radixHistogramWGSL, WGSLExpressionU32 } from '../../../imports.js';
 
 export type mainRadixHistogramWGSLOptions<T> = {
   workgroupSize: number;
@@ -26,7 +26,7 @@ export type mainRadixHistogramWGSLOptions<T> = {
 const mainRadixHistogramWGSL = <T>(
   blueprint: PipelineBlueprint,
   options: mainRadixHistogramWGSLOptions<T>
-): WGSLModuleDeclarations => {
+): void => {
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;
@@ -39,7 +39,7 @@ const mainRadixHistogramWGSL = <T>(
   blueprint.addSlot( 'input', bindings.input, BufferBindingType.READ_ONLY_STORAGE );
   blueprint.addSlot( 'output', bindings.output, BufferBindingType.STORAGE ); // TODO: make sure this is u32
 
-  return `
+  blueprint.add( 'main', `
     var<workgroup> histogram_scratch: array<atomic<u32>, ${1 << bitsPerPass}>;
     
     @compute @workgroup_size(${workgroupSize})
@@ -58,7 +58,7 @@ const mainRadixHistogramWGSL = <T>(
         storeHistogram: ( index, value ) => `output[ ${index} ] = ${value};`
       } )}
     }
-  `;
+  ` );
 };
 
 export default mainRadixHistogramWGSL;

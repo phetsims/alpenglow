@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, ceilDivideConstantDivisorWGSL, commentWGSL, BufferSlot, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, RakedSizable, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, PipelineBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLModuleDeclarations, BufferBindingType } from '../../../imports.js';
+import { alpenglow, BitOrder, BufferBindingType, BufferSlot, ceilDivideConstantDivisorWGSL, commentWGSL, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, PipelineBlueprint, RakedSizable, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -39,7 +39,7 @@ export const MAIN_RADIX_SCATTER_DEFAULTS = {
 const mainRadixScatterWGSL = <T>(
   blueprint: PipelineBlueprint,
   providedOptions: mainRadixScatterWGSLOptions<T>
-): WGSLModuleDeclarations => {
+): void => {
 
   const options = optionize3<mainRadixScatterWGSLOptions<T>>()( {}, MAIN_RADIX_SCATTER_DEFAULTS, providedOptions );
 
@@ -63,7 +63,7 @@ const mainRadixScatterWGSL = <T>(
   blueprint.addSlot( 'output', bindings.output, BufferBindingType.STORAGE );
 
   // TODO: generate more of the bindings
-  return `
+  blueprint.add( 'main', `
     
     // TODO: see how we can potentially reuse some memory?
     var<workgroup> bits_scratch: array<${{ 1: 'u32', 2: 'vec2u', 3: 'vec3u', 4: 'vec4u' }[ innerBitVectorSize ]}, ${workgroupSize}>;
@@ -225,7 +225,7 @@ const mainRadixScatterWGSL = <T>(
         } )}
       }
     }
-  `;
+  ` );
 };
 
 export default mainRadixScatterWGSL;
