@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroupLayout, BindingDescriptor, BufferSlot, BufferSlotSlice, ComputePipeline, DeviceContext, PipelineBlueprint, PipelineLayout, ResourceSlot, RoutineBlueprint } from '../../imports.js';
+import { alpenglow, BindGroupLayout, BindingDescriptor, BufferSlot, BufferSlotSlice, ComputePipeline, DeviceContext, ExecutionContext, PipelineBlueprint, PipelineLayout, ResourceSlot, RoutineBlueprint } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
-export default class Routine<T> {
+export default class Routine<T, In, Out> {
 
   public readonly pipelineBlueprints: PipelineBlueprint[];
   public readonly rootResourceSlots: ResourceSlot[];
@@ -22,19 +22,26 @@ export default class Routine<T> {
     public readonly rootBufferSlots: BufferSlot[],
     public readonly bufferSliceMap: Map<BufferSlot<IntentionalAny>, BufferSlotSlice>,
     public readonly pipelineLayoutMap: Map<PipelineBlueprint, PipelineLayout>,
-    public readonly computePipelineMap: Map<PipelineBlueprint, ComputePipeline>
+    public readonly computePipelineMap: Map<PipelineBlueprint, ComputePipeline>,
+    // TODO: factor out some types?
+    public readonly executeWrapper: ( context: ExecutionContext, execute: ( context: ExecutionContext, value: T ) => void, input: In ) => Promise<Out>
   ) {
     this.pipelineBlueprints = routineBlueprint.pipelineBlueprints;
     this.rootResourceSlots = [ ...nonBufferSlots, ...rootBufferSlots ];
     this.bindGroupLayouts = _.uniq( [ ...this.pipelineLayoutMap.values() ].flatMap( layout => layout.bindGroupLayouts ) );
   }
 
-  public static async create<T>(
+  public execute( context: ExecutionContext, data: In ): Promise<Out> {
+    return this.executeWrapper( context, this.routineBlueprint.execute, data );
+  }
+
+  public static async create<T, In, Out>(
     deviceContext: DeviceContext,
     routineBlueprint: RoutineBlueprint<T>,
     sharedBufferSlots: BufferSlot[],
-    layoutStrategy: ( deviceContext: DeviceContext, pipelineBlueprints: PipelineBlueprint[] ) => Map<PipelineBlueprint, PipelineLayout>
-  ): Promise<Routine<T>> {
+    layoutStrategy: ( deviceContext: DeviceContext, pipelineBlueprints: PipelineBlueprint[] ) => Map<PipelineBlueprint, PipelineLayout>,
+    executeWrapper: ( context: ExecutionContext, execute: ( context: ExecutionContext, value: T ) => void, value: In ) => Promise<Out>
+  ): Promise<Routine<T, In, Out>> {
     const slots = _.uniq( [
       ...sharedBufferSlots,
       ...routineBlueprint.getResourceSlots()
@@ -79,7 +86,8 @@ export default class Routine<T> {
       rootBufferSlots,
       bufferSliceMap,
       pipelineLayoutMap,
-      computePipelineMap
+      computePipelineMap,
+      executeWrapper
     );
   }
 

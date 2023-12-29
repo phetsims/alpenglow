@@ -89,24 +89,18 @@ export default class XPrototype {
       secondRoutineBlueprint.execute( context, Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
     } );
 
-    // TODO: better combinations
-    // TODO: ... should we parameterize the output type?
-    let promise: Promise<number[]>;
-    const testBlueprint = new RoutineBlueprint( combinedBlueprint.pipelineBlueprints, ( context, input: number[] ) => {
-
-      // TODO: slice it?
-      context.setTypedBufferValue( inputSlot, input );
-
-      combinedBlueprint.execute( context, input.length );
-
-      promise = context.getTypedBufferValue( outputSlot );
-    } );
-
     const routine = await Routine.create(
       deviceContext,
-      testBlueprint,
+      combinedBlueprint,
       [],
-      Routine.INDIVIDUAL_LAYOUT_STRATEGY
+      Routine.INDIVIDUAL_LAYOUT_STRATEGY,
+      ( context, execute, input: number[] ) => {
+        context.setTypedBufferValue( inputSlot, input );
+
+        execute( context, input.length );
+
+        return context.getTypedBufferValue( outputSlot );
+      }
     );
 
     const procedure = new Procedure( routine );
@@ -119,12 +113,9 @@ export default class XPrototype {
     const actualValues = await Executor.execute( deviceContext, log, async executor => {
       const separateComputePasses = false;
 
-      // TODO: parameterize things?
-      procedure.execute( executor, inputValues, {
+      return procedure.execute( executor, inputValues, {
         separateComputePasses: separateComputePasses
       } );
-
-      return promise;
     }, {
       logBuffer: log ? ( procedure.resourceMap.get( PipelineBlueprint.LOG_BUFFER_SLOT )! as BufferResource ).buffer : null
     } );

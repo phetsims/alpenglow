@@ -7,17 +7,18 @@
  */
 
 import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, ExecutionContext, Executor, Resource, ResourceSlot, Routine } from '../../imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export type ProcedureExecuteOptions = {
   separateComputePasses?: boolean;
 };
 
-export default class Procedure<T> {
+export default class Procedure<In, Out> {
 
   private readonly selfBuffers: GPUBuffer[] = [];
 
   public constructor(
-    public readonly routine: Routine<T>,
+    public readonly routine: Routine<IntentionalAny, In, Out>,
     public readonly resourceMap: Map<ResourceSlot, Resource> = new Map<ResourceSlot, Resource>(),
     public readonly bindGroupMap: Map<BindGroupLayout, BindGroup> = new Map<BindGroupLayout, BindGroup>()
   ) {}
@@ -42,6 +43,7 @@ export default class Procedure<T> {
     } );
   }
 
+  // TODO: bind all UNBOUND buffers would be better
   public bindAllBuffers(): void {
     for ( const slot of this.routine.rootBufferSlots ) {
       let storageUsage = false;
@@ -70,7 +72,7 @@ export default class Procedure<T> {
     }
   }
 
-  public createChild(): Procedure<T> {
+  public createChild(): Procedure<In, Out> {
     return new Procedure(
       this.routine,
       new Map( this.resourceMap ),
@@ -78,14 +80,16 @@ export default class Procedure<T> {
     );
   }
 
-  public execute( executor: Executor, data: T, options?: ProcedureExecuteOptions ): void {
+  public execute( executor: Executor, data: In, options?: ProcedureExecuteOptions ): Promise<Out> {
     const separateComputePasses = ( options && options.separateComputePasses ) || false;
 
     const context = new ExecutionContext( executor, this.routine.computePipelineMap, this.bindGroupMap, this.resourceMap, separateComputePasses );
 
-    this.routine.routineBlueprint.execute( context, data );
+    const resultPromise = this.routine.execute( context, data );
 
     context.finish();
+
+    return resultPromise;
   }
 
   public dispose(): void {
