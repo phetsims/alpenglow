@@ -6,27 +6,27 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, RoutineBlueprint } from '../../imports.js';
+import { alpenglow, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, Module } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 
-export type DirectRoutineBlueprintOptions<T> = {
+export type DirectModuleOptions<T> = {
   setup: ( blueprint: PipelineBlueprint ) => void;
   setDispatchSize: ( dispatchSize: Vector3, data: T ) => void;
 } & PipelineBlueprintOptions;
 
-const DIRECT_ROUTINE_BLUEPRINT_DEFAULTS = {
+export const DIRECT_MODULE_DEFAULTS = {
   // eslint-disable-next-line no-object-spread-on-non-literals
   ...PIPELINE_BLUEPRINT_DEFAULTS
 } as const;
 
 const scratchVector3 = Vector3.ZERO.copy();
 
-export default class DirectRoutineBlueprint<T> extends RoutineBlueprint<T> {
+export default class DirectModule<T> extends Module<T> {
   public constructor(
-    providedOptions: DirectRoutineBlueprintOptions<T>
+    providedOptions: DirectModuleOptions<T>
   ) {
-    const options = optionize3<DirectRoutineBlueprintOptions<T>>()( {}, DIRECT_ROUTINE_BLUEPRINT_DEFAULTS, providedOptions );
+    const options = optionize3<DirectModuleOptions<T>>()( {}, DIRECT_MODULE_DEFAULTS, providedOptions );
 
     const pipelineBlueprint = new PipelineBlueprint( options );
     options.setup( pipelineBlueprint );
@@ -40,4 +40,4 @@ export default class DirectRoutineBlueprint<T> extends RoutineBlueprint<T> {
     } );
   }
 }
-alpenglow.register( 'DirectRoutineBlueprint', DirectRoutineBlueprint );
+alpenglow.register( 'DirectModule', DirectModule );

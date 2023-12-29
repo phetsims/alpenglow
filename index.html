@@ -2121,10 +2121,15 @@
 
       <h4 id="WGSL-linking">Linking</h4>
 
-      <p class="TODO">
-        Create DispatchRoutineBlueprint (will create the blueprint), and IndirectRoutineBlueprint (similar).
+      <p>
+        Current weakness with a pipeline that would be given different inputs (e.g. ping-ponging in radix sort).
+        Current slot approach will require multiple pipelines (... more of a compilation step?) that will be
+        long-term undesirable. However it sounds tricky to actually have different inputs on a pipeline (as that might
+        actually constrain our bind group layout setup), since we'd need to pick ONE bind group layout for the pipeline.
 
-        Then look into ways where we combine the blueprints.
+        To repair... what if we had "switchable" buffer slots?
+
+        This would result in multiple bind groups PER layout.
       </p>
 
       <p class="TODO">

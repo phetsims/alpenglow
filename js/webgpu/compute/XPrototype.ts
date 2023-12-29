@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferResource, BufferSlot, DeviceContext, DirectRoutineBlueprint, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add } from '../../imports.js';
+import { alpenglow, BufferResource, BufferSlot, DeviceContext, DirectModule, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, Module, u32, U32Add } from '../../imports.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 
 /*
@@ -41,7 +41,7 @@ export default class XPrototype {
 
     // TODO: inspect all usages of everything, look for simplification opportunities
 
-    const firstRoutineBlueprint = new DirectRoutineBlueprint( {
+    const firstModule = new DirectModule( {
       name: 'first',
       log: log,
       setup: blueprint => mainReduceWGSL<number>( blueprint, {
@@ -59,7 +59,7 @@ export default class XPrototype {
       }
     } );
 
-    const secondRoutineBlueprint = new DirectRoutineBlueprint( {
+    const secondModule = new DirectModule( {
       name: 'second',
       log: log,
       setup: blueprint => mainReduceWGSL<number>( blueprint, {
@@ -79,18 +79,18 @@ export default class XPrototype {
 
     // TODO: really refine all of the types here
 
-    const combinedBlueprint = new RoutineBlueprint( [
-      ...firstRoutineBlueprint.pipelineBlueprints,
-      ...secondRoutineBlueprint.pipelineBlueprints
+    const compositeModule = new Module( [
+      ...firstModule.pipelineBlueprints,
+      ...secondModule.pipelineBlueprints
     ], ( context, inputSize: number ) => {
       // TODO: Is there a way we can set up these combinations so that we specify a list of child blueprints AND the inputs?
-      firstRoutineBlueprint.execute( context, inputSize );
-      secondRoutineBlueprint.execute( context, Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
+      firstModule.execute( context, inputSize );
+      secondModule.execute( context, Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
     } );
 
     const routine = await Routine.create(
       deviceContext,
-      combinedBlueprint,
+      compositeModule,
       [],
       Routine.INDIVIDUAL_LAYOUT_STRATEGY,
       ( context, execute, input: number[] ) => {

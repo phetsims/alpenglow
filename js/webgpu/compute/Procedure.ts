@@ -63,7 +63,7 @@ export default class Procedure<In, Out> {
 
       const buffer = this.routine.deviceContext.device.createBuffer( {
         // TODO: a label!
-        // label: `${this.routine.routineBlueprint.name} ${slot}`,
+        // label: `${this.routine.module.name} ${slot}`,
         size: slot.size,
         usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | ( storageUsage ? GPUBufferUsage.STORAGE : 0 ) | ( uniformUsage ? GPUBufferUsage.UNIFORM : 0 )
       } );

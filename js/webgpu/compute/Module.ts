@@ -8,7 +8,7 @@
 
 import { alpenglow, BufferSlot, ExecutionContext, PipelineBlueprint, ResourceSlot } from '../../imports.js';
 
-export default class RoutineBlueprint<T> {
+export default class Module<T> {
   public constructor(
     public readonly pipelineBlueprints: PipelineBlueprint[],
     public readonly execute: ( context: ExecutionContext, data: T ) => void
@@ -41,4 +41,4 @@ export default class RoutineBlueprint<T> {
     ];
   }
 }
-alpenglow.register( 'RoutineBlueprint', RoutineBlueprint );
+alpenglow.register( 'Module', Module );

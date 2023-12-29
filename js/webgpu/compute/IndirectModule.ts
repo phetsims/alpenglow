@@ -6,25 +6,25 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ExecutionContext, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, RoutineBlueprint } from '../../imports.js';
+import { alpenglow, ExecutionContext, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, Module } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 
-export type IndirectRoutineBlueprintOptions<T> = {
+export type IndirectModuleOptions<T> = {
   create: ( blueprint: PipelineBlueprint ) => void;
   // TODO: BufferSlot?
   execute: ( context: ExecutionContext, dispatch: ( context: ExecutionContext, indirectBuffer: GPUBuffer, indirectOffset: number ) => void, data: T ) => void;
 } & PipelineBlueprintOptions;
 
-const DIRECT_ROUTINE_BLUEPRINT_DEFAULTS = {
+export const INDIRECT_MODULE_DEFAULTS = {
   // eslint-disable-next-line no-object-spread-on-non-literals
   ...PIPELINE_BLUEPRINT_DEFAULTS
 } as const;
 
-export default class IndirectRoutineBlueprint<T> extends RoutineBlueprint<T> {
+export default class IndirectModule<T> extends Module<T> {
   public constructor(
-    providedOptions: IndirectRoutineBlueprintOptions<T>
+    providedOptions: IndirectModuleOptions<T>
   ) {
-    const options = optionize3<IndirectRoutineBlueprintOptions<T>>()( {}, DIRECT_ROUTINE_BLUEPRINT_DEFAULTS, providedOptions );
+    const options = optionize3<IndirectModuleOptions<T>>()( {}, INDIRECT_MODULE_DEFAULTS, providedOptions );
 
     const pipelineBlueprint = new PipelineBlueprint( options );
     options.create( pipelineBlueprint );
@@ -38,4 +38,4 @@ export default class IndirectRoutineBlueprint<T> extends RoutineBlueprint<T> {
     } );
   }
 }
-alpenglow.register( 'IndirectRoutineBlueprint', IndirectRoutineBlueprint );
+alpenglow.register( 'IndirectModule', IndirectModule );
