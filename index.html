@@ -2035,15 +2035,16 @@
       </p>
 
       <p class="TODO">
-        (Possibly) Get bindings from DualSnippet (parsed from the WGSL?) so we don't have to specify on ComputeShader creation.
-        NOTE: if we need to adjust bindings, could we do so with noting the "binding differences" we need? I'm leaving
-        bindings as inputs to ComputeShader for now, until we get more experience with this. DualSnippet could just include
-        binding information (if desired).
+        Live WGSL sandbox with compute input/output (and all our existing WGSL included?) -- use our templates in this,
+        would be powerful. Have it work like ShaderToy a bit.
       </p>
 
       <p class="TODO">
-        Live WGSL sandbox with compute input/output (and all our existing WGSL included?) -- use our templates in this,
-        would be powerful. Have it work like ShaderToy a bit.
+        Label canvas swapchain textures! texture.label =
+      </p>
+
+      <p class="TODO">
+        Better familiarize with <a href="https://shader-slang.com/slang/user-guide/00-introduction.html">https://shader-slang.com/slang/user-guide/00-introduction.html</a>.
       </p>
 
       <p>
@@ -2074,6 +2075,10 @@
       </p>
 
       <p class="TODO">
+        Look into using template literals to reduce what we're doing.
+      </p>
+
+      <p class="TODO">
         Sometimes parsing the WGSL of a parameter (to tell if it's doing something, and possibly optimizing it) could be
         useful. Getting to work with the WGSL AST would be great. For instance, knowing "hey, is this a statement or
         an expression?" would be great.
@@ -2082,9 +2087,23 @@
       <h4 id="WGSL-types">Types</h4>
 
       <p class="TODO">
+        Use size/alignment of structures for array/structure types. Our vec3 array is broken right now.
+        Note that storage and uniform address spaces have different layout constraints:
+        <a href="https://www.w3.org/TR/WGSL/#address-space-layout-constraints">https://www.w3.org/TR/WGSL/#address-space-layout-constraints</a>.
+      </p>
+
+      <p class="TODO">
+        Support runtime-sized arrays in ConcreteType.
+      </p>
+
+      <p class="TODO">
+        More of a class-based structure for array/structure types, since we need to slice/subset/etc.
+      </p>
+
+      <p class="TODO">
         Create a structure-like creator for ConcreteTypes. We'll want bit-packing (combine booleans, finite-precision types, etc.)
         For this, we'll presumably actually want variable bit-length values (e.g. like a u8, u16), and handle similar
-        packing for booleans.
+        packing for booleans. HLSL2021 includes bitfields?
       </p>
 
       <p class="TODO">
@@ -2103,17 +2122,27 @@
       <h4 id="WGSL-linking">Linking</h4>
 
       <p class="TODO">
+        Minimal example of "shared" bind groups. Or also... maybe toss the log into a bind group that isn't modified.
+
+        For this... get things like the radix sort example working (it's more... interesting).
+
+        Once we have radix sort, test bind group approaches, buffer sharing/aliasing, buffer offsets (one big buffer?)
+      </p>
+
+      <p class="TODO">
+        PipelineBlueprint constructor cleanup (... all options?).
+
+        Consider reversal, so our "main" shaders take a "new" blueprint, and return the "modified" same reference.
+
+        Convenience RoutineBlueprint creator, so we don't need to reference so many things.
+      </p>
+
+      <p class="TODO">
+        Typing improvements for linking!
+      </p>
+
+      <p class="TODO">
         Break out data sources. Explicitly model data sources (input/output).
-      </p>
-
-      <p class="TODO">
-        Working Mermaid diagram for the linking process.
-      </p>
-
-      <p class="TODO">
-        Use size/alignment of structures for getArrayType and the structure equivalent. Create more of a typed (class)
-        structure for types? - Note that storage and uniform address spaces have different layout constraints:
-        <a href="https://www.w3.org/TR/WGSL/#address-space-layout-constraints">https://www.w3.org/TR/WGSL/#address-space-layout-constraints</a>
       </p>
 
       <p class="TODO">
@@ -2128,15 +2157,19 @@
       </p>
 
       <p class="TODO">
-        Casting of ConcreteTypes to other types (e.g. reinterpretation as u32 array, or something using atomics in one)
-      </p>
-
-      <p class="TODO">
         ConcreteBufferSlot aliasing - we'll want these to be classed as BufferSlotSlices (so things will pass through).
       </p>
 
       <p class="TODO">
+        Get it working with texture storage (and combine with blitshader improvements) for full chain.
+      </p>
+
+      <p class="TODO">
         Get writeup for AI analysis.
+      </p>
+
+      <p class="TODO">
+        Working Mermaid diagram for the linking process.
       </p>
 
       <p>
@@ -2182,6 +2215,10 @@
       <p class="TODO">
         Consider splitting uniforms into "ones that change during calls" and "ones that do not". Performance cost
         potentially.
+      </p>
+
+      <p class="TODO">
+        Have things like lengthExpression use the blueprint/context, so they can include things.
       </p>
 
       <p class="TODO">
@@ -2489,6 +2526,12 @@
       <h4 id="WGSL-radixSort">Radix Sort</h4>
 
       <p class="TODO">
+        For sorting in general, read through <a href="https://xi.zulipchat.com/#narrow/stream/197075-gpu/topic/Sorting.20revisited">https://xi.zulipchat.com/#narrow/stream/197075-gpu/topic/Sorting.20revisited</a>,
+        and note the examples <a href="https://webgpu.github.io/webgpu-samples/samples/bitonicSort">https://webgpu.github.io/webgpu-samples/samples/bitonicSort</a>
+        and <a href="https://poniesandlight.co.uk/reflect/bitonic_merge_sort/">https://poniesandlight.co.uk/reflect/bitonic_merge_sort/</a>.
+      </p>
+
+      <p class="TODO">
         Look into a <a href="https://arxiv.org/ftp/arxiv/papers/2206/2206.01784.pdf">potentially faster radix sort implementation</a>
         with less memory access!
       </p>
@@ -2707,6 +2750,11 @@
       <h4 id="WGSL-notes">Notes</h4>
 
       <p>
+        Can request more storage buffers:
+        <a href="https://bugs.chromium.org/p/dawn/issues/detail?id=2159">https://bugs.chromium.org/p/dawn/issues/detail?id=2159</a>
+      </p>
+
+      <p>
         Synchronization notes: onSubmittedWorkDone() are settled in order, and mapAsync() settles before the corresponding
         onSubmittedWorkDone().
       </p>
@@ -2742,6 +2790,10 @@
       </p>
 
       <p>
+        Use <code>num_workgroups</code> more.
+      </p>
+
+      <p>
         Dynamic offset alignment restricted to 256 by default (https://www.w3.org/TR/webgpu/#dom-supported-limits-minstoragebufferoffsetalignment).
         Default 8 storage buffers max per pipeline layout, 12 uniform buffers max per pipeline layout. 256MiB for buffer size.
         16384 bytes for workgroup storage
@@ -2757,6 +2809,15 @@
 
       <p>
         Out-of-gamut premultiplied RGBA provided to a Canvas (rendered on the screen) has undefined behavior!
+      </p>
+
+      <p>
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/GPUAdapter/requestAdapterInfo">https://developer.mozilla.org/en-US/docs/Web/API/GPUAdapter/requestAdapterInfo</a>
+        plus WebGPU Developer Features flag (chrome flags) will show type/backend.
+      </p>
+
+      <p>
+        f16 types could be helpful, see <a href="https://developer.chrome.com/blog/new-in-webgpu-120">https://developer.chrome.com/blog/new-in-webgpu-120</a>.
       </p>
 
       <p class="TODO">
