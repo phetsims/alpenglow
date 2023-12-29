@@ -7,6 +7,9 @@
 import { alpenglow, BitOrder, BufferBindingType, BufferSlot, PipelineBlueprint, radixHistogramWGSL, WGSLExpressionU32 } from '../../../imports.js';
 
 export type mainRadixHistogramWGSLOptions<T> = {
+  input: BufferSlot<T[]>;
+  output: BufferSlot<T[]>;
+
   workgroupSize: number;
   grainSize: number;
 
@@ -16,11 +19,6 @@ export type mainRadixHistogramWGSLOptions<T> = {
   bitsPerPass: number;
 
   lengthExpression: WGSLExpressionU32; // TODO: support optional
-
-  bindings: {
-    input: BufferSlot<T[]>;
-    output: BufferSlot<T[]>;
-  };
 };
 
 const mainRadixHistogramWGSL = <T>(
@@ -34,10 +32,9 @@ const mainRadixHistogramWGSL = <T>(
   const pass = options.pass;
   const bitsPerPass = options.bitsPerPass;
   const lengthExpression = options.lengthExpression;
-  const bindings = options.bindings;
 
-  blueprint.addSlot( 'input', bindings.input, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'output', bindings.output, BufferBindingType.STORAGE ); // TODO: make sure this is u32
+  blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
+  blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE ); // TODO: make sure this is u32
 
   blueprint.add( 'main', `
     var<workgroup> histogram_scratch: array<atomic<u32>, ${1 << bitsPerPass}>;

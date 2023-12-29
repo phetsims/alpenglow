@@ -30,36 +30,26 @@ type SelfOptions<T> = {
   areScannedReductionsExclusive?: boolean;
 } & RakedSizable & ( {
   inPlace?: false;
-  bindings: {
     input: BufferSlot<T[]>;
-    output: BufferSlot<T[]>;
-  };
+  output: BufferSlot<T[]>;
 } | {
   inPlace: true;
-  bindings: {
-    data: BufferSlot<T[]>;
-  };
+  data: BufferSlot<T[]>;
 } ) & ( {
   storeReduction?: false;
 } | {
   storeReduction: true;
-  bindings: {
-    reduction: BufferSlot<T[]>;
-  };
+  reduction: BufferSlot<T[]>;
 } ) & ( ( {
   addScannedReduction?: false;
 } & Pick<scanComprehensiveWGSLOptions<T>, 'getAddedValue'> ) | ( {
   addScannedReduction: true;
-  bindings: {
-    scannedReduction: BufferSlot<T[]>;
-  };
+  scannedReduction: BufferSlot<T[]>;
 } & ( {
   addScannedDoubleReduction?: false;
 } | {
   addScannedDoubleReduction: true;
-  bindings: {
-    scannedDoubleReduction: BufferSlot<T[]>;
-  };
+  scannedDoubleReduction: BufferSlot<T[]>;
 } ) ) );
 
 export type mainScanWGSLOptions<T> = SelfOptions<T> & Pick<scanComprehensiveWGSLOptions<T>,
@@ -87,20 +77,20 @@ const mainScanWGSL = <T>(
   const grainSize = options.grainSize;
 
   if ( options.inPlace ) {
-    blueprint.addSlot( 'data', options.bindings.data, BufferBindingType.STORAGE );
+    blueprint.addSlot( 'data', options.data, BufferBindingType.STORAGE );
   }
   else {
-    blueprint.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
-    blueprint.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
+    blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
+    blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE );
   }
   if ( options.storeReduction ) {
-    blueprint.addSlot( 'reduction', options.bindings.reduction, BufferBindingType.STORAGE );
+    blueprint.addSlot( 'reduction', options.reduction, BufferBindingType.STORAGE );
   }
   if ( options.addScannedReduction ) {
-    blueprint.addSlot( 'scanned_reduction', options.bindings.scannedReduction, BufferBindingType.READ_ONLY_STORAGE );
+    blueprint.addSlot( 'scanned_reduction', options.scannedReduction, BufferBindingType.READ_ONLY_STORAGE );
 
     if ( options.addScannedDoubleReduction ) {
-      blueprint.addSlot( 'scanned_double_reduction', options.bindings.scannedDoubleReduction, BufferBindingType.READ_ONLY_STORAGE );
+      blueprint.addSlot( 'scanned_double_reduction', options.scannedDoubleReduction, BufferBindingType.READ_ONLY_STORAGE );
     }
   }
 

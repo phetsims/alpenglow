@@ -9,10 +9,8 @@ import { combineOptions, optionize3 } from '../../../../../phet-core/js/optioniz
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceWGSLOptions<T> = {
-  bindings: {
-    input: BufferSlot<T[]>;
-    output: BufferSlot<T[]>;
-  };
+  input: BufferSlot<T[]>;
+  output: BufferSlot<T[]>;
 
   // TODO: should we really have lengthExpression in loadReducedOptions? Also inputOrder options?!?
 
@@ -52,8 +50,8 @@ const mainReduceWGSL = <T>(
   const stripeOutput = options.stripeOutput;
   const convergentRemap = options.convergentRemap;
 
-  blueprint.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE );
+  blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
+  blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE );
 
   // TODO: generate storage binding and variable fully from Binding?
   blueprint.add( 'main', `

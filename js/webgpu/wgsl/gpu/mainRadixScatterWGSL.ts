@@ -9,6 +9,10 @@ import { combineOptions, optionize3 } from '../../../../../phet-core/js/optioniz
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainRadixScatterWGSLOptions<T> = {
+  input: BufferSlot<T[]>;
+  histogramOffsets: BufferSlot<T[]>;
+  output: BufferSlot<T[]>;
+
   order: BitOrder<T>;
 
   pass: number;
@@ -23,12 +27,6 @@ export type mainRadixScatterWGSLOptions<T> = {
 
   // e.g. factorOutSubexpressions
   loadMultipleOptions?: StrictOmit<loadMultipleWGSLOptions<T>, 'loadExpression' | 'loadStatements' | 'storeStatements' | 'type' | 'workgroupSize' | 'grainSize' | 'lengthExpression' | 'outOfRangeValue' | 'inputOrder' | 'inputAccessOrder'>;
-
-  bindings: {
-    input: BufferSlot<T[]>;
-    histogramOffsets: BufferSlot<T[]>;
-    output: BufferSlot<T[]>;
-  };
 } & RakedSizable;
 // TODO: options pass-through
 
@@ -53,14 +51,13 @@ const mainRadixScatterWGSL = <T>(
   const earlyLoad = options.earlyLoad;
   const lengthExpression = options.lengthExpression;
   const loadMultipleOptions = options.loadMultipleOptions;
-  const bindings = options.bindings;
 
   const getBits = ( value: WGSLExpressionT ) => order.getBitsWGSL( value, pass * bitsPerPass, bitsPerPass );
 
   // TODO: we should have type assertions to make sure these match?
-  blueprint.addSlot( 'input', bindings.input, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'histogramOffsets', bindings.histogramOffsets, BufferBindingType.READ_ONLY_STORAGE ); // make sure this is u32?
-  blueprint.addSlot( 'output', bindings.output, BufferBindingType.STORAGE );
+  blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
+  blueprint.addSlot( 'histogramOffsets', options.histogramOffsets, BufferBindingType.READ_ONLY_STORAGE ); // make sure this is u32?
+  blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE );
 
   // TODO: generate more of the bindings
   blueprint.add( 'main', `

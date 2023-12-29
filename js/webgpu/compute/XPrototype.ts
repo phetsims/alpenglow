@@ -48,17 +48,13 @@ export default class XPrototype {
       'first',
       // TODO: have the 'main' ones directly do this context add.
       blueprint => mainReduceWGSL<number>( blueprint, {
+        input: inputSlot,
+        output: middleSlot,
         binaryOp: binaryOp,
         workgroupSize: workgroupSize,
         grainSize: grainSize,
         loadReducedOptions: {
           lengthExpression: u32( inputSize )
-        },
-        // TODO: rename bindings to... slots?
-        // TODO: actually, just have 'inputSlot', 'outputSlot'.
-        bindings: {
-          input: inputSlot,
-          output: middleSlot
         }
       } ),
       log
@@ -67,15 +63,13 @@ export default class XPrototype {
     const secondPipelineBlueprint = new PipelineBlueprint(
       'second',
       blueprint => mainReduceWGSL<number>( blueprint, {
+        input: middleSlot,
+        output: outputSlot,
         binaryOp: binaryOp,
         workgroupSize: workgroupSize,
         grainSize: grainSize,
         loadReducedOptions: {
           lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
-        },
-        bindings: {
-          input: middleSlot,
-          output: outputSlot
         }
       } ),
       log

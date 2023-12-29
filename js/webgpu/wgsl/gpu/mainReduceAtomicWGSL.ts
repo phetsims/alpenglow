@@ -12,12 +12,10 @@ import { combineOptions, optionize3 } from '../../../../../phet-core/js/optioniz
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainReduceAtomicWGSLOptions<T> = {
-  binaryOp: BinaryOp<T>;
+  input: BufferSlot<T[]>;
+  output: BufferSlot<T>;
 
-  bindings: {
-    input: BufferSlot<T[]>;
-    output: BufferSlot<T>;
-  };
+  binaryOp: BinaryOp<T>;
 
   // e.g. length / inputOrder / inputAccessOrder / sequentialReduceStyle
   loadReducedOptions?: StrictOmit<loadReducedWGSLOptions<T>, 'value' | 'lengthExpression' | 'binaryOp' | 'loadExpression' | 'loadStatements' | 'workgroupSize' | 'grainSize' | 'globalIndex' | 'workgroupIndex' | 'localIndex'>;
@@ -49,8 +47,8 @@ const mainReduceAtomicWGSL = <T>(
 
   assert && assert( binaryOp.atomicName );
 
-  blueprint.addSlot( 'input', options.bindings.input, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'output', options.bindings.output, BufferBindingType.STORAGE ); // TODO: assert that this is an atomic(!)
+  blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
+  blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE ); // TODO: assert that this is an atomic(!)
 
   // TODO: generate storage binding and variable fully from Binding?
   blueprint.add( 'main', `
