@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferResource, BufferSlot, DeviceContext, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add } from '../../imports.js';
+import { alpenglow, BufferResource, BufferSlot, DeviceContext, DirectRoutineBlueprint, Executor, getArrayType, mainReduceWGSL, PipelineBlueprint, Procedure, Routine, RoutineBlueprint, u32, U32Add } from '../../imports.js';
 
 /*
 We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer
@@ -40,9 +40,10 @@ export default class XPrototype {
 
     // TODO: inspect all usages of everything, look for simplification opportunities
 
-    const firstPipelineBlueprint = new PipelineBlueprint(
-      'first',
-      blueprint => mainReduceWGSL<number>( blueprint, {
+    const firstRoutineBlueprint = new DirectRoutineBlueprint( {
+      name: 'first',
+      log: log,
+      create: blueprint => mainReduceWGSL<number>( blueprint, {
         input: inputSlot,
         output: middleSlot,
         binaryOp: binaryOp,
@@ -52,12 +53,15 @@ export default class XPrototype {
           lengthExpression: u32( inputSize )
         }
       } ),
-      log
-    );
+      execute: ( context, dispatch, stageInputSize: number ) => {
+        dispatch( context, Math.ceil( stageInputSize / ( workgroupSize * grainSize ) ) );
+      }
+    } );
 
-    const secondPipelineBlueprint = new PipelineBlueprint(
-      'second',
-      blueprint => mainReduceWGSL<number>( blueprint, {
+    const secondRoutineBlueprint = new DirectRoutineBlueprint( {
+      name: 'second',
+      log: log,
+      create: blueprint => mainReduceWGSL<number>( blueprint, {
         input: middleSlot,
         output: outputSlot,
         binaryOp: binaryOp,
@@ -67,15 +71,9 @@ export default class XPrototype {
           lengthExpression: u32( Math.ceil( inputSize / ( workgroupSize * grainSize ) ) )
         }
       } ),
-      log
-    );
-
-    const firstRoutineBlueprint = new RoutineBlueprint( [ firstPipelineBlueprint ], ( context, stageInputSize: number ) => {
-      context.dispatch( firstPipelineBlueprint, Math.ceil( stageInputSize / ( workgroupSize * grainSize ) ) );
-    } );
-
-    const secondRoutineBlueprint = new RoutineBlueprint( [ secondPipelineBlueprint ], ( context, stageInputSize: number ) => {
-      context.dispatch( secondPipelineBlueprint, Math.ceil( stageInputSize / ( workgroupSize * grainSize ) ) );
+      execute: ( context, dispatch, stageInputSize: number ) => {
+        dispatch( context, Math.ceil( stageInputSize / ( workgroupSize * grainSize ) ) );
+      }
     } );
 
     // TODO: really refine all of the types here

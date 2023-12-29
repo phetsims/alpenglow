@@ -19,11 +19,17 @@ export default class SingleReduceShader<T> extends ExecutableShader<T[], T[]> {
     options: SingleReduceShaderOptions<T>
   ): Promise<SingleReduceShader<T>> {
 
+    // TODO: eeek! (also deprecate)
+    const pipelineBlueprint = new PipelineBlueprint( {
+      name: name,
+      log: !!options.log
+    } );
+    mainReduceWGSL( pipelineBlueprint, options );
+
     const shader = await OldComputeShader.fromContextAsync(
       deviceContext.device,
       name,
-      // TODO: eeek! (also deprecate)
-      new PipelineBlueprint( name, blueprint => mainReduceWGSL( blueprint, options ), !!options.log ),
+      pipelineBlueprint,
       [
         OldBindingType.READ_ONLY_STORAGE_BUFFER,
         OldBindingType.STORAGE_BUFFER

@@ -7,22 +7,34 @@
  */
 
 import { alpenglow, BindingType, BufferSlot, ComputePipeline, DeviceContext, getArrayType, getCastedType, PipelineLayout, ResourceSlot, ResourceUsage, U32Type, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
+import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
+
+export type PipelineBlueprintOptions = {
+  name: string;
+  log?: boolean;
+};
+
+export const PIPELINE_BLUEPRINT_DEFAULTS = {
+  log: false
+} as const;
 
 export default class PipelineBlueprint {
 
-  public readonly usages: ResourceUsage[];
+  public readonly usages: ResourceUsage[] = [];
+  public readonly name: string;
+  public readonly log: boolean;
 
   private readonly declarations: WGSLInternalDeclaration[] = [];
   private readonly usageMap: Map<WGSLVariableName, ResourceUsage> = new Map<WGSLVariableName, ResourceUsage>();
 
   public constructor(
-    public readonly name: string,
-    public readonly withBlueprint: ( blueprint: PipelineBlueprint ) => void, // TODO: combine this into the type(!)
-    public readonly log = false
+    providedOptions: PipelineBlueprintOptions
   ) {
-    withBlueprint( this );
+    const options = optionize3<PipelineBlueprintOptions>()( {}, PIPELINE_BLUEPRINT_DEFAULTS, providedOptions );
 
-    this.usages = Array.from( this.usageMap.values() );
+    this.name = options.name;
+    this.log = options.log;
   }
 
   public async toComputePipeline(
@@ -61,19 +73,25 @@ export default class PipelineBlueprint {
   }
 
   public addSlot( name: WGSLVariableName, slot: ResourceSlot, bindingType: BindingType ): void {
+    let usage: ResourceUsage;
     // If it already exists, we'll do some checks and "combine" types (might switch read-only to read-write, etc.)
     if ( this.usageMap.has( name ) ) {
-      const usage = this.usageMap.get( name )!;
-      assert && assert( usage.resourceSlot === slot );
+      const oldUsage = this.usageMap.get( name )!;
+      assert && assert( oldUsage.resourceSlot === slot );
 
-      const combinedType = bindingType.combined( usage.bindingType )!;
+      const combinedType = bindingType.combined( oldUsage.bindingType )!;
       assert && assert( combinedType );
 
-      this.usageMap.set( name, new ResourceUsage( slot, combinedType ) );
+      arrayRemove( this.usages, oldUsage );
+
+      usage = new ResourceUsage( slot, combinedType );
     }
     else {
-      this.usageMap.set( name, new ResourceUsage( slot, bindingType ) );
+      usage = new ResourceUsage( slot, bindingType );
     }
+
+    this.usageMap.set( name, usage );
+    this.usages.push( usage );
   }
 
   public toString( pipelineLayout: PipelineLayout ): string {
