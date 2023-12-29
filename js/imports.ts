@@ -487,8 +487,6 @@ export { default as Resource } from './webgpu/compute/Resource.js';
 export { default as BufferResource } from './webgpu/compute/BufferResource.js';
 export { default as TextureViewResource } from './webgpu/compute/TextureViewResource.js';
 export { default as ResourceUsage } from './webgpu/compute/ResourceUsage.js';
-export { default as BufferUsage } from './webgpu/compute/BufferUsage.js';
-export { default as TextureViewUsage } from './webgpu/compute/TextureViewUsage.js';
 export { default as BindingDescriptor } from './webgpu/compute/BindingDescriptor.js';
 export { default as Binding } from './webgpu/compute/Binding.js';
 export { default as BufferBinding } from './webgpu/compute/BufferBinding.js';
