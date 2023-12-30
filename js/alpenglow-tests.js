@@ -9,6 +9,7 @@
 window.assertions.enableAssertSlow();
 
 import qunitStart from '../../chipper/js/sim-tests/qunitStart.js';
+import './webgpu/tests/gpu/ReduceModuleTests.js';
 import './cag/ClippableFaceTests.js';
 import './cag/PolygonalBooleanTests.js';
 import './clip/PolygonClippingTests.js';

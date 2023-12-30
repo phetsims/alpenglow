@@ -2121,6 +2121,15 @@
 
       <h4 id="WGSL-linking">Linking</h4>
 
+      <p class="TODO">
+        We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer
+        sharing (for profiling or optimization), while providing a convenient interface for writing shaders.
+
+        TODO: describe the API we're working with
+
+        TODO: flesh out this description and current work
+      </p>
+
       <p>
         Current weakness with a pipeline that would be given different inputs (e.g. ping-ponging in radix sort).
         Current slot approach will require multiple pipelines (... more of a compilation step?) that will be
@@ -2150,6 +2159,10 @@
         Consider reversal, so our "main" shaders take a "new" blueprint, and return the "modified" same reference.
 
         Convenience RoutineBlueprint creator, so we don't need to reference so many things.
+      </p>
+
+      <p class="TODO">
+        We'll really need to port over the double/triple reduce styles, since it handles non-commutative correctly.
       </p>
 
       <p class="TODO">

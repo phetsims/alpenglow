@@ -20,7 +20,6 @@ export default class ComputePass {
     computePassDescriptor: GPUComputePassDescriptor
   ) {
     this.computePassEncoder = encoder.beginComputePass( computePassDescriptor );
-    console.log( 'begin compute pass' );
   }
 
   private prepare(
@@ -87,7 +86,6 @@ export default class ComputePass {
   }
 
   public end(): void {
-    console.log( 'end compute pass' );
     this.computePassEncoder.end();
   }
 }

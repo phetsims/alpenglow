@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, getArrayType, SingleReduceModule } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, getArrayType, SingleReduceModule, SingleReduceModuleOptions } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -20,13 +20,16 @@ type SelfOptions<T> = {
 
   name?: string;
   log?: boolean;
+
+  mainReduceWGSLOptions?: SingleReduceModuleOptions<T>[ 'mainReduceWGSLOptions' ];
 };
 
 export type ReduceModuleOptions<T> = SelfOptions<T>;
 
 export const REDUCE_MODULE_DEFAULTS = {
   name: 'reduce',
-  log: false // TODO: how to deduplicate this?
+  log: false, // TODO: how to deduplicate this?
+  mainReduceWGSLOptions: {}
 } as const;
 
 // stageInputSize: number
@@ -49,6 +52,8 @@ export default class ReduceModule<T> extends CompositeModule<number> {
 
     // TODO: detect the atomic case(!)
 
+    // TODO: should we "stripe" the next layer of data?
+
     const internalSlots: BufferArraySlot<T>[] = _.range( 0, numStages - 1 ).map( i => {
       return new BufferArraySlot( getArrayType( options.binaryOp.type, Math.ceil( initialStageInputSize / ( perStageReduction ** ( i + 1 ) ) ), options.binaryOp.identity ) );
     } );
@@ -59,8 +64,6 @@ export default class ReduceModule<T> extends CompositeModule<number> {
       options.output
     ];
 
-    // TODO: convergent for commutative, etc. OPTIMIZE!
-
     const modules = _.range( 0, numStages ).map( i => {
       return new SingleReduceModule( {
         name: `${options.name} ${i}`,
@@ -70,7 +73,8 @@ export default class ReduceModule<T> extends CompositeModule<number> {
         binaryOp: options.binaryOp,
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
-        lengthExpression: ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction ** i )
+        lengthExpression: ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction ** i ),
+        mainReduceWGSLOptions: options.mainReduceWGSLOptions
       } );
     } );
 

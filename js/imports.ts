@@ -510,7 +510,6 @@ export { default as ComputePass } from './webgpu/compute/ComputePass.js';
 export { default as ExecutionContext } from './webgpu/compute/ExecutionContext.js';
 export { default as Executor } from './webgpu/compute/Executor.js';
 export type { ExecutorOptions } from './webgpu/compute/Executor.js';
-export { default as XPrototype } from './webgpu/compute/XPrototype.js';
 
 export { partialWGSLBeautify, addLineNumbers, stripWGSLComments, GLOBAL_INDEXABLE_DEFAULTS, WORKGROUP_INDEXABLE_DEFAULTS, LOCAL_INDEXABLE_DEFAULTS, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS } from './webgpu/wgsl/WGSLUtils.js';
 export type { GlobalIndexable, WorkgroupIndexable, LocalIndexable, WorkgroupSizable, RakedSizable, OptionalLengthExpressionable, GrainSizable } from './webgpu/wgsl/WGSLUtils.js';

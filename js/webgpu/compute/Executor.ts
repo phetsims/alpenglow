@@ -123,7 +123,6 @@ export default class Executor {
 
     const logPromise = logBuffer ? executor.arrayBuffer( logBuffer ) : Promise.resolve( null );
 
-    console.log( 'finish' );
     const commandBuffer = encoder.finish();
     deviceContext.device.queue.submit( [ commandBuffer ] );
 
