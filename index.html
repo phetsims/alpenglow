@@ -2087,6 +2087,11 @@
       <h4 id="WGSL-types">Types</h4>
 
       <p class="TODO">
+        "atomic" types possible for different configurations (compound objects!), we'll want to get these set up for
+        atomic-able operations.
+      </p>
+
+      <p class="TODO">
         Use size/alignment of structures for array/structure types. Our vec3 array is broken right now.
         Note that storage and uniform address spaces have different layout constraints:
         <a href="https://www.w3.org/TR/WGSL/#address-space-layout-constraints">https://www.w3.org/TR/WGSL/#address-space-layout-constraints</a>.
@@ -2120,6 +2125,10 @@
       </p>
 
       <h4 id="WGSL-linking">Linking</h4>
+
+      <p class="TODO">
+        Get the multipass reduce working for non-commutative and atomics first.
+      </p>
 
       <p class="TODO">
         We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer

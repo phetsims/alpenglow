@@ -583,8 +583,10 @@ export type { mergeWGSLOptions } from './webgpu/wgsl/gpu/mergeWGSL.js';
 export { default as mainScanWGSL, MAIN_SCAN_DEFAULTS } from './webgpu/wgsl/gpu/mainScanWGSL.js';
 export type { mainScanWGSLOptions } from './webgpu/wgsl/gpu/mainScanWGSL.js';
 
-export { default as SingleReduceModule, SINGLE_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/SingleReduceModule.js';
-export type { SingleReduceModuleOptions } from './webgpu/modules/gpu/SingleReduceModule.js';
+export { default as MainReduceModule, MAIN_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceModule.js';
+export type { MainReduceModuleOptions } from './webgpu/modules/gpu/MainReduceModule.js';
+export { default as MainReduceNonCommutativeModule, MAIN_REDUCE_NON_COMMUTATIVE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceNonCommutativeModule.js';
+export type { MainReduceNonCommutativeModuleOptions } from './webgpu/modules/gpu/MainReduceNonCommutativeModule.js';
 export { default as ReduceModule, REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/ReduceModule.js';
 export type { ReduceModuleOptions } from './webgpu/modules/gpu/ReduceModule.js';
 

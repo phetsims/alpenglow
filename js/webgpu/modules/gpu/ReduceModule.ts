@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, getArrayType, SingleReduceModule, SingleReduceModuleOptions } from '../../../imports.js';
-import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, getArrayType, MAIN_REDUCE_MODULE_DEFAULTS, MainReduceModule, MainReduceModuleOptions } from '../../../imports.js';
+import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
   input: BufferArraySlot<T>;
@@ -18,18 +18,26 @@ type SelfOptions<T> = {
   grainSize: number;
   lengthExpression: string; // TODO: we'll need ability to pass in context
 
+  // TODO: instead of these, get fusable data operators
+  inputOrder?: 'blocked' | 'striped';
+  inputAccessOrder?: 'blocked' | 'striped';
+
   name?: string;
   log?: boolean;
-
-  mainReduceWGSLOptions?: SingleReduceModuleOptions<T>[ 'mainReduceWGSLOptions' ];
 };
 
-export type ReduceModuleOptions<T> = SelfOptions<T>;
+type ParentOptions<T> = {
+  mainReduceWGSLOptions?: MainReduceModuleOptions<T>;
+};
+
+export type ReduceModuleOptions<T> = SelfOptions<T> & ParentOptions<T>;
 
 export const REDUCE_MODULE_DEFAULTS = {
   name: 'reduce',
   log: false, // TODO: how to deduplicate this?
-  mainReduceWGSLOptions: {}
+  inputOrder: 'blocked',
+  inputAccessOrder: 'striped',
+  mainReduceWGSLOptions: MAIN_REDUCE_MODULE_DEFAULTS
 } as const;
 
 // stageInputSize: number
@@ -65,7 +73,7 @@ export default class ReduceModule<T> extends CompositeModule<number> {
     ];
 
     const modules = _.range( 0, numStages ).map( i => {
-      return new SingleReduceModule( {
+      return new MainReduceModule( combineOptions<MainReduceModuleOptions<T>>( {
         name: `${options.name} ${i}`,
         log: options.log,
         input: slots[ i ],
@@ -73,9 +81,15 @@ export default class ReduceModule<T> extends CompositeModule<number> {
         binaryOp: options.binaryOp,
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
-        lengthExpression: ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction ** i ),
-        mainReduceWGSLOptions: options.mainReduceWGSLOptions
-      } );
+        loadReducedOptions: {
+          lengthExpression: ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction ** i ),
+          inputOrder: options.inputOrder,
+          inputAccessOrder: options.inputAccessOrder
+        },
+        reduceOptions: {
+          convergent: options.binaryOp.isCommutative
+        }
+      }, options.mainReduceWGSLOptions ) );
     } );
 
     super( modules, ( context, inputSize: number ) => {
