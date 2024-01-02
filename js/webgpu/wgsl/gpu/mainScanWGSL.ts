@@ -90,7 +90,7 @@ const mainScanWGSL = <T>(
     blueprint.addSlot( 'scanned_reduction', options.scannedReduction, BufferBindingType.READ_ONLY_STORAGE );
 
     if ( options.addScannedDoubleReduction ) {
-      blueprint.addSlot( 'scanned_double_reduction', options.scannedDoubleReduction, BufferBindingType.READ_ONLY_STORAGE );
+      blueprint.addSlot( 'double_scanned_reduction', options.scannedDoubleReduction, BufferBindingType.READ_ONLY_STORAGE );
     }
   }
 

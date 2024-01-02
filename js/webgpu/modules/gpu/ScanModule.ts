@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, CompositeModule, ExecutionContext, getArrayType, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, MainScanModule, MainScanModuleOptions, Module, u32 } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, MainScanModule, MainScanModuleOptions, Module } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 
@@ -140,8 +140,7 @@ export default class ScanModule<T> extends CompositeModule<number> {
         binaryOp: options.binaryOp,
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
-        // WGSL "ceil" equivalent
-        lengthExpression: options.lengthExpression ? `( ${options.lengthExpression} + ${u32( perStageReduction - 1 )} - 1u ) / ${u32( perStageReduction )}` : null,
+        lengthExpression: options.lengthExpression ? ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction ) : null,
         inputOrder: options.internalStriping ? 'striped' : 'blocked',
         inputAccessOrder: options.inputAccessOrder,
         exclusive: options.areScannedReductionsExclusive,
@@ -181,6 +180,102 @@ export default class ScanModule<T> extends CompositeModule<number> {
 
       slots = _.uniq( [ options.input, options.output, reductionSlot ] );
       internalSlots = [ reductionSlot ];
+    }
+    else if ( numStages === 3 ) {
+
+      const reductionSlot = new BufferArraySlot( getArrayType( options.input.concreteArrayType.elementType, Math.ceil( initialStageInputSize / perStageReduction ) ) );
+      const doubleReductionSlot = new BufferArraySlot( getArrayType( options.input.concreteArrayType.elementType, Math.ceil( initialStageInputSize / ( perStageReduction * perStageReduction ) ) ) );
+
+      const reduceOptions = {
+        name: `${options.name} reduce`,
+        log: options.log,
+        input: options.input,
+        output: reductionSlot,
+        binaryOp: options.binaryOp,
+        workgroupSize: options.workgroupSize,
+        grainSize: options.grainSize
+      };
+      const reduceModule = ( options.inputOrder === 'blocked' && options.inputAccessOrder === 'striped' && !options.binaryOp.isCommutative ) ? new MainReduceNonCommutativeModule( combineOptions<MainReduceNonCommutativeModuleOptions<T>>( {
+        lengthExpression: options.lengthExpression
+      }, reduceOptions, options.mainReduceNonCommutativeModuleOptions ) ) : new MainReduceModule( combineOptions<MainReduceModuleOptions<T>>( {
+        loadReducedOptions: {
+          lengthExpression: options.lengthExpression,
+          inputOrder: options.inputOrder,
+          inputAccessOrder: options.inputAccessOrder
+        },
+        reduceOptions: {
+          convergent: options.binaryOp.isCommutative
+        },
+        stripeOutput: options.internalStriping
+      }, reduceOptions, options.mainReduceModuleOptions ) );
+
+      const middleScanModule = new MainScanModule( combineOptions<MainScanModuleOptions<T>>( {
+        name: `${options.name} middle scan`,
+        log: options.log,
+        binaryOp: options.binaryOp,
+        workgroupSize: options.workgroupSize,
+        grainSize: options.grainSize,
+        lengthExpression: options.lengthExpression ? ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction ) : null,
+        inputOrder: options.internalStriping ? 'striped' : 'blocked',
+        inputAccessOrder: options.inputAccessOrder,
+        exclusive: options.areScannedReductionsExclusive,
+        inPlace: true,
+        data: reductionSlot,
+        storeReduction: true,
+        reduction: doubleReductionSlot,
+        stripeReducedOutput: options.internalStriping
+      }, options.mainScanModuleOptions ) );
+
+      const lowerScanModule = new MainScanModule( combineOptions<MainScanModuleOptions<T>>( {
+        name: `${options.name} lower scan`,
+        log: options.log,
+        binaryOp: options.binaryOp,
+        workgroupSize: options.workgroupSize,
+        grainSize: options.grainSize,
+        lengthExpression: options.lengthExpression ? ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction * perStageReduction ) : null,
+        inputOrder: options.internalStriping ? 'striped' : 'blocked',
+        inputAccessOrder: options.inputAccessOrder,
+        exclusive: options.areScannedReductionsExclusive,
+        inPlace: true,
+        data: doubleReductionSlot,
+        stripeReducedOutput: options.internalStriping
+      }, options.mainScanModuleOptions ) );
+
+      const upperScanModule = new MainScanModule( combineOptions<MainScanModuleOptions<T>>( {
+        name: `${options.name} upper scan`,
+        log: options.log,
+        binaryOp: options.binaryOp,
+        workgroupSize: options.workgroupSize,
+        grainSize: options.grainSize,
+        lengthExpression: options.lengthExpression,
+        inputOrder: options.inputOrder,
+        inputAccessOrder: options.inputAccessOrder,
+        exclusive: options.exclusive,
+        areScannedReductionsExclusive: options.areScannedReductionsExclusive,
+        addScannedReduction: true,
+        scannedReduction: reductionSlot,
+        addScannedDoubleReduction: true,
+        scannedDoubleReduction: doubleReductionSlot
+      }, inPlace ? {
+        inPlace: true,
+        data: options.input
+      } : {
+        inPlace: false,
+        input: options.input,
+        output: options.output
+      }, options.mainScanModuleOptions ) );
+
+      modules = [ reduceModule, middleScanModule, lowerScanModule, upperScanModule ];
+
+      execute = ( context, inputSize: number ) => {
+        reduceModule.execute( context, inputSize );
+        middleScanModule.execute( context, Math.ceil( inputSize / perStageReduction ) );
+        lowerScanModule.execute( context, Math.ceil( inputSize / ( perStageReduction * perStageReduction ) ) );
+        upperScanModule.execute( context, inputSize );
+      };
+
+      slots = _.uniq( [ options.input, options.output, reductionSlot, doubleReductionSlot ] );
+      internalSlots = [ reductionSlot, doubleReductionSlot ];
     }
     else {
       throw new Error( `invalid number of stages: ${numStages}` );
