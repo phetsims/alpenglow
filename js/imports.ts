@@ -583,14 +583,21 @@ export type { mergeWGSLOptions } from './webgpu/wgsl/gpu/mergeWGSL.js';
 export { default as mainScanWGSL, MAIN_SCAN_DEFAULTS } from './webgpu/wgsl/gpu/mainScanWGSL.js';
 export type { mainScanWGSLOptions } from './webgpu/wgsl/gpu/mainScanWGSL.js';
 
+// "main" modules (a single pipeline each)
 export { default as MainReduceModule, MAIN_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceModule.js';
 export type { MainReduceModuleOptions } from './webgpu/modules/gpu/MainReduceModule.js';
 export { default as MainReduceNonCommutativeModule, MAIN_REDUCE_NON_COMMUTATIVE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceNonCommutativeModule.js';
 export type { MainReduceNonCommutativeModuleOptions } from './webgpu/modules/gpu/MainReduceNonCommutativeModule.js';
 export { default as MainReduceAtomicModule, MAIN_REDUCE_ATOMIC_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceAtomicModule.js';
 export type { MainReduceAtomicModuleOptions } from './webgpu/modules/gpu/MainReduceAtomicModule.js';
+export { default as MainScanModule, MAIN_SCAN_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainScanModule.js';
+export type { MainScanModuleOptions } from './webgpu/modules/gpu/MainScanModule.js';
+
+// "composite" modules
 export { default as ReduceModule, REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/ReduceModule.js';
 export type { ReduceModuleOptions } from './webgpu/modules/gpu/ReduceModule.js';
+export { default as ScanModule, SCAN_MODULE_DEFAULTS } from './webgpu/modules/gpu/ScanModule.js';
+export type { ScanModuleOptions } from './webgpu/modules/gpu/ScanModule.js';
 
 // TODO: deprecate and remove these
 export { default as SingleReduceShader } from './webgpu/shaders/gpu/SingleReduceShader.js';

@@ -1,7 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
 /**
- * A single level of standalone reduction.
+ * A full reduction, with the method of reduction chosen based on the type and configuration.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

@@ -30,7 +30,7 @@ type SelfOptions<T> = {
   areScannedReductionsExclusive?: boolean;
 } & RakedSizable & ( {
   inPlace?: false;
-    input: BufferSlot<T[]>;
+  input: BufferSlot<T[]>;
   output: BufferSlot<T[]>;
 } | {
   inPlace: true;
