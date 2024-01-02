@@ -113,3 +113,51 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
     } );
   } );
 }
+
+// double-level
+{
+  const workgroupSize = 256;
+  const grainSize = 4;
+  // NOTE: we're using a lot of workgroup size here(!)
+
+  const options = {
+    inputSize: workgroupSize * grainSize * 5 - 27,
+    maximumSize: workgroupSize * grainSize * 10,
+    workgroupSize: workgroupSize,
+    grainSize: grainSize
+  } as const;
+
+  [ false, true ].forEach( exclusive => {
+    testScanModule( {
+      // eslint-disable-next-line no-object-spread-on-non-literals
+      ...options,
+      name: `u32 add scan double-size (${exclusive ? 'exclusive' : 'inclusive'})`,
+      binaryOp: U32Add,
+      exclusive: false
+    } );
+
+    testScanModule( {
+      // eslint-disable-next-line no-object-spread-on-non-literals
+      ...options,
+      name: `i32 add scan double-size (${exclusive ? 'exclusive' : 'inclusive'})`,
+      binaryOp: I32Add,
+      exclusive: false
+    } );
+
+    testScanModule( {
+      // eslint-disable-next-line no-object-spread-on-non-literals
+      ...options,
+      name: `vec2u add scan double-size (${exclusive ? 'exclusive' : 'inclusive'})`,
+      binaryOp: Vec2uAdd,
+      exclusive: false
+    } );
+
+    testScanModule( {
+      // eslint-disable-next-line no-object-spread-on-non-literals
+      ...options,
+      name: `bicyclic semigroup add scan double-size (${exclusive ? 'exclusive' : 'inclusive'})`,
+      binaryOp: Vec2uBic,
+      exclusive: false
+    } );
+  } );
+}

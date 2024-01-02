@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, CompositeModule, ExecutionContext, MainReduceModuleOptions, MainReduceNonCommutativeModuleOptions, MainScanModule, MainScanModuleOptions, Module } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferArraySlot, CompositeModule, ExecutionContext, getArrayType, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, MainScanModule, MainScanModuleOptions, Module, u32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 
@@ -23,6 +23,12 @@ type SelfOptions<T> = {
   // TODO: instead of these, get fusable data operators
   inputOrder?: 'blocked' | 'striped';
   inputAccessOrder?: 'blocked' | 'striped';
+
+  // TODO: marked as potentially broken?
+  internalStriping?: boolean;
+
+  // Whether our internal "reduces" data will be exclusive or inclusive (both are possible)
+  areScannedReductionsExclusive?: boolean;
 
   name?: string;
   log?: boolean;
@@ -41,6 +47,8 @@ export const SCAN_MODULE_DEFAULTS = {
   log: false, // TODO: how to deduplicate this? - We don't really need all of the defaults, right?
   inputOrder: 'blocked',
   inputAccessOrder: 'striped',
+  internalStriping: false,
+  areScannedReductionsExclusive: false,
   mainScanModuleOptions: {},
   mainReduceModuleOptions: {},
   mainReduceNonCommutativeModuleOptions: {}
@@ -98,6 +106,81 @@ export default class ScanModule<T> extends CompositeModule<number> {
 
       slots = _.uniq( [ options.input, options.output ] );
       internalSlots = [];
+    }
+    else if ( numStages === 2 ) {
+
+      const reductionSlot = new BufferArraySlot( getArrayType( options.input.concreteArrayType.elementType, Math.ceil( initialStageInputSize / perStageReduction ) ) );
+
+      const reduceOptions = {
+        name: `${options.name} reduce`,
+        log: options.log,
+        input: options.input,
+        output: reductionSlot,
+        binaryOp: options.binaryOp,
+        workgroupSize: options.workgroupSize,
+        grainSize: options.grainSize
+      };
+      const reduceModule = ( options.inputOrder === 'blocked' && options.inputAccessOrder === 'striped' && !options.binaryOp.isCommutative ) ? new MainReduceNonCommutativeModule( combineOptions<MainReduceNonCommutativeModuleOptions<T>>( {
+        lengthExpression: options.lengthExpression
+      }, reduceOptions, options.mainReduceNonCommutativeModuleOptions ) ) : new MainReduceModule( combineOptions<MainReduceModuleOptions<T>>( {
+        loadReducedOptions: {
+          lengthExpression: options.lengthExpression,
+          inputOrder: options.inputOrder,
+          inputAccessOrder: options.inputAccessOrder
+        },
+        reduceOptions: {
+          convergent: options.binaryOp.isCommutative
+        },
+        stripeOutput: options.internalStriping
+      }, reduceOptions, options.mainReduceModuleOptions ) );
+
+      const lowerScanModule = new MainScanModule( combineOptions<MainScanModuleOptions<T>>( {
+        name: `${options.name} lower scan`,
+        log: options.log,
+        binaryOp: options.binaryOp,
+        workgroupSize: options.workgroupSize,
+        grainSize: options.grainSize,
+        // WGSL "ceil" equivalent
+        lengthExpression: options.lengthExpression ? `( ${options.lengthExpression} + ${u32( perStageReduction - 1 )} - 1u ) / ${u32( perStageReduction )}` : null,
+        inputOrder: options.internalStriping ? 'striped' : 'blocked',
+        inputAccessOrder: options.inputAccessOrder,
+        exclusive: options.areScannedReductionsExclusive,
+        inPlace: true,
+        data: reductionSlot
+      }, options.mainScanModuleOptions ) );
+
+      const upperScanModule = new MainScanModule( combineOptions<MainScanModuleOptions<T>>( {
+        name: `${options.name} upper scan`,
+        log: options.log,
+        binaryOp: options.binaryOp,
+        workgroupSize: options.workgroupSize,
+        grainSize: options.grainSize,
+        lengthExpression: options.lengthExpression,
+        inputOrder: options.inputOrder,
+        inputAccessOrder: options.inputAccessOrder,
+        exclusive: options.exclusive,
+        areScannedReductionsExclusive: options.areScannedReductionsExclusive,
+        addScannedReduction: true,
+        scannedReduction: reductionSlot
+      }, inPlace ? {
+        inPlace: true,
+        data: options.input
+      } : {
+        inPlace: false,
+        input: options.input,
+        output: options.output
+      }, options.mainScanModuleOptions ) );
+
+      modules = [ reduceModule, lowerScanModule, upperScanModule ];
+
+      execute = ( context, inputSize: number ) => {
+        reduceModule.execute( context, inputSize );
+        lowerScanModule.execute( context, Math.ceil( inputSize / perStageReduction ) );
+        upperScanModule.execute( context, inputSize );
+      };
+
+      slots = _.uniq( [ options.input, options.output, reductionSlot ] );
+      internalSlots = [ reductionSlot ];
     }
     else {
       throw new Error( `invalid number of stages: ${numStages}` );
