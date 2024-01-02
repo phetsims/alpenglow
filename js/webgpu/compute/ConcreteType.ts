@@ -391,7 +391,7 @@ export const I32Type: ConcreteType<number> = {
   wgslAlign: 4,
   wgslSize: 4,
 
-  generateRandom: ( fullSize = false ) => random.nextIntBetween( 0, fullSize ? -0x7fffffff : -0x7f, fullSize ? 0x7fffffff : 0x7f ),
+  generateRandom: ( fullSize = false ) => random.nextIntBetween( fullSize ? -0x7fffffff : -0x7f, fullSize ? 0x7fffffff : 0x7f ),
 
   toDebugString: ( value: number ) => value.toString()
 };
@@ -425,11 +425,27 @@ export const I32AtomicType: ConcreteType<number> = {
   wgslAlign: 4,
   wgslSize: 4,
 
-  generateRandom: ( fullSize = false ) => random.nextIntBetween( 0, fullSize ? 0xffffffff : 0xff ),
+  generateRandom: ( fullSize = false ) => random.nextIntBetween( fullSize ? -0x7fffffff : -0x7f, fullSize ? 0x7fffffff : 0x7f ),
 
   toDebugString: ( value: number ) => value.toString()
 };
 alpenglow.register( 'I32AtomicType', I32AtomicType );
+
+export const I32Add: BinaryOp<number> = {
+  name: 'i32 addition',
+  type: I32Type,
+  isCommutative: true,
+
+  identity: 0,
+  apply: ( a: number, b: number ): number => a + b,
+
+  identityWGSL: '0i',
+  combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
+  atomicName: 'atomicAdd'
+};
+// TODO: add other atomic types (and specifically atomic types)
+alpenglow.register( 'I32Add', I32Add );
 
 export const Vec2uType: ConcreteType<Vector2> = {
   name: 'vec2u',

@@ -169,6 +169,7 @@ const loadReducedWGSL = <T>(
 
   assert && assert( !rangeCheckIndexExpression === ( lengthExpression === null ), 'rangeCheckIndexExpression must be created iff length is provided' );
 
+  // TODO: factor out length expression conditionally, since sometimes it might duplicate buffer loads(!)
   const loadWithRangeCheckExpression = ( i: number ) => rangeCheckIndexExpression
     ? `select( ${binaryOp.identityWGSL}, ${loadExpression!( loadIndexExpression!( i ) )}, ${rangeCheckIndexExpression( i )} < ${lengthExpression} )`
     : loadExpression!( loadIndexExpression!( i ) );

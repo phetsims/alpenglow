@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ConcreteType, ExecutionContext, getArrayType, I32AtomicType, I32Type, MAIN_REDUCE_ATOMIC_MODULE_DEFAULTS, MAIN_REDUCE_MODULE_DEFAULTS, MAIN_REDUCE_NON_COMMUTATIVE_MODULE_DEFAULTS, MainReduceAtomicModule, MainReduceAtomicModuleOptions, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, Module, U32AtomicType, U32Type } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ConcreteType, ExecutionContext, getArrayType, I32AtomicType, I32Type, MainReduceAtomicModule, MainReduceAtomicModuleOptions, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, Module, U32AtomicType, U32Type } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 
@@ -40,14 +40,14 @@ export type ReduceModuleOptions<T> = SelfOptions<T> & ParentOptions<T>;
 
 export const REDUCE_MODULE_DEFAULTS = {
   name: 'reduce',
-  log: false, // TODO: how to deduplicate this?
+  log: false, // TODO: how to deduplicate this? - We don't really need all of the defaults, right?
   inputOrder: 'blocked',
   inputAccessOrder: 'striped',
   allowAtomicShader: true,
   allowNonCommutativeShader: true,
-  mainReduceModuleOptions: MAIN_REDUCE_MODULE_DEFAULTS,
-  mainReduceNonCommutativeModuleOptions: MAIN_REDUCE_NON_COMMUTATIVE_MODULE_DEFAULTS,
-  mainReduceAtomicModuleOptions: MAIN_REDUCE_ATOMIC_MODULE_DEFAULTS
+  mainReduceModuleOptions: {},
+  mainReduceNonCommutativeModuleOptions: {},
+  mainReduceAtomicModuleOptions: {}
 } as const;
 
 // stageInputSize: number
@@ -63,6 +63,11 @@ export default class ReduceModule<T> extends CompositeModule<number> {
   ) {
     const options = optionize3<ReduceModuleOptions<T>, SelfOptions<T>>()( {}, REDUCE_MODULE_DEFAULTS, providedOptions );
 
+    const perStageReduction = options.workgroupSize * options.grainSize;
+    const initialStageInputSize = options.input.length;
+    const numStages = Math.ceil( Math.log2( initialStageInputSize ) / Math.log2( perStageReduction ) );
+    assert && assert( numStages > 0, 'Do not pass in a single-element input' );
+
     let modules: Module<IntentionalAny>[];
     let execute: ( context: ExecutionContext, inputSize: number ) => void;
     let slots: BufferArraySlot<T>[];
@@ -75,8 +80,12 @@ export default class ReduceModule<T> extends CompositeModule<number> {
     if (
       options.allowAtomicShader &&
       options.binaryOp.atomicName &&
-      ( isU32Type || isI32Type )
+      ( isU32Type || isI32Type ) &&
+      numStages > 1 // no point to doing atomics if we only have one stage
     ) {
+
+      // TODO: we should set the atomic type to the initial value (identity), no? Especially if we are reusing buffers
+
       const atomicType = ( isU32Type ? U32AtomicType : I32AtomicType ) as unknown as ConcreteType<T>;
       const module = new MainReduceAtomicModule( combineOptions<MainReduceAtomicModuleOptions<T>>( {
         name: `${options.name} atomic`,
@@ -105,13 +114,6 @@ export default class ReduceModule<T> extends CompositeModule<number> {
       internalSlots = [];
     }
     else {
-      const perStageReduction = options.workgroupSize * options.grainSize;
-      const initialStageInputSize = options.input.length;
-      const numStages = Math.ceil( Math.log2( initialStageInputSize ) / Math.log2( perStageReduction ) );
-      assert && assert( numStages > 0, 'Do not pass in a single-element input' );
-
-      // TODO: detect the atomic case(!)
-
       // TODO: should we "stripe" the next layer of data?
 
       internalSlots = _.range( 0, numStages - 1 ).map( i => {
@@ -141,10 +143,8 @@ export default class ReduceModule<T> extends CompositeModule<number> {
           options.inputAccessOrder === 'striped' &&
           !options.binaryOp.isCommutative
         ) {
-          assert && assert( !options.lengthExpression, 'Not yet supported' ); // TODO: handle length(!)
-
           return new MainReduceNonCommutativeModule( combineOptions<MainReduceNonCommutativeModuleOptions<T>>( {
-            // anything in the future?
+            lengthExpression: options.lengthExpression
           }, commonOptions, options.mainReduceNonCommutativeModuleOptions ) );
         }
         else {

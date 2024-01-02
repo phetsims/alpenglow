@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLExpression, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, OptionalLengthExpressionable, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLExpression, WGSLVariableName } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -24,9 +24,10 @@ export type mainReduceNonCommutativeWGSLOptions<T> = {
 
   // e.g. something in the future?
   reduceOptions?: StrictOmit<reduceWGSLOptions<T>, 'value' | 'scratch' | 'workgroupSize' | 'binaryOp' | 'localIndex' | 'scratchPreloaded' | 'valuePreloaded' | 'mapScratchIndex' | 'convergent'>;
-} & RakedSizable;
+} & RakedSizable & OptionalLengthExpressionable;
 
 export const MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS = {
+  lengthExpression: null,
   stripeOutput: false,
   reduceOptions: {}
 } as const;
@@ -42,6 +43,7 @@ const mainReduceNonCommutativeWGSL = <T>(
   const grainSize = options.grainSize;
   const binaryOp = options.binaryOp;
   const stripeOutput = options.stripeOutput;
+  const lengthExpression = options.lengthExpression;
 
   blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
   blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE );
@@ -61,6 +63,10 @@ const mainReduceNonCommutativeWGSL = <T>(
       if ( local_id.x == 0u ) {
         scratch[ 0u ] = ${binaryOp.identityWGSL};
       }
+      
+      ${lengthExpression ? `
+        let rn_length = ${lengthExpression};
+      ` : ''}
     
       var value: ${binaryOp.type.valueType( blueprint )};
       ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => {
@@ -71,7 +77,12 @@ const mainReduceNonCommutativeWGSL = <T>(
     
         return `
           {
-            value = input[ workgroup_id.x * ${u32( workgroupSize * grainSize )} + ${u32( i * workgroupSize )} + local_id.x ];
+            let rn_index = workgroup_id.x * ${u32( workgroupSize * grainSize )} + ${u32( i * workgroupSize )} + local_id.x;
+            ${lengthExpression ? `
+              value = select( ${binaryOp.identityWGSL}, input[ rn_index ], rn_index < rn_length );
+            ` : `
+              value = input[ rn_index ];
+            `}
             if ( local_id.x == 0u ) {
               ${combineToValue( 'value', 'scratch[ 0u ]', 'value' )}
             }

@@ -6,57 +6,190 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, Procedure, ReduceModule, Routine, u32, U32Add } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Add, Procedure, ReduceModule, ReduceModuleOptions, Routine, u32, U32Add, Vec2uAdd, Vec2uBic } from '../../../imports.js';
+import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 QUnit.module( 'ReduceModuleTests' );
 
-asyncTestWithDevice( 'u32 add 2-level initial reduce', async ( device, deviceContext ) => {
-const binaryOp = U32Add;
+type ReduceModuleTestOptions<T> = {
+  name: string;
+  inputSize: number;
+  maximumSize: number;
+} & StrictOmit<ReduceModuleOptions<T>, 'input' | 'output' | 'lengthExpression'>;
+
+const testReduceModule = <T>( options: ReduceModuleTestOptions<T> ) => {
+  asyncTestWithDevice( options.name, async ( device, deviceContext ) => {
+
+    const inputSlot = new BufferArraySlot( getArrayType( options.binaryOp.type, options.maximumSize, options.binaryOp.identity ) );
+    const outputSlot = new BufferArraySlot( getArrayType( options.binaryOp.type, 1, options.binaryOp.identity ) ); // TODO
+
+    // TODO: inspect all usages of everything, look for simplification opportunities
+
+    const reduceModule = new ReduceModule( combineOptions<ReduceModuleOptions<T>>( {
+      input: inputSlot,
+      output: outputSlot,
+      lengthExpression: u32( options.inputSize )
+    }, options ) );
+
+    const routine = await Routine.create(
+      deviceContext,
+      reduceModule,
+      [ inputSlot, outputSlot ],
+      Routine.INDIVIDUAL_LAYOUT_STRATEGY,
+      ( context, execute, input: T[] ) => {
+        context.setTypedBufferValue( inputSlot, input );
+
+        execute( context, input.length );
+
+        return context.getTypedBufferValue( outputSlot );
+      }
+    );
+
+    const procedure = new Procedure( routine ).bindRemainingBuffers();
+
+    const inputValues = _.range( 0, options.inputSize ).map( () => options.binaryOp.type.generateRandom( false ) );
+    const expectedValues = [ inputValues.reduce( ( a, b ) => options.binaryOp.apply( a, b ), options.binaryOp.identity ) ];
+    const actualValues = await procedure.standaloneExecute( deviceContext, inputValues );
+
+    procedure.dispose();
+
+    return compareArrays( options.binaryOp.type, inputValues, expectedValues, actualValues );
+  } );
+};
+
+// single-level
+{
   const workgroupSize = 256;
   const grainSize = 8;
-  const inputSize = workgroupSize * grainSize * 5 - 27;
 
-  // TODO: make sure we're including testing WITH logging(!)
-  const log = false;
-  const maxItemCount = workgroupSize * grainSize * 10; // pretend
-
-  const inputSlot = new BufferArraySlot( getArrayType( binaryOp.type, maxItemCount, binaryOp.identity ) );
-  const outputSlot = new BufferArraySlot( getArrayType( binaryOp.type, 1 ) ); // TODO
-
-  // TODO: inspect all usages of everything, look for simplification opportunities
-
-  const reduceModule = new ReduceModule( {
-    name: 'u32 add 2-level initial reduce',
-    log: log,
-    input: inputSlot,
-    output: outputSlot,
-    binaryOp: binaryOp,
+  const options = {
+    inputSize: workgroupSize * grainSize - 27,
+    maximumSize: workgroupSize * grainSize,
     workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    lengthExpression: u32( inputSize )
+    grainSize: grainSize
+  } as const;
+
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'u32 add reduce (atomic) single-size',
+    binaryOp: U32Add
   } );
 
-  const routine = await Routine.create(
-    deviceContext,
-    reduceModule,
-    [ inputSlot, outputSlot ],
-    Routine.INDIVIDUAL_LAYOUT_STRATEGY,
-    ( context, execute, input: number[] ) => {
-      context.setTypedBufferValue( inputSlot, input );
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'i32 add reduce (atomic) single-size',
+    binaryOp: I32Add
+  } );
 
-      execute( context, input.length );
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'vec2u add reduce (multi-layer commutative) single-size',
+    binaryOp: Vec2uAdd
+  } );
 
-      return context.getTypedBufferValue( outputSlot );
-    }
-  );
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'bicyclic semigroup reduce (multi-layer non-commutative) single-size',
+    binaryOp: Vec2uBic
+  } );
+}
 
-  const procedure = new Procedure( routine ).bindRemainingBuffers();
+// double-level
+{
+  const workgroupSize = 256;
+  const grainSize = 8;
 
-  const inputValues = _.range( 0, inputSize ).map( () => binaryOp.type.generateRandom( false ) );
-  const expectedValues = [ inputValues.reduce( ( a, b ) => binaryOp.apply( a, b ), binaryOp.identity ) ];
-  const actualValues = await procedure.standaloneExecute( deviceContext, inputValues );
+  const options = {
+    inputSize: workgroupSize * grainSize * 5 - 27,
+    maximumSize: workgroupSize * grainSize * 10,
+    workgroupSize: workgroupSize,
+    grainSize: grainSize
+  } as const;
 
-  procedure.dispose();
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'u32 add reduce (atomic) double-size',
+    binaryOp: U32Add
+  } );
 
-  return compareArrays( binaryOp.type, inputValues, expectedValues, actualValues );
-} );
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'i32 add reduce (atomic) double-size',
+    binaryOp: I32Add
+  } );
+
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'vec2u add reduce (multi-layer commutative) double-size',
+    binaryOp: Vec2uAdd
+  } );
+
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'bicyclic semigroup reduce (multi-layer non-commutative) double-size',
+    binaryOp: Vec2uBic
+  } );
+}
+
+// triple-level
+{
+  const workgroupSize = 32;
+  const grainSize = 2;
+
+  const options = {
+    inputSize: Math.ceil( ( workgroupSize * grainSize ) ** 2.1 ),
+    maximumSize: Math.ceil( ( workgroupSize * grainSize ) ** 2.2 ),
+    workgroupSize: workgroupSize,
+    grainSize: grainSize
+  } as const;
+
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'u32 add reduce (atomic) triple-size',
+    binaryOp: U32Add
+  } );
+
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'i32 add reduce (atomic) triple-size',
+    binaryOp: I32Add
+  } );
+
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'vec2u add reduce (multi-layer commutative) triple-size',
+    binaryOp: Vec2uAdd
+  } );
+
+  testReduceModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'bicyclic semigroup reduce (multi-layer non-commutative) triple-size',
+    binaryOp: Vec2uBic
+  } );
+}
+
+{
+  testReduceModule( {
+    name: 'logging test: vec2 add reduce (multi-layer commutative) double-size',
+    binaryOp: Vec2uAdd,
+    log: true,
+    inputSize: 702,
+    maximumSize: 1024,
+    workgroupSize: 256,
+    grainSize: 2
+  } );
+}
+
