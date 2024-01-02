@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, BufferResource, compareArrays, Executor, getArrayType, PipelineBlueprint, Procedure, ReduceModule, Routine, u32, U32Add } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, Executor, getArrayType, Procedure, ReduceModule, Routine, u32, U32Add } from '../../../imports.js';
 
 QUnit.module( 'ReduceModuleTests' );
 
@@ -57,14 +57,14 @@ const binaryOp = U32Add;
   const inputValues = _.range( 0, inputSize ).map( () => binaryOp.type.generateRandom( false ) );
   const expectedValues = [ inputValues.reduce( ( a, b ) => binaryOp.apply( a, b ), binaryOp.identity ) ];
 
-  const actualValues = await Executor.execute( deviceContext, log, async executor => {
+  const actualValues = await Executor.execute( deviceContext, async executor => {
     const separateComputePasses = false;
 
     return procedure.execute( executor, inputValues, {
       separateComputePasses: separateComputePasses
     } );
   }, {
-    logBuffer: log ? ( procedure.resourceMap.get( PipelineBlueprint.LOG_BUFFER_SLOT )! as BufferResource ).buffer : null
+    logBuffer: procedure.getLogBuffer()
   } );
 
   procedure.dispose();

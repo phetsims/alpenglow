@@ -100,7 +100,6 @@ export default class Executor {
 
   public static async execute<T>(
     deviceContext: DeviceContext,
-    log: boolean,
     task: ( executor: Executor ) => Promise<T>,
     options?: ExecutorOptions
   ): Promise<T> {
@@ -116,7 +115,6 @@ export default class Executor {
     );
 
     const logBuffer = options?.logBuffer || null;
-    assert && assert( !log || logBuffer );
 
     // TODO: staging ring for our "out" buffers?
     const outputPromise = task( executor );

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, ExecutionContext, Executor, Resource, ResourceSlot, Routine } from '../../imports.js';
+import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, ExecutionContext, Executor, PipelineBlueprint, Resource, ResourceSlot, Routine } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import BufferSlot from './BufferSlot.js';
 
@@ -114,6 +114,16 @@ export default class Procedure<In, Out> {
     context.finish();
 
     return resultPromise;
+  }
+
+  public getLogBuffer(): GPUBuffer | null {
+    const resource = this.resourceMap.get( PipelineBlueprint.LOG_BUFFER_SLOT );
+    if ( resource ) {
+      return ( resource as BufferResource ).buffer;
+    }
+    else {
+      return null;
+    }
   }
 
   public dispose(): void {
