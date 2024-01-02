@@ -24,8 +24,23 @@ export default class BufferSlot<T = unknown> extends ResourceSlot {
     return this.bufferSlotSlices.some( slice => slice.bufferSlot === slot );
   }
 
+  public getSubtreeSlots(): BufferSlot[] {
+    return _.uniq( [
+      this as BufferSlot,
+      ...this.bufferSlotSlices.flatMap( slice => slice.bufferSlot.getSubtreeSlots() )
+    ] );
+  }
+
   public toDebugString(): string {
     return `BufferSlot[#${this.id} size:${this.size} type:${this.concreteType.name}]`;
+  }
+
+  public castTo<U>( concreteType: ConcreteType<U> ): BufferSlot<U> {
+    const slot = new BufferSlot<U>( concreteType );
+
+    this.bufferSlotSlices.push( new BufferSlotSlice( slot, 0 ) );
+
+    return slot;
   }
 }
 alpenglow.register( 'BufferSlot', BufferSlot );

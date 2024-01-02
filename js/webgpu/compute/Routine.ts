@@ -38,7 +38,7 @@ export default class Routine<T, In, Out> {
   public static async create<T, In, Out>(
     deviceContext: DeviceContext,
     module: Module<T>,
-    sharedBufferSlots: BufferSlot[],
+    sharedBufferSlots: BufferSlot<IntentionalAny>[],
     layoutStrategy: ( deviceContext: DeviceContext, pipelineBlueprints: PipelineBlueprint[] ) => Map<PipelineBlueprint, PipelineLayout>,
     executeWrapper: ( context: ExecutionContext, execute: ( context: ExecutionContext, value: T ) => void, value: In ) => Promise<Out>
   ): Promise<Routine<T, In, Out>> {

@@ -11,8 +11,8 @@ import { alpenglow, Binding, Resource } from '../../imports.js';
 export default class BufferResource extends Resource {
   public constructor(
     public readonly buffer: GPUBuffer,
-    public readonly offset = 0, // TODO: remove offset, since our BufferSlotSlices should handle it
-    public readonly size = 0 // TODO: remove size, since our buffer already has a size
+    public readonly offset = 0,
+    public readonly size = 0
   ) {
     super( buffer );
   }
@@ -25,6 +25,7 @@ export default class BufferResource extends Resource {
       bufferBinding.offset = this.offset;
     }
     if ( this.size !== 0 ) {
+      // TODO: pass more sizes in!
       bufferBinding.size = this.size;
     }
     return {

@@ -249,6 +249,40 @@ export const U32Type: ConcreteType<number> = {
 };
 alpenglow.register( 'U32Type', U32Type );
 
+export const U32AtomicType: ConcreteType<number> = {
+  name: 'u32 atomic',
+  bytesPerElement: 4,
+
+  equals( a: number, b: number ): boolean {
+    return a === b;
+  },
+
+  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
+    return `( atomicLoad( &${a} ) == atomicLoad( &${b} ) )`;
+  },
+
+  encode( value: number, encoder: ByteEncoder ): void {
+    encoder.pushU32( value );
+  },
+  decode( encoder: ByteEncoder, offset: number ): number {
+    return encoder.fullU32Array[ offset ];
+  },
+
+  valueType: () => 'atomic<u32>',
+  writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
+    return `
+       ${storeStatement( '0u', `atomicLoad( &${value} )` )}
+    `;
+  },
+  wgslAlign: 4,
+  wgslSize: 4,
+
+  generateRandom: ( fullSize = false ) => random.nextIntBetween( 0, fullSize ? 0xffffffff : 0xff ),
+
+  toDebugString: ( value: number ) => value.toString()
+};
+alpenglow.register( 'U32AtomicType', U32AtomicType );
+
 export const U32Add: BinaryOp<number> = {
   name: 'u32 addition',
   type: U32Type,
@@ -362,6 +396,40 @@ export const I32Type: ConcreteType<number> = {
   toDebugString: ( value: number ) => value.toString()
 };
 alpenglow.register( 'I32Type', I32Type );
+
+export const I32AtomicType: ConcreteType<number> = {
+  name: 'i32 atomic',
+  bytesPerElement: 4,
+
+  equals( a: number, b: number ): boolean {
+    return a === b;
+  },
+
+  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
+    return `( atomicLoad( &${a} ) == atomicLoad( &${b} ) )`;
+  },
+
+  encode( value: number, encoder: ByteEncoder ): void {
+    encoder.pushU32( value );
+  },
+  decode( encoder: ByteEncoder, offset: number ): number {
+    return encoder.fullU32Array[ offset ];
+  },
+
+  valueType: () => 'atomic<i32>',
+  writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
+    return `
+       ${storeStatement( '0u', `bitcast<u32>( atomicLoad( &${value} ) )` )}
+    `;
+  },
+  wgslAlign: 4,
+  wgslSize: 4,
+
+  generateRandom: ( fullSize = false ) => random.nextIntBetween( 0, fullSize ? 0xffffffff : 0xff ),
+
+  toDebugString: ( value: number ) => value.toString()
+};
+alpenglow.register( 'I32AtomicType', I32AtomicType );
 
 export const Vec2uType: ConcreteType<Vector2> = {
   name: 'vec2u',

@@ -18,14 +18,12 @@ export type mainReduceAtomicWGSLOptions<T> = {
   binaryOp: BinaryOp<T>;
 
   // e.g. length / inputOrder / inputAccessOrder / sequentialReduceStyle
-  loadReducedOptions?: StrictOmit<loadReducedWGSLOptions<T>, 'value' | 'lengthExpression' | 'binaryOp' | 'loadExpression' | 'loadStatements' | 'workgroupSize' | 'grainSize' | 'globalIndex' | 'workgroupIndex' | 'localIndex'>;
+  loadReducedOptions?: StrictOmit<loadReducedWGSLOptions<T>, 'value' | 'binaryOp' | 'loadExpression' | 'loadStatements' | 'workgroupSize' | 'grainSize' | 'globalIndex' | 'workgroupIndex' | 'localIndex'>;
 
   reduceOptions?: StrictOmit<reduceWGSLOptions<T>, 'value' | 'scratch' | 'workgroupSize' | 'binaryOp' | 'localIndex' | 'scratchPreloaded' | 'valuePreloaded' | 'mapScratchIndex'>;
 } & RakedSizable;
 
 export const MAIN_REDUCE_ATOMIC_DEFAULTS = {
-  lengthExpression: null,
-
   loadReducedOptions: {
     inputAccessOrder: 'striped'
   },

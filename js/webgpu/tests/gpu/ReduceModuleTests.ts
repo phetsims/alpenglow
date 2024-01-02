@@ -39,7 +39,7 @@ const binaryOp = U32Add;
   const routine = await Routine.create(
     deviceContext,
     reduceModule,
-    [],
+    [ inputSlot, outputSlot ],
     Routine.INDIVIDUAL_LAYOUT_STRATEGY,
     ( context, execute, input: number[] ) => {
       context.setTypedBufferValue( inputSlot, input );

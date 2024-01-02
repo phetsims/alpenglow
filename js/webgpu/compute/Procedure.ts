@@ -8,6 +8,7 @@
 
 import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, ExecutionContext, Executor, Resource, ResourceSlot, Routine } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import BufferSlot from './BufferSlot.js';
 
 export type ProcedureExecuteOptions = {
   separateComputePasses?: boolean;
@@ -27,7 +28,24 @@ export default class Procedure<In, Out> {
     assert && assert( !this.resourceMap.has( slot ), 'Already bound' );
     assert && assert( this.routine.rootResourceSlots.includes( slot ), 'Not a root resource slot' );
 
+    // Set the root resource
     this.resourceMap.set( slot, resource );
+
+    // If it is a buffer resource, recursively visit slices and set them up in the resource map
+    if ( slot instanceof BufferSlot && resource instanceof BufferResource ) {
+      const recur = ( slot: BufferSlot, resource: BufferResource ): void => {
+        for ( const slice of slot.bufferSlotSlices ) {
+          const subSlot = slice.bufferSlot;
+
+          // TODO: handle buffer sizes! We can explicitly pass them in, in that case?
+          const subResource = new BufferResource( resource.buffer, resource.offset + slice.offset );
+
+          this.resourceMap.set( subSlot, subResource );
+          recur( subSlot, subResource );
+        }
+      };
+      recur( slot, resource );
+    }
 
     this.routine.bindGroupLayouts.forEach( bindGroupLayout => {
       if ( !this.bindGroupMap.has( bindGroupLayout ) ) {
@@ -51,8 +69,9 @@ export default class Procedure<In, Out> {
 
       let storageUsage = false;
       let uniformUsage = false;
+      const subtreeSlots = slot.getSubtreeSlots();
       this.routine.pipelineBlueprints.forEach( pipelineBlueprint => {
-        const usage = pipelineBlueprint.usages.find( usage => usage.resourceSlot === slot );
+        const usage = pipelineBlueprint.usages.find( usage => subtreeSlots.includes( usage.resourceSlot as BufferSlot ) );
 
         if ( usage && usage.bindingType instanceof BufferBindingType ) {
           if ( usage.bindingType.type === 'uniform' ) {
@@ -63,6 +82,8 @@ export default class Procedure<In, Out> {
           }
         }
       } );
+
+      assert && assert( storageUsage || uniformUsage );
 
       const buffer = this.routine.deviceContext.device.createBuffer( {
         // TODO: a label!

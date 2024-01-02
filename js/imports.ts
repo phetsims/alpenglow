@@ -464,7 +464,7 @@ export type { OldComputeShaderOptions, OldComputeShaderDispatchOptions, OldCompu
 export { default as BlitShader } from './webgpu/BlitShader.js';
 export { default as ByteEncoder } from './webgpu/compute/ByteEncoder.js';
 export type { F32, U32, I32, U8 } from './webgpu/compute/ByteEncoder.js';
-export { U32Type, U32Add, U32Order, U32ReverseOrder, I32Type, Vec2uType, Vec2uBic, Vec3uType, Vec4uType, Vec2uLexicographicalOrder, getArrayType, getCastedType, Vec2uAdd, Vec3uAdd, Vec4uAdd } from './webgpu/compute/ConcreteType.js';
+export { U32Type, U32Add, U32Order, U32ReverseOrder, I32Type, Vec2uType, Vec2uBic, Vec3uType, Vec4uType, Vec2uLexicographicalOrder, getArrayType, getCastedType, Vec2uAdd, Vec3uAdd, Vec4uAdd, U32AtomicType, I32AtomicType } from './webgpu/compute/ConcreteType.js';
 export type { default as ConcreteType, ConcreteArrayType, BinaryOp, BitOrder, CompareOrder, Order, WGSLExpression, WGSLStatements, WGSLVariableName, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionBool, WGSLModuleDeclarations, WGSLExpressionT } from './webgpu/compute/ConcreteType.js';
 export { default as ConsoleLogger, ConsoleLoggedEntry, ConsoleLoggedThread, ConsoleLoggedLine, ConsoleLoggedShader } from './webgpu/compute/ConsoleLogger.js';
 export type { ConsoleLogInfo } from './webgpu/compute/ConsoleLogger.js';
@@ -587,6 +587,8 @@ export { default as MainReduceModule, MAIN_REDUCE_MODULE_DEFAULTS } from './webg
 export type { MainReduceModuleOptions } from './webgpu/modules/gpu/MainReduceModule.js';
 export { default as MainReduceNonCommutativeModule, MAIN_REDUCE_NON_COMMUTATIVE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceNonCommutativeModule.js';
 export type { MainReduceNonCommutativeModuleOptions } from './webgpu/modules/gpu/MainReduceNonCommutativeModule.js';
+export { default as MainReduceAtomicModule, MAIN_REDUCE_ATOMIC_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceAtomicModule.js';
+export type { MainReduceAtomicModuleOptions } from './webgpu/modules/gpu/MainReduceAtomicModule.js';
 export { default as ReduceModule, REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/ReduceModule.js';
 export type { ReduceModuleOptions } from './webgpu/modules/gpu/ReduceModule.js';
 
