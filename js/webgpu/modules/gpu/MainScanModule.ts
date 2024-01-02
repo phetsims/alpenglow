@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2024, University of Colorado Boulder
 
 /**
  * A single level of scan (prefix sum) with configurable options.

@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * Loads data (usually from main memory) with multiple values per thread, but reduces them into a single value per
