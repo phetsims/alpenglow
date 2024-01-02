@@ -6,13 +6,21 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, ExecutionContext, Executor, PipelineBlueprint, Resource, ResourceSlot, Routine } from '../../imports.js';
+import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, DeviceContext, ExecutionContext, Executor, ExecutorOptions, PipelineBlueprint, Resource, ResourceSlot, Routine } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import BufferSlot from './BufferSlot.js';
+import { combineOptions } from '../../../../phet-core/js/optionize.js';
 
 export type ProcedureExecuteOptions = {
   separateComputePasses?: boolean;
 };
+
+export type ProcedureStandaloneExecuteOptions = {
+  procedureExecuteOptions?: ProcedureExecuteOptions;
+  executorOptions?: ExecutorOptions;
+};
+
+const emptyOptions = {} as const;
 
 export default class Procedure<In, Out> {
 
@@ -24,7 +32,7 @@ export default class Procedure<In, Out> {
     public readonly bindGroupMap: Map<BindGroupLayout, BindGroup> = new Map<BindGroupLayout, BindGroup>()
   ) {}
 
-  public bind( slot: ResourceSlot, resource: Resource ): void {
+  public bind( slot: ResourceSlot, resource: Resource ): this {
     assert && assert( !this.resourceMap.has( slot ), 'Already bound' );
     assert && assert( this.routine.rootResourceSlots.includes( slot ), 'Not a root resource slot' );
 
@@ -59,9 +67,11 @@ export default class Procedure<In, Out> {
         }
       }
     } );
+
+    return this;
   }
 
-  public bindRemainingBuffers(): void {
+  public bindRemainingBuffers(): this {
     for ( const slot of this.routine.rootBufferSlots ) {
       if ( this.resourceMap.has( slot ) ) {
         continue;
@@ -94,6 +104,8 @@ export default class Procedure<In, Out> {
       this.selfBuffers.push( buffer );
       this.bind( slot, new BufferResource( buffer ) );
     }
+
+    return this;
   }
 
   public createChild(): Procedure<In, Out> {
@@ -114,6 +126,16 @@ export default class Procedure<In, Out> {
     context.finish();
 
     return resultPromise;
+  }
+
+  public standaloneExecute( deviceContext: DeviceContext, data: In, options?: ProcedureStandaloneExecuteOptions ): Promise<Out> {
+    const executorOptions = combineOptions<ExecutorOptions>( {
+      logBuffer: this.getLogBuffer()
+    }, options?.executorOptions );
+
+    return Executor.execute( deviceContext, async executor => {
+      return this.execute( executor, data, options?.procedureExecuteOptions || emptyOptions );
+    }, executorOptions );
   }
 
   public getLogBuffer(): GPUBuffer | null {

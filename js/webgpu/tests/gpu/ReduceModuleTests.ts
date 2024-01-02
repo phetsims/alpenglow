@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, Executor, getArrayType, Procedure, ReduceModule, Routine, u32, U32Add } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, Procedure, ReduceModule, Routine, u32, U32Add } from '../../../imports.js';
 
 QUnit.module( 'ReduceModuleTests' );
 
@@ -50,22 +50,11 @@ const binaryOp = U32Add;
     }
   );
 
-  const procedure = new Procedure( routine );
-
-  procedure.bindRemainingBuffers();
+  const procedure = new Procedure( routine ).bindRemainingBuffers();
 
   const inputValues = _.range( 0, inputSize ).map( () => binaryOp.type.generateRandom( false ) );
   const expectedValues = [ inputValues.reduce( ( a, b ) => binaryOp.apply( a, b ), binaryOp.identity ) ];
-
-  const actualValues = await Executor.execute( deviceContext, async executor => {
-    const separateComputePasses = false;
-
-    return procedure.execute( executor, inputValues, {
-      separateComputePasses: separateComputePasses
-    } );
-  }, {
-    logBuffer: procedure.getLogBuffer()
-  } );
+  const actualValues = await procedure.standaloneExecute( deviceContext, inputValues );
 
   procedure.dispose();
 
