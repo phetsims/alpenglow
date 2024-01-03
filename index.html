@@ -2127,10 +2127,28 @@
       <h4 id="WGSL-linking">Linking</h4>
 
       <p class="TODO">
-        Get the multipass reduce working for non-commutative and atomics first.
+        Radix sort is NOT combining the scan pipelines! We're getting multiple compute pipelines.
+
+        We'll need to look at "combining" the pipelines (at least the ones with same layout) that are duplicated in radix sort.
+
+        All of the "same pipelineBlueprint + same bind group layout" should be turned into the same compute pipeline.
+
+        We'll want some way of denoting different compute pipelines for the same pipeline blueprint (e.g. different
+        layouts).
+
+        Some compute pipelines will have different bind groups (duh).
+
+        Is our current interface (for layout strategy) sufficient? Should we improve the API at all?
       </p>
 
       <p class="TODO">
+        Debug the radix sort, compare with same "starting conditions" as the other working version, to identify
+        where it is going wrong.
+      </p>
+
+      <p class="TODO">
+        Top level doc todo:
+
         We are creating a framework around WebGPU's compute shader APIs so that we can easily vary the bind group and buffer
         sharing (for profiling or optimization), while providing a convenient interface for writing shaders.
 

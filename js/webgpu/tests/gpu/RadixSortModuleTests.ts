@@ -78,7 +78,7 @@ const testRadixSortModule = <T>( options: RadixSortModuleTestOptions<T> ) => {
 //
 //   const bitsPerInnerPass = Math.min( maxBitsPerInnerPass, 2 );
 //   const bitsPerPass = 4;
-//   const isReductionExcluive = false;
+//   const isReductionExclusive = false;
 //   const inPlace = false;
 //   const maxInputSize = RadixSortModule.getMaximumElementQuantity( workgroupSize, grainSize, workgroupSize, grainSize, bitsPerPass );
 //
@@ -97,7 +97,7 @@ const testRadixSortModule = <T>( options: RadixSortModuleTestOptions<T> ) => {
 //     earlyLoad: false,
 //     inPlace: inPlace,
 //     scanModuleOptions: {
-//       areScannedReductionsExclusive: isReductionExcluive
+//       areScannedReductionsExclusive: isReductionExclusive
 //     },
 //     inputSize: Math.min( maxInputSize, ( workgroupSize * grainSize ) * workgroupSize * grainSize * 2 ) - 27
 //   } );
