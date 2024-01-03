@@ -56,7 +56,7 @@ const mainRadixScatterWGSL = <T>(
 
   // TODO: we should have type assertions to make sure these match?
   blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'histogramOffsets', options.histogramOffsets, BufferBindingType.READ_ONLY_STORAGE ); // make sure this is u32?
+  blueprint.addSlot( 'histogram_offsets', options.histogramOffsets, BufferBindingType.READ_ONLY_STORAGE ); // make sure this is u32?
   blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE );
 
   // TODO: generate more of the bindings

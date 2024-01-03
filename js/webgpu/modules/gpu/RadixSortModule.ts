@@ -38,9 +38,9 @@ type SelfOptions<T> = {
 };
 
 type ParentOptions<T> = {
-  mainRadixHistogramModuleOptions: MainRadixHistogramModuleOptions<T>;
-  mainRadixScatterModuleOptions: MainRadixScatterModuleOptions<T>;
-  scanModuleOptions: ScanModuleOptions<number>;
+  mainRadixHistogramModuleOptions?: Partial<MainRadixHistogramModuleOptions<T>>;
+  mainRadixScatterModuleOptions?: Partial<MainRadixScatterModuleOptions<T>>;
+  scanModuleOptions?: Partial<ScanModuleOptions<number>>;
 };
 
 export type RadixSortModuleOptions<T> = SelfOptions<T> & ParentOptions<T>;
@@ -286,6 +286,24 @@ export default class RadixSortModule<T> extends CompositeModule<number> {
     this.output = providedOptions.output;
     this.histogram = histogramSlot;
     this.extraSlots = extraSlots;
+  }
+
+  public static getMaximumElementQuantity(
+    radixWorkgroupSize: number,
+    radixGrainSize: number,
+    scanWorkgroupSize: number,
+    scanGrainSize: number,
+    bitsPerPass: number,
+    scanLevels = 3
+  ): number {
+    // histogramCount = Math.ceil( inputSize / radixReduction ) * ( 1 << options.bitsPerPass )
+    // max histogramCount = ( scanReduction ) ** scanLevels
+    // Math.ceil( inputSize / radixReduction ) * ( 1 << options.bitsPerPass ) <= ( scanReduction ) ** scanLevels
+    // Math.ceil( inputSize / radixReduction ) <= ( ( scanReduction ) ** scanLevels ) / ( 1 << options.bitsPerPass )
+    // inputSize / radixReduction <= Math.floor( ( ( scanReduction ) ** scanLevels ) / ( 1 << options.bitsPerPass ) )
+    // inputSize <= Math.floor( ( ( scanReduction ) ** scanLevels ) / ( 1 << options.bitsPerPass ) ) * radixReduction
+
+    return ( radixWorkgroupSize * radixGrainSize ) * Math.floor( ( ( scanWorkgroupSize * scanGrainSize ) ** scanLevels ) / ( 1 << bitsPerPass ) );
   }
 }
 alpenglow.register( 'RadixSortModule', RadixSortModule );

@@ -34,6 +34,8 @@ type ConcreteType<T = unknown> = {
   // TODO: deduplicate with wgslSize/wgslAlign. This is the size of the ENTIRE type, drop the "element" bit
   bytesPerElement: number;
 
+  outOfRangeElement?: T;
+
   // TS
   equals: ( a: T, b: T ) => boolean;
 
@@ -166,10 +168,10 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
     },
 
     encode( value: T[], encoder: ByteEncoder ): void {
-      assert && assert( outOfRangeElement !== undefined || value.length === size );
+      assert && assert( outOfRangeElement !== undefined || type.outOfRangeElement !== undefined || value.length === size );
 
       for ( let i = 0; i < size; i++ ) {
-        type.encode( i < value.length ? value[ i ] : outOfRangeElement!, encoder );
+        type.encode( i < value.length ? value[ i ] : outOfRangeElement === undefined ? type.outOfRangeElement! : outOfRangeElement, encoder );
       }
     },
 
@@ -218,6 +220,8 @@ export const getCastedType = <T>( type: ConcreteType<T>, valueType: ( blueprint:
 export const U32Type: ConcreteType<number> = {
   name: 'u32',
   bytesPerElement: 4,
+
+  outOfRangeElement: 101010101,
 
   equals( a: number, b: number ): boolean {
     return a === b;
@@ -367,6 +371,8 @@ export const I32Type: ConcreteType<number> = {
   name: 'i32',
   bytesPerElement: 4,
 
+  outOfRangeElement: 101010101,
+
   equals( a: number, b: number ): boolean {
     return a === b;
   },
@@ -450,6 +456,8 @@ alpenglow.register( 'I32Add', I32Add );
 export const Vec2uType: ConcreteType<Vector2> = {
   name: 'vec2u',
   bytesPerElement: 8,
+
+  outOfRangeElement: new Vector2( 101010101, 101010101 ),
 
   equals( a: Vector2, b: Vector2 ): boolean {
     return a.equals( b );
@@ -572,6 +580,8 @@ export const Vec3uType: ConcreteType<Vector3> = {
   name: 'vec3u',
   bytesPerElement: 12,
 
+  outOfRangeElement: new Vector3( 101010101, 101010101, 101010101 ),
+
   equals( a: Vector3, b: Vector3 ): boolean {
     return a.equals( b );
   },
@@ -628,6 +638,8 @@ alpenglow.register( 'Vec3uAdd', Vec3uAdd );
 export const Vec4uType: ConcreteType<Vector4> = {
   name: 'vec4u',
   bytesPerElement: 16,
+
+  outOfRangeElement: new Vector4( 101010101, 101010101, 101010101, 101010101 ),
 
   equals( a: Vector4, b: Vector4 ): boolean {
     return a.equals( b );

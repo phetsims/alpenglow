@@ -125,8 +125,8 @@ const nBitCompactSingleSortWGSL = <T>(
       // Store our thread's "raked" values histogram into tb_bits_vector
       ${unrollWGSL( 0, grainSize, i => `
         // TODO: see if factoring out constants doesn't kill registers
-        if ( ${u32( grainSize )} * ${localIndex}.x + ${u32( i )} < ${lengthExpression} ) {
-          let tb_value = ${valueScratch}[ ${u32( grainSize )} * ${localIndex}.x + ${u32( i )} ];
+        if ( ${u32( grainSize )} * ${localIndex} + ${u32( i )} < ${lengthExpression} ) {
+          let tb_value = ${valueScratch}[ ${u32( grainSize )} * ${localIndex} + ${u32( i )} ];
           let tb_bits = ${getBits( 'tb_value' )};
 
           ${logValueWGSL( blueprint, {
@@ -184,7 +184,7 @@ const nBitCompactSingleSortWGSL = <T>(
 
         ${unrollWGSL( 0, grainSize, i => `
           // TODO: see if factoring out constants doesn't kill registers
-          tb_values[ ${u32( i )} ] = ${valueScratch}[ ${u32( grainSize )} * ${localIndex}.x + ${u32( i )} ];
+          tb_values[ ${u32( i )} ] = ${valueScratch}[ ${u32( grainSize )} * ${localIndex} + ${u32( i )} ];
         ` )}
 
         workgroupBarrier();
@@ -192,7 +192,7 @@ const nBitCompactSingleSortWGSL = <T>(
 
       ${unrollWGSL( 0, grainSize, i => `
         // TODO: see if factoring out constants doesn't kill registers
-        if ( ${u32( grainSize )} * ${localIndex}.x + ${u32( i )} < ${lengthExpression} ) {
+        if ( ${u32( grainSize )} * ${localIndex} + ${u32( i )} < ${lengthExpression} ) {
           let tb_value = tb_values[ ${u32( i )} ];
           let tb_bits = ${getBits( 'tb_value' )};
 

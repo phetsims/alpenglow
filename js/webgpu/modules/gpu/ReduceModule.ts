@@ -31,9 +31,9 @@ type SelfOptions<T> = {
 };
 
 type ParentOptions<T> = {
-  mainReduceModuleOptions?: MainReduceModuleOptions<T>;
-  mainReduceNonCommutativeModuleOptions?: MainReduceNonCommutativeModuleOptions<T>;
-  mainReduceAtomicModuleOptions?: MainReduceAtomicModuleOptions<T>;
+  mainReduceModuleOptions?: Partial<MainReduceModuleOptions<T>>;
+  mainReduceNonCommutativeModuleOptions?: Partial<MainReduceNonCommutativeModuleOptions<T>>;
+  mainReduceAtomicModuleOptions?: Partial<MainReduceAtomicModuleOptions<T>>;
 };
 
 export type ReduceModuleOptions<T> = SelfOptions<T> & ParentOptions<T>;

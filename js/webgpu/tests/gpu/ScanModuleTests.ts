@@ -1,8 +1,6 @@
 // Copyright 2024, University of Colorado Boulder
 
 /**
- * Assorted WGSL example tests
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
