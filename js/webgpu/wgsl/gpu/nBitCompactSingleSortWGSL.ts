@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * Performs a N-bit radix sort of an array in workgroup memory (which can be of length workgroupSize * grainSize),
