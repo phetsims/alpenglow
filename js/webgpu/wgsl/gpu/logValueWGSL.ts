@@ -22,7 +22,7 @@ const logValueWGSL = <T>(
   const options = combineOptions<logWGSLOptions<T>>( {
     name: providedOptions.value,
     writeData: write => `
-      ${write( '0u', 'value' )}
+      ${write( '0u', providedOptions.value )}
     `,
     dataCount: 1
   }, providedOptions );

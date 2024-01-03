@@ -20,7 +20,6 @@ export default class ComputePipeline {
     public readonly name: string,
     public readonly wgsl: string,
     public readonly pipelineLayout: PipelineLayout,
-    public readonly log: boolean,
     async: boolean
   ) {
     console.groupCollapsed( `[shader] ${name}` );
@@ -49,7 +48,7 @@ export default class ComputePipeline {
       }
     };
 
-    const logBarrierPipelineDescriptor = log ? {
+    const logBarrierPipelineDescriptor = pipelineLayout.hasBindingWithSlot( PipelineBlueprint.LOG_BUFFER_SLOT ) ? {
       label: 'logBarrier pipeline',
       layout: pipelineLayout.layout, // we share the layout
       compute: {
@@ -98,12 +97,11 @@ export default class ComputePipeline {
     deviceContext: DeviceContext,
     name: string,
     wgsl: WGSLModuleDeclarations,
-    pipelineLayout: PipelineLayout,
-    log: boolean
+    pipelineLayout: PipelineLayout
   ): Promise<ComputePipeline> {
     const actualWGSL = partialWGSLBeautify( stripWGSLComments( wgsl, false ) );
 
-    const computePipeline = new ComputePipeline( deviceContext, name, actualWGSL, pipelineLayout, log, true );
+    const computePipeline = new ComputePipeline( deviceContext, name, actualWGSL, pipelineLayout, true );
     await computePipeline.pipelinePromise;
     return computePipeline;
   }

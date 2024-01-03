@@ -12,6 +12,8 @@ import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 
 export type PipelineBlueprintOptions = {
   name: string;
+
+  // TODO: NOTE that this is not really... needed? Can we remove it? (log should only be for the WGSL generation)
   log?: boolean;
 };
 
@@ -45,8 +47,7 @@ export default class PipelineBlueprint {
       deviceContext,
       this.name,
       this.toString( pipelineLayout ),
-      pipelineLayout,
-      this.log
+      pipelineLayout
     );
   }
 

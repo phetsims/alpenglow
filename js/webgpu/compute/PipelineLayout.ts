@@ -20,6 +20,15 @@ export default class PipelineLayout {
     } );
   }
 
+  public hasBindingWithSlot( slot: ResourceSlot ): boolean {
+    for ( let i = 0; i < this.bindGroupLayouts.length; i++ ) {
+      if ( this.bindGroupLayouts[ i ].hasBindingWithSlot( slot ) ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public getBindingFromSlot( slot: ResourceSlot ): Binding {
     let binding: Binding | null = null;
     for ( let i = 0; i < this.bindGroupLayouts.length; i++ ) {

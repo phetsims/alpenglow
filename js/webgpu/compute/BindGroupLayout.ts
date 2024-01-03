@@ -39,6 +39,10 @@ export default class BindGroupLayout {
     } );
   }
 
+  public hasBindingWithSlot( slot: ResourceSlot ): boolean {
+    return this.bindings.some( binding => binding.slot === slot );
+  }
+
   public getBindingFromSlot( slot: ResourceSlot ): Binding | null {
     return this.bindings.find( binding => binding.slot === slot ) || null;
   }
