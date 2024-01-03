@@ -564,7 +564,7 @@ export { default as histogramWGSL, HISTOGRAM_DEFAULTS } from './webgpu/wgsl/gpu/
 export type { histogramWGSLOptions } from './webgpu/wgsl/gpu/histogramWGSL.js';
 export { default as radixHistogramWGSL } from './webgpu/wgsl/gpu/radixHistogramWGSL.js';
 export type { radixHistogramWGSLOptions } from './webgpu/wgsl/gpu/radixHistogramWGSL.js';
-export { default as mainRadixHistogramWGSL } from './webgpu/wgsl/gpu/mainRadixHistogramWGSL.js';
+export { default as mainRadixHistogramWGSL, MAIN_RADIX_HISTOGRAM_DEFAULTS } from './webgpu/wgsl/gpu/mainRadixHistogramWGSL.js';
 export type { mainRadixHistogramWGSLOptions } from './webgpu/wgsl/gpu/mainRadixHistogramWGSL.js';
 export { default as mainRadixScatterWGSL, MAIN_RADIX_SCATTER_DEFAULTS } from './webgpu/wgsl/gpu/mainRadixScatterWGSL.js';
 export type { mainRadixScatterWGSLOptions } from './webgpu/wgsl/gpu/mainRadixScatterWGSL.js';
@@ -592,12 +592,18 @@ export { default as MainReduceAtomicModule, MAIN_REDUCE_ATOMIC_MODULE_DEFAULTS }
 export type { MainReduceAtomicModuleOptions } from './webgpu/modules/gpu/MainReduceAtomicModule.js';
 export { default as MainScanModule, MAIN_SCAN_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainScanModule.js';
 export type { MainScanModuleOptions } from './webgpu/modules/gpu/MainScanModule.js';
+export { default as MainRadixHistogramModule, MAIN_RADIX_HISTOGRAM_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainRadixHistogramModule.js';
+export type { MainRadixHistogramModuleOptions } from './webgpu/modules/gpu/MainRadixHistogramModule.js';
+export { default as MainRadixScatterModule, MAIN_RADIX_SCATTER_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainRadixScatterModule.js';
+export type { MainRadixScatterModuleOptions } from './webgpu/modules/gpu/MainRadixScatterModule.js';
 
 // "composite" modules
 export { default as ReduceModule, REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/ReduceModule.js';
 export type { ReduceModuleOptions } from './webgpu/modules/gpu/ReduceModule.js';
 export { default as ScanModule, SCAN_MODULE_DEFAULTS } from './webgpu/modules/gpu/ScanModule.js';
 export type { ScanModuleOptions } from './webgpu/modules/gpu/ScanModule.js';
+export { default as RadixSortModule, RADIX_SORT_MODULE_DEFAULTS, getMaxRadixBitsPerInnerPass, getRadixBitVectorSize } from './webgpu/modules/gpu/RadixSortModule.js';
+export type { RadixSortModuleOptions } from './webgpu/modules/gpu/RadixSortModule.js';
 
 // TODO: deprecate and remove these
 export { default as SingleReduceShader } from './webgpu/shaders/gpu/SingleReduceShader.js';
@@ -614,7 +620,7 @@ export { default as TripleReduceScanShader } from './webgpu/shaders/gpu/TripleRe
 export type { TripleReduceScanShaderOptions } from './webgpu/shaders/gpu/TripleReduceScanShader.js';
 export { default as DoubleRadixSortShader } from './webgpu/shaders/gpu/DoubleRadixSortShader.js';
 export type { DoubleRadixSortShaderOptions } from './webgpu/shaders/gpu/DoubleRadixSortShader.js';
-export { default as TripleRadixSortShader, getMaxRadixBitsPerInnerPass } from './webgpu/shaders/gpu/TripleRadixSortShader.js';
+export { default as TripleRadixSortShader } from './webgpu/shaders/gpu/TripleRadixSortShader.js';
 export type { TripleRadixSortShaderOptions } from './webgpu/shaders/gpu/TripleRadixSortShader.js';
 
 export { default as TestToCanvas } from './webgpu/TestToCanvas.js';

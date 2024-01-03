@@ -10,7 +10,7 @@ import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
 export type mainRadixScatterWGSLOptions<T> = {
   input: BufferSlot<T[]>;
-  histogramOffsets: BufferSlot<T[]>;
+  histogramOffsets: BufferSlot<number[]>;
   output: BufferSlot<T[]>;
 
   order: BitOrder<T>;

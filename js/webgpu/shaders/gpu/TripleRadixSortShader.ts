@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, OldBindingType, BitOrder, ByteEncoder, OldComputeShader, OldComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, OldExecution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_add_2 } from '../../../imports.js';
+import { alpenglow, OldBindingType, BitOrder, ByteEncoder, OldComputeShader, OldComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, OldExecution, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_reduce, wgsl_main_scan_add_2, getMaxRadixBitsPerInnerPass, getRadixBitVectorSize } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type TripleRadixSortShaderOptions<T> = {
@@ -47,32 +47,6 @@ const DEFAULT_OPTIONS = {
 
   log: false
 } as const;
-
-export const getMaxRadixBitsPerInnerPass = (
-  workgroupSize: number,
-  grainSize: number
-): number => {
-  const maxBitVectorSize = 4;
-
-  const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
-  const countsPerComponent = Math.floor( 32 / countBitQuantity );
-
-  return Math.floor( Math.log2( maxBitVectorSize * countsPerComponent ) );
-};
-
-export const getRadixBitVectorSize = (
-  workgroupSize: number,
-  grainSize: number,
-  bitsPerInnerPass: number
-): number => {
-  const countBitQuantity = Math.ceil( Math.log2( workgroupSize * grainSize ) );
-  const countsPerComponent = Math.floor( 32 / countBitQuantity );
-
-  const result = Math.ceil( ( 1 << bitsPerInnerPass ) / countsPerComponent );
-  assert && assert( result <= 4 );
-
-  return result;
-};
 
 export default class TripleRadixSortShader<T> extends ExecutableShader<T[], T[]> {
 

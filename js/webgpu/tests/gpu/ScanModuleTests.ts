@@ -16,13 +16,14 @@ type ScanModuleTestOptions<T> = {
   name: string;
   inputSize: number;
   maximumSize: number;
+  inPlace?: boolean;
 } & StrictOmit<ScanModuleOptions<T>, 'input' | 'output' | 'lengthExpression'>;
 
 const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
   asyncTestWithDevice( options.name, async ( device, deviceContext ) => {
 
     const inputSlot = new BufferArraySlot( getArrayType( options.binaryOp.type, options.maximumSize, options.binaryOp.identity ) );
-    const outputSlot = new BufferArraySlot( getArrayType( options.binaryOp.type, options.maximumSize, options.binaryOp.identity ) );
+    const outputSlot = options.inPlace ? inputSlot : new BufferArraySlot( getArrayType( options.binaryOp.type, options.maximumSize, options.binaryOp.identity ) );
 
     const reduceModule = new ScanModule( combineOptions<ScanModuleOptions<T>>( {
       input: inputSlot,
@@ -79,37 +80,45 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
     grainSize: grainSize
   } as const;
 
-  [ false, true ].forEach( exclusive => {
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `u32 add scan single-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: U32Add,
-      exclusive: false
-    } );
+  [ false, true ].forEach( inPlace => {
+    [ false, true ].forEach( exclusive => {
+      const commonString = `scan single-size ${exclusive ? 'exclusive' : 'inclusive'}${inPlace ? ' in-place' : ''}`;
 
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `i32 add scan single-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: I32Add,
-      exclusive: false
-    } );
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `u32 add ${commonString}`,
+        binaryOp: U32Add,
+        exclusive: false,
+        inPlace: inPlace
+      } );
 
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `vec2u add scan single-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: Vec2uAdd,
-      exclusive: false
-    } );
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `i32 add ${commonString}`,
+        binaryOp: I32Add,
+        exclusive: false,
+        inPlace: inPlace
+      } );
 
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `bicyclic semigroup add scan single-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: Vec2uBic,
-      exclusive: false
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `vec2u add ${commonString}`,
+        binaryOp: Vec2uAdd,
+        exclusive: false,
+        inPlace: inPlace
+      } );
+
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `bicyclic semigroup add ${commonString}`,
+        binaryOp: Vec2uBic,
+        exclusive: false,
+        inPlace: inPlace
+      } );
     } );
   } );
 }
@@ -127,37 +136,45 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
     grainSize: grainSize
   } as const;
 
-  [ false, true ].forEach( exclusive => {
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `u32 add scan double-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: U32Add,
-      exclusive: false
-    } );
+  [ false, true ].forEach( inPlace => {
+    [ false, true ].forEach( exclusive => {
+      const commonString = `scan double-size ${exclusive ? 'exclusive' : 'inclusive'}${inPlace ? ' in-place' : ''}`;
 
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `i32 add scan double-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: I32Add,
-      exclusive: false
-    } );
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `u32 add ${commonString}`,
+        binaryOp: U32Add,
+        exclusive: false,
+        inPlace: inPlace
+      } );
 
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `vec2u add scan double-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: Vec2uAdd,
-      exclusive: false
-    } );
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `i32 add ${commonString}`,
+        binaryOp: I32Add,
+        exclusive: false,
+        inPlace: inPlace
+      } );
 
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `bicyclic semigroup add scan double-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: Vec2uBic,
-      exclusive: false
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `vec2u add ${commonString}`,
+        binaryOp: Vec2uAdd,
+        exclusive: false,
+        inPlace: inPlace
+      } );
+
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `bicyclic semigroup add ${commonString}`,
+        binaryOp: Vec2uBic,
+        exclusive: false,
+        inPlace: inPlace
+      } );
     } );
   } );
 }
@@ -174,37 +191,45 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
     grainSize: grainSize
   } as const;
 
-  [ false, true ].forEach( exclusive => {
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `u32 add scan triple-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: U32Add,
-      exclusive: false
-    } );
+  [ false, true ].forEach( inPlace => {
+    [ false, true ].forEach( exclusive => {
+      const commonString = `scan triple-size ${exclusive ? 'exclusive' : 'inclusive'}${inPlace ? ' in-place' : ''}`;
 
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `i32 add scan triple-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: I32Add,
-      exclusive: false
-    } );
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `u32 add ${commonString}`,
+        binaryOp: U32Add,
+        exclusive: false,
+        inPlace: inPlace
+      } );
 
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `vec2u add scan triple-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: Vec2uAdd,
-      exclusive: false
-    } );
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `i32 add ${commonString}`,
+        binaryOp: I32Add,
+        exclusive: false,
+        inPlace: inPlace
+      } );
 
-    testScanModule( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
-      ...options,
-      name: `bicyclic semigroup add scan triple-size (${exclusive ? 'exclusive' : 'inclusive'})`,
-      binaryOp: Vec2uBic,
-      exclusive: false
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `vec2u add ${commonString}`,
+        binaryOp: Vec2uAdd,
+        exclusive: false,
+        inPlace: inPlace
+      } );
+
+      testScanModule( {
+        // eslint-disable-next-line no-object-spread-on-non-literals
+        ...options,
+        name: `bicyclic semigroup add ${commonString}`,
+        binaryOp: Vec2uBic,
+        exclusive: false,
+        inPlace: inPlace
+      } );
     } );
   } );
 }

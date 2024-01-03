@@ -11,8 +11,10 @@ import { combineOptions, optionize3 } from '../../../../../phet-core/js/optioniz
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 
 type SelfOptions<T> = {
+  // NOTE: Can be in-place of input and output point to the same slot
   input: BufferArraySlot<T>;
   output: BufferArraySlot<T>;
+
   binaryOp: BinaryOp<T>;
   exclusive: boolean;
 

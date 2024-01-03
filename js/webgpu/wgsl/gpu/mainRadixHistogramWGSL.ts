@@ -8,7 +8,7 @@ import { alpenglow, BitOrder, BufferBindingType, BufferSlot, PipelineBlueprint, 
 
 export type mainRadixHistogramWGSLOptions<T> = {
   input: BufferSlot<T[]>;
-  output: BufferSlot<T[]>;
+  output: BufferSlot<number[]>;
 
   workgroupSize: number;
   grainSize: number;
@@ -20,6 +20,10 @@ export type mainRadixHistogramWGSLOptions<T> = {
 
   lengthExpression: WGSLExpressionU32; // TODO: support optional
 };
+
+export const MAIN_RADIX_HISTOGRAM_DEFAULTS = {
+  // TODO: will need something once we have lengthExpression optional
+} as const;
 
 const mainRadixHistogramWGSL = <T>(
   blueprint: PipelineBlueprint,

@@ -6,9 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, OldBindingType, BitOrder, ByteEncoder, OldComputeShader, OldComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, OldExecution, getMaxRadixBitsPerInnerPass, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_add_1 } from '../../../imports.js';
+import { alpenglow, OldBindingType, BitOrder, ByteEncoder, OldComputeShader, OldComputeShaderSourceOptions, ConsoleLogger, DeviceContext, ExecutableShader, OldExecution, getMaxRadixBitsPerInnerPass, u32, wgsl_main_radix_histogram, wgsl_main_radix_scatter, wgsl_main_reduce, wgsl_main_scan, wgsl_main_scan_add_1, getRadixBitVectorSize } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { getRadixBitVectorSize } from './TripleRadixSortShader.js';
 
 export type DoubleRadixSortShaderOptions<T> = {
   order: BitOrder<T>;
