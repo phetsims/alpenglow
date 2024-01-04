@@ -68,7 +68,7 @@ ${template( ( {
   addedValueNeedsWorkgroupBarrier = true,
 } ) => {
   return `
-    ${comment( 'begin scan_comprehensive' )}
+    ${comment( `begin scan_comprehensive ${exclusive ? 'exclusive' : 'inclusive'}` )}
 
     // Load into workgroup memory
     ${load_multiple( {
@@ -96,7 +96,7 @@ ${template( ( {
       combineStatements: combineStatements,
       storeReduction: storeReduction,
       stripeReducedOutput: stripeReducedOutput,
-      exclusive: exclusive,
+      exclusive: false,
       getAddedValue: getAddedValue,
       addedValueNeedsWorkgroupBarrier: addedValueNeedsWorkgroupBarrier,
     } )}

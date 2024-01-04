@@ -55,7 +55,7 @@ const scanComprehensiveWGSL = <T>(
   const binaryOp = options.binaryOp;
 
   return `
-    ${commentWGSL( 'begin scan_comprehensive' )}
+    ${commentWGSL( `begin scan_comprehensive ${exclusive ? 'exclusive' : 'inclusive'}` )}
 
     // Load into workgroup memory
     ${loadMultipleWGSL( blueprint, {
@@ -84,7 +84,7 @@ const scanComprehensiveWGSL = <T>(
       grainSize: options.grainSize,
       workgroupIndex: options.workgroupIndex,
       localIndex: options.localIndex,
-      exclusive: exclusive,
+      exclusive: false,
       getAddedValue: getAddedValue,
       addedValueNeedsWorkgroupBarrier: options.addedValueNeedsWorkgroupBarrier,
       storeReduction: options.storeReduction,
