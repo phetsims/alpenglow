@@ -445,7 +445,6 @@ const fs = require( 'fs' );
   }` );
   links[ '10.1145/1281500.1281665' ] = 'https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf';
 
-  // eslint-disable-next-line bad-text
   await cite.add( `@mastersthesis{MCDF,
     author = {Viktor Chlumský},
     title = {Shape Decomposition for Multi-channel Distance Fields},
