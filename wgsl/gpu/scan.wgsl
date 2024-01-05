@@ -72,9 +72,11 @@ ${template( ( {
   return `
     ${comment( `begin scan direction:${direction} exclusive:${exclusive}` )}
     ${!scratchPreloaded ? `
+      ${comment( `loading scratch` )}
       ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};
     ` : ``}
     ${!valuePreloaded ? `
+      ${comment( `loading value` )}
       ${value} = ${scratch}[ ${mapScratchIndex( localIndex )} ];
     ` : ``}
 

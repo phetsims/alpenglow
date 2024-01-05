@@ -195,8 +195,8 @@ export default class RadixSortModule<T> extends CompositeModule<number> {
         const extraBuffer = new BufferArraySlot( getArrayType( type, initialStageInputSize ) );
         extraSlots.push( extraBuffer );
 
-        const evenOutputBuffer = iterationCount % 2 === 0 ? extraBuffer : options.output;
-        const oddOutputBuffer = iterationCount % 2 === 0 ? options.output : extraBuffer;
+        const evenOutputBuffer = iterationCount % 2 === 0 ? options.output : extraBuffer;
+        const oddOutputBuffer = iterationCount % 2 === 0 ? extraBuffer : options.output;
 
         for ( let i = 0; i < iterationCount; i++ ) {
           iterationBufferPairs.push( new BufferPair(
@@ -276,9 +276,13 @@ export default class RadixSortModule<T> extends CompositeModule<number> {
       const scanSize = Math.ceil( inputSize / radixReduction ) * ( 1 << options.bitsPerPass );
 
       for ( let i = 0; i < iterationCount; i++ ) {
+        // context.u32Numbers( histogramModules[ i ].input ).then( histogram => console.log( `input ${i} #${histogramModules[ i ].input.id}`, histogram ) ).catch( e => { throw e; } );
+
         histogramModules[ i ].execute( context, inputSize );
         scanModule.execute( context, scanSize );
         scatterModules[ i ].execute( context, inputSize );
+
+        // context.u32Numbers( scatterModules[ i ].output ).then( histogram => console.log( `output ${i} #${scatterModules[ i ].output.id}`, histogram ) ).catch( e => { throw e; } );
       }
     } );
 
@@ -302,6 +306,8 @@ export default class RadixSortModule<T> extends CompositeModule<number> {
     // Math.ceil( inputSize / radixReduction ) <= ( ( scanReduction ) ** scanLevels ) / ( 1 << options.bitsPerPass )
     // inputSize / radixReduction <= Math.floor( ( ( scanReduction ) ** scanLevels ) / ( 1 << options.bitsPerPass ) )
     // inputSize <= Math.floor( ( ( scanReduction ) ** scanLevels ) / ( 1 << options.bitsPerPass ) ) * radixReduction
+
+    // TODO: can't specify array size with 4294967296 (2^32) or larger, since it can't be represented as an i32
 
     return ( radixWorkgroupSize * radixGrainSize ) * Math.floor( ( ( scanWorkgroupSize * scanGrainSize ) ** scanLevels ) / ( 1 << bitsPerPass ) );
   }

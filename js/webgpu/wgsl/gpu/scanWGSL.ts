@@ -92,9 +92,11 @@ const scanWGSL = <T>(
   return `
     ${commentWGSL( `begin scan direction:${direction} exclusive:${exclusive}` )}
     ${!scratchPreloaded ? `
+      ${commentWGSL( 'loading scratch' )}
       ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};
     ` : ''}
     ${!valuePreloaded ? `
+      ${commentWGSL( 'loading value' )}
       ${value} = ${scratch}[ ${mapScratchIndex( localIndex )} ];
     ` : ''}
 

@@ -10,6 +10,7 @@
 #import ./histogram
 #import ./unroll
 #import ./ceil_divide_constant_divisor
+#import ./log_u32_raked
 
 ${template( ( {
   workgroupSize, // number
@@ -32,6 +33,15 @@ ${template( ( {
       histogramScratch: histogramScratch,
       getBin: getBin,
       length: length,
+    } )}
+
+    ${log_u32_raked( {
+      name: 'histogram_scratch',
+      type: U32Type,
+      workgroupSize: workgroupSize,
+      grainSize: grainSize,
+      relativeLength: u32( workgroupSize * grainSize ),
+      relativeAccessExpression: i => `atomicLoad( &histogram_scratch[ ${i} ] )`,
     } )}
 
     let num_valid_workgroups = ${ceil_divide_constant_divisor( length, workgroupSize * grainSize )};

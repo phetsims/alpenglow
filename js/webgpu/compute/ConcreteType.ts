@@ -81,6 +81,26 @@ const roundUp = ( k: number, n: number ) => Math.ceil( n / k ) * k;
 // TODO: Have ConcreteType and things be classes? The Array type should contain more info, etc. But we also want to
 // TODO: allow full flexibility...? Structure types we'll want to get things out of.
 
+export const U32_IDENTITY_VALUES = {
+  add: 0,
+  max: 0,
+  min: 0xffffffff,
+  and: 0xffffffff,
+  or: 0,
+  xor: 0
+} as const;
+
+// TODO: double-check some of these
+export const I32_IDENTITY_VALUES = {
+  add: 0,
+  // max: -0x80000000, // what, why can't this be represented?
+  max: -0x7fffffff,
+  min: 0x7fffffff,
+  and: -1,
+  or: 0,
+  xor: 0
+} as const;
+
 export type ConcreteArrayType<T = unknown> = ConcreteType<T[]> & {
   elementType: ConcreteType<T>;
   length: number;
@@ -292,16 +312,91 @@ export const U32Add: BinaryOp<number> = {
   type: U32Type,
   isCommutative: true,
 
-  identity: 0,
+  identity: U32_IDENTITY_VALUES.add,
   apply: ( a: number, b: number ): number => a + b,
 
-  identityWGSL: '0u',
+  identityWGSL: u32( U32_IDENTITY_VALUES.add ),
   combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
 // TODO: add other atomic types (and specifically atomic types)
 alpenglow.register( 'U32Add', U32Add );
+
+export const U32Min: BinaryOp<number> = {
+  name: 'u32 min',
+  type: U32Type,
+  isCommutative: true,
+
+  identity: U32_IDENTITY_VALUES.min,
+  apply: ( a: number, b: number ): number => Math.min( a, b ),
+
+  identityWGSL: u32( U32_IDENTITY_VALUES.min ),
+  combineExpression: ( a: string, b: string ) => `min( ${a}, ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = min( ${a} + ${b} );`,
+  atomicName: 'atomicMin'
+};
+alpenglow.register( 'U32Min', U32Min );
+
+export const U32Max: BinaryOp<number> = {
+  name: 'u32 max',
+  type: U32Type,
+  isCommutative: true,
+
+  identity: U32_IDENTITY_VALUES.max,
+  apply: ( a: number, b: number ): number => Math.max( a, b ),
+
+  identityWGSL: u32( U32_IDENTITY_VALUES.max ),
+  combineExpression: ( a: string, b: string ) => `max( ${a}, ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = max( ${a} + ${b} );`,
+  atomicName: 'atomicMax'
+};
+alpenglow.register( 'U32Max', U32Max );
+
+export const U32And: BinaryOp<number> = {
+  name: 'u32 and',
+  type: U32Type,
+  isCommutative: true,
+
+  identity: U32_IDENTITY_VALUES.and,
+  apply: ( a: number, b: number ): number => ( a & b ) >>> 0,
+
+  identityWGSL: u32( U32_IDENTITY_VALUES.and ),
+  combineExpression: ( a: string, b: string ) => `( ${a} & ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} & ${b} );`,
+  atomicName: 'atomicAnd'
+};
+alpenglow.register( 'U32And', U32And );
+
+export const U32Or: BinaryOp<number> = {
+  name: 'u32 or',
+  type: U32Type,
+  isCommutative: true,
+
+  identity: U32_IDENTITY_VALUES.or,
+  apply: ( a: number, b: number ): number => ( a | b ) >>> 0,
+
+  identityWGSL: u32( U32_IDENTITY_VALUES.or ),
+  combineExpression: ( a: string, b: string ) => `( ${a} | ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} | ${b} );`,
+  atomicName: 'atomicOr'
+};
+alpenglow.register( 'U32Or', U32Or );
+
+export const U32Xor: BinaryOp<number> = {
+  name: 'u32 xor',
+  type: U32Type,
+  isCommutative: true,
+
+  identity: U32_IDENTITY_VALUES.xor,
+  apply: ( a: number, b: number ): number => ( a ^ b ) >>> 0,
+
+  identityWGSL: u32( U32_IDENTITY_VALUES.xor ),
+  combineExpression: ( a: string, b: string ) => `( ${a} ^ ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} ^ ${b} );`,
+  atomicName: 'atomicXor'
+};
+alpenglow.register( 'U32Xor', U32Xor );
 
 export const U32Order: Order<number> = {
   name: 'u32 order',

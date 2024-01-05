@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferBindingType, BufferSlot, ceilDivideConstantDivisorWGSL, commentWGSL, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, PipelineBlueprint, RakedSizable, scanRakedWGSL, u32, U32Add, U32Type, unrollWGSL, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BitOrder, BufferBindingType, BufferSlot, ceilDivideConstantDivisorWGSL, commentWGSL, conditionalIfWGSL, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, PipelineBlueprint, RakedSizable, scanRakedWGSL, u32, U32Max, U32Type, unrollWGSL, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -189,7 +189,7 @@ const mainRadixScatterWGSL = <T>(
 
         ${scanRakedWGSL( blueprint, {
           scratch: 'start_indices',
-          binaryOp: U32Add,
+          binaryOp: U32Max, // TODO: eeek we need to MAX combine here
           workgroupSize: workgroupSize,
           grainSize: grainSize,
           exclusive: false

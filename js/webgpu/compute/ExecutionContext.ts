@@ -70,56 +70,56 @@ export default class ExecutionContext {
     return this.executor.getTypedBufferValue( this.getTypedBuffer( bufferSlot ) );
   }
 
-  public async arrayBuffer(
-    bufferSlot: BufferSlot
+  public async arrayBuffer<T>(
+    bufferSlot: BufferSlot<T>
   ): Promise<ArrayBuffer> {
     this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
 
     return this.executor.arrayBuffer( this.getBuffer( bufferSlot ) );
   }
 
-  public async u32(
-    bufferSlot: BufferSlot
+  public async u32<T>(
+    bufferSlot: BufferSlot<T>
   ): Promise<Uint32Array> {
     this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
 
     return this.executor.u32( this.getBuffer( bufferSlot ) );
   }
 
-  public async i32(
-    bufferSlot: BufferSlot
+  public async i32<T>(
+    bufferSlot: BufferSlot<T>
   ): Promise<Int32Array> {
     this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
 
     return this.executor.i32( this.getBuffer( bufferSlot ) );
   }
 
-  public async f32(
-    bufferSlot: BufferSlot
+  public async f32<T>(
+    bufferSlot: BufferSlot<T>
   ): Promise<Float32Array> {
     this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
 
     return this.executor.f32( this.getBuffer( bufferSlot ) );
   }
 
-  public async u32Numbers(
-    bufferSlot: BufferSlot
+  public async u32Numbers<T>(
+    bufferSlot: BufferSlot<T>
   ): Promise<number[]> {
     this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
 
     return this.executor.u32Numbers( this.getBuffer( bufferSlot ) );
   }
 
-  public async i32Numbers(
-    bufferSlot: BufferSlot
+  public async i32Numbers<T>(
+    bufferSlot: BufferSlot<T>
   ): Promise<number[]> {
     this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
 
     return this.executor.i32Numbers( this.getBuffer( bufferSlot ) );
   }
 
-  public async f32Numbers(
-    bufferSlot: BufferSlot
+  public async f32Numbers<T>(
+    bufferSlot: BufferSlot<T>
   ): Promise<number[]> {
     this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
 

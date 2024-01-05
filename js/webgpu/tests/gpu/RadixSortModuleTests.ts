@@ -71,45 +71,8 @@ const testRadixSortModule = <T>( options: RadixSortModuleTestOptions<T> ) => {
   } );
 };
 
-// {
-//   const workgroupSize = 8;
-//   const grainSize = 4;
-//   const maxBitsPerInnerPass = getMaxRadixBitsPerInnerPass( workgroupSize, grainSize );
-//
-//   const bitsPerInnerPass = Math.min( maxBitsPerInnerPass, 2 );
-//   const bitsPerPass = 4;
-//   const isReductionExclusive = false;
-//   const inPlace = false;
-//   const maxInputSize = RadixSortModule.getMaximumElementQuantity( workgroupSize, grainSize, workgroupSize, grainSize, bitsPerPass );
-//
-//   testRadixSortModule( {
-//     log: true,
-//     order: U32Order,
-//     totalBits: 32,
-//     radixWorkgroupSize: workgroupSize,
-//     radixGrainSize: grainSize,
-//     scanWorkgroupSize: workgroupSize,
-//     scanGrainSize: grainSize,
-//     bitsPerPass: bitsPerPass,
-//     bitsPerInnerPass: bitsPerInnerPass,
-//     fullSize: false,
-//     maximumSize: maxInputSize,
-//     earlyLoad: false,
-//     inPlace: inPlace,
-//     scanModuleOptions: {
-//       areScannedReductionsExclusive: isReductionExclusive
-//     },
-//     inputSize: Math.min( maxInputSize, ( workgroupSize * grainSize ) * workgroupSize * grainSize * 2 ) - 27
-//   } );
-// }
-
 // TODO: for less shader compilation, get a way where we're not compiling a shader for each radix pass
 [ false, true ].forEach( fullSize => {
-  // TODO: enable this!
-  // eslint-disable-next-line no-constant-condition
-  if ( 0.1 < 0.2 ) {
-    return;
-  }
   ( [
     { workgroupSize: 8, grainSize: 4 },
     { workgroupSize: 128, grainSize: 4 }
@@ -123,7 +86,10 @@ const testRadixSortModule = <T>( options: RadixSortModuleTestOptions<T> ) => {
       [ 4, 8 ].forEach( bitsPerPass => {
         [ false, true ].forEach( isReductionExclusive => {
           [ false, true ].forEach( inPlace => {
-            const maxInputSize = RadixSortModule.getMaximumElementQuantity( workgroupSize, grainSize, workgroupSize, grainSize, bitsPerPass );
+            const maxInputSize = Math.min(
+              ( workgroupSize * grainSize ) * workgroupSize * grainSize * 2,
+              RadixSortModule.getMaximumElementQuantity( workgroupSize, grainSize, workgroupSize, grainSize, bitsPerPass )
+            );
 
             // TODO: separate workgroup sizes for the scan and the rest(!)
             const commonOptions: StrictOmit<RadixSortModuleTestOptions<IntentionalAny>, 'order' | 'totalBits'> = {

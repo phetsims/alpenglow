@@ -270,10 +270,25 @@ export default class ScanModule<T> extends CompositeModule<number> {
       modules = [ reduceModule, middleScanModule, lowerScanModule, upperScanModule ];
 
       execute = ( context, inputSize: number ) => {
+
+        // context.u32Numbers( options.input ).then( histogram => console.log( `histogram`, histogram ) ).catch( e => { throw e; } );
+
         reduceModule.execute( context, inputSize );
+
+        // context.u32Numbers( reductionSlot ).then( histogram => console.log( `reduction`, histogram ) ).catch( e => { throw e; } );
+
         middleScanModule.execute( context, Math.ceil( inputSize / perStageReduction ) );
+
+        // context.u32Numbers( reductionSlot ).then( histogram => console.log( `reduction (scanned)`, histogram ) ).catch( e => { throw e; } );
+        // context.u32Numbers( doubleReductionSlot ).then( histogram => console.log( `double reduction`, histogram ) ).catch( e => { throw e; } );
+
         lowerScanModule.execute( context, Math.ceil( inputSize / ( perStageReduction * perStageReduction ) ) );
+
+        // context.u32Numbers( doubleReductionSlot ).then( histogram => console.log( `double reduction (scanned)`, histogram ) ).catch( e => { throw e; } );
+
         upperScanModule.execute( context, inputSize );
+
+        // context.u32Numbers( options.output ).then( histogram => console.log( `scanned histogram`, histogram ) ).catch( e => { throw e; } );
       };
 
       slots = _.uniq( [ options.input, options.output, reductionSlot, doubleReductionSlot ] );

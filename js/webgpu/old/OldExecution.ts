@@ -28,7 +28,7 @@ const DEFAULT_OPTIONS = {
   timestampLog: true,
   timestampLoggerCapacity: 100,
   log: false,
-  logBufferSize: 1 << 22
+  logBufferSize: 1 << 23
 };
 
 // @deprecated

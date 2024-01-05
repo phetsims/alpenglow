@@ -70,7 +70,7 @@ export default class Routine<T, In, Out> {
     const pipelineLayoutMap = layoutStrategy( deviceContext, module.pipelineBlueprints );
 
     const computePipelineMap = new Map<PipelineBlueprint, ComputePipeline>();
-    for ( const pipelineBlueprint of module.pipelineBlueprints ) {
+    for ( const pipelineBlueprint of _.uniq( module.pipelineBlueprints ) ) {
       const pipelineLayout = pipelineLayoutMap.get( pipelineBlueprint )!;
       assert && assert( pipelineLayout, 'Missing pipeline layout' );
 
@@ -91,12 +91,14 @@ export default class Routine<T, In, Out> {
     );
   }
 
+  // TODO: Since we're returning a map, it's enforcing "no different layouts for different locations of the same blueprint"
+  // TODO: which is less than ideal(!). Figure this out, and possibly different bind groups for the same bind group layout.
   public static readonly INDIVIDUAL_LAYOUT_STRATEGY = (
     deviceContext: DeviceContext,
     pipelineBlueprints: PipelineBlueprint[]
   ): Map<PipelineBlueprint, PipelineLayout> => {
     const map = new Map<PipelineBlueprint, PipelineLayout>();
-    pipelineBlueprints.forEach( pipelineBlueprint => {
+    _.uniq( pipelineBlueprints ).forEach( pipelineBlueprint => {
       const bindGroupLayout = new BindGroupLayout(
         deviceContext,
         pipelineBlueprint.name,

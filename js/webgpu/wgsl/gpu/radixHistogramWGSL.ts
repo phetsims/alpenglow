@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ceilDivideConstantDivisorWGSL, commentWGSL, histogramWGSL, histogramWGSLOptions, u32, unrollWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, ceilDivideConstantDivisorWGSL, commentWGSL, histogramWGSL, histogramWGSLOptions, u32, unrollWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLStatements, logRakedWGSL, U32Type } from '../../../imports.js';
 import WithoutNull from '../../../../../phet-core/js/types/WithoutNull.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 
@@ -33,7 +33,16 @@ const radixHistogramWGSL = (
   
     {
       ${histogramWGSL( blueprint, options )}
-  
+      
+      ${logRakedWGSL( blueprint, {
+        name: 'histogram_scratch',
+        type: U32Type,
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        relativeLengthExpression: u32( workgroupSize * grainSize ),
+        relativeAccessExpression: i => `atomicLoad( &histogram_scratch[ ${i} ] )`
+      } )}
+      
       let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression, workgroupSize * grainSize )};
       if ( workgroup_id.x < num_valid_workgroups ) {
         // Should be uniform control flow for the workgroup
