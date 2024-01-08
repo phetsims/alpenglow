@@ -164,7 +164,7 @@
           bitsPerPass: 8,
           bitsPerInnerPass: 2
         } ),
-        runs: 2
+        runs: 5000
       },
       {
         makeShader: device => getRadixSort( device, uintNumbers, {
@@ -177,7 +177,7 @@
           bitsPerPass: 8,
           bitsPerInnerPass: 2
         } ),
-        runs: 2
+        runs: 5000
       },
       {
         makeShader: device => getRadixSort( device, uintNumbers, {
@@ -190,7 +190,7 @@
           bitsPerPass: 8,
           bitsPerInnerPass: 2
         } ),
-        runs: 2
+        runs: 5000
       },
 
       // Pair of combine false/true
@@ -205,7 +205,7 @@
           bitsPerPass: 2,
           bitsPerInnerPass: 2
         } ),
-        runs: 2
+        runs: 5000
       },
       {
         makeShader: device => getRadixSort( device, uintNumbers, {
