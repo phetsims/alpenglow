@@ -148,10 +148,7 @@
   };
 
   ( async () => {
-    const workgroupSize = 256;
-    const inputSize = workgroupSize * ( 6 ) - 27 * 301;
-    // const inputSize = workgroupSize * workgroupSize * ( 6 ) - 27 * 301;
-    // const inputSize = workgroupSize * workgroupSize * ( workgroupSize - 3 ) - 27 * 301;
+    const inputSize = 4000;
     const uintNumbers = new Uint32Array( _.range( 0, inputSize ).map( () => random.nextInt( 0, 100 ) ) );
 
     await benchRunner( [
