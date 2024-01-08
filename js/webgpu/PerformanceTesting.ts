@@ -161,7 +161,7 @@ export default class PerformanceTesting {
     combineStrategy: boolean,
     separateComputePasses: boolean
   ): Promise<void> {
-    const countPerFrame = 100;
+    const countPerFrame = 1000;
 
     const inputSize = 4000;
     // const inputSize = workgroupSize * workgroupSize * ( 6 ) - 27 * 301;
