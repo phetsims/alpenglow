@@ -196,6 +196,12 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.radixPerformanceTest = function() {
+    setTimeout( async () => {
+      phet.alpenglow.PerformanceTesting.loopRadixSortTest();
+    } );
+  };
+
   window.centroidTest = () => {
     setTimeout( async () => {
 
