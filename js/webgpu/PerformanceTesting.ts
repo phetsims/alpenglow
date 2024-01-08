@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * For testing overlapping (parallel) execution of shader stages that don't write to the same memory.
