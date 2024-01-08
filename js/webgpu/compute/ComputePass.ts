@@ -8,7 +8,11 @@
 
 import { alpenglow, BindGroup, ComputePipeline } from '../../imports.js';
 
+let globalId = 1;
+
 export default class ComputePass {
+
+  public readonly id = globalId++;
 
   public readonly computePassEncoder: GPUComputePassEncoder;
 

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroupLayout, BindingDescriptor, BufferSlot, BufferSlotSlice, ComputePipeline, DeviceContext, ExecutionContext, PipelineBlueprint, PipelineLayout, ResourceSlot, Module } from '../../imports.js';
+import { alpenglow, BindGroupLayout, BindingDescriptor, BufferSlot, BufferSlotSlice, ComputePipeline, DeviceContext, ExecutionContext, PipelineBlueprint, PipelineLayout, ResourceSlot, Module, BindingType } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export default class Routine<T, In, Out> {
@@ -108,6 +108,44 @@ export default class Routine<T, In, Out> {
         } )
       );
       const pipelineLayout = new PipelineLayout( deviceContext, [ bindGroupLayout ] );
+      map.set( pipelineBlueprint, pipelineLayout );
+    } );
+    return map;
+  };
+
+  public static readonly COMBINE_ALL_LAYOUT_STRATEGY = (
+    deviceContext: DeviceContext,
+    pipelineBlueprints: PipelineBlueprint[]
+  ): Map<PipelineBlueprint, PipelineLayout> => {
+    const slots = _.uniq( pipelineBlueprints.flatMap( pipelineBlueprint => pipelineBlueprint.usages.map( usage => usage.resourceSlot ) ) );
+
+    const bindingDescriptors = slots.map( ( slot, index ) => {
+      // Compute the binding type
+      let bindingType: BindingType | null = null;
+      for ( const pipelineBlueprint of pipelineBlueprints ) {
+        const usage = pipelineBlueprint.usages.find( usage => usage.resourceSlot === slot );
+        if ( usage ) {
+          if ( !bindingType ) {
+            bindingType = usage.bindingType;
+          }
+          else {
+            bindingType = bindingType.combined( usage.bindingType );
+          }
+        }
+      }
+      assert && assert( bindingType, 'Missing binding type' );
+      return new BindingDescriptor( index, bindingType!, slot );
+    } );
+
+    const bindGroupLayout = new BindGroupLayout(
+      deviceContext,
+      'combine all',
+      0,
+      bindingDescriptors
+    );
+    const pipelineLayout = new PipelineLayout( deviceContext, [ bindGroupLayout ] );
+    const map = new Map<PipelineBlueprint, PipelineLayout>();
+    _.uniq( pipelineBlueprints ).forEach( pipelineBlueprint => {
       map.set( pipelineBlueprint, pipelineLayout );
     } );
     return map;

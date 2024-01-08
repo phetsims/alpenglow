@@ -51,296 +51,177 @@
     gpuTiming
   } from 'thimbleberry';
   import { // eslint-disable-line single-line-import
-    BindingType,
-    ComputeShader,
-    DeviceContext,
-    wgsl_f32_reduce_simple,
-    wgsl_f32_reduce_raked_striped_blocked_convergent,
-    wgsl_u32_reduce_raked_striped_blocked_convergent,
-    wgsl_u32_atomic_reduce_raked_striped_blocked_convergent
+    BufferArraySlot,
+    getArrayType,
+    RadixSortModule,
+    BufferLogger,
+    Executor,
+    u32,
+    U32Order,
+    Routine,
+    Procedure,
+    DeviceContext
   } from '../../chipper/dist/js/alpenglow/js/imports.js';
 
   console.log( 'loaded' );
 
   const random = new phet.dot.Random();
 
-  const getDispatchOptions = name => {
-    return {
-      timestampWrites: gpuTiming?.timestampWrites( name ) || null
-    };
-  };
+  const getRadixSort = async ( device, numbers, options ) => {
+    const separateComputePasses = options.separateComputePasses;
+    const combineStrategy = options.combineStrategy;
+    const radixWorkgroupSize = options.radixWorkgroupSize;
+    const radixGrainSize = options.radixGrainSize;
+    const scanWorkgroupSize = options.scanWorkgroupSize;
+    const scanGrainSize = options.scanGrainSize;
+    const bitsPerPass = options.bitsPerPass;
+    const bitsPerInnerPass = options.bitsPerInnerPass;
 
-  const getF32ReduceSimpleShader = ( device, workgroupSize, numbers ) => {
+    const name = `radix sort sep:${separateComputePasses} comb:${combineStrategy} radix:${radixWorkgroupSize}x${radixGrainSize} scan:${scanWorkgroupSize}x${scanGrainSize} bits:${bitsPerPass}x${bitsPerInnerPass}`;
+
     const deviceContext = new DeviceContext( device );
 
-    const inputSize = numbers.length;
+    const order = U32Order;
+    const size = numbers.length;
+    const maximumSize = numbers.length;
 
-    const shaderOptions = {
-      workgroupSize: workgroupSize,
-      identity: '0f',
-      combine: ( a, b ) => `${a} + ${b}`
-    };
+    const inputSlot = new BufferArraySlot( getArrayType( order.type, maximumSize ) );
+    const outputSlot = new BufferArraySlot( getArrayType( order.type, maximumSize ) );
 
-    const shader0 = ComputeShader.fromSource(
-      device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], phet.phetCore.merge( {
-        inputSize: inputSize
-      }, shaderOptions )
+    const radixSortModule = new RadixSortModule( {
+      input: inputSlot,
+      output: outputSlot,
+      name: name,
+
+      order: order,
+      totalBits: 32,
+
+      radixWorkgroupSize: radixWorkgroupSize,
+      radixGrainSize: radixGrainSize,
+      scanWorkgroupSize: scanWorkgroupSize,
+      scanGrainSize: scanGrainSize,
+
+      lengthExpression: u32( size ),
+
+      bitsPerPass: bitsPerPass,
+      bitsPerInnerPass: bitsPerInnerPass,
+      earlyLoad: false,
+      scanModuleOptions: {
+        areScannedReductionsExclusive: false
+      }
+    } );
+
+    // TODO: can we factor out some things here, like the execute wrapper?
+    const routine = await Routine.create(
+      deviceContext,
+      radixSortModule,
+      [ inputSlot, outputSlot ],
+      combineStrategy ? Routine.COMBINE_ALL_LAYOUT_STRATEGY : Routine.INDIVIDUAL_LAYOUT_STRATEGY,
+      ( context, execute, input ) => {
+        context.setTypedBufferValue( inputSlot, input );
+
+        execute( context, input.length );
+      }
     );
-    const shader1 = ComputeShader.fromSource(
-      device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], phet.phetCore.merge( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize ) )
-      }, shaderOptions )
-    );
-    const shader2 = ComputeShader.fromSource(
-      device, 'f32_reduce_simple 2', wgsl_f32_reduce_simple, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], phet.phetCore.merge( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) )
-      }, shaderOptions )
-    );
 
-    const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-    device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
+    const procedure = new Procedure( routine ).bindRemainingBuffers();
 
-    const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize ) ) );
-    const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ) );
-    const outputBuffer = deviceContext.createBuffer( 4 );
+    const bufferLogger = new BufferLogger();
 
     return {
       shader: {
-        name: `f32_reduce_simple wg:${workgroupSize}`,
+        name: name,
         commands: encoder => {
-          shader0.dispatch( encoder, [
-            inputBuffer, firstMiddleBuffer
-          ], Math.ceil( inputSize / ( workgroupSize ) ), 1, 1, getDispatchOptions( 'reduce 0' ) );
-          shader1.dispatch( encoder, [
-            firstMiddleBuffer, secondMiddleBuffer
-          ], Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ), 1, 1, getDispatchOptions( 'reduce 1' ) );
-          shader2.dispatch( encoder, [
-            secondMiddleBuffer, outputBuffer
-          ], 1, 1, 1, getDispatchOptions( 'reduce 2' ) );
+          const executor = new Executor( deviceContext, encoder, bufferLogger, {
+            getTimestampWrites: name => gpuTiming?.timestampWrites( name ) || null
+          } );
+          procedure.execute( executor, numbers, {
+            separateComputePasses: separateComputePasses
+          } );
         },
         destroy: () => {
-          inputBuffer.destroy();
-          firstMiddleBuffer.destroy();
-          secondMiddleBuffer.destroy();
-          outputBuffer.destroy();
+          procedure.dispose();
         }
       },
-      srcSize: Float32Array.BYTES_PER_ELEMENT * inputSize
-    };
-  };
-
-  const getF32ReduceRakedStripedBlockedConvergentShader = ( device, workgroupSize, numbers, grainSize ) => {
-    const deviceContext = new DeviceContext( device );
-
-    const inputSize = numbers.length;
-
-    const shaderOptions = {
-      workgroupSize: workgroupSize,
-      grainSize: grainSize,
-      identity: '0f',
-      combine: ( a, b ) => `${a} + ${b}`
-    };
-
-    const shader0 = ComputeShader.fromSource(
-      device, 'f32_reduce_raked_striped_blocked_convergent 0', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], phet.phetCore.merge( {
-        inputSize: inputSize
-      }, shaderOptions )
-    );
-    const shader1 = ComputeShader.fromSource(
-      device, 'f32_reduce_raked_striped_blocked_convergent 1', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], phet.phetCore.merge( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
-      }, shaderOptions )
-    );
-    const shader2 = ComputeShader.fromSource(
-      device, 'f32_reduce_raked_striped_blocked_convergent 2', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], phet.phetCore.merge( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
-      }, shaderOptions )
-    );
-
-    const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-    device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
-
-    const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-    const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-    const outputBuffer = deviceContext.createBuffer( 4 );
-
-    return {
-      shader: {
-        name: `f32_reduce_raked_striped_blocked_convergent wg:${workgroupSize}, vt:${grainSize}`,
-        commands: encoder => {
-          shader0.dispatch( encoder, [
-            inputBuffer, firstMiddleBuffer
-          ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, getDispatchOptions( 'reduce 0' ) );
-          shader1.dispatch( encoder, [
-            firstMiddleBuffer, secondMiddleBuffer
-          ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1, getDispatchOptions( 'reduce 1' ) );
-          shader2.dispatch( encoder, [
-            secondMiddleBuffer, outputBuffer
-          ], 1, 1, 1, getDispatchOptions( 'reduce 2' ) );
-        },
-        destroy: () => {
-          inputBuffer.destroy();
-          firstMiddleBuffer.destroy();
-          secondMiddleBuffer.destroy();
-          outputBuffer.destroy();
-        }
-      },
-      srcSize: Float32Array.BYTES_PER_ELEMENT * inputSize
-    };
-  };
-
-  const getU32ReduceRakedStripedBlockedConvergentShader = ( device, workgroupSize, numbers, grainSize ) => {
-    const deviceContext = new DeviceContext( device );
-
-    const inputSize = numbers.length;
-
-    const shaderOptions = {
-      workgroupSize: workgroupSize,
-      grainSize: grainSize,
-      identity: '0u',
-      combine: ( a, b ) => `${a} + ${b}`
-    };
-
-    const shader0 = ComputeShader.fromSource(
-      device, 'u32_reduce_raked_striped_blocked_convergent 0', wgsl_u32_reduce_raked_striped_blocked_convergent, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], phet.phetCore.merge( {
-        inputSize: inputSize
-      }, shaderOptions )
-    );
-    const shader1 = ComputeShader.fromSource(
-      device, 'u32_reduce_raked_striped_blocked_convergent 1', wgsl_u32_reduce_raked_striped_blocked_convergent, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], phet.phetCore.merge( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
-      }, shaderOptions )
-    );
-    const shader2 = ComputeShader.fromSource(
-      device, 'u32_reduce_raked_striped_blocked_convergent 2', wgsl_u32_reduce_raked_striped_blocked_convergent, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], phet.phetCore.merge( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
-      }, shaderOptions )
-    );
-
-    const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-    device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
-
-    const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-    const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-    const outputBuffer = deviceContext.createBuffer( 4 );
-
-    return {
-      shader: {
-        name: `u32_reduce_raked_striped_blocked_convergent wg:${workgroupSize}, vt:${grainSize}`,
-        commands: encoder => {
-          shader0.dispatch( encoder, [
-            inputBuffer, firstMiddleBuffer
-          ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, getDispatchOptions( 'reduce 0' ) );
-          shader1.dispatch( encoder, [
-            firstMiddleBuffer, secondMiddleBuffer
-          ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1, getDispatchOptions( 'reduce 1' ) );
-          shader2.dispatch( encoder, [
-            secondMiddleBuffer, outputBuffer
-          ], 1, 1, 1, getDispatchOptions( 'reduce 2' ) );
-        },
-        destroy: () => {
-          inputBuffer.destroy();
-          firstMiddleBuffer.destroy();
-          secondMiddleBuffer.destroy();
-          outputBuffer.destroy();
-        }
-      },
-      srcSize: Uint32Array.BYTES_PER_ELEMENT * inputSize
-    };
-  };
-
-  const getU32AtomicReduceRakedStripedBlockedConvergentShader = ( device, workgroupSize, numbers, grainSize ) => {
-    const deviceContext = new DeviceContext( device );
-
-    const inputSize = numbers.length;
-
-    const shaderOptions = {
-      workgroupSize: workgroupSize,
-      grainSize: grainSize,
-      identity: '0u',
-      combine: ( a, b ) => `${a} + ${b}`
-    };
-
-    const shader = ComputeShader.fromSource(
-      device, 'u32_atomic_reduce_raked_striped_blocked_convergent 0', wgsl_u32_atomic_reduce_raked_striped_blocked_convergent, [
-        BindingType.READ_ONLY_STORAGE_BUFFER,
-        BindingType.STORAGE_BUFFER
-      ], phet.phetCore.merge( {
-        inputSize: inputSize
-      }, shaderOptions )
-    );
-
-    const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-    device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
-
-    const outputBuffer = deviceContext.createBuffer( 4 );
-
-    return {
-      shader: {
-        name: `u32_atomic_reduce_raked_striped_blocked_convergent wg:${workgroupSize}, vt:${grainSize}`,
-        commands: encoder => {
-          shader.dispatch( encoder, [
-            inputBuffer, outputBuffer
-          ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, getDispatchOptions( 'reduce 0' ) );
-        },
-        destroy: () => {
-          inputBuffer.destroy();
-          outputBuffer.destroy();
-        }
-      },
-      srcSize: Uint32Array.BYTES_PER_ELEMENT * inputSize
+      srcSize: Uint32Array.BYTES_PER_ELEMENT * numbers.length
     };
   };
 
   ( async () => {
     const workgroupSize = 256;
-    const inputSize = workgroupSize * workgroupSize * ( workgroupSize - 3 ) - 27 * 301;
-    const floatNumbers = new Float32Array( _.range( 0, inputSize ).map( () => random.nextDouble() ) );
+    const inputSize = workgroupSize * ( 6 ) - 27 * 301;
+    // const inputSize = workgroupSize * workgroupSize * ( 6 ) - 27 * 301;
+    // const inputSize = workgroupSize * workgroupSize * ( workgroupSize - 3 ) - 27 * 301;
     const uintNumbers = new Uint32Array( _.range( 0, inputSize ).map( () => random.nextInt( 0, 100 ) ) );
 
     await benchRunner( [
+      // separate/combine true+false, false+false, false+true
       {
-        makeShader: device => getF32ReduceSimpleShader( device, workgroupSize, floatNumbers ),
-        runs: 200
+        makeShader: device => getRadixSort( device, uintNumbers, {
+          separateComputePasses: true,
+          combineStrategy: false,
+          radixWorkgroupSize: 64,
+          radixGrainSize: 4,
+          scanWorkgroupSize: 64,
+          scanGrainSize: 4,
+          bitsPerPass: 8,
+          bitsPerInnerPass: 2
+        } ),
+        runs: 2
       },
       {
-        makeShader: device => getF32ReduceRakedStripedBlockedConvergentShader( device, workgroupSize, floatNumbers, 8 ),
-        runs: 200
+        makeShader: device => getRadixSort( device, uintNumbers, {
+          separateComputePasses: false,
+          combineStrategy: false,
+          radixWorkgroupSize: 64,
+          radixGrainSize: 4,
+          scanWorkgroupSize: 64,
+          scanGrainSize: 4,
+          bitsPerPass: 8,
+          bitsPerInnerPass: 2
+        } ),
+        runs: 2
       },
       {
-        makeShader: device => getU32ReduceRakedStripedBlockedConvergentShader( device, workgroupSize, uintNumbers, 8 ),
-        runs: 200
+        makeShader: device => getRadixSort( device, uintNumbers, {
+          separateComputePasses: false,
+          combineStrategy: true,
+          radixWorkgroupSize: 64,
+          radixGrainSize: 4,
+          scanWorkgroupSize: 64,
+          scanGrainSize: 4,
+          bitsPerPass: 8,
+          bitsPerInnerPass: 2
+        } ),
+        runs: 2
+      },
+
+      // Pair of combine false/true
+      {
+        makeShader: device => getRadixSort( device, uintNumbers, {
+          separateComputePasses: false,
+          combineStrategy: false,
+          radixWorkgroupSize: 64,
+          radixGrainSize: 4,
+          scanWorkgroupSize: 64,
+          scanGrainSize: 4,
+          bitsPerPass: 2,
+          bitsPerInnerPass: 2
+        } ),
+        runs: 2
       },
       {
-        makeShader: device => getU32AtomicReduceRakedStripedBlockedConvergentShader( device, workgroupSize, uintNumbers, 8 ),
-        runs: 200
+        makeShader: device => getRadixSort( device, uintNumbers, {
+          separateComputePasses: false,
+          combineStrategy: true,
+          radixWorkgroupSize: 64,
+          radixGrainSize: 4,
+          scanWorkgroupSize: 64,
+          scanGrainSize: 4,
+          bitsPerPass: 2,
+          bitsPerInnerPass: 2
+        } ),
+        runs: 5000
       }
     ] );
   } )();
