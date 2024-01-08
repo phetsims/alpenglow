@@ -196,9 +196,9 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
-  window.radixPerformanceTest = function() {
+  window.radixPerformanceTest = function( combineStrategy, separateComputePasses ) {
     setTimeout( async () => {
-      phet.alpenglow.PerformanceTesting.loopRadixSortTest();
+      phet.alpenglow.PerformanceTesting.loopRadixSortTest( combineStrategy, separateComputePasses );
     } );
   };
 
