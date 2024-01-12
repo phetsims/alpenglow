@@ -12,7 +12,7 @@ export default class TextureBindingType extends BindingType {
   public constructor(
     public readonly sampleType: GPUTextureSampleType,
     public readonly viewDimension: GPUTextureViewDimension = '2d',
-    public readonly multisampled: boolean = false
+    public readonly multisampled = false
   ) {
     super();
   }

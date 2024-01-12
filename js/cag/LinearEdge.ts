@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClipSimplifier, alpenglow } from '../imports.js';
+import { alpenglow, ClipSimplifier } from '../imports.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Line, Shape } from '../../../kite/js/imports.js';
@@ -21,7 +21,7 @@ export default class LinearEdge {
   public constructor(
     public readonly startPoint: Vector2,
     public readonly endPoint: Vector2,
-    public readonly containsFakeCorner: boolean = false // TODO: propagate fake corners
+    public readonly containsFakeCorner = false // TODO: propagate fake corners
   ) {
     assert && assert( startPoint.isFinite() );
     assert && assert( endPoint.isFinite() );
