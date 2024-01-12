@@ -118,8 +118,10 @@ export type BinaryOp<T> = {
 
   // WGSL
   identityWGSL: string;
-  combineExpression?: ( a: string, b: string ) => string;
-  combineStatements?: ( varName: string, a: string, b: string ) => string;
+  // TODO: Take blueprint
+  combineExpression?: ( a: string, b: string ) => WGSLExpressionT;
+  // TODO: Take blueprint
+  combineStatements?: ( varName: string, a: string, b: string ) => WGSLStatements;
   atomicName?: string;
 };
 
@@ -131,6 +133,7 @@ export type BitOrder<T> = {
   getBits: ( value: T, bitOffset: number, bitQuantity: number ) => number;
 
   // WGSL TODO support statements(!) --- or do we need that? Could use function-call overhead
+  // TODO: Take blueprint
   getBitsWGSL: ( value: WGSLExpressionT, bitOffset: number, bitQuantity: number ) => WGSLExpressionU32;
 };
 
@@ -143,11 +146,14 @@ export type CompareOrder<T> = {
 
   // WGSL
   // ( a: expr:T, b: expr:T ) => expr:i32
-  compareWGSL: ( a: string, b: string ) => string;
+  // TODO: Take blueprint
+  compareWGSL: ( a: string, b: string ) => WGSLExpressionI32;
   // ( a: expr:T, b: expr:T ) => expr:bool
-  greaterThan: ( a: string, b: string ) => string;
+  // TODO: Take blueprint
+  greaterThan: ( a: string, b: string ) => WGSLExpressionBool;
   // ( a: expr:T, b: expr:T ) => expr:bool
-  lessThanOrEqual: ( a: string, b: string ) => string;
+  // TODO: Take blueprint
+  lessThanOrEqual: ( a: string, b: string ) => WGSLExpressionBool;
 };
 
 export type Order<T> = BitOrder<T> & CompareOrder<T>;

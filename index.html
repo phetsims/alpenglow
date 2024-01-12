@@ -267,6 +267,10 @@
         Improve styling, see <a href="https://getbootstrap.com/2.3.2/scaffolding.html">Old Bootstrap docs</a>.
       </p>
 
+      <p class="TODO">
+        Add "(your browser)" on SVG/Canvas demo labels?
+      </p>
+
       <h3 id="overview-mainChallenges">Main Challenges</h3>
 
       <p>
@@ -2127,23 +2131,29 @@
       <h4 id="WGSL-linking">Linking</h4>
 
       <p class="TODO">
-        Radix sort is NOT combining the scan pipelines! We're getting multiple compute pipelines.
-
-        We'll need to look at "combining" the pipelines (at least the ones with same layout) that are duplicated in radix sort.
-
-        All of the "same pipelineBlueprint + same bind group layout" should be turned into the same compute pipeline.
-
-        We'll want some way of denoting different compute pipelines for the same pipeline blueprint (e.g. different
-        layouts).
-
-        Some compute pipelines will have different bind groups (duh).
-
-        Is our current interface (for layout strategy) sufficient? Should we improve the API at all?
+        Create mainMerge, so we can test the merge code.
       </p>
 
       <p class="TODO">
-        Debug the radix sort, compare with same "starting conditions" as the other working version, to identify
-        where it is going wrong.
+        Buffer offsets for uniforms, for radix passes? (Can we use dynamic offsets in that case?) - We will want to
+        minimize number of shaders eventually, for Windows.
+      </p>
+
+      <p class="TODO">
+        Put blueprints into ConcreteType
+      </p>
+
+      <p class="TODO">
+        Think out "data source" abstraction. With fusing.
+      </p>
+
+      <p class="TODO">
+        Add a "fill" primitive (to fill a certain buffer/slot with a specific value). Needed for non-zero (or multiple
+        use) atomics.
+      </p>
+
+      <p class="TODO">
+        Performance test radix sorts (micro and macro).
       </p>
 
       <p class="TODO">
@@ -2169,7 +2179,9 @@
       </p>
 
       <p class="TODO">
-        lengthExpression taking context. Factor out length getter.
+        lengthExpression taking context. Factor out length getter. Think about abstractions for "expression" vs
+        "assignment statement". For "statements", do we just have the user create a function? (With certain types,
+        that might not be feasible?)
       </p>
 
       <p class="TODO">
@@ -2197,12 +2209,21 @@
       </p>
 
       <p class="TODO">
+        Buffer labels!
+      </p>
+
+      <p class="TODO">
         Break out data sources. Explicitly model data sources (input/output).
       </p>
 
       <p class="TODO">
         Set up example of stored "slots" potentially on routines as fields, so they can be accessed. Figure out bind group
         optimization with this.
+      </p>
+
+      <p class="TODO">
+        Test performance comparison between "changing bind groups" and "changing pipelines" (could use one bind group with
+        multiple pipelines, or multiple bind groups with one pipeline in some cases).
       </p>
 
       <p class="TODO">
@@ -2293,6 +2314,10 @@
         Use staging buffer ring like in
         <a href="https://toji.dev/webgpu-best-practices/buffer-uploads.html#:~:text=Buffer%20data%20flow,-Before%20we%20get%20into%20the">WebGPU Buffer Uploads</a>.
         Actually, find the other (WGPU) example of a buffer "belt" and implement that!
+      </p>
+
+      <p class="TODO">
+        Use unique names in each template, so we can trace code back better(!)
       </p>
 
       <p class="DEFERRED">
