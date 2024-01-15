@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, MergeModule, MergeModuleOptions, Procedure, Routine, u32, U32Order, U32ReverseOrder, Vec2uLexicographicalOrder } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Order, MergeModule, MergeModuleOptions, Procedure, Routine, u32, U32Order, U32ReverseOrder, Vec2uLexicographicalOrder } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -77,21 +77,28 @@ const testMergeModule = <T>( options: MergeModuleTestOptions<T> ) => {
   testMergeModule( {
     // eslint-disable-next-line no-object-spread-on-non-literals
     ...options,
-    name: 'u32 merge simple',
+    name: 'i32 merge',
+    order: I32Order
+  } );
+
+  testMergeModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'u32 merge',
     order: U32Order
   } );
 
   testMergeModule( {
     // eslint-disable-next-line no-object-spread-on-non-literals
     ...options,
-    name: 'u32 reverse merge simple',
+    name: 'u32 reverse merge',
     order: U32ReverseOrder
   } );
 
   testMergeModule( {
     // eslint-disable-next-line no-object-spread-on-non-literals
     ...options,
-    name: 'vec2u merge simple',
+    name: 'vec2u merge',
     order: Vec2uLexicographicalOrder
   } );
 }

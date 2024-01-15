@@ -52,9 +52,9 @@ const mainMergeSimpleWGSL = <T>(
         setFromA: ( indexOutput, indexA ) => `c[ ${indexOutput} ] = a[ ${indexA} ];`,
         setFromB: ( indexOutput, indexB ) => `c[ ${indexOutput} ] = b[ ${indexB} ];`,
         grainSize: grainSize,
-        compare: order.compareWGSL,
-        greaterThan: order.greaterThanWGSL,
-        lessThanOrEqual: order.lessThanOrEqualWGSL
+        compare: ( indexA, indexB ) => order.compareWGSL( `a[ ${indexA} ]`, `b[ ${indexB} ]` ),
+        greaterThan: ( indexA, indexB ) => order.greaterThanWGSL( `a[ ${indexA} ]`, `b[ ${indexB} ]` ),
+        lessThanOrEqual: ( indexA, indexB ) => order.lessThanOrEqualWGSL( `a[ ${indexA} ]`, `b[ ${indexB} ]` )
       } )}
     }
   ` );

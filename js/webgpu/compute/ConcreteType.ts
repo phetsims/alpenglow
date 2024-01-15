@@ -554,6 +554,29 @@ export const I32Add: BinaryOp<number> = {
 // TODO: add other atomic types (and specifically atomic types)
 alpenglow.register( 'I32Add', I32Add );
 
+// TODO: Do a full order, with bit sorts(!)
+export const I32Order: CompareOrder<number> = {
+  name: 'i32 order',
+  type: I32Type,
+
+  compare( a: number, b: number ): number {
+    return a - b;
+  },
+
+  compareWGSL: ( a: string, b: string ): string => {
+    return `( ${a} - ${b} )`;
+  },
+
+  greaterThanWGSL: ( a: string, b: string ): string => {
+    return `( ${a} > ${b} )`;
+  },
+
+  lessThanOrEqualWGSL: ( a: string, b: string ): string => {
+    return `( ${a} <= ${b} )`;
+  }
+};
+alpenglow.register( 'I32Order', I32Order );
+
 export const Vec2uType: ConcreteType<Vector2> = {
   name: 'vec2u',
   bytesPerElement: 8,

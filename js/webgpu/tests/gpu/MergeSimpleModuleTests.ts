@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, MergeSimpleModule, MergeSimpleModuleOptions, Procedure, Routine, u32, U32Order, U32ReverseOrder, Vec2uLexicographicalOrder } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Order, MergeSimpleModule, MergeSimpleModuleOptions, Procedure, Routine, u32, U32Order, U32ReverseOrder, Vec2uLexicographicalOrder } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -62,8 +62,8 @@ const testMergeSimpleModule = <T>( options: MergeSimpleModuleTestOptions<T> ) =>
 };
 
 {
-  const workgroupSize = 32;
-  const grainSize = 4;
+  const workgroupSize = 64;
+  const grainSize = 8;
 
   const options = {
     inputASize: 1300,
@@ -71,6 +71,13 @@ const testMergeSimpleModule = <T>( options: MergeSimpleModuleTestOptions<T> ) =>
     workgroupSize: workgroupSize,
     grainSize: grainSize
   } as const;
+
+  testMergeSimpleModule( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'i32 merge simple',
+    order: I32Order
+  } );
 
   testMergeSimpleModule( {
     // eslint-disable-next-line no-object-spread-on-non-literals
