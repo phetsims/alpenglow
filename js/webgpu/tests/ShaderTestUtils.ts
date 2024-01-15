@@ -7,6 +7,7 @@
  */
 
 import { alpenglow, ConcreteType, DeviceContext } from '../../imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export const shaderTestDevicePromise: Promise<GPUDevice | null> = ( async () => {
   try {
@@ -47,7 +48,7 @@ export const asyncTestWithDeviceContext = ( name: string, test: ( deviceContext:
 
 alpenglow.register( 'asyncTestWithDeviceContext', asyncTestWithDeviceContext );
 
-export const compareArrays = <T>( type: ConcreteType<T>, inputValues: T[], expectedValues: T[], actualValues: T[] ): string | null => {
+export const compareArrays = <T>( type: ConcreteType<T>, inputValues: IntentionalAny, expectedValues: T[], actualValues: T[] ): string | null => {
   for ( let i = 0; i < expectedValues.length; i++ ) {
     const expected = expectedValues[ i ];
     const actual = actualValues[ i ];

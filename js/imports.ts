@@ -582,6 +582,10 @@ export { default as mergeWGSL, MERGE_DEFAULTS } from './webgpu/wgsl/gpu/mergeWGS
 export type { mergeWGSLOptions } from './webgpu/wgsl/gpu/mergeWGSL.js';
 export { default as mainScanWGSL, MAIN_SCAN_DEFAULTS } from './webgpu/wgsl/gpu/mainScanWGSL.js';
 export type { mainScanWGSLOptions } from './webgpu/wgsl/gpu/mainScanWGSL.js';
+export { default as mainMergeSimpleWGSL, MAIN_MERGE_SIMPLE_DEFAULTS } from './webgpu/wgsl/gpu/mainMergeSimpleWGSL.js';
+export type { mainMergeSimpleWGSLOptions } from './webgpu/wgsl/gpu/mainMergeSimpleWGSL.js';
+export { default as mainMergeWGSL, MAIN_MERGE_DEFAULTS } from './webgpu/wgsl/gpu/mainMergeWGSL.js';
+export type { mainMergeWGSLOptions } from './webgpu/wgsl/gpu/mainMergeWGSL.js';
 
 // "main" modules (a single pipeline each)
 export { default as MainReduceModule, MAIN_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceModule.js';
@@ -596,6 +600,10 @@ export { default as MainRadixHistogramModule, MAIN_RADIX_HISTOGRAM_MODULE_DEFAUL
 export type { MainRadixHistogramModuleOptions } from './webgpu/modules/gpu/MainRadixHistogramModule.js';
 export { default as MainRadixScatterModule, MAIN_RADIX_SCATTER_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainRadixScatterModule.js';
 export type { MainRadixScatterModuleOptions } from './webgpu/modules/gpu/MainRadixScatterModule.js';
+export { default as MainMergeSimpleModule, MAIN_MERGE_SIMPLE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainMergeSimpleModule.js';
+export type { MainMergeSimpleModuleOptions } from './webgpu/modules/gpu/MainMergeSimpleModule.js';
+export { default as MainMergeModule, MAIN_MERGE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainMergeModule.js';
+export type { MainMergeModuleOptions } from './webgpu/modules/gpu/MainMergeModule.js';
 
 // "composite" modules
 export { default as ReduceModule, REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/ReduceModule.js';
@@ -604,6 +612,10 @@ export { default as ScanModule, SCAN_MODULE_DEFAULTS } from './webgpu/modules/gp
 export type { ScanModuleOptions } from './webgpu/modules/gpu/ScanModule.js';
 export { default as RadixSortModule, RADIX_SORT_MODULE_DEFAULTS, getMaxRadixBitsPerInnerPass, getRadixBitVectorSize } from './webgpu/modules/gpu/RadixSortModule.js';
 export type { RadixSortModuleOptions } from './webgpu/modules/gpu/RadixSortModule.js';
+export { default as MergeSimpleModule, MERGE_SIMPLE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MergeSimpleModule.js';
+export type { MergeSimpleModuleOptions } from './webgpu/modules/gpu/MergeSimpleModule.js';
+export { default as MergeModule, MERGE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MergeModule.js';
+export type { MergeModuleOptions } from './webgpu/modules/gpu/MergeModule.js';
 
 // TODO: deprecate and remove these
 export { default as SingleReduceShader } from './webgpu/shaders/gpu/SingleReduceShader.js';

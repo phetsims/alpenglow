@@ -150,10 +150,10 @@ export type CompareOrder<T> = {
   compareWGSL: ( a: string, b: string ) => WGSLExpressionI32;
   // ( a: expr:T, b: expr:T ) => expr:bool
   // TODO: Take blueprint
-  greaterThan: ( a: string, b: string ) => WGSLExpressionBool;
+  greaterThanWGSL: ( a: string, b: string ) => WGSLExpressionBool;
   // ( a: expr:T, b: expr:T ) => expr:bool
   // TODO: Take blueprint
-  lessThanOrEqual: ( a: string, b: string ) => WGSLExpressionBool;
+  lessThanOrEqualWGSL: ( a: string, b: string ) => WGSLExpressionBool;
 };
 
 export type Order<T> = BitOrder<T> & CompareOrder<T>;
@@ -423,11 +423,11 @@ export const U32Order: Order<number> = {
     return `select( -1i, select( 0i, 1i, ${a} > ${b} ), ${a} < ${b} )`;
   },
 
-  greaterThan: ( a: string, b: string ): string => {
+  greaterThanWGSL: ( a: string, b: string ): string => {
     return `( ${a} > ${b} )`;
   },
 
-  lessThanOrEqual: ( a: string, b: string ): string => {
+  lessThanOrEqualWGSL: ( a: string, b: string ): string => {
     return `( ${a} <= ${b} )`;
   },
 
@@ -453,11 +453,11 @@ export const U32ReverseOrder: Order<number> = {
     return `select( -1i, select( 0i, 1i, ${a} < ${b} ), ${a} > ${b} )`;
   },
 
-  greaterThan: ( a: string, b: string ): string => {
+  greaterThanWGSL: ( a: string, b: string ): string => {
     return `( ${a} < ${b} )`;
   },
 
-  lessThanOrEqual: ( a: string, b: string ): string => {
+  lessThanOrEqualWGSL: ( a: string, b: string ): string => {
     return `( ${a} >= ${b} )`;
   },
 
@@ -654,11 +654,11 @@ export const Vec2uLexicographicalOrder: Order<Vector2> = {
     return `select( -1i, select( select( -1i, select( 0i, 1i, ${a}.y > ${b}.y ), ${a}.y < ${b}.y ), 1i, ${a}.x > ${b}.x ), ${a}.x < ${b}.x )`;
   },
 
-  greaterThan: ( a: string, b: string ): string => {
+  greaterThanWGSL: ( a: string, b: string ): string => {
     return `( ${a}.x > ${b}.x || ( ${a}.x == ${b}.x && ${a}.y > ${b}.y ) )`;
   },
 
-  lessThanOrEqual: ( a: string, b: string ): string => {
+  lessThanOrEqualWGSL: ( a: string, b: string ): string => {
     return `( ${a}.x <= ${b}.x && ( ${a}.x != ${b}.x || ${a}.y <= ${b}.y ) )`;
   },
 

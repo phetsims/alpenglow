@@ -12,6 +12,8 @@ import qunitStart from '../../chipper/js/sim-tests/qunitStart.js';
 import './webgpu/tests/gpu/ReduceModuleTests.js';
 import './webgpu/tests/gpu/ScanModuleTests.js';
 import './webgpu/tests/gpu/RadixSortModuleTests.js';
+// import './webgpu/tests/gpu/MergeSimpleModuleTests.js';
+// import './webgpu/tests/gpu/MergeModuleTests.js';
 import './cag/ClippableFaceTests.js';
 import './cag/PolygonalBooleanTests.js';
 import './clip/PolygonClippingTests.js';

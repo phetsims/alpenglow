@@ -2135,16 +2135,24 @@
       </p>
 
       <p class="TODO">
+        Think out "data source" abstraction. With fusing.
+
+        Presumably it also specifies the access pattern/mapping? - We'll be able to "store" this in either a private/local
+        variable, or a workgroup shared variable?
+
+        Actually, think of operations that "map" data. When fusing, we'll want to execute the operation at the "load".
+        Is that actually... the extend of fusing? Then we can just do that in "load expressions"?
+
+        Are there concrete cases of more advanced fusing?
+      </p>
+
+      <p class="TODO">
         Buffer offsets for uniforms, for radix passes? (Can we use dynamic offsets in that case?) - We will want to
         minimize number of shaders eventually, for Windows.
       </p>
 
       <p class="TODO">
         Put blueprints into ConcreteType
-      </p>
-
-      <p class="TODO">
-        Think out "data source" abstraction. With fusing.
       </p>
 
       <p class="TODO">
