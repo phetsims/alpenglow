@@ -420,7 +420,7 @@ export const U32Order: Order<number> = {
     // TODO: THIS FAILS RANGE CHECKS
     // return `( i32( ${a} ) - i32( ${b} ) )`;
 
-    return `select( -1i, select( 0i, 1i, ${a} > ${b} ), ${a} < ${b} )`;
+    return `select( select( 0i, 1i, ${a} > ${b} ), -1i, ${a} < ${b} )`;
   },
 
   greaterThanWGSL: ( a: string, b: string ): string => {
@@ -450,7 +450,7 @@ export const U32ReverseOrder: Order<number> = {
   },
 
   compareWGSL: ( a: string, b: string ): string => {
-    return `select( -1i, select( 0i, 1i, ${a} < ${b} ), ${a} > ${b} )`;
+    return `select( select( 0i, 1i, ${a} < ${b} ), -1i, ${a} > ${b} )`;
   },
 
   greaterThanWGSL: ( a: string, b: string ): string => {
@@ -674,7 +674,7 @@ export const Vec2uLexicographicalOrder: Order<Vector2> = {
 
   // TODO: support statements
   compareWGSL: ( a: string, b: string ): string => {
-    return `select( -1i, select( select( -1i, select( 0i, 1i, ${a}.y > ${b}.y ), ${a}.y < ${b}.y ), 1i, ${a}.x > ${b}.x ), ${a}.x < ${b}.x )`;
+    return `select( select( select( select( 0i, 1i, ${a}.y > ${b}.y ), -1i, ${a}.y < ${b}.y ), 1i, ${a}.x > ${b}.x ), -1i, ${a}.x < ${b}.x )`;
   },
 
   greaterThanWGSL: ( a: string, b: string ): string => {
