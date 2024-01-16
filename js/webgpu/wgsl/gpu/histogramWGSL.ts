@@ -14,6 +14,7 @@ type SelfOptions = {
   // var<workgroup> array<atomic<u32>, numBins> // TODO: can we actually get memory-compacted histograms here, instead of using a full u32?
   histogramScratch: WGSLVariableName;
 
+  // TODO: blueprint
   getBin: ( index: WGSLExpressionU32 ) => WGSLExpressionU32;
 };
 

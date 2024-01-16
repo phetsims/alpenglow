@@ -586,6 +586,8 @@ export { default as mainMergeSimpleWGSL, MAIN_MERGE_SIMPLE_DEFAULTS } from './we
 export type { mainMergeSimpleWGSLOptions } from './webgpu/wgsl/gpu/mainMergeSimpleWGSL.js';
 export { default as mainMergeWGSL, MAIN_MERGE_DEFAULTS } from './webgpu/wgsl/gpu/mainMergeWGSL.js';
 export type { mainMergeWGSLOptions } from './webgpu/wgsl/gpu/mainMergeWGSL.js';
+export { default as mainHistogramWGSL, MAIN_HISTOGRAM_DEFAULTS } from './webgpu/wgsl/gpu/mainHistogramWGSL.js';
+export type { mainHistogramWGSLOptions } from './webgpu/wgsl/gpu/mainHistogramWGSL.js';
 
 // "main" modules (a single pipeline each)
 export { default as MainReduceModule, MAIN_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceModule.js';
@@ -604,6 +606,8 @@ export { default as MainMergeSimpleModule, MAIN_MERGE_SIMPLE_MODULE_DEFAULTS } f
 export type { MainMergeSimpleModuleOptions } from './webgpu/modules/gpu/MainMergeSimpleModule.js';
 export { default as MainMergeModule, MAIN_MERGE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainMergeModule.js';
 export type { MainMergeModuleOptions } from './webgpu/modules/gpu/MainMergeModule.js';
+export { default as MainHistogramModule, MAIN_HISTOGRAM_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainHistogramModule.js';
+export type { MainHistogramModuleOptions } from './webgpu/modules/gpu/MainHistogramModule.js';
 
 // "composite" modules
 export { default as ReduceModule, REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/ReduceModule.js';
@@ -616,6 +620,8 @@ export { default as MergeSimpleModule, MERGE_SIMPLE_MODULE_DEFAULTS } from './we
 export type { MergeSimpleModuleOptions } from './webgpu/modules/gpu/MergeSimpleModule.js';
 export { default as MergeModule, MERGE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MergeModule.js';
 export type { MergeModuleOptions } from './webgpu/modules/gpu/MergeModule.js';
+export { default as HistogramModule, HISTOGRAM_MODULE_DEFAULTS } from './webgpu/modules/gpu/HistogramModule.js';
+export type { HistogramModuleOptions } from './webgpu/modules/gpu/HistogramModule.js';
 
 // TODO: deprecate and remove these
 export { default as SingleReduceShader } from './webgpu/shaders/gpu/SingleReduceShader.js';
