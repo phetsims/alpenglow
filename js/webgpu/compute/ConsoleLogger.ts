@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, ConcreteType, DeviceContext, OldComputeShader, wgsl_main_log_barrier } from '../../imports.js';
+import { alpenglow, ByteEncoder, ConcreteType } from '../../imports.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
 
@@ -121,14 +121,6 @@ export default class ConsoleLogger {
     return result;
   }
 
-  public static async getLogBarrierComputeShader( deviceContext: DeviceContext ): Promise<OldComputeShader> {
-    // TODO: memoize
-    return OldComputeShader.fromSourceAsync(
-      deviceContext.device, 'log barrier', wgsl_main_log_barrier, [], {
-        log: true
-      }
-    );
-  }
 }
 
 export class ConsoleLoggedEntry<T = unknown> {

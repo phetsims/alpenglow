@@ -21,7 +21,6 @@ import './clip/PolygonClippingTests.js';
 import './parallel/ParallelTests.js';
 import './raster/RasterizeTests.js';
 import './webgpu/old/OldSnippetTests.js';
-import './webgpu/old/OldExampleTests.js';
 import './render-program/RenderProgramTests.js';
 import './webgpu/RenderProgramWebGPUTests.js';
 
