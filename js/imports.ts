@@ -202,17 +202,7 @@ export { default as wgsl_raster_accumulate } from '../wgsl/raster/raster_accumul
 export { default as wgsl_raster_to_texture } from '../wgsl/raster/raster_to_texture.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_example_raked_reduce } from '../wgsl/examples/reduce/example_raked_reduce.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_f32_reduce_simple } from '../wgsl/examples/reduce/f32_reduce_simple.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_f32_reduce_raked_blocked } from '../wgsl/examples/reduce/f32_reduce_raked_blocked.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_f32_reduce_raked_striped } from '../wgsl/examples/reduce/f32_reduce_raked_striped.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_f32_reduce_raked_striped_blocked } from '../wgsl/examples/reduce/f32_reduce_raked_striped_blocked.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_f32_reduce_raked_striped_blocked_convergent } from '../wgsl/examples/reduce/f32_reduce_raked_striped_blocked_convergent.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u32_reduce_raked_striped_blocked_convergent } from '../wgsl/examples/reduce/u32_reduce_raked_striped_blocked_convergent.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
@@ -230,10 +220,6 @@ export { default as wgsl_f32_exclusive_scan_raked_striped_single } from '../wgsl
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_f32_inclusive_scan_raked_striped_single } from '../wgsl/examples/scan/f32_inclusive_scan_raked_striped_single.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_i32_merge_simple } from '../wgsl/examples/merge/i32_merge_simple.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_i32_merge } from '../wgsl/examples/merge/i32_merge.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u32_workgroup_radix_sort } from '../wgsl/examples/sort/u32_workgroup_radix_sort.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u32_compact_workgroup_radix_sort } from '../wgsl/examples/sort/u32_compact_workgroup_radix_sort.js';
@@ -241,8 +227,6 @@ export { default as wgsl_u32_compact_workgroup_radix_sort } from '../wgsl/exampl
 export { default as wgsl_u32_single_radix_sort } from '../wgsl/examples/sort/u32_single_radix_sort.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u32_compact_single_radix_sort } from '../wgsl/examples/sort/u32_compact_single_radix_sort.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_u32_histogram } from '../wgsl/examples/histogram/u32_histogram.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u32_radix_histogram } from '../wgsl/examples/sort/u32_radix_histogram.js';
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
@@ -623,29 +607,9 @@ export type { MergeModuleOptions } from './webgpu/modules/gpu/MergeModule.js';
 export { default as HistogramModule, HISTOGRAM_MODULE_DEFAULTS } from './webgpu/modules/gpu/HistogramModule.js';
 export type { HistogramModuleOptions } from './webgpu/modules/gpu/HistogramModule.js';
 
-// TODO: deprecate and remove these
-export { default as SingleReduceShader } from './webgpu/shaders/gpu/SingleReduceShader.js';
-export type { SingleReduceShaderOptions } from './webgpu/shaders/gpu/SingleReduceShader.js';
-export { default as AtomicReduceShader, u32AtomicIdentities, i32AtomicIdentities } from './webgpu/shaders/gpu/AtomicReduceShader.js';
-export type { AtomicReduceShaderOptions, AtomicType, AtomicOperation } from './webgpu/shaders/gpu/AtomicReduceShader.js';
-export { default as FullAtomicReduceShader } from './webgpu/shaders/gpu/FullAtomicReduceShader.js';
-export type { FullAtomicReduceShaderOptions } from './webgpu/shaders/gpu/FullAtomicReduceShader.js';
-export { default as SingleScanShader } from './webgpu/shaders/gpu/SingleScanShader.js';
-export type { SingleScanShaderOptions } from './webgpu/shaders/gpu/SingleScanShader.js';
-export { default as DoubleReduceScanShader } from './webgpu/shaders/gpu/DoubleReduceScanShader.js';
-export type { DoubleReduceScanShaderOptions } from './webgpu/shaders/gpu/DoubleReduceScanShader.js';
-export { default as TripleReduceScanShader } from './webgpu/shaders/gpu/TripleReduceScanShader.js';
-export type { TripleReduceScanShaderOptions } from './webgpu/shaders/gpu/TripleReduceScanShader.js';
-export { default as DoubleRadixSortShader } from './webgpu/shaders/gpu/DoubleRadixSortShader.js';
-export type { DoubleRadixSortShaderOptions } from './webgpu/shaders/gpu/DoubleRadixSortShader.js';
-export { default as TripleRadixSortShader } from './webgpu/shaders/gpu/TripleRadixSortShader.js';
-export type { TripleRadixSortShaderOptions } from './webgpu/shaders/gpu/TripleRadixSortShader.js';
-
 export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';
-export { default as BrokenTesting } from './webgpu/BrokenTesting.js';
-export { OldExampleSimpleF32Reduce, OldBic } from './webgpu/old/OldExampleShaders.js';
 export { default as GPUProfiling } from './webgpu/GPUProfiling.js';
 export { default as RasterClipper } from './webgpu/old/RasterClipper.js';
 export type { RasterClipperOptions } from './webgpu/old/RasterClipper.js';

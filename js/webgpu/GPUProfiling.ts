@@ -22,9 +22,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BasicExecution, OldBindingType, BufferLogger, OldComputeShader, OldComputeShaderDispatchOptions, OldComputeShaderSourceOptions, DeviceContext, OldExecution, TimestampLogger, TimestampLoggerResult, wgsl_f32_reduce_raked_blocked, wgsl_f32_reduce_raked_striped_blocked, wgsl_f32_reduce_raked_striped_blocked_convergent, wgsl_f32_reduce_simple } from '../imports.js';
+import { alpenglow, BufferArraySlot, BufferLogger, DeviceContext, getArrayType, Procedure, RadixSortModule, Routine, TimestampLogger, TimestampLoggerResult, u32, U32Order } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
-import { combineOptions } from '../../../phet-core/js/optionize.js';
 
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
@@ -56,20 +55,19 @@ export default class GPUProfiling {
 
     const workgroupSize = 256;
     const inputSize = workgroupSize * workgroupSize * ( workgroupSize - 3 ) - 27 * 301;
-    const numbers = new Float32Array( _.range( 0, inputSize ).map( () => random.nextDouble() ) );
+
+    const u32Numbers = _.range( 0, inputSize ).map( () => random.nextInt( 1000000 ) );
 
     await GPUProfiling.loopingTest( [
-      deviceContext => GPUProfiling.getReduceSimpleProfiler( deviceContext, workgroupSize, numbers ),
-      // deviceContext => GPUProfiling.getReduceRakedBlockedProfiler( deviceContext, workgroupSize, numbers, 2 ),
-      // deviceContext => GPUProfiling.getReduceRakedBlockedProfiler( deviceContext, workgroupSize, numbers, 3 ),
-      // deviceContext => GPUProfiling.getReduceRakedBlockedProfiler( deviceContext, workgroupSize, numbers, 4 ),
-      // deviceContext => GPUProfiling.getReduceRakedBlockedProfiler( deviceContext, workgroupSize, numbers, 5 ),
-      deviceContext => GPUProfiling.getReduceRakedBlockedProfiler( deviceContext, workgroupSize, numbers, 8 ),
-      // deviceContext => GPUProfiling.getReduceRakedBlockedProfiler( deviceContext, workgroupSize, numbers, 16 )
-
-      // deviceContext => GPUProfiling.getReduceRakedStripedBlockedProfiler( deviceContext, workgroupSize, numbers, 4 ),
-      deviceContext => GPUProfiling.getReduceRakedStripedBlockedProfiler( deviceContext, workgroupSize, numbers, 8 ),
-      deviceContext => GPUProfiling.getReduceRakedStripedBlockedConvergentProfiler( deviceContext, workgroupSize, numbers, 8 )
+      deviceContext => GPUProfiling.getRadixProfiler( deviceContext, u32Numbers, {
+        combineStrategy: true,
+        radixWorkgroupSize: 128,
+        radixGrainSize: 4,
+        scanWorkgroupSize: 128,
+        scanGrainSize: 4,
+        bitsPerPass: 8,
+        bitsPerInnerPass: 2
+      } )
     ] );
   }
 
@@ -119,395 +117,104 @@ export default class GPUProfiling {
     }
   }
 
-  public static async getReduceSimpleProfiler(
+  public static async getRadixProfiler(
     deviceContext: DeviceContext,
-    workgroupSize: number,
-    numbers: Float32Array
+    numbers: number[],
+    options: {
+      combineStrategy: boolean;
+      radixWorkgroupSize: number;
+      radixGrainSize: number;
+      scanWorkgroupSize: number;
+      scanGrainSize: number;
+      bitsPerPass: number;
+      bitsPerInnerPass: number;
+    }
   ): Promise<GPUProfiler> {
-    const device = deviceContext.device;
+
+    const combineStrategy = options.combineStrategy;
+    const radixWorkgroupSize = options.radixWorkgroupSize;
+    const radixGrainSize = options.radixGrainSize;
+    const scanWorkgroupSize = options.scanWorkgroupSize;
+    const scanGrainSize = options.scanGrainSize;
+    const bitsPerPass = options.bitsPerPass;
+    const bitsPerInnerPass = options.bitsPerInnerPass;
+
+    const name = `radix sort comb:${combineStrategy} radix:${radixWorkgroupSize}x${radixGrainSize} scan:${scanWorkgroupSize}x${scanGrainSize} bits:${bitsPerPass}x${bitsPerInnerPass}`;
+
+    const order = U32Order;
+    const size = numbers.length;
+    const maximumSize = numbers.length;
+
+    const inputSlot = new BufferArraySlot( getArrayType( order.type, maximumSize ) );
+    const outputSlot = new BufferArraySlot( getArrayType( order.type, maximumSize ) );
+
+    const radixSortModule = new RadixSortModule( {
+      input: inputSlot,
+      output: outputSlot,
+      name: name,
+
+      order: order,
+      totalBits: 32,
+
+      radixWorkgroupSize: radixWorkgroupSize,
+      radixGrainSize: radixGrainSize,
+      scanWorkgroupSize: scanWorkgroupSize,
+      scanGrainSize: scanGrainSize,
+
+      lengthExpression: u32( size ),
+
+      bitsPerPass: bitsPerPass,
+      bitsPerInnerPass: bitsPerInnerPass,
+      earlyLoad: false,
+      scanModuleOptions: {
+        areScannedReductionsExclusive: false
+      }
+    } );
+
+    // TODO: can we factor out some things here, like the execute wrapper?
+    const routine = await Routine.create(
+      deviceContext,
+      radixSortModule,
+      [ inputSlot, outputSlot ],
+      combineStrategy ? Routine.COMBINE_ALL_LAYOUT_STRATEGY : Routine.INDIVIDUAL_LAYOUT_STRATEGY,
+      ( context, execute, input: { numbers: number[]; timestampLogger: TimestampLogger } ) => {
+        context.setTypedBufferValue( inputSlot, input.numbers );
+
+        execute( context, input.numbers.length );
+
+        context.finish();
+
+        // TODO: improve this?
+        // TODO: doesn't seem like this is finishing!
+        return input.timestampLogger.resolve( context.executor.encoder, bufferLogger );
+      }
+    );
+
+    const procedure = new Procedure( routine ).bindRemainingBuffers();
 
     const bufferLogger = new BufferLogger( deviceContext );
 
-    const inputSize = numbers.length;
+    return new GPUProfiler( name, async () => {
 
-    const shaderOptions = {
-      workgroupSize: workgroupSize,
-      identity: '0f',
-      combine: ( a: string, b: string ) => `${a} + ${b}`
-    };
-
-    const shader0 = OldComputeShader.fromSource(
-      device, 'f32_reduce_simple 0', wgsl_f32_reduce_simple, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: inputSize
-      }, shaderOptions )
-    );
-    const shader1 = OldComputeShader.fromSource(
-      device, 'f32_reduce_simple 1', wgsl_f32_reduce_simple, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize ) )
-      }, shaderOptions )
-    );
-    const shader2 = OldComputeShader.fromSource(
-      device, 'f32_reduce_simple 2', wgsl_f32_reduce_simple, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize ) )
-      }, shaderOptions )
-    );
-
-    return new GPUProfiler( 'f32_reduce_simple', async () => {
       const timestampLogger = new TimestampLogger( deviceContext, 100 ); // capacity is probably overkill
-      const dispatchOptions: OldComputeShaderDispatchOptions = {
+
+      const timestampResult = await procedure.standaloneExecute( deviceContext, {
+        numbers: numbers,
         timestampLogger: timestampLogger
-      };
-
-      const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-      device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
-
-      const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize ) ) );
-      const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ) );
-      const outputBuffer = deviceContext.createBuffer( 4 );
-
-      const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-      shader0.dispatch( encoder, [
-        inputBuffer, firstMiddleBuffer
-      ], Math.ceil( inputSize / ( workgroupSize ) ), 1, 1, dispatchOptions );
-      shader1.dispatch( encoder, [
-        firstMiddleBuffer, secondMiddleBuffer
-      ], Math.ceil( inputSize / ( workgroupSize * workgroupSize ) ), 1, 1, dispatchOptions );
-      shader2.dispatch( encoder, [
-        secondMiddleBuffer, outputBuffer
-      ], 1, 1, 1, dispatchOptions );
-
-      const resultPromise = bufferLogger.arrayBufferPromise( encoder, outputBuffer );
-
-      const timestampResultPromise = timestampLogger.resolve( encoder, bufferLogger );
-
-      const commandBuffer = encoder.finish();
-      device.queue.submit( [ commandBuffer ] );
-
-      await device.queue.onSubmittedWorkDone();
-      await bufferLogger.complete();
-
-      const timestampResult = await timestampResultPromise;
-      const outputArray = new Float32Array( await resultPromise );
-
-      if ( !timestampResult ) {
-        throw new Error( 'missing timestamps' );
-      }
-
-      inputBuffer.destroy();
-      firstMiddleBuffer.destroy();
-      secondMiddleBuffer.destroy();
-      outputBuffer.destroy();
-      timestampLogger.dispose();
-
-      const expectedValue = _.sum( [ ...numbers ] );
-      const actualValue = outputArray[ 0 ];
-
-      // Yay inaccurate math!
-      if ( Math.abs( expectedValue - actualValue ) > 1 ) {
-        throw new Error( 'invalid result' );
-      }
-
-      return timestampResult;
-    } );
-  }
-
-  public static async getReduceRakedBlockedProfiler(
-    deviceContext: DeviceContext,
-    workgroupSize: number,
-    numbers: Float32Array,
-    grainSize: number
-  ): Promise<GPUProfiler> {
-    const device = deviceContext.device;
-
-    const bufferLogger = new BufferLogger( deviceContext );
-
-    const inputSize = numbers.length;
-
-    const shaderOptions = {
-      workgroupSize: workgroupSize,
-      grainSize: grainSize,
-      identity: '0f',
-      combine: ( a: string, b: string ) => `${a} + ${b}`
-    };
-
-    const shader0 = OldComputeShader.fromSource(
-      device, 'f32_reduce_raked_blocked 0', wgsl_f32_reduce_raked_blocked, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: inputSize
-      }, shaderOptions )
-    );
-    const shader1 = OldComputeShader.fromSource(
-      device, 'f32_reduce_raked_blocked 1', wgsl_f32_reduce_raked_blocked, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
-      }, shaderOptions )
-    );
-    const shader2 = OldComputeShader.fromSource(
-      device, 'f32_reduce_raked_blocked 2', wgsl_f32_reduce_raked_blocked, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
-      }, shaderOptions )
-    );
-
-    return new GPUProfiler( `f32_reduce_raked_blocked ${grainSize}`, async () => {
-      const timestampLogger = new TimestampLogger( deviceContext, 100 ); // capacity is probably overkill
-      const dispatchOptions: OldComputeShaderDispatchOptions = {
-        timestampLogger: timestampLogger
-      };
-
-      const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-      device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
-
-      const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-      const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-      const outputBuffer = deviceContext.createBuffer( 4 );
-
-      const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-      shader0.dispatch( encoder, [
-        inputBuffer, firstMiddleBuffer
-      ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, dispatchOptions );
-      shader1.dispatch( encoder, [
-        firstMiddleBuffer, secondMiddleBuffer
-      ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1, dispatchOptions );
-      shader2.dispatch( encoder, [
-        secondMiddleBuffer, outputBuffer
-      ], 1, 1, 1, dispatchOptions );
-
-      const resultPromise = bufferLogger.arrayBufferPromise( encoder, outputBuffer );
-
-      const timestampResultPromise = timestampLogger.resolve( encoder, bufferLogger );
-
-      const commandBuffer = encoder.finish();
-      device.queue.submit( [ commandBuffer ] );
-
-      await device.queue.onSubmittedWorkDone();
-      await bufferLogger.complete();
-
-      const timestampResult = await timestampResultPromise;
-      const outputArray = new Float32Array( await resultPromise );
-
-      if ( !timestampResult ) {
-        throw new Error( 'missing timestamps' );
-      }
-
-      inputBuffer.destroy();
-      firstMiddleBuffer.destroy();
-      secondMiddleBuffer.destroy();
-      outputBuffer.destroy();
-      timestampLogger.dispose();
-
-      const expectedValue = _.sum( [ ...numbers ] );
-      const actualValue = outputArray[ 0 ];
-
-      // Yay inaccurate math!
-      if ( Math.abs( expectedValue - actualValue ) > 1 ) {
-        throw new Error( 'invalid result' );
-      }
-
-      return timestampResult;
-    } );
-  }
-
-  public static async getReduceRakedStripedBlockedProfiler(
-    deviceContext: DeviceContext,
-    workgroupSize: number,
-    numbers: Float32Array,
-    grainSize: number
-  ): Promise<GPUProfiler> {
-    const device = deviceContext.device;
-
-    const bufferLogger = new BufferLogger( deviceContext );
-
-    const inputSize = numbers.length;
-
-    const shaderOptions = {
-      workgroupSize: workgroupSize,
-      grainSize: grainSize,
-      identity: '0f',
-      combine: ( a: string, b: string ) => `${a} + ${b}`
-    } as const;
-
-    const shader0 = OldComputeShader.fromSource(
-      device, 'f32_reduce_raked_striped_blocked 0', wgsl_f32_reduce_raked_striped_blocked, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: inputSize
-      }, shaderOptions )
-    );
-    const shader1 = OldComputeShader.fromSource(
-      device, 'f32_reduce_raked_striped_blocked 1', wgsl_f32_reduce_raked_striped_blocked, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
-      }, shaderOptions )
-    );
-    const shader2 = OldComputeShader.fromSource(
-      device, 'f32_reduce_raked_striped_blocked 2', wgsl_f32_reduce_raked_striped_blocked, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
-      }, shaderOptions )
-    );
-
-    return new GPUProfiler( `f32_reduce_raked_striped_blocked ${grainSize}`, async () => {
-      const timestampLogger = new TimestampLogger( deviceContext, 100 ); // capacity is probably overkill
-      const dispatchOptions: OldComputeShaderDispatchOptions = {
-        timestampLogger: timestampLogger
-      };
-
-      const inputBuffer = deviceContext.createBuffer( 4 * inputSize );
-      device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
-
-      const firstMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-      const secondMiddleBuffer = deviceContext.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-      const outputBuffer = deviceContext.createBuffer( 4 );
-
-      const encoder = device.createCommandEncoder( { label: 'the encoder' } );
-
-      shader0.dispatch( encoder, [
-        inputBuffer, firstMiddleBuffer
-      ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1, dispatchOptions );
-      shader1.dispatch( encoder, [
-        firstMiddleBuffer, secondMiddleBuffer
-      ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1, dispatchOptions );
-      shader2.dispatch( encoder, [
-        secondMiddleBuffer, outputBuffer
-      ], 1, 1, 1, dispatchOptions );
-
-      const resultPromise = bufferLogger.arrayBufferPromise( encoder, outputBuffer );
-
-      const timestampResultPromise = timestampLogger.resolve( encoder, bufferLogger );
-
-      const commandBuffer = encoder.finish();
-      device.queue.submit( [ commandBuffer ] );
-
-      await device.queue.onSubmittedWorkDone();
-      await bufferLogger.complete();
-
-      const timestampResult = await timestampResultPromise;
-      const outputArray = new Float32Array( await resultPromise );
-
-      if ( !timestampResult ) {
-        throw new Error( 'missing timestamps' );
-      }
-
-      inputBuffer.destroy();
-      firstMiddleBuffer.destroy();
-      secondMiddleBuffer.destroy();
-      outputBuffer.destroy();
-      timestampLogger.dispose();
-
-      const expectedValue = _.sum( [ ...numbers ] );
-      const actualValue = outputArray[ 0 ];
-
-      // Yay inaccurate math!
-      if ( Math.abs( expectedValue - actualValue ) > 1 ) {
-        throw new Error( 'invalid result' );
-      }
-
-      return timestampResult;
-    } );
-  }
-
-  public static async getReduceRakedStripedBlockedConvergentProfiler(
-    deviceContext: DeviceContext,
-    workgroupSize: number,
-    numbers: Float32Array,
-    grainSize: number
-  ): Promise<GPUProfiler> {
-    const device = deviceContext.device;
-    const inputSize = numbers.length;
-
-    const shaderOptions = {
-      workgroupSize: workgroupSize,
-      grainSize: grainSize,
-      identity: '0f',
-      combine: ( a: string, b: string ) => `${a} + ${b}`
-    } as const;
-
-    const shader0 = OldComputeShader.fromSource(
-      device, 'f32_reduce_raked_striped_blocked_convergent 0', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: inputSize
-      }, shaderOptions )
-    );
-    const shader1 = OldComputeShader.fromSource(
-      device, 'f32_reduce_raked_striped_blocked_convergent 1', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * grainSize ) )
-      }, shaderOptions )
-    );
-    const shader2 = OldComputeShader.fromSource(
-      device, 'f32_reduce_raked_striped_blocked_convergent 2', wgsl_f32_reduce_raked_striped_blocked_convergent, [
-        OldBindingType.READ_ONLY_STORAGE_BUFFER,
-        OldBindingType.STORAGE_BUFFER
-      ], combineOptions<OldComputeShaderSourceOptions>( {
-        inputSize: Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) )
-      }, shaderOptions )
-    );
-
-    // TODO: are we... causing slower patterns with our new profiling pattern?
-    return new GPUProfiler( `f32_reduce_raked_striped_blocked_convergent ${grainSize}`, async () => {
-      const execution = new BasicExecution( deviceContext );
-
-      const outputArray = await execution.executeSingle( async ( encoder: GPUCommandEncoder, execution: OldExecution ) => {
-        const inputBuffer = execution.createBuffer( 4 * inputSize );
-        device.queue.writeBuffer( inputBuffer, 0, numbers.buffer );
-
-        const firstMiddleBuffer = execution.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * grainSize ) ) );
-        const secondMiddleBuffer = execution.createBuffer( 4 * Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ) );
-        const outputBuffer = execution.createBuffer( 4 );
-
-        execution.dispatch( shader0, [
-          inputBuffer, firstMiddleBuffer
-        ], Math.ceil( inputSize / ( workgroupSize * grainSize ) ), 1, 1 );
-        execution.dispatch( shader1, [
-          firstMiddleBuffer, secondMiddleBuffer
-        ], Math.ceil( inputSize / ( workgroupSize * workgroupSize * grainSize * grainSize ) ), 1, 1 );
-        execution.dispatch( shader2, [
-          secondMiddleBuffer, outputBuffer
-        ], 1, 1, 1 );
-
-        return execution.f32Numbers( outputBuffer );
+      }, {
+        procedureExecuteOptions: {
+          separateComputePasses: true
+        },
+        executorOptions: {
+          getTimestampWrites: name => timestampLogger.getGPUComputePassTimestampWrites( name )
+        }
       } );
 
-      const expectedValue = _.sum( [ ...numbers ] );
-      const actualValue = outputArray[ 0 ];
-
-      // Yay inaccurate math!
-      if ( Math.abs( expectedValue - actualValue ) > 1 ) {
-        throw new Error( 'invalid result' );
-      }
-
-      const timestampResult = await execution.timestampResultPromise;
-
       if ( !timestampResult ) {
         throw new Error( 'missing timestamps' );
       }
+
+      timestampLogger.dispose();
 
       return timestampResult;
     } );

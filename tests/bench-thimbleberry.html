@@ -126,7 +126,7 @@
 
     const procedure = new Procedure( routine ).bindRemainingBuffers();
 
-    const bufferLogger = new BufferLogger();
+    const bufferLogger = new BufferLogger( deviceContext );
 
     return {
       shader: {

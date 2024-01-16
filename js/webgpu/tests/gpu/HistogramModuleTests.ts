@@ -4,9 +4,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, ConcreteType, getArrayType, HistogramModule, HistogramModuleOptions, Procedure, Routine, u32, U32AtomicType, U32Type } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, ConcreteType, getArrayType, HistogramModule, HistogramModuleOptions, Procedure, Routine, u32, U32AtomicType, U32Type, Vec2uType } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
 
 QUnit.module( 'HistogramModuleTests' );
 
@@ -58,12 +59,10 @@ const testHistogramModule = <T>( options: HistogramModuleTestOptions<T> ) => {
 };
 
 {
-  const workgroupSize = 64;
-  const grainSize = 8;
-
   const options = {
-    workgroupSize: workgroupSize,
-    grainSize: grainSize
+    workgroupSize: 64,
+    grainSize: 8,
+    inputSize: 2000
   } as const;
 
   testHistogramModule<number>( {
@@ -72,8 +71,17 @@ const testHistogramModule = <T>( options: HistogramModuleTestOptions<T> ) => {
     name: 'u32 histogram mod 256',
     numBins: 256,
     type: U32Type,
-    inputSize: 10000,
     getBinTS: value => value % 256,
     getBin: value => `( ${value} % 256u )`
+  } );
+
+  testHistogramModule<Vector2>( {
+    // eslint-disable-next-line no-object-spread-on-non-literals
+    ...options,
+    name: 'vec2u histogram custom',
+    numBins: 256,
+    type: Vec2uType,
+    getBinTS: value => ( ( value.x % 10203 ) + ( value.y % 1234 ) ) % 256,
+    getBin: value => `( ( ( ${value}.x % 10203u ) + ( ${value}.y % 1234u ) ) % 256u )`
   } );
 }

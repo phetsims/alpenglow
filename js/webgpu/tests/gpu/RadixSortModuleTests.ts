@@ -29,7 +29,7 @@ const testRadixSortModule = <T>( options: RadixSortModuleTestOptions<T> ) => {
 
   const innerBitVectorSize = getRadixBitVectorSize( options.radixWorkgroupSize, options.radixGrainSize, options.bitsPerInnerPass );
 
-  const name = `${options.order.name} triple radix sort (#:${options.inputSize} radix wg:${options.radixWorkgroupSize} gr:${options.radixGrainSize} scan wg:${options.scanWorkgroupSize} gr:${options.scanGrainSize} bits:${options.bitsPerPass}, bitQ:${options.bitsPerInnerPass} bitVec:${innerBitVectorSize} full:${options.fullSize} early:${options.earlyLoad} reducEx:${options.scanModuleOptions.areScannedReductionsExclusive})`;
+  const name = `${options.order.name} radix sort (#:${options.inputSize} radix:${options.radixWorkgroupSize}x${options.radixGrainSize} scan:${options.scanWorkgroupSize}x${options.scanGrainSize} bits:${options.bitsPerPass}, bitQ:${options.bitsPerInnerPass} bitVec:${innerBitVectorSize} full:${options.fullSize} early:${options.earlyLoad} reducEx:${options.scanModuleOptions.areScannedReductionsExclusive})`;
 
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
 
