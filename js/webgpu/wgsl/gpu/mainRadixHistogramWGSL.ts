@@ -53,7 +53,7 @@ const mainRadixHistogramWGSL = <T>(
         workgroupSize: workgroupSize,
         grainSize: grainSize,
         histogramScratch: 'histogram_scratch',
-        getBin: index => order.getBitsWGSL( `input[ ${index} ]`, pass * bitsPerPass, bitsPerPass ), // TODO: consider rename of getBin
+        getBin: ( blueprint, index ) => order.getBitsWGSL( blueprint, `input[ ${index} ]`, pass * bitsPerPass, bitsPerPass ), // TODO: consider rename of getBin
         numBins: ( 1 << bitsPerPass ),
         lengthExpression: lengthExpression,
         storeHistogram: ( index, value ) => `output[ ${index} ] = ${value};`

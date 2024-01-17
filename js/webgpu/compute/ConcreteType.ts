@@ -133,8 +133,7 @@ export type BitOrder<T> = {
   getBits: ( value: T, bitOffset: number, bitQuantity: number ) => number;
 
   // WGSL TODO support statements(!) --- or do we need that? Could use function-call overhead
-  // TODO: Take blueprint
-  getBitsWGSL: ( value: WGSLExpressionT, bitOffset: number, bitQuantity: number ) => WGSLExpressionU32;
+  getBitsWGSL: ( blueprint: PipelineBlueprint, value: WGSLExpressionT, bitOffset: number, bitQuantity: number ) => WGSLExpressionU32;
 };
 
 export type CompareOrder<T> = {
@@ -431,7 +430,7 @@ export const U32Order: Order<number> = {
     return `( ${a} <= ${b} )`;
   },
 
-  getBitsWGSL: ( value: string, bitOffset: number, bitQuantity: number ): string => {
+  getBitsWGSL: ( blueprint: PipelineBlueprint, value: WGSLExpressionT, bitOffset: number, bitQuantity: number ): string => {
     return `( ( ${value} >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
   }
 };
@@ -461,7 +460,7 @@ export const U32ReverseOrder: Order<number> = {
     return `( ${a} >= ${b} )`;
   },
 
-  getBitsWGSL: ( value: string, bitOffset: number, bitQuantity: number ): string => {
+  getBitsWGSL: ( blueprint: PipelineBlueprint, value: WGSLExpressionT, bitOffset: number, bitQuantity: number ): string => {
     // TODO: is there a bitwise trick?
     return `( ( ( 0xffffffffu - ${value} ) >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
   }
@@ -685,7 +684,7 @@ export const Vec2uLexicographicalOrder: Order<Vector2> = {
     return `( ${a}.x <= ${b}.x && ( ${a}.x != ${b}.x || ${a}.y <= ${b}.y ) )`;
   },
 
-  getBitsWGSL: ( value: string, bitOffset: number, bitQuantity: number ): string => {
+  getBitsWGSL: ( blueprint: PipelineBlueprint, value: WGSLExpressionT, bitOffset: number, bitQuantity: number ): string => {
     // NOTE: WGSL doesn't like `<< 32u`, so we split it like so.
     if ( bitOffset === 0 ) {
       return `( ( ${value}.y >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;

@@ -52,7 +52,8 @@ const mainRadixScatterWGSL = <T>(
   const lengthExpression = options.lengthExpression;
   const loadMultipleOptions = options.loadMultipleOptions;
 
-  const getBits = ( value: WGSLExpressionT ) => order.getBitsWGSL( value, pass * bitsPerPass, bitsPerPass );
+  // TODO: blueprint
+  const getBits = ( value: WGSLExpressionT ) => order.getBitsWGSL( blueprint, value, pass * bitsPerPass, bitsPerPass );
 
   // TODO: we should have type assertions to make sure these match?
   blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );

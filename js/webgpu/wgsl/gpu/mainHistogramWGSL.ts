@@ -12,7 +12,7 @@ export type mainHistogramWGSLOptions<T> = {
   output: BufferSlot<number[]>;
 
   numBins: number;
-  getBin: ( value: WGSLExpressionT ) => WGSLExpressionU32; // TODO: blueprint(!)
+  getBin: ( blueprint: PipelineBlueprint, value: WGSLExpressionT ) => WGSLExpressionU32;
 } & OptionalLengthExpressionable & RakedSizable;
 
 export const MAIN_HISTOGRAM_DEFAULTS = {
@@ -51,7 +51,7 @@ const mainHistogramWGSL = <T>(
         workgroupSize: workgroupSize,
         grainSize: grainSize,
         histogramScratch: 'histogram_scratch',
-        getBin: index => getBin( `input[ ${index} ]` ),
+        getBin: ( blueprint, index ) => getBin( blueprint, `input[ ${index} ]` ),
         lengthExpression: lengthExpression
       } )}
     

@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, CompositeModule, ExecutionContext, MainHistogramModule, MainHistogramModuleOptions, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, CompositeModule, ExecutionContext, MainHistogramModule, MainHistogramModuleOptions, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, PipelineBlueprint, RakedSizable, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -16,7 +16,7 @@ type SelfOptions<T> = {
   output: BufferArraySlot<number>;
 
   numBins: number;
-  getBin: ( value: WGSLExpressionT ) => WGSLExpressionU32; // TODO: blueprint(!)
+  getBin: ( blueprint: PipelineBlueprint, value: WGSLExpressionT ) => WGSLExpressionU32; // TODO: blueprint(!)
 
   name?: string;
   log?: boolean;

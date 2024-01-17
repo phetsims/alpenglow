@@ -33,7 +33,7 @@ export default class MainHistogramModule<T> extends DirectModule<number> {
     options: MainHistogramModuleOptions<T>
   ) {
     assert && assert( !options.setup );
-    options.setup = blueprint => mainHistogramWGSL<T>( blueprint, options );
+    options.setup = blueprint => mainHistogramWGSL( blueprint, options );
 
     assert && assert( !options.setDispatchSize );
     options.setDispatchSize = ( dispatchSize: Vector3, outputSize: number ) => {

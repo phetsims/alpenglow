@@ -72,7 +72,7 @@ const testHistogramModule = <T>( options: HistogramModuleTestOptions<T> ) => {
     numBins: 256,
     type: U32Type,
     getBinTS: value => value % 256,
-    getBin: value => `( ${value} % 256u )`
+    getBin: ( pipeline, value ) => `( ${value} % 256u )`
   } );
 
   testHistogramModule<Vector2>( {
@@ -82,6 +82,6 @@ const testHistogramModule = <T>( options: HistogramModuleTestOptions<T> ) => {
     numBins: 256,
     type: Vec2uType,
     getBinTS: value => ( ( value.x % 10203 ) + ( value.y % 1234 ) ) % 256,
-    getBin: value => `( ( ( ${value}.x % 10203u ) + ( ${value}.y % 1234u ) ) % 256u )`
+    getBin: ( pipeline, value ) => `( ( ( ${value}.x % 10203u ) + ( ${value}.y % 1234u ) ) % 256u )`
   } );
 }

@@ -14,8 +14,7 @@ type SelfOptions = {
   // var<workgroup> array<atomic<u32>, numBins> // TODO: can we actually get memory-compacted histograms here, instead of using a full u32?
   histogramScratch: WGSLVariableName;
 
-  // TODO: blueprint
-  getBin: ( index: WGSLExpressionU32 ) => WGSLExpressionU32;
+  getBin: ( blueprint: PipelineBlueprint, index: WGSLExpressionU32 ) => WGSLExpressionU32;
 };
 
 export type histogramWGSLOptions = SelfOptions & StrictOmit<coalescedLoopWGSLOptions, 'callback'>;
@@ -31,9 +30,6 @@ const histogramWGSL = (
 
   const options = optionize3<histogramWGSLOptions, SelfOptions>()( {}, HISTOGRAM_DEFAULTS, providedOptions );
 
-  const histogramScratch = options.histogramScratch;
-  const getBin = options.getBin;
-
   return `
     ${commentWGSL( 'begin histogram' )}
     {
@@ -44,7 +40,7 @@ const histogramWGSL = (
         workgroupIndex: options.workgroupIndex,
         localIndex: options.localIndex,
         callback: ( localIndex, dataIndex ) => `
-          atomicAdd( &${histogramScratch}[ ${getBin( dataIndex )} ], 1u );
+          atomicAdd( &${options.histogramScratch}[ ${options.getBin( blueprint, dataIndex )} ], 1u );
         `
       } )}
     }
