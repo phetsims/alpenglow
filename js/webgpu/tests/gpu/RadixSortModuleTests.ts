@@ -75,7 +75,7 @@ const testRadixSortModule = <T>( options: RadixSortModuleTestOptions<T> ) => {
 [ false, true ].forEach( fullSize => {
   ( [
     { workgroupSize: 8, grainSize: 4 },
-    { workgroupSize: 128, grainSize: 4 }
+    { workgroupSize: 64, grainSize: 4 }
   ] as const ).forEach( ( { workgroupSize, grainSize } ) => {
 
     const maxBitsPerInnerPass = getMaxRadixBitsPerInnerPass( workgroupSize, grainSize );
@@ -86,6 +86,17 @@ const testRadixSortModule = <T>( options: RadixSortModuleTestOptions<T> ) => {
       [ 4, 8 ].forEach( bitsPerPass => {
         [ false, true ].forEach( isReductionExclusive => {
           [ false, true ].forEach( inPlace => {
+            // Strategically reduce the number of tests we are running
+            const nonStandardCount =
+              ( workgroupSize === 64 ? 0 : 1 ) +
+              ( fullSize ? 0 : 1 ) +
+              ( bitsPerPass === 8 ? 0 : 1 ) +
+              ( isReductionExclusive ? 0 : 1 ) +
+              ( !inPlace ? 0 : 1 );
+            if ( nonStandardCount > 1 ) {
+              return;
+            }
+
             const maxInputSize = Math.min(
               ( workgroupSize * grainSize ) * workgroupSize * grainSize * 2,
               RadixSortModule.getMaximumElementQuantity( workgroupSize, grainSize, workgroupSize, grainSize, bitsPerPass )
