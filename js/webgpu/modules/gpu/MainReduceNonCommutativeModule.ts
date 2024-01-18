@@ -6,33 +6,23 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, mainReduceNonCommutativeWGSL, mainReduceNonCommutativeWGSLOptions, PipelineBlueprint, WGSLExpressionU32 } from '../../../imports.js';
-import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
-import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
+import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS, mainReduceNonCommutativeWGSL, mainReduceNonCommutativeWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
+import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 
-type SelfOptions<T> = {
+export type MainReduceNonCommutativeModuleOptions<T> = {
   input: BufferArraySlot<T>;
   output: BufferArraySlot<T>;
-  binaryOp: BinaryOp<T>;
-
-  workgroupSize: number;
-  grainSize: number;
-  lengthExpression: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
-
-  mainReduceNonCommutativeWGSLOptions?: StrictOmit<mainReduceNonCommutativeWGSLOptions<T>, 'input' | 'output' | 'binaryOp' | 'workgroupSize' | 'grainSize'>;
-};
-
-export type MainReduceNonCommutativeModuleOptions<T> = SelfOptions<T> & StrictOmit<DirectModuleOptions<T>, 'setup' | 'setDispatchSize'>;
+} & mainReduceNonCommutativeWGSLOptions<T> & PipelineBlueprintOptions;
 
 export const MAIN_REDUCE_NON_COMMUTATIVE_MODULE_DEFAULTS = {
   // eslint-disable-next-line no-object-spread-on-non-literals
   ...DIRECT_MODULE_DEFAULTS,
-
-  mainReduceNonCommutativeWGSLOptions: {}
+  // eslint-disable-next-line no-object-spread-on-non-literals
+  ...MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS
 } as const;
 
-// stageInputSize: number
+// inputSize: number
 export default class MainReduceNonCommutativeModule<T> extends DirectModule<number> {
 
   public readonly input: BufferArraySlot<T>;
@@ -41,25 +31,17 @@ export default class MainReduceNonCommutativeModule<T> extends DirectModule<numb
   public constructor(
     providedOptions: MainReduceNonCommutativeModuleOptions<T>
   ) {
-    // @ts-expect-error TODO: ask MK about this
-    const options = optionize3<MainReduceNonCommutativeModuleOptions<T>, SelfOptions<T>, DirectModuleOptions<number>>()( {}, MAIN_REDUCE_NON_COMMUTATIVE_MODULE_DEFAULTS, providedOptions );
-
-    options.setup = blueprint => mainReduceNonCommutativeWGSL<T>( blueprint, combineOptions<mainReduceNonCommutativeWGSLOptions<T>>( {
-      input: providedOptions.input,
-      output: providedOptions.output,
-      binaryOp: providedOptions.binaryOp,
-      workgroupSize: providedOptions.workgroupSize,
-      grainSize: providedOptions.grainSize
-    }, providedOptions.mainReduceNonCommutativeWGSLOptions ) );
-
-    options.setDispatchSize = ( dispatchSize: Vector3, stageInputSize: number ) => {
-      dispatchSize.x = Math.ceil( stageInputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
-    };
+    const options = combineOptions<MainReduceNonCommutativeModuleOptions<T> & DirectModuleOptions<number>>( {
+      setup: blueprint => mainReduceNonCommutativeWGSL( blueprint, providedOptions ),
+      setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
+        dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
+      }
+    }, MAIN_REDUCE_NON_COMMUTATIVE_MODULE_DEFAULTS, providedOptions );
 
     super( options );
 
-    this.input = providedOptions.input;
-    this.output = providedOptions.output;
+    this.input = options.input;
+    this.output = options.output;
   }
 }
 alpenglow.register( 'MainReduceNonCommutativeModule', MainReduceNonCommutativeModule );

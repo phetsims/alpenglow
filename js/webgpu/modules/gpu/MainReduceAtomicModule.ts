@@ -7,15 +7,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferSlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_REDUCE_ATOMIC_DEFAULTS, mainReduceAtomicWGSL, mainReduceAtomicWGSLOptions } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, BufferSlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_REDUCE_ATOMIC_DEFAULTS, mainReduceAtomicWGSL, mainReduceAtomicWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
+import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 
-type SelfOptions<T> = {
+export type MainReduceAtomicModuleOptions<T> = {
   input: BufferArraySlot<T>;
   output: BufferSlot<T>;
-} & mainReduceAtomicWGSLOptions<T>; // TODO: pass in context to lengthExpression
-
-export type MainReduceAtomicModuleOptions<T> = SelfOptions<T> & DirectModuleOptions<number>;
+} & mainReduceAtomicWGSLOptions<T> & PipelineBlueprintOptions;
 
 export const MAIN_REDUCE_ATOMIC_MODULE_DEFAULTS = {
   // eslint-disable-next-line no-object-spread-on-non-literals
@@ -24,22 +23,21 @@ export const MAIN_REDUCE_ATOMIC_MODULE_DEFAULTS = {
   ...MAIN_REDUCE_ATOMIC_DEFAULTS
 } as const;
 
-// stageInputSize: number
+// inputSize: number
 export default class MainReduceAtomicModule<T> extends DirectModule<number> {
 
   public readonly input: BufferArraySlot<T>;
   public readonly output: BufferSlot<T>;
 
   public constructor(
-    options: MainReduceAtomicModuleOptions<T>
+    providedOptions: MainReduceAtomicModuleOptions<T>
   ) {
-    assert && assert( !options.setup );
-    options.setup = blueprint => mainReduceAtomicWGSL<T>( blueprint, options );
-
-    assert && assert( !options.setDispatchSize );
-    options.setDispatchSize = ( dispatchSize: Vector3, stageInputSize: number ) => {
-      dispatchSize.x = Math.ceil( stageInputSize / ( options.workgroupSize * options.grainSize ) );
-    };
+    const options = combineOptions<MainReduceAtomicModuleOptions<T> & DirectModuleOptions<number>>( {
+      setup: blueprint => mainReduceAtomicWGSL( blueprint, providedOptions ),
+      setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
+        dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
+      }
+    }, MAIN_REDUCE_ATOMIC_MODULE_DEFAULTS, providedOptions );
 
     super( options );
 
