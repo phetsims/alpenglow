@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WGSLExpressionU32, WGSLModuleDeclarations } from '../../imports.js';
+import { alpenglow, PipelineBlueprint, WGSLExpressionU32, WGSLModuleDeclarations } from '../../imports.js';
 
 export type WorkgroupSizable = {
   // the number of threads running this command
@@ -49,7 +49,7 @@ export const LOCAL_INDEXABLE_DEFAULTS = {
 
 export type OptionalLengthExpressionable = {
   // if provided, it will enable range checks (based on whatever input order of the data was given)
-  lengthExpression?: WGSLExpressionU32 | null;
+  lengthExpression?: ( ( blueprint: PipelineBlueprint ) => WGSLExpressionU32 ) | null;
 };
 export const OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS = {
   lengthExpression: null

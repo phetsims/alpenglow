@@ -18,7 +18,7 @@ export type mainRadixHistogramWGSLOptions<T> = {
   pass: number;
   bitsPerPass: number;
 
-  lengthExpression: WGSLExpressionU32; // TODO: support optional
+  lengthExpression: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
 };
 
 export const MAIN_RADIX_HISTOGRAM_DEFAULTS = {
@@ -56,7 +56,7 @@ const mainRadixHistogramWGSL = <T>(
         getBin: ( blueprint, index ) => order.getBitsWGSL( blueprint, `input[ ${index} ]`, pass * bitsPerPass, bitsPerPass ), // TODO: consider rename of getBin
         numBins: ( 1 << bitsPerPass ),
         lengthExpression: lengthExpression,
-        storeHistogram: ( index, value ) => `output[ ${index} ] = ${value};`
+        storeHistogram: ( pipeline, index, value ) => `output[ ${index} ] = ${value};`
       } )}
     }
   ` );

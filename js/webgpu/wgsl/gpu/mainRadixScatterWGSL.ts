@@ -23,7 +23,7 @@ export type mainRadixScatterWGSLOptions<T> = {
 
   // TODO: get option pass-through
 
-  lengthExpression: WGSLExpressionU32; // TODO: support optional
+  lengthExpression: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
 
   // e.g. factorOutSubexpressions
   loadMultipleOptions?: StrictOmit<loadMultipleWGSLOptions<T>, 'loadExpression' | 'loadStatements' | 'storeStatements' | 'type' | 'workgroupSize' | 'grainSize' | 'lengthExpression' | 'outOfRangeValue' | 'inputOrder' | 'inputAccessOrder'>;
@@ -77,7 +77,7 @@ const mainRadixScatterWGSL = <T>(
     ) {
       ${logStringWGSL( blueprint, 'main_radix_scatter start' )}
 
-      let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression, workgroupSize * grainSize )};
+      let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression( blueprint ), workgroupSize * grainSize )};
 
       ${logValueWGSL( blueprint, {
         value: 'num_valid_workgroups',
@@ -130,7 +130,7 @@ const mainRadixScatterWGSL = <T>(
         workgroupBarrier();
 
         ${lengthExpression ? `
-          let reduced_length = ( ${lengthExpression} ) - workgroup_id.x * ${u32( workgroupSize * grainSize )};
+          let reduced_length = ( ${lengthExpression( blueprint )} ) - workgroup_id.x * ${u32( workgroupSize * grainSize )};
         ` : ''}
 
         ${logValueWGSL( blueprint, {
@@ -152,7 +152,7 @@ const mainRadixScatterWGSL = <T>(
             bitVectorSize: innerBitVectorSize,
             bitsScratch: 'bits_scratch',
             valueScratch: 'value_scratch',
-            lengthExpression: 'reduced_length', // TODO: lengthExpression ? 'reduced_length' : null
+            lengthExpression: () => 'reduced_length', // TODO: lengthExpression ? 'reduced_length' : null
             getBits: value => `( ( ( ${getBits( value )} ) >> srs_i ) & ${u32( ( 1 << bitsPerInnerPass ) - 1 )} )`,
             earlyLoad: earlyLoad
           } )}
@@ -173,7 +173,7 @@ const mainRadixScatterWGSL = <T>(
         ${unrollWGSL( 0, grainSize, i => `
           {
             let local_index = ${u32( workgroupSize * i )} + local_id.x;
-            ${conditionalIfWGSL( lengthExpression ? 'local_index < reduced_length' : null, `
+            ${conditionalIfWGSL( lengthExpression !== null ? 'local_index < reduced_length' : null, `
               var head_value = 0u;
 
               if ( local_index > 0u && ${getBits( 'value_scratch[ local_index ]' )} != ${getBits( 'value_scratch[ local_index - 1u ]' )} ) {
@@ -202,7 +202,7 @@ const mainRadixScatterWGSL = <T>(
         ${unrollWGSL( 0, grainSize, i => `
           {
             let local_index = ${u32( workgroupSize * i )} + local_id.x;
-            ${conditionalIfWGSL( lengthExpression ? 'local_index < reduced_length' : null, `
+            ${conditionalIfWGSL( lengthExpression !== null ? 'local_index < reduced_length' : null, `
               let local_offset = local_index - start_indices[ local_index ];
               let value = value_scratch[ local_index ];
               let offset = local_histogram_offsets[ ${getBits( 'value' )} ] + local_offset;

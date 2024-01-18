@@ -29,8 +29,8 @@ const testMergeModule = <T>( options: MergeModuleTestOptions<T> ) => {
       inputA: inputASlot,
       inputB: inputBSlot,
       output: outputSlot,
-      lengthExpressionA: u32( options.inputASize ),
-      lengthExpressionB: u32( options.inputBSize )
+      lengthExpressionA: blueprint => u32( options.inputASize ),
+      lengthExpressionB: blueprint => u32( options.inputBSize )
     }, options ) );
 
     const routine = await Routine.create(

@@ -161,7 +161,7 @@ export default class GPUProfiling {
       scanWorkgroupSize: scanWorkgroupSize,
       scanGrainSize: scanGrainSize,
 
-      lengthExpression: u32( size ),
+      lengthExpression: () => u32( size ),
 
       bitsPerPass: bitsPerPass,
       bitsPerInnerPass: bitsPerInnerPass,

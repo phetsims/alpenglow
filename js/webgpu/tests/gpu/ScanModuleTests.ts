@@ -26,7 +26,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
     const reduceModule = new ScanModule( combineOptions<ScanModuleOptions<T>>( {
       input: inputSlot,
       output: outputSlot,
-      lengthExpression: u32( options.inputSize )
+      lengthExpression: blueprint => u32( options.inputSize )
     }, options ) );
 
     // TODO: can we factor out some things here, like the execute wrapper?

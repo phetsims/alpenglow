@@ -12,7 +12,7 @@ import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 import PickRequired from '../../../../../phet-core/js/types/PickRequired.js';
 
 export type logRakedWGSLOptions<T> = {
-  lengthExpression?: WGSLExpressionU32 | null;
+  lengthExpression?: ( ( blueprint: PipelineBlueprint ) => WGSLExpressionU32 ) | null;
   relativeLengthExpression?: WGSLExpressionU32 | null;
   skipBarriers?: boolean;
   accessExpression?: ( ( index: WGSLExpressionU32 ) => WGSLExpression ) | null;
@@ -59,7 +59,7 @@ const logRakedWGSL = <T>(
         let combined_base = base_log_index + base_local_log_index;
 
         ${lengthExpression !== null ? `
-          if ( combined_base < ${lengthExpression} ) {
+          if ( combined_base < ${lengthExpression!( blueprint )} ) {
         ` : ''}
         ${relativeLengthExpression !== null ? `
           if ( base_local_log_index < ${relativeLengthExpression} ) {
@@ -67,7 +67,7 @@ const logRakedWGSL = <T>(
 
         var log_length = ${u32( grainSize )};
         ${lengthExpression !== null ? `
-          log_length = min( log_length, ${lengthExpression} - combined_base );
+          log_length = min( log_length, ${lengthExpression!( blueprint )} - combined_base );
         ` : ''}
         ${relativeLengthExpression !== null ? `
           log_length = min( log_length, ${relativeLengthExpression} - base_local_log_index );

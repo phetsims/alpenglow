@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, mainReduceNonCommutativeWGSL, mainReduceNonCommutativeWGSLOptions } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, mainReduceNonCommutativeWGSL, mainReduceNonCommutativeWGSLOptions, PipelineBlueprint, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
@@ -18,7 +18,7 @@ type SelfOptions<T> = {
 
   workgroupSize: number;
   grainSize: number;
-  lengthExpression: string; // TODO: we'll need ability to pass in context
+  lengthExpression: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
 
   mainReduceNonCommutativeWGSLOptions?: StrictOmit<mainReduceNonCommutativeWGSLOptions<T>, 'input' | 'output' | 'binaryOp' | 'workgroupSize' | 'grainSize'>;
 };

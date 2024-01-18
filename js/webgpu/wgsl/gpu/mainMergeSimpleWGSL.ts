@@ -16,8 +16,8 @@ export type mainMergeSimpleWGSLOptions<T> = {
 
   order: CompareOrder<T>;
 
-  lengthExpressionA: WGSLExpressionU32; // TODO: support optional
-  lengthExpressionB: WGSLExpressionU32; // TODO: support optional
+  lengthExpressionA: ( blueprint: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
+  lengthExpressionB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
 };
 
 export const MAIN_MERGE_SIMPLE_DEFAULTS = {

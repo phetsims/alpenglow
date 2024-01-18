@@ -14,7 +14,7 @@ export type radixHistogramWGSLOptions = {
   numBins: number;
 
   // indices up to numBins * Math.ceil( length / ( workgroupSize * grainSize ) )
-  storeHistogram: ( index: WGSLExpressionU32, value: WGSLExpressionU32 ) => WGSLStatements;
+  storeHistogram: ( blueprint: PipelineBlueprint, index: WGSLExpressionU32, value: WGSLExpressionU32 ) => WGSLStatements;
 } & WithoutNull<WithRequired<histogramWGSLOptions, 'lengthExpression'>, 'lengthExpression'>;
 
 const radixHistogramWGSL = (
@@ -43,7 +43,7 @@ const radixHistogramWGSL = (
         relativeAccessExpression: i => `atomicLoad( &histogram_scratch[ ${i} ] )`
       } )}
       
-      let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression, workgroupSize * grainSize )};
+      let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression( blueprint ), workgroupSize * grainSize )};
       if ( workgroup_id.x < num_valid_workgroups ) {
         // Should be uniform control flow for the workgroup
         workgroupBarrier();
@@ -52,7 +52,7 @@ const radixHistogramWGSL = (
           {
             let local_index = ${u32( workgroupSize * i )} + local_id.x;
             if ( local_index < ${u32( numBins )} ) {
-              ${storeHistogram( 'local_index * num_valid_workgroups + workgroup_id.x', 'atomicLoad( &histogram_scratch[ local_index ] )' )}
+              ${storeHistogram( blueprint, 'local_index * num_valid_workgroups + workgroup_id.x', 'atomicLoad( &histogram_scratch[ local_index ] )' )}
             }
           }
         ` )}

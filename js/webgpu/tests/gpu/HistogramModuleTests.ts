@@ -27,7 +27,7 @@ const testHistogramModule = <T>( options: HistogramModuleTestOptions<T> ) => {
     const module = new HistogramModule( combineOptions<HistogramModuleOptions<T>>( {
       input: inputSlot,
       output: outputSlot,
-      lengthExpression: u32( options.inputSize )
+      lengthExpression: blueprint => u32( options.inputSize )
     }, options ) );
 
     const routine = await Routine.create(

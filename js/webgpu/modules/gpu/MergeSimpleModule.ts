@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, CompareOrder, CompositeModule, ExecutionContext, MainMergeSimpleModule, MainMergeSimpleModuleOptions, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, CompareOrder, CompositeModule, ExecutionContext, MainMergeSimpleModule, MainMergeSimpleModuleOptions, PipelineBlueprint, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -21,9 +21,8 @@ type SelfOptions<T> = {
   workgroupSize: number;
   grainSize: number;
 
-  // TODO: support blueprint
-  lengthExpressionA: WGSLExpressionU32; // TODO: support optional
-  lengthExpressionB: WGSLExpressionU32; // TODO: support optional
+  lengthExpressionA: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
+  lengthExpressionB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
 
   name?: string;
   log?: boolean;

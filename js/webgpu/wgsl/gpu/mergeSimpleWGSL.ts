@@ -10,9 +10,8 @@ import { alpenglow, commentWGSL, getCorankWGSL, GLOBAL_INDEXABLE_DEFAULTS, Globa
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mergeSimpleWGSLOptions = {
-  // TODO: Take blueprints
-  lengthA: WGSLExpressionU32;
-  lengthB: WGSLExpressionU32;
+  lengthA: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
+  lengthB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
 
   // TODO: take a CompareOrder directly
   // => {-1, 0, 1} (i32)
@@ -54,7 +53,7 @@ const mergeSimpleWGSL = (
     ${commentWGSL( 'begin merge_simple' )}
     {
       // TODO: don't assume a specific linear workgroup size? -- use local_invocation_index?
-      let max_output = ${lengthA} + ${lengthB};
+      let max_output = ${lengthA( blueprint )} + ${lengthB( blueprint )};
       let start_output = min( max_output, ${globalIndex} * ${u32( grainSize )} );
       let end_output = min( max_output, start_output + ${u32( grainSize )} );
   

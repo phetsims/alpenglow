@@ -65,7 +65,7 @@ const mainReduceNonCommutativeWGSL = <T>(
       }
       
       ${lengthExpression ? `
-        let rn_length = ${lengthExpression};
+        let rn_length = ${lengthExpression( blueprint )};
       ` : ''}
     
       var value: ${binaryOp.type.valueType( blueprint )};

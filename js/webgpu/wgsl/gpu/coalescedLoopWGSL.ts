@@ -36,7 +36,7 @@ const coalescedLoopWGSL = (
       {
         let coalesced_local_index = ${u32( i * workgroupSize )} + ${options.localIndex};
         let coalesced_data_index = ${options.workgroupIndex} * ${u32( workgroupSize * grainSize )} + coalesced_local_index;
-        ${conditionalIfWGSL( lengthExpression ? `coalesced_data_index < ${lengthExpression}` : null, `
+        ${conditionalIfWGSL( lengthExpression ? `coalesced_data_index < ${lengthExpression( blueprint )}` : null, `
           ${callback( 'coalesced_local_index', 'coalesced_data_index' )}
         ` )}
       }

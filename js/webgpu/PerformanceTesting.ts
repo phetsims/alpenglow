@@ -192,7 +192,7 @@ export default class PerformanceTesting {
       scanWorkgroupSize: 64,
       scanGrainSize: 4,
 
-      lengthExpression: u32( size ),
+      lengthExpression: () => u32( size ),
 
       bitsPerPass: 2, // TODO: try 8 once we are doing more
       bitsPerInnerPass: 2,

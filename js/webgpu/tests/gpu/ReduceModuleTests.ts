@@ -27,7 +27,7 @@ const testReduceModule = <T>( options: ReduceModuleTestOptions<T> ) => {
     const reduceModule = new ReduceModule( combineOptions<ReduceModuleOptions<T>>( {
       input: inputSlot,
       output: outputSlot,
-      lengthExpression: u32( options.inputSize )
+      lengthExpression: blueprint => u32( options.inputSize )
     }, options ) );
 
     const routine = await Routine.create(

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ConcreteType, ExecutionContext, getArrayType, I32AtomicType, I32Type, MainReduceAtomicModule, MainReduceAtomicModuleOptions, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, Module, U32AtomicType, U32Type } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ConcreteType, ExecutionContext, getArrayType, I32AtomicType, I32Type, MainReduceAtomicModule, MainReduceAtomicModuleOptions, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, Module, PipelineBlueprint, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 
@@ -17,7 +17,7 @@ type SelfOptions<T> = {
 
   workgroupSize: number;
   grainSize: number;
-  lengthExpression: string; // TODO: we'll need ability to pass in context
+  lengthExpression: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
 
   // TODO: instead of these, get fusable data operators
   inputOrder?: 'blocked' | 'striped';
@@ -150,7 +150,7 @@ export default class ReduceModule<T> extends CompositeModule<number> {
         else {
           return new MainReduceModule( combineOptions<MainReduceModuleOptions<T>>( {
             loadReducedOptions: {
-              lengthExpression: ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction ** i ),
+              lengthExpression: blueprint => ceilDivideConstantDivisorWGSL( options.lengthExpression( blueprint ), perStageReduction ** i ),
               inputOrder: options.inputOrder,
               inputAccessOrder: options.inputAccessOrder
             },

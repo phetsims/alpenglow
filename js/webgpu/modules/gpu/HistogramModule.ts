@@ -16,7 +16,7 @@ type SelfOptions<T> = {
   output: BufferArraySlot<number>;
 
   numBins: number;
-  getBin: ( blueprint: PipelineBlueprint, value: WGSLExpressionT ) => WGSLExpressionU32; // TODO: blueprint(!)
+  getBin: ( blueprint: PipelineBlueprint, value: WGSLExpressionT ) => WGSLExpressionU32;
 
   name?: string;
   log?: boolean;

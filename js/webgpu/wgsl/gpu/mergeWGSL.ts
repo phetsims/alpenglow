@@ -13,9 +13,8 @@ import { alpenglow, commentWGSL, getCorankWGSL, mergeSequentialWGSL, u32, unroll
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mergeWGSLOptions = {
-  // TODO: Take blueprints
-  lengthA: WGSLExpressionU32;
-  lengthB: WGSLExpressionU32;
+  lengthA: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
+  lengthB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
 
   // TODO: take a CompareOrder directly
   // => {-1, 0, 1} (i32)
@@ -100,7 +99,7 @@ const mergeWGSL = (
     ${commentWGSL( 'begin merge' )}
 
     {
-      let max_output = ${lengthA} + ${lengthB};
+      let max_output = ${lengthA( blueprint )} + ${lengthB( blueprint )};
   
       // Determine the output (merged) index range for this entire workgroup (block). We'll likely accomplish this over
       // multiple iterations.
@@ -231,8 +230,8 @@ const mergeWGSL = (
             ${getCorankWGSL( blueprint, {
               value: 'thread_relative_start_a',
               outputIndex: 'output_relative_start',
-              lengthA: 'iteration_length_a',
-              lengthB: 'iteration_length_b',
+              lengthA: () => 'iteration_length_a',
+              lengthB: () => 'iteration_length_b',
               compare: compare ? ( ( indexA, indexB ) => compare(
                 `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                 `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
@@ -251,8 +250,8 @@ const mergeWGSL = (
             ${getCorankWGSL( blueprint, {
               value: 'thread_relative_end_a',
               outputIndex: 'output_relative_end',
-              lengthA: 'iteration_length_a',
-              lengthB: 'iteration_length_b',
+              lengthA: () => 'iteration_length_a',
+              lengthB: () => 'iteration_length_b',
               compare: compare ? ( ( indexA, indexB ) => compare(
                 `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                 `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
@@ -309,8 +308,8 @@ const mergeWGSL = (
               ${getCorankWGSL( blueprint, {
                 value: 'consumed_a',
                 outputIndex: u32( sharedMemorySize ),
-                lengthA: 'iteration_possible_a_length',
-                lengthB: 'iteration_possible_b_length',
+                lengthA: () => 'iteration_possible_a_length',
+                lengthB: () => 'iteration_possible_b_length',
                 compare: compare ? ( ( indexA, indexB ) => compare(
                   `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                   `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`

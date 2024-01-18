@@ -25,7 +25,7 @@ export type nBitCompactSingleSortWGSLOptions<T> = {
   // var<workgroup> array<T, workgroupSize * grainSize>
   valueScratch: WGSLVariableName;
 
-  lengthExpression: WGSLExpressionU32; // TODO: support null?
+  lengthExpression: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support null?
 
   getBits: ( value: WGSLExpressionT ) => WGSLExpressionU32;
 
@@ -108,7 +108,7 @@ const nBitCompactSingleSortWGSL = <T>(
   return `
     ${commentWGSL( 'begin n_bit_compact_single_sort' )}
 
-    ${logStringWGSL( blueprint, `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${lengthExpression}" earlyLoad:${earlyLoad}` )}
+    ${logStringWGSL( blueprint, `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${lengthExpression ? lengthExpression( blueprint ) : null}" earlyLoad:${earlyLoad}` )}
 
     {
       var tb_bits_vector = ${{
@@ -125,7 +125,7 @@ const nBitCompactSingleSortWGSL = <T>(
       // Store our thread's "raked" values histogram into tb_bits_vector
       ${unrollWGSL( 0, grainSize, i => `
         // TODO: see if factoring out constants doesn't kill registers
-        if ( ${u32( grainSize )} * ${localIndex} + ${u32( i )} < ${lengthExpression} ) {
+        if ( ${u32( grainSize )} * ${localIndex} + ${u32( i )} < ${lengthExpression( blueprint )} ) {
           let tb_value = ${valueScratch}[ ${u32( grainSize )} * ${localIndex} + ${u32( i )} ];
           let tb_bits = ${getBits( 'tb_value' )};
 
@@ -192,7 +192,7 @@ const nBitCompactSingleSortWGSL = <T>(
 
       ${unrollWGSL( 0, grainSize, i => `
         // TODO: see if factoring out constants doesn't kill registers
-        if ( ${u32( grainSize )} * ${localIndex} + ${u32( i )} < ${lengthExpression} ) {
+        if ( ${u32( grainSize )} * ${localIndex} + ${u32( i )} < ${lengthExpression( blueprint )} ) {
           let tb_value = tb_values[ ${u32( i )} ];
           let tb_bits = ${getBits( 'tb_value' )};
 

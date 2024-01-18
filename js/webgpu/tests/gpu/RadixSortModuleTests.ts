@@ -39,7 +39,7 @@ const testRadixSortModule = <T>( options: RadixSortModuleTestOptions<T> ) => {
     const radixSortModule = new RadixSortModule( combineOptions<RadixSortModuleOptions<T>>( {
       input: inputSlot,
       output: outputSlot,
-      lengthExpression: u32( options.inputSize ),
+      lengthExpression: blueprint => u32( options.inputSize ),
       name: name
     }, options ) );
 
