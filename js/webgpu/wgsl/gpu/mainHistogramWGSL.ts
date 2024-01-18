@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, BufferSlot, histogramWGSL, OptionalLengthExpressionable, PipelineBlueprint, RakedSizable, u32, unrollWGSL, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BufferBindingType, BufferSlot, histogramWGSL, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, PipelineBlueprint, RakedSizable, u32, unrollWGSL, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mainHistogramWGSLOptions<T> = {
@@ -16,7 +16,8 @@ export type mainHistogramWGSLOptions<T> = {
 } & OptionalLengthExpressionable & RakedSizable;
 
 export const MAIN_HISTOGRAM_DEFAULTS = {
-  lengthExpression: null
+  // eslint-disable-next-line no-object-spread-on-non-literals
+  ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS
 } as const;
 
 const mainHistogramWGSL = <T>(
@@ -34,8 +35,8 @@ const mainHistogramWGSL = <T>(
 
   // TODO: local_id.x should use LocalIndexable?
 
-  blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE );
+  blueprint.addSlot( 'mhist_input', options.input, BufferBindingType.READ_ONLY_STORAGE );
+  blueprint.addSlot( 'mhist_output', options.output, BufferBindingType.STORAGE );
 
   blueprint.add( 'main', `
     var<workgroup> histogram_scratch: array<atomic<u32>, ${numBins}>;
@@ -51,7 +52,7 @@ const mainHistogramWGSL = <T>(
         workgroupSize: workgroupSize,
         grainSize: grainSize,
         histogramScratch: 'histogram_scratch',
-        getBin: ( blueprint, index ) => getBin( blueprint, `input[ ${index} ]` ),
+        getBin: ( blueprint, index ) => getBin( blueprint, `mhist_input[ ${index} ]` ),
         lengthExpression: lengthExpression
       } )}
     
@@ -60,9 +61,9 @@ const mainHistogramWGSL = <T>(
       // coalesced atomics
       ${unrollWGSL( 0, Math.ceil( numBins / workgroupSize ), i => `
         {
-          let index = ${u32( workgroupSize * i )} + local_id.x;
-          if ( index < ${u32( numBins )} ) {
-            atomicAdd( &output[ index ], atomicLoad( &histogram_scratch[ index ] ) );
+          let mhist_index = ${u32( workgroupSize * i )} + local_id.x;
+          if ( mhist_index < ${u32( numBins )} ) {
+            atomicAdd( &mhist_output[ mhist_index ], atomicLoad( &histogram_scratch[ mhist_index ] ) );
           }
         }
       ` )}

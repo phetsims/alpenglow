@@ -528,8 +528,6 @@ export { default as MainMergeSimpleModule, MAIN_MERGE_SIMPLE_MODULE_DEFAULTS } f
 export type { MainMergeSimpleModuleOptions } from './webgpu/modules/gpu/MainMergeSimpleModule.js';
 export { default as MainMergeModule, MAIN_MERGE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainMergeModule.js';
 export type { MainMergeModuleOptions } from './webgpu/modules/gpu/MainMergeModule.js';
-export { default as MainHistogramModule, MAIN_HISTOGRAM_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainHistogramModule.js';
-export type { MainHistogramModuleOptions } from './webgpu/modules/gpu/MainHistogramModule.js';
 
 // "composite" modules
 export { default as ReduceModule, REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/ReduceModule.js';

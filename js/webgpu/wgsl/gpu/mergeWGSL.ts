@@ -16,7 +16,6 @@ export type mergeWGSLOptions = {
   lengthA: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
   lengthB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
 
-  // TODO: take a CompareOrder directly
   // => {-1, 0, 1} (i32)
   compare: ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
 
