@@ -6,15 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_RADIX_HISTOGRAM_DEFAULTS, mainRadixHistogramWGSL, mainRadixHistogramWGSLOptions } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_RADIX_HISTOGRAM_DEFAULTS, mainRadixHistogramWGSL, mainRadixHistogramWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
+import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 
-type SelfOptions<T> = {
+export type MainRadixHistogramModuleOptions<T> = {
   input: BufferArraySlot<T>;
   output: BufferArraySlot<number>;
-} & mainRadixHistogramWGSLOptions<T>; // TODO: pass in context to lengthExpression
-
-export type MainRadixHistogramModuleOptions<T> = SelfOptions<T> & DirectModuleOptions<number>;
+} & mainRadixHistogramWGSLOptions<T> & PipelineBlueprintOptions;
 
 export const MAIN_RADIX_HISTOGRAM_MODULE_DEFAULTS = {
   // eslint-disable-next-line no-object-spread-on-non-literals
@@ -23,22 +22,21 @@ export const MAIN_RADIX_HISTOGRAM_MODULE_DEFAULTS = {
   ...MAIN_RADIX_HISTOGRAM_DEFAULTS
 } as const;
 
-// stageInputSize: number
+// inputSize: number
 export default class MainRadixHistogramModule<T> extends DirectModule<number> {
 
   public readonly input: BufferArraySlot<T>;
   public readonly output: BufferArraySlot<number>;
 
   public constructor(
-    options: MainRadixHistogramModuleOptions<T>
+    providedOptions: MainRadixHistogramModuleOptions<T>
   ) {
-    assert && assert( !options.setup );
-    options.setup = blueprint => mainRadixHistogramWGSL<T>( blueprint, options );
-
-    assert && assert( !options.setDispatchSize );
-    options.setDispatchSize = ( dispatchSize: Vector3, stageInputSize: number ) => {
-      dispatchSize.x = Math.ceil( stageInputSize / ( options.workgroupSize * options.grainSize ) );
-    };
+    const options = combineOptions<MainRadixHistogramModuleOptions<T> & DirectModuleOptions<number>>( {
+      setup: blueprint => mainRadixHistogramWGSL( blueprint, providedOptions ),
+      setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
+        dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
+      }
+    }, MAIN_RADIX_HISTOGRAM_MODULE_DEFAULTS, providedOptions );
 
     super( options );
 
