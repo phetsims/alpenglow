@@ -524,10 +524,6 @@ export { default as MainRadixHistogramModule, MAIN_RADIX_HISTOGRAM_MODULE_DEFAUL
 export type { MainRadixHistogramModuleOptions } from './webgpu/modules/gpu/MainRadixHistogramModule.js';
 export { default as MainRadixScatterModule, MAIN_RADIX_SCATTER_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainRadixScatterModule.js';
 export type { MainRadixScatterModuleOptions } from './webgpu/modules/gpu/MainRadixScatterModule.js';
-export { default as MainMergeSimpleModule, MAIN_MERGE_SIMPLE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainMergeSimpleModule.js';
-export type { MainMergeSimpleModuleOptions } from './webgpu/modules/gpu/MainMergeSimpleModule.js';
-export { default as MainMergeModule, MAIN_MERGE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainMergeModule.js';
-export type { MainMergeModuleOptions } from './webgpu/modules/gpu/MainMergeModule.js';
 
 // "composite" modules
 export { default as ReduceModule, REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/ReduceModule.js';

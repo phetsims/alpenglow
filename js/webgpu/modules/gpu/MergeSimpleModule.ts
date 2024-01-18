@@ -1,42 +1,30 @@
 // Copyright 2024, University of Colorado Boulder
 
 /**
- * Merges two sorted arrays into a single sorted array.
- *
- * TODO: DO we... really want this wrapper type? Can we collapse these into one?
+ * Merges two sorted arrays into a single sorted array (with a simpler algorithm than MergeModule).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, CompareOrder, CompositeModule, ExecutionContext, MainMergeSimpleModule, MainMergeSimpleModuleOptions, PipelineBlueprint, WGSLExpressionU32 } from '../../../imports.js';
-import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_MERGE_SIMPLE_DEFAULTS, mainMergeSimpleWGSL, mainMergeSimpleWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
+import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import Vector3 from '../../../../../dot/js/Vector3.js';
 
-type SelfOptions<T> = {
+export type MergeSimpleModuleOptions<T> = {
   inputA: BufferArraySlot<T>;
   inputB: BufferArraySlot<T>;
   output: BufferArraySlot<T>;
-
-  order: CompareOrder<T>;
-
-  workgroupSize: number;
-  grainSize: number;
-
-  lengthExpressionA: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
-  lengthExpressionB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
-
-  name?: string;
-  log?: boolean;
-};
-
-export type MergeSimpleModuleOptions<T> = SelfOptions<T>;
+} & mainMergeSimpleWGSLOptions<T> & PipelineBlueprintOptions;
 
 export const MERGE_SIMPLE_MODULE_DEFAULTS = {
-  name: 'merge simple',
-  log: false // TODO: how to deduplicate this? - We don't really need all of the defaults, right?
+  // eslint-disable-next-line no-object-spread-on-non-literals
+  ...DIRECT_MODULE_DEFAULTS,
+  // eslint-disable-next-line no-object-spread-on-non-literals
+  ...MAIN_MERGE_SIMPLE_DEFAULTS
 } as const;
 
 // outputSize: number (sum of inputASize and inputBSize)
-export default class MergeSimpleModule<T> extends CompositeModule<number> {
+export default class MergeSimpleModule<T> extends DirectModule<number> {
 
   public readonly inputA: BufferArraySlot<T>;
   public readonly inputB: BufferArraySlot<T>;
@@ -45,26 +33,14 @@ export default class MergeSimpleModule<T> extends CompositeModule<number> {
   public constructor(
     providedOptions: MergeSimpleModuleOptions<T>
   ) {
-    const options = optionize3<MergeSimpleModuleOptions<T>, SelfOptions<T>>()( {}, MERGE_SIMPLE_MODULE_DEFAULTS, providedOptions );
+    const options = combineOptions<MergeSimpleModuleOptions<T> & DirectModuleOptions<number>>( {
+      setup: blueprint => mainMergeSimpleWGSL( blueprint, providedOptions ),
+      setDispatchSize: ( dispatchSize: Vector3, outputSize: number ) => {
+        dispatchSize.x = Math.ceil( outputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
+      }
+    }, MERGE_SIMPLE_MODULE_DEFAULTS, providedOptions );
 
-    const module = new MainMergeSimpleModule( combineOptions<MainMergeSimpleModuleOptions<T>>( {
-      name: `${options.name} main`,
-      log: options.log,
-      inputA: options.inputA,
-      inputB: options.inputB,
-      output: options.output,
-      order: options.order,
-      workgroupSize: options.workgroupSize,
-      grainSize: options.grainSize,
-      lengthExpressionA: options.lengthExpressionA,
-      lengthExpressionB: options.lengthExpressionB
-    } ) );
-
-    const execute = ( context: ExecutionContext, outputSize: number ) => {
-      module.execute( context, outputSize );
-    };
-
-    super( [ module ], execute );
+    super( options );
 
     this.inputA = providedOptions.inputA;
     this.inputB = providedOptions.inputB;
