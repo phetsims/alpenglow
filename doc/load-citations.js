@@ -1,5 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
+// @author Jonathan Olson <jonathan.olson@colorado.edu>
+
 const citationData = citations; // eslint-disable-line no-undef
 
 document.querySelector( '#references-container' ).innerHTML = citationData.bibliography;

@@ -1,5 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
+// @author Jonathan Olson <jonathan.olson@colorado.edu>
+
 let alpenglow;
 let ArrowNode;
 let scenery;

@@ -1,5 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
+// @author Jonathan Olson <jonathan.olson@colorado.edu>
+
 // Generates the bibliography for the Alpenglow documentation
 // Run with `node js/generate-bibliography.js`
 

@@ -1,5 +1,7 @@
 // Copyright 2023, University of Colorado Boulder
 
+// @author Jonathan Olson <jonathan.olson@colorado.edu>
+
 // Hides TODOs unless a query parameter (?TODO) is present
 
 ( () => {
