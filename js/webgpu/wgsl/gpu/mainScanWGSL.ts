@@ -20,7 +20,6 @@
 import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, PipelineBlueprint, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
-// TODO: use multiple named types to simplify this boolean "mess"
 type SelfOptions<T> = {
   binaryOp: BinaryOp<T>;
   inPlace?: boolean;
@@ -28,29 +27,26 @@ type SelfOptions<T> = {
   addScannedReduction?: boolean;
   addScannedDoubleReduction?: boolean;
   areScannedReductionsExclusive?: boolean;
-} & RakedSizable & ( {
-  inPlace?: false;
-  input: BufferSlot<T[]>;
-  output: BufferSlot<T[]>;
-} | {
-  inPlace: true;
-  data: BufferSlot<T[]>;
-} ) & ( {
-  storeReduction?: false;
-} | {
-  storeReduction: true;
-  reduction: BufferSlot<T[]>;
-} ) & ( ( {
-  addScannedReduction?: false;
-} & Pick<scanComprehensiveWGSLOptions<T>, 'getAddedValue'> ) | ( {
-  addScannedReduction: true;
-  scannedReduction: BufferSlot<T[]>;
-} & ( {
-  addScannedDoubleReduction?: false;
-} | {
-  addScannedDoubleReduction: true;
-  scannedDoubleReduction: BufferSlot<T[]>;
-} ) ) );
+
+  // Iff inPlace:false
+  input?: BufferSlot<T[]> | null;
+  output?: BufferSlot<T[]> | null;
+
+  // Iff inPlace:true
+  data?: BufferSlot<T[]> | null;
+
+  // iff storeReduction:true
+  reduction?: BufferSlot<T[]> | null;
+
+  // iff addScannedReduction:true
+  scannedReduction?: BufferSlot<T[]> | null;
+
+  // iff addScannedDoubleReduction:true
+  scannedDoubleReduction?: BufferSlot<T[]> | null;
+
+  // only if addScannedReduction:false
+  getAddedValue?: scanComprehensiveWGSLOptions<T>[ 'getAddedValue' ];
+} & RakedSizable;
 
 export type mainScanWGSLOptions<T> = SelfOptions<T> & Pick<scanComprehensiveWGSLOptions<T>,
   'exclusive' | 'lengthExpression' | 'inputOrder' | 'inputAccessOrder' | 'factorOutSubexpressions' | 'stripeReducedOutput'
@@ -61,7 +57,14 @@ export const MAIN_SCAN_DEFAULTS = {
   storeReduction: false,
   addScannedReduction: false,
   addScannedDoubleReduction: false,
-  areScannedReductionsExclusive: false
+  areScannedReductionsExclusive: false,
+  input: null,
+  output: null,
+  data: null,
+  reduction: null,
+  scannedReduction: null,
+  scannedDoubleReduction: null,
+  getAddedValue: null
 } as const;
 
 const mainScanWGSL = <T>(
@@ -77,20 +80,26 @@ const mainScanWGSL = <T>(
   const grainSize = options.grainSize;
 
   if ( options.inPlace ) {
-    blueprint.addSlot( 'data', options.data, BufferBindingType.STORAGE );
+    assert && assert( options.data );
+    blueprint.addSlot( 'data', options.data!, BufferBindingType.STORAGE );
   }
   else {
-    blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
-    blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE );
+    assert && assert( options.input );
+    assert && assert( options.output );
+    blueprint.addSlot( 'input', options.input!, BufferBindingType.READ_ONLY_STORAGE );
+    blueprint.addSlot( 'output', options.output!, BufferBindingType.STORAGE );
   }
   if ( options.storeReduction ) {
-    blueprint.addSlot( 'reduction', options.reduction, BufferBindingType.STORAGE );
+    assert && assert( options.reduction );
+    blueprint.addSlot( 'reduction', options.reduction!, BufferBindingType.STORAGE );
   }
   if ( options.addScannedReduction ) {
-    blueprint.addSlot( 'scanned_reduction', options.scannedReduction, BufferBindingType.READ_ONLY_STORAGE );
+    assert && assert( options.scannedReduction );
+    blueprint.addSlot( 'scanned_reduction', options.scannedReduction!, BufferBindingType.READ_ONLY_STORAGE );
 
     if ( options.addScannedDoubleReduction ) {
-      blueprint.addSlot( 'double_scanned_reduction', options.scannedDoubleReduction, BufferBindingType.READ_ONLY_STORAGE );
+      assert && assert( options.scannedDoubleReduction );
+      blueprint.addSlot( 'double_scanned_reduction', options.scannedDoubleReduction!, BufferBindingType.READ_ONLY_STORAGE );
     }
   }
 

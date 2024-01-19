@@ -6,35 +6,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_SCAN_DEFAULTS, mainScanWGSL, mainScanWGSLOptions } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_SCAN_DEFAULTS, mainScanWGSL, mainScanWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
+import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 
-// Adjust the type with BufferArraySlots. TODO cleanup API
-type SelfOptions<T> = mainScanWGSLOptions<T> & ( {
-  inPlace?: false;
-  input: BufferArraySlot<T>;
-  output: BufferArraySlot<T>;
-} | {
-  inPlace: true;
-  data: BufferArraySlot<T>;
-} ) & ( {
-  storeReduction?: false;
-} | {
-  storeReduction: true;
-  reduction: BufferArraySlot<T>;
-} ) & ( ( {
-  addScannedReduction?: false;
-} ) | ( {
-  addScannedReduction: true;
-  scannedReduction: BufferArraySlot<T>;
-} & ( {
-  addScannedDoubleReduction?: false;
-} | {
-  addScannedDoubleReduction: true;
-  scannedDoubleReduction: BufferArraySlot<T>;
-} ) ) ); // TODO: pass in context to lengthExpression
-
-export type MainScanModuleOptions<T> = SelfOptions<T> & DirectModuleOptions<number>;
+export type MainScanModuleOptions<T> = {
+  input?: BufferArraySlot<T> | null;
+  output?: BufferArraySlot<T> | null;
+  data?: BufferArraySlot<T> | null;
+  reduction?: BufferArraySlot<T> | null;
+  scannedReduction?: BufferArraySlot<T> | null;
+  scannedDoubleReduction?: BufferArraySlot<T> | null;
+} & mainScanWGSLOptions<T> & PipelineBlueprintOptions;
 
 export const MAIN_SCAN_MODULE_DEFAULTS = {
   // eslint-disable-next-line no-object-spread-on-non-literals
@@ -43,7 +26,7 @@ export const MAIN_SCAN_MODULE_DEFAULTS = {
   ...MAIN_SCAN_DEFAULTS
 } as const;
 
-// stageInputSize: number
+// inputSize: number
 export default class MainScanModule<T> extends DirectModule<number> {
 
   public readonly input: BufferArraySlot<T>;
@@ -53,35 +36,40 @@ export default class MainScanModule<T> extends DirectModule<number> {
   public readonly scannedDoubleReduction: BufferArraySlot<T> | null = null;
 
   public constructor(
-    options: MainScanModuleOptions<T>
+    providedOptions: MainScanModuleOptions<T>
   ) {
-    assert && assert( !options.setup );
-    options.setup = blueprint => mainScanWGSL<T>( blueprint, options );
-
-    assert && assert( !options.setDispatchSize );
-    options.setDispatchSize = ( dispatchSize: Vector3, stageInputSize: number ) => {
-      dispatchSize.x = Math.ceil( stageInputSize / ( options.workgroupSize * options.grainSize ) );
-    };
+    const options = combineOptions<MainScanModuleOptions<T> & DirectModuleOptions<number>>( {
+      setup: blueprint => mainScanWGSL( blueprint, providedOptions ),
+      setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
+        dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
+      }
+    }, MAIN_SCAN_MODULE_DEFAULTS, providedOptions );
 
     super( options );
 
     if ( options.inPlace ) {
-      this.input = options.data;
-      this.output = options.data;
+      assert && assert( options.data );
+      this.input = options.data!;
+      this.output = options.data!;
     }
     else {
-      this.input = options.input;
-      this.output = options.output;
+      assert && assert( options.input );
+      assert && assert( options.output );
+      this.input = options.input!;
+      this.output = options.output!;
     }
 
     if ( options.storeReduction ) {
-      this.reduction = options.reduction;
+      assert && assert( options.reduction );
+      this.reduction = options.reduction!;
     }
     if ( options.addScannedReduction ) {
-      this.scannedReduction = options.scannedReduction;
+      assert && assert( options.scannedReduction );
+      this.scannedReduction = options.scannedReduction!;
 
       if ( options.addScannedDoubleReduction ) {
-        this.scannedDoubleReduction = options.scannedDoubleReduction;
+        assert && assert( options.scannedDoubleReduction );
+        this.scannedDoubleReduction = options.scannedDoubleReduction!;
       }
     }
   }
