@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ConcreteType, ExecutionContext, getArrayType, I32AtomicType, I32Type, MainReduceAtomicModule, MainReduceAtomicModuleOptions, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, Module, PipelineBlueprint, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ConcreteType, ExecutionContext, getArrayType, I32AtomicType, I32Type, MainReduceAtomicModule, MainReduceAtomicModuleOptions, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, Module, PipelineBlueprint, PipelineBlueprintOptions, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 
@@ -25,22 +25,17 @@ type SelfOptions<T> = {
 
   allowAtomicShader?: boolean;
   allowNonCommutativeShader?: boolean;
-
-  name?: string;
-  log?: boolean;
 };
 
 type ParentOptions<T> = {
   mainReduceModuleOptions?: Partial<MainReduceModuleOptions<T>>;
   mainReduceNonCommutativeModuleOptions?: Partial<MainReduceNonCommutativeModuleOptions<T>>;
   mainReduceAtomicModuleOptions?: Partial<MainReduceAtomicModuleOptions<T>>;
-};
+} & PipelineBlueprintOptions;
 
 export type ReduceModuleOptions<T> = SelfOptions<T> & ParentOptions<T>;
 
 export const REDUCE_MODULE_DEFAULTS = {
-  name: 'reduce',
-  log: false, // TODO: how to deduplicate this? - We don't really need all of the defaults, right?
   inputOrder: 'blocked',
   inputAccessOrder: 'striped',
   allowAtomicShader: true,
@@ -50,7 +45,7 @@ export const REDUCE_MODULE_DEFAULTS = {
   mainReduceAtomicModuleOptions: {}
 } as const;
 
-// stageInputSize: number
+// inputSize: number
 export default class ReduceModule<T> extends CompositeModule<number> {
 
   public readonly input: BufferArraySlot<T>;

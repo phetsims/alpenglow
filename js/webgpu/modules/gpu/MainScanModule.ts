@@ -43,7 +43,7 @@ export default class MainScanModule<T> extends DirectModule<number> {
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }
-    }, MAIN_SCAN_MODULE_DEFAULTS, providedOptions );
+    }, providedOptions );
 
     super( options );
 

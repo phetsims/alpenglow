@@ -6,28 +6,24 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, Module } from '../../imports.js';
-import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import { alpenglow, Module, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions } from '../../imports.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 
-export type DirectModuleOptions<T> = {
+type SelfOptions<T> = {
   setup: ( blueprint: PipelineBlueprint ) => void;
   setDispatchSize: ( dispatchSize: Vector3, data: T ) => void;
-} & PipelineBlueprintOptions;
+};
 
-export const DIRECT_MODULE_DEFAULTS = {
-  // eslint-disable-next-line no-object-spread-on-non-literals
-  ...PIPELINE_BLUEPRINT_DEFAULTS
-} as const;
+export type DirectModuleOptions<T> = SelfOptions<T> & PipelineBlueprintOptions;
+
+export const DIRECT_MODULE_DEFAULTS = PIPELINE_BLUEPRINT_DEFAULTS;
 
 const scratchVector3 = Vector3.ZERO.copy();
 
 export default class DirectModule<T> extends Module<T> {
   public constructor(
-    providedOptions: DirectModuleOptions<T>
+    options: DirectModuleOptions<T>
   ) {
-    const options = optionize3<DirectModuleOptions<T>>()( {}, DIRECT_MODULE_DEFAULTS, providedOptions );
-
     const pipelineBlueprint = new PipelineBlueprint( options );
     options.setup( pipelineBlueprint );
 

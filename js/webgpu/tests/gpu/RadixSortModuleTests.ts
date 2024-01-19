@@ -23,7 +23,7 @@ type RadixSortModuleTestOptions<T> = {
   scanModuleOptions: {
     areScannedReductionsExclusive: boolean;
   };
-} & StrictOmit<RadixSortModuleOptions<T>, 'input' | 'output' | 'lengthExpression'>;
+} & StrictOmit<RadixSortModuleOptions<T>, 'input' | 'output' | 'lengthExpression' | 'name'>;
 
 const testRadixSortModule = <T>( options: RadixSortModuleTestOptions<T> ) => {
 

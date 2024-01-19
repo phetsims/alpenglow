@@ -36,7 +36,7 @@ export default class MainReduceNonCommutativeModule<T> extends DirectModule<numb
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }
-    }, MAIN_REDUCE_NON_COMMUTATIVE_MODULE_DEFAULTS, providedOptions );
+    }, providedOptions );
 
     super( options );
 

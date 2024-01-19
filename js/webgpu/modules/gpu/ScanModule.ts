@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, MainScanModule, MainScanModuleOptions, Module, PipelineBlueprint, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, MainScanModule, MainScanModuleOptions, Module, PipelineBlueprint, PipelineBlueprintOptions, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 
@@ -31,16 +31,13 @@ type SelfOptions<T> = {
 
   // Whether our internal "reduces" data will be exclusive or inclusive (both are possible)
   areScannedReductionsExclusive?: boolean;
-
-  name?: string;
-  log?: boolean;
 };
 
 type ParentOptions<T> = {
   mainScanModuleOptions?: Partial<MainScanModuleOptions<T>>;
   mainReduceModuleOptions?: Partial<MainReduceModuleOptions<T>>;
   mainReduceNonCommutativeModuleOptions?: Partial<MainReduceNonCommutativeModuleOptions<T>>;
-};
+} & PipelineBlueprintOptions;
 
 export type ScanModuleOptions<T> = SelfOptions<T> & ParentOptions<T>;
 

@@ -36,8 +36,7 @@ export default class HistogramModule<T> extends DirectModule<number> {
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }
-    }, HISTOGRAM_MODULE_DEFAULTS, providedOptions );
-    // TODO: we really shouldn't have to apply these defaults, since we aren't specifying anything here
+    }, providedOptions );
 
     super( options );
 

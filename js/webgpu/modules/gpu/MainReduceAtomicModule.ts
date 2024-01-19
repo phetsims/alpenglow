@@ -37,7 +37,7 @@ export default class MainReduceAtomicModule<T> extends DirectModule<number> {
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }
-    }, MAIN_REDUCE_ATOMIC_MODULE_DEFAULTS, providedOptions );
+    }, providedOptions );
 
     super( options );
 

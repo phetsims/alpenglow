@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainRadixHistogramModule, MainRadixHistogramModuleOptions, MainRadixScatterModule, MainRadixScatterModuleOptions, PipelineBlueprint, ScanModule, ScanModuleOptions, u32, U32Add, U32Type, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BitOrder, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainRadixHistogramModule, MainRadixHistogramModuleOptions, MainRadixScatterModule, MainRadixScatterModuleOptions, PipelineBlueprint, PipelineBlueprintOptions, ScanModule, ScanModuleOptions, u32, U32Add, U32Type, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -32,22 +32,17 @@ type SelfOptions<T> = {
 
   // buffer options
   canMutateInput?: boolean;
-
-  name?: string;
-  log?: boolean;
 };
 
 type ParentOptions<T> = {
   mainRadixHistogramModuleOptions?: Partial<MainRadixHistogramModuleOptions<T>>;
   mainRadixScatterModuleOptions?: Partial<MainRadixScatterModuleOptions<T>>;
   scanModuleOptions?: Partial<ScanModuleOptions<number>>;
-};
+} & PipelineBlueprintOptions;
 
 export type RadixSortModuleOptions<T> = SelfOptions<T> & ParentOptions<T>;
 
 export const RADIX_SORT_MODULE_DEFAULTS = {
-  name: 'radix sort',
-  log: false, // TODO: how to deduplicate this? - We don't really need all of the defaults, right?
   bitsPerPass: 8,
   bitsPerInnerPass: 2,
   earlyLoad: false,

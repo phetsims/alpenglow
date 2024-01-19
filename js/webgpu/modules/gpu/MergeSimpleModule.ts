@@ -38,7 +38,7 @@ export default class MergeSimpleModule<T> extends DirectModule<number> {
       setDispatchSize: ( dispatchSize: Vector3, outputSize: number ) => {
         dispatchSize.x = Math.ceil( outputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }
-    }, MERGE_SIMPLE_MODULE_DEFAULTS, providedOptions );
+    }, providedOptions );
 
     super( options );
 
