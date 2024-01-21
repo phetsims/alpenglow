@@ -14,10 +14,10 @@ export type mergeSequentialWGSLOptions = {
   lengthB: WGSLExpressionU32;
 
   // => {-1, 0, 1} (i32)
-  compare: ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
+  compare: ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
 
-  setFromA: ( indexOutput: WGSLExpressionU32, indexA: WGSLExpressionU32 ) => WGSLStatements;
-  setFromB: ( indexOutput: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLStatements;
+  setFromA: ( blueprint: PipelineBlueprint, indexOutput: WGSLExpressionU32, indexA: WGSLExpressionU32 ) => WGSLStatements;
+  setFromB: ( blueprint: PipelineBlueprint, indexOutput: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLStatements;
 };
 
 export const MERGE_SEQUENTIAL_DEFAULTS = {
@@ -55,12 +55,12 @@ const mergeSequentialWGSL = (
           break;
         }
   
-        if ( ${compare( 'ms_i', 'ms_j' )} <= 0i ) {
-          ${setFromA( 'ms_k', 'ms_i' )}
+        if ( ${compare( blueprint, 'ms_i', 'ms_j' )} <= 0i ) {
+          ${setFromA( blueprint, 'ms_k', 'ms_i' )}
           ms_i++;
         }
         else {
-          ${setFromB( 'ms_k', 'ms_j' )}
+          ${setFromB( blueprint, 'ms_k', 'ms_j' )}
           ms_j++;
         }
         ms_k++;
@@ -73,7 +73,7 @@ const mergeSequentialWGSL = (
           break;
         }
   
-        ${setFromA( 'ms_k', 'ms_i' )}
+        ${setFromA( blueprint, 'ms_k', 'ms_i' )}
         ms_i++;
         ms_k++;
       }
@@ -85,7 +85,7 @@ const mergeSequentialWGSL = (
           break;
         }
   
-        ${setFromB( 'ms_k', 'ms_j' )}
+        ${setFromB( blueprint, 'ms_k', 'ms_j' )}
         ms_j++;
         ms_k++;
       }

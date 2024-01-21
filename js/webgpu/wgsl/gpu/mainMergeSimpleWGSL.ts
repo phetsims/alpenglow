@@ -49,12 +49,12 @@ const mainMergeSimpleWGSL = <T>(
       ${mergeSimpleWGSL( blueprint, {
         lengthA: lengthExpressionA,
         lengthB: lengthExpressionB,
-        setFromA: ( indexOutput, indexA ) => `c[ ${indexOutput} ] = a[ ${indexA} ];`,
-        setFromB: ( indexOutput, indexB ) => `c[ ${indexOutput} ] = b[ ${indexB} ];`,
+        setFromA: ( blueprint, indexOutput, indexA ) => `c[ ${indexOutput} ] = a[ ${indexA} ];`,
+        setFromB: ( blueprint, indexOutput, indexB ) => `c[ ${indexOutput} ] = b[ ${indexB} ];`,
         grainSize: grainSize,
-        compare: ( indexA, indexB ) => order.compareWGSL( `a[ ${indexA} ]`, `b[ ${indexB} ]` ),
-        greaterThan: ( indexA, indexB ) => order.greaterThanWGSL( `a[ ${indexA} ]`, `b[ ${indexB} ]` ),
-        lessThanOrEqual: ( indexA, indexB ) => order.lessThanOrEqualWGSL( `a[ ${indexA} ]`, `b[ ${indexB} ]` )
+        compare: ( blueprint, indexA, indexB ) => order.compareWGSL( blueprint, `a[ ${indexA} ]`, `b[ ${indexB} ]` ),
+        greaterThan: ( blueprint, indexA, indexB ) => order.greaterThanWGSL( blueprint, `a[ ${indexA} ]`, `b[ ${indexB} ]` ),
+        lessThanOrEqual: ( blueprint, indexA, indexB ) => order.lessThanOrEqualWGSL( blueprint, `a[ ${indexA} ]`, `b[ ${indexB} ]` )
       } )}
     }
   ` );

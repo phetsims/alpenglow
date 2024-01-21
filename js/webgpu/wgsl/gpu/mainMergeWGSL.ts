@@ -57,9 +57,9 @@ const mainMergeWGSL = <T>(
       ${mergeWGSL( blueprint, {
         workgroupA: 'scratch_a',
         workgroupB: 'scratch_b',
-        loadFromA: indexA => `a[ ${indexA} ]`,
-        loadFromB: indexB => `b[ ${indexB} ]`,
-        storeOutput: ( indexOutput, value ) => `c[ ${indexOutput} ] = ${value};`,
+        loadFromA: ( blueprint, indexA ) => `a[ ${indexA} ]`,
+        loadFromB: ( blueprint, indexB ) => `b[ ${indexB} ]`,
+        storeOutput: ( blueprint, indexOutput, value ) => `c[ ${indexOutput} ] = ${value};`,
         lengthA: lengthExpressionA,
         lengthB: lengthExpressionB,
         workgroupSize: workgroupSize,

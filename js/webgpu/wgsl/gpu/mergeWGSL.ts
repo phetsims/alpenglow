@@ -17,18 +17,18 @@ export type mergeWGSLOptions = {
   lengthB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
 
   // => {-1, 0, 1} (i32)
-  compare: ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
+  compare: ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
 
   // used (sometimes) instead of compare if provided
-  greaterThan?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
-  lessThanOrEqual?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
+  greaterThan?: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
+  lessThanOrEqual?: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
 
   // var<workgroup> array<T,sharedMemorySize>
   workgroupA: WGSLVariableName;
   workgroupB: WGSLVariableName;
 
-  loadFromA: ( indexA: WGSLExpressionU32 ) => WGSLExpressionT;
-  loadFromB: ( indexB: WGSLExpressionU32 ) => WGSLExpressionT;
+  loadFromA: ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32 ) => WGSLExpressionT;
+  loadFromB: ( blueprint: PipelineBlueprint, indexB: WGSLExpressionU32 ) => WGSLExpressionT;
 
   // TODO: we should provide either storeOutput OR setFromA/setFromB. In one case, we set from our shared memory,
   // TODO: but in the other case, it is a global memory (say that we're sorting objects that are much larger?)
@@ -40,7 +40,7 @@ export type mergeWGSLOptions = {
   // TODO: It is unclear how much of a performance win this would be, so I haven't implemented it yet.
   // TODO:   setFromA, // ( indexOutput, indexA ) => void
   // TODO:   setFromB, // ( indexOutput, indexB ) => void
-  storeOutput: ( indexOutput: WGSLExpressionU32, value: WGSLExpressionT ) => WGSLStatements;
+  storeOutput: ( blueprint: PipelineBlueprint, indexOutput: WGSLExpressionU32, value: WGSLExpressionT ) => WGSLStatements;
 
   blockOutputSize: number;
 
@@ -115,9 +115,9 @@ const mergeWGSL = (
             outputIndex: 'output_index',
             lengthA: lengthA,
             lengthB: lengthB,
-            compare: compare ? ( ( indexA, indexB ) => compare( loadFromA( indexA ), loadFromB( indexB ) ) ) : null,
-            greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan( loadFromA( indexA ), loadFromB( indexB ) ) ) : null,
-            lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual( loadFromA( indexA ), loadFromB( indexB ) ) ) : null
+            compare: compare ? ( ( blueprint, indexA, indexB ) => compare( blueprint, loadFromA( blueprint, indexA ), loadFromB( blueprint, indexB ) ) ) : null,
+            greaterThan: greaterThan ? ( ( blueprint, indexA, indexB ) => greaterThan( blueprint, loadFromA( blueprint, indexA ), loadFromB( blueprint, indexB ) ) ) : null,
+            lessThanOrEqual: lessThanOrEqual ? ( ( blueprint, indexA, indexB ) => lessThanOrEqual( blueprint, loadFromA( blueprint, indexA ), loadFromB( blueprint, indexB ) ) ) : null
           } )}
           if ( local_id.x == 0u ) {
             block_start_a = block_a;
@@ -172,7 +172,7 @@ const mergeWGSL = (
               let relative_index = local_id.x + ${u32( i * workgroupSize )};
               if ( relative_index < loading_a_quantity ) {
                 let index = relative_index + loaded_index_a;
-                ${workgroupA}[ index % ${u32( sharedMemorySize )} ] = ${loadFromA( 'index' )};
+                ${workgroupA}[ index % ${u32( sharedMemorySize )} ] = ${loadFromA( blueprint, 'index' )};
               }
             }
           ` )}
@@ -186,7 +186,7 @@ const mergeWGSL = (
               let relative_index = local_id.x + ${u32( i * workgroupSize )};
               if ( relative_index < loading_b_quantity ) {
                 let index = relative_index + loaded_index_b;
-                ${workgroupB}[ index % ${u32( sharedMemorySize )} ] = ${loadFromB( 'index' )};
+                ${workgroupB}[ index % ${u32( sharedMemorySize )} ] = ${loadFromB( blueprint, 'index' )};
               }
             }
           ` )}
@@ -231,15 +231,18 @@ const mergeWGSL = (
               outputIndex: 'output_relative_start',
               lengthA: () => 'iteration_length_a',
               lengthB: () => 'iteration_length_b',
-              compare: compare ? ( ( indexA, indexB ) => compare(
+              compare: compare ? ( ( blueprint, indexA, indexB ) => compare(
+                blueprint,
                 `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                 `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
               ) ) : null,
-              greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
+              greaterThan: greaterThan ? ( ( blueprint, indexA, indexB ) => greaterThan(
+                blueprint,
                 `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                 `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
               ) ) : null,
-              lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
+              lessThanOrEqual: lessThanOrEqual ? ( ( blueprint, indexA, indexB ) => lessThanOrEqual(
+                blueprint,
                 `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                 `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
               ) ) : null
@@ -251,15 +254,18 @@ const mergeWGSL = (
               outputIndex: 'output_relative_end',
               lengthA: () => 'iteration_length_a',
               lengthB: () => 'iteration_length_b',
-              compare: compare ? ( ( indexA, indexB ) => compare(
+              compare: compare ? ( ( blueprint, indexA, indexB ) => compare(
+                blueprint,
                 `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                 `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
               ) ) : null,
-              greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
+              greaterThan: greaterThan ? ( ( blueprint, indexA, indexB ) => greaterThan(
+                blueprint,
                 `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                 `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
               ) ) : null,
-              lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
+              lessThanOrEqual: lessThanOrEqual ? ( ( blueprint, indexA, indexB ) => lessThanOrEqual(
+                blueprint,
                 `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                 `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
               ) ) : null
@@ -283,16 +289,19 @@ const mergeWGSL = (
             ${mergeSequentialWGSL( blueprint, {
               lengthA: 'thread_length_a',
               lengthB: 'thread_length_b',
-              compare: ( indexA, indexB ) => compare(
+              compare: ( blueprint, indexA, indexB ) => compare(
+                blueprint,
                 // A/B indices are now relative to 0 (for our thread)
                 `${workgroupA}[ ( ${indexA} + processed_index_a + thread_relative_start_a ) % ${u32( sharedMemorySize )} ]`,
                 `${workgroupB}[ ( ${indexB} + processed_index_b + thread_relative_start_b ) % ${u32( sharedMemorySize )} ]`
               ),
-              setFromA: ( indexOutput, indexA ) => storeOutput(
+              setFromA: ( blueprint, indexOutput, indexA ) => storeOutput(
+                blueprint,
                 `( ${indexOutput} + thread_start_output )`,
                 `${workgroupA}[ ( ${indexA} + processed_index_a + thread_relative_start_a ) % ${u32( sharedMemorySize )} ]`
               ),
-              setFromB: ( indexOutput, indexB ) => storeOutput(
+              setFromB: ( blueprint, indexOutput, indexB ) => storeOutput(
+                blueprint,
                 `( ${indexOutput} + thread_start_output )`,
                 `${workgroupB}[ ( ${indexB} + processed_index_b + thread_relative_start_b ) % ${u32( sharedMemorySize )} ]`
               )
@@ -309,15 +318,18 @@ const mergeWGSL = (
                 outputIndex: u32( sharedMemorySize ),
                 lengthA: () => 'iteration_possible_a_length',
                 lengthB: () => 'iteration_possible_b_length',
-                compare: compare ? ( ( indexA, indexB ) => compare(
+                compare: compare ? ( ( blueprint, indexA, indexB ) => compare(
+                  blueprint,
                   `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                   `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
                 ) ) : null,
-                greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
+                greaterThan: greaterThan ? ( ( blueprint, indexA, indexB ) => greaterThan(
+                  blueprint,
                   `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                   `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
                 ) ) : null,
-                lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
+                lessThanOrEqual: lessThanOrEqual ? ( ( blueprint, indexA, indexB ) => lessThanOrEqual(
+                  blueprint,
                   `${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32( sharedMemorySize )} ]`,
                   `${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32( sharedMemorySize )} ]`
                 ) ) : null

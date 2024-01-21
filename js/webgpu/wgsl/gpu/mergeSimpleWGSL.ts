@@ -14,14 +14,14 @@ export type mergeSimpleWGSLOptions = {
   lengthB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
 
   // => {-1, 0, 1} (i32)
-  compare: ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
+  compare: ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
 
   // used (sometimes) instead of compare if provided
-  greaterThan?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
-  lessThanOrEqual?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
+  greaterThan?: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
+  lessThanOrEqual?: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
 
-  setFromA: ( indexOutput: WGSLExpressionU32, indexA: WGSLExpressionU32 ) => WGSLStatements;
-  setFromB: ( indexOutput: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLStatements;
+  setFromA: ( blueprint: PipelineBlueprint, indexOutput: WGSLExpressionU32, indexA: WGSLExpressionU32 ) => WGSLStatements;
+  setFromB: ( blueprint: PipelineBlueprint, indexOutput: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLStatements;
 } & GrainSizable & GlobalIndexable;
 
 export const MERGE_SIMPLE_DEFAULTS = {
@@ -85,9 +85,9 @@ const mergeSimpleWGSL = (
         ${mergeSequentialWGSL( blueprint, {
           lengthA: 'span_a',
           lengthB: 'span_b',
-          compare: ( indexA, indexB ) => compare( `start_a + ${indexA}`, `start_b + ${indexB}` ),
-          setFromA: ( indexOutput, indexA ) => setFromA( `start_output + ${indexOutput}`, `start_a + ${indexA}` ),
-          setFromB: ( indexOutput, indexB ) => setFromB( `start_output + ${indexOutput}`, `start_b + ${indexB}` )
+          compare: ( blueprint, indexA, indexB ) => compare( blueprint, `start_a + ${indexA}`, `start_b + ${indexB}` ),
+          setFromA: ( blueprint, indexOutput, indexA ) => setFromA( blueprint, `start_output + ${indexOutput}`, `start_a + ${indexA}` ),
+          setFromB: ( blueprint, indexOutput, indexB ) => setFromB( blueprint, `start_output + ${indexOutput}`, `start_b + ${indexB}` )
         } )}
       }
     }

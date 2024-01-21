@@ -28,11 +28,11 @@ export type getCorankWGSLOptions = {
   // TODO: can we rewrite this as a custom ORDER type?
 
   // => {-1, 0, 1} (i32)
-  compare: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32 ) | null;
+  compare: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32 ) | null;
 
   // used (sometimes) instead of compare if provided
-  greaterThan?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
-  lessThanOrEqual?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
+  greaterThan?: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
+  lessThanOrEqual?: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
 };
 
 export const GET_CORANK_DEFAULTS = {
@@ -82,13 +82,13 @@ const getCorankWGSL = (
           break;
         }
   
-        if ( ${value} > 0u && gc_j < ${lengthB( blueprint )} && ${greaterThan ? greaterThan( `${value} - 1u`, 'gc_j' ) : `${compare!( `${value} - 1u`, 'gc_j' )} > 0i`} ) {
+        if ( ${value} > 0u && gc_j < ${lengthB( blueprint )} && ${greaterThan ? greaterThan( blueprint, `${value} - 1u`, 'gc_j' ) : `${compare!( blueprint, `${value} - 1u`, 'gc_j' )} > 0i`} ) {
           gc_delta = ( ${value} - gc_i_low + 1u ) >> 1u;
           gc_j_low = gc_j;
           gc_j = gc_j + gc_delta;
           ${value} = ${value} - gc_delta;
         }
-        else if ( gc_j > 0u && ${value} < ${lengthA( blueprint )} && ${lessThanOrEqual ? lessThanOrEqual( value, 'gc_j - 1u' ) : `${compare!( value, 'gc_j - 1u' )} <= 0i`} ) {
+        else if ( gc_j > 0u && ${value} < ${lengthA( blueprint )} && ${lessThanOrEqual ? lessThanOrEqual( blueprint, value, 'gc_j - 1u' ) : `${compare!( blueprint, value, 'gc_j - 1u' )} <= 0i`} ) {
           gc_delta = ( gc_j - gc_j_low + 1u ) >> 1u;
           gc_i_low = ${value};
           ${value} = ${value} + gc_delta;

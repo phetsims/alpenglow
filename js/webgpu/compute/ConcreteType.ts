@@ -147,13 +147,13 @@ export type CompareOrder<T> = {
   // WGSL
   // ( a: expr:T, b: expr:T ) => expr:i32
   // TODO: Take blueprint
-  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionI32;
+  compareWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionI32;
   // ( a: expr:T, b: expr:T ) => expr:bool
   // TODO: Take blueprint
-  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
+  greaterThanWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
   // ( a: expr:T, b: expr:T ) => expr:bool
   // TODO: Take blueprint
-  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
+  lessThanOrEqualWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
 };
 
 export type Order<T> = BitOrder<T> & CompareOrder<T>;
@@ -415,18 +415,18 @@ export const U32Order: Order<number> = {
     return ( ( value >>> bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0;
   },
 
-  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
+  compareWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
     // TODO: THIS FAILS RANGE CHECKS
     // return `( i32( ${a} ) - i32( ${b} ) )`;
 
     return `select( select( 0i, 1i, ${a} > ${b} ), -1i, ${a} < ${b} )`;
   },
 
-  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+  greaterThanWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} > ${b} )`;
   },
 
-  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+  lessThanOrEqualWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} <= ${b} )`;
   },
 
@@ -448,15 +448,15 @@ export const U32ReverseOrder: Order<number> = {
     return ( ( ( 0xffffffff - value ) >>> bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0;
   },
 
-  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
+  compareWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
     return `select( select( 0i, 1i, ${a} < ${b} ), -1i, ${a} > ${b} )`;
   },
 
-  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+  greaterThanWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} < ${b} )`;
   },
 
-  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+  lessThanOrEqualWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} >= ${b} )`;
   },
 
@@ -636,15 +636,15 @@ export const I32Order: CompareOrder<number> = {
     return a - b;
   },
 
-  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
+  compareWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
     return `( ${a} - ${b} )`;
   },
 
-  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+  greaterThanWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} > ${b} )`;
   },
 
-  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+  lessThanOrEqualWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} <= ${b} )`;
   }
 };
@@ -745,16 +745,16 @@ export const Vec2uLexicographicalOrder: Order<Vector2> = {
            ( ( ByteEncoder.rightShiftU32( value.y, bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0 );
   },
 
-  // TODO: support statements
-  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
+  // TODO: potentially stuff this in a function so it is more readable?
+  compareWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
     return `select( select( select( select( 0i, 1i, ${a}.y > ${b}.y ), -1i, ${a}.y < ${b}.y ), 1i, ${a}.x > ${b}.x ), -1i, ${a}.x < ${b}.x )`;
   },
 
-  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+  greaterThanWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a}.x > ${b}.x || ( ${a}.x == ${b}.x && ${a}.y > ${b}.y ) )`;
   },
 
-  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+  lessThanOrEqualWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a}.x <= ${b}.x && ( ${a}.x != ${b}.x || ${a}.y <= ${b}.y ) )`;
   },
 
