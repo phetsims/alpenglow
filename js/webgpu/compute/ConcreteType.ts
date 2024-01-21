@@ -39,7 +39,7 @@ type ConcreteType<T = unknown> = {
   // TS
   equals: ( a: T, b: T ) => boolean;
 
-  // WGSL TODO: allow statements
+  // WGSL
   equalsWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
 
   // Encodes a given value into the end of the encoder
@@ -49,7 +49,7 @@ type ConcreteType<T = unknown> = {
   decode( encoder: ByteEncoder, offset: number ): T;
 
   // WGSL representation
-  // TODO: consider rename to getValueType?
+  // TODO: consider rename to getValueType? valueTypeWGSL?
   valueType: ( blueprint: PipelineBlueprint ) => string;
   writeU32s(
     // given an expr:u32 offset and expr:u32 value, it will store the value at the offset
@@ -119,8 +119,9 @@ export type BinaryOp<T> = {
   // WGSL
   identityWGSL: string;
   // TODO: Take blueprint
-  combineExpression?: ( a: string, b: string ) => WGSLExpressionT;
-  // TODO: Take blueprint
+  combineExpression?: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionT;
+
+  // TODO: Don't have this, if needed just rely on a function placed on the blueprint(!)
   combineStatements?: ( varName: string, a: string, b: string ) => WGSLStatements;
   atomicName?: string;
 };
@@ -146,13 +147,13 @@ export type CompareOrder<T> = {
   // WGSL
   // ( a: expr:T, b: expr:T ) => expr:i32
   // TODO: Take blueprint
-  compareWGSL: ( a: string, b: string ) => WGSLExpressionI32;
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionI32;
   // ( a: expr:T, b: expr:T ) => expr:bool
   // TODO: Take blueprint
-  greaterThanWGSL: ( a: string, b: string ) => WGSLExpressionBool;
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
   // ( a: expr:T, b: expr:T ) => expr:bool
   // TODO: Take blueprint
-  lessThanOrEqualWGSL: ( a: string, b: string ) => WGSLExpressionBool;
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
 };
 
 export type Order<T> = BitOrder<T> & CompareOrder<T>;
@@ -321,7 +322,7 @@ export const U32Add: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => a + b,
 
   identityWGSL: u32( U32_IDENTITY_VALUES.add ),
-  combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
@@ -336,7 +337,7 @@ export const U32Min: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => Math.min( a, b ),
 
   identityWGSL: u32( U32_IDENTITY_VALUES.min ),
-  combineExpression: ( a: string, b: string ) => `min( ${a}, ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `min( ${a}, ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = min( ${a} + ${b} );`,
   atomicName: 'atomicMin'
 };
@@ -351,7 +352,7 @@ export const U32Max: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => Math.max( a, b ),
 
   identityWGSL: u32( U32_IDENTITY_VALUES.max ),
-  combineExpression: ( a: string, b: string ) => `max( ${a}, ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `max( ${a}, ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = max( ${a} + ${b} );`,
   atomicName: 'atomicMax'
 };
@@ -366,7 +367,7 @@ export const U32And: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => ( a & b ) >>> 0,
 
   identityWGSL: u32( U32_IDENTITY_VALUES.and ),
-  combineExpression: ( a: string, b: string ) => `( ${a} & ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} & ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} & ${b} );`,
   atomicName: 'atomicAnd'
 };
@@ -381,7 +382,7 @@ export const U32Or: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => ( a | b ) >>> 0,
 
   identityWGSL: u32( U32_IDENTITY_VALUES.or ),
-  combineExpression: ( a: string, b: string ) => `( ${a} | ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} | ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} | ${b} );`,
   atomicName: 'atomicOr'
 };
@@ -396,7 +397,7 @@ export const U32Xor: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => ( a ^ b ) >>> 0,
 
   identityWGSL: u32( U32_IDENTITY_VALUES.xor ),
-  combineExpression: ( a: string, b: string ) => `( ${a} ^ ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} ^ ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} ^ ${b} );`,
   atomicName: 'atomicXor'
 };
@@ -414,18 +415,18 @@ export const U32Order: Order<number> = {
     return ( ( value >>> bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0;
   },
 
-  compareWGSL: ( a: string, b: string ): string => {
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
     // TODO: THIS FAILS RANGE CHECKS
     // return `( i32( ${a} ) - i32( ${b} ) )`;
 
     return `select( select( 0i, 1i, ${a} > ${b} ), -1i, ${a} < ${b} )`;
   },
 
-  greaterThanWGSL: ( a: string, b: string ): string => {
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} > ${b} )`;
   },
 
-  lessThanOrEqualWGSL: ( a: string, b: string ): string => {
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} <= ${b} )`;
   },
 
@@ -447,15 +448,15 @@ export const U32ReverseOrder: Order<number> = {
     return ( ( ( 0xffffffff - value ) >>> bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0;
   },
 
-  compareWGSL: ( a: string, b: string ): string => {
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
     return `select( select( 0i, 1i, ${a} < ${b} ), -1i, ${a} > ${b} )`;
   },
 
-  greaterThanWGSL: ( a: string, b: string ): string => {
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} < ${b} )`;
   },
 
-  lessThanOrEqualWGSL: ( a: string, b: string ): string => {
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} >= ${b} )`;
   },
 
@@ -545,7 +546,7 @@ export const I32Add: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => a + b,
 
   identityWGSL: i32( I32_IDENTITY_VALUES.add ),
-  combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
@@ -560,7 +561,7 @@ export const I32Min: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => Math.min( a, b ),
 
   identityWGSL: i32( I32_IDENTITY_VALUES.min ),
-  combineExpression: ( a: string, b: string ) => `min( ${a}, ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `min( ${a}, ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = min( ${a} + ${b} );`,
   atomicName: 'atomicMin'
 };
@@ -575,7 +576,7 @@ export const I32Max: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => Math.max( a, b ),
 
   identityWGSL: i32( I32_IDENTITY_VALUES.max ),
-  combineExpression: ( a: string, b: string ) => `max( ${a}, ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `max( ${a}, ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = max( ${a} + ${b} );`,
   atomicName: 'atomicMax'
 };
@@ -590,7 +591,7 @@ export const I32And: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => ( a & b ) >>> 0,
 
   identityWGSL: i32( I32_IDENTITY_VALUES.and ),
-  combineExpression: ( a: string, b: string ) => `( ${a} & ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} & ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} & ${b} );`,
   atomicName: 'atomicAnd'
 };
@@ -605,7 +606,7 @@ export const I32Or: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => ( a | b ) >>> 0,
 
   identityWGSL: i32( I32_IDENTITY_VALUES.or ),
-  combineExpression: ( a: string, b: string ) => `( ${a} | ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} | ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} | ${b} );`,
   atomicName: 'atomicOr'
 };
@@ -620,7 +621,7 @@ export const I32Xor: BinaryOp<number> = {
   apply: ( a: number, b: number ): number => ( a ^ b ) >>> 0,
 
   identityWGSL: i32( I32_IDENTITY_VALUES.xor ),
-  combineExpression: ( a: string, b: string ) => `( ${a} ^ ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} ^ ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} ^ ${b} );`,
   atomicName: 'atomicXor'
 };
@@ -635,15 +636,15 @@ export const I32Order: CompareOrder<number> = {
     return a - b;
   },
 
-  compareWGSL: ( a: string, b: string ): string => {
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
     return `( ${a} - ${b} )`;
   },
 
-  greaterThanWGSL: ( a: string, b: string ): string => {
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} > ${b} )`;
   },
 
-  lessThanOrEqualWGSL: ( a: string, b: string ): string => {
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a} <= ${b} )`;
   }
 };
@@ -700,7 +701,7 @@ export const Vec2uAdd: BinaryOp<Vector2> = {
   apply: ( a: Vector2, b: Vector2 ): Vector2 => a.plus( b ),
 
   identityWGSL: 'vec2u()',
-  combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
 };
 alpenglow.register( 'Vec2uAdd', Vec2uAdd );
@@ -720,7 +721,7 @@ export const Vec2uBic: BinaryOp<Vector2> = {
   },
 
   identityWGSL: 'vec2( 0u )',
-  combineExpression: ( a: string, b: string ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b} - min( ${a}.y, ${b}.x );`
 };
 alpenglow.register( 'Vec2uBic', Vec2uBic );
@@ -745,15 +746,15 @@ export const Vec2uLexicographicalOrder: Order<Vector2> = {
   },
 
   // TODO: support statements
-  compareWGSL: ( a: string, b: string ): string => {
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
     return `select( select( select( select( 0i, 1i, ${a}.y > ${b}.y ), -1i, ${a}.y < ${b}.y ), 1i, ${a}.x > ${b}.x ), -1i, ${a}.x < ${b}.x )`;
   },
 
-  greaterThanWGSL: ( a: string, b: string ): string => {
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a}.x > ${b}.x || ( ${a}.x == ${b}.x && ${a}.y > ${b}.y ) )`;
   },
 
-  lessThanOrEqualWGSL: ( a: string, b: string ): string => {
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     return `( ${a}.x <= ${b}.x && ( ${a}.x != ${b}.x || ${a}.y <= ${b}.y ) )`;
   },
 
@@ -826,7 +827,7 @@ export const Vec3uAdd: BinaryOp<Vector3> = {
   apply: ( a: Vector3, b: Vector3 ): Vector3 => a.plus( b ),
 
   identityWGSL: 'vec3u()',
-  combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
 };
 alpenglow.register( 'Vec3uAdd', Vec3uAdd );
@@ -889,7 +890,7 @@ export const Vec4uAdd: BinaryOp<Vector4> = {
   apply: ( a: Vector4, b: Vector4 ): Vector4 => a.plus( b ),
 
   identityWGSL: 'vec4u()',
-  combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
 };
 alpenglow.register( 'Vec4uAdd', Vec4uAdd );
