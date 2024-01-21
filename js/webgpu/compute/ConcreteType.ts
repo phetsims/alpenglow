@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, u32, PipelineBlueprint } from '../../imports.js';
+import { alpenglow, ByteEncoder, u32, PipelineBlueprint, i32 } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Random from '../../../../dot/js/Random.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
@@ -325,7 +325,6 @@ export const U32Add: BinaryOp<number> = {
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
-// TODO: add other atomic types (and specifically atomic types)
 alpenglow.register( 'U32Add', U32Add );
 
 export const U32Min: BinaryOp<number> = {
@@ -542,16 +541,90 @@ export const I32Add: BinaryOp<number> = {
   type: I32Type,
   isCommutative: true,
 
-  identity: 0,
+  identity: I32_IDENTITY_VALUES.add,
   apply: ( a: number, b: number ): number => a + b,
 
-  identityWGSL: '0i',
+  identityWGSL: i32( I32_IDENTITY_VALUES.add ),
   combineExpression: ( a: string, b: string ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
-// TODO: add other atomic types (and specifically atomic types)
 alpenglow.register( 'I32Add', I32Add );
+
+export const I32Min: BinaryOp<number> = {
+  name: 'i32 min',
+  type: I32Type,
+  isCommutative: true,
+
+  identity: I32_IDENTITY_VALUES.min,
+  apply: ( a: number, b: number ): number => Math.min( a, b ),
+
+  identityWGSL: i32( I32_IDENTITY_VALUES.min ),
+  combineExpression: ( a: string, b: string ) => `min( ${a}, ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = min( ${a} + ${b} );`,
+  atomicName: 'atomicMin'
+};
+alpenglow.register( 'I32Min', I32Min );
+
+export const I32Max: BinaryOp<number> = {
+  name: 'i32 max',
+  type: I32Type,
+  isCommutative: true,
+
+  identity: I32_IDENTITY_VALUES.max,
+  apply: ( a: number, b: number ): number => Math.max( a, b ),
+
+  identityWGSL: i32( I32_IDENTITY_VALUES.max ),
+  combineExpression: ( a: string, b: string ) => `max( ${a}, ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = max( ${a} + ${b} );`,
+  atomicName: 'atomicMax'
+};
+alpenglow.register( 'I32Max', I32Max );
+
+export const I32And: BinaryOp<number> = {
+  name: 'i32 and',
+  type: I32Type,
+  isCommutative: true,
+
+  identity: I32_IDENTITY_VALUES.and,
+  apply: ( a: number, b: number ): number => ( a & b ) >>> 0,
+
+  identityWGSL: i32( I32_IDENTITY_VALUES.and ),
+  combineExpression: ( a: string, b: string ) => `( ${a} & ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} & ${b} );`,
+  atomicName: 'atomicAnd'
+};
+alpenglow.register( 'I32And', I32And );
+
+export const I32Or: BinaryOp<number> = {
+  name: 'i32 or',
+  type: I32Type,
+  isCommutative: true,
+
+  identity: I32_IDENTITY_VALUES.or,
+  apply: ( a: number, b: number ): number => ( a | b ) >>> 0,
+
+  identityWGSL: i32( I32_IDENTITY_VALUES.or ),
+  combineExpression: ( a: string, b: string ) => `( ${a} | ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} | ${b} );`,
+  atomicName: 'atomicOr'
+};
+alpenglow.register( 'I32Or', I32Or );
+
+export const I32Xor: BinaryOp<number> = {
+  name: 'i32 xor',
+  type: I32Type,
+  isCommutative: true,
+
+  identity: I32_IDENTITY_VALUES.xor,
+  apply: ( a: number, b: number ): number => ( a ^ b ) >>> 0,
+
+  identityWGSL: i32( I32_IDENTITY_VALUES.xor ),
+  combineExpression: ( a: string, b: string ) => `( ${a} ^ ${b} )`,
+  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} ^ ${b} );`,
+  atomicName: 'atomicXor'
+};
+alpenglow.register( 'I32Xor', I32Xor );
 
 // TODO: Do a full order, with bit sorts(!)
 export const I32Order: CompareOrder<number> = {
