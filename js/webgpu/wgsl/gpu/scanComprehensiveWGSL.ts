@@ -102,7 +102,7 @@ const scanComprehensiveWGSL = <T>(
       workgroupIndex: options.workgroupIndex,
       localIndex: options.localIndex,
       callback: ( localIndex, dataIndex ) => `
-        ${output}[ ${dataIndex} ] = ${exclusive ? `select( ${getAddedValue ? 'workgroup_added_value' : binaryOp.identityWGSL}, ${scratch}[ ${localIndex} - 1u ], ${localIndex} > 0u )` : `${scratch}[ ${localIndex} ]`};
+        ${output}[ ${dataIndex} ] = ${exclusive ? `select( ${getAddedValue ? 'workgroup_added_value' : binaryOp.identityWGSL( blueprint )}, ${scratch}[ ${localIndex} - 1u ], ${localIndex} > 0u )` : `${scratch}[ ${localIndex} ]`};
       `
     } )}
     ${commentWGSL( 'end (output write)' )}

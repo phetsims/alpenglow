@@ -24,7 +24,7 @@ export type loadMultipleWGSLOptions<T> = {
   type: ConcreteType<T>;
 
   // if a length is provided, used to map things out-of-range
-  outOfRangeValue?: WGSLExpressionT | null;
+  outOfRangeValue?: ( ( blueprint: PipelineBlueprint ) => WGSLExpressionT ) | null;
 
   // The actual order of the data in memory (needed for range checks, not required if range checks are disabled)
   inputOrder: 'blocked' | 'striped';
@@ -186,7 +186,7 @@ const loadMultipleWGSL = <T>(
             ${ifRangeCheck( i, `
               ${indexedLoadStatements( 'lm_val', i )}
             `, `
-              lm_val = ${outOfRangeValue};
+              lm_val = ${outOfRangeValue( blueprint )};
             ` )}
 
             // TODO: can we further simplify?

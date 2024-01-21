@@ -117,7 +117,7 @@ export type BinaryOp<T> = {
   apply: ( a: T, b: T ) => T;
 
   // WGSL
-  identityWGSL: string;
+  identityWGSL: ( blueprint: PipelineBlueprint ) => WGSLExpressionT;
   // TODO: Take blueprint
   combineExpression?: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionT;
 
@@ -321,7 +321,7 @@ export const U32Add: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.add,
   apply: ( a: number, b: number ): number => a + b,
 
-  identityWGSL: u32( U32_IDENTITY_VALUES.add ),
+  identityWGSL: () => u32( U32_IDENTITY_VALUES.add ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
@@ -336,7 +336,7 @@ export const U32Min: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.min,
   apply: ( a: number, b: number ): number => Math.min( a, b ),
 
-  identityWGSL: u32( U32_IDENTITY_VALUES.min ),
+  identityWGSL: () => u32( U32_IDENTITY_VALUES.min ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `min( ${a}, ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = min( ${a} + ${b} );`,
   atomicName: 'atomicMin'
@@ -351,7 +351,7 @@ export const U32Max: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.max,
   apply: ( a: number, b: number ): number => Math.max( a, b ),
 
-  identityWGSL: u32( U32_IDENTITY_VALUES.max ),
+  identityWGSL: () => u32( U32_IDENTITY_VALUES.max ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `max( ${a}, ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = max( ${a} + ${b} );`,
   atomicName: 'atomicMax'
@@ -366,7 +366,7 @@ export const U32And: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.and,
   apply: ( a: number, b: number ): number => ( a & b ) >>> 0,
 
-  identityWGSL: u32( U32_IDENTITY_VALUES.and ),
+  identityWGSL: () => u32( U32_IDENTITY_VALUES.and ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} & ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} & ${b} );`,
   atomicName: 'atomicAnd'
@@ -381,7 +381,7 @@ export const U32Or: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.or,
   apply: ( a: number, b: number ): number => ( a | b ) >>> 0,
 
-  identityWGSL: u32( U32_IDENTITY_VALUES.or ),
+  identityWGSL: () => u32( U32_IDENTITY_VALUES.or ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} | ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} | ${b} );`,
   atomicName: 'atomicOr'
@@ -396,7 +396,7 @@ export const U32Xor: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.xor,
   apply: ( a: number, b: number ): number => ( a ^ b ) >>> 0,
 
-  identityWGSL: u32( U32_IDENTITY_VALUES.xor ),
+  identityWGSL: () => u32( U32_IDENTITY_VALUES.xor ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} ^ ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} ^ ${b} );`,
   atomicName: 'atomicXor'
@@ -545,7 +545,7 @@ export const I32Add: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.add,
   apply: ( a: number, b: number ): number => a + b,
 
-  identityWGSL: i32( I32_IDENTITY_VALUES.add ),
+  identityWGSL: () => i32( I32_IDENTITY_VALUES.add ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
@@ -560,7 +560,7 @@ export const I32Min: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.min,
   apply: ( a: number, b: number ): number => Math.min( a, b ),
 
-  identityWGSL: i32( I32_IDENTITY_VALUES.min ),
+  identityWGSL: () => i32( I32_IDENTITY_VALUES.min ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `min( ${a}, ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = min( ${a} + ${b} );`,
   atomicName: 'atomicMin'
@@ -575,7 +575,7 @@ export const I32Max: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.max,
   apply: ( a: number, b: number ): number => Math.max( a, b ),
 
-  identityWGSL: i32( I32_IDENTITY_VALUES.max ),
+  identityWGSL: () => i32( I32_IDENTITY_VALUES.max ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `max( ${a}, ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = max( ${a} + ${b} );`,
   atomicName: 'atomicMax'
@@ -590,7 +590,7 @@ export const I32And: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.and,
   apply: ( a: number, b: number ): number => ( a & b ) >>> 0,
 
-  identityWGSL: i32( I32_IDENTITY_VALUES.and ),
+  identityWGSL: () => i32( I32_IDENTITY_VALUES.and ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} & ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} & ${b} );`,
   atomicName: 'atomicAnd'
@@ -605,7 +605,7 @@ export const I32Or: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.or,
   apply: ( a: number, b: number ): number => ( a | b ) >>> 0,
 
-  identityWGSL: i32( I32_IDENTITY_VALUES.or ),
+  identityWGSL: () => i32( I32_IDENTITY_VALUES.or ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} | ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} | ${b} );`,
   atomicName: 'atomicOr'
@@ -620,7 +620,7 @@ export const I32Xor: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.xor,
   apply: ( a: number, b: number ): number => ( a ^ b ) >>> 0,
 
-  identityWGSL: i32( I32_IDENTITY_VALUES.xor ),
+  identityWGSL: () => i32( I32_IDENTITY_VALUES.xor ),
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} ^ ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} ^ ${b} );`,
   atomicName: 'atomicXor'
@@ -700,7 +700,7 @@ export const Vec2uAdd: BinaryOp<Vector2> = {
   identity: Vector2.ZERO,
   apply: ( a: Vector2, b: Vector2 ): Vector2 => a.plus( b ),
 
-  identityWGSL: 'vec2u()',
+  identityWGSL: () => 'vec2u()',
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
 };
@@ -720,7 +720,7 @@ export const Vec2uBic: BinaryOp<Vector2> = {
     );
   },
 
-  identityWGSL: 'vec2( 0u )',
+  identityWGSL: () => 'vec2( 0u )',
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b} - min( ${a}.y, ${b}.x );`
 };
@@ -826,7 +826,7 @@ export const Vec3uAdd: BinaryOp<Vector3> = {
   identity: Vector3.ZERO,
   apply: ( a: Vector3, b: Vector3 ): Vector3 => a.plus( b ),
 
-  identityWGSL: 'vec3u()',
+  identityWGSL: () => 'vec3u()',
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
 };
@@ -889,7 +889,7 @@ export const Vec4uAdd: BinaryOp<Vector4> = {
   identity: Vector4.ZERO,
   apply: ( a: Vector4, b: Vector4 ): Vector4 => a.plus( b ),
 
-  identityWGSL: 'vec4u()',
+  identityWGSL: () => 'vec4u()',
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
   combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
 };

@@ -61,7 +61,7 @@ const mainReduceNonCommutativeWGSL = <T>(
     ) {
       // TODO: we can probably accomplish this with smarter use of the local variables
       if ( local_id.x == 0u ) {
-        scratch[ 0u ] = ${binaryOp.identityWGSL};
+        scratch[ 0u ] = ${binaryOp.identityWGSL( blueprint )};
       }
       
       ${lengthExpression ? `
@@ -79,7 +79,7 @@ const mainReduceNonCommutativeWGSL = <T>(
           {
             let rn_index = workgroup_id.x * ${u32( workgroupSize * grainSize )} + ${u32( i * workgroupSize )} + local_id.x;
             ${lengthExpression ? `
-              value = select( ${binaryOp.identityWGSL}, input[ rn_index ], rn_index < rn_length );
+              value = select( ${binaryOp.identityWGSL( blueprint )}, input[ rn_index ], rn_index < rn_length );
             ` : `
               value = input[ rn_index ];
             `}

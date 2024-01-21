@@ -134,7 +134,7 @@ const scanRakedWGSL = <T>(
 
     // Add those values into all the other elements of the next tile
     ${commentWGSL( 'begin (add scanned values to tile)' )}
-    var added_value = select( ${binaryOp.identityWGSL}, ${scratch}[ ${localIndex} * ${u32( grainSize )} - 1u ], ${localIndex} > 0 );
+    var added_value = select( ${binaryOp.identityWGSL( blueprint )}, ${scratch}[ ${localIndex} * ${u32( grainSize )} - 1u ], ${localIndex} > 0 );
     ${getAddedValue ? `
       ${commentWGSL( 'begin (get global added values)' )}
 
@@ -180,7 +180,7 @@ const scanRakedWGSL = <T>(
       // TODO: will it be more readable/maintainable for these two cases to be combined?
       ${direction === 'left' ? `
         let exclusive_base_index = ${localIndex} * ${u32( grainSize )};
-        var exclusive_value = select( ${binaryOp.identityWGSL}, ${scratch}[ exclusive_base_index - 1u ], exclusive_base_index > 0u );
+        var exclusive_value = select( ${binaryOp.identityWGSL( blueprint )}, ${scratch}[ exclusive_base_index - 1u ], exclusive_base_index > 0u );
         var next_value = ${scratch}[ exclusive_base_index ];
         workgroupBarrier();
         ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => `
@@ -194,7 +194,7 @@ const scanRakedWGSL = <T>(
         ` )}
       ` : `
         let exclusive_base_index = ${localIndex} * ${u32( grainSize )} + ${u32( grainSize - 1 )};
-        var exclusive_value = select( ${binaryOp.identityWGSL}, ${scratch}[ exclusive_base_index + 1u ], exclusive_base_index < ${u32( workgroupSize - 1 )} );
+        var exclusive_value = select( ${binaryOp.identityWGSL( blueprint )}, ${scratch}[ exclusive_base_index + 1u ], exclusive_base_index < ${u32( workgroupSize - 1 )} );
         var next_value = ${scratch}[ exclusive_base_index ];
         workgroupBarrier();
         ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => `

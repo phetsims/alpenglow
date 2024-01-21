@@ -171,7 +171,7 @@ const loadReducedWGSL = <T>(
 
   // TODO: factor out length expression conditionally, since sometimes it might duplicate buffer loads(!)
   const loadWithRangeCheckExpression = ( i: number ) => rangeCheckIndexExpression
-    ? `select( ${binaryOp.identityWGSL}, ${loadExpression!( loadIndexExpression!( i ) )}, ${rangeCheckIndexExpression( i )} < ${lengthExpression!( blueprint )} )`
+    ? `select( ${binaryOp.identityWGSL( blueprint )}, ${loadExpression!( loadIndexExpression!( i ) )}, ${rangeCheckIndexExpression( i )} < ${lengthExpression!( blueprint )} )`
     : loadExpression!( loadIndexExpression!( i ) );
 
   const ifRangeCheck = ( i: number, trueStatements: WGSLStatements, falseStatements: WGSLStatements | null = null ) => {
@@ -190,7 +190,7 @@ const loadReducedWGSL = <T>(
   const loadWithRangeCheckStatements = ( varName: WGSLVariableName, i: number ) => ifRangeCheck( i, `
     ${indexedLoadStatements( varName, i )}
   `, `
-    ${varName} = ${binaryOp.identityWGSL};
+    ${varName} = ${binaryOp.identityWGSL( blueprint )};
   ` );
 
   const getNestedExpression = ( i: number ): WGSLExpression => {

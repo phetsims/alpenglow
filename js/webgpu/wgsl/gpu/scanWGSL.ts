@@ -124,9 +124,9 @@ const scanWGSL = <T>(
       workgroupBarrier();
 
       ${direction === 'left' ? `
-        ${value} = select( ${binaryOp.identityWGSL}, ${scratch}[ ${mapScratchIndex( `${localIndex} - 1u` )} ], ${localIndex} > 0u );
+        ${value} = select( ${binaryOp.identityWGSL( blueprint )}, ${scratch}[ ${mapScratchIndex( `${localIndex} - 1u` )} ], ${localIndex} > 0u );
       ` : `
-        ${value} = select( ${binaryOp.identityWGSL}, ${scratch}[ ${mapScratchIndex( `${localIndex} + 1u` )} ], ${localIndex} < ${u32( workgroupSize - 1 )} );
+        ${value} = select( ${binaryOp.identityWGSL( blueprint )}, ${scratch}[ ${mapScratchIndex( `${localIndex} + 1u` )} ], ${localIndex} < ${u32( workgroupSize - 1 )} );
       `}
     ` : ''}
 

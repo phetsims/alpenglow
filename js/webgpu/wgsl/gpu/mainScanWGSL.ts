@@ -142,14 +142,14 @@ const mainScanWGSL = <T>(
               // NOTE: assumes the same workgroup/grain size for each level
               // This should work for any level of workgroup handling
               if ( workgroup_id.x % ${u32( workgroupSize * grainSize )} == 0u ) {
-                middle_value = ${binaryOp.identityWGSL};
+                middle_value = ${binaryOp.identityWGSL( blueprint )};
               }
               else {
                 middle_value = scanned_reduction[ workgroup_id.x - 1u ];
               }
               let lower_index = workgroup_id.x / ${u32( workgroupSize * grainSize )};
               if ( lower_index % ${u32( workgroupSize * grainSize )} == 0u ) {
-                lower_value = ${binaryOp.identityWGSL};
+                lower_value = ${binaryOp.identityWGSL( blueprint )};
               }
               else {
                 lower_value = double_scanned_reduction[ lower_index - 1u ];
@@ -171,7 +171,7 @@ const mainScanWGSL = <T>(
               // NOTE: assumes the same workgroup/grain size for each level
               // This should work for any level of workgroup handling
               if ( workgroup_id.x % ${u32( workgroupSize * grainSize )} == 0u ) {
-                reduction_value = ${binaryOp.identityWGSL};
+                reduction_value = ${binaryOp.identityWGSL( blueprint )};
               }
               else {
                 reduction_value = scanned_reduction[ workgroup_id.x - 1u ];
