@@ -32,7 +32,7 @@ export default class HistogramModule<T> extends DirectModule<number> {
     providedOptions: HistogramModuleOptions<T>
   ) {
     const options = combineOptions<HistogramModuleOptions<T> & DirectModuleOptions<number>>( {
-      setup: blueprint => mainHistogramWGSL( blueprint, providedOptions ),
+      main: mainHistogramWGSL( providedOptions ),
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }

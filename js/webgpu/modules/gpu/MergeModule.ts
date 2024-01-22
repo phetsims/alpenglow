@@ -34,7 +34,7 @@ export default class MergeModule<T> extends DirectModule<number> {
     providedOptions: MergeModuleOptions<T>
   ) {
     const options = combineOptions<MergeModuleOptions<T> & DirectModuleOptions<number>>( {
-      setup: blueprint => mainMergeWGSL( blueprint, providedOptions ),
+      main: mainMergeWGSL( providedOptions ),
       setDispatchSize: ( dispatchSize: Vector3, outputSize: number ) => {
         dispatchSize.x = Math.ceil( outputSize / providedOptions.blockOutputSize );
       }

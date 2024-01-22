@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, BufferSlot, CompareOrder, decimalS, mergeSimpleWGSL, PipelineBlueprint, wgsl, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BufferBindingType, BufferSlot, CompareOrder, decimalS, mergeSimpleWGSL, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 
 export type mainMergeSimpleWGSLOptions<T> = {
   inputA: BufferSlot<T[]>;
@@ -25,9 +25,8 @@ export const MAIN_MERGE_SIMPLE_DEFAULTS = {
 } as const;
 
 const mainMergeSimpleWGSL = <T>(
-  blueprint: PipelineBlueprint,
   options: mainMergeSimpleWGSLOptions<T>
-): void => {
+): WGSLMainModule => {
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;
@@ -35,18 +34,18 @@ const mainMergeSimpleWGSL = <T>(
   const lengthExpressionA = options.lengthExpressionA;
   const lengthExpressionB = options.lengthExpressionB;
 
-  blueprint.addSlot( 'a', options.inputA, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'b', options.inputB, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'c', options.output, BufferBindingType.STORAGE );
-
-  blueprint.add( 'main', wgsl`
+  return new WGSLMainModule( [
+    new WGSLSlot( 'a', options.inputA, BufferBindingType.READ_ONLY_STORAGE ),
+    new WGSLSlot( 'b', options.inputB, BufferBindingType.READ_ONLY_STORAGE ),
+    new WGSLSlot( 'c', options.output, BufferBindingType.STORAGE )
+  ], wgsl`
     @compute @workgroup_size(${decimalS( workgroupSize )})
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
-      ${mergeSimpleWGSL( blueprint, {
+      ${mergeSimpleWGSL( {
         lengthA: lengthExpressionA,
         lengthB: lengthExpressionB,
         setFromA: ( indexOutput, indexA ) => wgsl`c[ ${indexOutput} ] = a[ ${indexA} ];`,

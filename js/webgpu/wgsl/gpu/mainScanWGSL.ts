@@ -17,7 +17,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, decimalS, PipelineBlueprint, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, decimalS, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -68,9 +68,8 @@ export const MAIN_SCAN_DEFAULTS = {
 } as const;
 
 const mainScanWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: mainScanWGSLOptions<T>
-): void => {
+): WGSLMainModule => {
 
   // TODO: how to specify that we don't fill in defaults for things like factorOutSubexpressions?
   const options = optionize3<mainScanWGSLOptions<T>, SelfOptions<T>>()( {}, MAIN_SCAN_DEFAULTS, providedOptions );
@@ -79,31 +78,33 @@ const mainScanWGSL = <T>(
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;
 
+  const slots: WGSLSlot[] = [];
+
   if ( options.inPlace ) {
     assert && assert( options.data );
-    blueprint.addSlot( 'data', options.data!, BufferBindingType.STORAGE );
+    slots.push( new WGSLSlot( 'data', options.data!, BufferBindingType.STORAGE ) );
   }
   else {
     assert && assert( options.input );
     assert && assert( options.output );
-    blueprint.addSlot( 'input', options.input!, BufferBindingType.READ_ONLY_STORAGE );
-    blueprint.addSlot( 'output', options.output!, BufferBindingType.STORAGE );
+    slots.push( new WGSLSlot( 'input', options.input!, BufferBindingType.READ_ONLY_STORAGE ) );
+    slots.push( new WGSLSlot( 'output', options.output!, BufferBindingType.STORAGE ) );
   }
   if ( options.storeReduction ) {
     assert && assert( options.reduction );
-    blueprint.addSlot( 'reduction', options.reduction!, BufferBindingType.STORAGE );
+    slots.push( new WGSLSlot( 'reduction', options.reduction!, BufferBindingType.STORAGE ) );
   }
   if ( options.addScannedReduction ) {
     assert && assert( options.scannedReduction );
-    blueprint.addSlot( 'scanned_reduction', options.scannedReduction!, BufferBindingType.READ_ONLY_STORAGE );
+    slots.push( new WGSLSlot( 'scanned_reduction', options.scannedReduction!, BufferBindingType.READ_ONLY_STORAGE ) );
 
     if ( options.addScannedDoubleReduction ) {
       assert && assert( options.scannedDoubleReduction );
-      blueprint.addSlot( 'double_scanned_reduction', options.scannedDoubleReduction!, BufferBindingType.READ_ONLY_STORAGE );
+      slots.push( new WGSLSlot( 'double_scanned_reduction', options.scannedDoubleReduction!, BufferBindingType.READ_ONLY_STORAGE ) );
     }
   }
 
-  blueprint.add( 'main', wgsl`
+  return new WGSLMainModule( slots, wgsl`
     
     ${options.addScannedReduction ? wgsl`
       var<workgroup> reduction_value: ${binaryOp.type.valueType};
@@ -117,7 +118,7 @@ const mainScanWGSL = <T>(
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
-      ${scanComprehensiveWGSL( blueprint, {
+      ${scanComprehensiveWGSL( {
         input: options.inPlace ? wgsl`data` : wgsl`input`,
         output: options.inPlace ? wgsl`data` : wgsl`output`,
         scratch: wgsl`scratch`,

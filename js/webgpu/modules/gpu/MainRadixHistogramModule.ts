@@ -32,7 +32,7 @@ export default class MainRadixHistogramModule<T> extends DirectModule<number> {
     providedOptions: MainRadixHistogramModuleOptions<T>
   ) {
     const options = combineOptions<MainRadixHistogramModuleOptions<T> & DirectModuleOptions<number>>( {
-      setup: blueprint => mainRadixHistogramWGSL( blueprint, providedOptions ),
+      main: mainRadixHistogramWGSL( providedOptions ),
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }

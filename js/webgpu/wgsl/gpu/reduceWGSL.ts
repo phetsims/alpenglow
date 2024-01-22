@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logValueWGSL, u32S, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable, wgsl } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logValueWGSL, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type reduceWGSLOptions<T> = {
@@ -49,7 +49,6 @@ export const REDUCE_DEFAULTS = {
 } as const;
 
 const reduceWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: reduceWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -90,7 +89,7 @@ const reduceWGSL = <T>(
       ${value} = ${scratch}[ ${mapScratchIndex( localIndex )} ];
     ` : wgsl``}
     
-    ${logValueWGSL( blueprint, {
+    ${logValueWGSL( {
       name: `before reduce convergent:${convergent}`,
       value: 'value',
       type: binaryOp.type

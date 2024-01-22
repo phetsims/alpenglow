@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, decimal, f32, i32, i32Hex, PipelineBlueprint, u32, u32Hex } from '../../imports.js';
+import { alpenglow, BindingType, decimal, f32, i32, i32Hex, PipelineBlueprint, ResourceSlot, u32, u32Hex } from '../../imports.js';
 
 export default abstract class WGSLString {
   public abstract withBlueprint( blueprint: PipelineBlueprint ): string;
@@ -59,6 +59,56 @@ export class WGSLStringAccumulator extends WGSLString {
 }
 alpenglow.register( 'WGSLStringAccumulator', WGSLStringAccumulator );
 
+// TODO: use this where we need
+export class WGSLModule extends WGSLString {
+  public constructor(
+    public readonly name: string,
+    public readonly declarations: WGSLModuleDeclarations
+  ) {
+    super();
+  }
+
+  public withBlueprint( blueprint: PipelineBlueprint ): string {
+    blueprint.add( this.name, this.declarations );
+    return '';
+  }
+}
+alpenglow.register( 'WGSLModule', WGSLModule );
+
+export class WGSLMainModule extends WGSLModule {
+  public constructor(
+    public readonly slots: WGSLSlot[],
+    declarations: WGSLModuleDeclarations
+  ) {
+    super( 'main', declarations );
+  }
+
+  public override withBlueprint( blueprint: PipelineBlueprint ): string {
+    this.slots.forEach( slot => {
+      slot.withBlueprint( blueprint );
+    } );
+
+    return super.withBlueprint( blueprint );
+  }
+}
+alpenglow.register( 'WGSLMainModule', WGSLMainModule );
+
+export class WGSLSlot extends WGSLModule {
+  public constructor(
+     name: string,
+     public readonly slot: ResourceSlot,
+     public readonly bindingType: BindingType
+  ) {
+    super( name, wgsl`` );
+  }
+
+  public override withBlueprint( blueprint: PipelineBlueprint ): string {
+    blueprint.addSlot( this.name, this.slot, this.bindingType );
+    return '';
+  }
+}
+alpenglow.register( 'WGSLSlot', WGSLSlot );
+
 export const wgslString = ( value: string ): WGSLStringLiteral => {
   return new WGSLStringLiteral( value );
 };
@@ -68,6 +118,11 @@ export const wgslFunction = ( value: ( blueprint: PipelineBlueprint ) => string 
   return new WGSLStringFunction( value );
 };
 alpenglow.register( 'wgslFunction', wgslFunction );
+
+export const wgslBlueprint = ( value: ( blueprint: PipelineBlueprint ) => WGSLString ): WGSLStringFunction => {
+  return new WGSLStringFunction( blueprint => value( blueprint ).withBlueprint( blueprint ) );
+};
+alpenglow.register( 'wgslBlueprint', wgslBlueprint );
 
 // For tagged template literals
 export const wgsl = ( strings: TemplateStringsArray, ...values: WGSLString[] ): WGSLString => {
@@ -155,10 +210,11 @@ export const wgslOneLine = ( value: WGSLString ): WGSLString => {
 };
 alpenglow.register( 'wgslOneLine', wgslOneLine );
 
-export const wgslWith = ( value: WGSLString, declarationName: string, declaration: WGSLModuleDeclarations ): WGSLString => {
+export const wgslWith = ( value: WGSLString, ...modules: WGSLModule[] ): WGSLString => {
   return new WGSLStringFunction( blueprint => {
-    // TODO: can we get a better "add" functionality?
-    blueprint.add( declarationName, declaration );
+    modules.forEach( module => {
+      module.withBlueprint( blueprint );
+    } );
 
     return value.withBlueprint( blueprint );
   } );

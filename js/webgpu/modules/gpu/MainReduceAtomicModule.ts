@@ -33,7 +33,7 @@ export default class MainReduceAtomicModule<T> extends DirectModule<number> {
     providedOptions: MainReduceAtomicModuleOptions<T>
   ) {
     const options = combineOptions<MainReduceAtomicModuleOptions<T> & DirectModuleOptions<number>>( {
-      setup: blueprint => mainReduceAtomicWGSL( blueprint, providedOptions ),
+      main: mainReduceAtomicWGSL( providedOptions ),
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }

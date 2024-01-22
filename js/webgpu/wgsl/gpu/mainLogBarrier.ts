@@ -6,19 +6,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, PipelineBlueprint, wgsl } from '../../../imports.js';
+import { alpenglow, logWGSL, wgsl, WGSLMainModule } from '../../../imports.js';
 
-const mainLogBarrier = (
-  blueprint: PipelineBlueprint
-): void => {
-  blueprint.add( 'main', wgsl`
+// TODO: remove the function call?
+const mainLogBarrier = (): WGSLMainModule => {
+  return new WGSLMainModule( [], wgsl`
     @compute @workgroup_size(1)
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
-      ${logWGSL( blueprint, {
+      ${logWGSL( {
         name: null
       } )}
     }

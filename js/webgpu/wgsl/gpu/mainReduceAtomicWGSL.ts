@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, decimalS, loadReducedWGSL, loadReducedWGSLOptions, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions, wgsl, wgslString } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, decimalS, loadReducedWGSL, loadReducedWGSLOptions, RakedSizable, reduceWGSL, reduceWGSLOptions, wgsl, WGSLMainModule, WGSLSlot, wgslString } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -33,9 +33,8 @@ export const MAIN_REDUCE_ATOMIC_DEFAULTS = {
 } as const;
 
 const mainReduceAtomicWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: mainReduceAtomicWGSLOptions<T>
-): void => {
+): WGSLMainModule => {
 
   const options = optionize3<mainReduceAtomicWGSLOptions<T>>()( {}, MAIN_REDUCE_ATOMIC_DEFAULTS, providedOptions );
 
@@ -45,11 +44,10 @@ const mainReduceAtomicWGSL = <T>(
 
   assert && assert( binaryOp.atomicName );
 
-  blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE ); // TODO: assert that this is an atomic(!)
-
-  // TODO: generate storage binding and variable fully from Binding?
-  blueprint.add( 'main', wgsl`
+  return new WGSLMainModule( [
+    new WGSLSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE ),
+    new WGSLSlot( 'output', options.output, BufferBindingType.STORAGE ) // TODO: assert that this is an atomic(!)
+  ], wgsl`
     
     var<workgroup> scratch: array<${binaryOp.type.valueType}, ${decimalS( workgroupSize )}>;
     
@@ -60,7 +58,7 @@ const mainReduceAtomicWGSL = <T>(
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
     
-      ${loadReducedWGSL( blueprint, combineOptions<loadReducedWGSLOptions<T>>( {
+      ${loadReducedWGSL( combineOptions<loadReducedWGSLOptions<T>>( {
         value: wgsl`value`,
         binaryOp: binaryOp,
         loadExpression: i => wgsl`input[ ${i} ]`,
@@ -68,7 +66,7 @@ const mainReduceAtomicWGSL = <T>(
         grainSize: grainSize
       }, options.loadReducedOptions ) )}
     
-      ${reduceWGSL( blueprint, combineOptions<reduceWGSLOptions<T>>( {
+      ${reduceWGSL( combineOptions<reduceWGSLOptions<T>>( {
         value: wgsl`value`,
         binaryOp: binaryOp,
         scratch: wgsl`scratch`,

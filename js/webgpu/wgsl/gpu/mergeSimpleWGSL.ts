@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, getCorankWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, GrainSizable, mergeSequentialWGSL, PipelineBlueprint, u32S, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, commentWGSL, getCorankWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, GrainSizable, mergeSequentialWGSL, u32S, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mergeSimpleWGSLOptions = {
@@ -31,7 +31,6 @@ export const MERGE_SIMPLE_DEFAULTS = {
 } as const;
 
 const mergeSimpleWGSL = (
-  blueprint: PipelineBlueprint,
   providedOptions: mergeSimpleWGSLOptions
 ): WGSLStatements => {
 
@@ -57,7 +56,7 @@ const mergeSimpleWGSL = (
       let end_output = min( max_output, start_output + ${u32S( grainSize )} );
   
       if ( start_output != end_output ) {
-        ${getCorankWGSL( blueprint, {
+        ${getCorankWGSL( {
           value: wgsl`start_a`,
           outputIndex: wgsl`start_output`,
           lengthA: lengthA,
@@ -66,7 +65,7 @@ const mergeSimpleWGSL = (
           greaterThan: greaterThan,
           lessThanOrEqual: lessThanOrEqual
         } )}
-        ${getCorankWGSL( blueprint, {
+        ${getCorankWGSL( {
           value: wgsl`end_a`,
           outputIndex: wgsl`end_output`,
           lengthA: lengthA,
@@ -82,7 +81,7 @@ const mergeSimpleWGSL = (
         let span_a = end_a - start_a;
         let span_b = end_b - start_b;
   
-        ${mergeSequentialWGSL( blueprint, {
+        ${mergeSequentialWGSL( {
           lengthA: wgsl`span_a`,
           lengthB: wgsl`span_b`,
           compare: ( indexA, indexB ) => compare( wgsl`start_a + ${indexA}`, wgsl`start_b + ${indexB}` ),

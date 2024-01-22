@@ -32,7 +32,7 @@ export default class MainRadixScatterModule<T> extends DirectModule<number> {
     providedOptions: MainRadixScatterModuleOptions<T>
   ) {
     const options = combineOptions<MainRadixScatterModuleOptions<T> & DirectModuleOptions<number>>( {
-      setup: blueprint => mainRadixScatterWGSL( blueprint, providedOptions ),
+      main: mainRadixScatterWGSL( providedOptions ),
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, logWGSLOptions, PipelineBlueprint, RakedSizable, u32S, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, logWGSL, logWGSLOptions, RakedSizable, u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 import PickRequired from '../../../../../phet-core/js/types/PickRequired.js';
@@ -30,7 +30,6 @@ export const LOG_RAKED_OPTIONS = {
 } as const;
 
 const logRakedWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: logRakedWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -48,61 +47,64 @@ const logRakedWGSL = <T>(
   assert && assert( lengthExpression || relativeLengthExpression );
   assert && assert( accessExpression || relativeAccessExpression );
 
-  if ( blueprint.log ) {
-    return wgsl`
-      {
-        ${!skipBarriers ? wgsl`
-          workgroupBarrier();
-          storageBarrier();
-        ` : wgsl``}
+  return wgslBlueprint( blueprint => {
 
-        let base_log_index = workgroup_id.x * ${u32S( workgroupSize * grainSize )};
-        let base_local_log_index = ${u32S( grainSize )} * local_id.x;
-        let combined_base = base_log_index + base_local_log_index;
-
-        ${lengthExpression !== null ? wgsl`
-          if ( combined_base < ${lengthExpression} ) {
-        ` : wgsl``}
-        ${relativeLengthExpression !== null ? wgsl`
-          if ( base_local_log_index < ${relativeLengthExpression} ) {
-        ` : wgsl``}
-
-        var log_length = ${u32S( grainSize )};
-        ${lengthExpression !== null ? wgsl`
-          log_length = min( log_length, ${lengthExpression} - combined_base );
-        ` : wgsl``}
-        ${relativeLengthExpression !== null ? wgsl`
-          log_length = min( log_length, ${relativeLengthExpression} - base_local_log_index );
-        ` : wgsl``}
-
-        ${logWGSL( blueprint, combineOptions<logWGSLOptions<T>>( {
-          dataCount: wgsl`log_length`,
-          writeData: ( write: ( tIndex: WGSLExpressionU32, tValue: WGSLExpression ) => WGSLStatements ) => wgsl`
-            for ( var _i = 0u; _i < log_length; _i++ ) {
-              ${accessExpression ? wgsl`
-                // "global" access
-                let _expr = ${accessExpression( wgsl`combined_base + _i` )};
-              ` : wgsl`
-                // "local" access
-                let _expr = ${relativeAccessExpression!( wgsl`base_local_log_index + _i` )};
-              `}
-              ${write( wgsl`_i * ${u32S( options.type!.bytesPerElement / 4 )}`, wgsl`_expr` )}
+    if ( blueprint.log ) {
+      return wgsl`
+        {
+          ${!skipBarriers ? wgsl`
+            workgroupBarrier();
+            storageBarrier();
+          ` : wgsl``}
+  
+          let base_log_index = workgroup_id.x * ${u32S( workgroupSize * grainSize )};
+          let base_local_log_index = ${u32S( grainSize )} * local_id.x;
+          let combined_base = base_log_index + base_local_log_index;
+  
+          ${lengthExpression !== null ? wgsl`
+            if ( combined_base < ${lengthExpression} ) {
+          ` : wgsl``}
+          ${relativeLengthExpression !== null ? wgsl`
+            if ( base_local_log_index < ${relativeLengthExpression} ) {
+          ` : wgsl``}
+  
+          var log_length = ${u32S( grainSize )};
+          ${lengthExpression !== null ? wgsl`
+            log_length = min( log_length, ${lengthExpression} - combined_base );
+          ` : wgsl``}
+          ${relativeLengthExpression !== null ? wgsl`
+            log_length = min( log_length, ${relativeLengthExpression} - base_local_log_index );
+          ` : wgsl``}
+  
+          ${logWGSL( combineOptions<logWGSLOptions<T>>( {
+            dataCount: wgsl`log_length`,
+            writeData: ( write: ( tIndex: WGSLExpressionU32, tValue: WGSLExpression ) => WGSLStatements ) => wgsl`
+              for ( var _i = 0u; _i < log_length; _i++ ) {
+                ${accessExpression ? wgsl`
+                  // "global" access
+                  let _expr = ${accessExpression( wgsl`combined_base + _i` )};
+                ` : wgsl`
+                  // "local" access
+                  let _expr = ${relativeAccessExpression!( wgsl`base_local_log_index + _i` )};
+                `}
+                ${write( wgsl`_i * ${u32S( options.type!.bytesPerElement / 4 )}`, wgsl`_expr` )}
+              }
+            `
+          }, options ) )}
+  
+          ${relativeLengthExpression !== null ? wgsl`
             }
-          `
-        }, options ) )}
-
-        ${relativeLengthExpression !== null ? wgsl`
-          }
-        ` : wgsl``}
-        ${lengthExpression !== null ? wgsl`
-          }
-        ` : wgsl``}
-      }
-    `;
-  }
-  else {
-    return wgsl``;
-  }
+          ` : wgsl``}
+          ${lengthExpression !== null ? wgsl`
+            }
+          ` : wgsl``}
+        }
+      `;
+    }
+    else {
+      return wgsl``;
+    }
+  } );
 };
 
 export default logRakedWGSL;

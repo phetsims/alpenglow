@@ -32,7 +32,7 @@ export default class MainReduceModule<T> extends DirectModule<number> {
     providedOptions: MainReduceModuleOptions<T>
   ) {
     const options = combineOptions<MainReduceModuleOptions<T> & DirectModuleOptions<number>>( {
-      setup: blueprint => mainReduceWGSL( blueprint, providedOptions ),
+      main: mainReduceWGSL( providedOptions ),
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }

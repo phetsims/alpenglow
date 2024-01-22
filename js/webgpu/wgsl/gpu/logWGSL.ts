@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, ConcreteType, ConsoleLoggedLine, ConsoleLogger, PipelineBlueprint, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLString, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, BufferBindingType, ConcreteType, ConsoleLoggedLine, ConsoleLogger, PipelineBlueprint, u32S, wgsl, wgslBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLString, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type logWGSLOptions<T> = {
@@ -37,7 +37,6 @@ export const LOG_DEFAULTS = {
 } as const;
 
 const logWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: logWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -50,96 +49,99 @@ const logWGSL = <T>(
   const dataCount = options.dataCount;
   let lineToLog = options.lineToLog;
 
-  if ( !blueprint.log ) {
-    return wgsl``;
-  }
+  return wgslBlueprint( blueprint => {
 
-  assert && assert( type || dataCount === 0 );
+    if ( !blueprint.log ) {
+      return wgsl``;
+    }
 
-  blueprint.addSlot( '_log', PipelineBlueprint.LOG_BUFFER_SLOT, BufferBindingType.STORAGE );
+    assert && assert( type || dataCount === 0 );
 
-  // defaults for lineToLog
-  if ( !lineToLog ) {
-    lineToLog = dataCount === 0 ? ConsoleLoggedLine.toLogNull : ConsoleLoggedLine.toLogExistingFlat;
-  }
+    blueprint.addSlot( '_log', PipelineBlueprint.LOG_BUFFER_SLOT, BufferBindingType.STORAGE );
 
-  if ( name === null ) {
-    return wgsl`
-      {
-        let _log_offset = atomicAdd( &_log.next_space, 1u );
-        _log.data[ _log_offset ] = 0u;
-      }
-    `;
-  }
-  else {
-    const id = ConsoleLogger.register( {
-      type: type,
-      logName: name,
-      shaderName: blueprint.name,
-      dataCount: typeof dataCount === 'number' ? dataCount : null,
-      hasAdditionalIndex: additionalIndex !== null,
-      lineToLog: lineToLog
-    } );
+    // defaults for lineToLog
+    if ( !lineToLog ) {
+      lineToLog = dataCount === 0 ? ConsoleLoggedLine.toLogNull : ConsoleLoggedLine.toLogExistingFlat;
+    }
 
-    const nonDataLength =
-      1 + // id
-      3 + // workgroup_id
-      3 + // local_id
-      ( additionalIndex !== null ? 1 : 0 ) + // additional index (if provided)
-      ( typeof dataCount !== 'number' ? 1 : 0 ); // data length (if dynamic)
-
-    let countableIndex = 0;
-
-    return wgsl`
-      {
-        ${typeof dataCount === 'number' ? wgsl`
-          // handle a static dataCount
-          let _log_item_length = ${u32S( nonDataLength + dataCount * ( dataCount === 0 ? 0 : type!.bytesPerElement / 4 ) )};
-        ` : ( dataCount instanceof WGSLString ? wgsl`
-          // handle a dynamic (string:expression:u32) dataCount
-          let _log_data_count = ${dataCount};
-          let _log_item_length = ${u32S( nonDataLength )} + _log_data_count * ${u32S( type!.bytesPerElement / 4 )};
-        ` : wgsl`
-          // handle a dynamic (string:statements) dataCount
-          var _log_data_count: u32;
-          ${dataCount( wgsl`_log_data_count` )}
-          let _log_item_length = ${u32S( nonDataLength )} + _log_data_count * ${u32S( type!.bytesPerElement / 4 )};
-        ` )}
-
-        var _log_offset = atomicAdd( &_log.next_space, _log_item_length );
-
-        // Don't write past the end (it could scribble, mess up our atomic counter, and make us think we did NOT overrun it)
-        if ( _log_offset + _log_item_length > arrayLength( &_log.data ) ) {
-          _log.data[ 0u ] = 0xffffffffu;
-          _log_offset = 1;
+    if ( name === null ) {
+      return wgsl`
+        {
+          let _log_offset = atomicAdd( &_log.next_space, 1u );
+          _log.data[ _log_offset ] = 0u;
         }
+      `;
+    }
+    else {
+      const id = ConsoleLogger.register( {
+        type: type,
+        logName: name,
+        shaderName: blueprint.name,
+        dataCount: typeof dataCount === 'number' ? dataCount : null,
+        hasAdditionalIndex: additionalIndex !== null,
+        lineToLog: lineToLog
+      } );
 
-        _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${u32S( id )};
-        _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = workgroup_id.x;
-        _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = workgroup_id.y;
-        _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = workgroup_id.z;
-        _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = local_id.x;
-        _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = local_id.y;
-        _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = local_id.z;
+      const nonDataLength =
+        1 + // id
+        3 + // workgroup_id
+        3 + // local_id
+        ( additionalIndex !== null ? 1 : 0 ) + // additional index (if provided)
+        ( typeof dataCount !== 'number' ? 1 : 0 ); // data length (if dynamic)
 
-        ${additionalIndex !== null ? wgsl`
-          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${additionalIndex};
-        ` : wgsl``}
+      let countableIndex = 0;
 
-        ${typeof dataCount !== 'number' ? wgsl`
-          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = _log_data_count;
-        ` : wgsl``}
-
-        ${dataCount !== 0 ? wgsl`
-          ${writeData!( ( tIndex, tExpr ) => {
-            return type!.writeU32s( ( offset, u32Expr ) => {
-              return wgsl`_log.data[ _log_offset + ${u32S( countableIndex )} + ( ${tIndex} ) * ${u32S( type!.bytesPerElement / 4 )} + ( ${offset} ) ] = ${u32Expr};`;
-            }, tExpr );
-          } )}
-        ` : wgsl``}
-      }
-    `;
-  }
+      return wgsl`
+        {
+          ${typeof dataCount === 'number' ? wgsl`
+            // handle a static dataCount
+            let _log_item_length = ${u32S( nonDataLength + dataCount * ( dataCount === 0 ? 0 : type!.bytesPerElement / 4 ) )};
+          ` : ( dataCount instanceof WGSLString ? wgsl`
+            // handle a dynamic (string:expression:u32) dataCount
+            let _log_data_count = ${dataCount};
+            let _log_item_length = ${u32S( nonDataLength )} + _log_data_count * ${u32S( type!.bytesPerElement / 4 )};
+          ` : wgsl`
+            // handle a dynamic (string:statements) dataCount
+            var _log_data_count: u32;
+            ${dataCount( wgsl`_log_data_count` )}
+            let _log_item_length = ${u32S( nonDataLength )} + _log_data_count * ${u32S( type!.bytesPerElement / 4 )};
+          ` )}
+  
+          var _log_offset = atomicAdd( &_log.next_space, _log_item_length );
+  
+          // Don't write past the end (it could scribble, mess up our atomic counter, and make us think we did NOT overrun it)
+          if ( _log_offset + _log_item_length > arrayLength( &_log.data ) ) {
+            _log.data[ 0u ] = 0xffffffffu;
+            _log_offset = 1;
+          }
+  
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${u32S( id )};
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = workgroup_id.x;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = workgroup_id.y;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = workgroup_id.z;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = local_id.x;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = local_id.y;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = local_id.z;
+  
+          ${additionalIndex !== null ? wgsl`
+            _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${additionalIndex};
+          ` : wgsl``}
+  
+          ${typeof dataCount !== 'number' ? wgsl`
+            _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = _log_data_count;
+          ` : wgsl``}
+  
+          ${dataCount !== 0 ? wgsl`
+            ${writeData!( ( tIndex, tExpr ) => {
+              return type!.writeU32s( ( offset, u32Expr ) => {
+                return wgsl`_log.data[ _log_offset + ${u32S( countableIndex )} + ( ${tIndex} ) * ${u32S( type!.bytesPerElement / 4 )} + ( ${offset} ) ] = ${u32Expr};`;
+              }, tExpr );
+            } )}
+          ` : wgsl``}
+        }
+      `;
+    }
+  } );
 };
 
 export default logWGSL;

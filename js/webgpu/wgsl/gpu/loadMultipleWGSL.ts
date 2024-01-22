@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, ConcreteType, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32S, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable, WGSLString, wgsl, wgslJoin } from '../../../imports.js';
+import { alpenglow, commentWGSL, ConcreteType, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLString, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type loadMultipleWGSLOptions<T> = {
@@ -52,7 +52,6 @@ export const LOAD_MULTIPLE_DEFAULTS = {
 } as const;
 
 const loadMultipleWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: loadMultipleWGSLOptions<T>
 ): WGSLStatements => {
 

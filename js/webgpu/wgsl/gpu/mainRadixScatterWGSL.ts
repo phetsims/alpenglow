@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferBindingType, BufferSlot, ceilDivideConstantDivisorWGSL, commentWGSL, conditionalIfWGSL, decimalS, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, PipelineBlueprint, RakedSizable, scanRakedWGSL, U32Max, u32S, U32Type, unrollWGSL, wgsl, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BitOrder, BufferBindingType, BufferSlot, ceilDivideConstantDivisorWGSL, commentWGSL, conditionalIfWGSL, decimalS, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, RakedSizable, scanRakedWGSL, U32Max, u32S, U32Type, unrollWGSL, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -35,9 +35,8 @@ export const MAIN_RADIX_SCATTER_DEFAULTS = {
 } as const;
 
 const mainRadixScatterWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: mainRadixScatterWGSLOptions<T>
-): void => {
+): WGSLMainModule => {
 
   const options = optionize3<mainRadixScatterWGSLOptions<T>>()( {}, MAIN_RADIX_SCATTER_DEFAULTS, providedOptions );
 
@@ -54,13 +53,12 @@ const mainRadixScatterWGSL = <T>(
 
   const getBits = ( value: WGSLExpressionT ) => order.getBitsWGSL( value, pass * bitsPerPass, bitsPerPass );
 
-  // TODO: we should have type assertions to make sure these match?
-  blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'histogram_offsets', options.histogramOffsets, BufferBindingType.READ_ONLY_STORAGE ); // make sure this is u32?
-  blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE );
-
-  // TODO: generate more of the bindings
-  blueprint.add( 'main', wgsl`
+  return new WGSLMainModule( [
+    // TODO: we should have type assertions to make sure these match?
+    new WGSLSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE ),
+    new WGSLSlot( 'histogram_offsets', options.histogramOffsets, BufferBindingType.READ_ONLY_STORAGE ), // make sure this is u32?
+    new WGSLSlot( 'output', options.output, BufferBindingType.STORAGE )
+  ], wgsl`
     
     // TODO: see how we can potentially reuse some memory?
     var<workgroup> bits_scratch: array<${{ 1: wgsl`u32`, 2: wgsl`vec2u`, 3: wgsl`vec3u`, 4: wgsl`vec4u` }[ innerBitVectorSize ]!}, ${decimalS( workgroupSize )}>;
@@ -74,17 +72,17 @@ const mainRadixScatterWGSL = <T>(
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
-      ${logStringWGSL( blueprint, 'main_radix_scatter start' )}
+      ${logStringWGSL( 'main_radix_scatter start' )}
 
       let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression, workgroupSize * grainSize )};
 
-      ${logValueWGSL( blueprint, {
+      ${logValueWGSL( {
         value: 'num_valid_workgroups',
         type: U32Type
       } )}
 
       if ( workgroup_id.x < num_valid_workgroups ) {
-        ${loadMultipleWGSL( blueprint, combineOptions<loadMultipleWGSLOptions<T>>( {
+        ${loadMultipleWGSL( combineOptions<loadMultipleWGSLOptions<T>>( {
           loadExpression: index => wgsl`input[ ${index} ]`,
           storeStatements: ( index, value ) => wgsl`value_scratch[ ${index} ] = ${value};`,
           type: order.type,
@@ -96,7 +94,7 @@ const mainRadixScatterWGSL = <T>(
           inputAccessOrder: 'striped'
         }, loadMultipleOptions ) )}
 
-        ${logRakedWGSL( blueprint, {
+        ${logRakedWGSL( {
           name: 'initial data',
           type: order.type,
           workgroupSize: workgroupSize,
@@ -116,7 +114,7 @@ const mainRadixScatterWGSL = <T>(
         ` )}
         ${commentWGSL( 'end load histogram offsets' )}
 
-        ${logRakedWGSL( blueprint, {
+        ${logRakedWGSL( {
           name: 'scanned histogram',
           type: U32Type,
           workgroupSize: workgroupSize,
@@ -132,18 +130,18 @@ const mainRadixScatterWGSL = <T>(
           let reduced_length = ( ${lengthExpression} ) - workgroup_id.x * ${u32S( workgroupSize * grainSize )};
         ` : wgsl``}
 
-        ${logValueWGSL( blueprint, {
+        ${logValueWGSL( {
           value: 'reduced_length',
           type: U32Type
         } )}
 
         for ( var srs_i = 0u; srs_i < ${u32S( bitsPerPass )}; srs_i += ${u32S( bitsPerInnerPass )} ) {
-          ${logValueWGSL( blueprint, {
+          ${logValueWGSL( {
             value: 'srs_i',
             type: U32Type
           } )}
 
-          ${nBitCompactSingleSortWGSL( blueprint, {
+          ${nBitCompactSingleSortWGSL( {
             order: order,
             workgroupSize: workgroupSize,
             grainSize: grainSize,
@@ -156,7 +154,7 @@ const mainRadixScatterWGSL = <T>(
             earlyLoad: earlyLoad
           } )}
 
-          ${logRakedWGSL( blueprint, {
+          ${logRakedWGSL( {
             name: `after b_bit_sort ${bitsPerInnerPass} ${innerBitVectorSize}`,
             type: order.type,
             workgroupSize: workgroupSize,
@@ -187,7 +185,7 @@ const mainRadixScatterWGSL = <T>(
 
         workgroupBarrier();
 
-        ${scanRakedWGSL( blueprint, {
+        ${scanRakedWGSL( {
           scratch: wgsl`start_indices`,
           binaryOp: U32Max, // TODO: eeek we need to MAX combine here
           workgroupSize: workgroupSize,
@@ -212,7 +210,7 @@ const mainRadixScatterWGSL = <T>(
         ` )}
         ${commentWGSL( 'end write output' )}
 
-        ${logRakedWGSL( blueprint, {
+        ${logRakedWGSL( {
           name: 'exit(!) data',
           type: order.type,
           workgroupSize: workgroupSize,

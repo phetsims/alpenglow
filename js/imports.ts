@@ -374,7 +374,7 @@ export { default as ParallelRasterChunkIndexPatch } from './parallel/raster-clip
 export { default as ParallelRasterEdgeIndexPatch } from './parallel/raster-clip/ParallelRasterEdgeIndexPatch.js';
 export { default as ParallelRaster } from './parallel/raster-clip/ParallelRaster.js';
 
-export { default as WGSLString, WGSLStringLiteral, WGSLStringFunction, WGSLStringAccumulator, wgslString, wgslFunction, wgsl, decimalS, u32S, u32HexS, i32S, i32HexS, f32S, wgslJoin, wgslMapJoin, wgslOneLine, wgslWith } from './webgpu/wgsl/WGSLString.js';
+export { default as WGSLString, WGSLStringLiteral, WGSLStringFunction, WGSLStringAccumulator, WGSLModule, WGSLMainModule, WGSLSlot, wgslString, wgslFunction, wgslBlueprint, wgsl, decimalS, u32S, u32HexS, i32S, i32HexS, f32S, wgslJoin, wgslMapJoin, wgslOneLine, wgslWith } from './webgpu/wgsl/WGSLString.js';
 export type { WGSLExpression, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionF32, WGSLExpressionBool, WGSLExpressionT, WGSLStatements, WGSLModuleDeclarations, WGSLVariableName, WGSLType, WGSLBinaryExpression } from './webgpu/wgsl/WGSLString.js';
 
 export { default as OldSnippet } from './webgpu/old/OldSnippet.js';

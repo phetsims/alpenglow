@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, u32S, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable, wgsl } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -55,7 +55,6 @@ export const SCAN_DEFAULTS = {
 } as const;
 
 const scanWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: scanWGSLOptions<T>
 ): WGSLStatements => {
 

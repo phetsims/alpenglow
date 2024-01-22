@@ -12,7 +12,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, bitPackRadixAccessWGSL, bitPackRadixExclusiveScanWGSL, bitPackRadixIncrementWGSL, commentWGSL, ConsoleLoggedLine, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logStringWGSL, logValueWGSL, logWGSL, RakedSizable, scanWGSL, u32S, U32Add, U32Type, unrollWGSL, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType, PipelineBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, wgsl, decimalS } from '../../../imports.js';
+import { alpenglow, BitOrder, bitPackRadixAccessWGSL, bitPackRadixExclusiveScanWGSL, bitPackRadixIncrementWGSL, commentWGSL, ConsoleLoggedLine, decimalS, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logStringWGSL, logValueWGSL, logWGSL, RakedSizable, scanWGSL, U32Add, u32S, U32Type, unrollWGSL, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type nBitCompactSingleSortWGSLOptions<T> = {
@@ -45,7 +45,6 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 const nBitCompactSingleSortWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: nBitCompactSingleSortWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -79,7 +78,7 @@ const nBitCompactSingleSortWGSL = <T>(
     4: Vec4uAdd
   }[ bitVectorSize ];
 
-  const logPackedBits = <T>( name: string, varName: WGSLVariableName ) => logWGSL<T>( blueprint, {
+  const logPackedBits = <T>( name: string, varName: WGSLVariableName ) => logWGSL<T>( {
     name: `${name} (countBitQuantity: ${Math.ceil( Math.log2( workgroupSize * grainSize ) )})`,
     // @ts-expect-error - Should we get 4 different cases to get the typing to work nicely?
     type: bitType,
@@ -108,7 +107,7 @@ const nBitCompactSingleSortWGSL = <T>(
   return wgsl`
     ${commentWGSL( 'begin n_bit_compact_single_sort' )}
 
-    ${logStringWGSL( blueprint, `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${lengthExpression ? lengthExpression : null}" earlyLoad:${earlyLoad}` )}
+    ${logStringWGSL( `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${lengthExpression ? lengthExpression : null}" earlyLoad:${earlyLoad}` )}
 
     {
       var tb_bits_vector = ${{
@@ -129,13 +128,13 @@ const nBitCompactSingleSortWGSL = <T>(
           let tb_value = ${valueScratch}[ ${u32S( grainSize )} * ${localIndex} + ${u32S( i )} ];
           let tb_bits = ${getBits( wgsl`tb_value` )};
 
-          ${logValueWGSL( blueprint, {
+          ${logValueWGSL( {
             value: 'tb_value',
             name: `tb_value (raked index ${i})`,
             type: order.type
           } )}
 
-          ${logValueWGSL( blueprint, {
+          ${logValueWGSL( {
             value: 'tb_bits',
             name: `tb_bits (raked index ${i})`,
             type: U32Type
@@ -157,7 +156,7 @@ const nBitCompactSingleSortWGSL = <T>(
 
       ${logPackedBits( 'n_bit histogram initial', wgsl`tb_bits_vector` )}
 
-      ${scanWGSL( blueprint, {
+      ${scanWGSL( {
         value: wgsl`tb_bits_vector`,
         // @ts-expect-error - Hmm, should we actually split this into 4 cases?
         binaryOp: addBinaryOp,

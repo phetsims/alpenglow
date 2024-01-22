@@ -88,7 +88,7 @@ export default class ComputePipeline {
       name: 'logBarrier',
       log: true
     } );
-    mainLogBarrier( logBarrierPipelineBlueprint );
+    mainLogBarrier().withBlueprint( logBarrierPipelineBlueprint );
     return partialWGSLBeautify( stripWGSLComments( logBarrierPipelineBlueprint.toString( pipelineLayout ) ) );
   }
 

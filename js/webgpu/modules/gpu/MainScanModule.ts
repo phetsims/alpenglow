@@ -39,7 +39,7 @@ export default class MainScanModule<T> extends DirectModule<number> {
     providedOptions: MainScanModuleOptions<T>
   ) {
     const options = combineOptions<MainScanModuleOptions<T> & DirectModuleOptions<number>>( {
-      setup: blueprint => mainScanWGSL( blueprint, providedOptions ),
+      main: mainScanWGSL( providedOptions ),
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }

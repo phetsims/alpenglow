@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, BufferSlot, decimalS, histogramWGSL, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, PipelineBlueprint, RakedSizable, u32S, unrollWGSL, wgsl, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BufferBindingType, BufferSlot, decimalS, histogramWGSL, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32S, unrollWGSL, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mainHistogramWGSLOptions<T> = {
@@ -21,9 +21,8 @@ export const MAIN_HISTOGRAM_DEFAULTS = {
 } as const;
 
 const mainHistogramWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: mainHistogramWGSLOptions<T>
-): void => {
+): WGSLMainModule => {
 
   const options = optionize3<mainHistogramWGSLOptions<T>>()( {}, MAIN_HISTOGRAM_DEFAULTS, providedOptions );
 
@@ -35,10 +34,10 @@ const mainHistogramWGSL = <T>(
 
   // TODO: local_id.x should use LocalIndexable?
 
-  blueprint.addSlot( 'mhist_input', options.input, BufferBindingType.READ_ONLY_STORAGE );
-  blueprint.addSlot( 'mhist_output', options.output, BufferBindingType.STORAGE );
-
-  blueprint.add( 'main', wgsl`
+  return new WGSLMainModule( [
+    new WGSLSlot( 'mhist_input', options.input, BufferBindingType.READ_ONLY_STORAGE ),
+    new WGSLSlot( 'mhist_output', options.output, BufferBindingType.STORAGE )
+  ], wgsl`
     var<workgroup> histogram_scratch: array<atomic<u32>, ${decimalS( numBins )}>;
     
     @compute @workgroup_size(${decimalS( workgroupSize )})
@@ -48,7 +47,7 @@ const mainHistogramWGSL = <T>(
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
     
-      ${histogramWGSL( blueprint, {
+      ${histogramWGSL( {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
         histogramScratch: wgsl`histogram_scratch`,

@@ -32,7 +32,7 @@ export default class MainReduceNonCommutativeModule<T> extends DirectModule<numb
     providedOptions: MainReduceNonCommutativeModuleOptions<T>
   ) {
     const options = combineOptions<MainReduceNonCommutativeModuleOptions<T> & DirectModuleOptions<number>>( {
-      setup: blueprint => mainReduceNonCommutativeWGSL( blueprint, providedOptions ),
+      main: mainReduceNonCommutativeWGSL( providedOptions ),
       setDispatchSize: ( dispatchSize: Vector3, inputSize: number ) => {
         dispatchSize.x = Math.ceil( inputSize / ( providedOptions.workgroupSize * providedOptions.grainSize ) );
       }

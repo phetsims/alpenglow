@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, logWGSLOptions, PipelineBlueprint, wgsl, WGSLStatements, wgslString } from '../../../imports.js';
+import { alpenglow, logWGSL, logWGSLOptions, wgsl, WGSLStatements, wgslString } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithOptional from '../../../../../phet-core/js/types/WithOptional.js';
 
@@ -15,7 +15,6 @@ export type logValueWGSLOptions<T> = {
 } & WithOptional<logWGSLOptions<T>, 'name'>;
 
 const logValueWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: logValueWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -27,7 +26,7 @@ const logValueWGSL = <T>(
     dataCount: 1
   }, providedOptions );
 
-  return logWGSL( blueprint, options );
+  return logWGSL( options );
 };
 
 export default logValueWGSL;

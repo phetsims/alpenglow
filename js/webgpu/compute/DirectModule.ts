@@ -6,11 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Module, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions } from '../../imports.js';
+import { alpenglow, Module, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, WGSLMainModule } from '../../imports.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 
 type SelfOptions<T> = {
-  setup: ( blueprint: PipelineBlueprint ) => void;
+  main: WGSLMainModule;
   setDispatchSize: ( dispatchSize: Vector3, data: T ) => void;
 };
 
@@ -25,7 +25,8 @@ export default class DirectModule<T> extends Module<T> {
     options: DirectModuleOptions<T>
   ) {
     const pipelineBlueprint = new PipelineBlueprint( options );
-    options.setup( pipelineBlueprint );
+
+    options.main.withBlueprint( pipelineBlueprint );
 
     super( [ pipelineBlueprint ], ( context, data ) => {
       const dispatchSize = scratchVector3.setXYZ( 1, 1, 1 );

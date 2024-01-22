@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, getCorankWGSL, mergeSequentialWGSL, PipelineBlueprint, u32S, unrollWGSL, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable } from '../../../imports.js';
+import { alpenglow, commentWGSL, getCorankWGSL, mergeSequentialWGSL, u32S, unrollWGSL, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionT, WGSLExpressionU32, WGSLModule, WGSLStatements, WGSLVariableName, wgslWith, WorkgroupSizable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mergeWGSLOptions = {
@@ -58,7 +58,6 @@ export const MERGE_DEFAULTS = {
 } as const;
 
 const mergeWGSL = (
-  blueprint: PipelineBlueprint,
   providedOptions: mergeWGSLOptions
 ): WGSLStatements => {
 
@@ -82,7 +81,7 @@ const mergeWGSL = (
   assert && assert( Number.isInteger( blockOutputSize / sharedMemorySize ) );
   assert && assert( Number.isInteger( sharedMemorySize / workgroupSize ) );
 
-  blueprint.add( 'merge workgroup handling', wgsl`
+  const mergeModule = new WGSLModule( 'merge workgroup handling', wgsl`
     ${atomicConsumed ? wgsl`
       var<workgroup> consumed_a: atomic<u32>;
       var<workgroup> consumed_b: atomic<u32>;
@@ -94,7 +93,7 @@ const mergeWGSL = (
 
   // TODO: WorkgroupIndexable and such
 
-  return wgsl`
+  return wgslWith( wgsl`
     ${commentWGSL( 'begin merge' )}
 
     {
@@ -110,7 +109,7 @@ const mergeWGSL = (
         // Use the first 2 threads to load the coranks for the start/end of the block
         if ( local_id.x < 2u ) {
           let output_index = select( block_start_output, block_end_output, local_id.x == 1u );
-          ${getCorankWGSL( blueprint, {
+          ${getCorankWGSL( {
             value: wgsl`block_a`,
             outputIndex: wgsl`output_index`,
             lengthA: lengthA,
@@ -226,7 +225,7 @@ const mergeWGSL = (
             let output_relative_end = thread_end_output - base_iteration_index;
   
             // Get the corank for the start of our thread's input ranges
-            ${getCorankWGSL( blueprint, {
+            ${getCorankWGSL( {
               value: wgsl`thread_relative_start_a`,
               outputIndex: wgsl`output_relative_start`,
               lengthA: wgsl`iteration_length_a`,
@@ -246,7 +245,7 @@ const mergeWGSL = (
             } )}
   
             // Get the corank for the end of our thread's input ranges
-            ${getCorankWGSL( blueprint, {
+            ${getCorankWGSL( {
               value: wgsl`thread_relative_end_a`,
               outputIndex: wgsl`output_relative_end`,
               lengthA: wgsl`iteration_length_a`,
@@ -280,7 +279,7 @@ const mergeWGSL = (
             ` : wgsl``}
   
             // Actually write things into our output array serially.
-            ${mergeSequentialWGSL( blueprint, {
+            ${mergeSequentialWGSL( {
               lengthA: wgsl`thread_length_a`,
               lengthB: wgsl`thread_length_b`,
               compare: ( indexA, indexB ) => compare(
@@ -304,7 +303,7 @@ const mergeWGSL = (
               let iteration_possible_b_length = loaded_index_b - processed_index_b;
   
               // NOTE: The output will be invalid once we're past the end of the block, but we don't care(?)
-              ${getCorankWGSL( blueprint, {
+              ${getCorankWGSL( {
                 value: wgsl`consumed_a`,
                 outputIndex: u32S( sharedMemorySize ),
                 lengthA: wgsl`iteration_possible_a_length`,
@@ -340,7 +339,7 @@ const mergeWGSL = (
       }
     }
     ${commentWGSL( 'end merge' )}
-  `;
+  `, mergeModule );
 };
 
 export default mergeWGSL;

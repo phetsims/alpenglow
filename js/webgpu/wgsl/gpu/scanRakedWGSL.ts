@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, PipelineBlueprint, RakedSizable, scanWGSL, toStripedIndexWGSL, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, RakedSizable, scanWGSL, toStripedIndexWGSL, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type scanRakedWGSLOptions<T> = {
@@ -52,7 +52,6 @@ export const SCAN_RAKED_DEFAULTS = {
 } as const;
 
 const scanRakedWGSL = <T>(
-  blueprint: PipelineBlueprint,
   providedOptions: scanRakedWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -99,7 +98,7 @@ const scanRakedWGSL = <T>(
     workgroupBarrier();
 
     // Scan the last-scanned element of each thread's tile (inclusive)
-    ${scanWGSL( blueprint, {
+    ${scanWGSL( {
       value: wgsl`value`,
       scratch: scratch,
       workgroupSize: workgroupSize,
