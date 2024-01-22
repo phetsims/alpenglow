@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * A template that performs a reduce operation on a single workgroup. The value will be valid at local_id.x === 0.
