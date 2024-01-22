@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, COALESCED_LOOP_DEFAULTS, coalescedLoopWGSL, coalescedLoopWGSLOptions, commentWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, COALESCED_LOOP_DEFAULTS, coalescedLoopWGSL, coalescedLoopWGSLOptions, commentWGSL, PipelineBlueprint, wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -14,7 +14,7 @@ type SelfOptions = {
   // var<workgroup> array<atomic<u32>, numBins> // TODO: can we actually get memory-compacted histograms here, instead of using a full u32?
   histogramScratch: WGSLVariableName;
 
-  getBin: ( blueprint: PipelineBlueprint, index: WGSLExpressionU32 ) => WGSLExpressionU32;
+  getBin: ( index: WGSLExpressionU32 ) => WGSLExpressionU32;
 };
 
 export type histogramWGSLOptions = SelfOptions & StrictOmit<coalescedLoopWGSLOptions, 'callback'>;
@@ -30,7 +30,7 @@ const histogramWGSL = (
 
   const options = optionize3<histogramWGSLOptions, SelfOptions>()( {}, HISTOGRAM_DEFAULTS, providedOptions );
 
-  return `
+  return wgsl`
     ${commentWGSL( 'begin histogram' )}
     {
       ${coalescedLoopWGSL( blueprint, {
@@ -39,8 +39,8 @@ const histogramWGSL = (
         lengthExpression: options.lengthExpression,
         workgroupIndex: options.workgroupIndex,
         localIndex: options.localIndex,
-        callback: ( localIndex, dataIndex ) => `
-          atomicAdd( &${options.histogramScratch}[ ${options.getBin( blueprint, dataIndex )} ], 1u );
+        callback: ( localIndex, dataIndex ) => wgsl`
+          atomicAdd( &${options.histogramScratch}[ ${options.getBin( dataIndex )} ], 1u );
         `
       } )}
     }

@@ -14,7 +14,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, PipelineBlueprint, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, commentWGSL, PipelineBlueprint, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type getCorankWGSLOptions = {
@@ -22,17 +22,17 @@ export type getCorankWGSLOptions = {
   value: WGSLVariableName;
 
   outputIndex: WGSLExpressionU32;
-  lengthA: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
-  lengthB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
+  lengthA: WGSLExpressionU32;
+  lengthB: WGSLExpressionU32;
 
   // TODO: can we rewrite this as a custom ORDER type?
 
   // => {-1, 0, 1} (i32)
-  compare: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32 ) | null;
+  compare: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32 ) | null;
 
   // used (sometimes) instead of compare if provided
-  greaterThan?: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
-  lessThanOrEqual?: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
+  greaterThan?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
+  lessThanOrEqual?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
 };
 
 export const GET_CORANK_DEFAULTS = {
@@ -58,20 +58,20 @@ const getCorankWGSL = (
   assert && assert( compare || greaterThan, 'One of these should be defined' );
   assert && assert( compare || lessThanOrEqual, 'One of these should be defined' );
 
-  return `
+  return wgsl`
     // TODO: add assertions
   
     ${commentWGSL( 'begin get_corank' )}
   
-    var ${value} = min( ${outputIndex}, ${lengthA( blueprint )} );
+    var ${value} = min( ${outputIndex}, ${lengthA} );
     {
       var gc_j = ${outputIndex} - ${value};
   
       // NOTE: Parameter order and boolean swapped here to avoid a bug in Metal
       // See i32-test.html (reports out -992 buggily, where it takes the wrong branch of the select statement)
       // Bug report is https://bugs.chromium.org/p/tint/issues/detail?id=2087 (thanks James Price!)
-      var gc_i_low: u32 = select( ${outputIndex} - ${lengthB( blueprint )}, 0u, ${outputIndex} <= ${lengthB( blueprint )} );
-      var gc_j_low = select( ${outputIndex} - ${lengthA( blueprint )}, 0u, ${outputIndex} <= ${lengthA( blueprint )} );
+      var gc_i_low: u32 = select( ${outputIndex} - ${lengthB}, 0u, ${outputIndex} <= ${lengthB} );
+      var gc_j_low = select( ${outputIndex} - ${lengthA}, 0u, ${outputIndex} <= ${lengthA} );
       var gc_delta: u32;
   
       // TODO: remove oops_count
@@ -82,13 +82,13 @@ const getCorankWGSL = (
           break;
         }
   
-        if ( ${value} > 0u && gc_j < ${lengthB( blueprint )} && ${greaterThan ? greaterThan( blueprint, `${value} - 1u`, 'gc_j' ) : `${compare!( blueprint, `${value} - 1u`, 'gc_j' )} > 0i`} ) {
+        if ( ${value} > 0u && gc_j < ${lengthB} && ${greaterThan ? greaterThan( wgsl`${value} - 1u`, wgsl`gc_j` ) : wgsl`${compare!( wgsl`${value} - 1u`, wgsl`gc_j` )} > 0i`} ) {
           gc_delta = ( ${value} - gc_i_low + 1u ) >> 1u;
           gc_j_low = gc_j;
           gc_j = gc_j + gc_delta;
           ${value} = ${value} - gc_delta;
         }
-        else if ( gc_j > 0u && ${value} < ${lengthA( blueprint )} && ${lessThanOrEqual ? lessThanOrEqual( blueprint, value, 'gc_j - 1u' ) : `${compare!( blueprint, value, 'gc_j - 1u' )} <= 0i`} ) {
+        else if ( gc_j > 0u && ${value} < ${lengthA} && ${lessThanOrEqual ? lessThanOrEqual( value, wgsl`gc_j - 1u` ) : wgsl`${compare!( value, wgsl`gc_j - 1u` )} <= 0i`} ) {
           gc_delta = ( gc_j - gc_j_low + 1u ) >> 1u;
           gc_i_low = ${value};
           ${value} = ${value} + gc_delta;

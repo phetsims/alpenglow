@@ -6,18 +6,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, u32, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, u32S, wgsl, WGSLExpressionU32 } from '../../../imports.js';
 
 // Math.ceil( x / y ), but with unsigned numbers
 const ceilDivideConstantDivisorWGSL = (
   x: WGSLExpressionU32,
   y: number
-): string => {
+): WGSLExpressionU32 => {
   if ( y === 1 ) {
     return x;
   }
   else {
-    return `( ( ( ${x} ) + ${u32( y - 1 )} ) / ${u32( y )} )`;
+    return wgsl`( ( ( ${x} ) + ${u32S( y - 1 )} ) / ${u32S( y )} )`;
   }
 };
 

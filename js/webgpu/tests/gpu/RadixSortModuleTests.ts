@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, getMaxRadixBitsPerInnerPass, getRadixBitVectorSize, Order, Procedure, RadixSortModule, RadixSortModuleOptions, Routine, u32, U32Order, U32ReverseOrder, Vec2uLexicographicalOrder } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, getMaxRadixBitsPerInnerPass, getRadixBitVectorSize, Order, Procedure, RadixSortModule, RadixSortModuleOptions, Routine, U32Order, U32ReverseOrder, u32S, Vec2uLexicographicalOrder } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -39,7 +39,7 @@ const testRadixSortModule = <T>( options: RadixSortModuleTestOptions<T> ) => {
     const radixSortModule = new RadixSortModule( combineOptions<RadixSortModuleOptions<T>>( {
       input: inputSlot,
       output: outputSlot,
-      lengthExpression: blueprint => u32( options.inputSize ),
+      lengthExpression: u32S( options.inputSize ),
       name: name
     }, options ) );
 

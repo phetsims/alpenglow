@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, PipelineBlueprint, WGSLExpressionU32, WGSLModuleDeclarations } from '../../imports.js';
+import { alpenglow, wgsl, WGSLExpressionU32 } from '../../imports.js';
 
 export type WorkgroupSizable = {
   // the number of threads running this command
@@ -26,7 +26,7 @@ export type GlobalIndexable = {
   globalIndex?: WGSLExpressionU32;
 };
 export const GLOBAL_INDEXABLE_DEFAULTS = {
-  globalIndex: 'global_id.x'
+  globalIndex: wgsl`global_id.x`
 } as const;
 
 export type WorkgroupIndexable = {
@@ -35,7 +35,7 @@ export type WorkgroupIndexable = {
   workgroupIndex?: WGSLExpressionU32;
 };
 export const WORKGROUP_INDEXABLE_DEFAULTS = {
-  workgroupIndex: 'workgroup_id.x'
+  workgroupIndex: wgsl`workgroup_id.x`
 } as const;
 
 export type LocalIndexable = {
@@ -44,18 +44,18 @@ export type LocalIndexable = {
   localIndex?: WGSLExpressionU32;
 };
 export const LOCAL_INDEXABLE_DEFAULTS = {
-  localIndex: 'local_id.x'
+  localIndex: wgsl`local_id.x`
 } as const;
 
 export type OptionalLengthExpressionable = {
   // if provided, it will enable range checks (based on whatever input order of the data was given)
-  lengthExpression?: ( ( blueprint: PipelineBlueprint ) => WGSLExpressionU32 ) | null;
+  lengthExpression?: WGSLExpressionU32 | null;
 };
 export const OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS = {
   lengthExpression: null
 } as const;
 
-export const partialWGSLBeautify = ( wgsl: WGSLModuleDeclarations ): WGSLModuleDeclarations => {
+export const partialWGSLBeautify = ( wgsl: string ): string => {
   const lines = wgsl.split( '\n' ).filter( s => s.trim().length > 0 );
   let count = 0;
   let beautified = '';
@@ -76,7 +76,7 @@ export const partialWGSLBeautify = ( wgsl: WGSLModuleDeclarations ): WGSLModuleD
 
 alpenglow.register( 'partialWGSLBeautify', partialWGSLBeautify );
 
-export const addLineNumbers = ( wgsl: WGSLModuleDeclarations ): string => {
+export const addLineNumbers = ( wgsl: string ): string => {
   return wgsl.split( '\n' ).map( ( s, i ) => `${i + 1} ${s}` ).join( '\n' );
 };
 
@@ -88,9 +88,9 @@ alpenglow.register( 'addLineNumbers', addLineNumbers );
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 export const stripWGSLComments = (
-  str: WGSLModuleDeclarations,
+  str: string,
   allComments = true // if false, we'll leave things starting with /** and ending with **/ (for our own comments)
-): WGSLModuleDeclarations => {
+): string => {
   return str.replace( allComments ? /\/\**?\*\//g : /\/\*[^*]*?[^*]\*\//g, '' ).replace( /\r\n/g, '\n' ).split( '\n' ).map( line => {
     const index = line.indexOf( '//' );
     return index >= 0 ? line.substring( 0, index ) : line;

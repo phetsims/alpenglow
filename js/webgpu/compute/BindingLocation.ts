@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../../imports.js';
+import { alpenglow, decimalS, wgsl, WGSLString } from '../../imports.js';
 
 export default class BindingLocation {
   public constructor(
@@ -14,8 +14,8 @@ export default class BindingLocation {
     public readonly bindingIndex: number
   ) {}
 
-  public getWGSLAnnotation(): string {
-    return `@group(${this.groupIndex}) @binding(${this.bindingIndex})`;
+  public getWGSLAnnotation(): WGSLString {
+    return wgsl`@group(${decimalS( this.groupIndex )}) @binding(${decimalS( this.bindingIndex )})`;
   }
 }
 

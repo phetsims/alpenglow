@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logValueWGSL, u32, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logValueWGSL, u32S, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable, wgsl } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type reduceWGSLOptions<T> = {
@@ -71,24 +71,24 @@ const reduceWGSL = <T>(
   const start = convergent ? Math.log2( workgroupSize ) : 0;
   const end = convergent ? 0 : Math.log2( workgroupSize );
   const condition = ( i: number ) => convergent
-    ? `${localIndex} < ${u32( 1 << ( i - 1 ) )}`
-    : `${localIndex} % ${u32( 1 << ( i + 1 ) )} == 0u`;
+    ? wgsl`${localIndex} < ${u32S( 1 << ( i - 1 ) )}`
+    : wgsl`${localIndex} % ${u32S( 1 << ( i + 1 ) )} == 0u`;
   const accessIndex = ( i: number ) => convergent
-    ? `${localIndex} + ${u32( 1 << ( i - 1 ) )}`
-    : `${localIndex} + ${u32( 1 << i )}`;
+    ? wgsl`${localIndex} + ${u32S( 1 << ( i - 1 ) )}`
+    : wgsl`${localIndex} + ${u32S( 1 << i )}`;
 
   const combineToValue = ( varName: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => {
     return binaryExpressionStatementWGSL( varName, binaryOp.combineExpression || null, binaryOp.combineStatements || null, a, b );
   };
 
-  return `
+  return wgsl`
     ${commentWGSL( `begin reduce convergent:${convergent}` )}
-    ${!scratchPreloaded ? `
+    ${!scratchPreloaded ? wgsl`
       ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};
-    ` : ''}
-    ${!valuePreloaded ? `
+    ` : wgsl``}
+    ${!valuePreloaded ? wgsl`
       ${value} = ${scratch}[ ${mapScratchIndex( localIndex )} ];
-    ` : ''}
+    ` : wgsl``}
     
     ${logValueWGSL( blueprint, {
       name: `before reduce convergent:${convergent}`,
@@ -96,19 +96,19 @@ const reduceWGSL = <T>(
       type: binaryOp.type
     } )}
     
-    ${unrollWGSL( start, end, ( i, isFirst, isLast ) => `
+    ${unrollWGSL( start, end, ( i, isFirst, isLast ) => wgsl`
       // We don't need the first workgroupBarrier() if scratchPreloaded is true
-      ${!scratchPreloaded || !isFirst ? `
+      ${!scratchPreloaded || !isFirst ? wgsl`
         workgroupBarrier();
-      ` : ''}
+      ` : wgsl``}
 
       // TODO: check performance differences with a select/combine?
       if ( ${condition( i )} ) {
-        ${combineToValue( value, value, `${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )}
+        ${combineToValue( value, value, wgsl`${scratch}[ ${mapScratchIndex( accessIndex( i ) )} ]` )}
 
-        ${!isLast ? `
+        ${!isLast ? wgsl`
           ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};
-        ` : ''}
+        ` : wgsl``}
       }
     ` )}
     ${commentWGSL( 'end reduce' )}

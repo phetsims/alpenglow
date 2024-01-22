@@ -22,7 +22,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferLogger, DeviceContext, getArrayType, Procedure, RadixSortModule, Routine, TimestampLogger, TimestampLoggerResult, u32, U32Order } from '../imports.js';
+import { alpenglow, BufferArraySlot, BufferLogger, DeviceContext, getArrayType, Procedure, RadixSortModule, Routine, TimestampLogger, TimestampLoggerResult, U32Order, u32S } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
 // eslint-disable-next-line bad-sim-text
@@ -161,7 +161,7 @@ export default class GPUProfiling {
       scanWorkgroupSize: scanWorkgroupSize,
       scanGrainSize: scanGrainSize,
 
-      lengthExpression: () => u32( size ),
+      lengthExpression: u32S( size ),
 
       bitsPerPass: bitsPerPass,
       bitsPerInnerPass: bitsPerInnerPass,

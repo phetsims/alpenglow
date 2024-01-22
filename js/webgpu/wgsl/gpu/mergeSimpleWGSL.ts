@@ -6,22 +6,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, getCorankWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, GrainSizable, mergeSequentialWGSL, u32, PipelineBlueprint, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, commentWGSL, getCorankWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, GrainSizable, mergeSequentialWGSL, PipelineBlueprint, u32S, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mergeSimpleWGSLOptions = {
-  lengthA: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
-  lengthB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
+  lengthA: WGSLExpressionU32;
+  lengthB: WGSLExpressionU32;
 
   // => {-1, 0, 1} (i32)
-  compare: ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
+  compare: ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
 
   // used (sometimes) instead of compare if provided
-  greaterThan?: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
-  lessThanOrEqual?: ( ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
+  greaterThan?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
+  lessThanOrEqual?: ( ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionBool ) | null;
 
-  setFromA: ( blueprint: PipelineBlueprint, indexOutput: WGSLExpressionU32, indexA: WGSLExpressionU32 ) => WGSLStatements;
-  setFromB: ( blueprint: PipelineBlueprint, indexOutput: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLStatements;
+  setFromA: ( indexOutput: WGSLExpressionU32, indexA: WGSLExpressionU32 ) => WGSLStatements;
+  setFromB: ( indexOutput: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLStatements;
 } & GrainSizable & GlobalIndexable;
 
 export const MERGE_SIMPLE_DEFAULTS = {
@@ -48,18 +48,18 @@ const mergeSimpleWGSL = (
   const globalIndex = options.globalIndex;
 
   // TODO: factor out lengthA/lengthB so they aren't recomputed.
-  return `
+  return wgsl`
     ${commentWGSL( 'begin merge_simple' )}
     {
       // TODO: don't assume a specific linear workgroup size? -- use local_invocation_index?
-      let max_output = ${lengthA( blueprint )} + ${lengthB( blueprint )};
-      let start_output = min( max_output, ${globalIndex} * ${u32( grainSize )} );
-      let end_output = min( max_output, start_output + ${u32( grainSize )} );
+      let max_output = ${lengthA} + ${lengthB};
+      let start_output = min( max_output, ${globalIndex} * ${u32S( grainSize )} );
+      let end_output = min( max_output, start_output + ${u32S( grainSize )} );
   
       if ( start_output != end_output ) {
         ${getCorankWGSL( blueprint, {
-          value: 'start_a',
-          outputIndex: 'start_output',
+          value: wgsl`start_a`,
+          outputIndex: wgsl`start_output`,
           lengthA: lengthA,
           lengthB: lengthB,
           compare: compare,
@@ -67,8 +67,8 @@ const mergeSimpleWGSL = (
           lessThanOrEqual: lessThanOrEqual
         } )}
         ${getCorankWGSL( blueprint, {
-          value: 'end_a',
-          outputIndex: 'end_output',
+          value: wgsl`end_a`,
+          outputIndex: wgsl`end_output`,
           lengthA: lengthA,
           lengthB: lengthB,
           compare: compare,
@@ -83,11 +83,11 @@ const mergeSimpleWGSL = (
         let span_b = end_b - start_b;
   
         ${mergeSequentialWGSL( blueprint, {
-          lengthA: 'span_a',
-          lengthB: 'span_b',
-          compare: ( blueprint, indexA, indexB ) => compare( blueprint, `start_a + ${indexA}`, `start_b + ${indexB}` ),
-          setFromA: ( blueprint, indexOutput, indexA ) => setFromA( blueprint, `start_output + ${indexOutput}`, `start_a + ${indexA}` ),
-          setFromB: ( blueprint, indexOutput, indexB ) => setFromB( blueprint, `start_output + ${indexOutput}`, `start_b + ${indexB}` )
+          lengthA: wgsl`span_a`,
+          lengthB: wgsl`span_b`,
+          compare: ( indexA, indexB ) => compare( wgsl`start_a + ${indexA}`, wgsl`start_b + ${indexB}` ),
+          setFromA: ( indexOutput, indexA ) => setFromA( wgsl`start_output + ${indexOutput}`, wgsl`start_a + ${indexA}` ),
+          setFromB: ( indexOutput, indexB ) => setFromB( wgsl`start_output + ${indexOutput}`, wgsl`start_b + ${indexB}` )
         } )}
       }
     }

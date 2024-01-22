@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferBindingType, BufferSlot, PipelineBlueprint, radixHistogramWGSL, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BitOrder, BufferBindingType, BufferSlot, decimalS, PipelineBlueprint, radixHistogramWGSL, wgsl, WGSLExpressionU32 } from '../../../imports.js';
 
 export type mainRadixHistogramWGSLOptions<T> = {
   input: BufferSlot<T[]>;
@@ -18,7 +18,7 @@ export type mainRadixHistogramWGSLOptions<T> = {
   pass: number;
   bitsPerPass: number;
 
-  lengthExpression: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
+  lengthExpression: WGSLExpressionU32; // TODO: support optional
 };
 
 export const MAIN_RADIX_HISTOGRAM_DEFAULTS = {
@@ -40,10 +40,10 @@ const mainRadixHistogramWGSL = <T>(
   blueprint.addSlot( 'input', options.input, BufferBindingType.READ_ONLY_STORAGE );
   blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE ); // TODO: make sure this is u32
 
-  blueprint.add( 'main', `
-    var<workgroup> histogram_scratch: array<atomic<u32>, ${1 << bitsPerPass}>;
+  blueprint.add( 'main', wgsl`
+    var<workgroup> histogram_scratch: array<atomic<u32>, ${decimalS( 1 << bitsPerPass )}>;
     
-    @compute @workgroup_size(${workgroupSize})
+    @compute @workgroup_size(${decimalS( workgroupSize )})
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
       @builtin(local_invocation_id) local_id: vec3u,
@@ -52,11 +52,11 @@ const mainRadixHistogramWGSL = <T>(
       ${radixHistogramWGSL( blueprint, {
         workgroupSize: workgroupSize,
         grainSize: grainSize,
-        histogramScratch: 'histogram_scratch',
-        getBin: ( blueprint, index ) => order.getBitsWGSL( blueprint, `input[ ${index} ]`, pass * bitsPerPass, bitsPerPass ), // TODO: consider rename of getBin
+        histogramScratch: wgsl`histogram_scratch`,
+        getBin: index => order.getBitsWGSL( wgsl`input[ ${index} ]`, pass * bitsPerPass, bitsPerPass ), // TODO: consider rename of getBin
         numBins: ( 1 << bitsPerPass ),
         lengthExpression: lengthExpression,
-        storeHistogram: ( pipeline, index, value ) => `output[ ${index} ] = ${value};`
+        storeHistogram: ( index, value ) => wgsl`output[ ${index} ] = ${value};`
       } )}
     }
   ` );

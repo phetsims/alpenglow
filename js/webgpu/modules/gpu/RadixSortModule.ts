@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainRadixHistogramModule, MainRadixHistogramModuleOptions, MainRadixScatterModule, MainRadixScatterModuleOptions, PipelineBlueprint, PipelineBlueprintOptions, ScanModule, ScanModuleOptions, u32, U32Add, U32Type, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BitOrder, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainRadixHistogramModule, MainRadixHistogramModuleOptions, MainRadixScatterModule, MainRadixScatterModuleOptions, PipelineBlueprintOptions, ScanModule, ScanModuleOptions, U32Add, u32S, U32Type, wgsl, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -23,7 +23,7 @@ type SelfOptions<T> = {
   radixGrainSize: number;
   scanWorkgroupSize: number;
   scanGrainSize: number;
-  lengthExpression: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
+  lengthExpression: WGSLExpressionU32;
 
   // radix options
   bitsPerPass?: number;
@@ -257,7 +257,7 @@ export default class RadixSortModule<T> extends CompositeModule<number> {
 
       binaryOp: U32Add,
       exclusive: true,
-      lengthExpression: blueprint => `( ${ceilDivideConstantDivisorWGSL( options.lengthExpression( blueprint ), radixReduction )} << ${u32( options.bitsPerPass )} )`,
+      lengthExpression: wgsl`( ${ceilDivideConstantDivisorWGSL( options.lengthExpression, radixReduction )} << ${u32S( options.bitsPerPass )} )`,
 
       workgroupSize: options.scanWorkgroupSize,
       grainSize: options.scanGrainSize

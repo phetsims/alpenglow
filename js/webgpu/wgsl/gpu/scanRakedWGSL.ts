@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, RakedSizable, scanWGSL, toStripedIndexWGSL, u32, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, PipelineBlueprint, RakedSizable, scanWGSL, toStripedIndexWGSL, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type scanRakedWGSLOptions<T> = {
@@ -78,19 +78,19 @@ const scanRakedWGSL = <T>(
   // TODO: handle right-scans
   assert && assert( direction === 'left' );
 
-  return `
+  return wgsl`
     ${commentWGSL( 'begin scan_raked' )}
 
-    // TODO: consider factoring out ${localIndex} * ${u32( grainSize )}? -- it will take up an extra register?
+    // TODO: consider factoring out ${localIndex} * ${u32S( grainSize )}? -- it will take up an extra register?
 
     // TODO: isolate out into scan_sequential?
     // Sequential scan of each thread's tile (inclusive)
     ${commentWGSL( 'begin (sequential scan of tile)' )}
-    var value = ${scratch}[ ${localIndex} * ${u32( grainSize )} ];
-    ${unrollWGSL( 1, grainSize, i => `
+    var value = ${scratch}[ ${localIndex} * ${u32S( grainSize )} ];
+    ${unrollWGSL( 1, grainSize, i => wgsl`
       {
-        ${combineToValue( 'value', 'value', `${scratch}[ ${localIndex} * ${u32( grainSize )} + ${u32( i )} ]` )}
-        ${scratch}[ ${localIndex} * ${u32( grainSize )} + ${u32( i )} ] = value;
+        ${combineToValue( wgsl`value`, wgsl`value`, wgsl`${scratch}[ ${localIndex} * ${u32S( grainSize )} + ${u32S( i )} ]` )}
+        ${scratch}[ ${localIndex} * ${u32S( grainSize )} + ${u32S( i )} ] = value;
       }
     ` )}
     ${commentWGSL( 'end (sequential scan of tile)' )}
@@ -100,15 +100,15 @@ const scanRakedWGSL = <T>(
 
     // Scan the last-scanned element of each thread's tile (inclusive)
     ${scanWGSL( blueprint, {
-      value: 'value',
+      value: wgsl`value`,
       scratch: scratch,
       workgroupSize: workgroupSize,
       binaryOp: binaryOp,
-      mapScratchIndex: index => `( ${index} ) * ${u32( grainSize )} + ${u32( grainSize - 1 )}`,
+      mapScratchIndex: index => wgsl`( ${index} ) * ${u32S( grainSize )} + ${u32S( grainSize - 1 )}`,
       exclusive: false,
       needsValidScratch: true,
 
-      // both 'value' and the scratch value should be matching!
+      // both wgsl`'`value' and the scratch value should be matching!
       scratchPreloaded: true,
       valuePreloaded: true
     } )}
@@ -117,97 +117,97 @@ const scanRakedWGSL = <T>(
 
     // IF exclusive and we want the full reduced value, we'd need to extract it now.
     // TODO: we'll need to change indices if we allow right-scans(!)
-    ${storeReduction ? `
+    ${storeReduction ? wgsl`
       ${commentWGSL( 'begin (store reduction)' )}
-      if ( ${localIndex} == ${u32( workgroupSize - 1 )} ) {
+      if ( ${localIndex} == ${u32S( workgroupSize - 1 )} ) {
         ${storeReduction(
           stripeReducedOutput ? toStripedIndexWGSL( {
             i: workgroupIndex,
             workgroupSize: workgroupSize,
             grainSize: grainSize
           } ) : workgroupIndex,
-          'value'
+          wgsl`value`
         )}
       }
       ${commentWGSL( 'end (store reduction)' )}
-    ` : ''}
+    ` : wgsl``}
 
     // Add those values into all the other elements of the next tile
     ${commentWGSL( 'begin (add scanned values to tile)' )}
-    var added_value = select( ${binaryOp.identityWGSL( blueprint )}, ${scratch}[ ${localIndex} * ${u32( grainSize )} - 1u ], ${localIndex} > 0 );
-    ${getAddedValue ? `
+    var added_value = select( ${binaryOp.identityWGSL}, ${scratch}[ ${localIndex} * ${u32S( grainSize )} - 1u ], ${localIndex} > 0 );
+    ${getAddedValue ? wgsl`
       ${commentWGSL( 'begin (get global added values)' )}
 
       // Get the value we'll add to everything
-      var workgroup_added_value: ${binaryOp.type.valueType( blueprint )};
-      ${getAddedValue( 'workgroup_added_value' )}
+      var workgroup_added_value: ${binaryOp.type.valueType};
+      ${getAddedValue( wgsl`workgroup_added_value` )}
 
       // We need to LOAD the value before anything writes to it, since we'll be modifying those values
-      ${addedValueNeedsWorkgroupBarrier ? `
+      ${addedValueNeedsWorkgroupBarrier ? wgsl`
         workgroupBarrier();
-      ` : ''}
+      ` : wgsl``}
 
       // Update the last element of this tile (which would otherwise go untouched)
       {
-        let last_value = ${scratch}[ ${localIndex} * ${u32( grainSize )} + ${u32( grainSize - 1 )} ];
+        let last_value = ${scratch}[ ${localIndex} * ${u32S( grainSize )} + ${u32S( grainSize - 1 )} ];
 
-        var new_last_value: ${binaryOp.type.valueType( blueprint )};
-        ${combineToValue( 'new_last_value', 'workgroup_added_value', 'last_value' )}
+        var new_last_value: ${binaryOp.type.valueType};
+        ${combineToValue( wgsl`new_last_value`, wgsl`workgroup_added_value`, wgsl`last_value` )}
 
-        ${scratch}[ ${localIndex} * ${u32( grainSize )} + ${u32( grainSize - 1 )} ] = new_last_value;
+        ${scratch}[ ${localIndex} * ${u32S( grainSize )} + ${u32S( grainSize - 1 )} ] = new_last_value;
       }
 
       // Add the value to what we'll add to everything else
-      ${combineToValue( 'added_value', 'workgroup_added_value', 'added_value' )}
+      ${combineToValue( wgsl`added_value`, wgsl`workgroup_added_value`, wgsl`added_value` )}
 
       ${commentWGSL( 'end (get global added values)' )}
-    ` : `
+    ` : wgsl`
     `}
-    ${unrollWGSL( 0, grainSize - 1, i => `
+    ${unrollWGSL( 0, grainSize - 1, i => wgsl`
       {
-        let index = ${localIndex} * ${u32( grainSize )} + ${u32( i )};
-        var current_value: ${binaryOp.type.valueType( blueprint )};
-        ${combineToValue( 'current_value', 'added_value', `${scratch}[ index ]` )}
+        let index = ${localIndex} * ${u32S( grainSize )} + ${u32S( i )};
+        var current_value: ${binaryOp.type.valueType};
+        ${combineToValue( wgsl`current_value`, wgsl`added_value`, wgsl`${scratch}[ index ]` )}
         ${scratch}[ index ] = current_value;
       }
     ` )}
     ${commentWGSL( 'end (add scanned values to tile)' )}
     
     // TODO: consider shift at start to potentially avoid this workgroupBarrier?
-    ${exclusive ? `
+    ${exclusive ? wgsl`
       workgroupBarrier();
       
       // TODO: will it be more readable/maintainable for these two cases to be combined?
-      ${direction === 'left' ? `
-        let exclusive_base_index = ${localIndex} * ${u32( grainSize )};
-        var exclusive_value = select( ${binaryOp.identityWGSL( blueprint )}, ${scratch}[ exclusive_base_index - 1u ], exclusive_base_index > 0u );
+      ${direction === 'left' ? wgsl`
+        let exclusive_base_index = ${localIndex} * ${u32S( grainSize )};
+        var exclusive_value = select( ${binaryOp.identityWGSL}, ${scratch}[ exclusive_base_index - 1u ], exclusive_base_index > 0u );
         var next_value = ${scratch}[ exclusive_base_index ];
         workgroupBarrier();
-        ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => `
-          ${!isLast ? `
-            next_value = ${scratch}[ exclusive_base_index + ${u32( i )} ];
-          ` : ''}
-          ${scratch}[ exclusive_base_index + ${u32( i )} ] = exclusive_value;
-          ${!isLast ? `
+        ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => wgsl`
+          ${!isLast ? wgsl`
+            next_value = ${scratch}[ exclusive_base_index + ${u32S( i )} ];
+          ` : wgsl``}
+          ${scratch}[ exclusive_base_index + ${u32S( i )} ] = exclusive_value;
+          ${!isLast ? wgsl`
             exclusive_value = next_value;
-          ` : ''}
+          ` : wgsl``}
         ` )}
-      ` : `
-        let exclusive_base_index = ${localIndex} * ${u32( grainSize )} + ${u32( grainSize - 1 )};
-        var exclusive_value = select( ${binaryOp.identityWGSL( blueprint )}, ${scratch}[ exclusive_base_index + 1u ], exclusive_base_index < ${u32( workgroupSize - 1 )} );
+      ` : wgsl`
+        let exclusive_base_index = ${localIndex} * ${u32S( grainSize )} + ${u32S( grainSize - 1 )};
+        var exclusive_value = select( ${binaryOp.identityWGSL}, ${scratch}[ exclusive_base_index + 1u ], exclusive_base_index < ${u32S( workgroupSize - 1 )} );
         var next_value = ${scratch}[ exclusive_base_index ];
         workgroupBarrier();
-        ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => `
-          ${!isLast ? `
-            next_value = ${scratch}[ exclusive_base_index + ${u32( i )} ];
-          ` : ''}
-          ${scratch}[ exclusive_base_index - ${u32( i )} ] = exclusive_value;
-          ${!isLast ? `
+        ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => wgsl`
+          ${!isLast ? wgsl`
+            next_value = ${scratch}[ exclusive_base_index + ${u32S( i )} ];
+          ` : wgsl``}
+          ${scratch}[ exclusive_base_index - ${u32S( i )} ] = exclusive_value;
+          ${!isLast ? wgsl`
             exclusive_value = next_value;
-          ` : ''}
+          ` : wgsl``}
         ` )}
       `}
-    ` : ''}
+    ` : wgsl``}
 
     ${commentWGSL( 'end scan_raked' )}
   `;

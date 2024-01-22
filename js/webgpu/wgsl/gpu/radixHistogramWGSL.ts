@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ceilDivideConstantDivisorWGSL, commentWGSL, histogramWGSL, histogramWGSLOptions, u32, unrollWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLStatements, logRakedWGSL, U32Type } from '../../../imports.js';
+import { alpenglow, ceilDivideConstantDivisorWGSL, commentWGSL, histogramWGSL, histogramWGSLOptions, logRakedWGSL, PipelineBlueprint, u32S, U32Type, unrollWGSL, wgsl, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import WithoutNull from '../../../../../phet-core/js/types/WithoutNull.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
 
@@ -14,7 +14,7 @@ export type radixHistogramWGSLOptions = {
   numBins: number;
 
   // indices up to numBins * Math.ceil( length / ( workgroupSize * grainSize ) )
-  storeHistogram: ( blueprint: PipelineBlueprint, index: WGSLExpressionU32, value: WGSLExpressionU32 ) => WGSLStatements;
+  storeHistogram: ( index: WGSLExpressionU32, value: WGSLExpressionU32 ) => WGSLStatements;
 } & WithoutNull<WithRequired<histogramWGSLOptions, 'lengthExpression'>, 'lengthExpression'>;
 
 const radixHistogramWGSL = (
@@ -28,7 +28,7 @@ const radixHistogramWGSL = (
   const numBins = options.numBins;
   const storeHistogram = options.storeHistogram;
 
-  return `
+  return wgsl`
     ${commentWGSL( 'begin radix_histogram' )}
   
     {
@@ -39,20 +39,20 @@ const radixHistogramWGSL = (
         type: U32Type,
         workgroupSize: workgroupSize,
         grainSize: grainSize,
-        relativeLengthExpression: u32( workgroupSize * grainSize ),
-        relativeAccessExpression: i => `atomicLoad( &histogram_scratch[ ${i} ] )`
+        relativeLengthExpression: u32S( workgroupSize * grainSize ),
+        relativeAccessExpression: i => wgsl`atomicLoad( &histogram_scratch[ ${i} ] )`
       } )}
       
-      let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression( blueprint ), workgroupSize * grainSize )};
+      let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression, workgroupSize * grainSize )};
       if ( workgroup_id.x < num_valid_workgroups ) {
         // Should be uniform control flow for the workgroup
         workgroupBarrier();
   
-        ${unrollWGSL( 0, Math.ceil( numBins / workgroupSize ), i => `
+        ${unrollWGSL( 0, Math.ceil( numBins / workgroupSize ), i => wgsl`
           {
-            let local_index = ${u32( workgroupSize * i )} + local_id.x;
-            if ( local_index < ${u32( numBins )} ) {
-              ${storeHistogram( blueprint, 'local_index * num_valid_workgroups + workgroup_id.x', 'atomicLoad( &histogram_scratch[ local_index ] )' )}
+            let local_index = ${u32S( workgroupSize * i )} + local_id.x;
+            if ( local_index < ${u32S( numBins )} ) {
+              ${storeHistogram( wgsl`local_index * num_valid_workgroups + workgroup_id.x`, wgsl`atomicLoad( &histogram_scratch[ local_index ] )` )}
             }
           }
         ` )}

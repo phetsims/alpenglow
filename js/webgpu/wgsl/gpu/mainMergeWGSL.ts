@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, BufferSlot, CompareOrder, mergeWGSL, PipelineBlueprint, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BufferBindingType, BufferSlot, CompareOrder, decimalS, mergeWGSL, PipelineBlueprint, wgsl, WGSLExpressionU32 } from '../../../imports.js';
 
 export type mainMergeWGSLOptions<T> = {
   inputA: BufferSlot<T[]>;
@@ -20,8 +20,8 @@ export type mainMergeWGSLOptions<T> = {
 
   order: CompareOrder<T>;
 
-  lengthExpressionA: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
-  lengthExpressionB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
+  lengthExpressionA: WGSLExpressionU32; // TODO: support optional
+  lengthExpressionB: WGSLExpressionU32; // TODO: support optional
 };
 
 export const MAIN_MERGE_DEFAULTS = {
@@ -44,22 +44,22 @@ const mainMergeWGSL = <T>(
   blueprint.addSlot( 'b', options.inputB, BufferBindingType.READ_ONLY_STORAGE );
   blueprint.addSlot( 'c', options.output, BufferBindingType.STORAGE );
 
-  blueprint.add( 'main', `
-    var<workgroup> scratch_a: array<${order.type.valueType( blueprint )},${sharedMemorySize}>;
-    var<workgroup> scratch_b: array<${order.type.valueType( blueprint )},${sharedMemorySize}>;
+  blueprint.add( 'main', wgsl`
+    var<workgroup> scratch_a: array<${order.type.valueType},${decimalS( sharedMemorySize )}>;
+    var<workgroup> scratch_b: array<${order.type.valueType},${decimalS( sharedMemorySize )}>;
     
-    @compute @workgroup_size(${workgroupSize})
+    @compute @workgroup_size(${decimalS( workgroupSize )})
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
       ${mergeWGSL( blueprint, {
-        workgroupA: 'scratch_a',
-        workgroupB: 'scratch_b',
-        loadFromA: ( blueprint, indexA ) => `a[ ${indexA} ]`,
-        loadFromB: ( blueprint, indexB ) => `b[ ${indexB} ]`,
-        storeOutput: ( blueprint, indexOutput, value ) => `c[ ${indexOutput} ] = ${value};`,
+        workgroupA: wgsl`scratch_a`,
+        workgroupB: wgsl`scratch_b`,
+        loadFromA: indexA => wgsl`a[ ${indexA} ]`,
+        loadFromB: indexB => wgsl`b[ ${indexB} ]`,
+        storeOutput: ( indexOutput, value ) => wgsl`c[ ${indexOutput} ] = ${value};`,
         lengthA: lengthExpressionA,
         lengthB: lengthExpressionB,
         workgroupSize: workgroupSize,

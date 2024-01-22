@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, u32, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, u32S, wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 
 export type bitPackRadixIncrementWGSLOptions = {
   // u32 name
@@ -41,10 +41,10 @@ const bitPackRadixIncrementWGSL = (
   const countsPerComponent = Math.floor( 32 / countBitQuantity );
   assert && assert( bitVectorSize * countsPerComponent >= ( 1 << bitsPerInnerPass ), 'Not enough space for bit-packing' );
 
-  return `
-    ${bitVector}${bitVectorSize > 1 ? `[ ${
-      countsPerComponent === 1 ? bits : `( ${bits} ) / ${u32( countsPerComponent )}`
-    } ]` : ''} += 1u${countsPerComponent === 1 ? '' : ` << ( ( ( ${bits} ) % ${u32( countsPerComponent )} ) * ${u32( countBitQuantity )} )`};
+  return wgsl`
+    ${bitVector}${bitVectorSize > 1 ? wgsl`[ ${
+      countsPerComponent === 1 ? bits : wgsl`( ${bits} ) / ${u32S( countsPerComponent )}`
+    } ]` : wgsl``} += 1u${countsPerComponent === 1 ? wgsl`` : wgsl` << ( ( ( ${bits} ) % ${u32S( countsPerComponent )} ) * ${u32S( countBitQuantity )} )`};
   `;
 };
 

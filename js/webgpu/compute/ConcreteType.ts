@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, u32, PipelineBlueprint, i32 } from '../../imports.js';
+import { alpenglow, ByteEncoder, decimalS, i32S, u32S, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLType, WGSLVariableName } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Random from '../../../../dot/js/Random.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
@@ -15,15 +15,6 @@ import Vector4 from '../../../../dot/js/Vector4.js';
 // eslint-disable-next-line bad-sim-text
 const random = new Random();
 
-export type WGSLExpression = string;
-export type WGSLExpressionU32 = WGSLExpression;
-export type WGSLExpressionI32 = WGSLExpression;
-export type WGSLExpressionBool = WGSLExpression;
-export type WGSLExpressionT = WGSLExpression; // For use when we have a generic type
-export type WGSLStatements = string;
-export type WGSLModuleDeclarations = string;
-export type WGSLVariableName = string;
-export type WGSLBinaryExpression = ( a: WGSLExpression, b: WGSLExpression ) => WGSLExpression;
 export type WGSLBinaryStatements = ( value: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => WGSLStatements;
 
 type StoreStatementCallback = ( offset: WGSLExpressionU32, u32expr: WGSLExpressionU32 ) => WGSLStatements;
@@ -40,7 +31,7 @@ type ConcreteType<T = unknown> = {
   equals: ( a: T, b: T ) => boolean;
 
   // WGSL
-  equalsWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
+  equalsWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
 
   // Encodes a given value into the end of the encoder
   encode( value: T, encoder: ByteEncoder ): void;
@@ -49,8 +40,8 @@ type ConcreteType<T = unknown> = {
   decode( encoder: ByteEncoder, offset: number ): T;
 
   // WGSL representation
-  // TODO: consider rename to getValueType? valueTypeWGSL?
-  valueType: ( blueprint: PipelineBlueprint ) => string;
+  // TODO: consider rename to valueTypeWGSL?
+  valueType: WGSLType;
   writeU32s(
     // given an expr:u32 offset and expr:u32 value, it will store the value at the offset
     storeStatement: StoreStatementCallback,
@@ -117,12 +108,12 @@ export type BinaryOp<T> = {
   apply: ( a: T, b: T ) => T;
 
   // WGSL
-  identityWGSL: ( blueprint: PipelineBlueprint ) => WGSLExpressionT;
-  // TODO: Take blueprint
+  identityWGSL: WGSLExpressionT;
   combineExpression?: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionT;
 
   // TODO: Don't have this, if needed just rely on a function placed on the blueprint(!)
-  combineStatements?: ( varName: string, a: string, b: string ) => WGSLStatements;
+  // TODO: remove this(!)
+  combineStatements?: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLStatements;
   atomicName?: string;
 };
 
@@ -133,8 +124,8 @@ export type BitOrder<T> = {
   // TS
   getBits: ( value: T, bitOffset: number, bitQuantity: number ) => number;
 
-  // WGSL TODO support statements(!) --- or do we need that? Could use function-call overhead
-  getBitsWGSL: ( blueprint: PipelineBlueprint, value: WGSLExpressionT, bitOffset: number, bitQuantity: number ) => WGSLExpressionU32;
+  // WGSL
+  getBitsWGSL: ( value: WGSLExpressionT, bitOffset: number, bitQuantity: number ) => WGSLExpressionU32;
 };
 
 export type CompareOrder<T> = {
@@ -145,15 +136,9 @@ export type CompareOrder<T> = {
   compare: ( a: T, b: T ) => number;
 
   // WGSL
-  // ( a: expr:T, b: expr:T ) => expr:i32
-  // TODO: Take blueprint
-  compareWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionI32;
-  // ( a: expr:T, b: expr:T ) => expr:bool
-  // TODO: Take blueprint
-  greaterThanWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
-  // ( a: expr:T, b: expr:T ) => expr:bool
-  // TODO: Take blueprint
-  lessThanOrEqualWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionI32;
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ) => WGSLExpressionBool;
 };
 
 export type Order<T> = BitOrder<T> & CompareOrder<T>;
@@ -187,10 +172,10 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
       return true;
     },
 
-    equalsWGSL( blueprint: PipelineBlueprint, a: string, b: string ): string {
-      return `( ${_.range( 0, size ).map( i => {
-        return type.equalsWGSL( blueprint, `${a}[ ${u32( i )} ]`, `${b}[ ${u32( i )} ]` );
-      } ).join( ' && ' )} )`;
+    equalsWGSL( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool {
+      return wgslJoin( ' && ', _.range( 0, size ).map( i => {
+        return type.equalsWGSL( wgsl`${a}[ ${u32S( i )} ]`, wgsl`${b}[ ${u32S( i )} ]` );
+      } ) );
     },
 
     encode( value: T[], encoder: ByteEncoder ): void {
@@ -211,14 +196,14 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
       return array;
     },
 
-    valueType: ( blueprint: PipelineBlueprint ) => `array<${type.valueType( blueprint )}, ${size}>`,
+    valueType: wgsl`array<${type.valueType}, ${decimalS( size )}>`,
     writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
-      return _.range( 0, size ).map( i => {
+      return wgslJoin( '\n', _.range( 0, size ).map( i => {
         return type.writeU32s(
-          ( offset, u32expr ) => storeStatement( `( ${offset} + ${u32( i * u32sPerElement )} )`, u32expr ),
-          `${value}[ ${u32( i )} ]`
+          ( offset, u32expr ) => storeStatement( wgsl`( ${offset} + ${u32S( i * u32sPerElement )} )`, u32expr ),
+          wgsl`${value}[ ${u32S( i )} ]`
         );
-      } ).join( '\n' );
+      } ) );
     },
 
     wgslAlign: type.wgslAlign,
@@ -235,7 +220,7 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
 };
 alpenglow.register( 'getArrayType', getArrayType );
 
-export const getCastedType = <T>( type: ConcreteType<T>, valueType: ( blueprint: PipelineBlueprint ) => string ): ConcreteType<T> => {
+export const getCastedType = <T>( type: ConcreteType<T>, valueType: WGSLType ): ConcreteType<T> => {
   return {
     // eslint-disable-next-line no-object-spread-on-non-literals
     ...type,
@@ -253,8 +238,8 @@ export const U32Type: ConcreteType<number> = {
     return a === b;
   },
 
-  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
-    return `( ${a} == ${b} )`;
+  equalsWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} == ${b} )`;
   },
 
   encode( value: number, encoder: ByteEncoder ): void {
@@ -264,10 +249,10 @@ export const U32Type: ConcreteType<number> = {
     return encoder.fullU32Array[ offset ];
   },
 
-  valueType: () => 'u32',
+  valueType: wgsl`u32`,
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
-    return `
-       ${storeStatement( '0u', value )}
+    return wgsl`
+       ${storeStatement( wgsl`0u`, value )}
     `;
   },
   wgslAlign: 4,
@@ -287,8 +272,8 @@ export const U32AtomicType: ConcreteType<number> = {
     return a === b;
   },
 
-  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
-    return `( atomicLoad( &${a} ) == atomicLoad( &${b} ) )`;
+  equalsWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( atomicLoad( &${a} ) == atomicLoad( &${b} ) )`;
   },
 
   encode( value: number, encoder: ByteEncoder ): void {
@@ -298,10 +283,10 @@ export const U32AtomicType: ConcreteType<number> = {
     return encoder.fullU32Array[ offset ];
   },
 
-  valueType: () => 'atomic<u32>',
+  valueType: wgsl`atomic<u32>`,
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
-    return `
-       ${storeStatement( '0u', `atomicLoad( &${value} )` )}
+    return wgsl`
+       ${storeStatement( wgsl`0u`, wgsl`atomicLoad( &${value} )` )}
     `;
   },
   wgslAlign: 4,
@@ -321,9 +306,9 @@ export const U32Add: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.add,
   apply: ( a: number, b: number ): number => a + b,
 
-  identityWGSL: () => u32( U32_IDENTITY_VALUES.add ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
+  identityWGSL: u32S( U32_IDENTITY_VALUES.add ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} + ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
 alpenglow.register( 'U32Add', U32Add );
@@ -336,9 +321,9 @@ export const U32Min: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.min,
   apply: ( a: number, b: number ): number => Math.min( a, b ),
 
-  identityWGSL: () => u32( U32_IDENTITY_VALUES.min ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `min( ${a}, ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = min( ${a} + ${b} );`,
+  identityWGSL: u32S( U32_IDENTITY_VALUES.min ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`min( ${a}, ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = min( ${a} + ${b} );`,
   atomicName: 'atomicMin'
 };
 alpenglow.register( 'U32Min', U32Min );
@@ -351,9 +336,9 @@ export const U32Max: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.max,
   apply: ( a: number, b: number ): number => Math.max( a, b ),
 
-  identityWGSL: () => u32( U32_IDENTITY_VALUES.max ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `max( ${a}, ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = max( ${a} + ${b} );`,
+  identityWGSL: u32S( U32_IDENTITY_VALUES.max ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`max( ${a}, ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = max( ${a} + ${b} );`,
   atomicName: 'atomicMax'
 };
 alpenglow.register( 'U32Max', U32Max );
@@ -366,9 +351,9 @@ export const U32And: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.and,
   apply: ( a: number, b: number ): number => ( a & b ) >>> 0,
 
-  identityWGSL: () => u32( U32_IDENTITY_VALUES.and ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} & ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} & ${b} );`,
+  identityWGSL: u32S( U32_IDENTITY_VALUES.and ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} & ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} & ${b} );`,
   atomicName: 'atomicAnd'
 };
 alpenglow.register( 'U32And', U32And );
@@ -381,9 +366,9 @@ export const U32Or: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.or,
   apply: ( a: number, b: number ): number => ( a | b ) >>> 0,
 
-  identityWGSL: () => u32( U32_IDENTITY_VALUES.or ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} | ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} | ${b} );`,
+  identityWGSL: u32S( U32_IDENTITY_VALUES.or ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} | ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} | ${b} );`,
   atomicName: 'atomicOr'
 };
 alpenglow.register( 'U32Or', U32Or );
@@ -396,9 +381,9 @@ export const U32Xor: BinaryOp<number> = {
   identity: U32_IDENTITY_VALUES.xor,
   apply: ( a: number, b: number ): number => ( a ^ b ) >>> 0,
 
-  identityWGSL: () => u32( U32_IDENTITY_VALUES.xor ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} ^ ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} ^ ${b} );`,
+  identityWGSL: u32S( U32_IDENTITY_VALUES.xor ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} ^ ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} ^ ${b} );`,
   atomicName: 'atomicXor'
 };
 alpenglow.register( 'U32Xor', U32Xor );
@@ -415,23 +400,23 @@ export const U32Order: Order<number> = {
     return ( ( value >>> bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0;
   },
 
-  compareWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
     // TODO: THIS FAILS RANGE CHECKS
     // return `( i32( ${a} ) - i32( ${b} ) )`;
 
-    return `select( select( 0i, 1i, ${a} > ${b} ), -1i, ${a} < ${b} )`;
+    return wgsl`select( select( 0i, 1i, ${a} > ${b} ), -1i, ${a} < ${b} )`;
   },
 
-  greaterThanWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
-    return `( ${a} > ${b} )`;
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} > ${b} )`;
   },
 
-  lessThanOrEqualWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
-    return `( ${a} <= ${b} )`;
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} <= ${b} )`;
   },
 
-  getBitsWGSL: ( blueprint: PipelineBlueprint, value: WGSLExpressionT, bitOffset: number, bitQuantity: number ): string => {
-    return `( ( ${value} >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
+  getBitsWGSL: ( value: WGSLExpressionT, bitOffset: number, bitQuantity: number ): WGSLExpressionU32 => {
+    return wgsl`( ( ${value} >> ${u32S( bitOffset )} ) & ${u32S( ( 1 << bitQuantity ) - 1 )} )`;
   }
 };
 alpenglow.register( 'U32Order', U32Order );
@@ -448,21 +433,21 @@ export const U32ReverseOrder: Order<number> = {
     return ( ( ( 0xffffffff - value ) >>> bitOffset ) & ( ( 1 << bitQuantity ) - 1 ) ) >>> 0;
   },
 
-  compareWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
-    return `select( select( 0i, 1i, ${a} < ${b} ), -1i, ${a} > ${b} )`;
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
+    return wgsl`select( select( 0i, 1i, ${a} < ${b} ), -1i, ${a} > ${b} )`;
   },
 
-  greaterThanWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
-    return `( ${a} < ${b} )`;
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} < ${b} )`;
   },
 
-  lessThanOrEqualWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
-    return `( ${a} >= ${b} )`;
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} >= ${b} )`;
   },
 
-  getBitsWGSL: ( blueprint: PipelineBlueprint, value: WGSLExpressionT, bitOffset: number, bitQuantity: number ): string => {
+  getBitsWGSL: ( value: WGSLExpressionT, bitOffset: number, bitQuantity: number ): WGSLExpressionU32 => {
     // TODO: is there a bitwise trick?
-    return `( ( ( 0xffffffffu - ${value} ) >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
+    return wgsl`( ( ( 0xffffffffu - ${value} ) >> ${u32S( bitOffset )} ) & ${u32S( ( 1 << bitQuantity ) - 1 )} )`;
   }
 };
 alpenglow.register( 'U32ReverseOrder', U32ReverseOrder );
@@ -477,8 +462,8 @@ export const I32Type: ConcreteType<number> = {
     return a === b;
   },
 
-  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
-    return `( ${a} == ${b} )`;
+  equalsWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} == ${b} )`;
   },
 
   encode( value: number, encoder: ByteEncoder ): void {
@@ -488,10 +473,10 @@ export const I32Type: ConcreteType<number> = {
     return encoder.fullI32Array[ offset ];
   },
 
-  valueType: () => 'i32',
+  valueType: wgsl`i32`,
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
-    return `
-       ${storeStatement( '0u', `bitcast<u32>( ${value} )` )}
+    return wgsl`
+       ${storeStatement( wgsl`0u`, wgsl`bitcast<u32>( ${value} )` )}
     `;
   },
   wgslAlign: 4,
@@ -511,8 +496,8 @@ export const I32AtomicType: ConcreteType<number> = {
     return a === b;
   },
 
-  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
-    return `( atomicLoad( &${a} ) == atomicLoad( &${b} ) )`;
+  equalsWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( atomicLoad( &${a} ) == atomicLoad( &${b} ) )`;
   },
 
   encode( value: number, encoder: ByteEncoder ): void {
@@ -522,10 +507,10 @@ export const I32AtomicType: ConcreteType<number> = {
     return encoder.fullU32Array[ offset ];
   },
 
-  valueType: () => 'atomic<i32>',
+  valueType: wgsl`atomic<i32>`,
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
-    return `
-       ${storeStatement( '0u', `bitcast<u32>( atomicLoad( &${value} ) )` )}
+    return wgsl`
+       ${storeStatement( wgsl`0u`, wgsl`bitcast<u32>( atomicLoad( &${value} ) )` )}
     `;
   },
   wgslAlign: 4,
@@ -545,9 +530,9 @@ export const I32Add: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.add,
   apply: ( a: number, b: number ): number => a + b,
 
-  identityWGSL: () => i32( I32_IDENTITY_VALUES.add ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`,
+  identityWGSL: i32S( I32_IDENTITY_VALUES.add ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} + ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
 alpenglow.register( 'I32Add', I32Add );
@@ -560,9 +545,9 @@ export const I32Min: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.min,
   apply: ( a: number, b: number ): number => Math.min( a, b ),
 
-  identityWGSL: () => i32( I32_IDENTITY_VALUES.min ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `min( ${a}, ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = min( ${a} + ${b} );`,
+  identityWGSL: i32S( I32_IDENTITY_VALUES.min ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`min( ${a}, ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = min( ${a} + ${b} );`,
   atomicName: 'atomicMin'
 };
 alpenglow.register( 'I32Min', I32Min );
@@ -575,9 +560,9 @@ export const I32Max: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.max,
   apply: ( a: number, b: number ): number => Math.max( a, b ),
 
-  identityWGSL: () => i32( I32_IDENTITY_VALUES.max ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `max( ${a}, ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = max( ${a} + ${b} );`,
+  identityWGSL: i32S( I32_IDENTITY_VALUES.max ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`max( ${a}, ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = max( ${a} + ${b} );`,
   atomicName: 'atomicMax'
 };
 alpenglow.register( 'I32Max', I32Max );
@@ -590,9 +575,9 @@ export const I32And: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.and,
   apply: ( a: number, b: number ): number => ( a & b ) >>> 0,
 
-  identityWGSL: () => i32( I32_IDENTITY_VALUES.and ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} & ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} & ${b} );`,
+  identityWGSL: i32S( I32_IDENTITY_VALUES.and ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} & ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} & ${b} );`,
   atomicName: 'atomicAnd'
 };
 alpenglow.register( 'I32And', I32And );
@@ -605,9 +590,9 @@ export const I32Or: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.or,
   apply: ( a: number, b: number ): number => ( a | b ) >>> 0,
 
-  identityWGSL: () => i32( I32_IDENTITY_VALUES.or ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} | ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} | ${b} );`,
+  identityWGSL: i32S( I32_IDENTITY_VALUES.or ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} | ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} | ${b} );`,
   atomicName: 'atomicOr'
 };
 alpenglow.register( 'I32Or', I32Or );
@@ -620,9 +605,9 @@ export const I32Xor: BinaryOp<number> = {
   identity: I32_IDENTITY_VALUES.xor,
   apply: ( a: number, b: number ): number => ( a ^ b ) >>> 0,
 
-  identityWGSL: () => i32( I32_IDENTITY_VALUES.xor ),
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} ^ ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ( ${a} ^ ${b} );`,
+  identityWGSL: i32S( I32_IDENTITY_VALUES.xor ),
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} ^ ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} ^ ${b} );`,
   atomicName: 'atomicXor'
 };
 alpenglow.register( 'I32Xor', I32Xor );
@@ -636,16 +621,16 @@ export const I32Order: CompareOrder<number> = {
     return a - b;
   },
 
-  compareWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
-    return `( ${a} - ${b} )`;
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
+    return wgsl`( ${a} - ${b} )`;
   },
 
-  greaterThanWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
-    return `( ${a} > ${b} )`;
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} > ${b} )`;
   },
 
-  lessThanOrEqualWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
-    return `( ${a} <= ${b} )`;
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} <= ${b} )`;
   }
 };
 alpenglow.register( 'I32Order', I32Order );
@@ -660,9 +645,9 @@ export const Vec2uType: ConcreteType<Vector2> = {
     return a.equals( b );
   },
 
-  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
+  equalsWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     // TODO: test
-    return `all( ${a} == ${b} )`;
+    return wgsl`all( ${a} == ${b} )`;
   },
 
   encode( value: Vector2, encoder: ByteEncoder ): void {
@@ -673,11 +658,11 @@ export const Vec2uType: ConcreteType<Vector2> = {
     return new Vector2( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ] );
   },
 
-  valueType: () => 'vec2u',
+  valueType: wgsl`vec2u`,
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
-    return `
-       ${storeStatement( '0u', `${value}.x` )}
-       ${storeStatement( '1u', `${value}.y` )}
+    return wgsl`
+       ${storeStatement( wgsl`0u`, wgsl`${value}.x` )}
+       ${storeStatement( wgsl`1u`, wgsl`${value}.y` )}
     `;
   },
   wgslAlign: 8,
@@ -700,9 +685,9 @@ export const Vec2uAdd: BinaryOp<Vector2> = {
   identity: Vector2.ZERO,
   apply: ( a: Vector2, b: Vector2 ): Vector2 => a.plus( b ),
 
-  identityWGSL: () => 'vec2u()',
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
+  identityWGSL: wgsl`vec2u()`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} + ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b};`
 };
 alpenglow.register( 'Vec2uAdd', Vec2uAdd );
 
@@ -720,9 +705,9 @@ export const Vec2uBic: BinaryOp<Vector2> = {
     );
   },
 
-  identityWGSL: () => 'vec2( 0u )',
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b} - min( ${a}.y, ${b}.x );`
+  identityWGSL: wgsl`vec2( 0u )`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b} - min( ${a}.y, ${b}.x );`
 };
 alpenglow.register( 'Vec2uBic', Vec2uBic );
 
@@ -746,28 +731,28 @@ export const Vec2uLexicographicalOrder: Order<Vector2> = {
   },
 
   // TODO: potentially stuff this in a function so it is more readable?
-  compareWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
-    return `select( select( select( select( 0i, 1i, ${a}.y > ${b}.y ), -1i, ${a}.y < ${b}.y ), 1i, ${a}.x > ${b}.x ), -1i, ${a}.x < ${b}.x )`;
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
+    return wgsl`select( select( select( select( 0i, 1i, ${a}.y > ${b}.y ), -1i, ${a}.y < ${b}.y ), 1i, ${a}.x > ${b}.x ), -1i, ${a}.x < ${b}.x )`;
   },
 
-  greaterThanWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
-    return `( ${a}.x > ${b}.x || ( ${a}.x == ${b}.x && ${a}.y > ${b}.y ) )`;
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a}.x > ${b}.x || ( ${a}.x == ${b}.x && ${a}.y > ${b}.y ) )`;
   },
 
-  lessThanOrEqualWGSL: ( blueprint: PipelineBlueprint, a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
-    return `( ${a}.x <= ${b}.x && ( ${a}.x != ${b}.x || ${a}.y <= ${b}.y ) )`;
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a}.x <= ${b}.x && ( ${a}.x != ${b}.x || ${a}.y <= ${b}.y ) )`;
   },
 
-  getBitsWGSL: ( blueprint: PipelineBlueprint, value: WGSLExpressionT, bitOffset: number, bitQuantity: number ): string => {
+  getBitsWGSL: ( value: WGSLExpressionT, bitOffset: number, bitQuantity: number ): WGSLExpressionU32 => {
     // NOTE: WGSL doesn't like `<< 32u`, so we split it like so.
     if ( bitOffset === 0 ) {
-      return `( ( ${value}.y >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
+      return wgsl`( ( ${value}.y >> ${u32S( bitOffset )} ) & ${u32S( ( 1 << bitQuantity ) - 1 )} )`;
     }
     else if ( bitOffset < 32 ) {
-      return `( ( ( ${value}.x << ${u32( 32 - bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} ) | ( ( ${value}.y >> ${u32( bitOffset )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} ) )`;
+      return wgsl`( ( ( ${value}.x << ${u32S( 32 - bitOffset )} ) & ${u32S( ( 1 << bitQuantity ) - 1 )} ) | ( ( ${value}.y >> ${u32S( bitOffset )} ) & ${u32S( ( 1 << bitQuantity ) - 1 )} ) )`;
     }
     else {
-      return `( ( ${value}.x >> ${u32( bitOffset - 32 )} ) & ${u32( ( 1 << bitQuantity ) - 1 )} )`;
+      return wgsl`( ( ${value}.x >> ${u32S( bitOffset - 32 )} ) & ${u32S( ( 1 << bitQuantity ) - 1 )} )`;
     }
   }
 };
@@ -783,9 +768,9 @@ export const Vec3uType: ConcreteType<Vector3> = {
     return a.equals( b );
   },
 
-  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
+  equalsWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     // TODO: test
-    return `all( ${a} == ${b} )`;
+    return wgsl`all( ${a} == ${b} )`;
   },
 
   encode( value: Vector3, encoder: ByteEncoder ): void {
@@ -797,12 +782,12 @@ export const Vec3uType: ConcreteType<Vector3> = {
     return new Vector3( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ], encoder.fullU32Array[ offset + 2 ] );
   },
 
-  valueType: () => 'vec3u',
+  valueType: wgsl`vec3u`,
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
-    return `
-       ${storeStatement( '0u', `${value}.x` )}
-       ${storeStatement( '1u', `${value}.y` )}
-       ${storeStatement( '2u', `${value}.z` )}
+    return wgsl`
+       ${storeStatement( wgsl`0u`, wgsl`${value}.x` )}
+       ${storeStatement( wgsl`1u`, wgsl`${value}.y` )}
+       ${storeStatement( wgsl`2u`, wgsl`${value}.z` )}
     `;
   },
   wgslAlign: 16,
@@ -826,9 +811,9 @@ export const Vec3uAdd: BinaryOp<Vector3> = {
   identity: Vector3.ZERO,
   apply: ( a: Vector3, b: Vector3 ): Vector3 => a.plus( b ),
 
-  identityWGSL: () => 'vec3u()',
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
+  identityWGSL: wgsl`vec3u()`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} + ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b};`
 };
 alpenglow.register( 'Vec3uAdd', Vec3uAdd );
 
@@ -842,9 +827,9 @@ export const Vec4uType: ConcreteType<Vector4> = {
     return a.equals( b );
   },
 
-  equalsWGSL: ( blueprint: PipelineBlueprint, a: string, b: string ): string => {
+  equalsWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
     // TODO: test
-    return `all( ${a} == ${b} )`;
+    return wgsl`all( ${a} == ${b} )`;
   },
 
   encode( value: Vector4, encoder: ByteEncoder ): void {
@@ -857,13 +842,13 @@ export const Vec4uType: ConcreteType<Vector4> = {
     return new Vector4( encoder.fullU32Array[ offset ], encoder.fullU32Array[ offset + 1 ], encoder.fullU32Array[ offset + 2 ], encoder.fullU32Array[ offset + 3 ] );
   },
 
-  valueType: () => 'vec4u',
+  valueType: wgsl`vec4u`,
   writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
-    return `
-       ${storeStatement( '0u', `${value}.x` )}
-       ${storeStatement( '1u', `${value}.y` )}
-       ${storeStatement( '2u', `${value}.z` )}
-       ${storeStatement( '3u', `${value}.w` )}
+    return wgsl`
+       ${storeStatement( wgsl`0u`, wgsl`${value}.x` )}
+       ${storeStatement( wgsl`1u`, wgsl`${value}.y` )}
+       ${storeStatement( wgsl`2u`, wgsl`${value}.z` )}
+       ${storeStatement( wgsl`3u`, wgsl`${value}.w` )}
     `;
   },
 
@@ -889,8 +874,8 @@ export const Vec4uAdd: BinaryOp<Vector4> = {
   identity: Vector4.ZERO,
   apply: ( a: Vector4, b: Vector4 ): Vector4 => a.plus( b ),
 
-  identityWGSL: () => 'vec4u()',
-  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => `( ${a} + ${b} )`,
-  combineStatements: ( varName: string, a: string, b: string ) => `${varName} = ${a} + ${b};`
+  identityWGSL: wgsl`vec4u()`,
+  combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} + ${b} )`,
+  combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b};`
 };
 alpenglow.register( 'Vec4uAdd', Vec4uAdd );

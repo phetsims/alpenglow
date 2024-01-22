@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, decimalS, loadReducedWGSL, loadReducedWGSLOptions, logStringWGSL, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions, toConvergentIndexWGSL, toStripedIndexWGSL, wgsl } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -54,10 +54,10 @@ const mainReduceWGSL = <T>(
   blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE );
 
   // TODO: generate storage binding and variable fully from Binding?
-  blueprint.add( 'main', `
-    var<workgroup> scratch: array<${binaryOp.type.valueType( blueprint )}, ${workgroupSize}>;
+  blueprint.add( 'main', wgsl`
+    var<workgroup> scratch: array<${binaryOp.type.valueType}, ${decimalS( workgroupSize )}>;
     
-    @compute @workgroup_size(${workgroupSize})
+    @compute @workgroup_size(${decimalS( workgroupSize )})
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
       @builtin(local_invocation_id) local_id: vec3u,
@@ -66,23 +66,23 @@ const mainReduceWGSL = <T>(
       ${logStringWGSL( blueprint, `mainReduceWGSL start ${binaryOp.name}` )}
     
       ${loadReducedWGSL( blueprint, combineOptions<loadReducedWGSLOptions<T>>( {
-        value: 'value',
+        value: wgsl`value`,
         binaryOp: binaryOp,
-        loadExpression: i => `input[ ${i} ]`,
+        loadExpression: i => wgsl`input[ ${i} ]`,
         workgroupSize: workgroupSize,
         grainSize: grainSize
       }, options.loadReducedOptions ) )}
     
-      ${convergentRemap ? `
-        scratch[ ${toConvergentIndexWGSL( { i: 'local_id.x', size: workgroupSize } )} ] = value;
+      ${convergentRemap ? wgsl`
+        scratch[ ${toConvergentIndexWGSL( { i: wgsl`local_id.x`, size: workgroupSize } )} ] = value;
     
         workgroupBarrier();
-      ` : ''}
+      ` : wgsl``}
     
       ${reduceWGSL( blueprint, combineOptions<reduceWGSLOptions<T>>( {
-        value: 'value',
+        value: wgsl`value`,
         binaryOp: binaryOp,
-        scratch: 'scratch',
+        scratch: wgsl`scratch`,
         workgroupSize: workgroupSize,
         scratchPreloaded: convergentRemap, // if we convergently reloaded, we don't need to update the scratch
         valuePreloaded: !convergentRemap // if we convergently reloaded, we'll need to load the value from scratch
@@ -90,10 +90,10 @@ const mainReduceWGSL = <T>(
     
       if ( local_id.x == 0u ) {
         output[ ${stripeOutput ? toStripedIndexWGSL( {
-          i: 'workgroup_id.x',
+          i: wgsl`workgroup_id.x`,
           workgroupSize: workgroupSize,
           grainSize: grainSize
-        } ) : 'workgroup_id.x'} ] = value;
+        } ) : wgsl`workgroup_id.x`} ] = value;
       }
     }
   ` );

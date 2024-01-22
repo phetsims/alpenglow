@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, ConcreteType, getArrayType, HistogramModule, HistogramModuleOptions, Procedure, Routine, u32, U32AtomicType, U32Type, Vec2uType } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, ConcreteType, getArrayType, HistogramModule, HistogramModuleOptions, Procedure, Routine, U32AtomicType, u32S, U32Type, Vec2uType, wgsl } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
@@ -27,7 +27,7 @@ const testHistogramModule = <T>( options: HistogramModuleTestOptions<T> ) => {
     const module = new HistogramModule( combineOptions<HistogramModuleOptions<T>>( {
       input: inputSlot,
       output: outputSlot,
-      lengthExpression: blueprint => u32( options.inputSize )
+      lengthExpression: u32S( options.inputSize )
     }, options ) );
 
     const routine = await Routine.create(
@@ -72,7 +72,7 @@ const testHistogramModule = <T>( options: HistogramModuleTestOptions<T> ) => {
     numBins: 256,
     type: U32Type,
     getBinTS: value => value % 256,
-    getBin: ( pipeline, value ) => `( ${value} % 256u )`
+    getBin: value => wgsl`( ${value} % 256u )`
   } );
 
   testHistogramModule<Vector2>( {
@@ -82,6 +82,6 @@ const testHistogramModule = <T>( options: HistogramModuleTestOptions<T> ) => {
     numBins: 256,
     type: Vec2uType,
     getBinTS: value => ( ( value.x % 10203 ) + ( value.y % 1234 ) ) % 256,
-    getBin: ( pipeline, value ) => `( ( ( ${value}.x % 10203u ) + ( ${value}.y % 1234u ) ) % 256u )`
+    getBin: value => wgsl`( ( ( ${value}.x % 10203u ) + ( ${value}.y % 1234u ) ) % 256u )`
   } );
 }

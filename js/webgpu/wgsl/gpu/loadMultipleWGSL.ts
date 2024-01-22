@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, ConcreteType, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, commentWGSL, ConcreteType, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32S, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable, WGSLString, wgsl, wgslJoin } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type loadMultipleWGSLOptions<T> = {
@@ -24,7 +24,7 @@ export type loadMultipleWGSLOptions<T> = {
   type: ConcreteType<T>;
 
   // if a length is provided, used to map things out-of-range
-  outOfRangeValue?: ( ( blueprint: PipelineBlueprint ) => WGSLExpressionT ) | null;
+  outOfRangeValue?: WGSLExpressionT | null;
 
   // The actual order of the data in memory (needed for range checks, not required if range checks are disabled)
   inputOrder: 'blocked' | 'striped';
@@ -96,16 +96,16 @@ const loadMultipleWGSL = <T>(
   // TODO: identity vs outOfRangeValue
   if ( inputAccessOrder === 'blocked' ) {
     if ( factorOutSubexpressions ) {
-      outerDeclarations.push( `let base_blocked_index = ${u32( grainSize )} * ${globalIndex};` );
-      loadDeclarations.push( i => `let blocked_index = base_blocked_index + ${u32( i )};` ); // TODO: simplify i=0?
-      loadIndexExpression = i => 'blocked_index';
+      outerDeclarations.push( wgsl`let base_blocked_index = ${u32S( grainSize )} * ${globalIndex};` );
+      loadDeclarations.push( i => wgsl`let blocked_index = base_blocked_index + ${u32S( i )};` ); // TODO: simplify i=0?
+      loadIndexExpression = i => wgsl`blocked_index`;
       if ( lengthExpression !== null ) {
         // NOTE: only have to do the 'blocked' case, since for striped data we're not supporting blocked access order
         rangeCheckIndexExpression = loadIndexExpression;
       }
     }
     else {
-      loadIndexExpression = i => `${u32( grainSize )} * ${globalIndex} + ${u32( i )}`; // TODO: simplify i=0?
+      loadIndexExpression = i => wgsl`${u32S( grainSize )} * ${globalIndex} + ${u32S( i )}`; // TODO: simplify i=0?
       if ( lengthExpression !== null ) {
         // NOTE: only have to do the 'blocked' case, since for striped data we're not supporting blocked access order
         rangeCheckIndexExpression = loadIndexExpression;
@@ -115,20 +115,20 @@ const loadMultipleWGSL = <T>(
   else if ( inputAccessOrder === 'striped' ) {
     if ( factorOutSubexpressions ) {
       if ( inputOrder === 'striped' && lengthExpression ) {
-        outerDeclarations.push( `let base_workgroup = ${workgroupIndex} * ${u32( workgroupSize * grainSize )};` );
-        outerDeclarations.push( `let base_striped_index = base_workgroup + ${localIndex};` );
-        outerDeclarations.push( `let base_blocked_index = base_workgroup + ${localIndex} * ${u32( grainSize )};` );
+        outerDeclarations.push( wgsl`let base_workgroup = ${workgroupIndex} * ${u32S( workgroupSize * grainSize )};` );
+        outerDeclarations.push( wgsl`let base_striped_index = base_workgroup + ${localIndex};` );
+        outerDeclarations.push( wgsl`let base_blocked_index = base_workgroup + ${localIndex} * ${u32S( grainSize )};` );
       }
       else {
-        outerDeclarations.push( `let base_striped_index = ${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex};` );
+        outerDeclarations.push( wgsl`let base_striped_index = ${workgroupIndex} * ${u32S( workgroupSize * grainSize )} + ${localIndex};` );
       }
 
-      loadDeclarations.push( i => `let striped_index = base_striped_index + ${u32( i * workgroupSize )};` );
-      loadIndexExpression = () => 'striped_index';
+      loadDeclarations.push( i => wgsl`let striped_index = base_striped_index + ${u32S( i * workgroupSize )};` );
+      loadIndexExpression = () => wgsl`striped_index`;
 
       if ( lengthExpression !== null ) {
         if ( inputOrder === 'striped' ) {
-          rangeCheckIndexExpression = i => `base_blocked_index + ${u32( i )}`; // TODO: simplify i=0?
+          rangeCheckIndexExpression = i => wgsl`base_blocked_index + ${u32S( i )}`; // TODO: simplify i=0?
         }
         else if ( inputOrder === 'blocked' ) {
           rangeCheckIndexExpression = loadIndexExpression;
@@ -139,10 +139,10 @@ const loadMultipleWGSL = <T>(
       }
     }
     else {
-      loadIndexExpression = i => `${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex} + ${u32( i * workgroupSize )}`;
+      loadIndexExpression = i => wgsl`${workgroupIndex} * ${u32S( workgroupSize * grainSize )} + ${localIndex} + ${u32S( i * workgroupSize )}`;
       if ( lengthExpression !== null ) {
         if ( inputOrder === 'striped' ) {
-          rangeCheckIndexExpression = i => `${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex} * ${u32( grainSize )} + ${u32( i )}`; // TODO: simplify i=0?
+          rangeCheckIndexExpression = i => wgsl`${workgroupIndex} * ${u32S( workgroupSize * grainSize )} + ${localIndex} * ${u32S( grainSize )} + ${u32S( i )}`; // TODO: simplify i=0?
         }
         else if ( inputOrder === 'blocked' ) {
           rangeCheckIndexExpression = loadIndexExpression;
@@ -160,43 +160,43 @@ const loadMultipleWGSL = <T>(
   assert && assert( !rangeCheckIndexExpression === ( lengthExpression === null ), 'rangeCheckIndexExpression must be created iff length is provided' );
 
   const ifRangeCheck = ( i: number, trueStatements: WGSLStatements, falseStatements: WGSLStatements | null = null ) => {
-    return conditionalIfWGSL( rangeCheckIndexExpression ? `${rangeCheckIndexExpression( i )} < ${lengthExpression!( blueprint )}` : null, trueStatements, falseStatements );
+    return conditionalIfWGSL( rangeCheckIndexExpression ? wgsl`${rangeCheckIndexExpression( i )} < ${lengthExpression!}` : null, trueStatements, falseStatements );
   };
 
-  const indexedLoadStatements = ( varName: WGSLVariableName, i: number, declaration?: string ) => loadExpression ? `
-    ${declaration ? `${declaration} ` : ''}${varName} = ${loadExpression( loadIndexExpression!( i ) )};
-  ` : `
-    ${declaration ? `
-      var ${varName}: ${type.valueType( blueprint )};
-    ` : ''}
+  const indexedLoadStatements = ( varName: WGSLVariableName, i: number, declaration?: WGSLString ) => loadExpression ? wgsl`
+    ${declaration ? wgsl`${declaration} ` : wgsl``}${varName} = ${loadExpression( loadIndexExpression!( i ) )};
+  ` : wgsl`
+    ${declaration ? wgsl`
+      var ${varName}: ${type.valueType};
+    ` : wgsl``}
     ${loadStatements!( varName, loadIndexExpression!( i ) )}
   `;
 
   // TODO: more unique names to prevent namespace collision!
-  return `
+  return wgsl`
     ${commentWGSL( 'begin load_multiple' )}
     {
-      ${outerDeclarations.join( '\n' )}
-      ${unrollWGSL( 0, grainSize, i => `
+      ${wgslJoin( '\n', outerDeclarations )}
+      ${unrollWGSL( 0, grainSize, i => wgsl`
         {
-          ${loadDeclarations.map( declaration => declaration( i ) ).join( '\n' )}
+          ${wgslJoin( '\n', loadDeclarations.map( declaration => declaration( i ) ) )}
 
-          ${outOfRangeValue ? `
-            var lm_val: ${type.valueType( blueprint )};
-            ${ifRangeCheck( i, `
-              ${indexedLoadStatements( 'lm_val', i )}
-            `, `
-              lm_val = ${outOfRangeValue( blueprint )};
+          ${outOfRangeValue ? wgsl`
+            var lm_val: ${type.valueType};
+            ${ifRangeCheck( i, wgsl`
+              ${indexedLoadStatements( wgsl`lm_val`, i )}
+            `, wgsl`
+              lm_val = ${outOfRangeValue};
             ` )}
 
             // TODO: can we further simplify?
-            ${storeStatements( `${loadIndexExpression!( i )} - ${workgroupIndex} * ${u32( workgroupSize * grainSize )}`, 'lm_val' )}
-          ` : `
-            ${ifRangeCheck( i, `
-              var lm_val: ${type.valueType( blueprint )};
-              ${indexedLoadStatements( 'lm_val', i )}
+            ${storeStatements( wgsl`${loadIndexExpression!( i )} - ${workgroupIndex} * ${u32S( workgroupSize * grainSize )}`, wgsl`lm_val` )}
+          ` : wgsl`
+            ${ifRangeCheck( i, wgsl`
+              var lm_val: ${type.valueType};
+              ${indexedLoadStatements( wgsl`lm_val`, i )}
 
-              ${storeStatements( `${loadIndexExpression!( i )} - ${workgroupIndex} * ${u32( workgroupSize * grainSize )}`, 'lm_val' )}
+              ${storeStatements( wgsl`${loadIndexExpression!( i )} - ${workgroupIndex} * ${u32S( workgroupSize * grainSize )}`, wgsl`lm_val` )}
             ` )}
           `}
         }

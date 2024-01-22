@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, MainScanModule, MainScanModuleOptions, Module, PipelineBlueprint, PipelineBlueprintOptions, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, MainScanModule, MainScanModuleOptions, Module, PipelineBlueprintOptions, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 
@@ -20,7 +20,7 @@ type SelfOptions<T> = {
 
   workgroupSize: number;
   grainSize: number;
-  lengthExpression: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32;
+  lengthExpression: WGSLExpressionU32;
 
   // TODO: instead of these, get fusable data operators
   inputOrder?: 'blocked' | 'striped';
@@ -139,7 +139,7 @@ export default class ScanModule<T> extends CompositeModule<number> {
         binaryOp: options.binaryOp,
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
-        lengthExpression: options.lengthExpression ? blueprint => ceilDivideConstantDivisorWGSL( options.lengthExpression( blueprint ), perStageReduction ) : null,
+        lengthExpression: options.lengthExpression ? ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction ) : null,
         inputOrder: options.internalStriping ? 'striped' : 'blocked',
         inputAccessOrder: options.inputAccessOrder,
         exclusive: options.areScannedReductionsExclusive,
@@ -214,7 +214,7 @@ export default class ScanModule<T> extends CompositeModule<number> {
         binaryOp: options.binaryOp,
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
-        lengthExpression: options.lengthExpression ? blueprint => ceilDivideConstantDivisorWGSL( options.lengthExpression( blueprint ), perStageReduction ) : null,
+        lengthExpression: options.lengthExpression ? ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction ) : null,
         inputOrder: options.internalStriping ? 'striped' : 'blocked',
         inputAccessOrder: options.inputAccessOrder,
         exclusive: options.areScannedReductionsExclusive,
@@ -231,7 +231,7 @@ export default class ScanModule<T> extends CompositeModule<number> {
         binaryOp: options.binaryOp,
         workgroupSize: options.workgroupSize,
         grainSize: options.grainSize,
-        lengthExpression: options.lengthExpression ? blueprint => ceilDivideConstantDivisorWGSL( options.lengthExpression( blueprint ), perStageReduction * perStageReduction ) : null,
+        lengthExpression: options.lengthExpression ? ceilDivideConstantDivisorWGSL( options.lengthExpression, perStageReduction * perStageReduction ) : null,
         inputOrder: options.internalStriping ? 'striped' : 'blocked',
         inputAccessOrder: options.inputAccessOrder,
         exclusive: options.areScannedReductionsExclusive,

@@ -18,6 +18,7 @@ export { default as u32Hex } from './webgpu/compute/u32Hex.js';
 export { default as i32 } from './webgpu/compute/i32.js';
 export { default as i32Hex } from './webgpu/compute/i32Hex.js';
 export { default as f32 } from './webgpu/compute/f32.js';
+export { default as decimal } from './webgpu/compute/decimal.js';
 
 // @ts-expect-error WILL BE FILLED IN BY TRANSPILER
 export { default as wgsl_u64 } from '../wgsl/math/u64.js';
@@ -373,6 +374,9 @@ export { default as ParallelRasterChunkIndexPatch } from './parallel/raster-clip
 export { default as ParallelRasterEdgeIndexPatch } from './parallel/raster-clip/ParallelRasterEdgeIndexPatch.js';
 export { default as ParallelRaster } from './parallel/raster-clip/ParallelRaster.js';
 
+export { default as WGSLString, WGSLStringLiteral, WGSLStringFunction, WGSLStringAccumulator, wgslString, wgslFunction, wgsl, decimalS, u32S, u32HexS, i32S, i32HexS, f32S, wgslJoin, wgslMapJoin, wgslOneLine, wgslWith } from './webgpu/wgsl/WGSLString.js';
+export type { WGSLExpression, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionF32, WGSLExpressionBool, WGSLExpressionT, WGSLStatements, WGSLModuleDeclarations, WGSLVariableName, WGSLType, WGSLBinaryExpression } from './webgpu/wgsl/WGSLString.js';
+
 export { default as OldSnippet } from './webgpu/old/OldSnippet.js';
 export { default as OldDualSnippet } from './webgpu/old/OldDualSnippet.js';
 export type { OldDualSnippetSource } from './webgpu/old/OldDualSnippet.js';
@@ -387,7 +391,7 @@ export { default as BlitShader } from './webgpu/BlitShader.js';
 export { default as ByteEncoder } from './webgpu/compute/ByteEncoder.js';
 export type { F32, U32, I32, U8 } from './webgpu/compute/ByteEncoder.js';
 export { U32Type, U32Add, U32Min, U32Max, U32And, U32Or, U32Xor, U32Order, U32ReverseOrder, I32Type, Vec2uType, Vec2uBic, Vec3uType, Vec4uType, Vec2uLexicographicalOrder, I32Order, I32Add, I32Min, I32Max, I32And, I32Or, I32Xor, getArrayType, getCastedType, Vec2uAdd, Vec3uAdd, Vec4uAdd, U32AtomicType, I32AtomicType, U32_IDENTITY_VALUES, I32_IDENTITY_VALUES } from './webgpu/compute/ConcreteType.js';
-export type { default as ConcreteType, ConcreteArrayType, BinaryOp, BitOrder, CompareOrder, Order, WGSLExpression, WGSLStatements, WGSLVariableName, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionBool, WGSLModuleDeclarations, WGSLExpressionT } from './webgpu/compute/ConcreteType.js';
+export type { default as ConcreteType, ConcreteArrayType, BinaryOp, BitOrder, CompareOrder, Order, WGSLBinaryStatements } from './webgpu/compute/ConcreteType.js';
 export { default as ConsoleLogger, ConsoleLoggedEntry, ConsoleLoggedThread, ConsoleLoggedLine, ConsoleLoggedShader } from './webgpu/compute/ConsoleLogger.js';
 export type { ConsoleLogInfo } from './webgpu/compute/ConsoleLogger.js';
 export { default as BufferLogger } from './webgpu/compute/BufferLogger.js';

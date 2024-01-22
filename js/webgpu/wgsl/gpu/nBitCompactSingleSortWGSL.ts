@@ -12,7 +12,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, bitPackRadixAccessWGSL, bitPackRadixExclusiveScanWGSL, bitPackRadixIncrementWGSL, commentWGSL, ConsoleLoggedLine, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logStringWGSL, logValueWGSL, logWGSL, RakedSizable, scanWGSL, u32, U32Add, U32Type, unrollWGSL, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType, PipelineBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, BitOrder, bitPackRadixAccessWGSL, bitPackRadixExclusiveScanWGSL, bitPackRadixIncrementWGSL, commentWGSL, ConsoleLoggedLine, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logStringWGSL, logValueWGSL, logWGSL, RakedSizable, scanWGSL, u32S, U32Add, U32Type, unrollWGSL, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType, PipelineBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, wgsl, decimalS } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type nBitCompactSingleSortWGSLOptions<T> = {
@@ -25,7 +25,7 @@ export type nBitCompactSingleSortWGSLOptions<T> = {
   // var<workgroup> array<T, workgroupSize * grainSize>
   valueScratch: WGSLVariableName;
 
-  lengthExpression: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support null?
+  lengthExpression: WGSLExpressionU32; // TODO: support null (optional)?
 
   getBits: ( value: WGSLExpressionT ) => WGSLExpressionU32;
 
@@ -105,29 +105,29 @@ const nBitCompactSingleSortWGSL = <T>(
     lineToLog: ConsoleLoggedLine.toLogExisting
   } );
 
-  return `
+  return wgsl`
     ${commentWGSL( 'begin n_bit_compact_single_sort' )}
 
-    ${logStringWGSL( blueprint, `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${lengthExpression ? lengthExpression( blueprint ) : null}" earlyLoad:${earlyLoad}` )}
+    ${logStringWGSL( blueprint, `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${lengthExpression ? lengthExpression : null}" earlyLoad:${earlyLoad}` )}
 
     {
       var tb_bits_vector = ${{
-        1: '0u',
-        2: 'vec2( 0u )',
-        3: 'vec3( 0u )',
-        4: 'vec4( 0u )'
+        1: wgsl`0u`,
+        2: wgsl`vec2( 0u )`,
+        3: wgsl`vec3( 0u )`,
+        4: wgsl`vec4( 0u )`
       }[ bitVectorSize ]};
 
-      ${earlyLoad ? `
-        var tb_values: array<${order.type.valueType( blueprint )}, ${grainSize}>;
-      ` : ''}
+      ${earlyLoad ? wgsl`
+        var tb_values: array<${order.type.valueType}, ${decimalS( grainSize )}>;
+      ` : wgsl``}
 
       // Store our thread's "raked" values histogram into tb_bits_vector
-      ${unrollWGSL( 0, grainSize, i => `
+      ${unrollWGSL( 0, grainSize, i => wgsl`
         // TODO: see if factoring out constants doesn't kill registers
-        if ( ${u32( grainSize )} * ${localIndex} + ${u32( i )} < ${lengthExpression( blueprint )} ) {
-          let tb_value = ${valueScratch}[ ${u32( grainSize )} * ${localIndex} + ${u32( i )} ];
-          let tb_bits = ${getBits( 'tb_value' )};
+        if ( ${u32S( grainSize )} * ${localIndex} + ${u32S( i )} < ${lengthExpression} ) {
+          let tb_value = ${valueScratch}[ ${u32S( grainSize )} * ${localIndex} + ${u32S( i )} ];
+          let tb_bits = ${getBits( wgsl`tb_value` )};
 
           ${logValueWGSL( blueprint, {
             value: 'tb_value',
@@ -142,23 +142,23 @@ const nBitCompactSingleSortWGSL = <T>(
           } )}
 
           ${bitPackRadixIncrementWGSL( {
-            bitVector: 'tb_bits_vector',
-            bits: 'tb_bits',
+            bitVector: wgsl`tb_bits_vector`,
+            bits: wgsl`tb_bits`,
             bitsPerInnerPass: bitsPerInnerPass,
             bitVectorSize: bitVectorSize,
             maxCount: workgroupSize * grainSize
           } )}
 
-          ${earlyLoad ? `
-            tb_values[ ${u32( i )} ] = tb_value;
-          ` : ''}
+          ${earlyLoad ? wgsl`
+            tb_values[ ${u32S( i )} ] = tb_value;
+          ` : wgsl``}
         }
       ` )}
 
-      ${logPackedBits( 'n_bit histogram initial', 'tb_bits_vector' )}
+      ${logPackedBits( 'n_bit histogram initial', wgsl`tb_bits_vector` )}
 
       ${scanWGSL( blueprint, {
-        value: 'tb_bits_vector',
+        value: wgsl`tb_bits_vector`,
         // @ts-expect-error - Hmm, should we actually split this into 4 cases?
         binaryOp: addBinaryOp,
         scratch: bitsScratch,
@@ -167,45 +167,45 @@ const nBitCompactSingleSortWGSL = <T>(
         needsValidScratch: true
       } )}
 
-      ${logPackedBits( 'n_bit histogram scanned', 'tb_bits_vector' )}
+      ${logPackedBits( 'n_bit histogram scanned', wgsl`tb_bits_vector` )}
 
       // now tb_bits_vector holds the partial exclusive scan, but the inclusive scan is still in the array
-      var tb_offsets = ${bitsScratch}[ ${u32( workgroupSize - 1 )} ];
+      var tb_offsets = ${bitsScratch}[ ${u32S( workgroupSize - 1 )} ];
 
       ${bitPackRadixExclusiveScanWGSL( {
-        bitVector: 'tb_offsets',
+        bitVector: wgsl`tb_offsets`,
         bitsPerInnerPass: bitsPerInnerPass,
         bitVectorSize: bitVectorSize,
         maxCount: workgroupSize * grainSize
       } )}
 
-      ${!earlyLoad ? `
-        var tb_values: array<${order.type.valueType( blueprint )}, ${grainSize}>;
+      ${!earlyLoad ? wgsl`
+        var tb_values: array<${order.type.valueType}, ${decimalS( grainSize )}>;
 
-        ${unrollWGSL( 0, grainSize, i => `
+        ${unrollWGSL( 0, grainSize, i => wgsl`
           // TODO: see if factoring out constants doesn't kill registers
-          tb_values[ ${u32( i )} ] = ${valueScratch}[ ${u32( grainSize )} * ${localIndex} + ${u32( i )} ];
+          tb_values[ ${u32S( i )} ] = ${valueScratch}[ ${u32S( grainSize )} * ${localIndex} + ${u32S( i )} ];
         ` )}
 
         workgroupBarrier();
-      ` : ''}
+      ` : wgsl``}
 
-      ${unrollWGSL( 0, grainSize, i => `
+      ${unrollWGSL( 0, grainSize, i => wgsl`
         // TODO: see if factoring out constants doesn't kill registers
-        if ( ${u32( grainSize )} * ${localIndex} + ${u32( i )} < ${lengthExpression( blueprint )} ) {
-          let tb_value = tb_values[ ${u32( i )} ];
-          let tb_bits = ${getBits( 'tb_value' )};
+        if ( ${u32S( grainSize )} * ${localIndex} + ${u32S( i )} < ${lengthExpression} ) {
+          let tb_value = tb_values[ ${u32S( i )} ];
+          let tb_bits = ${getBits( wgsl`tb_value` )};
 
           // TODO: a way to compute the index and access both of these efficiently?
           ${valueScratch}[ ( ${bitPackRadixAccessWGSL( {
-            bitVector: 'tb_offsets',
-            bits: 'tb_bits',
+            bitVector: wgsl`tb_offsets`,
+            bits: wgsl`tb_bits`,
             bitsPerInnerPass: bitsPerInnerPass,
             bitVectorSize: bitVectorSize,
             maxCount: workgroupSize * grainSize
           } )} ) + ( ${bitPackRadixAccessWGSL( {
-            bitVector: 'tb_bits_vector',
-            bits: 'tb_bits',
+            bitVector: wgsl`tb_bits_vector`,
+            bits: wgsl`tb_bits`,
             bitsPerInnerPass: bitsPerInnerPass,
             bitVectorSize: bitVectorSize,
             maxCount: workgroupSize * grainSize
@@ -213,8 +213,8 @@ const nBitCompactSingleSortWGSL = <T>(
 
           // NOTE the increment, so that we'll write to the next location next time
           ${bitPackRadixIncrementWGSL( {
-            bitVector: 'tb_bits_vector',
-            bits: 'tb_bits',
+            bitVector: wgsl`tb_bits_vector`,
+            bits: wgsl`tb_bits`,
             bitsPerInnerPass: bitsPerInnerPass,
             bitVectorSize: bitVectorSize,
             maxCount: workgroupSize * grainSize

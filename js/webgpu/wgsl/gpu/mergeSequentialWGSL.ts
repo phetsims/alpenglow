@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, PipelineBlueprint, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, commentWGSL, PipelineBlueprint, wgsl, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mergeSequentialWGSLOptions = {
@@ -14,10 +14,10 @@ export type mergeSequentialWGSLOptions = {
   lengthB: WGSLExpressionU32;
 
   // => {-1, 0, 1} (i32)
-  compare: ( blueprint: PipelineBlueprint, indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
+  compare: ( indexA: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLExpressionI32;
 
-  setFromA: ( blueprint: PipelineBlueprint, indexOutput: WGSLExpressionU32, indexA: WGSLExpressionU32 ) => WGSLStatements;
-  setFromB: ( blueprint: PipelineBlueprint, indexOutput: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLStatements;
+  setFromA: ( indexOutput: WGSLExpressionU32, indexA: WGSLExpressionU32 ) => WGSLStatements;
+  setFromB: ( indexOutput: WGSLExpressionU32, indexB: WGSLExpressionU32 ) => WGSLStatements;
 };
 
 export const MERGE_SEQUENTIAL_DEFAULTS = {
@@ -38,7 +38,7 @@ const mergeSequentialWGSL = (
   const setFromA = options.setFromA;
   const setFromB = options.setFromB;
 
-  return `
+  return wgsl`
     ${commentWGSL( 'begin merge_sequential' )}
     {
       var ms_i = 0u;
@@ -55,12 +55,12 @@ const mergeSequentialWGSL = (
           break;
         }
   
-        if ( ${compare( blueprint, 'ms_i', 'ms_j' )} <= 0i ) {
-          ${setFromA( blueprint, 'ms_k', 'ms_i' )}
+        if ( ${compare( wgsl`ms_i`, wgsl`ms_j` )} <= 0i ) {
+          ${setFromA( wgsl`ms_k`, wgsl`ms_i` )}
           ms_i++;
         }
         else {
-          ${setFromB( blueprint, 'ms_k', 'ms_j' )}
+          ${setFromB( wgsl`ms_k`, wgsl`ms_j` )}
           ms_j++;
         }
         ms_k++;
@@ -73,7 +73,7 @@ const mergeSequentialWGSL = (
           break;
         }
   
-        ${setFromA( blueprint, 'ms_k', 'ms_i' )}
+        ${setFromA( wgsl`ms_k`, wgsl`ms_i` )}
         ms_i++;
         ms_k++;
       }
@@ -85,7 +85,7 @@ const mergeSequentialWGSL = (
           break;
         }
   
-        ${setFromB( blueprint, 'ms_k', 'ms_j' )}
+        ${setFromB( wgsl`ms_k`, wgsl`ms_j` )}
         ms_j++;
         ms_k++;
       }

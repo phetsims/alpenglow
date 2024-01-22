@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, loadReducedWGSL, loadReducedWGSLOptions, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions } from '../../../imports.js';
+import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, decimalS, loadReducedWGSL, loadReducedWGSLOptions, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions, wgsl, wgslString } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -49,11 +49,11 @@ const mainReduceAtomicWGSL = <T>(
   blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE ); // TODO: assert that this is an atomic(!)
 
   // TODO: generate storage binding and variable fully from Binding?
-  blueprint.add( 'main', `
+  blueprint.add( 'main', wgsl`
     
-    var<workgroup> scratch: array<${binaryOp.type.valueType( blueprint )}, ${workgroupSize}>;
+    var<workgroup> scratch: array<${binaryOp.type.valueType}, ${decimalS( workgroupSize )}>;
     
-    @compute @workgroup_size(${workgroupSize})
+    @compute @workgroup_size(${decimalS( workgroupSize )})
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
       @builtin(local_invocation_id) local_id: vec3u,
@@ -61,22 +61,23 @@ const mainReduceAtomicWGSL = <T>(
     ) {
     
       ${loadReducedWGSL( blueprint, combineOptions<loadReducedWGSLOptions<T>>( {
-        value: 'value',
+        value: wgsl`value`,
         binaryOp: binaryOp,
-        loadExpression: i => `input[ ${i} ]`,
+        loadExpression: i => wgsl`input[ ${i} ]`,
         workgroupSize: workgroupSize,
         grainSize: grainSize
       }, options.loadReducedOptions ) )}
     
       ${reduceWGSL( blueprint, combineOptions<reduceWGSLOptions<T>>( {
-        value: 'value',
+        value: wgsl`value`,
         binaryOp: binaryOp,
-        scratch: 'scratch',
+        scratch: wgsl`scratch`,
         workgroupSize: workgroupSize
       }, options.reduceOptions ) )}
     
       if ( local_id.x == 0u ) {
-        ${binaryOp.atomicName}( &output, value );
+        // TODO: better way to handle atomic names
+        ${wgslString( binaryOp.atomicName! )}( &output, value );
       }
     }
   ` );

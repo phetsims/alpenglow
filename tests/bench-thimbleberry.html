@@ -56,7 +56,7 @@
     RadixSortModule,
     BufferLogger,
     Executor,
-    u32,
+    u32S,
     U32Order,
     Routine,
     Procedure,
@@ -101,7 +101,7 @@
       scanWorkgroupSize: scanWorkgroupSize,
       scanGrainSize: scanGrainSize,
 
-      lengthExpression: () => u32( size ),
+      lengthExpression: u32S( size ),
 
       bitsPerPass: bitsPerPass,
       bitsPerInnerPass: bitsPerInnerPass,

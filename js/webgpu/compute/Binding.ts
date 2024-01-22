@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingLocation, BindingType, BufferBindingType, BufferSlot, ResourceSlot, StorageTextureBindingType, PipelineBlueprint, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
+import { alpenglow, BindingLocation, BindingType, BufferBindingType, BufferSlot, ResourceSlot, StorageTextureBindingType, wgsl, WGSLModuleDeclarations, wgslString } from '../../imports.js';
 
 export default class Binding {
   public constructor(
@@ -15,13 +15,13 @@ export default class Binding {
     public readonly slot: ResourceSlot
   ) {}
 
-  public getWGSLDeclaration( blueprint: PipelineBlueprint, name: WGSLVariableName ): WGSLModuleDeclarations {
+  public getWGSLDeclaration( name: string ): WGSLModuleDeclarations {
     // TODO: typing improvements here? This isn't the best code
     if ( this.bindingType instanceof BufferBindingType && this.slot instanceof BufferSlot ) {
-      const varType = this.bindingType.type === 'uniform' ? 'uniform' : `storage, ${this.bindingType.type === 'read-only-storage' ? 'read' : 'read_write'}`;
-      return `
+      const varType = this.bindingType.type === 'uniform' ? wgsl`uniform` : wgsl`storage, ${this.bindingType.type === 'read-only-storage' ? wgsl`read` : wgsl`read_write`}`;
+      return wgsl`
         ${this.location.getWGSLAnnotation()}
-        var<${varType}> ${name}: ${this.slot.concreteType.valueType( blueprint )};
+        var<${varType}> ${wgslString( name )}: ${this.slot.concreteType.valueType};
       `;
     }
     else if ( this.bindingType instanceof StorageTextureBindingType ) {
@@ -30,8 +30,8 @@ export default class Binding {
         'read-only': 'read',
         'read-write': 'read_write'
       }[ this.bindingType.access ];
-      return `
-        var ${name}: texture_storage_2d<${this.bindingType.format}, ${access}>;
+      return wgsl`
+        var ${wgslString( name )}: texture_storage_2d<${wgslString( this.bindingType.format )}, ${wgslString( access )}>;
       `;
     }
     else {

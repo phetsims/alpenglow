@@ -17,7 +17,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, PipelineBlueprint, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, decimalS, PipelineBlueprint, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32 } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -103,24 +103,24 @@ const mainScanWGSL = <T>(
     }
   }
 
-  blueprint.add( 'main', `
+  blueprint.add( 'main', wgsl`
     
-    ${options.addScannedReduction ? `
-      var<workgroup> reduction_value: ${binaryOp.type.valueType( blueprint )};
-    ` : ''}
+    ${options.addScannedReduction ? wgsl`
+      var<workgroup> reduction_value: ${binaryOp.type.valueType};
+    ` : wgsl``}
     
-    var<workgroup> scratch: array<${binaryOp.type.valueType( blueprint )}, ${workgroupSize * grainSize}>;
+    var<workgroup> scratch: array<${binaryOp.type.valueType}, ${decimalS( workgroupSize * grainSize )}>;
     
-    @compute @workgroup_size(${workgroupSize})
+    @compute @workgroup_size(${decimalS( workgroupSize )})
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
       ${scanComprehensiveWGSL( blueprint, {
-        input: options.inPlace ? 'data' : 'input',
-        output: options.inPlace ? 'data' : 'output',
-        scratch: 'scratch',
+        input: options.inPlace ? wgsl`data` : wgsl`input`,
+        output: options.inPlace ? wgsl`data` : wgsl`output`,
+        scratch: wgsl`scratch`,
         binaryOp: binaryOp,
         workgroupSize: workgroupSize,
         grainSize: grainSize,
@@ -130,48 +130,48 @@ const mainScanWGSL = <T>(
         inputAccessOrder: options.inputAccessOrder,
         factorOutSubexpressions: options.factorOutSubexpressions,
         // TODO: combine these two approaches if possible?
-        getAddedValue: options.addScannedReduction ? ( options.addScannedDoubleReduction ? addedValue => `
+        getAddedValue: options.addScannedReduction ? ( options.addScannedDoubleReduction ? addedValue => wgsl`
           if ( local_id.x == 0u ) {
             // If our reductions are scanned exclusively, then we can just use the value directly
-            ${options.areScannedReductionsExclusive ? `
+            ${options.areScannedReductionsExclusive ? wgsl`
               let middle_value = scanned_reduction[ workgroup_id.x ];
-              let lower_value = double_scanned_reduction[ workgroup_id.x / ${u32( workgroupSize * grainSize )} ];
-            ` : `
-              var middle_value: ${binaryOp.type.valueType( blueprint )};
-              var lower_value: ${binaryOp.type.valueType( blueprint )};
+              let lower_value = double_scanned_reduction[ workgroup_id.x / ${u32S( workgroupSize * grainSize )} ];
+            ` : wgsl`
+              var middle_value: ${binaryOp.type.valueType};
+              var lower_value: ${binaryOp.type.valueType};
               // NOTE: assumes the same workgroup/grain size for each level
               // This should work for any level of workgroup handling
-              if ( workgroup_id.x % ${u32( workgroupSize * grainSize )} == 0u ) {
-                middle_value = ${binaryOp.identityWGSL( blueprint )};
+              if ( workgroup_id.x % ${u32S( workgroupSize * grainSize )} == 0u ) {
+                middle_value = ${binaryOp.identityWGSL};
               }
               else {
                 middle_value = scanned_reduction[ workgroup_id.x - 1u ];
               }
-              let lower_index = workgroup_id.x / ${u32( workgroupSize * grainSize )};
-              if ( lower_index % ${u32( workgroupSize * grainSize )} == 0u ) {
-                lower_value = ${binaryOp.identityWGSL( blueprint )};
+              let lower_index = workgroup_id.x / ${u32S( workgroupSize * grainSize )};
+              if ( lower_index % ${u32S( workgroupSize * grainSize )} == 0u ) {
+                lower_value = ${binaryOp.identityWGSL};
               }
               else {
                 lower_value = double_scanned_reduction[ lower_index - 1u ];
               }
             `}
     
-            ${binaryExpressionStatementWGSL( 'reduction_value', binaryOp.combineExpression || null, binaryOp.combineStatements || null, 'lower_value', 'middle_value' )}
+            ${binaryExpressionStatementWGSL( wgsl`reduction_value`, binaryOp.combineExpression || null, binaryOp.combineStatements || null, wgsl`lower_value`, wgsl`middle_value` )}
           }
     
           workgroupBarrier();
     
           ${addedValue} = reduction_value;
-        ` : addedValue => `
+        ` : addedValue => wgsl`
           if ( local_id.x == 0u ) {
             // If our reductions are scanned exclusively, then we can just use the value directly
-            ${options.areScannedReductionsExclusive ? `
+            ${options.areScannedReductionsExclusive ? wgsl`
               reduction_value = scanned_reduction[ workgroup_id.x ];
-            ` : `
+            ` : wgsl`
               // NOTE: assumes the same workgroup/grain size for each level
               // This should work for any level of workgroup handling
-              if ( workgroup_id.x % ${u32( workgroupSize * grainSize )} == 0u ) {
-                reduction_value = ${binaryOp.identityWGSL( blueprint )};
+              if ( workgroup_id.x % ${u32S( workgroupSize * grainSize )} == 0u ) {
+                reduction_value = ${binaryOp.identityWGSL};
               }
               else {
                 reduction_value = scanned_reduction[ workgroup_id.x - 1u ];
@@ -183,7 +183,7 @@ const mainScanWGSL = <T>(
     
           ${addedValue} = reduction_value;
         ` ) : options.getAddedValue,
-        storeReduction: options.storeReduction ? ( index: WGSLExpressionU32, value: WGSLExpressionT ) => `reduction[ ${index} ] = ${value};` : null
+        storeReduction: options.storeReduction ? ( index: WGSLExpressionU32, value: WGSLExpressionT ) => wgsl`reduction[ ${index} ] = ${value};` : null
       } )}
     }
   ` );

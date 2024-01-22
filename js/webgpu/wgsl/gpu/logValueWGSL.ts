@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, logWGSLOptions, PipelineBlueprint, WGSLExpression, WGSLStatements } from '../../../imports.js';
+import { alpenglow, logWGSL, logWGSLOptions, PipelineBlueprint, wgsl, WGSLStatements, wgslString } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithOptional from '../../../../../phet-core/js/types/WithOptional.js';
 
 export type logValueWGSLOptions<T> = {
-  value: WGSLExpression;
+  value: string; // The name!
 } & WithOptional<logWGSLOptions<T>, 'name'>;
 
 const logValueWGSL = <T>(
@@ -21,8 +21,8 @@ const logValueWGSL = <T>(
 
   const options = combineOptions<logWGSLOptions<T>>( {
     name: providedOptions.value,
-    writeData: write => `
-      ${write( '0u', providedOptions.value )}
+    writeData: write => wgsl`
+      ${write( wgsl`0u`, wgslString( providedOptions.value ) )}
     `,
     dataCount: 1
   }, providedOptions );

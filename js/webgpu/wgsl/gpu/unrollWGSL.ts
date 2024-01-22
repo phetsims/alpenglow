@@ -8,14 +8,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WGSLStatements } from '../../../imports.js';
+import { alpenglow, wgslJoin, WGSLStatements } from '../../../imports.js';
 
 const unrollWGSL = (
   start: number,
   end: number,
   callback: ( i: number, isFirst: boolean, isLast: boolean ) => WGSLStatements
 ): WGSLStatements => {
-  return _.range( start, end ).map( i => callback( i, i === start, i === end + ( start < end ? -1 : 1 ) ) ).join( '\n' );
+  return wgslJoin( '\n', _.range( start, end ).map( i => callback( i, i === start, i === end + ( start < end ? -1 : 1 ) ) ) );
 };
 
 export default unrollWGSL;

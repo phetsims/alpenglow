@@ -13,7 +13,6 @@ const i32 = ( n: number ): string => {
 
   return `${n >> 0}i`;
 };
+alpenglow.register( 'i32', i32 );
 
 export default i32;
-
-alpenglow.register( 'i32', i32 );

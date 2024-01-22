@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Add, Procedure, Routine, ScanModule, ScanModuleOptions, u32, U32Add, Vec2uAdd, Vec2uBic } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Add, Procedure, Routine, ScanModule, ScanModuleOptions, U32Add, u32S, Vec2uAdd, Vec2uBic } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -26,7 +26,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
     const reduceModule = new ScanModule( combineOptions<ScanModuleOptions<T>>( {
       input: inputSlot,
       output: outputSlot,
-      lengthExpression: blueprint => u32( options.inputSize )
+      lengthExpression: u32S( options.inputSize )
     }, options ) );
 
     // TODO: can we factor out some things here, like the execute wrapper?

@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Add, Procedure, ReduceModule, ReduceModuleOptions, Routine, u32, U32Add, Vec2uAdd, Vec2uBic } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Add, Procedure, ReduceModule, ReduceModuleOptions, Routine, U32Add, u32S, Vec2uAdd, Vec2uBic } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -27,7 +27,7 @@ const testReduceModule = <T>( options: ReduceModuleTestOptions<T> ) => {
     const reduceModule = new ReduceModule( combineOptions<ReduceModuleOptions<T>>( {
       input: inputSlot,
       output: outputSlot,
-      lengthExpression: blueprint => u32( options.inputSize )
+      lengthExpression: u32S( options.inputSize )
     }, options ) );
 
     const routine = await Routine.create(

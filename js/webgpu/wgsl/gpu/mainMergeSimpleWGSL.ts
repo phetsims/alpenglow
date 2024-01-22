@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, BufferSlot, CompareOrder, mergeSimpleWGSL, PipelineBlueprint, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BufferBindingType, BufferSlot, CompareOrder, decimalS, mergeSimpleWGSL, PipelineBlueprint, wgsl, WGSLExpressionU32 } from '../../../imports.js';
 
 export type mainMergeSimpleWGSLOptions<T> = {
   inputA: BufferSlot<T[]>;
@@ -16,8 +16,8 @@ export type mainMergeSimpleWGSLOptions<T> = {
 
   order: CompareOrder<T>;
 
-  lengthExpressionA: ( blueprint: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
-  lengthExpressionB: ( pipeline: PipelineBlueprint ) => WGSLExpressionU32; // TODO: support optional
+  lengthExpressionA: WGSLExpressionU32; // TODO: support optional
+  lengthExpressionB: WGSLExpressionU32; // TODO: support optional
 };
 
 export const MAIN_MERGE_SIMPLE_DEFAULTS = {
@@ -39,8 +39,8 @@ const mainMergeSimpleWGSL = <T>(
   blueprint.addSlot( 'b', options.inputB, BufferBindingType.READ_ONLY_STORAGE );
   blueprint.addSlot( 'c', options.output, BufferBindingType.STORAGE );
 
-  blueprint.add( 'main', `
-    @compute @workgroup_size(${workgroupSize})
+  blueprint.add( 'main', wgsl`
+    @compute @workgroup_size(${decimalS( workgroupSize )})
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
       @builtin(local_invocation_id) local_id: vec3u,
@@ -49,12 +49,12 @@ const mainMergeSimpleWGSL = <T>(
       ${mergeSimpleWGSL( blueprint, {
         lengthA: lengthExpressionA,
         lengthB: lengthExpressionB,
-        setFromA: ( blueprint, indexOutput, indexA ) => `c[ ${indexOutput} ] = a[ ${indexA} ];`,
-        setFromB: ( blueprint, indexOutput, indexB ) => `c[ ${indexOutput} ] = b[ ${indexB} ];`,
+        setFromA: ( indexOutput, indexA ) => wgsl`c[ ${indexOutput} ] = a[ ${indexA} ];`,
+        setFromB: ( indexOutput, indexB ) => wgsl`c[ ${indexOutput} ] = b[ ${indexB} ];`,
         grainSize: grainSize,
-        compare: ( blueprint, indexA, indexB ) => order.compareWGSL( blueprint, `a[ ${indexA} ]`, `b[ ${indexB} ]` ),
-        greaterThan: ( blueprint, indexA, indexB ) => order.greaterThanWGSL( blueprint, `a[ ${indexA} ]`, `b[ ${indexB} ]` ),
-        lessThanOrEqual: ( blueprint, indexA, indexB ) => order.lessThanOrEqualWGSL( blueprint, `a[ ${indexA} ]`, `b[ ${indexB} ]` )
+        compare: ( indexA, indexB ) => order.compareWGSL( wgsl`a[ ${indexA} ]`, wgsl`b[ ${indexB} ]` ),
+        greaterThan: ( indexA, indexB ) => order.greaterThanWGSL( wgsl`a[ ${indexA} ]`, wgsl`b[ ${indexB} ]` ),
+        lessThanOrEqual: ( indexA, indexB ) => order.lessThanOrEqualWGSL( wgsl`a[ ${indexA} ]`, wgsl`b[ ${indexB} ]` )
       } )}
     }
   ` );

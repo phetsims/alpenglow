@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, coalescedLoopWGSL, commentWGSL, GlobalIndexable, loadMultipleWGSL, loadMultipleWGSLOptions, LocalIndexable, OptionalLengthExpressionable, RakedSizable, scanRakedWGSL, scanRakedWGSLOptions, PipelineBlueprint, WGSLStatements, WGSLVariableName, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, BinaryOp, coalescedLoopWGSL, commentWGSL, GlobalIndexable, loadMultipleWGSL, loadMultipleWGSLOptions, LocalIndexable, OptionalLengthExpressionable, RakedSizable, scanRakedWGSL, scanRakedWGSLOptions, PipelineBlueprint, WGSLStatements, WGSLVariableName, WorkgroupIndexable, wgsl } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -54,13 +54,13 @@ const scanComprehensiveWGSL = <T>(
   const getAddedValue = options.getAddedValue;
   const binaryOp = options.binaryOp;
 
-  return `
+  return wgsl`
     ${commentWGSL( `begin scan_comprehensive ${exclusive ? 'exclusive' : 'inclusive'}` )}
 
     // Load into workgroup memory
     ${loadMultipleWGSL( blueprint, {
-      loadExpression: index => `${input}[ ${index} ]`,
-      storeStatements: ( index, value ) => `${scratch}[ ${index} ] = ${value};`,
+      loadExpression: index => wgsl`${input}[ ${index} ]`,
+      storeStatements: ( index, value ) => wgsl`${scratch}[ ${index} ] = ${value};`,
       workgroupSize: options.workgroupSize,
       grainSize: options.grainSize,
       type: binaryOp.type,
@@ -101,8 +101,8 @@ const scanComprehensiveWGSL = <T>(
       lengthExpression: options.lengthExpression,
       workgroupIndex: options.workgroupIndex,
       localIndex: options.localIndex,
-      callback: ( localIndex, dataIndex ) => `
-        ${output}[ ${dataIndex} ] = ${exclusive ? `select( ${getAddedValue ? 'workgroup_added_value' : binaryOp.identityWGSL( blueprint )}, ${scratch}[ ${localIndex} - 1u ], ${localIndex} > 0u )` : `${scratch}[ ${localIndex} ]`};
+      callback: ( localIndex, dataIndex ) => wgsl`
+        ${output}[ ${dataIndex} ] = ${exclusive ? wgsl`select( ${getAddedValue ? wgsl`workgroup_added_value` : binaryOp.identityWGSL}, ${scratch}[ ${localIndex} - 1u ], ${localIndex} > 0u )` : wgsl`${scratch}[ ${localIndex} ]`};
       `
     } )}
     ${commentWGSL( 'end (output write)' )}

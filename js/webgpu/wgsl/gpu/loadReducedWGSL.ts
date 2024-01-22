@@ -11,7 +11,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, PipelineBlueprint, RakedSizable, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 // CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
@@ -106,16 +106,16 @@ const loadReducedWGSL = <T>(
 
   if ( inputAccessOrder === 'blocked' ) {
     if ( sequentialReduceStyle === 'factored' ) {
-      outerDeclarations.push( `let base_blocked_index = ${u32( grainSize )} * ${globalIndex};` );
-      loadDeclarations.push( i => `let blocked_index = base_blocked_index + ${u32( i )};` ); // TODO: simplify i=0?
-      loadIndexExpression = () => 'blocked_index';
+      outerDeclarations.push( wgsl`let base_blocked_index = ${u32S( grainSize )} * ${globalIndex};` );
+      loadDeclarations.push( i => wgsl`let blocked_index = base_blocked_index + ${u32S( i )};` ); // TODO: simplify i=0?
+      loadIndexExpression = () => wgsl`blocked_index`;
       if ( lengthExpression !== null ) {
         // NOTE: only have to do the 'blocked' case, since for striped data we're not supporting blocked access order
         rangeCheckIndexExpression = loadIndexExpression;
       }
     }
     else {
-      loadIndexExpression = i => `${u32( grainSize )} * ${globalIndex} + ${u32( i )}`; // TODO: simplify i=0?
+      loadIndexExpression = i => wgsl`${u32S( grainSize )} * ${globalIndex} + ${u32S( i )}`; // TODO: simplify i=0?
       if ( lengthExpression !== null ) {
         // NOTE: only have to do the 'blocked' case, since for striped data we're not supporting blocked access order
         rangeCheckIndexExpression = loadIndexExpression;
@@ -125,20 +125,20 @@ const loadReducedWGSL = <T>(
   else if ( inputAccessOrder === 'striped' ) {
     if ( sequentialReduceStyle === 'factored' ) {
       if ( inputOrder === 'striped' && lengthExpression ) {
-        outerDeclarations.push( `let base_workgroup = ${workgroupIndex} * ${u32( workgroupSize * grainSize )};` );
-        outerDeclarations.push( `let base_striped_index = base_workgroup + ${localIndex};` );
-        outerDeclarations.push( `let base_blocked_index = base_workgroup + ${localIndex} * ${u32( grainSize )};` );
+        outerDeclarations.push( wgsl`let base_workgroup = ${workgroupIndex} * ${u32S( workgroupSize * grainSize )};` );
+        outerDeclarations.push( wgsl`let base_striped_index = base_workgroup + ${localIndex};` );
+        outerDeclarations.push( wgsl`let base_blocked_index = base_workgroup + ${localIndex} * ${u32S( grainSize )};` );
       }
       else {
-        outerDeclarations.push( `let base_striped_index = ${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex};` );
+        outerDeclarations.push( wgsl`let base_striped_index = ${workgroupIndex} * ${u32S( workgroupSize * grainSize )} + ${localIndex};` );
       }
 
-      loadDeclarations.push( i => `let striped_index = base_striped_index + ${u32( i * workgroupSize )};` );
-      loadIndexExpression = () => 'striped_index';
+      loadDeclarations.push( i => wgsl`let striped_index = base_striped_index + ${u32S( i * workgroupSize )};` );
+      loadIndexExpression = () => wgsl`striped_index`;
 
       if ( lengthExpression !== null ) {
         if ( inputOrder === 'striped' ) {
-          rangeCheckIndexExpression = i => `base_blocked_index + ${u32( i )}`; // TODO: simplify i=0?
+          rangeCheckIndexExpression = i => wgsl`base_blocked_index + ${u32S( i )}`; // TODO: simplify i=0?
         }
         else if ( inputOrder === 'blocked' ) {
           rangeCheckIndexExpression = loadIndexExpression;
@@ -149,10 +149,10 @@ const loadReducedWGSL = <T>(
       }
     }
     else {
-      loadIndexExpression = i => `${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex} + ${u32( i * workgroupSize )}`;
+      loadIndexExpression = i => wgsl`${workgroupIndex} * ${u32S( workgroupSize * grainSize )} + ${localIndex} + ${u32S( i * workgroupSize )}`;
       if ( lengthExpression !== null ) {
         if ( inputOrder === 'striped' ) {
-          rangeCheckIndexExpression = i => `${workgroupIndex} * ${u32( workgroupSize * grainSize )} + ${localIndex} * ${u32( grainSize )} + ${u32( i )}`; // TODO: simplify i=0?
+          rangeCheckIndexExpression = i => wgsl`${workgroupIndex} * ${u32S( workgroupSize * grainSize )} + ${localIndex} * ${u32S( grainSize )} + ${u32S( i )}`; // TODO: simplify i=0?
         }
         else if ( inputOrder === 'blocked' ) {
           rangeCheckIndexExpression = loadIndexExpression;
@@ -171,26 +171,26 @@ const loadReducedWGSL = <T>(
 
   // TODO: factor out length expression conditionally, since sometimes it might duplicate buffer loads(!)
   const loadWithRangeCheckExpression = ( i: number ) => rangeCheckIndexExpression
-    ? `select( ${binaryOp.identityWGSL( blueprint )}, ${loadExpression!( loadIndexExpression!( i ) )}, ${rangeCheckIndexExpression( i )} < ${lengthExpression!( blueprint )} )`
+    ? wgsl`select( ${binaryOp.identityWGSL}, ${loadExpression!( loadIndexExpression!( i ) )}, ${rangeCheckIndexExpression( i )} < ${lengthExpression!} )`
     : loadExpression!( loadIndexExpression!( i ) );
 
   const ifRangeCheck = ( i: number, trueStatements: WGSLStatements, falseStatements: WGSLStatements | null = null ) => {
-    return conditionalIfWGSL( rangeCheckIndexExpression ? `${rangeCheckIndexExpression( i )} < ${lengthExpression!( blueprint )}` : null, trueStatements, falseStatements );
+    return conditionalIfWGSL( rangeCheckIndexExpression ? wgsl`${rangeCheckIndexExpression( i )} < ${lengthExpression!}` : null, trueStatements, falseStatements );
   };
 
-  const indexedLoadStatements = ( varName: WGSLVariableName, i: number, declaration?: string ) => loadExpression ? `
-    ${declaration ? `${declaration} ` : ''}${varName} = ${loadExpression( loadIndexExpression!( i ) )};
-  ` : `
-    ${declaration ? `
-      var ${varName}: ${binaryOp.type.valueType( blueprint )};
-    ` : ''}
+  const indexedLoadStatements = ( varName: WGSLVariableName, i: number, declaration?: WGSLStatements ) => loadExpression ? wgsl`
+    ${declaration ? wgsl`${declaration} ` : wgsl``}${varName} = ${loadExpression( loadIndexExpression!( i ) )};
+  ` : wgsl`
+    ${declaration ? wgsl`
+      var ${varName}: ${binaryOp.type.valueType};
+    ` : wgsl``}
     ${loadStatements!( varName, loadIndexExpression!( i ) )}
   `;
 
-  const loadWithRangeCheckStatements = ( varName: WGSLVariableName, i: number ) => ifRangeCheck( i, `
+  const loadWithRangeCheckStatements = ( varName: WGSLVariableName, i: number ) => ifRangeCheck( i, wgsl`
     ${indexedLoadStatements( varName, i )}
-  `, `
-    ${varName} = ${binaryOp.identityWGSL( blueprint )};
+  `, wgsl`
+    ${varName} = ${binaryOp.identityWGSL};
   ` );
 
   const getNestedExpression = ( i: number ): WGSLExpression => {
@@ -202,30 +202,30 @@ const loadReducedWGSL = <T>(
   };
 
   // TODO: more unique names to prevent namespace collision!
-  return sequentialReduceStyle === 'nested' ? `
+  return sequentialReduceStyle === 'nested' ? wgsl`
     var ${value} = ${getNestedExpression( grainSize - 1 )};
-  ` : `
+  ` : wgsl`
     ${commentWGSL( 'begin load_reduced' )}
-    var ${value}: ${binaryOp.type.valueType( blueprint )};
+    var ${value}: ${binaryOp.type.valueType};
     {
-      ${outerDeclarations.join( '\n' )}
+      ${wgslJoin( '\n', outerDeclarations )}
       {
-        ${loadDeclarations.map( declaration => declaration( 0 ) ).join( '\n' )}
-        ${( loadExpression && useSelectIfOptional ) ? `
+        ${wgslJoin( '\n', loadDeclarations.map( declaration => declaration( 0 ) ) )}
+        ${( loadExpression && useSelectIfOptional ) ? wgsl`
           ${value} = ${loadWithRangeCheckExpression( 0 )};
-        ` : `
+        ` : wgsl`
           ${loadWithRangeCheckStatements( value, 0 )}
         `}
       }
-      ${unrollWGSL( 1, grainSize, i => `
+      ${unrollWGSL( 1, grainSize, i => wgsl`
         {
-          ${loadDeclarations.map( declaration => declaration( i ) ).join( '\n' )}
-          ${( loadExpression && useSelectIfOptional ) ? `
+          ${wgslJoin( '\n', loadDeclarations.map( declaration => declaration( i ) ) )}
+          ${( loadExpression && useSelectIfOptional ) ? wgsl`
             ${combineToValue( value, value, loadWithRangeCheckExpression( i ) )}
-          ` : `
-            ${ifRangeCheck( i, `
-              ${indexedLoadStatements( 'next_value', i, 'let' )}
-              ${combineToValue( value, value, 'next_value' )}
+          ` : wgsl`
+            ${ifRangeCheck( i, wgsl`
+              ${indexedLoadStatements( wgsl`next_value`, i, wgsl`let` )}
+              ${combineToValue( value, value, wgsl`next_value` )}
             ` )}
           `}
         }

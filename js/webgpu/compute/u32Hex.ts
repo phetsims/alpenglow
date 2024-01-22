@@ -13,7 +13,6 @@ const u32Hex = ( n: number ): string => {
 
   return `0x${( n >>> 0 ).toString( 16 )}u`;
 };
+alpenglow.register( 'u32Hex', u32Hex );
 
 export default u32Hex;
-
-alpenglow.register( 'u32Hex', u32Hex );

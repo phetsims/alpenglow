@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Order, MergeSimpleModule, MergeSimpleModuleOptions, Procedure, Routine, u32, U32Order, U32ReverseOrder, Vec2uLexicographicalOrder } from '../../../imports.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Order, MergeSimpleModule, MergeSimpleModuleOptions, Procedure, Routine, U32Order, U32ReverseOrder, u32S, Vec2uLexicographicalOrder } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -29,8 +29,8 @@ const testMergeSimpleModule = <T>( options: MergeSimpleModuleTestOptions<T> ) =>
       inputA: inputASlot,
       inputB: inputBSlot,
       output: outputSlot,
-      lengthExpressionA: blueprint => u32( options.inputASize ),
-      lengthExpressionB: blueprint => u32( options.inputBSize )
+      lengthExpressionA: u32S( options.inputASize ),
+      lengthExpressionB: u32S( options.inputBSize )
     }, options ) );
 
     const routine = await Routine.create(

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, u32, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, u32S, unrollWGSL, PipelineBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable, wgsl } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions<T> = {
@@ -74,45 +74,45 @@ const scanWGSL = <T>(
   const valuePreloaded = options.valuePreloaded;
 
   const condition = ( i: number ) => direction === 'left'
-    ? `${localIndex} >= ${u32( 1 << i )}`
-    : `${localIndex} < ${u32( workgroupSize - ( 1 << i ) )}`;
+    ? wgsl`${localIndex} >= ${u32S( 1 << i )}`
+    : wgsl`${localIndex} < ${u32S( workgroupSize - ( 1 << i ) )}`;
 
   const combineLeft = ( i: number ) => direction === 'left'
-    ? `${scratch}[ ${mapScratchIndex( `${localIndex} - ${u32( 1 << i )}` )} ]`
+    ? wgsl`${scratch}[ ${mapScratchIndex( wgsl`${localIndex} - ${u32S( 1 << i )}` )} ]`
     : value;
 
   const combineRight = ( i: number ) => direction === 'left'
     ? value
-    : `${scratch}[ ${mapScratchIndex( `${localIndex} + ${u32( 1 << i )}` )} ]`;
+    : wgsl`${scratch}[ ${mapScratchIndex( wgsl`${localIndex} + ${u32S( 1 << i )}` )} ]`;
 
   const combineToValue = ( varName: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => {
     return binaryExpressionStatementWGSL( varName, binaryOp.combineExpression || null, binaryOp.combineStatements || null, a, b );
   };
 
-  return `
+  return wgsl`
     ${commentWGSL( `begin scan direction:${direction} exclusive:${exclusive}` )}
-    ${!scratchPreloaded ? `
+    ${!scratchPreloaded ? wgsl`
       ${commentWGSL( 'loading scratch' )}
       ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};
-    ` : ''}
-    ${!valuePreloaded ? `
+    ` : wgsl``}
+    ${!valuePreloaded ? wgsl`
       ${commentWGSL( 'loading value' )}
       ${value} = ${scratch}[ ${mapScratchIndex( localIndex )} ];
-    ` : ''}
+    ` : wgsl``}
 
-    ${unrollWGSL( 0, Math.log2( workgroupSize ), ( i, isFirst, isLast ) => `
+    ${unrollWGSL( 0, Math.log2( workgroupSize ), ( i, isFirst, isLast ) => wgsl`
       // TODO: duplicated with reduce.wgsl... factor something out? Eventually?
       // We don't need the first workgroupBarrier() if scratchPreloaded is true
-      ${!scratchPreloaded || !isFirst ? `
+      ${!scratchPreloaded || !isFirst ? wgsl`
         workgroupBarrier();
-      ` : ''}
+      ` : wgsl``}
 
       // TODO: check performance differences with a select/combine?
       if ( ${condition( i )} ) {
         ${combineToValue( value, combineLeft( i ), combineRight( i ) )}
       }
 
-      ${isLast && !needsValidScratch && !exclusive ? '' : `
+      ${isLast && !needsValidScratch && !exclusive ? wgsl`` : wgsl`
         workgroupBarrier();
 
         ${scratch}[ ${mapScratchIndex( localIndex )} ] = ${value};
@@ -120,15 +120,15 @@ const scanWGSL = <T>(
     ` )}
 
     // TODO: consider shift at start to potentially avoid this workgroupBarrier?
-    ${exclusive ? `
+    ${exclusive ? wgsl`
       workgroupBarrier();
 
-      ${direction === 'left' ? `
-        ${value} = select( ${binaryOp.identityWGSL( blueprint )}, ${scratch}[ ${mapScratchIndex( `${localIndex} - 1u` )} ], ${localIndex} > 0u );
-      ` : `
-        ${value} = select( ${binaryOp.identityWGSL( blueprint )}, ${scratch}[ ${mapScratchIndex( `${localIndex} + 1u` )} ], ${localIndex} < ${u32( workgroupSize - 1 )} );
+      ${direction === 'left' ? wgsl`
+        ${value} = select( ${binaryOp.identityWGSL}, ${scratch}[ ${mapScratchIndex( wgsl`${localIndex} - 1u` )} ], ${localIndex} > 0u );
+      ` : wgsl`
+        ${value} = select( ${binaryOp.identityWGSL}, ${scratch}[ ${mapScratchIndex( wgsl`${localIndex} + 1u` )} ], ${localIndex} < ${u32S( workgroupSize - 1 )} );
       `}
-    ` : ''}
+    ` : wgsl``}
 
     // TODO: consider if we should update the scratch values after, OR keep it nice after exclusive.
     ${commentWGSL( 'end scan' )}

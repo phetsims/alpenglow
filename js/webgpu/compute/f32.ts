@@ -13,7 +13,6 @@ const f32 = ( n: number ): string => {
 
   return `${n}f`;
 };
+alpenglow.register( 'f32', f32 );
 
 export default f32;
-
-alpenglow.register( 'f32', f32 );

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, u32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow, u32S, wgsl, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 
 export type getConvergentIndexWGSLOptions = {
   i: WGSLExpressionU32;
@@ -19,7 +19,7 @@ const getConvergentIndexWGSL = (
   const i = options.i;
   const size = options.size;
 
-  return `( reverseBits( ${i} ) >> ${u32( 32 - Math.log2( size ) )} )`;
+  return wgsl`( reverseBits( ${i} ) >> ${u32S( 32 - Math.log2( size ) )} )`;
 };
 
 export default getConvergentIndexWGSL;

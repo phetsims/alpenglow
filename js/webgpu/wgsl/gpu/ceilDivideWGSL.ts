@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, wgsl, WGSLExpressionU32 } from '../../../imports.js';
 
 // Math.ceil( x / y ), but with unsigned numbers
 const ceilDivideWGSL = (
   x: WGSLExpressionU32,
   y: WGSLExpressionU32
-): string => {
-  return `( ( ( ${x} ) + ( ${y} ) - 1u ) / ( ${y} ) )`;
+): WGSLExpressionU32 => {
+  return wgsl`( ( ( ${x} ) + ( ${y} ) - 1u ) / ( ${y} ) )`;
 };
 
 export default ceilDivideWGSL;

@@ -13,7 +13,6 @@ const u32 = ( n: number ): string => {
 
   return `${n >>> 0}u`;
 };
+alpenglow.register( 'u32', u32 );
 
 export default u32;
-
-alpenglow.register( 'u32', u32 );

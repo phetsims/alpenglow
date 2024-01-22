@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, OptionalLengthExpressionable, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32, unrollWGSL, WGSLExpression, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, decimalS, OptionalLengthExpressionable, PipelineBlueprint, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLVariableName } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 
@@ -49,11 +49,11 @@ const mainReduceNonCommutativeWGSL = <T>(
   blueprint.addSlot( 'output', options.output, BufferBindingType.STORAGE );
 
   // TODO: generate storage binding and variable fully from Binding?
-  blueprint.add( 'main', `
+  blueprint.add( 'main', wgsl`
     
-    var<workgroup> scratch: array<${binaryOp.type.valueType( blueprint )}, ${workgroupSize}>;
+    var<workgroup> scratch: array<${binaryOp.type.valueType}, ${decimalS( workgroupSize )}>;
 
-    @compute @workgroup_size(${workgroupSize})
+    @compute @workgroup_size(${decimalS( workgroupSize )})
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
       @builtin(local_invocation_id) local_id: vec3u,
@@ -61,54 +61,54 @@ const mainReduceNonCommutativeWGSL = <T>(
     ) {
       // TODO: we can probably accomplish this with smarter use of the local variables
       if ( local_id.x == 0u ) {
-        scratch[ 0u ] = ${binaryOp.identityWGSL( blueprint )};
+        scratch[ 0u ] = ${binaryOp.identityWGSL};
       }
       
-      ${lengthExpression ? `
-        let rn_length = ${lengthExpression( blueprint )};
-      ` : ''}
+      ${lengthExpression ? wgsl`
+        let rn_length = ${lengthExpression};
+      ` : wgsl``}
     
-      var value: ${binaryOp.type.valueType( blueprint )};
+      var value: ${binaryOp.type.valueType};
       ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => {
         // TODO: factor out combineToValue handling
         const combineToValue = ( varName: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => {
           return binaryExpressionStatementWGSL( varName, binaryOp.combineExpression || null, binaryOp.combineStatements || null, a, b );
         };
     
-        return `
+        return wgsl`
           {
-            let rn_index = workgroup_id.x * ${u32( workgroupSize * grainSize )} + ${u32( i * workgroupSize )} + local_id.x;
-            ${lengthExpression ? `
-              value = select( ${binaryOp.identityWGSL( blueprint )}, input[ rn_index ], rn_index < rn_length );
-            ` : `
+            let rn_index = workgroup_id.x * ${u32S( workgroupSize * grainSize )} + ${u32S( i * workgroupSize )} + local_id.x;
+            ${lengthExpression ? wgsl`
+              value = select( ${binaryOp.identityWGSL}, input[ rn_index ], rn_index < rn_length );
+            ` : wgsl`
               value = input[ rn_index ];
             `}
             if ( local_id.x == 0u ) {
-              ${combineToValue( 'value', 'scratch[ 0u ]', 'value' )}
+              ${combineToValue( wgsl`value`, wgsl`scratch[ 0u ]`, wgsl`value` )}
             }
     
             ${reduceWGSL( blueprint, combineOptions<reduceWGSLOptions<T>>( {
-              value: 'value',
-              scratch: 'scratch',
+              value: wgsl`value`,
+              scratch: wgsl`scratch`,
               binaryOp: binaryOp,
               workgroupSize: workgroupSize
             }, options.reduceOptions ) )}
     
-            ${!isLast ? `
+            ${!isLast ? wgsl`
               if ( local_id.x == 0u ) {
                 scratch[ 0u ] = value;
               }
-            ` : ''}
+            ` : wgsl``}
           }
         `;
       } )}
     
       if ( local_id.x == 0u ) {
         output[ ${stripeOutput ? toStripedIndexWGSL( {
-          i: 'workgroup_id.x',
+          i: wgsl`workgroup_id.x`,
           workgroupSize: workgroupSize,
           grainSize: grainSize
-        } ) : 'workgroup_id.x'} ] = value;
+        } ) : wgsl`workgroup_id.x`} ] = value;
       }
     }
   ` );

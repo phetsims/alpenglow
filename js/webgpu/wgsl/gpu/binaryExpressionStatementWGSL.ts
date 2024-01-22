@@ -5,10 +5,12 @@
  *
  * TODO: Come up with a better TS solution to these
  *
+ * TODO: We could just... not use this (statements), rely on function calls
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpression, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, wgsl, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpression, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 
 const binaryExpressionStatementWGSL = (
   value: WGSLVariableName,
@@ -18,10 +20,10 @@ const binaryExpressionStatementWGSL = (
   b: WGSLExpression
 ): WGSLStatements => {
   if ( binaryExpression ) {
-    return `${value} = ${binaryExpression( a, b )};`;
+    return wgsl`${value} = ${binaryExpression( a, b )};`;
   }
   else if ( binaryStatements ) {
-    return `
+    return wgsl`
       ${binaryStatements( value, a, b )}
     `;
   }

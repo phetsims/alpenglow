@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, conditionalIfWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32, unrollWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLStatements, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow, conditionalIfWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32S, unrollWGSL, PipelineBlueprint, WGSLExpressionU32, WGSLStatements, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable, wgsl } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type coalescedLoopWGSLOptions = {
@@ -31,13 +31,13 @@ const coalescedLoopWGSL = (
   const lengthExpression = options.lengthExpression;
   const callback = options.callback;
 
-  return `
-    ${unrollWGSL( 0, options.grainSize, i => `
+  return wgsl`
+    ${unrollWGSL( 0, options.grainSize, i => wgsl`
       {
-        let coalesced_local_index = ${u32( i * workgroupSize )} + ${options.localIndex};
-        let coalesced_data_index = ${options.workgroupIndex} * ${u32( workgroupSize * grainSize )} + coalesced_local_index;
-        ${conditionalIfWGSL( lengthExpression ? `coalesced_data_index < ${lengthExpression( blueprint )}` : null, `
-          ${callback( 'coalesced_local_index', 'coalesced_data_index' )}
+        let coalesced_local_index = ${u32S( i * workgroupSize )} + ${options.localIndex};
+        let coalesced_data_index = ${options.workgroupIndex} * ${u32S( workgroupSize * grainSize )} + coalesced_local_index;
+        ${conditionalIfWGSL( lengthExpression ? wgsl`coalesced_data_index < ${lengthExpression}` : null, wgsl`
+          ${callback( wgsl`coalesced_local_index`, wgsl`coalesced_data_index` )}
         ` )}
       }
     ` )}

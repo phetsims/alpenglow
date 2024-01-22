@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, DeviceContext, mainLogBarrier, partialWGSLBeautify, PipelineLayout, stripWGSLComments, PipelineBlueprint, WGSLModuleDeclarations } from '../../imports.js';
+import { addLineNumbers, alpenglow, DeviceContext, mainLogBarrier, partialWGSLBeautify, PipelineBlueprint, PipelineLayout, stripWGSLComments } from '../../imports.js';
 
 export default class ComputePipeline {
   // This will be available by the time it can be accessed publicly
@@ -82,7 +82,7 @@ export default class ComputePipeline {
 
   public static getLogBarrierWGSL(
     pipelineLayout: PipelineLayout
-  ): WGSLModuleDeclarations {
+  ): string {
     // TODO: remove the superfluous main add
     const logBarrierPipelineBlueprint = new PipelineBlueprint( {
       name: 'logBarrier',
@@ -96,7 +96,7 @@ export default class ComputePipeline {
   public static async withContextAsync(
     deviceContext: DeviceContext,
     name: string,
-    wgsl: WGSLModuleDeclarations,
+    wgsl: string,
     pipelineLayout: PipelineLayout
   ): Promise<ComputePipeline> {
     const actualWGSL = partialWGSLBeautify( stripWGSLComments( wgsl, false ) );

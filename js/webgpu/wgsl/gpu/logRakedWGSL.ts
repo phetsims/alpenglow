@@ -6,18 +6,20 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, logWGSLOptions, RakedSizable, u32, PipelineBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
-import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow, logWGSL, logWGSLOptions, PipelineBlueprint, RakedSizable, u32S, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 import PickRequired from '../../../../../phet-core/js/types/PickRequired.js';
 
-export type logRakedWGSLOptions<T> = {
-  lengthExpression?: ( ( blueprint: PipelineBlueprint ) => WGSLExpressionU32 ) | null;
+type SelfOptions = {
+  lengthExpression?: WGSLExpressionU32 | null;
   relativeLengthExpression?: WGSLExpressionU32 | null;
   skipBarriers?: boolean;
   accessExpression?: ( ( index: WGSLExpressionU32 ) => WGSLExpression ) | null;
   relativeAccessExpression?: ( ( index: WGSLExpressionU32 ) => WGSLExpression ) | null;
-} & RakedSizable & StrictOmit<logWGSLOptions<T>, 'dataCount' | 'writeData'> & PickRequired<logWGSLOptions<T>, 'type'>;
+} & RakedSizable;
+
+export type logRakedWGSLOptions<T> = SelfOptions & StrictOmit<logWGSLOptions<T>, 'dataCount' | 'writeData'> & PickRequired<logWGSLOptions<T>, 'type'>;
 
 export const LOG_RAKED_OPTIONS = {
   lengthExpression: null,
@@ -32,7 +34,7 @@ const logRakedWGSL = <T>(
   providedOptions: logRakedWGSLOptions<T>
 ): WGSLStatements => {
 
-  const options = combineOptions<logRakedWGSLOptions<T>>( {}, LOG_RAKED_OPTIONS, providedOptions );
+  const options = optionize3<logRakedWGSLOptions<T>, SelfOptions>()( {}, LOG_RAKED_OPTIONS, providedOptions );
 
   const workgroupSize = options.workgroupSize;
   const grainSize = options.grainSize;
@@ -47,59 +49,59 @@ const logRakedWGSL = <T>(
   assert && assert( accessExpression || relativeAccessExpression );
 
   if ( blueprint.log ) {
-    return `
+    return wgsl`
       {
-        ${!skipBarriers ? `
+        ${!skipBarriers ? wgsl`
           workgroupBarrier();
           storageBarrier();
-        ` : ''}
+        ` : wgsl``}
 
-        let base_log_index = workgroup_id.x * ${u32( workgroupSize * grainSize )};
-        let base_local_log_index = ${u32( grainSize )} * local_id.x;
+        let base_log_index = workgroup_id.x * ${u32S( workgroupSize * grainSize )};
+        let base_local_log_index = ${u32S( grainSize )} * local_id.x;
         let combined_base = base_log_index + base_local_log_index;
 
-        ${lengthExpression !== null ? `
-          if ( combined_base < ${lengthExpression!( blueprint )} ) {
-        ` : ''}
-        ${relativeLengthExpression !== null ? `
+        ${lengthExpression !== null ? wgsl`
+          if ( combined_base < ${lengthExpression} ) {
+        ` : wgsl``}
+        ${relativeLengthExpression !== null ? wgsl`
           if ( base_local_log_index < ${relativeLengthExpression} ) {
-        ` : ''}
+        ` : wgsl``}
 
-        var log_length = ${u32( grainSize )};
-        ${lengthExpression !== null ? `
-          log_length = min( log_length, ${lengthExpression!( blueprint )} - combined_base );
-        ` : ''}
-        ${relativeLengthExpression !== null ? `
+        var log_length = ${u32S( grainSize )};
+        ${lengthExpression !== null ? wgsl`
+          log_length = min( log_length, ${lengthExpression} - combined_base );
+        ` : wgsl``}
+        ${relativeLengthExpression !== null ? wgsl`
           log_length = min( log_length, ${relativeLengthExpression} - base_local_log_index );
-        ` : ''}
+        ` : wgsl``}
 
         ${logWGSL( blueprint, combineOptions<logWGSLOptions<T>>( {
-          dataCount: 'log_length',
-          writeData: ( write: ( tIndex: WGSLExpressionU32, tValue: WGSLExpression ) => WGSLStatements ) => `
+          dataCount: wgsl`log_length`,
+          writeData: ( write: ( tIndex: WGSLExpressionU32, tValue: WGSLExpression ) => WGSLStatements ) => wgsl`
             for ( var _i = 0u; _i < log_length; _i++ ) {
-              ${accessExpression ? `
+              ${accessExpression ? wgsl`
                 // "global" access
-                let _expr = ${accessExpression( 'combined_base + _i' )};
-              ` : `
+                let _expr = ${accessExpression( wgsl`combined_base + _i` )};
+              ` : wgsl`
                 // "local" access
-                let _expr = ${relativeAccessExpression!( 'base_local_log_index + _i' )};
+                let _expr = ${relativeAccessExpression!( wgsl`base_local_log_index + _i` )};
               `}
-              ${write( `_i * ${u32( options.type!.bytesPerElement / 4 )}`, '_expr' )}
+              ${write( wgsl`_i * ${u32S( options.type!.bytesPerElement / 4 )}`, wgsl`_expr` )}
             }
           `
         }, options ) )}
 
-        ${relativeLengthExpression !== null ? `
+        ${relativeLengthExpression !== null ? wgsl`
           }
-        ` : ''}
-        ${lengthExpression !== null ? `
+        ` : wgsl``}
+        ${lengthExpression !== null ? wgsl`
           }
-        ` : ''}
+        ` : wgsl``}
       }
     `;
   }
   else {
-    return '';
+    return wgsl``;
   }
 };
 

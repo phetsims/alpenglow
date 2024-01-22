@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, BufferSlot, ComputePipeline, DeviceContext, getArrayType, getCastedType, PipelineLayout, ResourceSlot, ResourceUsage, U32Type, WGSLModuleDeclarations, WGSLVariableName } from '../../imports.js';
+import { alpenglow, BindingType, BufferSlot, ComputePipeline, DeviceContext, getArrayType, getCastedType, PipelineLayout, ResourceSlot, ResourceUsage, U32Type, wgsl, WGSLModuleDeclarations, wgslWith } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 
@@ -28,7 +28,7 @@ export default class PipelineBlueprint {
   public readonly log: boolean;
 
   private readonly declarations: WGSLInternalDeclaration[] = [];
-  private readonly usageMap: Map<WGSLVariableName, ResourceUsage> = new Map<WGSLVariableName, ResourceUsage>();
+  private readonly usageMap: Map<string, ResourceUsage> = new Map<string, ResourceUsage>();
 
   public constructor(
     providedOptions: PipelineBlueprintOptions
@@ -53,27 +53,24 @@ export default class PipelineBlueprint {
 
   // TODO: oh no, we need to put the atomic in here(!)
   // TODO: Or actually, just an ability to put structs of arbitrary types in ConcreteTypes
-  public static readonly LOG_BUFFER_SLOT = new BufferSlot( getCastedType( getArrayType( U32Type, 2 << 22, 0 ), blueprint => {
-    blueprint.add( '_Log', `
-      struct _Log {
-        next_space: atomic<u32>,
-        data: array<u32>
-      };
-    ` );
-
-    return '_Log';
-  } ) );
+  public static readonly LOG_BUFFER_SLOT = new BufferSlot( getCastedType( getArrayType( U32Type, 2 << 22, 0 ), wgslWith(
+    wgsl`_Log`, '_Log', wgsl`
+    struct _Log {
+      next_space: atomic<u32>,
+      data: array<u32>
+    };
+  ` ) ) );
 
   public add(
     name: string,
     declarations: WGSLModuleDeclarations
   ): void {
     if ( !this.declarations.some( declaration => declaration.name === name ) ) {
-      this.declarations.push( new WGSLInternalDeclaration( name, declarations ) );
+      this.declarations.push( new WGSLInternalDeclaration( name, declarations.withBlueprint( this ) ) );
     }
   }
 
-  public addSlot( name: WGSLVariableName, slot: ResourceSlot, bindingType: BindingType ): void {
+  public addSlot( name: string, slot: ResourceSlot, bindingType: BindingType ): void {
     let usage: ResourceUsage;
     // If it already exists, we'll do some checks and "combine" types (might switch read-only to read-write, etc.)
     if ( this.usageMap.has( name ) ) {
@@ -103,7 +100,7 @@ export default class PipelineBlueprint {
 
         // NOTE: type declaration should NOT create another usage. We will already have created bind group layouts
         // based on the usages at this point, so referencing ANOTHER slot would cause major issues.
-        return binding.getWGSLDeclaration( this, name );
+        return binding.getWGSLDeclaration( name ).withBlueprint( this );
       } ),
       ...this.declarations.map( declaration => declaration.declarations )
     ].join( '\n' );
@@ -121,6 +118,6 @@ alpenglow.register( 'PipelineBlueprint', PipelineBlueprint );
 class WGSLInternalDeclaration {
   public constructor(
     public readonly name: string,
-    public readonly declarations: WGSLModuleDeclarations
+    public readonly declarations: string
   ) {}
 }

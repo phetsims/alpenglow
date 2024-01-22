@@ -13,7 +13,6 @@ const i32Hex = ( n: number ): string => {
 
   return `0x${( n >> 0 ).toString( 16 )}i`;
 };
+alpenglow.register( 'i32Hex', i32Hex );
 
 export default i32Hex;
-
-alpenglow.register( 'i32Hex', i32Hex );

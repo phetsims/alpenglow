@@ -30,7 +30,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, u32, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, u32S, wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
 
 export type bitPackRadixAccessWGSLOptions = {
   // u32 name
@@ -65,15 +65,15 @@ const bitPackRadixAccessWGSL = (
   const countsPerComponent = Math.floor( 32 / countBitQuantity );
   assert && assert( bitVectorSize * countsPerComponent >= ( 1 << bitsPerInnerPass ), 'Not enough space for bit-packing' );
 
-  return `${
+  return wgsl`${
     // Opening paren needed if we have multiple components each
-    countsPerComponent === 1 ? '' : '( '
-  }${bitVector}${bitVectorSize > 1 ? `[ ${
+    countsPerComponent === 1 ? wgsl`` : wgsl`( `
+  }${bitVector}${bitVectorSize > 1 ? wgsl`[ ${
     // Our access index (if we're a vector)
-    countsPerComponent === 1 ? bits : `( ${bits} ) / ${u32( countsPerComponent )}`
-  } ]` : ''}${
+    countsPerComponent === 1 ? bits : wgsl`( ${bits} ) / ${u32S( countsPerComponent )}`
+  } ]` : wgsl``}${
     // If we have multiple components, we'll need to bit shift and &
-    countsPerComponent === 1 ? '' : ` >> ( ( ( ${bits} ) % ${u32( countsPerComponent )} ) * ${u32( countBitQuantity )} ) ) & ${u32( ( 1 << countBitQuantity ) - 1 )}`
+    countsPerComponent === 1 ? wgsl`` : wgsl` >> ( ( ( ${bits} ) % ${u32S( countsPerComponent )} ) * ${u32S( countBitQuantity )} ) ) & ${u32S( ( 1 << countBitQuantity ) - 1 )}`
   }`;
 };
 

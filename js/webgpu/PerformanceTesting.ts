@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, OldBindingType, BlitShader, OldComputeShader, DeviceContext, wgsl_copy_storage_operation, wgsl_expensive_operation, wgsl_fake_combine_to_texture, U32Order, BufferArraySlot, getArrayType, RadixSortModule, Routine, Procedure, u32 } from '../imports.js';
+import { alpenglow, BlitShader, BufferArraySlot, DeviceContext, getArrayType, OldBindingType, OldComputeShader, Procedure, RadixSortModule, Routine, U32Order, u32S, wgsl_copy_storage_operation, wgsl_expensive_operation, wgsl_fake_combine_to_texture } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Utils from '../../../dot/js/Utils.js';
 
@@ -192,7 +192,7 @@ export default class PerformanceTesting {
       scanWorkgroupSize: 64,
       scanGrainSize: 4,
 
-      lengthExpression: () => u32( size ),
+      lengthExpression: u32S( size ),
 
       bitsPerPass: 2, // TODO: try 8 once we are doing more
       bitsPerInnerPass: 2,

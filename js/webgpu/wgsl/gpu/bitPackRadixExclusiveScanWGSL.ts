@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, u32, u32Hex, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, commentWGSL, u32HexS, u32S, wgsl, WGSLExpressionU32, WGSLStatements, wgslString, WGSLStringAccumulator, WGSLVariableName } from '../../../imports.js';
 
 export type bitPackRadixExclusiveScanWGSLOptions = {
   // (u32/vec2u/vec3u/vec4u) name
@@ -39,13 +39,13 @@ const bitPackRadixExclusiveScanWGSL = (
   if ( countsPerComponent === 1 ) {
     switch( bitVectorSize ) {
       case 1:
-        return `${bitVector} = 0u;`;
+        return wgsl`${bitVector} = 0u;`;
       case 2:
-        return `${bitVector} = vec2( 0u, ${bitVector}.x );`;
+        return wgsl`${bitVector} = vec2( 0u, ${bitVector}.x );`;
       case 3:
-        return `${bitVector} = vec3( 0u, ${bitVector}.x, ${bitVector}.y );`;
+        return wgsl`${bitVector} = vec3( 0u, ${bitVector}.x, ${bitVector}.y );`;
       case 4:
-        return `${bitVector} = vec4( 0u, ${bitVector}.x, ${bitVector}.y, ${bitVector}.z );`;
+        return wgsl`${bitVector} = vec4( 0u, ${bitVector}.x, ${bitVector}.y, ${bitVector}.z );`;
       default:
         throw new Error( `Invalid bitVectorSize: ${bitVectorSize}` );
     }
@@ -54,39 +54,42 @@ const bitPackRadixExclusiveScanWGSL = (
     const singleMask = ( ( 1 << countBitQuantity ) >>> 0 ) - 1;
     const fullMask = 0xffffffff;
     const getFromIndex = ( index: number ): WGSLExpressionU32 => {
-      const vectorIndexExpr = bitVectorSize > 1 ? [ '.x', '.y', '.z', '.w' ][ Math.floor( index / countsPerComponent ) ] : '';
-      let expr = `${bitVector}${vectorIndexExpr}`;
+      const vectorIndexExpr = wgslString( bitVectorSize > 1 ? [ '.x', '.y', '.z', '.w' ][ Math.floor( index / countsPerComponent ) ] : '' );
+      let expr = wgsl`${bitVector}${vectorIndexExpr}`;
       const shiftAmount = countBitQuantity * ( index % countsPerComponent );
       if ( shiftAmount > 0 ) {
-        expr = `( ${expr} >> ${u32( shiftAmount )} )`;
+        expr = wgsl`( ${expr} >> ${u32S( shiftAmount )} )`;
       }
-      return `${expr} & ${u32Hex( singleMask )}`;
+      return wgsl`${expr} & ${u32HexS( singleMask )}`;
     };
     const setAtIndex = ( index: number, value: WGSLVariableName ): WGSLStatements => {
-      const vectorIndexExpr = bitVectorSize > 1 ? [ '.x', '.y', '.z', '.w' ][ Math.floor( index / countsPerComponent ) ] : '';
-      const accessExpr = `${bitVector}${vectorIndexExpr}`;
+      const vectorIndexExpr = wgslString( bitVectorSize > 1 ? [ '.x', '.y', '.z', '.w' ][ Math.floor( index / countsPerComponent ) ] : '' );
+      const accessExpr = wgsl`${bitVector}${vectorIndexExpr}`;
       const shiftAmount = countBitQuantity * ( index % countsPerComponent );
       const existingMask = fullMask - ( ( singleMask << shiftAmount ) >>> 0 );
-      const shiftedValueExpr = shiftAmount === 0 ? value : `( ( ${value} ) << ${u32( shiftAmount )} )`;
-      return `${accessExpr} = ( ${accessExpr} & ${u32Hex( existingMask )} ) | ${shiftedValueExpr}`;
+      const shiftedValueExpr = shiftAmount === 0 ? value : wgsl`( ( ${value} ) << ${u32S( shiftAmount )} )`;
+      return wgsl`${accessExpr} = ( ${accessExpr} & ${u32HexS( existingMask )} ) | ${shiftedValueExpr}`;
     };
-    let str = `
+
+    const str = new WGSLStringAccumulator();
+
+    str.add( wgsl`
       var bitty_value = 0u;
       var bitty_next_value = 0u;
-    `;
+    ` );
     const numBins = ( 1 << bitsPerInnerPass ) >>> 0;
     for ( let i = 0; i < numBins; i++ ) {
       const isLast = i === numBins - 1;
 
       if ( !isLast ) {
-        str += `bitty_next_value += ${getFromIndex( i )};\n`;
+        str.add( wgsl`bitty_next_value += ${getFromIndex( i )};\n` );
       }
-      str += `${setAtIndex( i, 'bitty_value' )};\n`;
+      str.add( wgsl`${setAtIndex( i, wgsl`bitty_value` )};\n` );
       if ( !isLast ) {
-        str += 'bitty_value = bitty_next_value;\n';
+        str.add( wgsl`bitty_value = bitty_next_value;\n` );
       }
     }
-    return `
+    return wgsl`
       ${commentWGSL( 'begin bit_pack_radix_exclusive_scan' )}
       ${str}
       ${commentWGSL( 'end bit_pack_radix_exclusive_scan' )}

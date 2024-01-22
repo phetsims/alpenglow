@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, PipelineBlueprint } from '../../../imports.js';
+import { alpenglow, logWGSL, PipelineBlueprint, wgsl } from '../../../imports.js';
 
 const mainLogBarrier = (
   blueprint: PipelineBlueprint
 ): void => {
-  blueprint.add( 'main', `
+  blueprint.add( 'main', wgsl`
     @compute @workgroup_size(1)
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
