@@ -8,7 +8,9 @@ Experimental rasterization engine, by PhET Interactive Simulations
 MIT license, see [LICENSE](LICENSE)
 
 ### Contributing
-If you would like to contribute to this repo, please read our [contributing guidelines](https://github.com/phetsims/community/blob/main/CONTRIBUTING.md).
+
+If you would like to contribute to this repo, please read
+our [contributing guidelines](https://github.com/phetsims/community/blob/main/CONTRIBUTING.md).
 
 ### Minimal Setup Instructions
 
@@ -49,7 +51,7 @@ Go to http://localhost/alpenglow/doc/ (or an equivalent) to browse, where the do
 the repositories checked out.
 
 ### Running (experimental) Thimbleberry WGSL benchmarks
-    
+
 ```sh
 # Go to the alpenglow directory
 cd ../alpenglow
