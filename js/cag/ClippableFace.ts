@@ -343,8 +343,6 @@ export type SerializedClippableFace = {
 };
 
 export const serializeClippableFace = ( clippableFace: ClippableFace ): SerializedClippableFace => {
-  // We are not checking the given type! We're wrapping these
-  // eslint-disable-next-line no-simple-type-checking-assertions
   assert && assert( clippableFace instanceof PolygonalFace || clippableFace instanceof EdgedFace );
 
   return {
