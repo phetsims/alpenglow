@@ -2079,10 +2079,6 @@
       </p>
 
       <p class="TODO">
-        Look into using template literals to reduce what we're doing.
-      </p>
-
-      <p class="TODO">
         Sometimes parsing the WGSL of a parameter (to tell if it's doing something, and possibly optimizing it) could be
         useful. Getting to work with the WGSL AST would be great. For instance, knowing "hey, is this a statement or
         an expression?" would be great.
@@ -2096,6 +2092,10 @@
       </p>
 
       <p class="TODO">
+        ConcreteType Structures<br>
+        We'll want to be able to slice/subtype (e.g. "extract these fields)? - e.g. sort on subset, move full object<br>
+        Support bit packing (combine booleans, finite-precision types - NOTE HLSL2021 includes bitfields)<br>
+        Structure-of-arrays handling<br>
         Use size/alignment of structures for array/structure types. Our vec3 array is broken right now.
         Note that storage and uniform address spaces have different layout constraints:
         <a href="https://www.w3.org/TR/WGSL/#address-space-layout-constraints">https://www.w3.org/TR/WGSL/#address-space-layout-constraints</a>.
@@ -2106,24 +2106,6 @@
       </p>
 
       <p class="TODO">
-        More of a class-based structure for array/structure types, since we need to slice/subset/etc.
-      </p>
-
-      <p class="TODO">
-        Create a structure-like creator for ConcreteTypes. We'll want bit-packing (combine booleans, finite-precision types, etc.)
-        For this, we'll presumably actually want variable bit-length values (e.g. like a u8, u16), and handle similar
-        packing for booleans. HLSL2021 includes bitfields?
-      </p>
-
-      <p class="TODO">
-        Structures that potentially allow structure-of-arrays handling.
-      </p>
-
-      <p class="TODO">
-        Subset of a structure type (or... array?): Load this subset so it can be sorted, then move the original object.
-      </p>
-
-      <p class="TODO">
         Have "casting" of ConcreteTypes to other types (e.g. reinterpretation as u32 array, or something using
         atomics in one pass, and not in another). This allows us to strongly type BufferSlots in varying contexts.
       </p>
@@ -2131,29 +2113,32 @@
       <h4 id="WGSL-linking">Linking</h4>
 
       <p class="TODO">
-        Histogram/merge/merge-simple "Main" modules probably not needed? Bake into the full form? (We have a lot of
-        overhead, no?)
+        A good example of fusing/etc. would be sorting one list of items by the results of another list or order? Or
+        by extracting out part of them?
       </p>
 
       <p class="TODO">
-        Think out "data source" abstraction. With fusing.
+        Do an initial fusing pass, but then move the raster clipper over into our new framework.
+      </p>
 
-        Presumably it also specifies the access pattern/mapping? - We'll be able to "store" this in either a private/local
-        variable, or a workgroup shared variable?
+      <p class="TODO">
+        Fusing<br><br>
 
-        Actually, think of operations that "map" data. When fusing, we'll want to execute the operation at the "load".
-        Is that actually... the extend of fusing? Then we can just do that in "load expressions"?
+        Easiest to think about loads and stores, e.g. "maps" for the input/output of a module. The load/store can
+        reference the BufferSlot, and knows the storage order of data (striped with workgroup/grain), including the type.
+        <br><br>
+        A "map" of values doesn't specify the access order. Presumably each "load/store" would have WGSL intended for
+        different "intermediate" places, e.g. so it can do coalesced accesses (somewhat like unroll, where it controls
+        the order?).<br><br>
+        Certain loads/stores will be... to local variables, workspace variables, or "global" memory.
+        <br><br>
 
-        Are there concrete cases of more advanced fusing?
+        More advanced fusing might be possible, for the future.
       </p>
 
       <p class="TODO">
         Buffer offsets for uniforms, for radix passes? (Can we use dynamic offsets in that case?) - We will want to
         minimize number of shaders eventually, for Windows.
-      </p>
-
-      <p class="TODO">
-        Put blueprints into ConcreteType
       </p>
 
       <p class="TODO">
@@ -2199,14 +2184,6 @@
         For this... get things like the radix sort example working (it's more... interesting).
 
         Once we have radix sort, test bind group approaches, buffer sharing/aliasing, buffer offsets (one big buffer?)
-      </p>
-
-      <p class="TODO">
-        PipelineBlueprint constructor cleanup (... all options?).
-
-        Consider reversal, so our "main" shaders take a "new" blueprint, and return the "modified" same reference.
-
-        Convenience RoutineBlueprint creator, so we don't need to reference so many things.
       </p>
 
       <p class="TODO">
