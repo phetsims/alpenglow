@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroupLayout, Binding, DeviceContext, ResourceSlot } from '../../imports.js';
+import { alpenglow, BindGroupLayout, Binding, DeviceContext, ResourceSlot, webgpu } from '../../imports.js';
 
 export default class PipelineLayout {
   public readonly layout: GPUPipelineLayout;
@@ -15,7 +15,7 @@ export default class PipelineLayout {
     public readonly deviceContext: DeviceContext,
     public readonly bindGroupLayouts: BindGroupLayout[]
   ) {
-    this.layout = deviceContext.device.createPipelineLayout( {
+    this.layout = webgpu.deviceCreatePipelineLayout( deviceContext.device, {
       bindGroupLayouts: bindGroupLayouts.map( bindGroupLayout => bindGroupLayout.layout )
     } );
   }

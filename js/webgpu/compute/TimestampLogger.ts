@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ByteEncoder, DeviceContext } from '../../imports.js';
+import { alpenglow, BufferLogger, ByteEncoder, DeviceContext, webgpu } from '../../imports.js';
 import Utils from '../../../../dot/js/Utils.js';
 
 export default class TimestampLogger {
@@ -23,7 +23,7 @@ export default class TimestampLogger {
     private readonly deviceContext: DeviceContext | null,
     private readonly capacity: number
   ) {
-    if ( deviceContext && deviceContext.device.features.has( 'timestamp-query' ) ) {
+    if ( deviceContext && webgpu.deviceHasFeature( deviceContext.device, 'timestamp-query' ) ) {
       this.querySet = deviceContext.createQuerySet( capacity );
       this.queryBuffer = deviceContext.createQueryBuffer( 8 * capacity );
     }
@@ -57,7 +57,7 @@ export default class TimestampLogger {
     bufferLogger: BufferLogger
   ): Promise<TimestampLoggerResult | null> {
     if ( this.querySet && this.queryBuffer ) {
-      encoder.resolveQuerySet( this.querySet, 0, this.index, this.queryBuffer, 0 );
+      webgpu.encoderResolveQuerySet( encoder, this.querySet, 0, this.index, this.queryBuffer, 0 );
 
       const buffer = this.queryBuffer;
 
@@ -84,8 +84,8 @@ export default class TimestampLogger {
   }
 
   public dispose(): void {
-    this.querySet?.destroy();
-    this.queryBuffer?.destroy();
+    this.querySet && webgpu.querySetDestroy( this.querySet );
+    this.queryBuffer && webgpu.bufferDestroy( this.queryBuffer );
   }
 }
 

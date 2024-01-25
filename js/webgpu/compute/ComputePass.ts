@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroup, ComputePipeline } from '../../imports.js';
+import { alpenglow, BindGroup, ComputePipeline, webgpu } from '../../imports.js';
 
 let globalId = 1;
 
@@ -23,7 +23,7 @@ export default class ComputePass {
     encoder: GPUCommandEncoder,
     computePassDescriptor: GPUComputePassDescriptor
   ) {
-    this.computePassEncoder = encoder.beginComputePass( computePassDescriptor );
+    this.computePassEncoder = webgpu.encoderBeginComputePass( encoder, computePassDescriptor );
   }
 
   private prepare(
@@ -31,7 +31,7 @@ export default class ComputePass {
     bindGroups: BindGroup[]
   ): void {
     if ( this.currentPipeline !== computePipeline ) {
-      this.computePassEncoder.setPipeline( computePipeline.pipeline );
+      webgpu.computePassEncoderSetPipeline( this.computePassEncoder, computePipeline.pipeline );
       this.currentPipeline = computePipeline;
     }
 
@@ -40,7 +40,7 @@ export default class ComputePass {
       const currentBindGroup = this.currentBindGroups.get( i );
 
       if ( currentBindGroup !== bindGroup ) {
-        this.computePassEncoder.setBindGroup( i, bindGroup.bindGroup );
+        webgpu.passEncoderSetBindGroup( this.computePassEncoder, i, bindGroup.bindGroup );
         this.currentBindGroups.set( i, bindGroup );
       }
     }
@@ -51,8 +51,8 @@ export default class ComputePass {
   ): void {
     if ( computePipeline.logBarrierPipeline ) {
       this.currentPipeline = null;
-      this.computePassEncoder.setPipeline( computePipeline.logBarrierPipeline );
-      this.computePassEncoder.dispatchWorkgroups( 1, 1, 1 );
+      webgpu.computePassEncoderSetPipeline( this.computePassEncoder, computePipeline.logBarrierPipeline );
+      webgpu.computePassEncoderDispatchWorkgroups( this.computePassEncoder, 1, 1, 1 );
     }
   }
 
@@ -65,7 +65,7 @@ export default class ComputePass {
   ): this {
     this.prepare( computePipeline, bindGroups );
 
-    this.computePassEncoder.dispatchWorkgroups( dispatchX, dispatchY, dispatchZ );
+    webgpu.computePassEncoderDispatchWorkgroups( this.computePassEncoder, dispatchX, dispatchY, dispatchZ );
 
     this.attemptLogBarrier( computePipeline );
 
@@ -81,7 +81,7 @@ export default class ComputePass {
   ): this {
     this.prepare( computePipeline, bindGroups );
 
-    this.computePassEncoder.dispatchWorkgroupsIndirect( indirectBuffer, indirectOffset );
+    webgpu.computePassEncoderDispatchWorkgroupsIndirect( this.computePassEncoder, indirectBuffer, indirectOffset );
 
     this.attemptLogBarrier( computePipeline );
 
@@ -90,7 +90,7 @@ export default class ComputePass {
   }
 
   public end(): void {
-    this.computePassEncoder.end();
+    webgpu.computePassEncoderEnd( this.computePassEncoder );
   }
 }
 alpenglow.register( 'ComputePass', ComputePass );

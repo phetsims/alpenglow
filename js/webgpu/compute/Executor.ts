@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ComputePass, ConsoleLogger, DeviceContext, TypedBuffer } from '../../imports.js';
+import { alpenglow, BufferLogger, ComputePass, ConsoleLogger, DeviceContext, TypedBuffer, webgpu } from '../../imports.js';
 import Utils from '../../../../dot/js/Utils.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 
@@ -104,7 +104,7 @@ export default class Executor {
     options?: ExecutorOptions
   ): Promise<T> {
 
-    const encoder = deviceContext.device.createCommandEncoder( { label: 'the encoder' } );
+    const encoder = webgpu.deviceCreateCommandEncoder( deviceContext.device, { label: 'the encoder' } );
     const bufferLogger = new BufferLogger( deviceContext );
 
     const executor = new Executor(
@@ -121,8 +121,8 @@ export default class Executor {
 
     const logPromise = logBuffer ? executor.arrayBuffer( logBuffer ) : Promise.resolve( null );
 
-    const commandBuffer = encoder.finish();
-    deviceContext.device.queue.submit( [ commandBuffer ] );
+    const commandBuffer = webgpu.encoderFinish( encoder );
+    webgpu.deviceQueueSubmit( deviceContext.device, [ commandBuffer ] );
 
     await bufferLogger.complete();
 

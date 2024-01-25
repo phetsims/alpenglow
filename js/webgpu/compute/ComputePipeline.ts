@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, DeviceContext, mainLogBarrier, partialWGSLBeautify, PipelineBlueprint, PipelineLayout, stripWGSLComments } from '../../imports.js';
+import { addLineNumbers, alpenglow, DeviceContext, mainLogBarrier, partialWGSLBeautify, PipelineBlueprint, PipelineLayout, stripWGSLComments, webgpu } from '../../imports.js';
 
 export default class ComputePipeline {
   // This will be available by the time it can be accessed publicly
@@ -26,7 +26,7 @@ export default class ComputePipeline {
     console.log( addLineNumbers( wgsl ) );
     console.groupEnd();
 
-    const module = deviceContext.device.createShaderModule( {
+    const module = webgpu.deviceCreateShaderModule( deviceContext.device, {
       label: name,
       code: wgsl,
 
@@ -52,7 +52,7 @@ export default class ComputePipeline {
       label: 'logBarrier pipeline',
       layout: pipelineLayout.layout, // we share the layout
       compute: {
-        module: deviceContext.device.createShaderModule( {
+        module: webgpu.deviceCreateShaderModule( deviceContext.device, {
           label: 'logBarrier',
           code: ComputePipeline.getLogBarrierWGSL( pipelineLayout )
         } ),
@@ -62,20 +62,20 @@ export default class ComputePipeline {
 
     if ( async ) {
       this.pipelinePromise = ( async () => {
-        this.pipeline = await deviceContext.device.createComputePipelineAsync( pipelineDescriptor );
+        this.pipeline = await webgpu.deviceCreateComputePipelineAsync( deviceContext.device, pipelineDescriptor );
         if ( logBarrierPipelineDescriptor ) {
-          this.logBarrierPipeline = await deviceContext.device.createComputePipelineAsync( logBarrierPipelineDescriptor );
+          this.logBarrierPipeline = await webgpu.deviceCreateComputePipelineAsync( deviceContext.device, logBarrierPipelineDescriptor );
         }
 
         return this.pipeline;
       } )();
     }
     else {
-      this.pipeline = deviceContext.device.createComputePipeline( pipelineDescriptor );
+      this.pipeline = webgpu.deviceCreateComputePipeline( deviceContext.device, pipelineDescriptor );
       this.pipelinePromise = Promise.resolve( this.pipeline );
 
       if ( logBarrierPipelineDescriptor ) {
-        this.logBarrierPipeline = deviceContext.device.createComputePipeline( logBarrierPipelineDescriptor );
+        this.logBarrierPipeline = webgpu.deviceCreateComputePipeline( deviceContext.device, logBarrierPipelineDescriptor );
       }
     }
   }

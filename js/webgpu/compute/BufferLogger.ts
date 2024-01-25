@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, DeviceContext } from '../../imports.js';
+import { alpenglow, DeviceContext, webgpu } from '../../imports.js';
 
 const COLLAPSE_LOGS = true;
 
@@ -38,14 +38,14 @@ export default class BufferLogger {
 
     const mappableBuffer = this.deviceContext.createMapReadableBuffer( buffer.size );
 
-    encoder.copyBufferToBuffer( buffer, 0, mappableBuffer, 0, mappableBuffer.size );
+    webgpu.encoderCopyBufferToBuffer( encoder, buffer, 0, mappableBuffer, 0, mappableBuffer.size );
 
     this.callbacksOnComplete.push( async () => {
       const arrayBuffer = await DeviceContext.getMappedArrayBuffer( mappableBuffer );
 
       await callback( arrayBuffer );
 
-      mappableBuffer.destroy();
+      webgpu.bufferDestroy( mappableBuffer );
     } );
   }
 

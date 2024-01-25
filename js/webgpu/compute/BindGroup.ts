@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroupLayout, DeviceContext, Resource, ResourceSlot } from '../../imports.js';
+import { alpenglow, BindGroupLayout, DeviceContext, Resource, ResourceSlot, webgpu } from '../../imports.js';
 
 export default class BindGroup {
 
@@ -24,7 +24,7 @@ export default class BindGroup {
       return resource.getBindGroupEntry( binding );
     } );
 
-    this.bindGroup = deviceContext.device.createBindGroup( {
+    this.bindGroup = webgpu.deviceCreateBindGroup( deviceContext.device, {
       label: `${this.name} bind group`,
       layout: layout.layout,
       entries: entries

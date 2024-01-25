@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, DeviceContext, ExecutionContext, Executor, ExecutorOptions, PipelineBlueprint, Resource, ResourceSlot, Routine } from '../../imports.js';
+import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, DeviceContext, ExecutionContext, Executor, ExecutorOptions, PipelineBlueprint, Resource, ResourceSlot, Routine, webgpu } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import BufferSlot from './BufferSlot.js';
 import { combineOptions } from '../../../../phet-core/js/optionize.js';
@@ -95,9 +95,8 @@ export default class Procedure<In, Out> {
 
       assert && assert( storageUsage || uniformUsage );
 
-      const buffer = this.routine.deviceContext.device.createBuffer( {
-        // TODO: a label!
-        // label: `${this.routine.module.name} ${slot}`,
+      // TODO: add a label!
+      const buffer = webgpu.deviceCreateBuffer( this.routine.deviceContext.device, {
         size: slot.size,
         usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | ( storageUsage ? GPUBufferUsage.STORAGE : 0 ) | ( uniformUsage ? GPUBufferUsage.UNIFORM : 0 )
       } );
@@ -149,7 +148,7 @@ export default class Procedure<In, Out> {
   }
 
   public dispose(): void {
-    this.selfBuffers.forEach( buffer => buffer.destroy() );
+    this.selfBuffers.forEach( buffer => webgpu.bufferDestroy( buffer ) );
   }
 }
 alpenglow.register( 'Procedure', Procedure );

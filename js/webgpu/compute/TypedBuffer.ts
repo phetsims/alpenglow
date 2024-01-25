@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ByteEncoder, ConcreteType, DeviceContext, getArrayType } from '../../imports.js';
+import { alpenglow, BufferLogger, ByteEncoder, ConcreteType, DeviceContext, getArrayType, webgpu } from '../../imports.js';
 
 export default class TypedBuffer<T = unknown> {
   public constructor(
@@ -17,7 +17,7 @@ export default class TypedBuffer<T = unknown> {
   public setValue( device: GPUDevice, value: T ): void {
     const encoder = new ByteEncoder();
     this.type.encode( value, encoder );
-    device.queue.writeBuffer( this.buffer, 0, encoder.fullArrayBuffer, 0, encoder.byteLength );
+    webgpu.deviceWriteBuffer( device, this.buffer, 0, encoder.fullArrayBuffer, 0, encoder.byteLength );
   }
 
   public async getValue( encoder: GPUCommandEncoder, bufferLogger: BufferLogger ): Promise<T> {
@@ -27,7 +27,7 @@ export default class TypedBuffer<T = unknown> {
   }
 
   public dispose(): void {
-    this.buffer.destroy();
+    webgpu.bufferDestroy( this.buffer );
   }
 
   public static createArray<T>(

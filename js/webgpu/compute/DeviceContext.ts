@@ -6,11 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionOptions, ExecutionSingleCallback, Unpromised } from '../../imports.js';
+import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionOptions, ExecutionSingleCallback, PreferredCanvasFormat, Unpromised, webgpu } from '../../imports.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import optionize, { combineOptions } from '../../../../phet-core/js/optionize.js';
-
-export type PreferredCanvasFormat = 'bgra8unorm' | 'rgba8unorm';
 
 export type DeviceContextDeviceOptions = {
   maxLimits?: boolean;
@@ -62,12 +60,10 @@ export default class DeviceContext {
   // NOTE: Not readonly, we'll handle context losses. Perhaps have a Property for the device?
   public constructor( public device: GPUDevice ) {
 
-    this.preferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat() as PreferredCanvasFormat;
-    assert && assert( this.preferredCanvasFormat === 'bgra8unorm' || this.preferredCanvasFormat === 'rgba8unorm',
-      'According to WebGPU documentation, this should only be bgra8unorm or rgba8unorm' );
+    this.preferredCanvasFormat = webgpu.getPreferredCanvasFormat();
 
     this.preferredStorageFormat =
-      ( this.preferredCanvasFormat === 'bgra8unorm' && device.features.has( 'bgra8unorm-storage' ) )
+      ( this.preferredCanvasFormat === 'bgra8unorm' && webgpu.deviceHasFeature( device, 'bgra8unorm-storage' ) )
       ? 'bgra8unorm'
       : 'rgba8unorm';
 
@@ -92,17 +88,18 @@ export default class DeviceContext {
   }
 
   // in bytes
-  public createBuffer( size: number ): GPUBuffer {
-    // TODO: label!!!
-    return this.device.createBuffer( {
-      size: Math.max( size, 16 ), // Min of 16 bytes used
-      usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE
+  public createBuffer( size: number, flags = 0 ): GPUBuffer {
+    assert && assert( size > 0 );
+
+    return webgpu.deviceCreateBuffer( this.device, {
+      size: size,
+      usage: flags === 0 ? ( GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE ) : flags
     } );
   }
 
   public createDataBuffer( data: ArrayBufferView ): GPUBuffer {
     const buffer = this.createBuffer( data.byteLength );
-    this.device.queue.writeBuffer( buffer, 0, data.buffer );
+    webgpu.deviceWriteBuffer( this.device, buffer, 0, data.buffer );
     return buffer;
   }
 
@@ -120,29 +117,23 @@ export default class DeviceContext {
 
   public createByteEncoderBuffer( encoder: ByteEncoder ): GPUBuffer {
     const buffer = this.createBuffer( encoder.byteLength );
-    this.device.queue.writeBuffer( buffer, 0, encoder.fullArrayBuffer, 0, encoder.byteLength );
+    webgpu.deviceWriteBuffer( this.device, buffer, 0, encoder.fullArrayBuffer, 0, encoder.byteLength );
     return buffer;
   }
 
   // in bytes
   public createMapReadableBuffer( size: number ): GPUBuffer {
-    return this.device.createBuffer( {
-      size: size,
-      usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST
-    } );
+    return this.createBuffer( size, GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST );
   }
 
   // in bytes (takes 8 bytes per count)
   public createQueryBuffer( size: number ): GPUBuffer {
-    return this.device.createBuffer( {
-      size: size,
-      usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
-    } );
+    return this.createBuffer( size, GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST );
   }
 
   // (will take 8*capacity bytes)
   public createQuerySet( capacity: number ): GPUQuerySet {
-    return this.device.createQuerySet( {
+    return webgpu.deviceCreateQuerySet( this.device, {
       type: 'timestamp',
       count: capacity
     } );
@@ -155,6 +146,7 @@ export default class DeviceContext {
       throw new Error( 'Could not get a WebGPU context for the given Canvas' );
     }
 
+    // TODO: how will we log this type of thing?
     context.configure( {
       device: this.device,
       format: this.preferredCanvasFormat,
@@ -215,7 +207,7 @@ export default class DeviceContext {
     let device: GPUDevice | null = null;
 
     try {
-      const adapter = await navigator.gpu?.requestAdapter( {
+      const adapter = await webgpu.getAdapter( {
         powerPreference: options.highPerformance ? 'high-performance' : 'low-power'
       } );
 
@@ -223,12 +215,12 @@ export default class DeviceContext {
         return null;
       }
 
-      const supportsBGRATextureStorage = adapter.features.has( 'bgra8unorm-storage' ) || false;
+      const supportsBGRATextureStorage = webgpu.adapterHasFeature( adapter, 'bgra8unorm-storage' );
 
       const features: GPUFeatureName[] = supportsBGRATextureStorage ? [ 'bgra8unorm-storage' ] : [];
 
       if ( options.timestampQuery ) {
-        if ( adapter.features.has( 'timestamp-query' ) ) {
+        if ( webgpu.adapterHasFeature( adapter, 'timestamp-query' ) ) {
           features.push( 'timestamp-query' );
         }
         else {
@@ -243,10 +235,11 @@ export default class DeviceContext {
         } );
       }
 
-      device = await adapter?.requestDevice( {
+      const requestDeviceOptions: GPUDeviceDescriptor = {
         requiredFeatures: features,
         requiredLimits: limits
-      } ) || null;
+      };
+      device = await webgpu.adapterRequestDevice( adapter, requestDeviceOptions );
     }
     catch( err ) {
       // For now, do nothing (WebGPU not enabled message perhaps?)
@@ -257,53 +250,54 @@ export default class DeviceContext {
   }
 
   public dispose(): void {
-    this.device.destroy();
+    webgpu.deviceDestroy( this.device );
   }
 
+  // TODO: reduce code duplication around here
   public static async getMappedFloatArray( buffer: GPUBuffer ): Promise<Float32Array> {
-    await buffer.mapAsync( GPUMapMode.READ );
-    const resultArrayBuffer = buffer.getMappedRange();
+    await webgpu.bufferMapAsync( buffer, GPUMapMode.READ );
+    const resultArrayBuffer = webgpu.bufferGetMappedRange( buffer );
 
     const outputArray = new Float32Array( resultArrayBuffer.byteLength / 4 );
     outputArray.set( new Float32Array( resultArrayBuffer ) );
 
-    buffer.unmap();
+    webgpu.bufferUnmap( buffer );
 
     return outputArray;
   }
 
   public static async getMappedUintArray( buffer: GPUBuffer ): Promise<Uint32Array> {
-    await buffer.mapAsync( GPUMapMode.READ );
-    const resultArrayBuffer = buffer.getMappedRange();
+    await webgpu.bufferMapAsync( buffer, GPUMapMode.READ );
+    const resultArrayBuffer = webgpu.bufferGetMappedRange( buffer );
 
     const outputArray = new Uint32Array( resultArrayBuffer.byteLength / 4 );
     outputArray.set( new Uint32Array( resultArrayBuffer ) );
 
-    buffer.unmap();
+    webgpu.bufferUnmap( buffer );
 
     return outputArray;
   }
 
   public static async getMappedIntArray( buffer: GPUBuffer ): Promise<Int32Array> {
-    await buffer.mapAsync( GPUMapMode.READ );
-    const resultArrayBuffer = buffer.getMappedRange();
+    await webgpu.bufferMapAsync( buffer, GPUMapMode.READ );
+    const resultArrayBuffer = webgpu.bufferGetMappedRange( buffer );
 
     const outputArray = new Int32Array( resultArrayBuffer.byteLength / 4 );
     outputArray.set( new Int32Array( resultArrayBuffer ) );
 
-    buffer.unmap();
+    webgpu.bufferUnmap( buffer );
 
     return outputArray;
   }
 
   public static async getMappedByteArray( buffer: GPUBuffer ): Promise<Uint8Array> {
-    await buffer.mapAsync( GPUMapMode.READ );
-    const resultArrayBuffer = buffer.getMappedRange();
+    await webgpu.bufferMapAsync( buffer, GPUMapMode.READ );
+    const resultArrayBuffer = webgpu.bufferGetMappedRange( buffer );
 
     const outputArray = new Uint8Array( resultArrayBuffer.byteLength );
     outputArray.set( new Uint8Array( resultArrayBuffer ) );
 
-    buffer.unmap();
+    webgpu.bufferUnmap( buffer );
 
     return outputArray;
   }

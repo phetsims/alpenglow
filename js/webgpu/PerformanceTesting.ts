@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BlitShader, BufferArraySlot, DeviceContext, getArrayType, OldBindingType, OldComputeShader, Procedure, RadixSortModule, Routine, U32Order, u32S, wgsl_copy_storage_operation, wgsl_expensive_operation, wgsl_fake_combine_to_texture } from '../imports.js';
+import { alpenglow, BlitShader, BufferArraySlot, DeviceContext, getArrayType, OldBindingType, OldComputeShader, Procedure, RadixSortModule, Routine, U32Order, u32S, webgpu, wgsl_copy_storage_operation, wgsl_expensive_operation, wgsl_fake_combine_to_texture } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Utils from '../../../dot/js/Utils.js';
 
@@ -153,7 +153,7 @@ export default class PerformanceTesting {
       const commandBuffer = encoder.finish();
       device.queue.submit( [ commandBuffer ] );
 
-      buffersToDestroy.forEach( buffer => buffer.destroy() );
+      buffersToDestroy.forEach( buffer => webgpu.bufferDestroy( buffer ) );
     } )();
   }
 

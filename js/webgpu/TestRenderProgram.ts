@@ -85,7 +85,7 @@ export default class TestRenderProgram {
     const instructionsBuffer = deviceContext.createBuffer( instructionEncoder.byteLength );
     device.queue.writeBuffer( instructionsBuffer, 0, instructionEncoder.arrayBuffer );
 
-    const edgesBuffer = deviceContext.createBuffer( 4 * edges.length );
+    const edgesBuffer = deviceContext.createBuffer( 4 * Math.max( 4, edges.length ) );
     device.queue.writeBuffer( edgesBuffer, 0, new Float32Array( edges.flatMap( edge => [
       edge.startPoint.x, edge.startPoint.y, edge.endPoint.x, edge.endPoint.y
     ] ) ).buffer );

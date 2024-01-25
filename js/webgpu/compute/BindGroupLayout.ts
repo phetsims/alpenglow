@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BindingDescriptor, BindingLocation, BufferBinding, BufferSlot, DeviceContext, ResourceSlot } from '../../imports.js';
+import { alpenglow, Binding, BindingDescriptor, BindingLocation, BufferBinding, BufferSlot, DeviceContext, ResourceSlot, webgpu } from '../../imports.js';
 
 export default class BindGroupLayout {
   public readonly layout: GPUBindGroupLayout;
@@ -18,7 +18,7 @@ export default class BindGroupLayout {
     public readonly groupIndex: number,
     public readonly bindingDescriptors: BindingDescriptor[]
   ) {
-    this.layout = deviceContext.device.createBindGroupLayout( {
+    this.layout = webgpu.deviceCreateBindGroupLayout( deviceContext.device, {
       label: `${name} bind group layout`,
       entries: bindingDescriptors.map( binding => binding.getBindGroupLayoutEntry() )
     } );
