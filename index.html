@@ -163,6 +163,7 @@
               <li><a href="#WGSL-templating">Templating</a></li>
               <li><a href="#WGSL-types">Types</a></li>
               <li><a href="#WGSL-linking">Linking</a></li>
+              <li><a href="#WGSL-recording">Recording</a></li>
               <li><a href="#WGSL-logging">Logging</a></li>
               <li><a href="#WGSL-algorithms">Algorithms</a></li>
               <li><a href="#WGSL-reduce">Reduce</a></li>
@@ -2133,6 +2134,8 @@
         Certain loads/stores will be... to local variables, workspace variables, or "global" memory.
         <br><br>
 
+        Only some access patterns are compatible (i.e. will not need a shader barrier).
+
         More advanced fusing might be possible, for the future.
       </p>
 
@@ -2355,6 +2358,59 @@
 
       <p class="DEFERRED">
         Get it to work with vertex/fragment shaders too (e.g. BlitShader)
+      </p>
+
+      <h4 id="WGSL-recording">Recording</h4>
+
+      <p class="TODO">
+        Plan is to record all WebGPU commands.
+
+        Goals:
+        (a) Replay for performance tests (run 1x or 100x a frame, be able to setup and destroy).
+            Have setup, run, and dispose.
+        (b) JS output suitable for manual iteration to test performance tweaks rapidly.
+        (c) Reproduction of bugs (particularly platform-specific ones), with easily readable WGSL/WebGPU commands.
+        (d) Record system details required for correct playback (e.g. the texture format we can use), conditionally
+            run the "compatible" tests.
+        (e) Historical record of performance
+        (f) Compatibility so that others could use the same format (for performance tests).
+
+        A command will record its input/output (what named objects it uses, and what it produces).
+        A closure is a group of commands, which will have its unbound resources (and a list of what it declares).
+        We will select sections of these, and be able to build repeatable performance tests
+        (record setup, in-frame, and cleanup respectively).
+
+        Closure will note the "raw JSON" of parameters, MINUS the named objects. It will list the replacement paths
+        into the JSON object (where the named objects are placed).
+
+        --- HOW to record "when map async / submitted work done" based things? Presumably for performance tests, we
+        don't need this. -- we COULD record the initial order the promises are resolved with, and then replay those?
+
+        TODO: record onSubmittedWorkDone()
+
+        ArrayBuffers: Do we store persistent and non-changing ones as "one object"? We could just recreate an ArrayBuffer
+        for every data transfer. We could also see the length and contents, and store it as a "constant" on the new end.
+
+        Wrap Canvas calls (if "discovered", record the resolution). Wrap the configure and texture getter.
+
+        Record with a list of command lists (new commands will go into all of them), so we can add/remove lists of
+        commands to record into (that might be nested).
+
+        Output JS for quick iteration. Map flag/enumeration values to their "good" forms.
+        - Be able to output JS closures, and performance test units (based on what is missing).
+        - Remember to record "destroy" and cleanup for performance tests.
+
+        Output serialization (or use in-memory) for actual re-execution (re-bind or use references, could use for production?)
+
+        Should allow for starting/stopping recording (and for sections), so we can record multiple different things.
+        Can choose to avoid device creation (bind device), and can only record inner-command-encoder parts (bind
+        command encoder).
+
+        When we run into "unknown" objects, handle it safely. Use instanceof to determine what type of object, then
+        give it a name/entry. It will be in the closure.
+
+        Buffer logger support (for debugging reproduction cases) - console.log anything that we've successfully
+        mapAsync'ed?
       </p>
 
       <h4 id="WGSL-logging">Logging</h4>
