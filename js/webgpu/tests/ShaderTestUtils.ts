@@ -6,8 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ConcreteType, DeviceContext } from '../../imports.js';
+import { alpenglow, ConcreteType, DeviceContext, webgpu } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+
+webgpu.enableRecording();
 
 export const shaderTestDevicePromise: Promise<GPUDevice | null> = ( async () => {
   try {
@@ -32,8 +34,19 @@ export const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, de
       assert.expect( 0 );
     }
     else {
+      console.groupCollapsed( name );
+
+      const list = webgpu.startRecording();
       const result = await test( device, new DeviceContext( device ) );
+      webgpu.stopRecording( list );
+
+      console.groupCollapsed( 'webgpu' );
+      console.log( list.toJSClosure() );
+      console.groupEnd();
+
       assert.ok( result === null, result || '' );
+
+      console.groupEnd();
     }
 
     done();

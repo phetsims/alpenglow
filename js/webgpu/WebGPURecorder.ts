@@ -290,7 +290,7 @@ export class WebGPUCommandList {
 
     return `(${unboundObjects.length ? ` ${unboundObjects.map( unboundObject => {
       return `${nameMap.get( unboundObject )!}: ${unboundObject.constructor.name}`;
-    } ).join( ', ' )} ` : ''}) => {\n${this.toJS( nameMap, level )}\n}`;
+    } ).join( ', ' )} ` : ''}) => {\n${this.toJS( nameMap, level + 1 )}\n}`;
   }
 }
 alpenglow.register( 'WebGPUCommandList', WebGPUCommandList );
