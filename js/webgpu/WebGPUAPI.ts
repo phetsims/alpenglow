@@ -1,22 +1,46 @@
 // Copyright 2024, University of Colorado Boulder
 
 /**
- * Responsible for recording GPU commands globally, so we can play them back later.
+ * WebGPU commands should be run through here, so we can record them for later playback (and possibly other reasons).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow, WebGPURecorder } from '../imports.js';
+import { WebGPUCommandList } from './WebGPURecorder.js';
 
 export type PreferredCanvasFormat = 'bgra8unorm' | 'rgba8unorm';
 
-let idCounter = 1;
-
 export default class WebGPUAPI {
 
-  public getAdapter( options?: GPURequestAdapterOptions ): Promise<GPUAdapter | null> {
-    return navigator.gpu?.requestAdapter( options );
+  public recorder: WebGPURecorder | null = null;
+
+  public enableRecording(): void {
+    this.recorder = this.recorder || new WebGPURecorder();
+  }
+
+  public startRecording(): WebGPUCommandList {
+    this.enableRecording();
+
+    assert && assert( this.recorder );
+    return this.recorder!.start();
+  }
+
+  public stopRecording( commandList: WebGPUCommandList ): void {
+    assert && assert( this.recorder );
+    this.recorder!.stop( commandList );
+  }
+
+  public async getAdapter(
+    options?: GPURequestAdapterOptions
+  ): Promise<GPUAdapter | null> {
+    const adapter = await navigator.gpu?.requestAdapter( options );
+
+    if ( this.recorder ) {
+      this.recorder.recordGetAdapter( adapter, options );
+    }
+
+    return adapter;
   }
   public getPreferredCanvasFormat(): PreferredCanvasFormat {
     const preferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat() as PreferredCanvasFormat;
@@ -27,15 +51,36 @@ export default class WebGPUAPI {
     return preferredCanvasFormat;
   }
 
-  public adapterHasFeature( adapter: GPUAdapter, featureName: string ): boolean {
+  public adapterHasFeature(
+    adapter: GPUAdapter,
+    featureName: string
+  ): boolean {
     return adapter.features.has( featureName ) || false;
   }
-  public async adapterRequestDevice( adapter: GPUAdapter, descriptor?: GPUDeviceDescriptor ): Promise<GPUDevice | null> {
-    return await adapter.requestDevice( descriptor ) || null;
+  public async adapterRequestDevice(
+    adapter: GPUAdapter,
+    descriptor?: GPUDeviceDescriptor
+  ): Promise<GPUDevice | null> {
+    const device = await adapter.requestDevice( descriptor ) || null;
+
+    if ( this.recorder && device ) {
+      this.recorder.recordAdapterRequestDevice( device, adapter, descriptor );
+    }
+
+    return device;
   }
 
-  public deviceCreateBuffer( device: GPUDevice, descriptor: GPUBufferDescriptor ): GPUBuffer {
-    return device.createBuffer( descriptor );
+  public deviceCreateBuffer(
+    device: GPUDevice,
+    descriptor: GPUBufferDescriptor
+  ): GPUBuffer {
+    const buffer = device.createBuffer( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceCreateBuffer( buffer, device, descriptor );
+    }
+
+    return buffer;
   }
   public deviceCreateQuerySet(
     device: GPUDevice,
@@ -235,97 +280,6 @@ export default class WebGPUAPI {
 
   public querySetDestroy( querySet: GPUQuerySet ): void {
     querySet.destroy();
-  }
-
-  // TODO: tags and sections
-
-  private readonly commands: string[] = [];
-  private readonly nameMap = new WeakMap<IntentionalAny, string>();
-
-  // Can adjust this to turn it on
-  public active = false;
-
-  public register( object: IntentionalAny, namePrefix: string ): void {
-    if ( this.active ) {
-      const id = idCounter++;
-      this.nameMap.set( object, namePrefix + id );
-    }
-  }
-
-  public command( object: IntentionalAny, name: string, ...args: string[] ): void {
-    if ( this.active ) {
-      const command = `${this.getName( object )}.${name}( ${args.join( ', ' )} );`;
-      this.commands.push( command );
-    }
-  }
-
-  public writeBuffer( queue: GPUQueue, buffer: GPUBuffer, bufferOffset: number, data: ArrayBufferLike, ...args: number[] ): void {
-    this.command( queue, 'writeBuffer', this.getName( buffer ), `${bufferOffset}`, WebGPUAPI.arrayBufferLikeString( data ), ...args.map( arg => `${arg}` ) );
-  }
-
-  public comment( comment: string ): void {
-    this.commands.push( `// ${comment}` );
-  }
-
-  public getName( object: IntentionalAny ): string {
-    if ( this.active ) {
-      const name = this.nameMap.get( object );
-
-      assert && assert( name, 'object not registered' );
-      return name!;
-    }
-    else {
-      return '';
-    }
-  }
-
-  public reset(): void {
-    if ( this.active ) {
-      this.commands.length = 0;
-    }
-  }
-
-  public static arrayBufferLikeString( data: ArrayBufferLike ): string {
-    return `new Uint8Array( [ ${new Uint8Array( data ).join( ', ' )} ] ).buffer`;
-  }
-
-  public static bufferDescriptorString( descriptor: GPUBufferDescriptor ): string {
-    const usageNames: string[] = [];
-
-    if ( descriptor.usage & GPUBufferUsage.MAP_READ ) {
-      usageNames.push( 'MAP_READ' );
-    }
-    if ( descriptor.usage & GPUBufferUsage.MAP_WRITE ) {
-      usageNames.push( 'MAP_WRITE' );
-    }
-    if ( descriptor.usage & GPUBufferUsage.COPY_SRC ) {
-      usageNames.push( 'COPY_SRC' );
-    }
-    if ( descriptor.usage & GPUBufferUsage.COPY_DST ) {
-      usageNames.push( 'COPY_DST' );
-    }
-    if ( descriptor.usage & GPUBufferUsage.INDEX ) {
-      usageNames.push( 'INDEX' );
-    }
-    if ( descriptor.usage & GPUBufferUsage.VERTEX ) {
-      usageNames.push( 'VERTEX' );
-    }
-    if ( descriptor.usage & GPUBufferUsage.UNIFORM ) {
-      usageNames.push( 'UNIFORM' );
-    }
-    if ( descriptor.usage & GPUBufferUsage.STORAGE ) {
-      usageNames.push( 'STORAGE' );
-    }
-    if ( descriptor.usage & GPUBufferUsage.INDIRECT ) {
-      usageNames.push( 'INDIRECT' );
-    }
-    if ( descriptor.usage & GPUBufferUsage.QUERY_RESOLVE ) {
-      usageNames.push( 'QUERY_RESOLVE' );
-    }
-
-    const usage = usageNames.length ? usageNames.map( name => `GPUBufferUsage.${name}` ).join( ' | ' ) : '0';
-
-    return `{ size: ${descriptor.size}, usage: ${usage}${descriptor.mappedAtCreation !== undefined ? `, mappedAtCreation: ${descriptor.mappedAtCreation}` : ''} }`;
   }
 }
 alpenglow.register( 'WebGPUAPI', WebGPUAPI );
