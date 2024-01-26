@@ -165,6 +165,7 @@
               <li><a href="#WGSL-linking">Linking</a></li>
               <li><a href="#WGSL-recording">Recording</a></li>
               <li><a href="#WGSL-logging">Logging</a></li>
+              <li><a href="#WGSL-testing">Testing</a></li>
               <li><a href="#WGSL-algorithms">Algorithms</a></li>
               <li><a href="#WGSL-reduce">Reduce</a></li>
               <li><a href="#WGSL-scan">Scan</a></li>
@@ -2145,8 +2146,19 @@
       </p>
 
       <p class="TODO">
-        Add a "fill" primitive (to fill a certain buffer/slot with a specific value). Needed for non-zero (or multiple
-        use) atomics.
+        Add Thrust-like primitives:
+
+        (a) "fill"  (to fill a certain buffer/slot with a specific value). Needed for non-zero (or multiple use) atomics.
+        (b) "sequence"
+        (c) "replace
+        (d) "transform"
+        (e) "filter" / "partition"
+        (f) "count"
+        (g) "unique"
+        (h) "sort-by-key" - and counting iterator to pair it.
+        (i) ability to use iterators and zip (to create tuples with their composite ConcreteTypes)
+
+        See <a href="https://docs.nvidia.com/cuda/thrust/index.html">Thrust docs</a>.
       </p>
 
       <p class="TODO">
@@ -2382,11 +2394,18 @@
 
         Closure will note the "raw JSON" of parameters, MINUS the named objects. It will list the replacement paths
         into the JSON object (where the named objects are placed).
+          ACTUALLY: Just record the actual object. When we "to-string" it, we'll provide a mapping of object => name,
+          AND we will have to actually handle the proper types of descriptors anyway (e.g. to handle enumerations).
+          It will be "good" to record the dependencies (actual objects) and the result (actual object).
 
         --- HOW to record "when map async / submitted work done" based things? Presumably for performance tests, we
         don't need this. -- we COULD record the initial order the promises are resolved with, and then replay those?
 
         TODO: record onSubmittedWorkDone()
+
+        Renumber/label objects when we generate JS (so... don't label them before, just reference them?).
+        If there aren't multiple, do NOT apply a number (e.g. device). Consider generating variable name prefixes
+        FROM labels?
 
         ArrayBuffers: Do we store persistent and non-changing ones as "one object"? We could just recreate an ArrayBuffer
         for every data transfer. We could also see the length and contents, and store it as a "constant" on the new end.
@@ -2399,6 +2418,7 @@
         Output JS for quick iteration. Map flag/enumeration values to their "good" forms.
         - Be able to output JS closures, and performance test units (based on what is missing).
         - Remember to record "destroy" and cleanup for performance tests.
+        - only line-breaks in options objects, not based on parameters
 
         Output serialization (or use in-memory) for actual re-execution (re-bind or use references, could use for production?)
 
@@ -2437,7 +2457,21 @@
         "log every thread that gets it" approach, BUT it _IS_ collapsed.
       </p>
 
+      <h4 id="WGSL-testing">Testing</h4>
+
+      <p class="TODO">
+        Write values into buffers PAST the length, to verify length checks.
+      </p>
+
+      <p class="TODO">
+        Write bogus values into output buffers (so if we do e.g. atomics, we set the value correctly first).
+      </p>
+
       <h4 id="WGSL-algorithms">Algorithms</h4>
+
+      <p class="TODO">
+        Add assertions for power-of-2 workgroupSize when needed (e.g. most places Math.log2 are used).
+      </p>
 
       <p class="TODO">
         Double-buffering works around write-after-read race conditions, we should use that more.
@@ -2592,6 +2626,10 @@
         We are using Hillis-Steele approaches <span class="citation" data-citation-id="10.1145/7902.7903"></span>, but with
         raking <span class="citation" data-citation-id="223009"></span> approaches from
         <span class="citation" data-citation-id="bb5afff9714941c681fc0e5270168a71"></span>, with notes from <span class="citation" data-citation-id="LevienPrefixSumVulkan"></span>.
+      </p>
+
+      <p class="TODO">
+        Can we have an example scanning (or reducing) packed u16 data?
       </p>
 
       <p class="TODO">
