@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * A GPUBuffer that is typed to a specific type, and can be used to encode/decode values to/from it.
