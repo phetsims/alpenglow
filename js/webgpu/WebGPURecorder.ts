@@ -50,6 +50,48 @@ export default class WebGPURecorder {
     }
   }
 
+  public recordDeviceCreateQuerySet( result: GPUQuerySet, device: GPUDevice, descriptor: GPUQuerySetDescriptor ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandDeviceCreateQuerySet( result, device, descriptor ) );
+    }
+  }
+
+  public recordDeviceCreateBindGroupLayout( result: GPUBindGroupLayout, device: GPUDevice, descriptor: GPUBindGroupLayoutDescriptor ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandDeviceCreateBindGroupLayout( result, device, descriptor ) );
+    }
+  }
+
+  public recordDeviceCreatePipelineLayout( result: GPUPipelineLayout, device: GPUDevice, descriptor: GPUPipelineLayoutDescriptor ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandDeviceCreatePipelineLayout( result, device, descriptor ) );
+    }
+  }
+
+  public recordDeviceCreateShaderModule( result: GPUShaderModule, device: GPUDevice, descriptor: GPUShaderModuleDescriptor ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandDeviceCreateShaderModule( result, device, descriptor ) );
+    }
+  }
+
+  public recordDeviceCreateComputePipeline( result: GPUComputePipeline, device: GPUDevice, descriptor: GPUComputePipelineDescriptor, async: boolean ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandDeviceCreateComputePipeline( result, device, descriptor, async ) );
+    }
+  }
+
+  public recordDeviceCreateBindGroup( result: GPUBindGroup, device: GPUDevice, descriptor: GPUBindGroupDescriptor ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandDeviceCreateBindGroup( result, device, descriptor ) );
+    }
+  }
+
+  public recordDeviceCreateCommandEncoder( result: GPUCommandEncoder, device: GPUDevice, descriptor?: GPUCommandEncoderDescriptor ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandDeviceCreateCommandEncoder( result, device, descriptor ) );
+    }
+  }
+
   public static getNamePrefix( obj: IntentionalAny ): string {
     if ( obj instanceof GPUDevice ) {
       return 'device';
@@ -86,6 +128,15 @@ export default class WebGPURecorder {
     }
     else if ( obj instanceof GPUComputePassEncoder ) {
       return 'computePassEncoder';
+    }
+    else if ( obj instanceof GPUTextureView ) {
+      return 'textureView';
+    }
+    else if ( obj instanceof GPUSampler ) {
+      return 'sampler';
+    }
+    else if ( obj instanceof GPUExternalTexture ) {
+      return 'externalTexture';
     }
     else {
       throw new Error( 'add the name' );
@@ -225,16 +276,6 @@ export default class WebGPURecorder {
 }
 alpenglow.register( 'WebGPURecorder', WebGPURecorder );
 
-export abstract class WebGPUCommand {
-  public constructor(
-    public readonly result: IntentionalAny | null,
-    public readonly dependencies: IntentionalAny[]
-  ) {}
-
-  public abstract toJS( nameMap: Map<IntentionalAny, string>, level?: number ): string;
-}
-alpenglow.register( 'WebGPUCommand', WebGPUCommand );
-
 export class WebGPUCommandList {
 
   public constructor(
@@ -288,12 +329,38 @@ export class WebGPUCommandList {
   public toJSClosure( nameMap: Map<IntentionalAny, string> = this.getNameMap(), level = 0 ): string {
     const unboundObjects = this.getUnboundObjects();
 
-    return `(${unboundObjects.length ? ` ${unboundObjects.map( unboundObject => {
+    return `async (${unboundObjects.length ? ` ${unboundObjects.map( unboundObject => {
       return `${nameMap.get( unboundObject )!}: ${unboundObject.constructor.name}`;
     } ).join( ', ' )} ` : ''}) => {\n${this.toJS( nameMap, level + 1 )}\n}`;
   }
 }
 alpenglow.register( 'WebGPUCommandList', WebGPUCommandList );
+
+const getName = ( nameMap: Map<IntentionalAny, string>, obj: IntentionalAny ): string => {
+  const name = nameMap.get( obj );
+
+  assert && assert( name );
+  return name!;
+};
+
+export abstract class WebGPUCommand {
+  public constructor(
+    public readonly result: IntentionalAny | null,
+    public readonly dependencies: IntentionalAny[]
+  ) {}
+
+  public abstract toJS( nameMap: Map<IntentionalAny, string>, level?: number ): string;
+
+  protected getDeclaration( nameMap: Map<IntentionalAny, string> ): string {
+    if ( this.result !== null ) {
+      return `const ${getName( nameMap, this.result )} = `;
+    }
+    else {
+      return '';
+    }
+  }
+}
+alpenglow.register( 'WebGPUCommand', WebGPUCommand );
 
 class WebGPUCommandGetAdapter extends WebGPUCommand {
   public constructor(
@@ -304,9 +371,7 @@ class WebGPUCommandGetAdapter extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const resultName = nameMap.get( this.result )!;
-    assert && assert( resultName );
-    return `const ${resultName} = await navigator.gpu?.requestAdapter(${this.options ? ` ${WebGPURecorder.rawValue( level, this.options, nameMap )} ` : ''});`;
+    return `${this.getDeclaration( nameMap )}await navigator.gpu?.requestAdapter(${this.options ? ` ${WebGPURecorder.rawValue( level, this.options, nameMap )} ` : ''});`;
   }
 }
 
@@ -320,13 +385,7 @@ class WebGPUCommandAdapterRequestDevice extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const resultName = nameMap.get( this.result )!;
-    assert && assert( resultName );
-
-    const adapterName = nameMap.get( this.adapter )!;
-    assert && assert( adapterName );
-
-    return `const ${resultName} = ${adapterName}.requestDevice(${this.descriptor ? ` ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} ` : ''});`;
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.adapter )}.requestDevice(${this.descriptor ? ` ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} ` : ''});`;
   }
 }
 
@@ -340,13 +399,10 @@ class WebGPUCommandDeviceCreateBuffer extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const resultName = nameMap.get( this.result )!;
-    assert && assert( resultName );
-
     const deviceName = nameMap.get( this.device )!;
     assert && assert( deviceName );
 
-    return `const ${resultName} = ${deviceName}.createBuffer( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {
+    return `${this.getDeclaration( nameMap )}${deviceName}.createBuffer( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {
       usage: ( value: IntentionalAny ) => {
         const numberValue = value as number;
         // eslint-disable-next-line no-simple-type-checking-assertions
@@ -366,5 +422,153 @@ class WebGPUCommandDeviceCreateBuffer extends WebGPUCommand {
         ] ) );
       }
     } )} );`;
+  }
+}
+
+class WebGPUCommandDeviceCreateQuerySet extends WebGPUCommand {
+  public constructor(
+    result: GPUQuerySet,
+    public readonly device: GPUDevice,
+    public readonly descriptor: GPUQuerySetDescriptor
+  ) {
+    super( result, [ device ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    const deviceName = nameMap.get( this.device )!;
+    assert && assert( deviceName );
+
+    return `${this.getDeclaration( nameMap )}${deviceName}.createQuerySet( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
+  }
+}
+
+class WebGPUCommandDeviceCreateBindGroupLayout extends WebGPUCommand {
+  public constructor(
+    result: GPUBindGroupLayout,
+    public readonly device: GPUDevice,
+    public readonly descriptor: GPUBindGroupLayoutDescriptor
+  ) {
+    super( result, [ device ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    const deviceName = nameMap.get( this.device )!;
+    assert && assert( deviceName );
+
+    return `${this.getDeclaration( nameMap )}${deviceName}.createBindGroupLayout( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {
+      entries: ( value: IntentionalAny ) => {
+        return WebGPURecorder.rawValue( level + 1, value, nameMap, {
+          arrayElement: ( value: IntentionalAny ) => {
+            return WebGPURecorder.rawValue( level + 2, value, nameMap, {
+              visibility: ( value: IntentionalAny ) => WebGPURecorder.bitfieldToString( value as number, new Map<number, string>( [
+                [ GPUShaderStage.VERTEX, 'GPUShaderStage.VERTEX' ],
+                [ GPUShaderStage.FRAGMENT, 'GPUShaderStage.FRAGMENT' ],
+                [ GPUShaderStage.COMPUTE, 'GPUShaderStage.COMPUTE' ]
+              ] ) )
+            } )!;
+          }
+        } )!;
+      }
+    } )} );`;
+  }
+}
+
+class WebGPUCommandDeviceCreatePipelineLayout extends WebGPUCommand {
+  public constructor(
+    result: GPUPipelineLayout,
+    public readonly device: GPUDevice,
+    public readonly descriptor: GPUPipelineLayoutDescriptor
+  ) {
+    super( result, [ device, ...descriptor.bindGroupLayouts ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    const deviceName = nameMap.get( this.device )!;
+    assert && assert( deviceName );
+
+    return `${this.getDeclaration( nameMap )}${deviceName}.createPipelineLayout( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
+  }
+}
+
+class WebGPUCommandDeviceCreateShaderModule extends WebGPUCommand {
+  public constructor(
+    result: GPUShaderModule,
+    public readonly device: GPUDevice,
+    public readonly descriptor: GPUShaderModuleDescriptor
+  ) {
+    const compilationHintLayouts = descriptor.compilationHints ? descriptor.compilationHints.map( hint => hint.layout ).filter( hint => hint && hint !== 'auto' ) : [];
+    super( result, [ device, ...compilationHintLayouts ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    const deviceName = nameMap.get( this.device )!;
+    assert && assert( deviceName );
+
+    return `${this.getDeclaration( nameMap )}${deviceName}.createShaderModule( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
+  }
+}
+
+class WebGPUCommandDeviceCreateComputePipeline extends WebGPUCommand {
+  public constructor(
+    result: GPUComputePipeline,
+    public readonly device: GPUDevice,
+    public readonly descriptor: GPUComputePipelineDescriptor,
+    public readonly async: boolean
+  ) {
+    const module = descriptor.compute.module;
+    const layout = descriptor.layout;
+
+    super( result, [ device, module, ...( layout === 'auto' ? [] : [ layout ] ) ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    const deviceName = nameMap.get( this.device )!;
+    assert && assert( deviceName );
+
+    return `${this.getDeclaration( nameMap )}${this.async ? 'await ' : ''}${deviceName}.createComputePipeline${this.async ? 'Async' : ''}( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
+  }
+}
+
+class WebGPUCommandDeviceCreateBindGroup extends WebGPUCommand {
+  public constructor(
+    result: GPUBindGroup,
+    public readonly device: GPUDevice,
+    public readonly descriptor: GPUBindGroupDescriptor
+  ) {
+    const resources = [ ...descriptor.entries ].map( entry => {
+      const resource = entry.resource;
+
+      if ( resource instanceof GPUSampler || resource instanceof GPUTextureView || resource instanceof GPUExternalTexture ) {
+        return resource;
+      }
+      else {
+        return resource.buffer;
+      }
+    } );
+    super( result, [ device, descriptor.layout, ...resources ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    const deviceName = nameMap.get( this.device )!;
+    assert && assert( deviceName );
+
+    return `${this.getDeclaration( nameMap )}${deviceName}.createBindGroup( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
+  }
+}
+
+class WebGPUCommandDeviceCreateCommandEncoder extends WebGPUCommand {
+  public constructor(
+    result: GPUCommandEncoder,
+    public readonly device: GPUDevice,
+    public readonly descriptor?: GPUCommandEncoderDescriptor
+  ) {
+    super( result, [ device ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    const deviceName = nameMap.get( this.device )!;
+    assert && assert( deviceName );
+
+    return `${this.getDeclaration( nameMap )}${deviceName}.createCommandEncoder(${this.descriptor ? ` ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} ` : ''});`;
   }
 }

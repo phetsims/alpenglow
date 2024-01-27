@@ -86,49 +86,98 @@ export default class WebGPUAPI {
     device: GPUDevice,
     descriptor: GPUQuerySetDescriptor
   ): GPUQuerySet {
-    return device.createQuerySet( descriptor );
-  }
-  public deviceCreateShaderModule(
-    device: GPUDevice,
-    descriptor: GPUShaderModuleDescriptor
-  ): GPUShaderModule {
-    return device.createShaderModule( descriptor );
-  }
-  public deviceCreateComputePipeline(
-    device: GPUDevice,
-    descriptor: GPUComputePipelineDescriptor
-  ): GPUComputePipeline {
-    return device.createComputePipeline( descriptor );
-  }
-  public deviceCreateComputePipelineAsync(
-    device: GPUDevice,
-    descriptor: GPUComputePipelineDescriptor
-  ): Promise<GPUComputePipeline> {
-    return device.createComputePipelineAsync( descriptor );
-  }
-  public deviceCreateBindGroup(
-    device: GPUDevice,
-    descriptor: GPUBindGroupDescriptor
-  ): GPUBindGroup {
-    return device.createBindGroup( descriptor );
+    const querySet = device.createQuerySet( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceCreateQuerySet( querySet, device, descriptor );
+    }
+
+    return querySet;
   }
   public deviceCreateBindGroupLayout(
     device: GPUDevice,
     descriptor: GPUBindGroupLayoutDescriptor
   ): GPUBindGroupLayout {
-    return device.createBindGroupLayout( descriptor );
+    const bindGroupLayout = device.createBindGroupLayout( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceCreateBindGroupLayout( bindGroupLayout, device, descriptor );
+    }
+
+    return bindGroupLayout;
   }
   public deviceCreatePipelineLayout(
     device: GPUDevice,
     descriptor: GPUPipelineLayoutDescriptor
   ): GPUPipelineLayout {
-    return device.createPipelineLayout( descriptor );
+    const pipelineLayout = device.createPipelineLayout( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceCreatePipelineLayout( pipelineLayout, device, descriptor );
+    }
+
+    return pipelineLayout;
   }
+  public deviceCreateShaderModule(
+    device: GPUDevice,
+    descriptor: GPUShaderModuleDescriptor
+  ): GPUShaderModule {
+    const shaderModule = device.createShaderModule( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceCreateShaderModule( shaderModule, device, descriptor );
+    }
+
+    return shaderModule;
+  }
+  public deviceCreateComputePipeline(
+    device: GPUDevice,
+    descriptor: GPUComputePipelineDescriptor
+  ): GPUComputePipeline {
+    const computePipeline = device.createComputePipeline( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceCreateComputePipeline( computePipeline, device, descriptor, false );
+    }
+
+    return computePipeline;
+  }
+  public async deviceCreateComputePipelineAsync(
+    device: GPUDevice,
+    descriptor: GPUComputePipelineDescriptor
+  ): Promise<GPUComputePipeline> {
+    const computePipeline = await device.createComputePipelineAsync( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceCreateComputePipeline( computePipeline, device, descriptor, true );
+    }
+
+    return computePipeline;
+  }
+  public deviceCreateBindGroup(
+    device: GPUDevice,
+    descriptor: GPUBindGroupDescriptor
+  ): GPUBindGroup {
+    const bindGroup = device.createBindGroup( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceCreateBindGroup( bindGroup, device, descriptor );
+    }
+
+    return bindGroup;
+  }
+
   public deviceCreateCommandEncoder(
     device: GPUDevice,
     descriptor?: GPUCommandEncoderDescriptor
   ): GPUCommandEncoder {
-    return device.createCommandEncoder( descriptor );
+    const commandEncoder = device.createCommandEncoder( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceCreateCommandEncoder( commandEncoder, device, descriptor );
+    }
+
+    return commandEncoder;
   }
   public deviceWriteBuffer(
     device: GPUDevice,
