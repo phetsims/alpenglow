@@ -190,6 +190,10 @@ export default class WebGPUAPI {
     size?: number
   ): void {
     device.queue.writeBuffer( buffer, bufferOffset, data, dataOffset, size );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceWriteBuffer( device, buffer, bufferOffset, data, dataOffset, size );
+    }
   }
   public deviceQueueSubmit(
     device: GPUDevice,

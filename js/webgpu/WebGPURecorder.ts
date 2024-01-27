@@ -92,6 +92,12 @@ export default class WebGPURecorder {
     }
   }
 
+  public recordDeviceWriteBuffer( device: GPUDevice, buffer: GPUBuffer, bufferOffset: number, data: BufferSource | SharedArrayBuffer, dataOffset?: number, size?: number ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandDeviceWriteBuffer( device, buffer, bufferOffset, data, dataOffset, size ) );
+    }
+  }
+
   public static getNamePrefix( obj: IntentionalAny ): string {
     if ( obj instanceof GPUDevice ) {
       return 'device';
@@ -173,7 +179,7 @@ export default class WebGPURecorder {
   }
 
   // TODO: consider how we're handling this
-  public static arrayBufferLikeString( data: ArrayBufferLike ): string {
+  public static arrayBufferLikeString( data: ArrayLike<number> | ArrayBufferLike ): string {
     return `new Uint8Array( [ ${new Uint8Array( data ).join( ', ' )} ] ).buffer`;
   }
 
@@ -570,5 +576,36 @@ class WebGPUCommandDeviceCreateCommandEncoder extends WebGPUCommand {
     assert && assert( deviceName );
 
     return `${this.getDeclaration( nameMap )}${deviceName}.createCommandEncoder(${this.descriptor ? ` ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} ` : ''});`;
+  }
+}
+
+class WebGPUCommandDeviceWriteBuffer extends WebGPUCommand {
+  public constructor(
+    public readonly device: GPUDevice,
+    public readonly buffer: GPUBuffer,
+    public readonly bufferOffset: number,
+    public readonly data: BufferSource | SharedArrayBuffer,
+    public readonly dataOffset?: number,
+    public readonly size?: number
+  ) {
+    super( null, [ device, buffer ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    const deviceName = nameMap.get( this.device )!;
+    assert && assert( deviceName );
+
+    let dataString: string;
+    if ( this.data instanceof ArrayBuffer ) {
+      dataString = WebGPURecorder.arrayBufferLikeString( this.data );
+    }
+    else if ( this.data instanceof SharedArrayBuffer ) {
+      dataString = WebGPURecorder.arrayBufferLikeString( this.data );
+    }
+    else {
+      dataString = WebGPURecorder.arrayBufferLikeString( this.data.buffer );
+    }
+
+    return `${deviceName}.queue.writeBuffer( ${getName( nameMap, this.buffer )}, ${this.bufferOffset}, ${dataString} );`;
   }
 }
