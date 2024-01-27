@@ -2115,6 +2115,24 @@
       <h4 id="WGSL-linking">Linking</h4>
 
       <p class="TODO">
+        Load/Store<br><br>
+
+        Add load/store, separate from any fusing. It's more powerful than Thrust iterators.
+
+        Load/store should support efficient ways of accessing data based on the particular order/striping, taking
+        local variables and local/workgroup/etc. identifiers into account. Good WGSL. Consider a
+        "predeclaration" somewhat similar to unroll, where we can create local variables needed for multiple loading.
+
+        They can access BufferSlots, and will know the actual storage order (blocked/striped with workgroup/grain) and
+        type. However they can also access workgroup variables, local variables, can be generated (i.e. indices or a
+        mapping of that), and should handle permutation.
+
+        It will support the "sort by key", etc.
+
+        Load should only put "read" binding on a buffer slot. If we also have a store, then they will get combined.
+      </p>
+
+      <p class="TODO">
         A good example of fusing/etc. would be sorting one list of items by the results of another list or order? Or
         by extracting out part of them?
       </p>
@@ -2124,18 +2142,19 @@
       </p>
 
       <p class="TODO">
+        Get an automated tester for bind group strategies, so that we can try ALL of the possible strategies, and
+        identify (based on the platform) what the fastest approaches are.
+      </p>
+
+      <p class="TODO">
         Fusing<br><br>
 
-        Easiest to think about loads and stores, e.g. "maps" for the input/output of a module. The load/store can
-        reference the BufferSlot, and knows the storage order of data (striped with workgroup/grain), including the type.
-        <br><br>
-        A "map" of values doesn't specify the access order. Presumably each "load/store" would have WGSL intended for
-        different "intermediate" places, e.g. so it can do coalesced accesses (somewhat like unroll, where it controls
-        the order?).<br><br>
-        Certain loads/stores will be... to local variables, workspace variables, or "global" memory.
-        <br><br>
+        Only some access patterns are compatible (i.e. will not need a shader barrier).<br><br>
 
-        Only some access patterns are compatible (i.e. will not need a shader barrier).
+        Do somewhat manual fusing - specify load/store for shared things to a local variable or workgroup memory,
+        then combine the main()s. We will want to factor out our "mains" and their needs separately.
+
+        How to reuse workgroup storage? (potential for u32 read-writing).
 
         More advanced fusing might be possible, for the future.
       </p>
@@ -2153,7 +2172,7 @@
         (c) "replace
         (d) "transform"
         (e) "filter" / "partition"
-        (f) "count"
+        (f) "count", and other map-reduce patterns.
         (g) "unique"
         (h) "sort-by-key" - and counting iterator to pair it.
         (i) ability to use iterators and zip (to create tuples with their composite ConcreteTypes)
