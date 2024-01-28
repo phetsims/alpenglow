@@ -2139,6 +2139,21 @@
         loadStriped( workgroupSize, grainSize, index )
         loadStripedDynamic( workgroupSize, grainSize, indexWGSL )
         loadBlocked( workgroupSize, grainSize, index )
+
+        -- the ability to QUERY what order the data is in, so we can pick a good order to read with.
+        For instance, is striped or blocked loading coalesced? If data is blocked, striped is coalesced.
+        If data is striped, blocked is coalesced.
+
+        loads/stores might have optional "preambles" (local variables we can compute with).
+        ACTUALLY, we can wrap this code inside something... like unroll, but declare local variables and then have a
+        "do work" section. We would NEED to guarantee we wouldn't have name conflicts (would each load have a unique
+        ID?) --- you could TRANSFORM a "non-premabled" load into a "preambled load"?
+
+        Maybe a load can have different access patterns you can "GRAB" from it, as an object. Decide on premable or not.
+        Then call the access pattern when needed.
+
+        Should we try to avoid block scope preambles? Always easier to NOT have that, so we can declare things used later
+        right?
       </p>
 
       <p class="TODO">
@@ -2408,64 +2423,58 @@
       <h4 id="WGSL-recording">Recording</h4>
 
       <p class="TODO">
-<br>        Plan is to record all WebGPU commands.
-<br>
-<br>        Goals:
-<br>        (a) Replay for performance tests (run 1x or 100x a frame, be able to setup and destroy).
-<br>            Have setup, run, and dispose.
-<br>        (b) JS output suitable for manual iteration to test performance tweaks rapidly.
-<br>        (c) Reproduction of bugs (particularly platform-specific ones), with easily readable WGSL/WebGPU commands.
-<br>        (d) Record system details required for correct playback (e.g. the texture format we can use), conditionally
-<br>            run the "compatible" tests.
-<br>        (e) Historical record of performance
-<br>        (f) Compatibility so that others could use the same format (for performance tests).
-<br>
-<br>        A command will record its input/output (what named objects it uses, and what it produces).
-<br>        A closure is a group of commands, which will have its unbound resources (and a list of what it declares).
-<br>        We will select sections of these, and be able to build repeatable performance tests
-<br>        (record setup, in-frame, and cleanup respectively).
-<br>
-<br>        Closure will note the "raw JSON" of parameters, MINUS the named objects. It will list the replacement paths
-<br>        into the JSON object (where the named objects are placed).
-<br>          ACTUALLY: Just record the actual object. When we "to-string" it, we'll provide a mapping of object => name,
-<br>          AND we will have to actually handle the proper types of descriptors anyway (e.g. to handle enumerations).
-<br>          It will be "good" to record the dependencies (actual objects) and the result (actual object).
-<br>
-<br>        --- HOW to record "when map async / submitted work done" based things? Presumably for performance tests, we
-<br>        don't need this. -- we COULD record the initial order the promises are resolved with, and then replay those?
-<br>
-<br>        TODO: record onSubmittedWorkDone()
-<br>
-<br>        Renumber/label objects when we generate JS (so... don't label them before, just reference them?).
-<br>        If there aren't multiple, do NOT apply a number (e.g. device). Consider generating variable name prefixes
-<br>        FROM labels?
-<br>
-<br>        ArrayBuffers: Do we store persistent and non-changing ones as "one object"? We could just recreate an ArrayBuffer
-<br>        for every data transfer. We could also see the length and contents, and store it as a "constant" on the new end.
-<br>
-<br>        Wrap Canvas calls (if "discovered", record the resolution). Wrap the configure and texture getter.
-<br>
-<br>        Record with a list of command lists (new commands will go into all of them), so we can add/remove lists of
-<br>        commands to record into (that might be nested).
-<br>
-<br>        Output JS for quick iteration. Map flag/enumeration values to their "good" forms.
-<br>        - Be able to output JS closures, and performance test units (based on what is missing).
-<br>        - Remember to record "destroy" and cleanup for performance tests.
-<br>        - only line-breaks in options objects, not based on parameters
-<br>
-<br>        Output serialization (or use in-memory) for actual re-execution (re-bind or use references, could use for production?)
-<br>
-<br>        Should allow for starting/stopping recording (and for sections), so we can record multiple different things.
-<br>        Can choose to avoid device creation (bind device), and can only record inner-command-encoder parts (bind
-<br>        command encoder).
-<br>
-<br>        When we run into "unknown" objects, handle it safely. Use instanceof to determine what type of object, then
-<br>        give it a name/entry. It will be in the closure.
-<br>
-<br>        Buffer logger support (for debugging reproduction cases) - console.log anything that we've successfully
-<br>        mapAsync'ed?
-<br>
-<br>        NOTE: Having all of the old raster clipper recorded could be interesting!
+        Record performance tests (perhaps in PerformanceTesting), to create the setup/run/dispose object (e.g.
+        () => { run, dispose } as closures).
+      </p>
+
+      <p class="TODO">
+        Have the ability to generate an easily-profiled "full-path animation frame" form, so we can iterate quickly
+        on manual tweaks to performance (e.g. manually tweak WGSL or WebGPU calls, to see how it performs).
+      </p>
+
+      <p class="TODO">
+        Add in render (e.g. BlitShader) commands.
+      </p>
+
+      <p class="TODO">
+        Add in wrapping of Canvas calls (especially if discovered, record the resolution). Wrap the configure and texture getter.
+      </p>
+
+      <p class="TODO">
+        Record properties of the device, so we can see if things are compatible (preferred canvas format, supported
+        storage texture formats, etc.)
+      </p>
+
+      <p class="TODO">
+        Record onSubmittedWorkDone()
+      </p>
+
+      <p class="TODO">
+        Use this to record any platform-specific behavior we have(!) - Or reproduction of bugs
+      </p>
+
+      <p class="TODO">
+        Set up a library for third parties that stubs out WebGPU APIs, and records like this. Can enable a website for
+        comparison of performance in approaches.
+      </p>
+
+      <p class="TODO">
+        How to handle mapAsync/onSubmittedWorkDone nicely? We could record the order they are resolved in, and then
+        replay them in that order.
+      </p>
+
+      <p class="TODO">
+        ArrayBuffers: Do we store persistent and non-changing ones as "one object"? We could just recreate an ArrayBuffer
+        for every data transfer. We could also see the length and contents, and store it as a "constant" on the new end.
+      </p>
+
+      <p class="TODO">
+        Consider "replay" or "replay with replacement of objects in the closure" - Could potentially use this for production
+        performance?
+      </p>
+
+      <p class="TODO">
+        Be able to record the raster clipper
       </p>
 
       <h4 id="WGSL-logging">Logging</h4>
