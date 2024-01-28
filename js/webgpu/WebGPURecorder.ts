@@ -98,6 +98,126 @@ export default class WebGPURecorder {
     }
   }
 
+  public recordDeviceQueueSubmit( device: GPUDevice, commandBuffers: Iterable<GPUCommandBuffer> ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandDeviceQueueSubmit( device, commandBuffers ) );
+    }
+  }
+
+  public recordDeviceDestroy( device: GPUDevice ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandDeviceDestroy( device ) );
+    }
+  }
+
+  public recordBufferMapAsync( buffer: GPUBuffer, mode: GPUMapModeFlags, offset?: number, size?: number ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandBufferMapAsync( buffer, mode, offset, size ) );
+    }
+  }
+
+  public recordBufferUnmap( buffer: GPUBuffer ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandBufferUnmap( buffer ) );
+    }
+  }
+
+  public recordBufferDestroy( buffer: GPUBuffer ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandBufferDestroy( buffer ) );
+    }
+  }
+
+  public recordEncoderBeginRenderPass( result: GPURenderPassEncoder, commandEncoder: GPUCommandEncoder, descriptor: GPURenderPassDescriptor ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandEncoderBeginRenderPass( result, commandEncoder, descriptor ) );
+    }
+  }
+
+  public recordEncoderBeginComputePass( result: GPUComputePassEncoder, commandEncoder: GPUCommandEncoder, descriptor?: GPUComputePassDescriptor ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandEncoderBeginComputePass( result, commandEncoder, descriptor ) );
+    }
+  }
+
+  public recordEncoderCopyBufferToBuffer( encoder: GPUCommandEncoder, source: GPUBuffer, sourceOffset: number, destination: GPUBuffer, destinationOffset: number, size: number ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandEncoderCopyBufferToBuffer( encoder, source, sourceOffset, destination, destinationOffset, size ) );
+    }
+  }
+
+  public recordEncoderCopyBufferToTexture( encoder: GPUCommandEncoder, source: GPUImageCopyBuffer, destination: GPUImageCopyTexture, copySize: GPUExtent3DStrict ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandEncoderCopyBufferToTexture( encoder, source, destination, copySize ) );
+    }
+  }
+
+  public recordEncoderCopyTextureToBuffer( encoder: GPUCommandEncoder, source: GPUImageCopyTexture, destination: GPUImageCopyBuffer, copySize: GPUExtent3DStrict ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandEncoderCopyTextureToBuffer( encoder, source, destination, copySize ) );
+    }
+  }
+
+  public recordEncoderCopyTextureToTexture( encoder: GPUCommandEncoder, source: GPUImageCopyTexture, destination: GPUImageCopyTexture, copySize: GPUExtent3DStrict ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandEncoderCopyTextureToTexture( encoder, source, destination, copySize ) );
+    }
+  }
+
+  public recordEncoderClearBuffer( encoder: GPUCommandEncoder, buffer: GPUBuffer, offset?: number, size?: number ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandEncoderClearBuffer( encoder, buffer, offset, size ) );
+    }
+  }
+
+  public recordEncoderResolveQuerySet( encoder: GPUCommandEncoder, querySet: GPUQuerySet, firstQuery: number, queryCount: number, destination: GPUBuffer, destinationOffset: number ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandEncoderResolveQuerySet( encoder, querySet, firstQuery, queryCount, destination, destinationOffset ) );
+    }
+  }
+
+  public recordEncoderFinish( result: GPUCommandBuffer, encoder: GPUCommandEncoder, descriptor?: GPUCommandBufferDescriptor ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandEncoderFinish( result, encoder, descriptor ) );
+    }
+  }
+
+  public recordComputePassEncoderSetPipeline( encoder: GPUComputePassEncoder, pipeline: GPUComputePipeline ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandComputePassEncoderSetPipeline( encoder, pipeline ) );
+    }
+  }
+
+  public recordComputePassEncoderDispatchWorkgroups( encoder: GPUComputePassEncoder, x: number, y?: number, z?: number ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandComputePassEncoderDispatchWorkgroups( encoder, x, y, z ) );
+    }
+  }
+
+  public recordComputePassEncoderDispatchWorkgroupsIndirect( encoder: GPUComputePassEncoder, indirectBuffer: GPUBuffer, indirectOffset: number ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandComputePassEncoderDispatchWorkgroupsIndirect( encoder, indirectBuffer, indirectOffset ) );
+    }
+  }
+
+  public recordComputePassEncoderEnd( encoder: GPUComputePassEncoder ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandComputePassEncoderEnd( encoder ) );
+    }
+  }
+
+  public recordPassEncoderSetBindGroup( passEncoder: GPURenderPassEncoder | GPUComputePassEncoder, index: number, bindGroup: GPUBindGroup | null, dynamicOffsets?: Iterable<number> ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandPassEncoderSetBindGroup( passEncoder, index, bindGroup, dynamicOffsets ) );
+    }
+  }
+
+  public recordQuerySetDestroy( querySet: GPUQuerySet ): void {
+    if ( this.commandLists.length ) {
+      this.recordCommand( new WebGPUCommandQuerySetDestroy( querySet ) );
+    }
+  }
+
   public static getNamePrefix( obj: IntentionalAny ): string {
     if ( obj instanceof GPUDevice ) {
       return 'device';
@@ -143,6 +263,9 @@ export default class WebGPURecorder {
     }
     else if ( obj instanceof GPUExternalTexture ) {
       return 'externalTexture';
+    }
+    else if ( obj instanceof GPUCommandBuffer ) {
+      return 'commandBuffer';
     }
     else {
       throw new Error( 'add the name' );
@@ -405,10 +528,7 @@ class WebGPUCommandDeviceCreateBuffer extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const deviceName = nameMap.get( this.device )!;
-    assert && assert( deviceName );
-
-    return `${this.getDeclaration( nameMap )}${deviceName}.createBuffer( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.device )}.createBuffer( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {
       usage: ( value: IntentionalAny ) => {
         const numberValue = value as number;
         // eslint-disable-next-line no-simple-type-checking-assertions
@@ -441,10 +561,7 @@ class WebGPUCommandDeviceCreateQuerySet extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const deviceName = nameMap.get( this.device )!;
-    assert && assert( deviceName );
-
-    return `${this.getDeclaration( nameMap )}${deviceName}.createQuerySet( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.device )}.createQuerySet( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
   }
 }
 
@@ -458,10 +575,7 @@ class WebGPUCommandDeviceCreateBindGroupLayout extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const deviceName = nameMap.get( this.device )!;
-    assert && assert( deviceName );
-
-    return `${this.getDeclaration( nameMap )}${deviceName}.createBindGroupLayout( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.device )}.createBindGroupLayout( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {
       entries: ( value: IntentionalAny ) => {
         return WebGPURecorder.rawValue( level + 1, value, nameMap, {
           arrayElement: ( value: IntentionalAny ) => {
@@ -489,10 +603,7 @@ class WebGPUCommandDeviceCreatePipelineLayout extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const deviceName = nameMap.get( this.device )!;
-    assert && assert( deviceName );
-
-    return `${this.getDeclaration( nameMap )}${deviceName}.createPipelineLayout( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.device )}.createPipelineLayout( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
   }
 }
 
@@ -507,10 +618,7 @@ class WebGPUCommandDeviceCreateShaderModule extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const deviceName = nameMap.get( this.device )!;
-    assert && assert( deviceName );
-
-    return `${this.getDeclaration( nameMap )}${deviceName}.createShaderModule( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.device )}.createShaderModule( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
   }
 }
 
@@ -528,10 +636,7 @@ class WebGPUCommandDeviceCreateComputePipeline extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const deviceName = nameMap.get( this.device )!;
-    assert && assert( deviceName );
-
-    return `${this.getDeclaration( nameMap )}${this.async ? 'await ' : ''}${deviceName}.createComputePipeline${this.async ? 'Async' : ''}( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
+    return `${this.getDeclaration( nameMap )}${this.async ? 'await ' : ''}${getName( nameMap, this.device )}.createComputePipeline${this.async ? 'Async' : ''}( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
   }
 }
 
@@ -555,10 +660,7 @@ class WebGPUCommandDeviceCreateBindGroup extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const deviceName = nameMap.get( this.device )!;
-    assert && assert( deviceName );
-
-    return `${this.getDeclaration( nameMap )}${deviceName}.createBindGroup( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.device )}.createBindGroup( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} );`;
   }
 }
 
@@ -572,10 +674,7 @@ class WebGPUCommandDeviceCreateCommandEncoder extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const deviceName = nameMap.get( this.device )!;
-    assert && assert( deviceName );
-
-    return `${this.getDeclaration( nameMap )}${deviceName}.createCommandEncoder(${this.descriptor ? ` ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} ` : ''});`;
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.device )}.createCommandEncoder(${this.descriptor ? ` ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} ` : ''});`;
   }
 }
 
@@ -592,9 +691,6 @@ class WebGPUCommandDeviceWriteBuffer extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    const deviceName = nameMap.get( this.device )!;
-    assert && assert( deviceName );
-
     let dataString: string;
     if ( this.data instanceof ArrayBuffer ) {
       dataString = WebGPURecorder.arrayBufferLikeString( this.data );
@@ -606,6 +702,309 @@ class WebGPUCommandDeviceWriteBuffer extends WebGPUCommand {
       dataString = WebGPURecorder.arrayBufferLikeString( this.data.buffer );
     }
 
-    return `${deviceName}.queue.writeBuffer( ${getName( nameMap, this.buffer )}, ${this.bufferOffset}, ${dataString} );`;
+    return `${getName( nameMap, this.device )}.queue.writeBuffer( ${getName( nameMap, this.buffer )}, ${this.bufferOffset}, ${dataString} );`;
   }
 }
+
+class WebGPUCommandDeviceQueueSubmit extends WebGPUCommand {
+  public constructor(
+    public readonly device: GPUDevice,
+    public readonly commandBuffers: Iterable<GPUCommandBuffer>
+  ) {
+    super( null, [ device, ...commandBuffers ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.device )}.queue.submit( ${WebGPURecorder.rawValue( 0, [
+      ...this.commandBuffers
+    ], nameMap )} );`;
+  }
+}
+
+class WebGPUCommandDeviceDestroy extends WebGPUCommand {
+  public constructor(
+    public readonly device: GPUDevice
+  ) {
+    super( null, [ device ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.device )}.destroy();`;
+  }
+}
+
+class WebGPUCommandBufferMapAsync extends WebGPUCommand {
+  public constructor(
+    public readonly buffer: GPUBuffer,
+    public readonly mode: GPUMapModeFlags,
+    public readonly offset?: number,
+    public readonly size?: number
+  ) {
+    super( null, [ buffer ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    const modeString = WebGPURecorder.bitfieldToString( this.mode, new Map<number, string>( [
+      [ GPUMapMode.READ, 'GPUMapMode.READ' ],
+      [ GPUMapMode.WRITE, 'GPUMapMode.WRITE' ]
+    ] ) );
+    return `${getName( nameMap, this.buffer )}.mapAsync( ${modeString}${this.offset !== undefined ? `, ${this.offset}` : ''}${this.size !== undefined ? `, ${this.size}` : ''} ).then( () => console.log( new Uint8Array( ${getName( nameMap, this.buffer )}.getMappedRange() ) ) );`;
+  }
+}
+
+class WebGPUCommandBufferUnmap extends WebGPUCommand {
+  public constructor(
+    public readonly buffer: GPUBuffer
+  ) {
+    super( null, [ buffer ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.buffer )}.unmap();`;
+  }
+}
+
+class WebGPUCommandBufferDestroy extends WebGPUCommand {
+  public constructor(
+    public readonly buffer: GPUBuffer
+  ) {
+    super( null, [ buffer ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.buffer )}.destroy();`;
+  }
+}
+
+class WebGPUCommandEncoderBeginRenderPass extends WebGPUCommand {
+  public constructor(
+    result: GPURenderPassEncoder,
+    public readonly commandEncoder: GPUCommandEncoder,
+    public readonly descriptor: GPURenderPassDescriptor
+  ) {
+    super( result, [
+      commandEncoder,
+      [ ...descriptor.colorAttachments ].flatMap( attachment => attachment === null ? [] : [
+        attachment.view,
+        ...( attachment.resolveTarget ? [ attachment.resolveTarget ] : [] )
+      ] ),
+      ...( descriptor.depthStencilAttachment ? [ descriptor.depthStencilAttachment.view ] : [] ),
+      ...( descriptor.occlusionQuerySet ? [ descriptor.occlusionQuerySet ] : [] ),
+      ...( descriptor.timestampWrites ? [ descriptor.timestampWrites.querySet ] : [] )
+    ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.commandEncoder )}.beginRenderPass( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {
+      
+    } )} );`;
+  }
+}
+
+class WebGPUCommandEncoderBeginComputePass extends WebGPUCommand {
+  public constructor(
+    result: GPUComputePassEncoder,
+    public readonly commandEncoder: GPUCommandEncoder,
+    public readonly descriptor?: GPUComputePassDescriptor
+  ) {
+    super( result, [
+      commandEncoder,
+      ...( descriptor && descriptor.timestampWrites ? [ descriptor.timestampWrites.querySet ] : [] )
+    ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.commandEncoder )}.beginComputePass(${this.descriptor ? ` ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} ` : ''});`;
+  }
+}
+
+class WebGPUCommandEncoderCopyBufferToBuffer extends WebGPUCommand {
+  public constructor(
+    public readonly encoder: GPUCommandEncoder,
+    public readonly source: GPUBuffer,
+    public readonly sourceOffset: number,
+    public readonly destination: GPUBuffer,
+    public readonly destinationOffset: number,
+    public readonly size: number
+  ) {
+    super( null, [ encoder, source, destination ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.encoder )}.copyBufferToBuffer( ${getName( nameMap, this.source )}, ${this.sourceOffset}, ${getName( nameMap, this.destination )}, ${this.destinationOffset}, ${this.size} );`;
+  }
+}
+
+class WebGPUCommandEncoderCopyBufferToTexture extends WebGPUCommand {
+  public constructor(
+    public readonly encoder: GPUCommandEncoder,
+    public readonly source: GPUImageCopyBuffer,
+    public readonly destination: GPUImageCopyTexture,
+    public readonly copySize: GPUExtent3DStrict
+  ) {
+    super( null, [ encoder, source, destination ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.encoder )}.copyBufferToTexture( ${getName( nameMap, this.source )}, ${getName( nameMap, this.destination )}, ${WebGPURecorder.rawValue( level, this.copySize, nameMap )} );`;
+  }
+}
+
+class WebGPUCommandEncoderCopyTextureToBuffer extends WebGPUCommand {
+  public constructor(
+    public readonly encoder: GPUCommandEncoder,
+    public readonly source: GPUImageCopyTexture,
+    public readonly destination: GPUImageCopyBuffer,
+    public readonly copySize: GPUExtent3DStrict
+  ) {
+    super( null, [ encoder, source, destination ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.encoder )}.copyTextureToBuffer( ${getName( nameMap, this.source )}, ${getName( nameMap, this.destination )}, ${WebGPURecorder.rawValue( level, this.copySize, nameMap )} );`;
+  }
+}
+
+class WebGPUCommandEncoderCopyTextureToTexture extends WebGPUCommand {
+  public constructor(
+    public readonly encoder: GPUCommandEncoder,
+    public readonly source: GPUImageCopyTexture,
+    public readonly destination: GPUImageCopyTexture,
+    public readonly copySize: GPUExtent3DStrict
+  ) {
+    super( null, [ encoder, source, destination ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.encoder )}.copyTextureToTexture( ${getName( nameMap, this.source )}, ${getName( nameMap, this.destination )}, ${WebGPURecorder.rawValue( level, this.copySize, nameMap )} );`;
+  }
+}
+
+class WebGPUCommandEncoderClearBuffer extends WebGPUCommand {
+  public constructor(
+    public readonly encoder: GPUCommandEncoder,
+    public readonly buffer: GPUBuffer,
+    public readonly offset?: number,
+    public readonly size?: number
+  ) {
+    super( null, [ encoder, buffer ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.encoder )}.clearBuffer( ${getName( nameMap, this.buffer )}${this.offset !== undefined ? `, ${this.offset}` : ''}${this.size !== undefined ? `, ${this.size}` : ''} );`;
+  }
+}
+
+class WebGPUCommandEncoderResolveQuerySet extends WebGPUCommand {
+  public constructor(
+    public readonly encoder: GPUCommandEncoder,
+    public readonly querySet: GPUQuerySet,
+    public readonly firstQuery: number,
+    public readonly queryCount: number,
+    public readonly destination: GPUBuffer,
+    public readonly destinationOffset: number
+  ) {
+    super( null, [ encoder, querySet, destination ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.encoder )}.resolveQuerySet( ${getName( nameMap, this.querySet )}, ${this.firstQuery}, ${this.queryCount}, ${getName( nameMap, this.destination )}, ${this.destinationOffset} );`;
+  }
+}
+
+class WebGPUCommandEncoderFinish extends WebGPUCommand {
+  public constructor(
+    result: GPUCommandBuffer,
+    public readonly encoder: GPUCommandEncoder,
+    public readonly descriptor?: GPUCommandBufferDescriptor
+  ) {
+    super( result, [ encoder ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.encoder )}.finish(${this.descriptor ? ` ${WebGPURecorder.rawValue( level, this.descriptor, nameMap )} ` : ''});`;
+  }
+}
+
+class WebGPUCommandComputePassEncoderSetPipeline extends WebGPUCommand {
+  public constructor(
+    public readonly computePassEncoder: GPUComputePassEncoder,
+    public readonly pipeline: GPUComputePipeline
+  ) {
+    super( null, [ computePassEncoder, pipeline ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.computePassEncoder )}.setPipeline( ${getName( nameMap, this.pipeline )} );`;
+  }
+}
+
+class WebGPUCommandComputePassEncoderDispatchWorkgroups extends WebGPUCommand {
+  public constructor(
+    public readonly computePassEncoder: GPUComputePassEncoder,
+    public readonly x: number,
+    public readonly y?: number,
+    public readonly z?: number
+  ) {
+    super( null, [ computePassEncoder ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.computePassEncoder )}.dispatchWorkgroups( ${this.x}${this.y !== undefined ? `, ${this.y}` : ''}${this.z !== undefined ? `, ${this.z}` : ''} );`;
+  }
+}
+
+class WebGPUCommandComputePassEncoderDispatchWorkgroupsIndirect extends WebGPUCommand {
+  public constructor(
+    public readonly computePassEncoder: GPUComputePassEncoder,
+    public readonly indirectBuffer: GPUBuffer,
+    public readonly indirectOffset: number
+  ) {
+    super( null, [ computePassEncoder, indirectBuffer ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.computePassEncoder )}.dispatchWorkgroupsIndirect( ${getName( nameMap, this.indirectBuffer )}, ${this.indirectOffset} );`;
+  }
+}
+
+class WebGPUCommandComputePassEncoderEnd extends WebGPUCommand {
+  public constructor(
+    public readonly computePassEncoder: GPUComputePassEncoder
+  ) {
+    super( null, [ computePassEncoder ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.computePassEncoder )}.end();`;
+  }
+}
+
+class WebGPUCommandPassEncoderSetBindGroup extends WebGPUCommand {
+  public constructor(
+    public readonly passEncoder: GPURenderPassEncoder | GPUComputePassEncoder,
+    public readonly index: number,
+    public readonly bindGroup: GPUBindGroup | null,
+    public readonly dynamicOffsets?: Iterable<number>
+  ) {
+    super( null, [ passEncoder ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.passEncoder )}.setBindGroup( ${this.index}, ${this.bindGroup === null ? 'null' : getName( nameMap, this.bindGroup )}${this.dynamicOffsets ? `, ${WebGPURecorder.rawValue( level, this.dynamicOffsets, nameMap )}` : ''} );`;
+  }
+}
+
+class WebGPUCommandQuerySetDestroy extends WebGPUCommand {
+  public constructor(
+    public readonly querySet: GPUQuerySet
+  ) {
+    super( null, [ querySet ] );
+  }
+
+  public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
+    return `${getName( nameMap, this.querySet )}.destroy();`;
+  }
+}
+
+// TODO: add more render commands (we're missing a lot).

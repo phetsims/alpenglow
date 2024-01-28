@@ -200,12 +200,20 @@ export default class WebGPUAPI {
     commandBuffers: Iterable<GPUCommandBuffer>
   ): void {
     device.queue.submit( commandBuffers );
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceQueueSubmit( device, commandBuffers );
+    }
   }
   public deviceHasFeature( device: GPUDevice, featureName: string ): boolean {
     return device.features.has( featureName ) || false;
   }
   public deviceDestroy( device: GPUDevice ): void {
     device.destroy();
+
+    if ( this.recorder ) {
+      this.recorder.recordDeviceDestroy( device );
+    }
   }
 
   public bufferMapAsync(
@@ -214,29 +222,52 @@ export default class WebGPUAPI {
     offset?: number,
     size?: number
   ): Promise<void> {
+    if ( this.recorder ) {
+      this.recorder.recordBufferMapAsync( buffer, mode, offset, size );
+    }
     return buffer.mapAsync( mode, offset, size );
   }
   public bufferUnmap( buffer: GPUBuffer ): void {
     buffer.unmap();
+
+    if ( this.recorder ) {
+      this.recorder.recordBufferUnmap( buffer );
+    }
   }
   public bufferGetMappedRange( buffer: GPUBuffer, offset?: number, size?: number ): ArrayBuffer {
     return buffer.getMappedRange( offset, size );
   }
   public bufferDestroy( buffer: GPUBuffer ): void {
     buffer.destroy();
+
+    if ( this.recorder ) {
+      this.recorder.recordBufferDestroy( buffer );
+    }
   }
 
   public encoderBeginRenderPass(
     encoder: GPUCommandEncoder,
     descriptor: GPURenderPassDescriptor
   ): GPURenderPassEncoder {
-    return encoder.beginRenderPass( descriptor );
+    const renderPassEncoder = encoder.beginRenderPass( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordEncoderBeginRenderPass( renderPassEncoder, encoder, descriptor );
+    }
+
+    return renderPassEncoder;
   }
   public encoderBeginComputePass(
     encoder: GPUCommandEncoder,
-    descriptor: GPUComputePassDescriptor
+    descriptor?: GPUComputePassDescriptor
   ): GPUComputePassEncoder {
-    return encoder.beginComputePass( descriptor );
+    const computePassEncoder = encoder.beginComputePass( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordEncoderBeginComputePass( computePassEncoder, encoder, descriptor );
+    }
+
+    return computePassEncoder;
   }
   public encoderCopyBufferToBuffer(
     encoder: GPUCommandEncoder,
@@ -247,6 +278,10 @@ export default class WebGPUAPI {
     size: number
   ): void {
     encoder.copyBufferToBuffer( source, sourceOffset, destination, destinationOffset, size );
+
+    if ( this.recorder ) {
+      this.recorder.recordEncoderCopyBufferToBuffer( encoder, source, sourceOffset, destination, destinationOffset, size );
+    }
   }
   public encoderCopyBufferToTexture(
     encoder: GPUCommandEncoder,
@@ -255,6 +290,10 @@ export default class WebGPUAPI {
     copySize: GPUExtent3DStrict
   ): void {
     encoder.copyBufferToTexture( source, destination, copySize );
+
+    if ( this.recorder ) {
+      this.recorder.recordEncoderCopyBufferToTexture( encoder, source, destination, copySize );
+    }
   }
   public encoderCopyTextureToBuffer(
     encoder: GPUCommandEncoder,
@@ -263,6 +302,10 @@ export default class WebGPUAPI {
     copySize: GPUExtent3DStrict
   ): void {
     encoder.copyTextureToBuffer( source, destination, copySize );
+
+    if ( this.recorder ) {
+      this.recorder.recordEncoderCopyTextureToBuffer( encoder, source, destination, copySize );
+    }
   }
   public encoderCopyTextureToTexture(
     encoder: GPUCommandEncoder,
@@ -271,6 +314,10 @@ export default class WebGPUAPI {
     copySize: GPUExtent3DStrict
   ): void {
     encoder.copyTextureToTexture( source, destination, copySize );
+
+    if ( this.recorder ) {
+      this.recorder.recordEncoderCopyTextureToTexture( encoder, source, destination, copySize );
+    }
   }
   public encoderClearBuffer(
     encoder: GPUCommandEncoder,
@@ -279,6 +326,10 @@ export default class WebGPUAPI {
     size?: number
   ): void {
     encoder.clearBuffer( buffer, offset, size );
+
+    if ( this.recorder ) {
+      this.recorder.recordEncoderClearBuffer( encoder, buffer, offset, size );
+    }
   }
   public encoderResolveQuerySet(
     encoder: GPUCommandEncoder,
@@ -289,12 +340,22 @@ export default class WebGPUAPI {
     destinationOffset: number
   ): void {
     encoder.resolveQuerySet( querySet, firstQuery, queryCount, destination, destinationOffset );
+
+    if ( this.recorder ) {
+      this.recorder.recordEncoderResolveQuerySet( encoder, querySet, firstQuery, queryCount, destination, destinationOffset );
+    }
   }
   public encoderFinish(
     encoder: GPUCommandEncoder,
     descriptor?: GPUCommandBufferDescriptor
   ): GPUCommandBuffer {
-    return encoder.finish( descriptor );
+    const commandBuffer = encoder.finish( descriptor );
+
+    if ( this.recorder ) {
+      this.recorder.recordEncoderFinish( commandBuffer, encoder, descriptor );
+    }
+
+    return commandBuffer;
   }
 
   public computePassEncoderSetPipeline(
@@ -302,6 +363,10 @@ export default class WebGPUAPI {
     pipeline: GPUComputePipeline
   ): void {
     computePassEncoder.setPipeline( pipeline );
+
+    if ( this.recorder ) {
+      this.recorder.recordComputePassEncoderSetPipeline( computePassEncoder, pipeline );
+    }
   }
   public computePassEncoderDispatchWorkgroups(
     computePassEncoder: GPUComputePassEncoder,
@@ -310,6 +375,10 @@ export default class WebGPUAPI {
     z?: number
   ): void {
     computePassEncoder.dispatchWorkgroups( x, y, z );
+
+    if ( this.recorder ) {
+      this.recorder.recordComputePassEncoderDispatchWorkgroups( computePassEncoder, x, y, z );
+    }
   }
   public computePassEncoderDispatchWorkgroupsIndirect(
     computePassEncoder: GPUComputePassEncoder,
@@ -317,7 +386,12 @@ export default class WebGPUAPI {
     indirectOffset: number
   ): void {
     computePassEncoder.dispatchWorkgroupsIndirect( indirectBuffer, indirectOffset );
+
+    if ( this.recorder ) {
+      this.recorder.recordComputePassEncoderDispatchWorkgroupsIndirect( computePassEncoder, indirectBuffer, indirectOffset );
+    }
   }
+  // TODO: consider adding the other approach to dynamic offsets?
   public passEncoderSetBindGroup(
     passEncoder: GPURenderPassEncoder | GPUComputePassEncoder,
     index: number,
@@ -325,14 +399,25 @@ export default class WebGPUAPI {
     dynamicOffsets?: Iterable<number>
   ): void {
     passEncoder.setBindGroup( index, bindGroup, dynamicOffsets );
+
+    if ( this.recorder ) {
+      this.recorder.recordPassEncoderSetBindGroup( passEncoder, index, bindGroup, dynamicOffsets );
+    }
   }
-  // TODO: consider adding the other approach to dynamic offsets?
   public computePassEncoderEnd( computePassEncoder: GPUComputePassEncoder ): void {
     computePassEncoder.end();
+
+    if ( this.recorder ) {
+      this.recorder.recordComputePassEncoderEnd( computePassEncoder );
+    }
   }
 
   public querySetDestroy( querySet: GPUQuerySet ): void {
     querySet.destroy();
+
+    if ( this.recorder ) {
+      this.recorder.recordQuerySetDestroy( querySet );
+    }
   }
 }
 alpenglow.register( 'WebGPUAPI', WebGPUAPI );
