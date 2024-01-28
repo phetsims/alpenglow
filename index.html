@@ -2140,6 +2140,16 @@
         loadStripedDynamic( workgroupSize, grainSize, indexWGSL )
         loadBlocked( workgroupSize, grainSize, index )
 
+        OR:
+
+        const accessor = load.getAccessor( 'striped', workgroupSize, grainSize, { premable: true } )
+        ${accessor.preamble}
+        ${accessor.load( index )}
+
+        const accessor = load.getAccessor( 'global', { premable: false } )
+        ${accessor.load( index )}
+
+
         -- the ability to QUERY what order the data is in, so we can pick a good order to read with.
         For instance, is striped or blocked loading coalesced? If data is blocked, striped is coalesced.
         If data is striped, blocked is coalesced.
