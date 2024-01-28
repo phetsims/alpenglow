@@ -702,7 +702,7 @@ class WebGPUCommandDeviceWriteBuffer extends WebGPUCommand {
       dataString = WebGPURecorder.arrayBufferLikeString( this.data.buffer );
     }
 
-    return `${getName( nameMap, this.device )}.queue.writeBuffer( ${getName( nameMap, this.buffer )}, ${this.bufferOffset}, ${dataString} );`;
+    return `${getName( nameMap, this.device )}.queue.writeBuffer( ${getName( nameMap, this.buffer )}, ${this.bufferOffset}, ${dataString}${this.dataOffset !== undefined ? `, ${this.dataOffset}` : ''}${this.size !== undefined ? `, ${this.size}` : ''} );`;
   }
 }
 
