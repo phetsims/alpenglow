@@ -2131,8 +2131,6 @@
 
         Load should only put "read" binding on a buffer slot. If we also have a store, then they will get combined.
 
-        Multidimensional load/store later (Load, Load2, Load3, etc.)
-
         Perhaps Load/Store classes with defaults? Does that give us bad inheritance?
 
         TODO:
@@ -2156,6 +2154,35 @@
           - can have different binary-compatible data layouts for the same buffer data in different shaders
         * actual load/store only happens with leaves (or a struct that essentially sets multiple leaves)
         * every data source can produce WGSL to load/store any individual leaf.
+        * "raw" data source is one that specifies the data layout directly (the WGSL type, and either the buffer,
+          workgroup, private variable, or local variable that it is stored in).
+          - e.g. might have array&lt;u32&gt;
+        * "reinterpret" data source wraps another one (e.g. turning array-u32 into array-implicitStruct{x:u32, y:32, ... + some booleans})
+          - changes the length of an array - we might have tricky mappings for this.
+          - Also provides getter/setter code.
+        * "leafify" (reinterpret) data source wraps another one (e.g. turning array-implicitStruct{x: u32, y:32, some booleans}
+          into array-struct{xy: vec2, some booleans}) - now it's a leaf and we can access and store it.
+          - If we have a binary/compare op on the "before", we should ideally have a binary op on it now.
+        * "map" (can be unidirectional or bidirectional) gives a different type (either for an array or a single bit?)
+        * "zip" combines 2+ data sources into one data source. Can be used to create tuples.
+        * "bit-pack" can turn a data source into a array-u32??? --- this we'd want to be the "raw" right?
+          - DO WE just have the "reinterpret" as the bit-pack?
+        * "striped permutation" - based on a workgroup/grain size, adjusts the indices, or:
+        * "permutation" - some arbitrary type of permutation
+
+        -- Should we have two --- representations? Both a "buffer" representation, and a "local" representation?
+        -- Probably not, we presumably will want to sometimes bit-pack "local" representations (for workgroup memory).
+        -- We implicitly have a "bit-packed" representation, and then "WGSL leaf" representation?
+
+        -- how to create mappings/combination of types (and bit-pack them for storage, but have in-memory non-bit-packed representations)
+        -- how to create the buffer slots / sources that are derivative for things
+
+        implictStructLoad.someImplicitField.leafField.getAccessor( 'striped', workgroupSize, grainSize, { premable: true } )
+
+        -- If we wrap an implicit struct into an explicit (leaf) struct, we need the code to get each field out to be generated.
+
+        -- NEED variable-length arrays (but also support fixed-size arrays - we just don't need to specify a size for
+        certain full operations).
 
         - think about sort-by-subset, (zip subset + index)
 
@@ -2201,6 +2228,12 @@
 
         Should we try to avoid block scope preambles? Always easier to NOT have that, so we can declare things used later
         right?
+
+        -- we need to get better uniforms setup.
+      </p>
+
+      <p class="DEFERRED">
+        Multidimensional load/store later (Load, Load2, Load3, etc.)
       </p>
 
       <p class="TODO">
