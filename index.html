@@ -2135,12 +2135,39 @@
 
         Perhaps Load/Store classes with defaults? Does that give us bad inheritance?
 
-        load( globalIndexWGSL )
-        loadStriped( workgroupSize, grainSize, index )
-        loadStripedDynamic( workgroupSize, grainSize, indexWGSL )
-        loadBlocked( workgroupSize, grainSize, index )
+        TODO:
+          How to handle cases where we don't want to "set" the entire object, but perhaps a field?
+            (WGSL doesn't actually let us do that for storage buffers, right?)
+          How does this work for structure-of-arrays?
+
+        -- nested structs for struct-of-arrays? First figure out simpler cases.
+
+        -- Have ConcreteType arrays with offsets into data - or other orders? SHOULD TYPING HANDLE THAT?
+
+        -- could have a struct-array split between workgroup/buffer/variables(!)
+
+        * "leaf" ConcreteType - represented by a WGSL type (nested struct, vec2, u32, etc.) - it's something we
+                                just grab one of at a time, and is loaded fully into memory at once.
+          - we can decompose "leaf" types into non-leaf types (e.g. extract a field of a struct, or not)
+          * need be to able to transform "bit-packed" / "structure-of-array" formats into a single WGSL leaf
+          - can create a leaf type for any struct-type combo (or even array)
+        * "data layout" is the actual configuration of leaf types for any data source (load/store)
+        * "binary-compatible" data layouts are data layouts that have the same binary layout (e.g. same stride, etc.)
+          - can have different binary-compatible data layouts for the same buffer data in different shaders
+        * actual load/store only happens with leaves (or a struct that essentially sets multiple leaves)
+        * every data source can produce WGSL to load/store any individual leaf.
+
+        - think about sort-by-subset, (zip subset + index)
 
         OR:
+
+        --------------
+
+        load.getLoaderForFields( ... ) // no, just use whatever API we can do create sub-structures (or also zip structs)
+
+        --------------
+
+        load.getBlocked( workgroupSize, grainSize )
 
         const accessor = load.getAccessor( 'striped', workgroupSize, grainSize, { premable: true } )
         ${accessor.preamble}
@@ -2148,6 +2175,16 @@
 
         const accessor = load.getAccessor( 'global', { premable: false } )
         ${accessor.load( index )}
+
+        --------------
+
+        store.setBlocked( workgroupSize, grainSize, valueWGSL )
+
+        const accessor = store.getAccessor( 'striped', workgroupSize, grainSize, { premable: true } )
+        ${accessor.preamble}
+        ${accessor.store( index, value )}
+
+        --------------
 
 
         -- the ability to QUERY what order the data is in, so we can pick a good order to read with.
