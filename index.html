@@ -2130,6 +2130,15 @@
         It will support the "sort by key", etc.
 
         Load should only put "read" binding on a buffer slot. If we also have a store, then they will get combined.
+
+        Multidimensional load/store later (Load, Load2, Load3, etc.)
+
+        Perhaps Load/Store classes with defaults? Does that give us bad inheritance?
+
+        load( globalIndexWGSL )
+        loadStriped( workgroupSize, grainSize, index )
+        loadStripedDynamic( workgroupSize, grainSize, indexWGSL )
+        loadBlocked( workgroupSize, grainSize, index )
       </p>
 
       <p class="TODO">
@@ -2167,7 +2176,7 @@
       <p class="TODO">
         Add Thrust-like primitives:
 
-        (a) "fill"  (to fill a certain buffer/slot with a specific value). Needed for non-zero (or multiple use) atomics.
+        (a) "fill"/"set" (to fill a certain buffer/slot with a specific value). Needed for non-zero (or multiple use) atomics.
         (b) "sequence"
         (c) "replace
         (d) "transform"
@@ -2183,6 +2192,10 @@
 
       <p class="TODO">
         Performance test radix sorts (micro and macro).
+      </p>
+
+      <p class="TODO">
+        Get a way to visualize the memory loading of a pipeline (order, is it coalesced?)
       </p>
 
       <p class="TODO">
