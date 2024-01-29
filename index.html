@@ -2117,7 +2117,7 @@
       <p class="TODO">
         Load/Store<br><br>
 
-        Add load/store, separate from any fusing. It's more powerful than Thrust iterators.
+        Add load/store, separate from any fusing. It's more powerful than the iterators.
 
         Load/store should support efficient ways of accessing data based on the particular order/striping, taking
         local variables and local/workgroup/etc. identifiers into account. Good WGSL. Consider a
@@ -2127,22 +2127,25 @@
         type. However they can also access workgroup variables, local variables, can be generated (i.e. indices or a
         mapping of that), and should handle permutation.
 
-        It will support the "sort by key", etc.
-
-        Load should only put "read" binding on a buffer slot. If we also have a store, then they will get combined.
-
         Perhaps Load/Store classes with defaults? Does that give us bad inheritance?
 
-        TODO:
-          How to handle cases where we don't want to "set" the entire object, but perhaps a field?
-            (WGSL doesn't actually let us do that for storage buffers, right?)
-          How does this work for structure-of-arrays?
-
-        -- nested structs for struct-of-arrays? First figure out simpler cases.
-
-        -- Have ConcreteType arrays with offsets into data - or other orders? SHOULD TYPING HANDLE THAT?
-
-        -- could have a struct-array split between workgroup/buffer/variables(!)
+        DEFER:
+          preambles
+            - Should we try to avoid block scope preambles? Always easier to NOT have that, so we can declare things
+              used later right?
+            - loads/stores might have optional "preambles" (local variables we can compute with).
+              ACTUALLY, we can wrap this code inside something... like unroll, but declare local variables and then have a
+              "do work" section. We would NEED to guarantee we wouldn't have name conflicts (would each load have a unique
+              ID?) --- you could TRANSFORM a "non-premabled" load into a "preambled load"?
+          automatic subsetting by what is used
+            - if we automatically check what "parts" of an implicit struct are used BEFORE deciding how to subset the type,
+              we'll need to "run the code generation" for that part first. With the blueprint bit, that is tricky?
+              Could we "dry compile" it, see what calls are needed, and then do it for real?
+          composite operations on small types
+            - Think about long-term "how we handle u8 arrays", since each memory access should really give us 4 elements.
+              We'll hit the same memory access with 4 threads if we don't do it more intelligently.
+          multidimensional load/store (multidimensional arrays)
+            - Load, Load2, Load3, etc.
 
         * "leaf" ConcreteType - represented by a WGSL type (nested struct, vec2, u32, etc.) - it's something we
                                 just grab one of at a time, and is loaded fully into memory at once.
@@ -2169,10 +2172,38 @@
           - DO WE just have the "reinterpret" as the bit-pack?
         * "striped permutation" - based on a workgroup/grain size, adjusts the indices, or:
         * "permutation" - some arbitrary type of permutation
+        * "offset" should be trivial
+
+        Examples of concepts applied:
+          structure-of-arrays is simply data sources zipped together - works for all cases
+          sort-by-subset accomplished by zipping an index with the mapped subset, then handling the last sort bit
+
+        Each data source has a "logical" representation (e.g. a specific concrete/implicit type) independent of how it is stored.
+        Each data source also can support requesting load/stores of specific "leaf" explicit representations, usually
+        of parts/slices, but also the whole. For instance:
+          "get the 'a' and 'b' fields from the 3rd striped element of the array, for specific workgroupgrain".
+        -- NOTE: we probably first "transform" the data source by saying "give us the logical slice of an array with
+          elements of just 'a' and 'b'". THEN transform it with getting things from a striped format with workgroup/grain.
+          THEN just ask for the element (with either a constant or varying expression), possibly the preamble too.
+          At each stage, should be able to note a good "access order"
+          !!!!!
+        -- NOTE: If we need to read data, we might have to "read" more bits than "necessary". If we're doing a store, we
+          might need to read certain "unmodified" bits to write out the leaf type.
+        -- Have a good way of encoding information into ByteEncoders (which can set the bytes/bits they care about)
+        -- Ability to create "rearranged" leaf struct types (so that they take up less space).
+          -- !! HOWEVER we probably don't need the binary equivalent forms WITH leaf struct types. Good eventually.
+        -- !!! Wait for optimization of index expressions until later. We'll tackle it, just need to know WHAT we need
+               to tackle first.
+        -- Figure out how to load ONLY the stored leaf types needed to extract the substructures(!). And how to create
+           substructures based on what an operation does (e.g. if we only need a certain operation that neglects
+           certain fields, can we auto-ignore it?)
 
         -- Should we have two --- representations? Both a "buffer" representation, and a "local" representation?
         -- Probably not, we presumably will want to sometimes bit-pack "local" representations (for workgroup memory).
         -- We implicitly have a "bit-packed" representation, and then "WGSL leaf" representation?
+
+        -- We'll want to sometimes extract multiple fields at the same time. So that we don't do "over-reads", perhaps
+           create a custom subset as an explicit leaf type that can be read.
 
         -- how to create mappings/combination of types (and bit-pack them for storage, but have in-memory non-bit-packed representations)
         -- how to create the buffer slots / sources that are derivative for things
@@ -2184,7 +2215,7 @@
         -- NEED variable-length arrays (but also support fixed-size arrays - we just don't need to specify a size for
         certain full operations).
 
-        - think about sort-by-subset, (zip subset + index)
+        Load should only put "read" binding on a buffer slot. If we also have a store, then they will get combined.
 
         OR:
 
@@ -2213,27 +2244,14 @@
 
         --------------
 
-
         -- the ability to QUERY what order the data is in, so we can pick a good order to read with.
         For instance, is striped or blocked loading coalesced? If data is blocked, striped is coalesced.
         If data is striped, blocked is coalesced.
 
-        loads/stores might have optional "preambles" (local variables we can compute with).
-        ACTUALLY, we can wrap this code inside something... like unroll, but declare local variables and then have a
-        "do work" section. We would NEED to guarantee we wouldn't have name conflicts (would each load have a unique
-        ID?) --- you could TRANSFORM a "non-premabled" load into a "preambled load"?
-
         Maybe a load can have different access patterns you can "GRAB" from it, as an object. Decide on premable or not.
         Then call the access pattern when needed.
 
-        Should we try to avoid block scope preambles? Always easier to NOT have that, so we can declare things used later
-        right?
-
         -- we need to get better uniforms setup.
-      </p>
-
-      <p class="DEFERRED">
-        Multidimensional load/store later (Load, Load2, Load3, etc.)
       </p>
 
       <p class="TODO">
