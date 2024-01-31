@@ -2117,6 +2117,8 @@
       <p class="TODO">
         Load/Store<br><br>
 
+        !!! IMPORTANT: Test to see if we can handle types with atomics(!), and how references to those can work!
+
         Add load/store, separate from any fusing. It's more powerful than the iterators.
 
         Load/store should support efficient ways of accessing data based on the particular order/striping, taking
@@ -2177,6 +2179,37 @@
         Examples of concepts applied:
           structure-of-arrays is simply data sources zipped together - works for all cases
           sort-by-subset accomplished by zipping an index with the mapped subset, then handling the last sort bit
+
+        Separation of "data source" from load/store (for things like map)
+          - data source just describes the data layout
+          - can grab load/store from data source, THEN apply maps/etc.
+        NOTE: For this, if it is a bidirectional (homomorphic) map, it can still act like a data source, no?
+
+        TODO: how to handle range checks? where do we store length?
+
+        NOTE: writes to bit-packed data are tricky, SINCE THEY COULD CONFLICT UNLESS WE DO ATOMICS
+
+        Examples:
+          1:
+            data:
+              buffer A, raw tightly-packed array(u32)
+              buffer B, raw tightly-packed array(f32)
+            data sources:
+              C:  raw A array(u32)
+              C*: interpret C as array( u8 )
+              D:  raw B array(f32)
+              D*: interpret D as array( implicit{ x: f32, y: f32, z: f32 } )
+              E:  zip C*,D* as array( implicit{ index: u8, x: f32, y: f32, z: f32 } )
+              F:  subset E to array( implicit{ index: u8, x: f32 } )
+              G:  leafify to array( struct{ index: u32 (rep u8), x: f32 } ) <--- hmm, do we do this so we can minimize duplicate loads?
+              H:  striped raked coalesced access of workgroupSize,grainSize to array( struct{ index: u32 (rep u8), x: f32 }, grainSize )
+              I:  H load at index, do a sort on x, then apply rearrange to E?
+          TODO: example where we do some scan/reduce ON BIT-PACKED DATA(!)
+            NOTE: writes to bit-packed data are tricky, SINCE THEY COULD CONFLICT UNLESS WE DO ATOMICS
+
+
+        TODO:
+          BufferLogger with zipped things from different buffers?
 
         Each data source has a "logical" representation (e.g. a specific concrete/implicit type) independent of how it is stored.
         Each data source also can support requesting load/stores of specific "leaf" explicit representations, usually
@@ -2250,6 +2283,8 @@
 
         Maybe a load can have different access patterns you can "GRAB" from it, as an object. Decide on premable or not.
         Then call the access pattern when needed.
+
+        Can get dynamic offsets by reading from uniforms.
 
         -- we need to get better uniforms setup.
       </p>
