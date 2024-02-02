@@ -2115,9 +2115,20 @@
       <h4 id="WGSL-linking">Linking</h4>
 
       <p class="TODO">
-        Load/Store<br><br>
+        Load/Store (separate from, but enables fusing)<br><br>
 
-        Add load/store, separate from any fusing. It's more powerful than the iterators.
+        Type terms:
+          - WGSL-type - a WGSL type, including atomics and runtime-length arrays nested structs etc., however excluding
+                        things we want to avoid (e.g. pointers, things that can't go in a var(storage), etc.)
+          - Leafable - constructible WGSL-typeable (can let/return/parameter it), or atomic typeable (do a direct action).
+          - Leaf - the WGSL type (and location) of the individual read/write (that likely takes part of a larger
+                   read/write operation). It is "leafable". - consider name "unit"
+          - Implicit - no defined WGSL type
+          - Bit-packed - possibly certain logical operations will access same WGSL type parts, or can be spread across
+                         multiple WGSL parts.
+              TODO: better define this? We have a spectrum, is this concept helpful?
+
+        -- A different meaning - of WGSL typeable, since... it can still be subdivided "and isn't 'leaf'".
 
         Load/store should support efficient ways of accessing data based on the particular order/striping, taking
         local variables and local/workgroup/etc. identifiers into account. Good WGSL. Consider a
@@ -2141,6 +2152,7 @@
               ACTUALLY, we can wrap this code inside something... like unroll, but declare local variables and then have a
               "do work" section. We would NEED to guarantee we wouldn't have name conflicts (would each load have a unique
               ID?) --- you could TRANSFORM a "non-premabled" load into a "preambled load"?
+            - Instead of preambles for now, make sure we can subset nicely to load "what we need"
           automatic subsetting by what is used
             - if we automatically check what "parts" of an implicit struct are used BEFORE deciding how to subset the type,
               we'll need to "run the code generation" for that part first. With the blueprint bit, that is tricky?
@@ -2164,11 +2176,6 @@
           BufferLogger
             BufferLogger with zipped things from different buffers?
 
-        * "leaf" ConcreteType - represented by a WGSL type (nested struct, vec2, u32, etc.) - it's something we
-                                just grab one of at a time, and is loaded fully into memory at once.
-          - we can decompose "leaf" types into non-leaf types (e.g. extract a field of a struct, or not)
-          * need be to able to transform "bit-packed" / "structure-of-array" formats into a single WGSL leaf
-          - can create a leaf type for any struct-type combo (or even array)
         * "data layout" is the actual configuration of leaf types for any data source (load/store)
         * "binary-compatible" data layouts are data layouts that have the same binary layout (e.g. same stride, etc.)
           - can have different binary-compatible data layouts for the same buffer data in different shaders
@@ -2183,6 +2190,8 @@
         * "leafify" (reinterpret) data source wraps another one (e.g. turning array-implicitStruct{x: u32, y:32, some booleans}
           into array-struct{xy: vec2, some booleans}) - now it's a leaf and we can access and store it.
           - If we have a binary/compare op on the "before", we should ideally have a binary op on it now.
+          - Ability to leafify things to either (a) unpacked or (b) bit-packed memory-efficient forms.
+        * "subset" - either one or multiple fields of a type (generally within an array?)
         * "map" (can be unidirectional or bidirectional) gives a different type (either for an array or a single bit?)
         * "zip" combines 2+ data sources into one data source. Can be used to create tuples.
         * "bit-pack" can turn a data source into a array-u32??? --- this we'd want to be the "raw" right?
@@ -2199,6 +2208,16 @@
           - data source just describes the data layout
           - can grab load/store from data source, THEN apply maps/etc.
         NOTE: For this, if it is a bidirectional (homomorphic) map, it can still act like a data source, no?
+
+        TODO: see if performance is worse when we use a function to do the mapping
+
+        Every access/store is for a WGSL type. They are either atomic or constructible.
+        We maintain metadata to be able to "access" any parts of this type (if constructible).
+
+        When subsetting things with bit-packed fields, we might be able to "transfer" multiple fields at once, e.g.
+        a mask and bit shift could transfer multiple booleans at once.
+
+        -- Should we be able to specify "leaf" WGSL struct types, and "convert" to that specific type for an access?
 
         Examples:
           1:
