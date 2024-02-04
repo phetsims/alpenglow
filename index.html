@@ -2123,12 +2123,129 @@
           - Leafable - constructible WGSL-typeable (can let/return/parameter it), or atomic typeable (do a direct action).
           - Leaf - the WGSL type (and location) of the individual read/write (that likely takes part of a larger
                    read/write operation). It is "leafable". - consider name "unit"
-          - Implicit - no defined WGSL type
-          - Bit-packed - possibly certain logical operations will access same WGSL type parts, or can be spread across
-                         multiple WGSL parts.
-              TODO: better define this? We have a spectrum, is this concept helpful?
+            NOTE it can have different scopes, e.g.:
+              - read someArray[ 5 ]
+              - read someArray[ 5 ].someField
+              - read someArray[ 5 ].someField.otherSubField
+              We'll need to see which can be faster (if we can read more data with a single read, even if we don't use
+              some of it, vs. more reads but less data).
+          - Logical type - logical array/structs with leaf nodes of boolean/integer/float/atomic types (defined number of bits).
+                           describes the logical bits of a type
+          - TypeScript type - Type that exists in TS, and stores the logical info in whatever way desired (easiest for
+                              the client, can be read/written to/from things using a logical type).
+          - Serialization - typescript <=> logical (happens for routines and start/end, and likely for BufferLogger support)
+          - Packing - logical <=> buffers or BufferLogger output (can be spread apart)
 
-        -- A different meaning - of WGSL typeable, since... it can still be subdivided "and isn't 'leaf'".
+        Load/Store terms:
+          - Access - a read/write/atomic operation that has has a leafable WGSL-type, and could take or return a specific
+                     value of that type (potentially with arbitrary data transformation/mapping)
+          - Access DAG - TODO: if bidirectional, our data has DAG nature?
+          - Node - TODO: has inputs and outputs? --- that's bidirectinoal
+          TODO: think load-only case
+            e.g. auto-generated indices(!)
+            .. can also run arbitrary WGSL to generate data
+            ** "read-only" nodes (like indices) can't be written to. you can't write to these "leaves"?
+              -- and can't write full objects that contain these(!)
+          TODO: think store-only case
+            ... we can write auto-generated indices too, right?
+            .. can also run arbitrary WGSL to store data?
+
+        ********* WAIT, if we take this approach, do we LOSE the "conditional loading" setup? (only load part of what is needed?)
+        **TODO TODO TODO TODO TODO** think about an example for this.
+        Loads and Stores --- can accept arbitrary (no or many) arguments?
+          Our loads seem to work at different levels(!)
+            Say we have a logical array(struct{point:struct{x: f32, y: f32}, color:vec4u, id: u32, properties: array(u32,10)})
+              - load() - IF we weren't runtime-length, could load the entire array
+              - load( index )
+              - load( index, 'point' )
+              - BUT this doesn't work well for "mixes", e.g. "give me {x, id, properties[4]}, but named as {coord, id, fifthprop} in logical"
+              load( subset ) <--
+              SUBSETS:
+                trivial subset: "give me the entire thing"
+                "point" subset: "when asked for (index), I give load(index).point"
+                "x" subset: "when asked for (index), I give load(index).point.x"
+                "properties[4]" subset: "when asked for (index), I give load(index).properties[4]"
+                ....?
+              SUBSETS + ZIP/COMBINE:
+                zip of that style: "when asked for (index), I give {coord: xSubset(index), id: idSubset( index ), fifthprop: fifthPropSubset( index )}"
+                -- NOTE: a store of this might need to read the y (e.g. if we store point as vec2f in our raw).
+            Clearly we have subset types:
+              StructSubsetter( properties: string[] ) -- try to keep props in order? (or... doesn't matter?)
+              ArraySubsetter( index: number )
+              BitSubsetter( ...? extract bits )
+              Array.applySubsetForEachElement( subsetter )
+              Struct..... hmmm
+
+
+          No args:
+            - load-constant - no-args load
+            - single-atomic-increment - no-args atomic
+            - store-constant - no-args set
+          Some args:
+            - typical array load - load( index: WGSLExpressionU32 ) => WGSLExpressionT
+            - typical array store - store( index: WGSLExpressionU32, value: WGSLExpressionT ) => void
+          More args:
+            - typical static striped load - load( workgroupSize: number, grainSize: number, index: number ) => WGSLExpressionT
+            - typical dynamic striped load - load( workgroupSize: number, grainSize: number, index: WGSLExpressionU32 ) => WGSLExpressionT
+            - typical static striped store - store( workgroupSize: number, grainSize: number, index: number, value: WGSLExpressionT ) => WGSLStatement
+            - typical dynamic striped store - store( workgroupSize: number, grainSize: number, index: WGSLExpressionU32, value: WGSLExpressionT ) => WGSLStatement
+          SO:
+            - loads/stores are essentially ( ...args ) => WGSLString (WGSLExpressionT for load, WGSLStatement for store)
+            - we can also have arbitrary... other functions?
+            - data source = { load: ( ...args ) => WGSLString, store: ( ...args ) => WGSLString }
+            AND the strictly typed parts of this is great, DataSource&lt;LoadParams, StoreParams&gt;
+            So we'll be able to handle load/stores in any way we want, AND create other type of objects as we want
+          BUT WAIT:
+            - given load(index) we can make a staticStripedLoad( workgroupSize, grainSize, index: number ) THAT CALLS load(index)
+            - given store(index, value) we can make a staticStripedStore( workgroupSize, grainSize, index: number, value ) THAT CALLS store(index, value)
+            etc.
+
+        Examples:
+          Sort:
+            Give a "load" and a "store", that take the same logical type. (HEY, that is a data source on its own!)
+            Give either "compare" or "extract bits + bit count" for the logical type.
+            *if* the (minimized) load is zipped with the index, the store extracts the index to move the full one.
+            We'll want to create buffers and workgroup vars to store the logical type
+              We'll likely want to use a more packed format.
+            Load (as written):
+             takes (logical index), zips both the underlying data source given (logical index), and turns index into an
+             index, providing (originalLoad(logical index), logical index)
+            Store (as written):
+              takes (logical index, logical type), extracts/subsets so we're storing (logical index, index-of-original),
+              issues lookup so we are storing (logical index, load( index-of-original))
+              *** our "store" op needs a "load" op
+            Store (for if we didn't do the zip, and have the full element):
+              takes (logical index, logical type), and we just write it into the location (normal store)
+          Pairs (array of structures);
+            buffer A, raw tightly-packed array(struct {x: u32, y: u32})
+            data source for A: logical array(struct {x: u32, y: u32})
+            data source B extracted: logical array(x: u32)
+            data source C extracted: logical array(y: u32)
+          Pairs (structure of arrays);
+            buffer A, raw tightly-packed array(x: u32)
+            buffer B, raw tightly-packed array(y: u32)
+            data source for A: logical array(x: u32)
+            data source for B: logical array(y: u32)
+            data source C zipped: logical array(struct {x: u32, y: u32}) - load/store-able
+
+
+        Mapping:
+          - TODO: Should implement the TypeScript map function also?
+          - TODO: Bidirectional vs unidirectional maps
+
+        -- how to mappings fit in? it goes from one logical type to another, right?
+        -- DO our mappings/transforms go from one "WGSL-type" to another, or can we make jumps in-between?
+        ** can mappings only apply to certain parts(!) of a logical type? (e.g. map a vector, but leave the type intact)
+        *-*- mappings should indicate:
+          - what logical parts are read in
+          - what logical parts are written out (changed)
+          - which logical parts are unaffected (say we go from vec3 => vec2, maybe x is unaffected)
+
+        -- Can I write things with higher-precision number types somewhat implicitly??? (e.g. knows how to multiply
+           two u64s into a u128) - suggests an eventual language where this is possible and gets compiled down.
+
+
+        -- Should we be able to specify "leaf" WGSL struct types, and "convert" to that specific type for an access?
 
         Load/store should support efficient ways of accessing data based on the particular order/striping, taking
         local variables and local/workgroup/etc. identifiers into account. Good WGSL. Consider a
@@ -2138,10 +2255,7 @@
         type. However they can also access workgroup variables, local variables, can be generated (i.e. indices or a
         mapping of that), and should handle permutation.
 
-        Perhaps Load/Store classes with defaults? Does that give us bad inheritance?
-
         DEFER:
-
           pointers
             - just deal with reference types, pointers will be tricky to use safely
             - do they have performance improvements?
@@ -2217,7 +2331,7 @@
         When subsetting things with bit-packed fields, we might be able to "transfer" multiple fields at once, e.g.
         a mask and bit shift could transfer multiple booleans at once.
 
-        -- Should we be able to specify "leaf" WGSL struct types, and "convert" to that specific type for an access?
+
 
         Examples:
           1:
