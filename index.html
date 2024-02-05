@@ -2121,6 +2121,7 @@
           - WGSL-type - a WGSL type, including atomics and runtime-length arrays nested structs etc., however excluding
                         things we want to avoid (e.g. pointers, things that can't go in a var(storage), etc.)
           - Leafable - constructible WGSL-typeable (can let/return/parameter it), or atomic typeable (do a direct action).
+                       NO combined atomics/other, and NO runtime-length arrays.
           - Leaf - the WGSL type (and location) of the individual read/write (that likely takes part of a larger
                    read/write operation). It is "leafable". - consider name "unit"
             NOTE it can have different scopes, e.g.:
@@ -2170,35 +2171,53 @@
                 zip of that style: "when asked for (index), I give {coord: xSubset(index), id: idSubset( index ), fifthprop: fifthPropSubset( index )}"
                 -- NOTE: a store of this might need to read the y (e.g. if we store point as vec2f in our raw).
             Clearly we have subset types:
-              StructSubsetter( properties: string[] ) -- try to keep props in order? (or... doesn't matter?)
-              ArraySubsetter( index: number )
+              StructSubsetter( properties: string[], newPropNames: string[] ) -- try to keep props in order? (or... doesn't matter?)
+              StaticArraySubsetter( index: number )
+              DynamicArraySubsetter( index: WGSLExpressionU32 ) <--- *** we would use this one a lot
+              ArraySliceSubsetter( start: number, end: number ) ???
               BitSubsetter( ...? extract bits )
               Array.applySubsetForEachElement( subsetter )
-              Struct..... hmmm
+            And zip types:
+              Struct( map: Record(string, ... ) )
+              FixedLengthArray( elements: T[] ) <-- length implicit
 
+              TODO TODO .... wait what? RuntimeLengthArray( ... )
+            Permuters:
+              RakedStripedPermute( workgroupSize: number, grainSize: number ) <--- uh, are we leaving an argument for the client?
+            Thus we would have:
+              ((let x =)) load()
+              store( value: WGSLExpressionT )
+              ((let old =)) atomicX( ... )
+              ((let old =)) atomicExchange( ... )
+              ((let result =)) atomicCompareExchangeWeak( ..., ... )
+                NOTE: "weak" since it might fail and no-op?
 
-          No args:
-            - load-constant - no-args load
-            - single-atomic-increment - no-args atomic
-            - store-constant - no-args set
-          Some args:
-            - typical array load - load( index: WGSLExpressionU32 ) => WGSLExpressionT
-            - typical array store - store( index: WGSLExpressionU32, value: WGSLExpressionT ) => void
-          More args:
-            - typical static striped load - load( workgroupSize: number, grainSize: number, index: number ) => WGSLExpressionT
-            - typical dynamic striped load - load( workgroupSize: number, grainSize: number, index: WGSLExpressionU32 ) => WGSLExpressionT
-            - typical static striped store - store( workgroupSize: number, grainSize: number, index: number, value: WGSLExpressionT ) => WGSLStatement
-            - typical dynamic striped store - store( workgroupSize: number, grainSize: number, index: WGSLExpressionU32, value: WGSLExpressionT ) => WGSLStatement
-          SO:
-            - loads/stores are essentially ( ...args ) => WGSLString (WGSLExpressionT for load, WGSLStatement for store)
-            - we can also have arbitrary... other functions?
-            - data source = { load: ( ...args ) => WGSLString, store: ( ...args ) => WGSLString }
-            AND the strictly typed parts of this is great, DataSource&lt;LoadParams, StoreParams&gt;
-            So we'll be able to handle load/stores in any way we want, AND create other type of objects as we want
-          BUT WAIT:
-            - given load(index) we can make a staticStripedLoad( workgroupSize, grainSize, index: number ) THAT CALLS load(index)
-            - given store(index, value) we can make a staticStripedStore( workgroupSize, grainSize, index: number, value ) THAT CALLS store(index, value)
-            etc.
+          NOTE: Almost all of these access patterns can be changed with subset/zip/permute
+            No args:
+              - load-constant - no-args load
+                load()
+              - single-atomic-increment - no-args atomic
+                atomicIncrement
+              - store-constant - no-args set
+                store()
+            Some args:
+              - typical array load - load( index: WGSLExpressionU32 ) => WGSLExpressionT
+              - typical array store - store( index: WGSLExpressionU32, value: WGSLExpressionT ) => void
+            More args:
+              - typical static striped load - load( workgroupSize: number, grainSize: number, index: number ) => WGSLExpressionT
+              - typical dynamic striped load - load( workgroupSize: number, grainSize: number, index: WGSLExpressionU32 ) => WGSLExpressionT
+              - typical static striped store - store( workgroupSize: number, grainSize: number, index: number, value: WGSLExpressionT ) => WGSLStatement
+              - typical dynamic striped store - store( workgroupSize: number, grainSize: number, index: WGSLExpressionU32, value: WGSLExpressionT ) => WGSLStatement
+            SO:
+              - loads/stores are essentially ( ...args ) => WGSLString (WGSLExpressionT for load, WGSLStatement for store)
+              - we can also have arbitrary... other functions?
+              - data source = { load: ( ...args ) => WGSLString, store: ( ...args ) => WGSLString }
+              AND the strictly typed parts of this is great, DataSource&lt;LoadParams, StoreParams&gt;
+              So we'll be able to handle load/stores in any way we want, AND create other type of objects as we want
+            BUT WAIT:
+              - given load(index) we can make a staticStripedLoad( workgroupSize, grainSize, index: number ) THAT CALLS load(index)
+              - given store(index, value) we can make a staticStripedStore( workgroupSize, grainSize, index: number, value ) THAT CALLS store(index, value)
+              etc.
 
         Examples:
           Sort:
