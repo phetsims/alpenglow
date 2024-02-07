@@ -2182,8 +2182,59 @@
               FixedLengthArray( elements: T[] ) <-- length implicit
 
               TODO TODO .... wait what? RuntimeLengthArray( ... )
+                TODO: also how to describe the packing
             Permuters:
               RakedStripedPermute( workgroupSize: number, grainSize: number ) <--- uh, are we leaving an argument for the client?
+            Bit Packing:
+              ... maps logical types to logical types. presumably each "leaf" type has bit definitions, and we map leaf to leaf?
+              TODO: how do arrays of runtime (or large) size work? Presumably we only want to "align" those in some cases, not others
+
+              NOTE: To do bit-packing, we'll presumably need to **shift** things IN a u32.
+                bitcast supports concrete numeric (scalar | vector), e.g. i32/u32/f32/f16, for vec2/vec3/vec4 of those.
+                  so if it's faster, we could potentially bitcast vec4us, unless we have to split it up
+                e.g. ( bitcast(u32)( a ) & 0xffff ) << 16 | ( bitcast(u32)( b ) & 0xffff0000 ), but some cases we can avoid
+
+              BUT: we could potentially load more data at once, and bitcast PARTS of it
+                NO! (I mean, potentially we can avoid this, but sometimes it might be helpful if we are array-of-structures)
+                We really don't want the register pressure if possible.
+              Can experiment with loading approaches.
+
+              ... for now, can we just think about load/store to array(u32) as the main one type of conversion?
+              combine immediately into vecN or matNxN (based on... zipping) for performance when needed.
+
+              NOTE: We'll need to sometimes keep the data in a packed format, while just having the getters out. Maybe this is a default?
+              Instead of extracting booleans to booleans, perhaps we extract them out of the packed format? (what can we potentially re-align?)
+
+              bit-packing runtime arrays has different tradeoffs than bit-packing small fixed-length arrays or structs (somewhat)
+                e.g. tight-packing 3-bit values into a u32, we will have 3 configurations of loads depending on the index
+                  (wait, but really either "split across 1 or 2 u32s"...?) but with variable-length integers it gets tricky
+                WAIT so we actually only need to handle... 2 different loading cases, since otherwise it is just
+                  - "offset into N loads" or
+                  - "offset into N+1 loads"
+                NONO, if our source is something like a vec4u, then we can't just offset easily... we have to have different styles.
+                BUT: if we just handle these with array(u32) for shared cases, we don't run into that.
+                  -- we can zip into other things, or extract from u32s (like packed booleans transferred)
+
+              WGSL-type mapping of logical types:
+                WGSLStructOf( ... (ordered key map) )
+                WGSLAtomicU32( atomic ) / WGSLAtomicI32( atomic )
+                WGSLFixedArray( ..., length: number )
+                WGSLRuntimeArray( ... )
+                WGSLVec4u( ... ) / WGSLVec3f( ... ) / ...
+                WGSLBitPacked( ..., { alignOptions } ) => arbitrary bit-packed structure?
+              ... can we have reusable packings that we can use for things? (Yes, factor them out?)
+
+              For a load/store, we effectively we have WGSL-type-map of our "input" and "output"
+
+              ***** We'll actually be able to "aggregate" stores, and create WGSL-type mapping and logical types that include LOCAL VARIABLES.
+              *****
+              *** And likewise, we could have a load output things to multiple local variables...
+                this would be like a top-level zip?
+
+                This sounds potentially helpful NOW. And being able to "inline" a lot of the loads sounds helpful
+
+
+              With booleans, presumably we can pack 32 into a u32
             Thus we would have:
               ((let x =)) load()
               store( value: WGSLExpressionT )
@@ -2191,6 +2242,27 @@
               ((let old =)) atomicExchange( ... )
               ((let result =)) atomicCompareExchangeWeak( ..., ... )
                 NOTE: "weak" since it might fail and no-op?
+
+            So... once you have your logical mappings and whatnot in place, any (function/operation/mapping/load/store)
+            that is provided a subset will need to specify information about how to WGSL-type the subset (bit-pack or explode),
+            so we can generate the necessary WGSL code to handle it.
+
+          *** We need to get something minimal working, so we can try it out, and get it to work with other algorithms we haven't done yet.
+          *** potentially subgroup operations(!).
+
+        \\\\\\\\\\\\\\\\\
+          *** really, for our current goals, get it working so we can abstract out data sources and load/store operations,
+          *** so our algorithms can be written in a generic way (can apply to anything, with mapping, collecting data sources, etc.)
+        \\\\\\\\\\\\\\\\\
+
+          ... a new language will make it so that we don't have to compute the "subsets" manually.
+          ... and the load/store complications will be... almost easier?
+          ... but doing code generation first will probably help figure out what the language would need.
+
+          -----
+            language, if we go that way:
+
+          -----
 
           NOTE: Almost all of these access patterns can be changed with subset/zip/permute
             No args:
