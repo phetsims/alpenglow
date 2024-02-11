@@ -2001,6 +2001,10 @@
         subgroups proposal: <a href="https://github.com/gpuweb/gpuweb/pull/4368">https://github.com/gpuweb/gpuweb/pull/4368</a>.
       </p>
 
+      <p>
+        Safari progress: <a href="https://github.com/WebKit/WebKit/commits/main/Source/WebGPU">https://github.com/WebKit/WebKit/commits/main/Source/WebGPU</a>.
+      </p>
+
       <p class="TODO">
         Complete TypeScript switch (e.g. testing, raster-clipper, etc.)
       </p>
@@ -2046,6 +2050,10 @@
 
       <p class="TODO">
         Bake in support for context loss handling.
+      </p>
+
+      <p class="TODO">
+        Look more into <a href="https://shadeup.dev/">Shadeup</a>.
       </p>
 
       <p class="TODO">
@@ -2125,6 +2133,13 @@
       </p>
 
       <h4 id="WGSL-linking">Linking</h4>
+
+      <p class="TODO">
+        Fully review WGSL linking from Mighdoll:
+        <a href="https://github.com/mighdoll/wgsl-linker/blob/parser/README.md">wgsl-linker</a>
+        and the <a href="https://github.com/mighdoll/wgsl-linker/blob/parser/packages/mini-parse/Parsing-README.md">parsing notes</a>.
+        Note Nearley, Lezer might be good options for parsing fast.
+      </p>
 
       <p class="TODO">
         Load/Store (separate from, but enables fusing)<br><br>
@@ -2751,6 +2766,8 @@
         Use staging buffer ring like in
         <a href="https://toji.dev/webgpu-best-practices/buffer-uploads.html#:~:text=Buffer%20data%20flow,-Before%20we%20get%20into%20the">WebGPU Buffer Uploads</a>.
         Actually, find the other (WGPU) example of a buffer "belt" and implement that!
+        See also <a href="https://github.com/gpuweb/gpuweb/blob/main/design/BufferOperations.md#updating-data-to-an-existing-buffer-like-webgls-buffersubdata">https://github.com/gpuweb/gpuweb/blob/main/design/BufferOperations.md#updating-data-to-an-existing-buffer-like-webgls-buffersubdata</a>
+        and <a href="https://github.com/gpuweb/gpuweb/discussions/1428">https://github.com/gpuweb/gpuweb/discussions/1428</a> ("Buffer ring “belt” in wgpu. It sub-allocates chunks of buffers to ship?").
       </p>
 
       <p class="TODO">
