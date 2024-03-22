@@ -13,7 +13,7 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { RasterColorConverter, RenderColor, alpenglow } from '../imports.js';
+import { alpenglow, RasterColorConverter, RenderColor } from '../imports.js';
 
 const scratchVector = Vector4.ZERO.copy();
 

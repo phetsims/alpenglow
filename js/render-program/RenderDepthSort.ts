@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderableFace, RenderColor, RenderEvaluationContext, RenderPlanar, RenderProgram, RenderStack, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { alpenglow, ClippableFace, RenderableFace, RenderColor, RenderEvaluationContext, RenderPlanar, RenderProgram, RenderStack, SerializedRenderProgram } from '../imports.js';
 import Range from '../../../dot/js/Range.js';
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Vector4 from '../../../dot/js/Vector4.js';

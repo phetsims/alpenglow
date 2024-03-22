@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderEvaluationContext, RenderInstruction, RenderInstructionLocation, alpenglow, RenderProgram, RenderEvaluator, RenderExecutionStack } from '../imports.js';
+import { alpenglow, RenderEvaluationContext, RenderEvaluator, RenderExecutionStack, RenderInstruction, RenderInstructionLocation, RenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 // Should be kept empty

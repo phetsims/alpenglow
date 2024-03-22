@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigIntVector2, BigRational, IntegerEdge, IntersectionPoint, RasterTileLog, RationalIntersection, alpenglow } from '../imports.js';
+import { alpenglow, BigIntVector2, BigRational, IntegerEdge, IntersectionPoint, RasterTileLog, RationalIntersection } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 
 export default class LineIntersector {

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderDepthSort, RenderPath, RenderPathBoolean, RenderPlanar, RenderProgram, RenderStack, RenderTrail, alpenglow } from '../imports.js';
+import { alpenglow, RenderDepthSort, RenderPath, RenderPathBoolean, RenderPlanar, RenderProgram, RenderStack, RenderTrail } from '../imports.js';
 
 const emptyIndexArray: number[] = [];
 

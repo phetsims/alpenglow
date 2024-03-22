@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { IntegerEdge, alpenglow } from '../imports.js';
+import { alpenglow, IntegerEdge } from '../imports.js';
 
 type P2 = 'x' | '-x' | 'y' | '-y';
 type P3 = 'x' | '-x' | 'y' | '-y' | 'z' | '-z';

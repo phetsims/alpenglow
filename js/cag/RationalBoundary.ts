@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRationalVector2, LinearEdge, RationalHalfEdge, alpenglow } from '../imports.js';
+import { alpenglow, BigRationalVector2, LinearEdge, RationalHalfEdge } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';

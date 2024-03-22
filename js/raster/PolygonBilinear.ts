@@ -5,7 +5,7 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-import { LinearEdge, alpenglow } from '../imports.js';
+import { alpenglow, LinearEdge } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 
 export default class PolygonBilinear {

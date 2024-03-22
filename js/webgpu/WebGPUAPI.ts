@@ -424,4 +424,3 @@ alpenglow.register( 'WebGPUAPI', WebGPUAPI );
 
 export const webgpu = new WebGPUAPI();
 alpenglow.register( 'webgpu', webgpu );
-

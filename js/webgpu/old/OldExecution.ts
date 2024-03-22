@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ByteEncoder, OldComputeShader, OldComputeShaderDispatchOptions, ConsoleLogger, DeviceContext, TimestampLogger, TimestampLoggerResult, webgpu } from '../../imports.js';
+import { alpenglow, BufferLogger, ByteEncoder, ConsoleLogger, DeviceContext, OldComputeShader, OldComputeShaderDispatchOptions, TimestampLogger, TimestampLoggerResult, webgpu } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 import Utils from '../../../../dot/js/Utils.js';
 

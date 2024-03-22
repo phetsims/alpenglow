@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, OldBindingType, BufferLogger, ByteEncoder, OldComputeShader, DeviceContext, LinearEdge, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderInstruction, RenderProgram, wgsl_test_render_program } from '../imports.js';
+import { alpenglow, BufferLogger, ByteEncoder, DeviceContext, LinearEdge, OldBindingType, OldComputeShader, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderInstruction, RenderProgram, wgsl_test_render_program } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';

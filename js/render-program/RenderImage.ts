@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonMitchellNetravali, RenderEvaluationContext, RenderExtend, RenderImageable, RenderProgram, RenderResampleType, alpenglow, SerializedRenderImageable, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation, ByteEncoder } from '../imports.js';
+import { alpenglow, ByteEncoder, ClippableFace, PolygonMitchellNetravali, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderExtend, RenderImageable, RenderInstruction, RenderInstructionLocation, RenderProgram, RenderResampleType, SerializedRenderImageable } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';

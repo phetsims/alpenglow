@@ -9,7 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderPathBoolean, RenderProgram, alpenglow, SerializedRenderProgram, RenderInstruction, RenderExecutionStack, RenderExecutor, RenderInstructionLocation, ByteEncoder } from '../imports.js';
+import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderPathBoolean, RenderProgram, SerializedRenderProgram } from '../imports.js';
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 

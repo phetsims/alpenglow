@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, BigRationalVector2, IntegerEdge, RationalHalfEdge, alpenglow } from '../imports.js';
+import { alpenglow, BigRational, BigRationalVector2, IntegerEdge, RationalHalfEdge } from '../imports.js';
 
 export default class LineSplitter {
   public static splitIntegerEdges( integerEdges: IntegerEdge[] ): RationalHalfEdge[] {

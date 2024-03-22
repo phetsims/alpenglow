@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { IntegerEdge, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, alpenglow } from '../imports.js';
+import { alpenglow, IntegerEdge, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';

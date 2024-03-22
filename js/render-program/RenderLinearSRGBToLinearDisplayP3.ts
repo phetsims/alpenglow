@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpaceConversion, RenderLinearDisplayP3ToLinearSRGB, RenderProgram, alpenglow, RenderInstruction, RenderExecutionStack, RenderEvaluationContext, RenderExecutor, ByteEncoder, RenderInstructionLocation } from '../imports.js';
+import { alpenglow, ByteEncoder, RenderColor, RenderColorSpaceConversion, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderLinearDisplayP3ToLinearSRGB, RenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderLinearSRGBToLinearDisplayP3 extends RenderColorSpaceConversion {

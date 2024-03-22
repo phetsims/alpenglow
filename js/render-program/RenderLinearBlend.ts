@@ -14,7 +14,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, alpenglow, SerializedRenderProgram, RenderRadialBlendLogic, ByteEncoder } from '../imports.js';
+import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, RenderRadialBlendLogic, SerializedRenderProgram } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';

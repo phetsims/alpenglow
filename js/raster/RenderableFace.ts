@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, RenderProgram, alpenglow } from '../imports.js';
+import { alpenglow, ClippableFace, RenderProgram } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 
 export default class RenderableFace {

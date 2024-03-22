@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { isWindingIncluded, LinearEdge, RenderColor, RenderEvaluationContext, RenderPath, RenderProgram, alpenglow, SerializedRenderProgram, SerializedRenderPath } from '../imports.js';
+import { alpenglow, isWindingIncluded, LinearEdge, RenderColor, RenderEvaluationContext, RenderPath, RenderProgram, SerializedRenderPath, SerializedRenderProgram } from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 

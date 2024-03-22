@@ -366,4 +366,3 @@ renderProgramTest(
     new Vector4( 0.01, 0.02, 0.03, 0.04 )
   )
 );
-

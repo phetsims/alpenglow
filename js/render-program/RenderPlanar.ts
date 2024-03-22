@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, EdgedFace, RenderProgram, alpenglow } from '../imports.js';
+import { alpenglow, ClippableFace, EdgedFace, RenderProgram } from '../imports.js';
 import Range from '../../../dot/js/Range.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';

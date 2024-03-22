@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { IntegerEdge, LineIntersector, LineSplitter, PolygonalFace, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderPath, alpenglow, HilbertMapping } from '../imports.js';
+import { alpenglow, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, PolygonalFace, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderPath } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';

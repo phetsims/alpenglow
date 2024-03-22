@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ClippableFace, PolygonalFace, alpenglow } from '../imports.js';
+import { alpenglow, ClippableFace, PolygonalFace } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 

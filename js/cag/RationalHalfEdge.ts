@@ -8,7 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BigRational, BigRationalVector2, RationalBoundary, RationalFace, alpenglow, WindingMap, ClippableFaceAccumulator } from '../imports.js';
+import { alpenglow, BigRational, BigRationalVector2, ClippableFaceAccumulator, RationalBoundary, RationalFace, WindingMap } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 

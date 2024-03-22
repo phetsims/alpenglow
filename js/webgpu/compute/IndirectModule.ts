@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ExecutionContext, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, Module } from '../../imports.js';
+import { alpenglow, ExecutionContext, Module, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions } from '../../imports.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 
 export type IndirectModuleOptions<T> = {

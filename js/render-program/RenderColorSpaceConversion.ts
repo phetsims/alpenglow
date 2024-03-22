@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderColorSpace, RenderEvaluationContext, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnpremultiply, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { alpenglow, RenderColor, RenderColorSpace, RenderEvaluationContext, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnpremultiply, SerializedRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 

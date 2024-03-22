@@ -534,4 +534,3 @@ const fs = require( 'fs' );
     } )
   } )};\n` );
 } )();
-

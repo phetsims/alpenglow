@@ -190,4 +190,3 @@ const testReduceModule = <T>( options: ReduceModuleTestOptions<T> ) => {
     grainSize: 2
   } );
 }
-

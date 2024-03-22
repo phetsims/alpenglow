@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { OutputRaster, RasterColorConverter, RasterPremultipliedConverter, Rasterize, alpenglow } from '../imports.js';
+import { alpenglow, OutputRaster, RasterColorConverter, Rasterize, RasterPremultipliedConverter } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 

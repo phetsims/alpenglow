@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderColor, RenderEvaluationContext, RenderInstruction, RenderInstructionMultiplyScalar, RenderPathBoolean, RenderProgram, alpenglow, SerializedRenderProgram } from '../imports.js';
+import { alpenglow, RenderColor, RenderEvaluationContext, RenderInstruction, RenderInstructionMultiplyScalar, RenderPathBoolean, RenderProgram, SerializedRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 
 export default class RenderAlpha extends RenderProgram {

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderProgram, alpenglow } from '../imports.js';
+import { alpenglow, RenderProgram } from '../imports.js';
 
 export default class RenderTrail {
   public constructor(

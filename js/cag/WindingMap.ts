@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { RenderPath, alpenglow } from '../imports.js';
+import { alpenglow, RenderPath } from '../imports.js';
 
 export default class WindingMap {
   public constructor( public readonly map: Map<RenderPath, number> = new Map() ) {}

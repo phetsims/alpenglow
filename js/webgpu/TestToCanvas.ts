@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, OldBindingType, BlitShader, OldComputeShader, DeviceContext, PolygonalFace, wgsl_test_to_canvas } from '../imports.js';
+import { alpenglow, BlitShader, DeviceContext, OldBindingType, OldComputeShader, PolygonalFace, wgsl_test_to_canvas } from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 
 export default class TestToCanvas {
