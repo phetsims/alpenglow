@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * Like Snippet, but designed for code where bindings are declared at a certain point, so it will contain both a

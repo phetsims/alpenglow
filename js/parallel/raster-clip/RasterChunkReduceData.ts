@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * (Partial) data for a single clipped chunk, which is reduced and then when complete (isFirstEdge && isLastEdge) is

@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * RenderColor displays a single solid color everywhere, and is a basic building-block for many other RenderPrograms.

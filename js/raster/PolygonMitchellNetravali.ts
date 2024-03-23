@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * Mitchell-Netravali filter (B=1/3, C=1/3 ) contribution given a polygon

@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * A ClippableFace based on a set of line segment edges, where (a) it is contained within a bounding box, and (b)

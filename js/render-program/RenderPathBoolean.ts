@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * RenderPathBoolean will display one RenderProgram "inside" the path, and another RenderProgram "outside" the path.

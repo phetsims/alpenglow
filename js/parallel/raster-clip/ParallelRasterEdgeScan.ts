@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * Multiple stream compaction: distributes the relevant data from the RasterEdgeClips into the reducible (RasterEdge)

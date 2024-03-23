@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * Represents the clipped state of a RasterEdge. For the binary version, there will be two of these edge clips per

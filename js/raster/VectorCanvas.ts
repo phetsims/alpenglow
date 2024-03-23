@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
  * Similar to an DOM Canvas, but stores a vector representation of the relevant drawing commands.
