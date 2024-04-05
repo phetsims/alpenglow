@@ -372,7 +372,7 @@ export default class WebGPURecorder {
       const map: Record<string, string | undefined > = {};
       Object.keys( value ).forEach( key => {
         if ( objectOverrides && objectOverrides[ key ] ) {
-          map[ key ] = objectOverrides[ key ]!( value[ key ] );
+          map[ key ] = objectOverrides[ key ]( value[ key ] );
         }
         else {
           map[ key ] = WebGPURecorder.rawValue( level + 1, value[ key ], nameMap );

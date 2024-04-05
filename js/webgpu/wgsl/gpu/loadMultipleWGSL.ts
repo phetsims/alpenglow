@@ -163,12 +163,12 @@ const loadMultipleWGSL = <T>(
   };
 
   const indexedLoadStatements = ( varName: WGSLVariableName, i: number, declaration?: WGSLString ) => loadExpression ? wgsl`
-    ${declaration ? wgsl`${declaration} ` : wgsl``}${varName} = ${loadExpression( loadIndexExpression!( i ) )};
+    ${declaration ? wgsl`${declaration} ` : wgsl``}${varName} = ${loadExpression( loadIndexExpression( i ) )};
   ` : wgsl`
     ${declaration ? wgsl`
       var ${varName}: ${type.valueType};
     ` : wgsl``}
-    ${loadStatements!( varName, loadIndexExpression!( i ) )}
+    ${loadStatements!( varName, loadIndexExpression( i ) )}
   `;
 
   // TODO: more unique names to prevent namespace collision!
@@ -189,13 +189,13 @@ const loadMultipleWGSL = <T>(
             ` )}
 
             // TODO: can we further simplify?
-            ${storeStatements( wgsl`${loadIndexExpression!( i )} - ${workgroupIndex} * ${u32S( workgroupSize * grainSize )}`, wgsl`lm_val` )}
+            ${storeStatements( wgsl`${loadIndexExpression( i )} - ${workgroupIndex} * ${u32S( workgroupSize * grainSize )}`, wgsl`lm_val` )}
           ` : wgsl`
             ${ifRangeCheck( i, wgsl`
               var lm_val: ${type.valueType};
               ${indexedLoadStatements( wgsl`lm_val`, i )}
 
-              ${storeStatements( wgsl`${loadIndexExpression!( i )} - ${workgroupIndex} * ${u32S( workgroupSize * grainSize )}`, wgsl`lm_val` )}
+              ${storeStatements( wgsl`${loadIndexExpression( i )} - ${workgroupIndex} * ${u32S( workgroupSize * grainSize )}`, wgsl`lm_val` )}
             ` )}
           `}
         }

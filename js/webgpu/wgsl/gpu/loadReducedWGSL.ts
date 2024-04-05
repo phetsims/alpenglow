@@ -170,20 +170,20 @@ const loadReducedWGSL = <T>(
 
   // TODO: factor out length expression conditionally, since sometimes it might duplicate buffer loads(!)
   const loadWithRangeCheckExpression = ( i: number ) => rangeCheckIndexExpression
-    ? wgsl`select( ${binaryOp.identityWGSL}, ${loadExpression!( loadIndexExpression!( i ) )}, ${rangeCheckIndexExpression( i )} < ${lengthExpression!} )`
-    : loadExpression!( loadIndexExpression!( i ) );
+    ? wgsl`select( ${binaryOp.identityWGSL}, ${loadExpression!( loadIndexExpression( i ) )}, ${rangeCheckIndexExpression( i )} < ${lengthExpression!} )`
+    : loadExpression!( loadIndexExpression( i ) );
 
   const ifRangeCheck = ( i: number, trueStatements: WGSLStatements, falseStatements: WGSLStatements | null = null ) => {
     return conditionalIfWGSL( rangeCheckIndexExpression ? wgsl`${rangeCheckIndexExpression( i )} < ${lengthExpression!}` : null, trueStatements, falseStatements );
   };
 
   const indexedLoadStatements = ( varName: WGSLVariableName, i: number, declaration?: WGSLStatements ) => loadExpression ? wgsl`
-    ${declaration ? wgsl`${declaration} ` : wgsl``}${varName} = ${loadExpression( loadIndexExpression!( i ) )};
+    ${declaration ? wgsl`${declaration} ` : wgsl``}${varName} = ${loadExpression( loadIndexExpression( i ) )};
   ` : wgsl`
     ${declaration ? wgsl`
       var ${varName}: ${binaryOp.type.valueType};
     ` : wgsl``}
-    ${loadStatements!( varName, loadIndexExpression!( i ) )}
+    ${loadStatements!( varName, loadIndexExpression( i ) )}
   `;
 
   const loadWithRangeCheckStatements = ( varName: WGSLVariableName, i: number ) => ifRangeCheck( i, wgsl`
