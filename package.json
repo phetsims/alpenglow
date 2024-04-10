@@ -32,6 +32,9 @@
     "rules": {
       "no-bitwise": "off",
       "todo-should-have-issue": "off"
-    }
+    },
+    "ignorePatterns": [
+      "doc/lib/"
+    ]
   }
 }
