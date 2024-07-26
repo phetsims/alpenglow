@@ -374,7 +374,7 @@ export { default as ParallelRasterChunkIndexPatch } from './parallel/raster-clip
 export { default as ParallelRasterEdgeIndexPatch } from './parallel/raster-clip/ParallelRasterEdgeIndexPatch.js';
 export { default as ParallelRaster } from './parallel/raster-clip/ParallelRaster.js';
 
-export { default as WGSLString, WGSLStringLiteral, WGSLStringFunction, WGSLStringAccumulator, WGSLModule, WGSLMainModule, WGSLSlot, wgslString, wgslFunction, wgslBlueprint, wgsl, decimalS, u32S, u32HexS, i32S, i32HexS, f32S, wgslJoin, wgslMapJoin, wgslOneLine, wgslWith } from './webgpu/wgsl/WGSLString.js';
+export { default as WGSLString, WGSLStringLiteral, WGSLStringFunction, WGSLStringAccumulator, WGSLModule, WGSLMainModule, WGSLReferenceModule, WGSLStringModule, WGSLSlot, wgslString, wgslFunction, wgslBlueprint, wgsl, decimalS, u32S, u32HexS, i32S, i32HexS, f32S, wgslJoin, wgslMapJoin, wgslOneLine, wgslWith } from './webgpu/wgsl/WGSLString.js';
 export type { WGSLExpression, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionF32, WGSLExpressionBool, WGSLExpressionT, WGSLStatements, WGSLModuleDeclarations, WGSLVariableName, WGSLType, WGSLBinaryExpression } from './webgpu/wgsl/WGSLString.js';
 
 export { default as WebGPURecorder, WebGPUCommand } from './webgpu/WebGPURecorder.js';
@@ -517,6 +517,46 @@ export { default as mainMergeWGSL, MAIN_MERGE_DEFAULTS } from './webgpu/wgsl/gpu
 export type { mainMergeWGSLOptions } from './webgpu/wgsl/gpu/mainMergeWGSL.js';
 export { default as mainHistogramWGSL, MAIN_HISTOGRAM_DEFAULTS } from './webgpu/wgsl/gpu/mainHistogramWGSL.js';
 export type { mainHistogramWGSLOptions } from './webgpu/wgsl/gpu/mainHistogramWGSL.js';
+
+// math
+export { default as u64WGSL } from './webgpu/wgsl/math/u64WGSL.js';
+export { default as i64WGSL } from './webgpu/wgsl/math/i64WGSL.js';
+export { default as q128WGSL } from './webgpu/wgsl/math/q128WGSL.js';
+export { default as i32_to_i64WGSL } from './webgpu/wgsl/math/i32_to_i64WGSL.js';
+export { default as ZERO_u64WGSL } from './webgpu/wgsl/math/ZERO_u64WGSL.js';
+export { default as ONE_u64WGSL } from './webgpu/wgsl/math/ONE_u64WGSL.js';
+export { default as ZERO_q128WGSL } from './webgpu/wgsl/math/ZERO_q128WGSL.js';
+export { default as ONE_q128WGSL } from './webgpu/wgsl/math/ONE_q128WGSL.js';
+export { default as u32_to_u64WGSL } from './webgpu/wgsl/math/u32_to_u64WGSL.js';
+export { default as add_u32_u32_to_u64WGSL } from './webgpu/wgsl/math/add_u32_u32_to_u64WGSL.js';
+export { default as mul_u32_u32_to_u64WGSL } from './webgpu/wgsl/math/mul_u32_u32_to_u64WGSL.js';
+export { default as add_u64_u64WGSL } from './webgpu/wgsl/math/add_u64_u64WGSL.js';
+export { default as add_i64_i64WGSL } from './webgpu/wgsl/math/add_i64_i64WGSL.js';
+export { default as negate_i64WGSL } from './webgpu/wgsl/math/negate_i64WGSL.js';
+export { default as is_zero_u64WGSL } from './webgpu/wgsl/math/is_zero_u64WGSL.js';
+export { default as is_negative_i64WGSL } from './webgpu/wgsl/math/is_negative_i64WGSL.js';
+export { default as abs_i64WGSL } from './webgpu/wgsl/math/abs_i64WGSL.js';
+export { default as left_shift_u64WGSL } from './webgpu/wgsl/math/left_shift_u64WGSL.js';
+export { default as right_shift_u64WGSL } from './webgpu/wgsl/math/right_shift_u64WGSL.js';
+// export { default as first_leading_bit_u64WGSL } from './webgpu/wgsl/math/first_leading_bit_u64WGSL.js';
+// export { default as first_trailing_bit_u64WGSL } from './webgpu/wgsl/math/first_trailing_bit_u64WGSL.js';
+// export { default as subtract_i64_i64WGSL } from './webgpu/wgsl/math/subtract_i64_i64WGSL.js';
+// export { default as cmp_u64_u64WGSL } from './webgpu/wgsl/math/cmp_u64_u64WGSL.js';
+// export { default as cmp_i64_i64WGSL } from './webgpu/wgsl/math/cmp_i64_i64WGSL.js';
+// export { default as mul_u64_u64WGSL } from './webgpu/wgsl/math/mul_u64_u64WGSL.js';
+// export { default as mul_i64_i64WGSL } from './webgpu/wgsl/math/mul_i64_i64WGSL.js';
+// export { default as div_u64_u64WGSL } from './webgpu/wgsl/math/div_u64_u64WGSL.js';
+// export { default as gcd_u64_u64WGSL } from './webgpu/wgsl/math/gcd_u64_u64WGSL.js';
+// export { default as i64_to_q128WGSL } from './webgpu/wgsl/math/i64_to_q128WGSL.js';
+// export { default as whole_i64_to_q128WGSL } from './webgpu/wgsl/math/whole_i64_to_q128WGSL.js';
+// export { default as equals_cross_mul_q128WGSL } from './webgpu/wgsl/math/equals_cross_mul_q128WGSL.js';
+// export { default as is_zero_q128WGSL } from './webgpu/wgsl/math/is_zero_q128WGSL.js';
+// export { default as ratio_test_q128WGSL } from './webgpu/wgsl/math/ratio_test_q128WGSL.js';
+// export { default as reduce_q128WGSL } from './webgpu/wgsl/math/reduce_q128WGSL.js';
+// export { default as IntersectionPointWGSL } from './webgpu/wgsl/math/IntersectionPointWGSL.js';
+// export { default as LineSegmentIntersectionWGSL } from './webgpu/wgsl/math/LineSegmentIntersectionWGSL.js';
+// export { default as intersect_line_segmentsWGSL } from './webgpu/wgsl/math/intersect_line_segmentsWGSL.js';
+// export { default as cbrtWGSL } from './webgpu/wgsl/math/cbrtWGSL.js';
 
 // "main" modules (a single pipeline each)
 export { default as MainReduceModule, MAIN_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceModule.js';

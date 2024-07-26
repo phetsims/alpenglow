@@ -15,6 +15,7 @@ import './webgpu/tests/gpu/RadixSortModuleTests.js';
 import './webgpu/tests/gpu/MergeSimpleModuleTests.js';
 import './webgpu/tests/gpu/MergeModuleTests.js';
 import './webgpu/tests/gpu/HistogramModuleTests.js';
+import './webgpu/tests/math/RationalTests.js';
 import './cag/ClippableFaceTests.js';
 import './cag/PolygonalBooleanTests.js';
 import './clip/PolygonClippingTests.js';

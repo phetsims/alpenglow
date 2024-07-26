@@ -93,6 +93,37 @@ export class WGSLMainModule extends WGSLModule {
 }
 alpenglow.register( 'WGSLMainModule', WGSLMainModule );
 
+export class WGSLReferenceModule extends WGSLString {
+  public constructor(
+    public readonly name: string,
+    public readonly declarations: WGSLModuleDeclarations
+  ) {
+    super();
+  }
+
+  public withBlueprint( blueprint: PipelineBlueprint ): string {
+    blueprint.add( this.name, this.declarations );
+    return this.name;
+  }
+}
+alpenglow.register( 'WGSLReferenceModule', WGSLReferenceModule );
+
+export class WGSLStringModule extends WGSLString {
+  public constructor(
+    public readonly name: string,
+    public readonly string: WGSLString,
+    public readonly declarations: WGSLModuleDeclarations
+  ) {
+    super();
+  }
+
+  public withBlueprint( blueprint: PipelineBlueprint ): string {
+    blueprint.add( this.name, this.declarations );
+    return this.string.withBlueprint( blueprint );
+  }
+}
+alpenglow.register( 'WGSLStringModule', WGSLStringModule );
+
 export class WGSLSlot extends WGSLModule {
   public constructor(
      name: string,
