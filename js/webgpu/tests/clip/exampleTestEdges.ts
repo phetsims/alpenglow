@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 import Vector2 from '../../../../../dot/js/Vector2.js';
 
