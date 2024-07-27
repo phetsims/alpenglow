@@ -574,11 +574,10 @@ export { default as gamut_map_premul_sRGBWGSL } from './webgpu/wgsl/color/gamut_
 export { default as gamut_map_premul_displayP3WGSL } from './webgpu/wgsl/color/gamut_map_premul_displayP3WGSL.js';
 // export { default as blend_composeWGSL } from './webgpu/wgsl/color/blend_composeWGSL.js';
 
-// clip
-export { default as MD_ClipResultWGSL } from './webgpu/wgsl/clip/MD_ClipResultWGSL.js';
-export { default as matthes_drakopoulos_clipWGSL } from './webgpu/wgsl/clip/matthes_drakopoulos_clipWGSL.js';
-// export { default as bounds_clip_edgeWGSL } from './webgpu/wgsl/clip/bounds_clip_edgeWGSL.js';
-// export { default as bounds_double_area_edgeWGSL } from './webgpu/wgsl/clip/bounds_double_area_edgeWGSL.js';
+// cag/clip
+export { default as LinearEdgeWGSL } from './webgpu/wgsl/cag/LinearEdgeWGSL.js';
+export { default as matthes_drakopoulos_clipWGSL, MD_ClipResultWGSL } from './webgpu/wgsl/clip/matthes_drakopoulos_clipWGSL.js';
+export { default as bounds_clip_edgeWGSL, bounds_clip_edge_ResultWGSL } from './webgpu/wgsl/clip/bounds_clip_edgeWGSL.js';
 
 // "main" modules (a single pipeline each)
 export { default as MainReduceModule, MAIN_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceModule.js';
@@ -608,7 +607,6 @@ export type { MergeModuleOptions } from './webgpu/modules/gpu/MergeModule.js';
 export { default as HistogramModule, HISTOGRAM_MODULE_DEFAULTS } from './webgpu/modules/gpu/HistogramModule.js';
 export type { HistogramModuleOptions } from './webgpu/modules/gpu/HistogramModule.js';
 
-export { default as TestToCanvas } from './webgpu/TestToCanvas.js';
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';
 export { default as GPUProfiling } from './webgpu/GPUProfiling.js';

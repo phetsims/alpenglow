@@ -18,12 +18,12 @@ import './webgpu/tests/gpu/HistogramModuleTests.js';
 import './webgpu/tests/math/RationalTests.js';
 import './webgpu/tests/color/ColorTests.js';
 import './webgpu/tests/clip/MatthesDrakopoulosClipTests.js';
+import './webgpu/tests/clip/BoundsClipEdgeTests.js';
 import './cag/ClippableFaceTests.js';
 import './cag/PolygonalBooleanTests.js';
 import './clip/PolygonClippingTests.js';
 import './parallel/ParallelTests.js';
 import './raster/RasterizeTests.js';
-import './webgpu/old/OldSnippetTests.js';
 import './render-program/RenderProgramTests.js';
 import './webgpu/RenderProgramWebGPUTests.js';
 

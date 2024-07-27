@@ -6,12 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, OldBindingType, BlitShader, BufferLogger, ByteEncoder, OldComputeShader, DeviceContext, PolygonalBoolean, PolygonalFace, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, Rasterize, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, TestToCanvas, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../../imports.js';
+import { alpenglow, BlitShader, BufferLogger, ByteEncoder, DeviceContext, OldBindingType, OldComputeShader, PolygonalBoolean, PolygonalFace, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, Rasterize, RasterSplitReduceData, RENDER_BLEND_CONSTANTS, RENDER_COMPOSE_CONSTANTS, RENDER_EXTEND_CONSTANTS, RENDER_GRADIENT_TYPE_CONSTANTS, RenderableFace, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, wgsl_raster_accumulate, wgsl_raster_chunk_index_patch, wgsl_raster_chunk_reduce, wgsl_raster_edge_index_patch, wgsl_raster_edge_scan, wgsl_raster_initial_chunk, wgsl_raster_initial_clip, wgsl_raster_initial_edge_reduce, wgsl_raster_initial_split_reduce, wgsl_raster_split_reduce, wgsl_raster_split_scan, wgsl_raster_to_texture, wgsl_raster_uniform_update } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import testPolygonalFace from '../tests/testPolygonalFace.js';
 
 const WORKGROUP_SIZE = 128;
 const BOUNDS_REDUCE = false;
@@ -250,7 +251,7 @@ export default class RasterClipper {
 
     const context = deviceContext.getCanvasContext( canvas, 'srgb' );
 
-    const clippableFace = TestToCanvas.getTestPath().toEdgedFace().withReversedEdges();
+    const clippableFace = testPolygonalFace.toEdgedFace().withReversedEdges();
 
     const matrix = Matrix3.scaling( 0.35 );
     const transformedFace = clippableFace.getTransformed( matrix );
@@ -345,7 +346,7 @@ export default class RasterClipper {
 
     const context = deviceContext.getCanvasContext( canvas, 'srgb' );
 
-    const clippableFace = TestToCanvas.getTestPath();
+    const clippableFace = testPolygonalFace;
 
     const mainFace = clippableFace.getTransformed( Matrix3.scaling( 0.37 ) );
     const smallerFace = clippableFace.getTransformed( Matrix3.translation( 16, 165 ).timesMatrix( Matrix3.scaling( 0.15 ) ) );

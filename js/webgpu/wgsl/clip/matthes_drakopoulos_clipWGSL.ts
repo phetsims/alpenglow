@@ -1,6 +1,6 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { MD_ClipResultWGSL, wgsl, WGSLExpression, WGSLExpressionF32, wgslString, WGSLStringModule } from '../../../imports.js';
+import { wgsl, WGSLExpression, WGSLExpressionF32, WGSLReferenceModule, wgslString, WGSLStringModule } from '../../../imports.js';
 
 /**
  * From "Another Simple but Faster Method for 2D Line Clipping" (2019)
@@ -8,6 +8,14 @@ import { MD_ClipResultWGSL, wgsl, WGSLExpression, WGSLExpressionF32, wgslString,
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+export const MD_ClipResultWGSL = new WGSLReferenceModule( 'MD_ClipResult', wgsl`
+  struct MD_ClipResult {
+    p0: vec2f,
+    p1: vec2f,
+    clipped: bool
+  }
+` );
 
 export default (
   p0: WGSLExpression, // vec2f
@@ -18,7 +26,7 @@ export default (
   maxY: WGSLExpressionF32,
   useExactSlope = false
 ): WGSLExpression => {
-  const name = `matthes_drakopoulos_clip${useExactSlope ? '_extract_slope' : ''}`;
+  const name = `matthes_drakopoulos_clip${useExactSlope ? '_exact_slope' : ''}`;
 
   return new WGSLStringModule( name, wgsl`${wgslString( name )}( ${p0}, ${p1}, ${minX}, ${minY}, ${maxX}, ${maxY} )`, wgsl`
     fn ${wgslString( name )}(
