@@ -635,6 +635,65 @@ export const I32Order: CompareOrder<number> = {
 };
 alpenglow.register( 'I32Order', I32Order );
 
+export const F32Type: ConcreteType<number> = {
+  name: 'f32',
+  bytesPerElement: 4,
+
+  outOfRangeElement: 7.101010101,
+
+  equals( a: number, b: number ): boolean {
+    return a === b;
+  },
+
+  equalsWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} == ${b} )`;
+  },
+
+  encode( value: number, encoder: ByteEncoder ): void {
+    encoder.pushF32( value );
+  },
+  decode( encoder: ByteEncoder, offset: number ): number {
+    return encoder.fullF32Array[ offset ];
+  },
+
+  valueType: wgsl`f32`,
+  writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
+    return wgsl`
+       ${storeStatement( wgsl`0u`, wgsl`bitcast<u32>( ${value} )` )}
+    `;
+  },
+  wgslAlign: 4,
+  wgslSize: 4,
+
+  generateRandom: ( fullSize = false ) => random.nextDoubleBetween( fullSize ? -0x7fffffff : 0, fullSize ? 0x7fffffff : 1 ),
+
+  toDebugString: ( value: number ) => value.toString()
+};
+alpenglow.register( 'F32Type', F32Type );
+
+// TODO: Do a full order, with bit sorts(!)
+export const F32Order: CompareOrder<number> = {
+  name: 'f32 order',
+  type: F32Type,
+
+  compare( a: number, b: number ): number {
+    return a - b;
+  },
+
+  compareWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionI32 => {
+    return wgsl`select( select( 0i, 1i, ${a} > ${b} ), -1i, ${a} < ${b} )`;
+  },
+
+  greaterThanWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} > ${b} )`;
+  },
+
+  lessThanOrEqualWGSL: ( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool => {
+    return wgsl`( ${a} <= ${b} )`;
+  }
+};
+alpenglow.register( 'F32Order', F32Order );
+
 export const Vec2uType: ConcreteType<Vector2> = {
   name: 'vec2u',
   bytesPerElement: 8,

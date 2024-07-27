@@ -10,7 +10,6 @@ import { wgsl, WGSLReferenceModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-const i64WGSL = new WGSLReferenceModule( 'i64', wgsl`
+export default new WGSLReferenceModule( 'i64', wgsl`
   alias i64 = vec2<u32>;
 ` );
-export default i64WGSL;

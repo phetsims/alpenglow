@@ -1,155 +1,16 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2023-2024, University of Colorado Boulder
 
 /**
- * Assorted WGSL snippet tests
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BoundsClipping, LinearEdge, LineClipping, OldDualSnippet, wgsl_bounds_clip_edge, wgsl_matthes_drakopoulos_clip } from '../../imports.js';
-import Vector2 from '../../../../dot/js/Vector2.js';
+import { asyncTestWithDevice, BufferArraySlot, BufferBindingType, DirectModule, F32Type, getArrayType, LineClipping, matthes_drakopoulos_clipWGSL, Procedure, Routine, wgsl, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
+import Vector3 from '../../../../../dot/js/Vector3.js';
 
-QUnit.module( 'Snippet' );
+QUnit.module( 'MatthesDrakopoulosClipTests' );
 
-const runInOut = async (
-  device: GPUDevice,
-  mainCode: string,
-  dependencies: OldDualSnippet[],
-  dispatchSize: number,
-  inputArrayBuffer: ArrayBuffer,
-  outputArrayBuffer: ArrayBuffer
-) => {
-  const code = new OldDualSnippet( `
-@group(0) @binding(0) var<storage, read_write> input: array<u32>;
-@group(0) @binding(1) var<storage, read_write> output: array<u32>;
-`, `
-@compute @workgroup_size(1) fn main(
-  @builtin(global_invocation_id) id: vec3<u32>
-) {
-  let i = id.x;
-  ${mainCode}
-}
-`, dependencies ).toString();
-  // console.log( code );
-  const module = device.createShaderModule( {
-    label: 'shader module',
-    code: code
-  } );
-
-  const bindGroupLayout = device.createBindGroupLayout( {
-    entries: [ {
-      binding: 0,
-      visibility: GPUShaderStage.COMPUTE,
-      buffer: {
-        type: 'storage'
-      }
-    }, {
-      binding: 1,
-      visibility: GPUShaderStage.COMPUTE,
-      buffer: {
-        type: 'storage'
-      }
-    } ]
-  } );
-
-  const pipeline = device.createComputePipeline( {
-    label: 'compute pipeline',
-    layout: device.createPipelineLayout( {
-      bindGroupLayouts: [ bindGroupLayout ]
-    } ),
-    compute: {
-      module: module,
-      entryPoint: 'main'
-    }
-  } );
-
-  const inputSize = inputArrayBuffer.byteLength;
-  const outputSize = outputArrayBuffer.byteLength;
-
-  const inputBuffer = device.createBuffer( {
-    label: 'work buffer',
-    size: inputSize,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-  } );
-  device.queue.writeBuffer( inputBuffer, 0, inputArrayBuffer );
-
-  const outputBuffer = device.createBuffer( {
-    label: 'output buffer',
-    size: outputSize,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
-  } );
-
-  const resultBuffer = device.createBuffer( {
-    label: 'result buffer',
-    size: outputSize,
-    usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST
-  } );
-
-  const bindGroup = device.createBindGroup( {
-    label: 'bindGroup',
-    layout: pipeline.getBindGroupLayout( 0 ),
-    entries: [
-      { binding: 0, resource: { buffer: inputBuffer } },
-      { binding: 1, resource: { buffer: outputBuffer } }
-    ]
-  } );
-
-  const encoder = device.createCommandEncoder( {
-    label: 'encoder'
-  } );
-  const pass = encoder.beginComputePass( {
-    label: 'compute pass'
-  } );
-  pass.setPipeline( pipeline );
-  pass.setBindGroup( 0, bindGroup );
-  pass.dispatchWorkgroups( dispatchSize );
-  pass.end();
-
-  encoder.copyBufferToBuffer( outputBuffer, 0, resultBuffer, 0, resultBuffer.size );
-
-  const commandBuffer = encoder.finish();
-  device.queue.submit( [ commandBuffer ] );
-
-  await resultBuffer.mapAsync( GPUMapMode.READ );
-  const resultArrayBuffer = resultBuffer.getMappedRange();
-  new Uint8Array( outputArrayBuffer ).set( new Uint8Array( resultArrayBuffer ) );
-
-  resultBuffer.unmap();
-
-  inputBuffer.destroy();
-  outputBuffer.destroy();
-  resultBuffer.destroy();
-};
-
-const devicePromise: Promise<GPUDevice | null> = ( async () => {
-  try {
-    const adapter = await navigator.gpu?.requestAdapter();
-    return ( await adapter?.requestDevice() ) || null;
-  }
-  catch( e ) {
-    return null;
-  }
-} )();
-
-const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice ) => Promise<string | null> ) => {
-  QUnit.test( name, async assert => {
-    const done = assert.async();
-
-    const device = await devicePromise;
-
-    if ( !device ) {
-      assert.expect( 0 );
-    }
-    else {
-      const result = await test( device );
-      assert.ok( result === null, result || '' );
-    }
-
-    done();
-  } );
-};
-
-const exampleEdges = [
+const exampleEdges: [ Vector2, Vector2 ][] = [
   [ new Vector2( -5, 5 ), new Vector2( 5, 5 ) ],
   [ new Vector2( -5, 5 ), new Vector2( 5, 7 ) ],
   [ new Vector2( 2, 5 ), new Vector2( 5, 7 ) ],
@@ -466,43 +327,76 @@ const exampleEdges = [
 ] as const;
 
 const matthesDrakopoulosTest = ( name: string, extractSlope: boolean ) => {
-  asyncTestWithDevice( name, async device => {
+  asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const inputEdges = exampleEdges;
 
     const dispatchSize = inputEdges.length;
 
-    const outputArray = new Float32Array( dispatchSize * 5 );
-    const uint32Array = new Uint32Array( outputArray.buffer );
+    const inputSlot = new BufferArraySlot( getArrayType( F32Type, dispatchSize * 4 ) );
+    const outputSlot = new BufferArraySlot( getArrayType( F32Type, dispatchSize * 5 ) );
 
-    await runInOut(
-      device,
-      `
-        let in = i * 4u;
-        let out = i * 5u;
-        let p0 = bitcast<vec2<f32>>( vec2( input[ in + 0u ], input[ in + 1u ] ) );
-        let p1 = bitcast<vec2<f32>>( vec2( input[ in + 2u ], input[ in + 3u ] ) );
-        let result = matthes_drakopoulos_clip( p0, p1, 0f, 0f, 10f, 10f );
-        let p0out = bitcast<vec2<u32>>( result.p0 );
-        let p1out = bitcast<vec2<u32>>( result.p1 );
-        let clipped = result.clipped;
-        output[ out + 0u ] = p0out.x;
-        output[ out + 1u ] = p0out.y;
-        output[ out + 2u ] = p1out.x;
-        output[ out + 3u ] = p1out.y;
-        output[ out + 4u ] = select( 0u, 1u, clipped );
-      `,
-      [ OldDualSnippet.fromSource( wgsl_matthes_drakopoulos_clip, {
-        matthes_drakopoulos_extract_slope: extractSlope
-      } ) ],
-      dispatchSize,
-      new Float32Array( inputEdges.flatMap( entry => [
-        entry[ 0 ].x,
-        entry[ 0 ].y,
-        entry[ 1 ].x,
-        entry[ 1 ].y
-      ] ) ).buffer,
-      outputArray.buffer
+    const module = new DirectModule<number>( {
+      name: `module_${name}`,
+      main: new WGSLMainModule( [
+        new WGSLSlot( 'input', inputSlot, BufferBindingType.READ_ONLY_STORAGE ),
+        new WGSLSlot( 'output', outputSlot, BufferBindingType.STORAGE )
+      ], wgsl`
+        @compute @workgroup_size(1) fn main(
+          @builtin(global_invocation_id) id: vec3<u32>
+        ) {
+          let i = id.x;
+          
+          let in = i * 4u;
+          let out = i * 5u;
+          let p0 = vec2( input[ in + 0u ], input[ in + 1u ] );
+          let p1 = vec2( input[ in + 2u ], input[ in + 3u ] );
+          let result = ${matthes_drakopoulos_clipWGSL(
+            wgsl`p0`,
+            wgsl`p1`,
+            wgsl`0f`,
+            wgsl`0f`,
+            wgsl`10f`,
+            wgsl`10f`
+          )};
+          let p0out = result.p0;
+          let p1out = result.p1;
+          let clipped = result.clipped;
+          output[ out + 0u ] = p0out.x;
+          output[ out + 1u ] = p0out.y;
+          output[ out + 2u ] = p1out.x;
+          output[ out + 3u ] = p1out.y;
+          output[ out + 4u ] = select( 0f, 1f, clipped );
+        }
+      ` ),
+      setDispatchSize: ( dispatchSize: Vector3, size: number ) => {
+        dispatchSize.x = size;
+      }
+    } );
+
+    const routine = await Routine.create(
+      deviceContext,
+      module,
+      [ inputSlot, outputSlot ],
+      Routine.INDIVIDUAL_LAYOUT_STRATEGY,
+      ( context, execute, input: number[] ) => {
+        context.setTypedBufferValue( inputSlot, input );
+
+        execute( context, dispatchSize );
+
+        return context.getTypedBufferValue( outputSlot );
+      }
     );
+
+    const procedure = new Procedure( routine ).bindRemainingBuffers();
+
+    const outputArray = await procedure.standaloneExecute( deviceContext, inputEdges.flatMap( entry => [
+      entry[ 0 ].x,
+      entry[ 0 ].y,
+      entry[ 1 ].x,
+      entry[ 1 ].y
+    ] ) );
+
+    procedure.dispose();
 
     for ( let i = 0; i < dispatchSize; i++ ) {
       const baseIndex = i * 5;
@@ -516,7 +410,7 @@ const matthesDrakopoulosTest = ( name: string, extractSlope: boolean ) => {
 
       const actualP0 = new Vector2( outputArray[ baseIndex ], outputArray[ baseIndex + 1 ] );
       const actualP1 = new Vector2( outputArray[ baseIndex + 2 ], outputArray[ baseIndex + 3 ] );
-      const actualClipped = uint32Array[ baseIndex + 4 ] !== 0;
+      const actualClipped = outputArray[ baseIndex + 4 ] !== 0;
 
       if ( actualClipped !== expectedClipped ) {
         return `matthes_drakopoulos_clip clip discrepancy, expected: ${expectedClipped}, actual: ${actualClipped}, i:${i}`;
@@ -537,100 +431,3 @@ const matthesDrakopoulosTest = ( name: string, extractSlope: boolean ) => {
 
 matthesDrakopoulosTest( 'matthes_drakopoulos_clip unextracted', false );
 matthesDrakopoulosTest( 'matthes_drakopoulos_clip extracted', true );
-
-asyncTestWithDevice( 'bounds_clip_edge', async device => {
-  const inputEdges = exampleEdges;
-
-  const dispatchSize = inputEdges.length;
-
-  const outputArray = new Float32Array( dispatchSize * 13 );
-  const uint32Array = new Uint32Array( outputArray.buffer );
-
-  await runInOut(
-    device,
-    `
-      let in = i * 4u;
-      let out = i * 13u;
-      let p0 = bitcast<vec2<f32>>( vec2( input[ in + 0u ], input[ in + 1u ] ) );
-      let p1 = bitcast<vec2<f32>>( vec2( input[ in + 2u ], input[ in + 3u ] ) );
-      let result = bounds_clip_edge( LinearEdge( p0, p1 ), 0f, 0f, 10f, 10f, 5f, 5f );
-      
-      let e0p0 = bitcast<vec2<u32>>( result.edges[ 0u ].startPoint );
-      let e0p1 = bitcast<vec2<u32>>( result.edges[ 0u ].endPoint );
-      
-      let e1p0 = bitcast<vec2<u32>>( result.edges[ 1u ].startPoint );
-      let e1p1 = bitcast<vec2<u32>>( result.edges[ 1u ].endPoint );
-      
-      let e2p0 = bitcast<vec2<u32>>( result.edges[ 2u ].startPoint );
-      let e2p1 = bitcast<vec2<u32>>( result.edges[ 2u ].endPoint );
-      
-      let count = u32( result.count );
-      
-      output[ out + 0u ] = e0p0.x;
-      output[ out + 1u ] = e0p0.y;
-      output[ out + 2u ] = e0p1.x;
-      output[ out + 3u ] = e0p1.y;
-      output[ out + 4u ] = e1p0.x;
-      output[ out + 5u ] = e1p0.y;
-      output[ out + 6u ] = e1p1.x;
-      output[ out + 7u ] = e1p1.y;
-      output[ out + 8u ] = e2p0.x;
-      output[ out + 9u ] = e2p0.y;
-      output[ out + 10u ] = e2p1.x;
-      output[ out + 11u ] = e2p1.y;
-      output[ out + 12u ] = count;
-    `,
-    [ OldDualSnippet.fromSource( wgsl_bounds_clip_edge ) ],
-    dispatchSize,
-    new Float32Array( inputEdges.flatMap( entry => [
-      entry[ 0 ].x,
-      entry[ 0 ].y,
-      entry[ 1 ].x,
-      entry[ 1 ].y
-    ] ) ).buffer,
-    outputArray.buffer
-  );
-
-  for ( let i = 0; i < dispatchSize; i++ ) {
-    const baseIndex = i * 13;
-
-    const inputEdge = new LinearEdge(
-      inputEdges[ i ][ 0 ],
-      inputEdges[ i ][ 1 ]
-    );
-
-    const actualEdges: LinearEdge[] = [];
-    const actualCount = uint32Array[ baseIndex + 12 ];
-    for ( let j = 0; j < actualCount; j++ ) {
-      const edgeBaseIndex = baseIndex + j * 4;
-      const edge = new LinearEdge(
-        new Vector2( outputArray[ edgeBaseIndex ], outputArray[ edgeBaseIndex + 1 ] ),
-        new Vector2( outputArray[ edgeBaseIndex + 2 ], outputArray[ edgeBaseIndex + 3 ] )
-      );
-      if ( edge.startPoint.distance( edge.endPoint ) > 1e-6 ) {
-        actualEdges.push( edge );
-      }
-    }
-
-    const expectedEdges: LinearEdge[] = [];
-    BoundsClipping.boundsClipEdge( inputEdge.startPoint, inputEdge.endPoint, 0, 0, 10, 10, 5, 5, expectedEdges );
-
-    if ( actualEdges.length !== expectedEdges.length ) {
-      return `bounds_clip_edge edge count discrepancy, expected: ${expectedEdges.length}, actual: ${actualEdges.length}, i:${i}`;
-    }
-
-    for ( let i = 0; i < actualEdges.length; i++ ) {
-      const actualEdge = actualEdges[ i ];
-      const expectedEdge = expectedEdges[ i ];
-
-      if ( !expectedEdge.startPoint.equalsEpsilon( actualEdge.startPoint, 1e-5 ) ) {
-        return `bounds_clip_edge start point discrepancy, expected: ${expectedEdge.startPoint}, actual: ${actualEdge.startPoint}, i:${i}`;
-      }
-      if ( !expectedEdge.endPoint.equalsEpsilon( actualEdge.endPoint, 1e-5 ) ) {
-        return `bounds_clip_edge end point discrepancy, expected: ${expectedEdge.endPoint}, actual: ${actualEdge.endPoint}, i:${i}`;
-      }
-    }
-  }
-
-  return null;
-} );

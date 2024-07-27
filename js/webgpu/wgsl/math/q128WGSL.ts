@@ -11,7 +11,6 @@ import { wgsl, WGSLReferenceModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-const q128WGSL = new WGSLReferenceModule( 'q128', wgsl`
+export default new WGSLReferenceModule( 'q128', wgsl`
   alias q128 = vec4<u32>;
 ` );
-export default q128WGSL;

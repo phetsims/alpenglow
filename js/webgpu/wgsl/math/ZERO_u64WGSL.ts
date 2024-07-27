@@ -8,7 +8,6 @@ import { wgsl, WGSLReferenceModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-const ZERO_u64WGSL = new WGSLReferenceModule( 'ZERO_u64', wgsl`
+export default new WGSLReferenceModule( 'ZERO_u64', wgsl`
   const ZERO_u64 = vec2( 0u, 0u );
 ` );
-export default ZERO_u64WGSL;
