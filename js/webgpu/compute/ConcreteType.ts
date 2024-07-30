@@ -17,7 +17,7 @@ const random = new Random();
 
 export type WGSLBinaryStatements = ( value: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => WGSLStatements;
 
-type StoreStatementCallback = ( offset: WGSLExpressionU32, u32expr: WGSLExpressionU32 ) => WGSLStatements;
+export type StoreStatementCallback = ( offset: WGSLExpressionU32, u32expr: WGSLExpressionU32 ) => WGSLStatements;
 
 type ConcreteType<T = unknown> = {
   name: string;

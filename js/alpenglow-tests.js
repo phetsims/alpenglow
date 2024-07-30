@@ -19,13 +19,13 @@ import './webgpu/tests/math/RationalTests.js';
 import './webgpu/tests/color/ColorTests.js';
 import './webgpu/tests/clip/MatthesDrakopoulosClipTests.js';
 import './webgpu/tests/clip/BoundsClipEdgeTests.js';
+import './webgpu/tests/render-program/RenderProgramComputeTests.js';
 import './cag/ClippableFaceTests.js';
 import './cag/PolygonalBooleanTests.js';
 import './clip/PolygonClippingTests.js';
 import './parallel/ParallelTests.js';
 import './raster/RasterizeTests.js';
 import './render-program/RenderProgramTests.js';
-import './webgpu/RenderProgramWebGPUTests.js';
 
 // Since our tests are loaded asynchronously, we must direct QUnit to begin the tests
 qunitStart();

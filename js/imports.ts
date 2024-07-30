@@ -277,7 +277,7 @@ export { default as RenderLinearGradient, RenderLinearGradientAccuracy, RenderLi
 export type { SerializedRenderLinearGradient } from './render-program/RenderLinearGradient.js';
 export { default as RenderRadialBlend, RenderRadialBlendLogic, RenderRadialBlendAccuracy } from './render-program/RenderRadialBlend.js';
 export type { SerializedRenderRadialBlend } from './render-program/RenderRadialBlend.js';
-export { default as RenderRadialGradient, RenderRadialGradientAccuracy, RenderRadialGradientLogic, RENDER_GRADIENT_TYPE_CONSTANTS } from './render-program/RenderRadialGradient.js';
+export { default as RenderRadialGradient, RenderRadialGradientAccuracy, RenderRadialGradientLogic, RENDER_GRADIENT_TYPE_CONSTANTS, RadialGradientType } from './render-program/RenderRadialGradient.js';
 export type { SerializedRenderRadialGradient } from './render-program/RenderRadialGradient.js';
 export { default as RenderResampleType } from './render-program/RenderResampleType.js';
 export { isWindingIncluded } from './render-program/FillRule.js';
@@ -394,7 +394,7 @@ export { default as BlitShader } from './webgpu/BlitShader.js';
 export { default as ByteEncoder } from './webgpu/compute/ByteEncoder.js';
 export type { F32, U32, I32, U8 } from './webgpu/compute/ByteEncoder.js';
 export { U32Type, U32Add, U32Min, U32Max, U32And, U32Or, U32Xor, U32Order, U32ReverseOrder, I32Type, Vec2uType, Vec2uBic, Vec3uType, Vec4uType, Vec2uLexicographicalOrder, I32Order, I32Add, I32Min, I32Max, I32And, I32Or, I32Xor, F32Type, F32Order, getArrayType, getCastedType, Vec2uAdd, Vec3uAdd, Vec4uAdd, U32AtomicType, I32AtomicType, U32_IDENTITY_VALUES, I32_IDENTITY_VALUES } from './webgpu/compute/ConcreteType.js';
-export type { default as ConcreteType, ConcreteArrayType, BinaryOp, BitOrder, CompareOrder, Order, WGSLBinaryStatements } from './webgpu/compute/ConcreteType.js';
+export type { default as ConcreteType, ConcreteArrayType, BinaryOp, BitOrder, CompareOrder, Order, WGSLBinaryStatements, StoreStatementCallback } from './webgpu/compute/ConcreteType.js';
 export { default as ConsoleLogger, ConsoleLoggedEntry, ConsoleLoggedThread, ConsoleLoggedLine, ConsoleLoggedShader } from './webgpu/compute/ConsoleLogger.js';
 export type { ConsoleLogInfo } from './webgpu/compute/ConsoleLogger.js';
 export { default as BufferLogger } from './webgpu/compute/BufferLogger.js';
@@ -572,12 +572,17 @@ export { default as gamut_map_linear_sRGBWGSL } from './webgpu/wgsl/color/gamut_
 export { default as gamut_map_linear_displayP3WGSL } from './webgpu/wgsl/color/gamut_map_linear_displayP3WGSL.js';
 export { default as gamut_map_premul_sRGBWGSL } from './webgpu/wgsl/color/gamut_map_premul_sRGBWGSL.js';
 export { default as gamut_map_premul_displayP3WGSL } from './webgpu/wgsl/color/gamut_map_premul_displayP3WGSL.js';
-// export { default as blend_composeWGSL } from './webgpu/wgsl/color/blend_composeWGSL.js';
+export { default as blend_composeWGSL } from './webgpu/wgsl/color/blend_composeWGSL.js';
 
 // cag/clip
 export { default as LinearEdgeWGSL } from './webgpu/wgsl/cag/LinearEdgeWGSL.js';
 export { default as matthes_drakopoulos_clipWGSL, MD_ClipResultWGSL } from './webgpu/wgsl/clip/matthes_drakopoulos_clipWGSL.js';
 export { default as bounds_clip_edgeWGSL, bounds_clip_edge_ResultWGSL } from './webgpu/wgsl/clip/bounds_clip_edgeWGSL.js';
+
+// render-program
+export { default as extend_f32WGSL } from './webgpu/wgsl/render-program/extend_f32WGSL.js';
+export { default as extend_i32WGSL } from './webgpu/wgsl/render-program/extend_i32WGSL.js';
+export { default as evaluate_render_program_instructionsWGSL } from './webgpu/wgsl/render-program/evaluate_render_program_instructionsWGSL.js';
 
 // "main" modules (a single pipeline each)
 export { default as MainReduceModule, MAIN_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceModule.js';

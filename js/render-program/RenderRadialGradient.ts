@@ -301,7 +301,7 @@ const twoPointToUnitLine = ( p0: Vector2, p1: Vector2 ): Matrix3 => {
   return fromPoly2( Vector2.ZERO, Vector2.X_UNIT ).timesMatrix( fromPoly2( p0, p1 ).inverted() );
 };
 
-enum RadialGradientType {
+export enum RadialGradientType {
   Circular = 0,
   Strip = 1,
   FocalOnCircle = 2,
