@@ -584,6 +584,15 @@ export { default as extend_f32WGSL } from './webgpu/wgsl/render-program/extend_f
 export { default as extend_i32WGSL } from './webgpu/wgsl/render-program/extend_i32WGSL.js';
 export { default as evaluate_render_program_instructionsWGSL } from './webgpu/wgsl/render-program/evaluate_render_program_instructionsWGSL.js';
 
+// rasterize-two-pass
+export type { default as TwoPassConfig } from './webgpu/wgsl/rasterize-two-pass/TwoPassConfig.js';
+export { default as TwoPassConfigWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassConfigWGSL.js';
+export { default as TwoPassConfigType } from './webgpu/wgsl/rasterize-two-pass/TwoPassConfigType.js';
+export type { default as TwoPassFineRenderableFace } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFace.js';
+export { default as TwoPassFineRenderableFaceWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFaceWGSL.js';
+export { default as TwoPassFineRenderableFaceType } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFaceType.js';
+export { default as mainTwoPassFineWGSL } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassFineWGSL.js';
+
 // "main" modules (a single pipeline each)
 export { default as MainReduceModule, MAIN_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceModule.js';
 export type { MainReduceModuleOptions } from './webgpu/modules/gpu/MainReduceModule.js';
