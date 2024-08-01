@@ -278,8 +278,8 @@ export const evaluateTwoPassFineSolo = async (
       binHeight: binHeight,
       tileSize: tileSize,
       binSize: binSize,
-      filter: 0,
-      filterScale: 1,
+      filter: filterType,
+      filterScale: filterScale,
       rasterColorSpace: 0
     },
     addresses: [ 0, 0, ...unpaddedAddresses ],

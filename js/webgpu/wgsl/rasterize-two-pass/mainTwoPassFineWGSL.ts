@@ -53,6 +53,8 @@ const mainTwoPassFineWGSL = (
   ], wgsl`
     const oops_inifinite_loop_code = vec4f( 0.5f, 0.5f, 0f, 0.5f );
     
+    const low_area_multiplier = 1e-4f;
+    
     var<workgroup> bin_xy: vec2<u32>;
     var<workgroup> workgroup_exit: bool;
     var<workgroup> next_address: u32;
@@ -126,8 +128,6 @@ const mainTwoPassFineWGSL = (
           break;
         }
         
-        //let last_address = next_address;
-        
         if ( local_id.x == 0u ) {
           current_face = fine_renderable_faces[ next_address ];
           next_address = current_face.next_address;
@@ -141,96 +141,69 @@ const mainTwoPassFineWGSL = (
           lineToLog: line => line.dataArray.flat()[ logIndex ]
         } )}
         
-        if ( !skip_pixel ) {
-          let needs_centroid = ( current_face.bits & 0x10000000u ) != 0u;
-          let needs_face = ( current_face.bits & 0x20000000u ) != 0u;
-          let is_full_area = ( current_face.bits & 0x80000000u ) != 0u;
-          
-          var area: f32;
-          var centroid: vec2f;
-          
-          let min = vec2f( pixel_xy );
-          let max = vec2f( pixel_xy + vec2( 1u ) );
-          let bounds_centroid = 0.5f * ( min + max );
-          let max_area = ( max.x - min.x ) * ( max.y - min.y );
-          
-          let render_program_index = current_face.bits & 0x00ffffffu;
-          
-          ${logValueWGSL( {
-            value: 'render_program_index',
-            type: U32Type,
-            lineToLog: line => line.dataArray.flat()[ logIndex ]
-          } )}
-          
-          if ( is_full_area ) {
-            area = max_area;
-            centroid = bounds_centroid;
-          }
-          else {
-            initialize_box_partials( &area, &centroid, current_face.clip_counts, needs_centroid, min, max, bounds_centroid );
-          
-            for ( var edge_offset = 0u; edge_offset < current_face.num_edges; edge_offset++ ) {
-              // TODO: coalesced reads of this for the future, once we have correctness
-              let linear_edge = edges[ current_face.edges_index + edge_offset ];
+        let needs_centroid = ( current_face.bits & 0x10000000u ) != 0u;
+        let needs_face = ( current_face.bits & 0x20000000u ) != 0u;
+        let is_full_area = ( current_face.bits & 0x80000000u ) != 0u;
+        
+        if ( config.filter_type == 0u ) {
+          // For box filter, we don't need uniform control flow, so we can skip pixels
+          if ( !skip_pixel ) {
+            var area: f32;
+            var centroid: vec2f;
+            
+            let bounds_centroid = vec2f( pixel_xy ) + vec2( 0.5f );
+            
+            let radius_partial = vec2( 0.5f * config.filter_scale );
+            
+            let min = bounds_centroid - radius_partial;
+            let max = bounds_centroid + radius_partial;
+            let max_area = ( max.x - min.x ) * ( max.y - min.y );
+            
+            let render_program_index = current_face.bits & 0x00ffffffu;
+            
+            ${logValueWGSL( {
+              value: 'render_program_index',
+              type: U32Type,
+              lineToLog: line => line.dataArray.flat()[ logIndex ]
+            } )}
+            
+            if ( is_full_area ) {
+              area = max_area;
+              centroid = bounds_centroid;
+            }
+            else {
+              initialize_box_partials( &area, &centroid, current_face.clip_counts, needs_centroid, min, max, bounds_centroid );
+            
+              for ( var edge_offset = 0u; edge_offset < current_face.num_edges; edge_offset++ ) {
+                // TODO: coalesced reads of this for the future, once we have correctness
+                let linear_edge = edges[ current_face.edges_index + edge_offset ];
+                
+                add_clipped_box_partials( &area, &centroid, linear_edge, needs_centroid, min, max, bounds_centroid );
+              }
               
-              add_clipped_box_partials( &area, &centroid, linear_edge, needs_centroid, min, max, bounds_centroid );
+              finalize_box_partials( &area, &centroid, needs_centroid );
             }
             
-            finalize_box_partials( &area, &centroid, needs_centroid );
-          }
-          
-          ${logValueWGSL( {
-            value: 'area',
-            type: F32Type,
-            lineToLog: line => line.dataArray.flat()[ logIndex ]
-          } )}
-          
-          ${logValueWGSL( {
-            value: 'centroid.x',
-            type: F32Type,
-            lineToLog: line => line.dataArray.flat()[ logIndex ]
-          } )}
-          
-          ${logValueWGSL( {
-            value: 'centroid.y',
-            type: F32Type,
-            lineToLog: line => line.dataArray.flat()[ logIndex ]
-          } )}
-          
-          if ( area > 1e-4f ) {
-            let color = evaluate_render_program_instructions(
-              render_program_index,
-              centroid,
-              bounds_centroid
-            );
-            
-            ${logValueWGSL( {
-              value: 'color.r',
-              type: F32Type,
-              lineToLog: line => line.dataArray.flat()[ logIndex ]
-            } )}
-            
-            ${logValueWGSL( {
-              value: 'color.g',
-              type: F32Type,
-              lineToLog: line => line.dataArray.flat()[ logIndex ]
-            } )}
-            
-            ${logValueWGSL( {
-              value: 'color.b',
-              type: F32Type,
-              lineToLog: line => line.dataArray.flat()[ logIndex ]
-            } )}
-            
-            ${logValueWGSL( {
-              value: 'color.a',
-              type: F32Type,
-              lineToLog: line => line.dataArray.flat()[ logIndex ]
-            } )}
-            
-            accumulation += color * area;
+            if ( area > max_area * low_area_multiplier ) {
+              let color = evaluate_render_program_instructions(
+                render_program_index,
+                centroid,
+                bounds_centroid
+              );
+              
+              accumulation += color * area / max_area;
+            }
           }
         }
+        else if ( config.filter_type == 1u ) {
+          // TODO: variable-scale bilinear
+        }
+        else if ( config.filter_type == 2u ) {
+          // TODO: variable-scale mitchell-netravali
+        }
+        // TODO: fixed-scale grid clip bilinear/mitchell-netravali
+        // TODO: compute all of the integrals (for each section) + ?centroid. compute color with ?centroid.
+        // TODO: stuff integrals + color in workgroup memory, barrier, then have each pixel (subset of threads) sum up
       }
       
       ${logValueWGSL( {
