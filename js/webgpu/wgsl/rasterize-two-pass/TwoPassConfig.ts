@@ -1,5 +1,7 @@
 // Copyright 2024, University of Colorado Boulder
 
+import { PolygonFilterType } from '../../../imports.js';
+
 /**
  * Raw type for a TwoPassConfig
  *
@@ -14,7 +16,7 @@ type TwoPassConfig = {
   binHeight: number;
   tileSize: number;
   binSize: number;
-  filter: number;
+  filter: PolygonFilterType;
   filterScale: number;
   rasterColorSpace: number; // 0: sRGB, 1: Display-P3
 };

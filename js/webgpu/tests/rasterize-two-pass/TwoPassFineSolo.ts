@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferSlot, ByteEncoder, DeviceContext, DirectModule, getArrayType, LinearEdge, LinearEdgeType, mainTwoPassFineWGSL, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TwoPassConfig, TwoPassConfigType, TwoPassFineRenderableFace, TwoPassFineRenderableFaceType, U32Type } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, BufferSlot, ByteEncoder, DeviceContext, DirectModule, getArrayType, LinearEdge, LinearEdgeType, mainTwoPassFineWGSL, PolygonFilterType, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TwoPassConfig, TwoPassConfigType, TwoPassFineRenderableFace, TwoPassFineRenderableFaceType, U32Type } from '../../../imports.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import testPolygonalFace from '../testPolygonalFace.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
@@ -13,6 +13,17 @@ export const evaluateTwoPassFineSolo = async (
   name: string,
   deviceContext: DeviceContext
 ): Promise<HTMLCanvasElement> => {
+
+  const filterType = PolygonFilterType.Box;
+  const filterScale = 1;
+
+  const filterRadius = {
+    [ PolygonFilterType.Box ]: 0.5,
+    [ PolygonFilterType.Bilinear ]: 1,
+    [ PolygonFilterType.MitchellNetravali ]: 2
+  }[ filterType ] * filterScale;
+
+  const filterExpansion = filterRadius - 0.5; // since our "bounds" already include a radius of 0.5 from the pixel centers
 
   const outputSize = 256;
   const rasterSize = Math.ceil( outputSize * window.devicePixelRatio );
@@ -58,7 +69,11 @@ export const evaluateTwoPassFineSolo = async (
 
   } );
 
-  const binSize = 16; // TODO: filtering
+  const binSize = filterScale === 1 ? {
+    [ PolygonFilterType.Box ]: 16,
+    [ PolygonFilterType.Bilinear ]: 15,
+    [ PolygonFilterType.MitchellNetravali ]: 13
+  }[ filterType ] : 16;
   const tileSize = 16 * binSize;
 
   const tileWidth = Math.ceil( rasterWidth / tileSize );
@@ -75,17 +90,7 @@ export const evaluateTwoPassFineSolo = async (
 
   const edges: LinearEdge[] = [];
 
-  // const allowlist = [
-  //   // TODO: remove when done debugging
-  //   2
-  // ];
-
   for ( const renderableFace of renderableFaces ) {
-
-    // // TODO: remove when done debugging
-    // if ( !allowlist.includes( renderableFaces.indexOf( renderableFace ) ) ) {
-    //   continue;
-    // }
 
     const face = renderableFace.face;
     const bounds = face.getBounds();
@@ -103,10 +108,11 @@ export const evaluateTwoPassFineSolo = async (
 
     for ( let binX = 0; binX < binWidth; binX++ ) {
       for ( let binY = 0; binY < binHeight; binY++ ) {
-        const minX = binX * 16;
-        const minY = binY * 16;
-        const maxX = minX + 16;
-        const maxY = minY + 16;
+        const minX = binX * 16 - filterExpansion;
+        const minY = binY * 16 - filterExpansion;
+        const maxX = ( binX + 1 ) * 16 + filterExpansion;
+        const maxY = ( binY + 1 ) * 16 + filterExpansion;
+        const maxArea = ( maxX - minX ) * ( maxY - minY );
 
         const face = edgeClippedFace.getClipped( minX, minY, maxX, maxY );
         if ( face.getArea() > 1e-4 ) {
@@ -122,7 +128,7 @@ export const evaluateTwoPassFineSolo = async (
           const nextAddress = unpaddedAddresses[ binIndex ];
           unpaddedAddresses[ binIndex ] = address;
 
-          if ( face.getArea() + 1e-6 >= 256 ) {
+          if ( face.getArea() + 1e-6 >= maxArea ) {
             fineRenderableFaces.push( {
               renderProgramIndex: renderProgramIndex,
               needsCentroid: needsCentroid,
@@ -216,11 +222,11 @@ export const evaluateTwoPassFineSolo = async (
   const canvas = document.createElement( 'canvas' );
   canvas.width = rasterWidth;
   canvas.height = rasterHeight;
-  canvas.style.width = `${rasterWidth / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
-  canvas.style.height = `${rasterHeight / window.devicePixelRatio}px`;
-  // canvas.style.width = `${256 * 4}px`; // TODO: hopefully integral for tests
-  // canvas.style.height = `${256 * 4}px`;
-  // canvas.style.imageRendering = 'pixelated';
+  // canvas.style.width = `${rasterWidth / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
+  // canvas.style.height = `${rasterHeight / window.devicePixelRatio}px`;
+  canvas.style.width = `${256 * 4}px`; // TODO: hopefully integral for tests
+  canvas.style.height = `${256 * 4}px`;
+  canvas.style.imageRendering = 'pixelated';
 
   const canvasContext = deviceContext.getCanvasContext( canvas, 'srgb' );
   const canvasTexture = canvasContext.getCurrentTexture();

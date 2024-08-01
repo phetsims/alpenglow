@@ -142,8 +142,7 @@ const mainTwoPassFineWGSL = (
         } )}
         
         if ( !skip_pixel ) {
-          //let needs_centroid = ( current_face.bits & 0x10000000u ) != 0u;
-          let needs_centroid = true; // TODO: remove
+          let needs_centroid = ( current_face.bits & 0x10000000u ) != 0u;
           let needs_face = ( current_face.bits & 0x20000000u ) != 0u;
           let is_full_area = ( current_face.bits & 0x80000000u ) != 0u;
           
@@ -274,32 +273,7 @@ const mainTwoPassFineWGSL = (
             } )}
             
             accumulation += color * area;
-            
-            // if ( oops_count == 1u ) {
-            //   accumulation += color * area;
-            // }
-            
-            //accumulation = vec4( select( 0f, 1f, area > 0.5f ), select( 0f, 1f, color.a > 0.5f ), 0f, 1f );
           }
-          
-          
-          //if ( accumulation.a < 1e-8f ) {
-          //  accumulation += color * area;
-          //}
-          //accumulation = color * area;
-          //if ( area > 1e-8f ) {
-          //  accumulation = vec4( ( centroid / vec2f( 512f ) ), 0f, 1f ) * area;
-          //}
-          
-          //accumulation += color * area;
-          //accumulation = vec4( 1f, 0f, area, 1f );
-          //accumulation = color;
-          //accumulation = vec4( select( 0f, 1f, area > 0.5f ), select( 0f, 1f, color.a > 0.5f ), 0f, 1f );
-          //accumulation += vec4( 0f, 0f, 0f, area ); // TODO: remove
-          //accumulation += vec4( f32( last_address ) / 1000f * area, 0f, 0f, area ); // TODO: remove
-          //accumulation += vec4( f32( render_program_index ) / 1000f * area, 0f, 0f, area ); // TODO: remove
-          //accumulation = vec4( select( 0f, 1f, maxXCount < 0f ), 0f, 0f, 1f ); // TODO: remove
-          //accumulation = vec4( minXCount * 0.5f + 0.5f, maxXCount * 0.5f + 0.5f, minYCount * 0.5f + 0.5f, 1f ); // TODO: remove
         }
       }
       
