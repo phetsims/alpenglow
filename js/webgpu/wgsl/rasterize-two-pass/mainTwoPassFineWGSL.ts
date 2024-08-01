@@ -94,6 +94,8 @@ const mainTwoPassFineWGSL = (
           break;
         }
         
+        //let last_address = next_address;
+        
         if ( local_id.x == 0u ) {
           current_face = fine_renderable_faces[ next_address ];
           next_address = current_face.next_address;
@@ -122,6 +124,8 @@ const mainTwoPassFineWGSL = (
           let minY = f32( pixel_xy.y );
           let maxX = f32( pixel_xy.x + 1u );
           let maxY = f32( pixel_xy.y + 1u );
+          
+          let raster_program_index = current_face.bits & 0x00ffffffu;
           
           if ( is_full_area ) {
             area = 1f;
@@ -176,6 +180,8 @@ const mainTwoPassFineWGSL = (
           }
           
           accumulation += vec4( 0f, 0f, 0f, area ); // TODO: remove
+          //accumulation += vec4( f32( last_address ) / 1000f * area, 0f, 0f, area ); // TODO: remove
+          //accumulation += vec4( f32( raster_program_index ) / 1000f * area, 0f, 0f, area ); // TODO: remove
           //accumulation = vec4( select( 0f, 1f, maxXCount < 0f ), 0f, 0f, 1f ); // TODO: remove
           //accumulation = vec4( minXCount * 0.5f + 0.5f, maxXCount * 0.5f + 0.5f, minYCount * 0.5f + 0.5f, 1f ); // TODO: remove
         }
