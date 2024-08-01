@@ -31,6 +31,7 @@ export default class Binding {
         'read-write': 'read_write'
       }[ this.bindingType.access ];
       return wgsl`
+        ${this.location.getWGSLAnnotation()}
         var ${wgslString( name )}: texture_storage_2d<${wgslString( this.bindingType.format )}, ${wgslString( access )}>;
       `;
     }

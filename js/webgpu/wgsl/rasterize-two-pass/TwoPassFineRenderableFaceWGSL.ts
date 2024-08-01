@@ -22,8 +22,8 @@ import { wgsl, WGSLReferenceModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default new WGSLReferenceModule( 'TwoPassConfig', wgsl`
-  struct TwoPassConfig {
+export default new WGSLReferenceModule( 'TwoPassFineRenderableFace', wgsl`
+  struct TwoPassFineRenderableFace {
     bits: u32,
     edges_index: u32,
     num_edges: u32,

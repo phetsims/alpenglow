@@ -59,7 +59,7 @@ const TwoPassConfigType: ConcreteType<TwoPassConfig> = {
        ${storeStatement( wgsl`5u`, wgsl`${value}.bin_height` )}
        ${storeStatement( wgsl`6u`, wgsl`${value}.tile_size` )}
        ${storeStatement( wgsl`7u`, wgsl`${value}.bin_size` )}
-       ${storeStatement( wgsl`8u`, wgsl`${value}.filter` )}
+       ${storeStatement( wgsl`8u`, wgsl`${value}.filter_type` )}
        ${storeStatement( wgsl`9u`, wgsl`bitcast<u32>( ${value}.filter_scale )` )}
        ${storeStatement( wgsl`10u`, wgsl`${value}.raster_color_space` )}
     `;

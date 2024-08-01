@@ -18,7 +18,7 @@ export default new WGSLReferenceModule( 'TwoPassConfig', wgsl`
     bin_height: u32,
     tile_size: u32,
     bin_size: u32,
-    filter: u32,
+    filter_type: u32,
     filter_scale: f32,
     raster_color_space: u32
   }

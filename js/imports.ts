@@ -576,6 +576,7 @@ export { default as blend_composeWGSL } from './webgpu/wgsl/color/blend_composeW
 
 // cag/clip
 export { default as LinearEdgeWGSL } from './webgpu/wgsl/cag/LinearEdgeWGSL.js';
+export { default as LinearEdgeType } from './webgpu/wgsl/cag/LinearEdgeType.js';
 export { default as matthes_drakopoulos_clipWGSL, MD_ClipResultWGSL } from './webgpu/wgsl/clip/matthes_drakopoulos_clipWGSL.js';
 export { default as bounds_clip_edgeWGSL, bounds_clip_edge_ResultWGSL } from './webgpu/wgsl/clip/bounds_clip_edgeWGSL.js';
 
@@ -583,15 +584,6 @@ export { default as bounds_clip_edgeWGSL, bounds_clip_edge_ResultWGSL } from './
 export { default as extend_f32WGSL } from './webgpu/wgsl/render-program/extend_f32WGSL.js';
 export { default as extend_i32WGSL } from './webgpu/wgsl/render-program/extend_i32WGSL.js';
 export { default as evaluate_render_program_instructionsWGSL } from './webgpu/wgsl/render-program/evaluate_render_program_instructionsWGSL.js';
-
-// rasterize-two-pass
-export type { default as TwoPassConfig } from './webgpu/wgsl/rasterize-two-pass/TwoPassConfig.js';
-export { default as TwoPassConfigWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassConfigWGSL.js';
-export { default as TwoPassConfigType } from './webgpu/wgsl/rasterize-two-pass/TwoPassConfigType.js';
-export type { default as TwoPassFineRenderableFace } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFace.js';
-export { default as TwoPassFineRenderableFaceWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFaceWGSL.js';
-export { default as TwoPassFineRenderableFaceType } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFaceType.js';
-export { default as mainTwoPassFineWGSL } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassFineWGSL.js';
 
 // "main" modules (a single pipeline each)
 export { default as MainReduceModule, MAIN_REDUCE_MODULE_DEFAULTS } from './webgpu/modules/gpu/MainReduceModule.js';
@@ -620,6 +612,18 @@ export { default as MergeModule, MERGE_MODULE_DEFAULTS } from './webgpu/modules/
 export type { MergeModuleOptions } from './webgpu/modules/gpu/MergeModule.js';
 export { default as HistogramModule, HISTOGRAM_MODULE_DEFAULTS } from './webgpu/modules/gpu/HistogramModule.js';
 export type { HistogramModuleOptions } from './webgpu/modules/gpu/HistogramModule.js';
+
+// rasterize-two-pass
+export type { default as TwoPassConfig } from './webgpu/wgsl/rasterize-two-pass/TwoPassConfig.js';
+export { default as TwoPassConfigWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassConfigWGSL.js';
+export { default as TwoPassConfigType } from './webgpu/wgsl/rasterize-two-pass/TwoPassConfigType.js';
+export type { default as TwoPassFineRenderableFace } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFace.js';
+export { default as TwoPassFineRenderableFaceWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFaceWGSL.js';
+export { default as TwoPassFineRenderableFaceType } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFaceType.js';
+export { default as mainTwoPassFineWGSL } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassFineWGSL.js';
+
+// testing
+export { evaluateTwoPassFineSolo } from './webgpu/tests/rasterize-two-pass/TwoPassFineSolo.js';
 
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';

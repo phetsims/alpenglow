@@ -33,10 +33,12 @@ const TwoPassFineRenderableFaceType: ConcreteType<TwoPassFineRenderableFace> = {
 
     // Support signed values packing into a u32
     encoder.pushU32(
-      ( value.minXCount && 0xff ) |
-      ( ( value.minYCount && 0xff ) << 8 ) |
-      ( ( value.maxXCount && 0xff ) << 16 ) |
-      ( ( value.maxYCount && 0xff ) << 24 )
+      (
+        ( value.minXCount & 0xff ) |
+        ( ( value.minYCount & 0xff ) << 8 ) |
+        ( ( value.maxXCount & 0xff ) << 16 ) |
+        ( ( value.maxYCount & 0xff ) << 24 )
+      ) >>> 0 // because JS omg
     );
 
     encoder.pushU32( value.nextAddress );
