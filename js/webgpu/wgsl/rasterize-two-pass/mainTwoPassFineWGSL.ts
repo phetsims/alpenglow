@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, F32Type, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, logValueWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, U32Type, unpremultiplyWGSL, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, F32Type, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, LinearEdgeWGSL, logValueWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, U32Type, unpremultiplyWGSL, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 
 export type mainTwoPassFineWGSLOptions = {
   config: BufferSlot<TwoPassConfig>;
@@ -149,19 +149,10 @@ const mainTwoPassFineWGSL = (
           var area: f32;
           var centroid: vec2f;
           
-          let bounds_centroid = vec2f( pixel_xy ) + vec2( 0.5f );
-          let clip_counts = unpack4xI8( current_face.clip_counts );
-          
-          // TODO: optimize for registers, if it isn't allocating registers and reordering nicely
-          // TODO: move these inside more
-          let minXCount = f32( clip_counts.x );
-          let minYCount = f32( clip_counts.y );
-          let maxXCount = f32( clip_counts.z );
-          let maxYCount = f32( clip_counts.w );
-          let minX = f32( pixel_xy.x );
-          let minY = f32( pixel_xy.y );
-          let maxX = f32( pixel_xy.x + 1u );
-          let maxY = f32( pixel_xy.y + 1u );
+          let min = vec2f( pixel_xy );
+          let max = vec2f( pixel_xy + vec2( 1u ) );
+          let bounds_centroid = 0.5f * ( min + max );
+          let max_area = ( max.x - min.x ) * ( max.y - min.y );
           
           let render_program_index = current_face.bits & 0x00ffffffu;
           
@@ -172,55 +163,20 @@ const mainTwoPassFineWGSL = (
           } )}
           
           if ( is_full_area ) {
-            area = 1f;
+            area = max_area;
             centroid = bounds_centroid;
           }
           else {
-            
-            // We will sum up partials. First we will initialize based on the edge-clipped counts
-            area = 2f * ( maxY - minY ) * ( minXCount * minX + maxXCount * maxX ); // double it for when we halve it later
-            if ( needs_centroid ) {
-              centroid = 6f * bounds_centroid * vec2(
-                ( minX - maxX ) * ( minYCount * minY + maxYCount * maxY ),
-                ( maxY - minY ) * ( minXCount * minX + maxXCount * maxX )
-              );
-            }
-            else {
-              centroid = bounds_centroid;
-            }
-            
-            for ( var edge_offset = 0u; edge_offset < current_face.num_edges; edge_offset++ ) {
-              let edge_index = current_face.edges_index + edge_offset;
-              
-              // TODO: coalesced reads of this for the future, once we have correctness
-              let linear_edge = edges[ edge_index ];
-              
-              // TODO: don't require passing so much(!) pointers or inline
-              let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`minX`, wgsl`minY`, wgsl`maxX`, wgsl`maxY`, wgsl`bounds_centroid.x`, wgsl`bounds_centroid.y` )};
-              
-              for ( var i = 0u; i < result.count; i++ ) {
-                let p0x = result.edges[ i ].startPoint.x;
-                let p0y = result.edges[ i ].startPoint.y;
-                let p1x = result.edges[ i ].endPoint.x;
-                let p1y = result.edges[ i ].endPoint.y;
-                
-                area += ( p1x + p0x ) * ( p1y - p0y );
-                
-                if ( needs_centroid ) {
-                  let base = p0x * ( 2f * p0y + p1y ) + p1x * ( p0y + 2f * p1y );
-                  centroid += base * vec2( p0x - p1x, p1y - p0y );
-                }
-              }
-            }
-            
-            area *= 0.5f;
-            if ( needs_centroid && area > 1e-5 ) {
-              centroid /= 6f * area;
-            }
+            initialize_box_partials( &area, &centroid, current_face.clip_counts, needs_centroid, min, max, bounds_centroid );
           
-            // TODO: load the edge data (possibly in coalesced reads)
-            // TODO: iterate through, computing the area and centroid
-            // TODO: (handle needs_face??)
+            for ( var edge_offset = 0u; edge_offset < current_face.num_edges; edge_offset++ ) {
+              // TODO: coalesced reads of this for the future, once we have correctness
+              let linear_edge = edges[ current_face.edges_index + edge_offset ];
+              
+              add_clipped_box_partials( &area, &centroid, linear_edge, needs_centroid, min, max, bounds_centroid );
+            }
+            
+            finalize_box_partials( &area, &centroid, needs_centroid );
           }
           
           ${logValueWGSL( {
@@ -328,9 +284,89 @@ const mainTwoPassFineWGSL = (
       textureStore( output, vec2( pixel_xy.x, pixel_xy.y ), ${premultiplyWGSL( wgsl`output_color` )} );
     }
     
+    fn initialize_box_partials(
+      area_partial: ptr<function, f32>,
+      centroid_partial: ptr<function, vec2<f32>>,
+      packed_clip_counts: u32,
+      needs_centroid: bool,
+      min: vec2f,
+      max: vec2f,
+      bounds_centroid: vec2f,
+    ) {
+      // Initialize based on the edge-clipped counts
+      //
+      // NOTE: The code below is an optimized form of the below:
+      //
+      // let minXCount = clip_counts.x;
+      // let minYCount = clip_counts.y;
+      // let maxXCount = clip_counts.z;
+      // let maxYCount = clip_counts.w;
+      // area = 2f * ( maxY - minY ) * ( minXCount * minX + maxXCount * maxX ); // double it for when we halve it later
+      // centroid = 6f * bounds_centroid * vec2(
+      //   ( minX - maxX ) * ( minYCount * minY + maxYCount * maxY ),
+      //   ( maxY - minY ) * ( minXCount * minX + maxXCount * maxX )
+      // );
+    
+      let clip_counts = vec4f( unpack4xI8( packed_clip_counts ) );
+      
+      *area_partial = 2f * ( max.y - min.y ) * ( clip_counts.x * min.x + clip_counts.z * max.x ); // double it for when we halve it later
+      
+      if ( needs_centroid ) {
+        *centroid_partial = 6f * bounds_centroid * vec2(
+          ( min.x - max.x ) * ( clip_counts.y * min.y + clip_counts.w * max.y ),
+          ( max.y - min.y ) * ( clip_counts.x * min.x + clip_counts.z * max.x )
+        );
+      }
+    }
+    
+    fn add_box_partial(
+      area_partial: ptr<function, f32>,
+      centroid_partial: ptr<function, vec2<f32>>,
+      edge: ${LinearEdgeWGSL},
+      needs_centroid: bool
+    ) {
+      let p0 = edge.startPoint;
+      let p1 = edge.endPoint;
+      
+      *area_partial += ( p1.x + p0.x ) * ( p1.y - p0.y );
+      
+      if ( needs_centroid ) {
+        let base = p0.x * ( 2f * p0.y + p1.y ) + p1.x * ( p0.y + 2f * p1.y );
+        *centroid_partial += base * vec2( p0.x - p1.x, p1.y - p0.y );
+      }
+    }
+    
+    fn add_clipped_box_partials(
+      area_partial: ptr<function, f32>,
+      centroid_partial: ptr<function, vec2<f32>>,
+      edge: ${LinearEdgeWGSL},
+      needs_centroid: bool,
+      min: vec2f,
+      max: vec2f,
+      bounds_centroid: vec2f,
+    ) {
+      // TODO: don't require passing so much(!) pointers or inline
+      let result = ${bounds_clip_edgeWGSL( wgsl`edge`, wgsl`min.x`, wgsl`min.y`, wgsl`max.x`, wgsl`max.y`, wgsl`bounds_centroid.x`, wgsl`bounds_centroid.y` )};
+      
+      for ( var i = 0u; i < result.count; i++ ) {
+        add_box_partial( area_partial, centroid_partial, result.edges[ i ], needs_centroid );
+      }
+    }
+    
+    fn finalize_box_partials(
+      area_partial: ptr<function, f32>,
+      centroid_partial: ptr<function, vec2<f32>>,
+      needs_centroid: bool
+    ) {
+      *area_partial *= 0.5f;
+      if ( needs_centroid && *area_partial > 1e-5 ) {
+        *centroid_partial /= 6f * *area_partial;
+      }
+    }
+    
     fn evaluate_render_program_instructions(
       render_program_index: u32,
-      centroid: vec2f,
+      centroid: vec2f, // only correct if the render program marked as needs centroid
       bounds_centroid: vec2f
     ) -> vec4f {
       var stack: array<vec4f,${decimalS( stackSize )}>;
@@ -343,9 +379,6 @@ const mainTwoPassFineWGSL = (
       var is_done = false;
     
       var oops_count = 0u;
-    
-      var fake_centroid = bounds_centroid;
-      var real_centroid = centroid;
     
       while ( !is_done ) {
         oops_count++;
@@ -488,7 +521,7 @@ const mainTwoPassFineWGSL = (
               ) );
               let offset = bitcast<f32>( ${getInstructionWGSL( wgsl`start_address + 6u` )} );
     
-              let centroid = select( fake_centroid, real_centroid, accuracy == 0u );
+              let centroid = select( bounds_centroid, centroid, accuracy == 0u );
               let dot_product = dot( scaled_normal, centroid );
               t = dot_product - offset;
             }
@@ -511,11 +544,11 @@ const mainTwoPassFineWGSL = (
     
               if ( accuracy == 0u ) {
                 // TODO: evaluate the integral!!!!!
-                let localPoint = inverse_transform * vec3( real_centroid, 1f );
+                let localPoint = inverse_transform * vec3( centroid, 1f );
                 average_distance = length( localPoint );
               }
               else {
-                let centroid = select( fake_centroid, real_centroid, accuracy == 1u );
+                let centroid = select( bounds_centroid, centroid, accuracy == 1u );
                 let localPoint = inverse_transform * vec3( centroid, 1f );
                 average_distance = length( localPoint.xy );
               }
@@ -581,7 +614,7 @@ const mainTwoPassFineWGSL = (
                   ${getInstructionWGSL( wgsl`start_address + 10u` )}
               ) );
     
-              let centroid = select( fake_centroid, real_centroid, accuracy == 0u || accuracy == 2u );
+              let centroid = select( bounds_centroid, centroid, accuracy == 0u || accuracy == 2u );
     
               let local_point = ( inverse_transform * vec3( centroid, 1f ) ).xy;
               let local_delta = local_point - start;
@@ -605,7 +638,7 @@ const mainTwoPassFineWGSL = (
               let t_sign = sign( 1f - focal_x );
     
               // TODO: centroid handling for this
-              let centroid = select( fake_centroid, real_centroid, accuracy == 0u || accuracy == 1u || accuracy == 3u );
+              let centroid = select( bounds_centroid, centroid, accuracy == 0u || accuracy == 1u || accuracy == 3u );
               let point = centroid;
     
               // Pixel-specifics
@@ -738,7 +771,7 @@ const mainTwoPassFineWGSL = (
     
             stack_length -= 2u;
     
-            let point = select( fake_centroid, real_centroid, accuracy == 0u );
+            let point = select( bounds_centroid, centroid, accuracy == 0u );
     
             let lambda_a = dot( diff_a, point - point_c ) / det;
             let lambda_b = dot( diff_b, point - point_c ) / det;
