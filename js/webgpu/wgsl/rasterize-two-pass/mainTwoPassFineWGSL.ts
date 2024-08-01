@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, unpremultiplyWGSL, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, F32Type, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, logValueWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, U32Type, unpremultiplyWGSL, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 
 export type mainTwoPassFineWGSLOptions = {
   config: BufferSlot<TwoPassConfig>;
@@ -36,6 +36,10 @@ const mainTwoPassFineWGSL = (
   // TODO: probably can't dynamically size then, hmm
   const stackSize = 10;
   const instructionStackSize = 8;
+
+  // const logIndex = Math.floor( Math.random() * 1000 );
+  const logIndex = 4794;
+  console.log( logIndex );
 
   const getInstructionWGSL = ( index: WGSLExpressionU32 ) => wgsl`render_program_instructions[ ${index} ]`;
 
@@ -89,11 +93,30 @@ const mainTwoPassFineWGSL = (
       
       let pixel_xy = bin_xy * config.bin_size + vec2( local_id.x % 16u, local_id.x / 16u );
       
+      // 21, 13 ish
+      
+      ${logValueWGSL( {
+        value: 'pixel_xy.x',
+        type: U32Type,
+        lineToLog: line => line.dataArray.flat()[ logIndex ]
+      } )}
+      ${logValueWGSL( {
+        value: 'pixel_xy.y',
+        type: U32Type,
+        lineToLog: line => line.dataArray.flat()[ logIndex ]
+      } )}
+              
       let skip_pixel = pixel_xy.x >= config.raster_width || pixel_xy.y >= config.raster_height;
       
       var accumulation = vec4f( 0f, 0f, 0f, 0f );
 
       //accumulation = vec4( f32( bin_xy.x ) / 16f, 0f, f32( bin_xy.y ) / 16f, 1f ); // TODO: remove
+      
+      ${logValueWGSL( {
+        value: 'next_address',
+        type: U32Type,
+        lineToLog: line => line.dataArray.flat()[ logIndex ]
+      } )}
       
       var oops_count = 0u;
       while ( workgroupUniformLoad( &next_address ) != 0xffffffffu ) {
@@ -111,6 +134,12 @@ const mainTwoPassFineWGSL = (
         }
         
         workgroupBarrier();
+        
+        ${logValueWGSL( {
+          value: 'select( 0u, 1u, skip_pixel )',
+          type: U32Type,
+          lineToLog: line => line.dataArray.flat()[ logIndex ]
+        } )}
         
         if ( !skip_pixel ) {
           //let needs_centroid = ( current_face.bits & 0x10000000u ) != 0u;
@@ -136,6 +165,12 @@ const mainTwoPassFineWGSL = (
           let maxY = f32( pixel_xy.y + 1u );
           
           let render_program_index = current_face.bits & 0x00ffffffu;
+          
+          ${logValueWGSL( {
+            value: 'render_program_index',
+            type: U32Type,
+            lineToLog: line => line.dataArray.flat()[ logIndex ]
+          } )}
           
           if ( is_full_area ) {
             area = 1f;
@@ -180,7 +215,7 @@ const mainTwoPassFineWGSL = (
             }
             
             area *= 0.5f;
-            if ( needs_centroid ) {
+            if ( needs_centroid && area > 1e-5 ) {
               centroid /= 6f * area;
             }
           
@@ -189,12 +224,54 @@ const mainTwoPassFineWGSL = (
             // TODO: (handle needs_face??)
           }
           
+          ${logValueWGSL( {
+            value: 'area',
+            type: F32Type,
+            lineToLog: line => line.dataArray.flat()[ logIndex ]
+          } )}
+          
+          ${logValueWGSL( {
+            value: 'centroid.x',
+            type: F32Type,
+            lineToLog: line => line.dataArray.flat()[ logIndex ]
+          } )}
+          
+          ${logValueWGSL( {
+            value: 'centroid.y',
+            type: F32Type,
+            lineToLog: line => line.dataArray.flat()[ logIndex ]
+          } )}
+          
           if ( area > 1e-4f ) {
             let color = evaluate_render_program_instructions(
               render_program_index,
               centroid,
               bounds_centroid
             );
+            
+            ${logValueWGSL( {
+              value: 'color.r',
+              type: F32Type,
+              lineToLog: line => line.dataArray.flat()[ logIndex ]
+            } )}
+            
+            ${logValueWGSL( {
+              value: 'color.g',
+              type: F32Type,
+              lineToLog: line => line.dataArray.flat()[ logIndex ]
+            } )}
+            
+            ${logValueWGSL( {
+              value: 'color.b',
+              type: F32Type,
+              lineToLog: line => line.dataArray.flat()[ logIndex ]
+            } )}
+            
+            ${logValueWGSL( {
+              value: 'color.a',
+              type: F32Type,
+              lineToLog: line => line.dataArray.flat()[ logIndex ]
+            } )}
             
             accumulation += color * area;
             
@@ -225,6 +302,30 @@ const mainTwoPassFineWGSL = (
           //accumulation = vec4( minXCount * 0.5f + 0.5f, maxXCount * 0.5f + 0.5f, minYCount * 0.5f + 0.5f, 1f ); // TODO: remove
         }
       }
+      
+      ${logValueWGSL( {
+        value: 'accumulation.r',
+        type: F32Type,
+        lineToLog: line => line.dataArray.flat()[ logIndex ]
+      } )}
+      
+      ${logValueWGSL( {
+        value: 'accumulation.g',
+        type: F32Type,
+        lineToLog: line => line.dataArray.flat()[ logIndex ]
+      } )}
+      
+      ${logValueWGSL( {
+        value: 'accumulation.b',
+        type: F32Type,
+        lineToLog: line => line.dataArray.flat()[ logIndex ]
+      } )}
+      
+      ${logValueWGSL( {
+        value: 'accumulation.a',
+        type: F32Type,
+        lineToLog: line => line.dataArray.flat()[ logIndex ]
+      } )}
       
       // TODO: do we need the integer scale here?
       let linear_unmapped_color = ${unpremultiplyWGSL( wgsl`accumulation` )};

@@ -75,17 +75,17 @@ export const evaluateTwoPassFineSolo = async (
 
   const edges: LinearEdge[] = [];
 
-  const allowlist = [
-    // TODO: remove when done debugging
-    2, 0
-  ];
+  // const allowlist = [
+  //   // TODO: remove when done debugging
+  //   2
+  // ];
 
   for ( const renderableFace of renderableFaces ) {
 
-    // TODO: remove when done debugging
-    if ( !allowlist.includes( renderableFaces.indexOf( renderableFace ) ) ) {
-      continue;
-    }
+    // // TODO: remove when done debugging
+    // if ( !allowlist.includes( renderableFaces.indexOf( renderableFace ) ) ) {
+    //   continue;
+    // }
 
     const face = renderableFace.face;
     const bounds = face.getBounds();
@@ -144,7 +144,7 @@ export const evaluateTwoPassFineSolo = async (
             edges.push( ...face.edges );
 
             fineRenderableFaces.push( {
-              renderProgramIndex: 0,
+              renderProgramIndex: renderProgramIndex,
               needsCentroid: needsCentroid,
               needsFace: needsFace,
               isConstant: isConstant,
@@ -179,6 +179,7 @@ export const evaluateTwoPassFineSolo = async (
 
   const module = new DirectModule<number>( {
     name: `module_${name}`,
+    // log: true,
     main: mainTwoPassFineWGSL( {
       config: configSlot,
       addresses: addressesSlot,

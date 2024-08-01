@@ -53,7 +53,7 @@ export default class PipelineBlueprint {
 
   // TODO: oh no, we need to put the atomic in here(!)
   // TODO: Or actually, just an ability to put structs of arbitrary types in ConcreteTypes
-  public static readonly LOG_BUFFER_SLOT = new BufferSlot( getCastedType( getArrayType( U32Type, 2 << 22, 0 ), wgslWith(
+  public static readonly LOG_BUFFER_SLOT = new BufferSlot( getCastedType( getArrayType( U32Type, 2 << 24, 0 ), wgslWith(
     wgsl`_Log`,
     new WGSLModule( '_Log', wgsl`
       struct _Log {
