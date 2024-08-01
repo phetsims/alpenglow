@@ -75,7 +75,17 @@ export const evaluateTwoPassFineSolo = async (
 
   const edges: LinearEdge[] = [];
 
+  const allowlist = [
+    // TODO: remove when done debugging
+    2, 0
+  ];
+
   for ( const renderableFace of renderableFaces ) {
+
+    // TODO: remove when done debugging
+    if ( !allowlist.includes( renderableFaces.indexOf( renderableFace ) ) ) {
+      continue;
+    }
 
     const face = renderableFace.face;
     const bounds = face.getBounds();
