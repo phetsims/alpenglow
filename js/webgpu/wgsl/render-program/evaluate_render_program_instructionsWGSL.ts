@@ -9,7 +9,7 @@ import optionize from '../../../../../phet-core/js/optionize.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export type blend_composeWGSLOptions = {
+export type evaluate_render_program_instructionsWGSLOptions = {
   getRenderProgramInstruction: ( index: WGSLExpressionU32 ) => WGSLExpression;
   getLinearEdge: ( index: WGSLExpressionU32 ) => WGSLExpression;
   stackSize?: number;
@@ -31,9 +31,9 @@ export default (
   minYCount: WGSLExpressionI32,
   maxXCount: WGSLExpressionI32,
   maxYCount: WGSLExpressionI32,
-  providedOptions?: blend_composeWGSLOptions
+  providedOptions?: evaluate_render_program_instructionsWGSLOptions
 ): WGSLExpression => {
-  const options = optionize<blend_composeWGSLOptions>()( {
+  const options = optionize<evaluate_render_program_instructionsWGSLOptions>()( {
     stackSize: 10,
     instructionStackSize: 8
   }, providedOptions );

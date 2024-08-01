@@ -87,6 +87,10 @@ export const evaluateTwoPassFineSolo = async (
     renderableFace.renderProgram.writeInstructions( instructions );
     RenderInstruction.instructionsToBinary( instructionsEncoder, instructions );
 
+    const needsCentroid = renderableFace.renderProgram.needsCentroid;
+    const needsFace = renderableFace.renderProgram.needsFace;
+    const isConstant = renderableFace.renderProgram instanceof RenderColor;
+
     for ( let binX = 0; binX < binWidth; binX++ ) {
       for ( let binY = 0; binY < binHeight; binY++ ) {
         const minX = binX * 16;
@@ -111,9 +115,9 @@ export const evaluateTwoPassFineSolo = async (
           if ( face.getArea() + 1e-6 >= 256 ) {
             fineRenderableFaces.push( {
               renderProgramIndex: renderProgramIndex,
-              needsCentroid: false,
-              needsFace: false,
-              isConstant: false,
+              needsCentroid: needsCentroid,
+              needsFace: needsFace,
+              isConstant: isConstant,
               isFullArea: true,
               edgesIndex: 0,
               numEdges: 0,
@@ -131,9 +135,9 @@ export const evaluateTwoPassFineSolo = async (
 
             fineRenderableFaces.push( {
               renderProgramIndex: 0,
-              needsCentroid: false,
-              needsFace: false,
-              isConstant: false,
+              needsCentroid: needsCentroid,
+              needsFace: needsFace,
+              isConstant: isConstant,
               isFullArea: false,
               edgesIndex: edgesIndex,
               numEdges: numEdges,
@@ -149,6 +153,9 @@ export const evaluateTwoPassFineSolo = async (
     }
   }
 
+  // TODO: get the typing so we don't need to do this
+  const renderProgramInstructions = [ ...instructionsEncoder.u32Array ];
+
   // const edgeClippedFace = testFace.toEdgedClippedFace( 0, 0, 512, 512 );
 
 
@@ -156,6 +163,7 @@ export const evaluateTwoPassFineSolo = async (
   // const addressesAtomicSlot = new BufferArraySlot( getArrayType( U32AtomicType, numBins + 2 ) ); // TODO: variable size
   const addressesSlot = new BufferArraySlot( getArrayType( U32Type, numBins + 2 ) ); // TODO: variable size
   const fineRenderableFacesSlot = new BufferArraySlot( getArrayType( TwoPassFineRenderableFaceType, fineRenderableFaces.length ) ); // TODO: variable size
+  const renderProgramInstructionsSlot = new BufferArraySlot( getArrayType( U32Type, renderProgramInstructions.length ) ); // TODO: variable size
   const edgesSlot = new BufferArraySlot( getArrayType( LinearEdgeType, edges.length ) ); // TODO: variable size
   const outputSlot = new TextureViewSlot();
 
@@ -165,10 +173,10 @@ export const evaluateTwoPassFineSolo = async (
       config: configSlot,
       addresses: addressesSlot,
       fineRenderableFaces: fineRenderableFacesSlot,
+      renderProgramInstructions: renderProgramInstructionsSlot,
       edges: edgesSlot,
       output: outputSlot,
-      storageFormat: deviceContext.preferredStorageFormat, // e.g. deviceContext.preferredStorageFormat
-      integerScale: 1
+      storageFormat: deviceContext.preferredStorageFormat // e.g. deviceContext.preferredStorageFormat
     } ),
     setDispatchSize: ( dispatchSize: Vector3, size: number ) => {
       dispatchSize.x = size;
@@ -180,10 +188,11 @@ export const evaluateTwoPassFineSolo = async (
     module,
     [ configSlot, addressesSlot, fineRenderableFacesSlot, edgesSlot ],
     Routine.INDIVIDUAL_LAYOUT_STRATEGY,
-    ( context, execute, input: { config: TwoPassConfig; addresses: number[]; fineRenderableFaces: TwoPassFineRenderableFace[]; edges: LinearEdge[] } ) => {
+    ( context, execute, input: { config: TwoPassConfig; addresses: number[]; fineRenderableFaces: TwoPassFineRenderableFace[]; renderProgramInstructions: number[]; edges: LinearEdge[] } ) => {
       context.setTypedBufferValue( configSlot, input.config );
       context.setTypedBufferValue( addressesSlot, input.addresses );
       context.setTypedBufferValue( fineRenderableFacesSlot, input.fineRenderableFaces );
+      context.setTypedBufferValue( renderProgramInstructionsSlot, input.renderProgramInstructions );
       context.setTypedBufferValue( edgesSlot, input.edges );
 
       execute( context, numBins );
@@ -258,6 +267,7 @@ export const evaluateTwoPassFineSolo = async (
     },
     addresses: [ 0, 0, ...unpaddedAddresses ],
     fineRenderableFaces: fineRenderableFaces,
+    renderProgramInstructions: renderProgramInstructions,
     edges: edges
   } );
 
