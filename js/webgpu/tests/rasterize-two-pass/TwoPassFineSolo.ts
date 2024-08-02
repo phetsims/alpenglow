@@ -14,8 +14,8 @@ export const evaluateTwoPassFineSolo = async (
   deviceContext: DeviceContext
 ): Promise<HTMLCanvasElement> => {
 
-  const filterType = PolygonFilterType.Box;
-  const filterScale = 1;
+  const filterType = PolygonFilterType.Bilinear;
+  const filterScale = 10;
 
   const filterRadius = {
     [ PolygonFilterType.Box ]: 0.5,
@@ -69,11 +69,13 @@ export const evaluateTwoPassFineSolo = async (
 
   } );
 
-  const binSize = filterScale === 1 ? {
-    [ PolygonFilterType.Box ]: 16,
-    [ PolygonFilterType.Bilinear ]: 15,
-    [ PolygonFilterType.MitchellNetravali ]: 13
-  }[ filterType ] : 16;
+  // TODO: grid clip type
+  // const binSize = filterScale === 1 ? {
+  //   [ PolygonFilterType.Box ]: 16,
+  //   [ PolygonFilterType.Bilinear ]: 15,
+  //   [ PolygonFilterType.MitchellNetravali ]: 13
+  // }[ filterType ] : 16;
+  const binSize = 16; // TODO: don't fix at 16 forever for filtering
   const tileSize = 16 * binSize;
 
   const tileWidth = Math.ceil( rasterWidth / tileSize );
@@ -91,6 +93,11 @@ export const evaluateTwoPassFineSolo = async (
   const edges: LinearEdge[] = [];
 
   for ( const renderableFace of renderableFaces ) {
+
+    // TODO: remove debugging note
+    // if ( renderableFaces.indexOf( renderableFace ) !== 2 ) {
+    //   continue;
+    // }
 
     const face = renderableFace.face;
     const bounds = face.getBounds();
@@ -114,6 +121,9 @@ export const evaluateTwoPassFineSolo = async (
         const maxY = ( binY + 1 ) * 16 + filterExpansion;
         const maxArea = ( maxX - minX ) * ( maxY - minY );
 
+        // NOTE: Use the below option if needing to remove edge-clipped counts for debugging
+        // TODO: can we replace "some" of them but not ALL?
+        // const face = edgeClippedFace.getClipped( minX, minY, maxX, maxY ).toEdgedFace().toEdgedClippedFaceWithoutCheck( minX, minY, maxX, maxY );
         const face = edgeClippedFace.getClipped( minX, minY, maxX, maxY );
         if ( face.getArea() > 1e-4 ) {
 
