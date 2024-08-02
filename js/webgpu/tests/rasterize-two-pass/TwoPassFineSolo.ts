@@ -15,7 +15,7 @@ export const evaluateTwoPassFineSolo = async (
 ): Promise<HTMLCanvasElement> => {
 
   const filterType = PolygonFilterType.Bilinear;
-  const filterScale = 10;
+  const filterScale = 17; // 25 box, 17 bilinear (comparison)
 
   const filterRadius = {
     [ PolygonFilterType.Box ]: 0.5,
