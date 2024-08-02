@@ -381,10 +381,13 @@ const mainTwoPassFineWGSL = (
           }
         }
         
-        finalize_box_partials( &areas[ 0 ], &centroids[ 0 ], needs_centroid );
-        finalize_box_partials( &areas[ 1 ], &centroids[ 1 ], needs_centroid );
-        finalize_box_partials( &areas[ 2 ], &centroids[ 2 ], needs_centroid );
-        finalize_box_partials( &areas[ 3 ], &centroids[ 3 ], needs_centroid );
+        // box partials are only for centroid
+        if ( needs_centroid ) {
+          finalize_box_partials( &areas[ 0 ], &centroids[ 0 ], needs_centroid );
+          finalize_box_partials( &areas[ 1 ], &centroids[ 1 ], needs_centroid );
+          finalize_box_partials( &areas[ 2 ], &centroids[ 2 ], needs_centroid );
+          finalize_box_partials( &areas[ 3 ], &centroids[ 3 ], needs_centroid );
+        }
       }
       
       // low-low
@@ -583,8 +586,11 @@ const mainTwoPassFineWGSL = (
       scale: f32, // will need to divide by this to put things in the unit box (after offset correction)
       output_scale: f32 // multiplier for the output box (area/centroid) AND bilinear (integral) contributions, likely used for edge-clipped counts
     ) {
-      // We apply no transformations to the area/centroid computations (normal coordinate space)
-      add_scaled_box_partial( area_partial, centroid_partial, edge, needs_centroid, output_scale );
+      // box partials are only for centroid
+      if ( needs_centroid ) {
+        // We apply no transformations to the area/centroid computations (normal coordinate space)
+        add_scaled_box_partial( area_partial, centroid_partial, edge, needs_centroid, output_scale );
+      }
       
       // points scaled into a unit box. if we had an orientation flip, sign_multiplier should be negative
       let p0 = abs( edge.startPoint - offset ) / vec2( scale );
