@@ -3,7 +3,7 @@
 import { wgsl, WGSLReferenceModule } from '../../../imports.js';
 
 /**
- * Uniforms for a TwoPassFineRenderableFace
+ * Uniforms for a TwoPassCoarseRenderableFace
  *
  * bits:
  *   0x00ffffff: renderProgramIndex
@@ -18,17 +18,17 @@ import { wgsl, WGSLReferenceModule } from '../../../imports.js';
  *   0x0000ff00: minYCount
  *   0x00ff0000: maxXCount
  *   0xff000000: maxYCount
- * nextAddress
+ * tileIndex
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default new WGSLReferenceModule( 'TwoPassFineRenderableFace', wgsl`
-  struct TwoPassFineRenderableFace {
+export default new WGSLReferenceModule( 'TwoPassCoarseRenderableFace', wgsl`
+  struct TwoPassCoarseRenderableFace {
     bits: u32,
     edges_index: u32,
     num_edges: u32,
     clip_counts: u32,
-    next_address: u32
+    tile_index: u32
   }
 ` );

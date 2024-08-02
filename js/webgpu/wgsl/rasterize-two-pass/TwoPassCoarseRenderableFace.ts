@@ -1,11 +1,11 @@
 // Copyright 2024, University of Colorado Boulder
 
 /**
- * Raw type for a TwoPassFineRenderableFace
+ * Raw type for a TwoPassCoarseRenderableFace
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-type TwoPassFineRenderableFace = {
+type TwoPassCoarseRenderableFace = {
   // RenderProgram packed info
   renderProgramIndex: number;
   needsCentroid: boolean;
@@ -19,7 +19,7 @@ type TwoPassFineRenderableFace = {
   minYCount: number;
   maxXCount: number;
   maxYCount: number;
-  nextAddress: number;
+  tileIndex: number;
 };
 
-export default TwoPassFineRenderableFace;
+export default TwoPassCoarseRenderableFace;

@@ -1,12 +1,26 @@
 // Copyright 2024, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Fine rasterization stage for the "two-pass" setup.
+ *
+ * Each bin (16x16, or smaller if grid-filtering) will have a linked list of (non-overlapping) faces that need to be
+ * rendered into its pixels. We spawn a workgroup PER bin, so we have (nominally) a thread-per-pixel. We'll loop over
+ * the faces, accumulating the color for each pixel. Then once done, we can gamut-map it and store it.
+ *
+ * There will be the following filter types:
+ * - Box filtering (implemented)
+ * - Bilinear filtering (implemented)
+ * - Mitchell-Netravali filtering (not implemented) TODO: implement Mitchell-Netravali (both grid and arbitrary-scale)
+ *
+ * When filter scale is 1, we can use a grid-filtering approach for bilinear+ filtering, where we will compute
+ * a full 16x16 grid of integrals (and colors), which will then be combined into the proper (e.g. 15x15) set of pixels.
+ * Thus the bin size can be 15x15 (if bilinear and filter_scale=1), or 13x13 (if Mitchell-Netravali and filter_scale=1).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, F32Type, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, LinearEdgeWGSL, logValueWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, U32Type, unpremultiplyWGSL, wgsl, wgslBlueprint, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import optionize from '../../../../../phet-core/js/optionize.js';
 
 export type mainTwoPassFineWGSLOptions = {
   config: BufferSlot<TwoPassConfig>;
@@ -16,11 +30,20 @@ export type mainTwoPassFineWGSLOptions = {
   edges: BufferSlot<LinearEdge[]>;
   output: TextureViewSlot;
   storageFormat: GPUTextureFormat; // e.g. deviceContext.preferredStorageFormat
+  supportsGridFiltering?: boolean;
+  supportsBilinear?: boolean;
+  supportsMitchellNetravali?: boolean;
 };
 
 const mainTwoPassFineWGSL = (
-  options: mainTwoPassFineWGSLOptions
+  providedOptions: mainTwoPassFineWGSLOptions
 ): WGSLMainModule => {
+
+  const options = optionize<mainTwoPassFineWGSLOptions>()( {
+    supportsGridFiltering: false,
+    supportsBilinear: true,
+    supportsMitchellNetravali: false
+  }, providedOptions );
 
   const configSlot = new WGSLSlot( 'config', options.config, BufferBindingType.UNIFORM );
   const addressesSlot = new WGSLSlot( 'addresses', options.addresses, BufferBindingType.READ_ONLY_STORAGE ); // TODO: see if read-write faster
@@ -47,6 +70,9 @@ const mainTwoPassFineWGSL = (
   const ifLogArguments = wgslBlueprint( blueprint => blueprint.log ? wgsl`, global_id, local_id, workgroup_id` : wgsl`` );
   const ifLogParameters = wgslBlueprint( blueprint => blueprint.log ? wgsl`, global_id: vec3u, local_id: vec3u, workgroup_id: vec3u` : wgsl`` );
 
+  const includeWorkgroupData = options.supportsGridFiltering && ( options.supportsBilinear || options.supportsMitchellNetravali );
+  const workgroupIntegralsSize = 256 * ( options.supportsMitchellNetravali ? 16 : 4 );
+
   return new WGSLMainModule( [
     configSlot,
     addressesSlot,
@@ -63,6 +89,11 @@ const mainTwoPassFineWGSL = (
     var<workgroup> workgroup_exit: bool;
     var<workgroup> next_address: u32;
     var<workgroup> current_face: ${TwoPassFineRenderableFaceWGSL};
+    
+    ${includeWorkgroupData ? wgsl`
+      var<workgroup> shared_integrals: array<f32, ${decimalS( workgroupIntegralsSize )}>;
+      var<workgroup> shared_colors: array<vec4<f32>, 256>;
+    ` : wgsl``}
     
     @compute @workgroup_size(256)
     fn main(
@@ -163,23 +194,39 @@ const mainTwoPassFineWGSL = (
             accumulate_box( &accumulation, min, max, bounds_centroid, render_program_index, is_full_area, needs_centroid );
           }
         }
-        else if ( config.filter_type == 1u ) {
-          // TODO: variable-scale bilinear
-          // For non-grid filtering, we don't need uniform control flow, so we can skip pixels
-          if ( !skip_pixel ) {
-            let mid = vec2f( pixel_xy ) + vec2( 0.5f );
-            
-            let radius_partial = vec2( config.filter_scale );
-            
-            let min = mid - radius_partial;
-            let max = mid + radius_partial;
-            
-            accumulate_bilinear( &accumulation, min, mid, max, render_program_index, is_full_area, needs_centroid${ifLogArguments} );  
+        ${options.supportsBilinear ? wgsl`
+          else if ( config.filter_type == 1u ) {
+            ${options.supportsGridFiltering ? wgsl`
+              if ( config.filter_scale == 1f ) {
+                let min = vec2f( pixel_xy ) - vec2( 0.5f );
+                let max = vec2f( pixel_xy ) + vec2( 0.5f );
+                
+                // TODO: handle is_full_area AND is_constant better?
+                accumulate_grid_bilinear( &accumulation, min, max, local_id, render_program_index, is_full_area, needs_centroid${ifLogArguments} );
+              }
+              else
+            ` : wgsl``}
+            {
+              // TODO: variable-scale bilinear
+              // For non-grid filtering, we don't need uniform control flow, so we can skip pixels
+              if ( !skip_pixel ) {
+                let mid = vec2f( pixel_xy ) + vec2( 0.5f );
+                
+                let radius_partial = vec2( config.filter_scale );
+                
+                let min = mid - radius_partial;
+                let max = mid + radius_partial;
+                
+                accumulate_bilinear( &accumulation, min, mid, max, render_program_index, is_full_area, needs_centroid${ifLogArguments} );  
+              }
+            }
           }
-        }
-        else if ( config.filter_type == 2u ) {
-          // TODO: variable-scale mitchell-netravali
-        }
+        ` : wgsl``}
+        ${options.supportsMitchellNetravali ? wgsl`
+          else if ( config.filter_type == 2u ) {
+            // TODO: variable-scale mitchell-netravali
+          }
+        ` : wgsl``}
         // TODO: fixed-scale grid clip bilinear/mitchell-netravali
         // TODO: compute all of the integrals (for each section) + ?centroid. compute color with ?centroid.
         // TODO: stuff integrals + color in workgroup memory, barrier, then have each pixel (subset of threads) sum up
@@ -209,31 +256,45 @@ const mainTwoPassFineWGSL = (
         lineToLog: line => line.dataArray.flat()[ logIndex ]
       } )}
       
-      // TODO: do we need the integer scale here?
-      let linear_unmapped_color = ${unpremultiplyWGSL( wgsl`accumulation` )};
-    
-      var output_color = vec4( 0f );
-      if ( linear_unmapped_color.a > 1e-8f ) {
-        switch ( config.raster_color_space ) {
-          case 0u: {
-            output_color = vec4(
-              ${linear_sRGB_to_sRGBWGSL( gamut_map_linear_sRGBWGSL( wgsl`linear_unmapped_color.rgb` ) )},
-              min( 1f, linear_unmapped_color.a )
-            );
-          }
-          case 1u: {
-            output_color = vec4(
-              ${linear_sRGB_to_sRGBWGSL( gamut_map_linear_displayP3WGSL( wgsl`linear_unmapped_color.rgb` ) )},
-              min( 1f, linear_unmapped_color.a )
-            );
-          }
-          default: {
-            output_color = vec4( 1f, 0.5f, 0.111111, 1f );
+      var will_store_pixel = !skip_pixel;
+      
+      ${options.supportsGridFiltering ? wgsl`
+        // Do not store the pixel if it isn't what we accumulated into
+        if ( will_store_pixel && config.filter_type != 0u && config.filter_scale == 1f ) {
+          let cutoff = select( 13u, 15u, config.filter_type == 1u ); // 15 for bilinear, 13 for mitchell-netravali
+          if ( local_id.x / 16u >= cutoff || local_id.x % 16u >= cutoff ) {
+            will_store_pixel = false;
           }
         }
-      }
+      ` : wgsl``}
       
-      textureStore( output, vec2( pixel_xy.x, pixel_xy.y ), ${premultiplyWGSL( wgsl`output_color` )} );
+      if ( will_store_pixel ) {
+        // TODO: do we need the integer scale here?
+        let linear_unmapped_color = ${unpremultiplyWGSL( wgsl`accumulation` )};
+      
+        var output_color = vec4( 0f );
+        if ( linear_unmapped_color.a > 1e-8f ) {
+          switch ( config.raster_color_space ) {
+            case 0u: {
+              output_color = vec4(
+                ${linear_sRGB_to_sRGBWGSL( gamut_map_linear_sRGBWGSL( wgsl`linear_unmapped_color.rgb` ) )},
+                min( 1f, linear_unmapped_color.a )
+              );
+            }
+            case 1u: {
+              output_color = vec4(
+                ${linear_sRGB_to_sRGBWGSL( gamut_map_linear_displayP3WGSL( wgsl`linear_unmapped_color.rgb` ) )},
+                min( 1f, linear_unmapped_color.a )
+              );
+            }
+            default: {
+              output_color = vec4( 1f, 0.5f, 0.111111, 1f );
+            }
+          }
+        }
+        
+        textureStore( output, vec2( pixel_xy.x, pixel_xy.y ), ${premultiplyWGSL( wgsl`output_color` )} );
+      }
     }
     
     fn accumulate_box(
@@ -275,163 +336,6 @@ const mainTwoPassFineWGSL = (
         );
         
         *accumulation += color * area / max_area;
-      }
-    }
-    
-    // TODO: do a grid-based version, since it will need fewer registers AND be 4x faster for compute
-    fn accumulate_bilinear(
-      accumulation: ptr<function, vec4<f32>>,
-      min: vec2f,
-      mid: vec2f,
-      max: vec2f,
-      render_program_index: u32,
-      is_full_area: bool,
-      needs_centroid: bool
-      ${ifLogParameters}
-    ) {
-
-      // we have four cells:
-      // low-low - x: min -> mid, y: min -> mid (positive sign for integral)
-      // low-high - x: min -> mid, y: mid -> max (negative sign for integral - abs flips orientation)
-      // high-low - x: mid -> max, y: min -> mid (negative sign for integral - abs flips orientation)
-      // high-high - x: mid -> max, y: mid -> max (positive sign for integral)
-      
-      // values for each cell, indexed as [ low-low, low-high, high-low, high-high ]
-      var integrals: array<f32, 4>; // special unit-box coordinate frame (with sign applied)
-      var centroids: array<vec2f, 4>; // normal coordinate frame
-      
-      // unit-box * scale = cell-box (bilinear has 4 cells)
-      let scale = mid.y - min.y;
-      
-      // midpoints for the various cells
-      let low = 0.5f * ( min + mid );
-      let high = 0.5f * ( mid + max );
-      let low_high = vec2( low.x, high.y );
-      let high_low = vec2( high.x, low.y );
-      
-      if ( is_full_area ) {
-        integrals = array( 0.25f, 0.25f, 0.25f, 0.25f );
-        centroids = array( low, low_high, high_low, high );
-      }
-      else {
-        var areas: array<f32, 4> = array( 0f, 0f, 0f, 0f ); // normal coordinate frame
-        integrals = array( 0f, 0f, 0f, 0f );
-        centroids = array( vec2( 0f ), vec2f( 0f ), vec2f( 0f ), vec2f( 0f ) );
-        
-        { // initialize partials by handling each edge
-          // low-low
-          initialize_bilinear_partial( 
-            &areas[ 0 ], &integrals[ 0 ], &centroids[ 0 ], current_face.clip_counts, mid, 1f, scale,
-            min, mid, needs_centroid${ifLogArguments}
-          );
-          
-          // low-high
-          initialize_bilinear_partial( 
-            &areas[ 1 ], &integrals[ 1 ], &centroids[ 1 ], current_face.clip_counts, mid, -1f, scale,
-            vec2( min.x, mid.y ), vec2( mid.x, max.y ), needs_centroid${ifLogArguments}
-          );
-          
-          // high-low
-          initialize_bilinear_partial( 
-            &areas[ 2 ], &integrals[ 2 ], &centroids[ 2 ], current_face.clip_counts, mid, -1f, scale,
-            vec2( mid.x, min.y ), vec2( max.x, mid.y ), needs_centroid${ifLogArguments}
-          );
-          
-          // high-high
-          initialize_bilinear_partial( 
-            &areas[ 3 ], &integrals[ 3 ], &centroids[ 3 ], current_face.clip_counts, mid, 1f, scale,
-            mid, max, needs_centroid${ifLogArguments}
-          );
-        }
-        
-        for ( var edge_offset = 0u; edge_offset < current_face.num_edges; edge_offset++ ) {
-          // TODO: coalesced reads of this for the future, once we have correctness
-          let linear_edge = edges[ current_face.edges_index + edge_offset ];
-          
-          { // low-low
-            let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`min.x`, wgsl`min.y`, wgsl`mid.x`, wgsl`mid.y`, wgsl`low.x`, wgsl`low.y` )};
-            
-            for ( var i = 0u; i < result.count; i++ ) {
-              add_bilinear_partial( &areas[ 0 ], &integrals[ 0 ], &centroids[ 0 ], result.edges[ i ], needs_centroid, mid, 1f, scale, 1f );
-            }
-          }
-          
-          { // low-high
-            let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`min.x`, wgsl`mid.y`, wgsl`mid.x`, wgsl`max.y`, wgsl`low_high.x`, wgsl`low_high.y` )};
-            
-            for ( var i = 0u; i < result.count; i++ ) {
-              add_bilinear_partial( &areas[ 1 ], &integrals[ 1 ], &centroids[ 1 ], result.edges[ i ], needs_centroid, mid, -1f, scale, 1f );
-            }
-          }
-          
-          { // high-low
-            let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`mid.x`, wgsl`min.y`, wgsl`max.x`, wgsl`mid.y`, wgsl`high_low.x`, wgsl`high_low.y` )};
-            
-            for ( var i = 0u; i < result.count; i++ ) {
-              add_bilinear_partial( &areas[ 2 ], &integrals[ 2 ], &centroids[ 2 ], result.edges[ i ], needs_centroid, mid, -1f, scale, 1f );
-            }
-          }
-          
-          { // high-high
-            let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`mid.x`, wgsl`mid.y`, wgsl`max.x`, wgsl`max.y`, wgsl`high.x`, wgsl`high.y` )};
-            
-            for ( var i = 0u; i < result.count; i++ ) {
-              add_bilinear_partial( &areas[ 3 ], &integrals[ 3 ], &centroids[ 3 ], result.edges[ i ], needs_centroid, mid, 1f, scale, 1f );
-            }
-          }
-        }
-        
-        // box partials are only for centroid
-        if ( needs_centroid ) {
-          finalize_box_partials( &areas[ 0 ], &centroids[ 0 ], needs_centroid );
-          finalize_box_partials( &areas[ 1 ], &centroids[ 1 ], needs_centroid );
-          finalize_box_partials( &areas[ 2 ], &centroids[ 2 ], needs_centroid );
-          finalize_box_partials( &areas[ 3 ], &centroids[ 3 ], needs_centroid );
-        }
-      }
-      
-      // low-low
-      if ( integrals[ 0 ] > low_area_multiplier ) {
-        let color = evaluate_render_program_instructions(
-          render_program_index,
-          centroids[ 0 ],
-          low
-        );
-        
-        *accumulation += color * integrals[ 0 ];
-      }
-      
-      // low-high
-      if ( integrals[ 1 ] > low_area_multiplier ) {
-        let color = evaluate_render_program_instructions(
-          render_program_index,
-          centroids[ 1 ],
-          low_high
-        );
-        
-        *accumulation += color * integrals[ 1 ];
-      }
-      
-      // high-low
-      if ( integrals[ 2 ] > low_area_multiplier ) {
-        let color = evaluate_render_program_instructions(
-          render_program_index,
-          centroids[ 2 ],
-          high_low
-        );
-        
-        *accumulation += color * integrals[ 2 ];
-      }
-      
-      // high-high
-      if ( integrals[ 3 ] > low_area_multiplier ) {
-        let color = evaluate_render_program_instructions(
-          render_program_index,
-          centroids[ 3 ],
-          high
-        );
-        
-        *accumulation += color * integrals[ 3 ];
       }
     }
     
@@ -534,75 +438,371 @@ const mainTwoPassFineWGSL = (
       }
     }
     
-    fn initialize_bilinear_partial(
-      area_partial: ptr<function, f32>,
-      integral: ptr<function, f32>,
-      centroid_partial: ptr<function, vec2<f32>>,
-      packed_clip_counts: u32,
-      offset: vec2f,
-      sign_multiplier: f32,
-      scale: f32,
-      min: vec2f,
-      max: vec2f,
-      needs_centroid: bool
-      ${ifLogParameters}
-    ) {
-      // We will manually construct the edges represented by edge-clipped counts, and will then add those as if they were
-      // directly provided.
-    
-      let clip_counts = vec4f( unpack4xI8( packed_clip_counts ) );
-      
-      // guards should be uniform control flow(!)
-      if ( clip_counts[ 0 ] != 0f ) {
-        add_bilinear_partial( area_partial, integral, centroid_partial, ${LinearEdgeWGSL}(
-          min, vec2( min.x, max.y )
-        ), needs_centroid, offset, sign_multiplier, scale, clip_counts[ 0 ] );
-      }
-      if ( clip_counts[ 1 ] != 0f ) {
-        add_bilinear_partial( area_partial, integral, centroid_partial, ${LinearEdgeWGSL}(
-          min, vec2( max.x, min.y )
-        ), needs_centroid, offset, sign_multiplier, scale, clip_counts[ 1 ] );
-      }
-      if ( clip_counts[ 2 ] != 0f ) {
-        add_bilinear_partial( area_partial, integral, centroid_partial, ${LinearEdgeWGSL}(
-          vec2( max.x, min.y ), max
-        ), needs_centroid, offset, sign_multiplier, scale, clip_counts[ 2 ] );
-      }
-      if ( clip_counts[ 3 ] != 0f ) {
-        add_bilinear_partial( area_partial, integral, centroid_partial, ${LinearEdgeWGSL}(
-          vec2( min.x, max.y ), max
-        ), needs_centroid, offset, sign_multiplier, scale, clip_counts[ 3 ] );
-      }
-    }
+    ${options.supportsBilinear ? wgsl`
+      ${options.supportsGridFiltering ? wgsl`
+
+        // grid-filtering for bilinear. we NEED ALL threads active, so we can't skip pixels (uniform control flow)
+        fn accumulate_grid_bilinear(
+          accumulation: ptr<function, vec4<f32>>,
+          min: vec2f,
+          max: vec2f,
+          local_index: vec3u,
+          render_program_index: u32,
+          is_full_area: bool,
+          needs_centroid: bool
+          ${ifLogParameters}
+        ) {
+          // integrals ordered for origin locations: low-low, low-high, high-low, high-high. This is where the
+          // "pixel center" will be, relative to the content.
+          var integrals: array<f32, 4>; // special unit-box coordinate frame (with sign applied)
+          
+          var centroid: vec2f;
+          
+          var bounds_centroid = vec2f( min + max ) * 0.5f;
+          
+          if ( is_full_area ) {
+            integrals = array( 0.25f, 0.25f, 0.25f, 0.25f );
+            
+            if ( needs_centroid ) {
+              centroid = bounds_centroid;
+            }
+          }
+          else {
+            integrals = array( 0f, 0f, 0f, 0f );
+            
+            var area: f32 = 0f;
+            
+            { // initialize integrals and area/centroid partials based on edge-clipped counts
+              // Compute the area/centroid initials directly.
+              if ( needs_centroid ) {
+                initialize_box_partials( &area, &centroid, current_face.clip_counts, needs_centroid, min, max, bounds_centroid );
+              }
+              
+              // Mark initialization of bilinear with needs_centroid:false, so it doesn't mess up our data above
+              // NOTE: changing the offset for each, since we're doing the same integral just with different origins
+              
+              // low-low
+              initialize_bilinear_partial( 
+                &area, &integrals[ 0 ], &centroid, current_face.clip_counts, min, 1f, 1f,
+                min, max, false${ifLogArguments}
+              );
+              
+              // low-high
+              initialize_bilinear_partial( 
+                &area, &integrals[ 1 ], &centroid, current_face.clip_counts, vec2( min.x, max.y ), -1f, 1f,
+                min, max, false${ifLogArguments}
+              );
+              
+              // high-low
+              initialize_bilinear_partial( 
+                &area, &integrals[ 2 ], &centroid, current_face.clip_counts, vec2( max.x, min.y ), -1f, 1f,
+                min, max, false${ifLogArguments}
+              );
+            
+              // high-high
+              initialize_bilinear_partial( 
+                &area, &integrals[ 3 ], &centroid, current_face.clip_counts, max, 1f, 1f,
+                min, max, false${ifLogArguments}
+              );
+            }
+          
+            for ( var edge_offset = 0u; edge_offset < current_face.num_edges; edge_offset++ ) {
+              // TODO: coalesced reads of this for the future, once we have correctness
+              let linear_edge = edges[ current_face.edges_index + edge_offset ];
+              
+              let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`min.x`, wgsl`min.y`, wgsl`max.x`, wgsl`max.y`, wgsl`bounds_centroid.x`, wgsl`bounds_centroid.y` )};
+              
+              for ( var i = 0u; i < result.count; i++ ) {
+                let edge = result.edges[ i ];
+              
+                // Add direct box-partials to area/centroid if we need the centroid
+                if ( needs_centroid ) {
+                  add_box_partial( &area, &centroid, edge, needs_centroid );
+                }
+                
+                // NOTE: needs_centroid set to false so it doesn't mess with things
+                add_bilinear_partial( &area, &integrals[ 0 ], &centroid, edge, false, min, 1f, 1f, 1f );
+                add_bilinear_partial( &area, &integrals[ 1 ], &centroid, edge, false, vec2( min.x, max.y ), -1f, 1f, 1f );
+                add_bilinear_partial( &area, &integrals[ 2 ], &centroid, edge, false, vec2( max.x, min.y ), -1f, 1f, 1f );
+                add_bilinear_partial( &area, &integrals[ 3 ], &centroid, edge, false, max, 1f, 1f, 1f );
+              }
+            }
+            
+            if ( needs_centroid ) {
+              finalize_box_partials( &area, &centroid, needs_centroid );
+            }
+          }
+          
+          // Write integrals to shared memory first, so those registers aren't needed during render program execution
+          shared_integrals[ local_index.x * 4u + 0u ] = integrals[ 0 ];
+          shared_integrals[ local_index.x * 4u + 1u ] = integrals[ 1 ];
+          shared_integrals[ local_index.x * 4u + 2u ] = integrals[ 2 ];
+          shared_integrals[ local_index.x * 4u + 3u ] = integrals[ 3 ];
+          
+          let has_nonzero =
+            integrals[ 0 ] > low_area_multiplier || 
+            integrals[ 1 ] > low_area_multiplier || 
+            integrals[ 2 ] > low_area_multiplier || 
+            integrals[ 3 ] > low_area_multiplier;
+         
+          shared_colors[ local_index.x ] = select( vec4( 0f ), evaluate_render_program_instructions(
+            render_program_index,
+            centroid,
+            bounds_centroid
+          ), has_nonzero );
+          
+          workgroupBarrier();
+          
+          let local_coords = vec2( local_index.x % 16u, local_index.x / 16u );
+          
+          // We only fill out a 15x15 pixel area
+          if ( local_coords.x < 15u && local_coords.y < 15u ) {
+            { // upper-left (offset is high-high)
+              let index = 16u * local_coords.y + local_coords.x;
+              *accumulation += shared_colors[ index ] * shared_integrals[ index * 4u + 3u ];
+            }
+            { // upper-right (offset is low-high)
+              let index = 16u * local_coords.y + local_coords.x + 1u;
+              *accumulation += shared_colors[ index ] * shared_integrals[ index * 4u + 1u ];
+            }
+            { // lower-left (offset is high-low)
+              let index = 16u * ( local_coords.y + 1u ) + local_coords.x;
+              *accumulation += shared_colors[ index ] * shared_integrals[ index * 4u + 2u ];
+            }
+            { // lower-right (offset is low-low)
+              let index = 16u * ( local_coords.y + 1u ) + local_coords.x + 1u;
+              *accumulation += shared_colors[ index ] * shared_integrals[ index * 4u + 0u ];
+            }
+          }
+        }
+      ` : wgsl``}
+
+      fn accumulate_bilinear(
+        accumulation: ptr<function, vec4<f32>>,
+        min: vec2f,
+        mid: vec2f,
+        max: vec2f,
+        render_program_index: u32,
+        is_full_area: bool,
+        needs_centroid: bool
+        ${ifLogParameters}
+      ) {
   
-    fn add_bilinear_partial(
-      area_partial: ptr<function, f32>,
-      integral: ptr<function, f32>,
-      centroid_partial: ptr<function, vec2<f32>>,
-      edge: ${LinearEdgeWGSL},
-      needs_centroid: bool,
-      offset: vec2f, // the "location" of the filter in space, e.g. the pixel we care about
-      sign_multiplier: f32, // sometimes not just a sign, integral contribution will be multiplied by this
-      scale: f32, // will need to divide by this to put things in the unit box (after offset correction)
-      output_scale: f32 // multiplier for the output box (area/centroid) AND bilinear (integral) contributions, likely used for edge-clipped counts
-    ) {
-      // box partials are only for centroid
-      if ( needs_centroid ) {
-        // We apply no transformations to the area/centroid computations (normal coordinate space)
-        add_scaled_box_partial( area_partial, centroid_partial, edge, needs_centroid, output_scale );
+        // we have four cells:
+        // low-low - x: min -> mid, y: min -> mid (positive sign for integral)
+        // low-high - x: min -> mid, y: mid -> max (negative sign for integral - abs flips orientation)
+        // high-low - x: mid -> max, y: min -> mid (negative sign for integral - abs flips orientation)
+        // high-high - x: mid -> max, y: mid -> max (positive sign for integral)
+        
+        // values for each cell, indexed as [ low-low, low-high, high-low, high-high ]
+        var integrals: array<f32, 4>; // special unit-box coordinate frame (with sign applied)
+        var centroids: array<vec2f, 4>; // normal coordinate frame
+        
+        // unit-box * scale = cell-box (bilinear has 4 cells)
+        let scale = mid.y - min.y;
+        
+        // midpoints for the various cells
+        let low = 0.5f * ( min + mid );
+        let high = 0.5f * ( mid + max );
+        let low_high = vec2( low.x, high.y );
+        let high_low = vec2( high.x, low.y );
+        
+        if ( is_full_area ) {
+          integrals = array( 0.25f, 0.25f, 0.25f, 0.25f );
+          centroids = array( low, low_high, high_low, high );
+        }
+        else {
+          var areas: array<f32, 4> = array( 0f, 0f, 0f, 0f ); // normal coordinate frame
+          integrals = array( 0f, 0f, 0f, 0f );
+          centroids = array( vec2( 0f ), vec2f( 0f ), vec2f( 0f ), vec2f( 0f ) );
+          
+          { // initialize partials by handling each edge
+            // low-low
+            initialize_bilinear_partial( 
+              &areas[ 0 ], &integrals[ 0 ], &centroids[ 0 ], current_face.clip_counts, mid, 1f, scale,
+              min, mid, needs_centroid${ifLogArguments}
+            );
+            
+            // low-high
+            initialize_bilinear_partial( 
+              &areas[ 1 ], &integrals[ 1 ], &centroids[ 1 ], current_face.clip_counts, mid, -1f, scale,
+              vec2( min.x, mid.y ), vec2( mid.x, max.y ), needs_centroid${ifLogArguments}
+            );
+            
+            // high-low
+            initialize_bilinear_partial( 
+              &areas[ 2 ], &integrals[ 2 ], &centroids[ 2 ], current_face.clip_counts, mid, -1f, scale,
+              vec2( mid.x, min.y ), vec2( max.x, mid.y ), needs_centroid${ifLogArguments}
+            );
+            
+            // high-high
+            initialize_bilinear_partial( 
+              &areas[ 3 ], &integrals[ 3 ], &centroids[ 3 ], current_face.clip_counts, mid, 1f, scale,
+              mid, max, needs_centroid${ifLogArguments}
+            );
+          }
+          
+          for ( var edge_offset = 0u; edge_offset < current_face.num_edges; edge_offset++ ) {
+            // TODO: coalesced reads of this for the future, once we have correctness
+            let linear_edge = edges[ current_face.edges_index + edge_offset ];
+            
+            { // low-low
+              let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`min.x`, wgsl`min.y`, wgsl`mid.x`, wgsl`mid.y`, wgsl`low.x`, wgsl`low.y` )};
+              
+              for ( var i = 0u; i < result.count; i++ ) {
+                add_bilinear_partial( &areas[ 0 ], &integrals[ 0 ], &centroids[ 0 ], result.edges[ i ], needs_centroid, mid, 1f, scale, 1f );
+              }
+            }
+            
+            { // low-high
+              let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`min.x`, wgsl`mid.y`, wgsl`mid.x`, wgsl`max.y`, wgsl`low_high.x`, wgsl`low_high.y` )};
+              
+              for ( var i = 0u; i < result.count; i++ ) {
+                add_bilinear_partial( &areas[ 1 ], &integrals[ 1 ], &centroids[ 1 ], result.edges[ i ], needs_centroid, mid, -1f, scale, 1f );
+              }
+            }
+            
+            { // high-low
+              let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`mid.x`, wgsl`min.y`, wgsl`max.x`, wgsl`mid.y`, wgsl`high_low.x`, wgsl`high_low.y` )};
+              
+              for ( var i = 0u; i < result.count; i++ ) {
+                add_bilinear_partial( &areas[ 2 ], &integrals[ 2 ], &centroids[ 2 ], result.edges[ i ], needs_centroid, mid, -1f, scale, 1f );
+              }
+            }
+            
+            { // high-high
+              let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`mid.x`, wgsl`mid.y`, wgsl`max.x`, wgsl`max.y`, wgsl`high.x`, wgsl`high.y` )};
+              
+              for ( var i = 0u; i < result.count; i++ ) {
+                add_bilinear_partial( &areas[ 3 ], &integrals[ 3 ], &centroids[ 3 ], result.edges[ i ], needs_centroid, mid, 1f, scale, 1f );
+              }
+            }
+          }
+          
+          // box partials are only for centroid
+          if ( needs_centroid ) {
+            finalize_box_partials( &areas[ 0 ], &centroids[ 0 ], needs_centroid );
+            finalize_box_partials( &areas[ 1 ], &centroids[ 1 ], needs_centroid );
+            finalize_box_partials( &areas[ 2 ], &centroids[ 2 ], needs_centroid );
+            finalize_box_partials( &areas[ 3 ], &centroids[ 3 ], needs_centroid );
+          }
+        }
+        
+        // low-low
+        if ( integrals[ 0 ] > low_area_multiplier ) {
+          let color = evaluate_render_program_instructions(
+            render_program_index,
+            centroids[ 0 ],
+            low
+          );
+          
+          *accumulation += color * integrals[ 0 ];
+        }
+        
+        // low-high
+        if ( integrals[ 1 ] > low_area_multiplier ) {
+          let color = evaluate_render_program_instructions(
+            render_program_index,
+            centroids[ 1 ],
+            low_high
+          );
+          
+          *accumulation += color * integrals[ 1 ];
+        }
+        
+        // high-low
+        if ( integrals[ 2 ] > low_area_multiplier ) {
+          let color = evaluate_render_program_instructions(
+            render_program_index,
+            centroids[ 2 ],
+            high_low
+          );
+          
+          *accumulation += color * integrals[ 2 ];
+        }
+        
+        // high-high
+        if ( integrals[ 3 ] > low_area_multiplier ) {
+          let color = evaluate_render_program_instructions(
+            render_program_index,
+            centroids[ 3 ],
+            high
+          );
+          
+          *accumulation += color * integrals[ 3 ];
+        }
       }
       
-      // points scaled into a unit box. if we had an orientation flip, sign_multiplier should be negative
-      let p0 = abs( edge.startPoint - offset ) / vec2( scale );
-      let p1 = abs( edge.endPoint - offset ) / vec2( scale );
+      fn initialize_bilinear_partial(
+        area_partial: ptr<function, f32>,
+        integral: ptr<function, f32>,
+        centroid_partial: ptr<function, vec2<f32>>,
+        packed_clip_counts: u32,
+        offset: vec2f,
+        sign_multiplier: f32,
+        scale: f32,
+        min: vec2f,
+        max: vec2f,
+        needs_centroid: bool
+        ${ifLogParameters}
+      ) {
+        // We will manually construct the edges represented by edge-clipped counts, and will then add those as if they were
+        // directly provided.
       
-      let c01 = p0.x * p1.y;
-      let c10 = p1.x * p0.y;
+        let clip_counts = vec4f( unpack4xI8( packed_clip_counts ) );
+        
+        // guards should be uniform control flow(!)
+        if ( clip_counts[ 0 ] != 0f ) {
+          add_bilinear_partial( area_partial, integral, centroid_partial, ${LinearEdgeWGSL}(
+            min, vec2( min.x, max.y )
+          ), needs_centroid, offset, sign_multiplier, scale, clip_counts[ 0 ] );
+        }
+        if ( clip_counts[ 1 ] != 0f ) {
+          add_bilinear_partial( area_partial, integral, centroid_partial, ${LinearEdgeWGSL}(
+            min, vec2( max.x, min.y )
+          ), needs_centroid, offset, sign_multiplier, scale, clip_counts[ 1 ] );
+        }
+        if ( clip_counts[ 2 ] != 0f ) {
+          add_bilinear_partial( area_partial, integral, centroid_partial, ${LinearEdgeWGSL}(
+            vec2( max.x, min.y ), max
+          ), needs_centroid, offset, sign_multiplier, scale, clip_counts[ 2 ] );
+        }
+        if ( clip_counts[ 3 ] != 0f ) {
+          add_bilinear_partial( area_partial, integral, centroid_partial, ${LinearEdgeWGSL}(
+            vec2( min.x, max.y ), max
+          ), needs_centroid, offset, sign_multiplier, scale, clip_counts[ 3 ] );
+        }
+      }
       
-      let raw = ( c01 - c10 ) * ( 12f - 4f * ( p0.x + p0.y + p1.x + p1.y ) + 2f * ( p0.x * p0.y + p1.x * p1.y ) + c10 + c01 ) / 24f;
-      
-      *integral += sign_multiplier * raw * output_scale;
-    }
+      fn add_bilinear_partial(
+        area_partial: ptr<function, f32>,
+        integral: ptr<function, f32>,
+        centroid_partial: ptr<function, vec2<f32>>,
+        edge: ${LinearEdgeWGSL},
+        needs_centroid: bool,
+        offset: vec2f, // the "location" of the filter in space, e.g. the pixel we care about
+        sign_multiplier: f32, // sometimes not just a sign, integral contribution will be multiplied by this
+        scale: f32, // will need to divide by this to put things in the unit box (after offset correction)
+        output_scale: f32 // multiplier for the output box (area/centroid) AND bilinear (integral) contributions, likely used for edge-clipped counts
+      ) {
+        // box partials are only for centroid
+        if ( needs_centroid ) {
+          // We apply no transformations to the area/centroid computations (normal coordinate space)
+          add_scaled_box_partial( area_partial, centroid_partial, edge, needs_centroid, output_scale );
+        }
+        
+        // points scaled into a unit box. if we had an orientation flip, sign_multiplier should be negative
+        let p0 = abs( edge.startPoint - offset ) / vec2( scale );
+        let p1 = abs( edge.endPoint - offset ) / vec2( scale );
+        
+        let c01 = p0.x * p1.y;
+        let c10 = p1.x * p0.y;
+        
+        let raw = ( c01 - c10 ) * ( 12f - 4f * ( p0.x + p0.y + p1.x + p1.y ) + 2f * ( p0.x * p0.y + p1.x * p1.y ) + c10 + c01 ) / 24f;
+        
+        *integral += sign_multiplier * raw * output_scale;
+      }
+    ` : wgsl``}
     
     fn evaluate_render_program_instructions(
       render_program_index: u32,

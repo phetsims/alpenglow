@@ -620,6 +620,11 @@ export { default as TwoPassConfigType } from './webgpu/wgsl/rasterize-two-pass/T
 export type { default as TwoPassFineRenderableFace } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFace.js';
 export { default as TwoPassFineRenderableFaceWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFaceWGSL.js';
 export { default as TwoPassFineRenderableFaceType } from './webgpu/wgsl/rasterize-two-pass/TwoPassFineRenderableFaceType.js';
+export type { default as TwoPassCoarseRenderableFace } from './webgpu/wgsl/rasterize-two-pass/TwoPassCoarseRenderableFace.js';
+export { default as TwoPassCoarseRenderableFaceWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassCoarseRenderableFaceWGSL.js';
+export { default as TwoPassCoarseRenderableFaceType } from './webgpu/wgsl/rasterize-two-pass/TwoPassCoarseRenderableFaceType.js';
+export { default as mainTwoPassInitializeAddressesWGSL } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassInitializeAddressesWGSL.js';
+export { default as mainTwoPassCoarseWGSL } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassCoarseWGSL.js';
 export { default as mainTwoPassFineWGSL } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassFineWGSL.js';
 
 // testing

@@ -15,7 +15,10 @@ export const evaluateTwoPassFineSolo = async (
 ): Promise<HTMLCanvasElement> => {
 
   const filterType = PolygonFilterType.Bilinear;
-  const filterScale = 17; // 25 box, 17 bilinear (comparison)
+  const filterScale = 1; // 25 box, 17 bilinear (comparison)
+  const supportsGridFiltering = true;
+  const supportsBilinear = true;
+  const supportsMitchellNetravali = false;
 
   const filterRadius = {
     [ PolygonFilterType.Box ]: 0.5,
@@ -69,13 +72,12 @@ export const evaluateTwoPassFineSolo = async (
 
   } );
 
-  // TODO: grid clip type
-  // const binSize = filterScale === 1 ? {
-  //   [ PolygonFilterType.Box ]: 16,
-  //   [ PolygonFilterType.Bilinear ]: 15,
-  //   [ PolygonFilterType.MitchellNetravali ]: 13
-  // }[ filterType ] : 16;
-  const binSize = 16; // TODO: don't fix at 16 forever for filtering
+  const binSize = ( supportsGridFiltering && filterScale === 1 ) ? {
+    [ PolygonFilterType.Box ]: 16,
+    [ PolygonFilterType.Bilinear ]: 15,
+    [ PolygonFilterType.MitchellNetravali ]: 13
+  }[ filterType ] : 16;
+  // const binSize = 16; // TODO: don't fix at 16 forever for filtering
   const tileSize = 16 * binSize;
 
   const tileWidth = Math.ceil( rasterWidth / tileSize );
@@ -115,10 +117,10 @@ export const evaluateTwoPassFineSolo = async (
 
     for ( let binX = 0; binX < binWidth; binX++ ) {
       for ( let binY = 0; binY < binHeight; binY++ ) {
-        const minX = binX * 16 - filterExpansion;
-        const minY = binY * 16 - filterExpansion;
-        const maxX = ( binX + 1 ) * 16 + filterExpansion;
-        const maxY = ( binY + 1 ) * 16 + filterExpansion;
+        const minX = binX * binSize - filterExpansion;
+        const minY = binY * binSize - filterExpansion;
+        const maxX = ( binX + 1 ) * binSize + filterExpansion;
+        const maxY = ( binY + 1 ) * binSize + filterExpansion;
         const maxArea = ( maxX - minX ) * ( maxY - minY );
 
         // NOTE: Use the below option if needing to remove edge-clipped counts for debugging
@@ -203,7 +205,10 @@ export const evaluateTwoPassFineSolo = async (
       renderProgramInstructions: renderProgramInstructionsSlot,
       edges: edgesSlot,
       output: outputSlot,
-      storageFormat: deviceContext.preferredStorageFormat // e.g. deviceContext.preferredStorageFormat
+      storageFormat: deviceContext.preferredStorageFormat, // e.g. deviceContext.preferredStorageFormat
+      supportsGridFiltering: supportsGridFiltering,
+      supportsBilinear: supportsBilinear,
+      supportsMitchellNetravali: supportsMitchellNetravali
     } ),
     setDispatchSize: ( dispatchSize: Vector3, size: number ) => {
       dispatchSize.x = size;
