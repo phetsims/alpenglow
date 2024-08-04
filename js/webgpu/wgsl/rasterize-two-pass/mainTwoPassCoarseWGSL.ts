@@ -159,8 +159,8 @@ const mainTwoPassCoarseWGSL = (
         // inclusive scan, so we'll request the atomics here
         base_indices = vec2(
           // TODO: detect and record overflow
-          atomicAdd( &addresses.next_edge_atomic, offsets.x ),
-          atomicAdd( &addresses.next_face_atomic, offsets.y )
+          atomicAdd( &addresses[ 1u ], offsets.x ),
+          atomicAdd( &addresses[ 0u ], offsets.y )
         );
       }
       
@@ -181,7 +181,7 @@ const mainTwoPassCoarseWGSL = (
       
       // bump allocation
       // TODO: detect and record overflow
-      let previous_address = atomicStore( &addresses.bin_atomics[ bin_index ], face_index );
+      let previous_address = atomicStore( &addresses[ bin_index + 2u ], face_index );
       
       // TODO: see if moving this down further reduces latency?
       fine_renderable_faces[ face_index ] = ${TwoPassFineRenderableFaceWGSL}(

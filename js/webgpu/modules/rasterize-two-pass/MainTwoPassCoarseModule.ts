@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferSlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, LinearEdge, MAIN_TWO_PASS_COARSE_DEFAULTS, mainTwoPassFineWGSL, mainTwoPassFineWGSLOptions, PipelineBlueprintOptions, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFace } from '../../../imports.js';
+import { alpenglow, BufferSlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, LinearEdge, MAIN_TWO_PASS_COARSE_DEFAULTS, mainTwoPassCoarseWGSL, mainTwoPassCoarseWGSLOptions, PipelineBlueprintOptions, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFace } from '../../../imports.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 
@@ -20,9 +20,9 @@ export type MainTwoPassCoarseModuleOptions = {
   fineRenderableFaces: BufferSlot<TwoPassFineRenderableFace[]>;
   fineEdges: BufferSlot<LinearEdge[]>;
   addresses: BufferSlot<number[]>; // note: first atomic is face-allocation, second is edge-allocation
-} & mainTwoPassFineWGSLOptions & PipelineBlueprintOptions;
+} & mainTwoPassCoarseWGSLOptions & PipelineBlueprintOptions;
 
-export const MAIN_TWO_PASS_FINE_MODULE_DEFAULTS = {
+export const MAIN_TWO_PASS_COARSE_MODULE_DEFAULTS = {
   // eslint-disable-next-line no-object-spread-on-non-literals
   ...DIRECT_MODULE_DEFAULTS,
   // eslint-disable-next-line no-object-spread-on-non-literals
@@ -46,7 +46,7 @@ export default class MainTwoPassCoarseModule extends DirectModule<number> {
     providedOptions: MainTwoPassCoarseModuleOptions
   ) {
     const options = combineOptions<MainTwoPassCoarseModuleOptions & DirectModuleOptions<number>>( {
-      main: mainTwoPassFineWGSL( providedOptions ),
+      main: mainTwoPassCoarseWGSL( providedOptions ),
       setDispatchSize: ( dispatchSize: Vector3, numRenderableFaces: number ) => {
         dispatchSize.x = numRenderableFaces;
       }
