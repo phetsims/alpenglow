@@ -5,7 +5,7 @@ import { wgsl, WGSLReferenceModule } from '../../../imports.js';
 /**
  * Uniforms for a TwoPassCoarseRenderableFace
  *
- * bits:
+ * bits
  *   0x00ffffff: renderProgramIndex
  *   0x10000000: needsCentroid
  *   0x20000000: needsFace
