@@ -21,6 +21,10 @@ export type mainTwoPassCoarseWGSLOptions = {
   addresses: BufferSlot<number[]>; // note: first atomic is face-allocation, second is edge-allocation
 };
 
+export const MAIN_TWO_PASS_COARSE_DEFAULTS = {
+  // placeholder
+} as const;
+
 const mainTwoPassCoarseWGSL = (
   providedOptions: mainTwoPassCoarseWGSLOptions
 ): WGSLMainModule => {

@@ -4,8 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferSlot, ByteEncoder, DeviceContext, DirectModule, getArrayType, LinearEdge, LinearEdgeType, mainTwoPassFineWGSL, PolygonFilterType, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TwoPassConfig, TwoPassConfigType, TwoPassFineRenderableFace, TwoPassFineRenderableFaceType, U32Type } from '../../../imports.js';
-import Vector3 from '../../../../../dot/js/Vector3.js';
+import { alpenglow, BufferArraySlot, BufferSlot, ByteEncoder, DeviceContext, getArrayType, LinearEdge, LinearEdgeType, MainTwoPassFineModule, PolygonFilterType, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TwoPassConfig, TwoPassConfigType, TwoPassFineRenderableFace, TwoPassFineRenderableFaceType, U32Type } from '../../../imports.js';
 import testPolygonalFace from '../testPolygonalFace.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
@@ -195,24 +194,19 @@ export const evaluateTwoPassFineSolo = async (
   const edgesSlot = new BufferArraySlot( getArrayType( LinearEdgeType, edges.length ) ); // TODO: variable size
   const outputSlot = new TextureViewSlot();
 
-  const module = new DirectModule<number>( {
+  const module = new MainTwoPassFineModule( {
     name: `module_${name}`,
-    // log: true,
-    main: mainTwoPassFineWGSL( {
-      config: configSlot,
-      addresses: addressesSlot,
-      fineRenderableFaces: fineRenderableFacesSlot,
-      renderProgramInstructions: renderProgramInstructionsSlot,
-      edges: edgesSlot,
-      output: outputSlot,
-      storageFormat: deviceContext.preferredStorageFormat, // e.g. deviceContext.preferredStorageFormat
-      supportsGridFiltering: supportsGridFiltering,
-      supportsBilinear: supportsBilinear,
-      supportsMitchellNetravali: supportsMitchellNetravali
-    } ),
-    setDispatchSize: ( dispatchSize: Vector3, size: number ) => {
-      dispatchSize.x = size;
-    }
+
+    config: configSlot,
+    addresses: addressesSlot,
+    fineRenderableFaces: fineRenderableFacesSlot,
+    renderProgramInstructions: renderProgramInstructionsSlot,
+    edges: edgesSlot,
+    output: outputSlot,
+    storageFormat: deviceContext.preferredStorageFormat, // e.g. deviceContext.preferredStorageFormat
+    supportsGridFiltering: supportsGridFiltering,
+    supportsBilinear: supportsBilinear,
+    supportsMitchellNetravali: supportsMitchellNetravali
   } );
 
   const routine = await Routine.create(

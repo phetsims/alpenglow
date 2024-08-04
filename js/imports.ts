@@ -623,9 +623,16 @@ export { default as TwoPassFineRenderableFaceType } from './webgpu/wgsl/rasteriz
 export type { default as TwoPassCoarseRenderableFace } from './webgpu/wgsl/rasterize-two-pass/TwoPassCoarseRenderableFace.js';
 export { default as TwoPassCoarseRenderableFaceWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassCoarseRenderableFaceWGSL.js';
 export { default as TwoPassCoarseRenderableFaceType } from './webgpu/wgsl/rasterize-two-pass/TwoPassCoarseRenderableFaceType.js';
-export { default as mainTwoPassInitializeAddressesWGSL } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassInitializeAddressesWGSL.js';
-export { default as mainTwoPassCoarseWGSL } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassCoarseWGSL.js';
-export { default as mainTwoPassFineWGSL } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassFineWGSL.js';
+export { default as mainTwoPassInitializeAddressesWGSL, MAIN_TWO_PASS_INITIALIZE_ADDRESSES_DEFAULTS } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassInitializeAddressesWGSL.js';
+export type { mainTwoPassInitializeAddressesWGSLOptions } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassInitializeAddressesWGSL.js';
+export { default as mainTwoPassCoarseWGSL, MAIN_TWO_PASS_COARSE_DEFAULTS } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassCoarseWGSL.js';
+export type { mainTwoPassCoarseWGSLOptions } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassCoarseWGSL.js';
+export { default as mainTwoPassFineWGSL, MAIN_TWO_PASS_FINE_DEFAULTS } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassFineWGSL.js';
+export type { mainTwoPassFineWGSLOptions } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassFineWGSL.js';
+
+// rasterize-two-pass modules
+export { default as MainTwoPassFineModule, MAIN_TWO_PASS_FINE_MODULE_DEFAULTS } from './webgpu/modules/rasterize-two-pass/MainTwoPassFineModule.js';
+export type { MainTwoPassFineModuleOptions } from './webgpu/modules/rasterize-two-pass/MainTwoPassFineModule.js';
 
 // testing
 export { evaluateTwoPassFineSolo } from './webgpu/tests/rasterize-two-pass/TwoPassFineSolo.js';

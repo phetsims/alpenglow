@@ -20,7 +20,7 @@
  */
 
 import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, F32Type, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, LinearEdgeWGSL, logValueWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, U32Type, unpremultiplyWGSL, wgsl, wgslBlueprint, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
-import optionize from '../../../../../phet-core/js/optionize.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mainTwoPassFineWGSLOptions = {
   config: BufferSlot<TwoPassConfig>;
@@ -35,15 +35,17 @@ export type mainTwoPassFineWGSLOptions = {
   supportsMitchellNetravali?: boolean;
 };
 
+export const MAIN_TWO_PASS_FINE_DEFAULTS = {
+  supportsGridFiltering: false,
+  supportsBilinear: true,
+  supportsMitchellNetravali: false
+} as const;
+
 const mainTwoPassFineWGSL = (
   providedOptions: mainTwoPassFineWGSLOptions
 ): WGSLMainModule => {
 
-  const options = optionize<mainTwoPassFineWGSLOptions>()( {
-    supportsGridFiltering: false,
-    supportsBilinear: true,
-    supportsMitchellNetravali: false
-  }, providedOptions );
+  const options = optionize3<mainTwoPassFineWGSLOptions>()( {}, MAIN_TWO_PASS_FINE_DEFAULTS, providedOptions );
 
   const configSlot = new WGSLSlot( 'config', options.config, BufferBindingType.UNIFORM );
   const addressesSlot = new WGSLSlot( 'addresses', options.addresses, BufferBindingType.READ_ONLY_STORAGE ); // TODO: see if read-write faster

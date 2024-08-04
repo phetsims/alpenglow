@@ -12,6 +12,10 @@ export type mainTwoPassInitializeAddressesWGSLOptions = {
   addresses: BufferSlot<number[]>;
 };
 
+export const MAIN_TWO_PASS_INITIALIZE_ADDRESSES_DEFAULTS = {
+  // placeholder
+} as const;
+
 const mainTwoPassInitializeAddressesWGSL = (
   options: mainTwoPassInitializeAddressesWGSLOptions
 ): WGSLMainModule => {
