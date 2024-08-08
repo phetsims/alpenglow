@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getArrayType, LinearEdge, LinearEdgeType, MainTwoPassCoarseModule, MainTwoPassCoarseModuleOptions, MainTwoPassFineModule, MainTwoPassFineModuleOptions, MainTwoPassInitializeAddressesModule, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFaceType, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getArrayType, LinearEdge, LinearEdgeType, MainTwoPassCoarseModule, MainTwoPassCoarseModuleOptions, MainTwoPassFineModule, MainTwoPassFineModuleOptions, MainTwoPassInitializeAddressesModule, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFaceType, U32AtomicType, U32Type } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions = {
@@ -23,7 +23,8 @@ type SelfOptions = {
   // supportsBilinear?: boolean;
   // supportsMitchellNetravali?: boolean;
 
-  lengthExpression: WGSLExpressionU32;
+  // TODO: support length
+  // lengthExpression: WGSLExpressionU32;
 };
 
 type ParentOptions = {
@@ -45,7 +46,7 @@ export type TwoPassRunSize = {
   numCoarseRenderableFaces: number;
 };
 
-// inputSize: number
+// inputSize: TwoPassRunSize
 export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
 
   public readonly config: BufferSlot<TwoPassConfig>;

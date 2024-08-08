@@ -54,7 +54,7 @@ const mainTwoPassCoarseWGSL = (
     const low_area_multiplier = 1e-4f;
     
     var<workgroup> coarse_face: ${TwoPassCoarseRenderableFaceWGSL};
-    var<workgroup> scratch_data<vec2u, 256>
+    var<workgroup> scratch_data: array<vec2u, 256>;
     var<workgroup> base_indices: vec2u;
     
     @compute @workgroup_size(256)

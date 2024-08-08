@@ -886,6 +886,17 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.twoPassDualTest = function() {
+    setTimeout( async function() {
+      const device = await phet.alpenglow.DeviceContext.getDevice();
+      const deviceContext = new phet.alpenglow.DeviceContext( device );
+
+      const canvas = await phet.alpenglow.evaluateTwoPassFineDual( 'twoPassSolo', deviceContext );
+
+      document.body.appendChild( canvas );
+    } );
+  };
+
   window.rasterTest = function() {
     setTimeout( async function() {
       const boundsRect = bounds => [

@@ -642,6 +642,7 @@ export type { TwoPassModuleOptions, TwoPassRunSize } from './webgpu/modules/rast
 
 // testing
 export { evaluateTwoPassFineSolo } from './webgpu/tests/rasterize-two-pass/TwoPassFineSolo.js';
+export { evaluateTwoPassFineDual } from './webgpu/tests/rasterize-two-pass/TwoPassFineDual.js';
 
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';
