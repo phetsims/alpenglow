@@ -55,13 +55,17 @@ export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
   public readonly renderProgramInstructions: BufferSlot<number[]>;
   public readonly output: TextureViewSlot;
 
+  public readonly initializeAddressesModule: MainTwoPassInitializeAddressesModule;
+  public readonly coarseModule: MainTwoPassCoarseModule;
+  public readonly fineModule: MainTwoPassFineModule;
+
   public constructor(
     providedOptions: TwoPassModuleOptions
   ) {
     const options = optionize3<TwoPassModuleOptions, SelfOptions>()( {}, TWO_PASS_MODULE_DEFAULTS, providedOptions );
 
     const MAX_FINE_FACES = 2 ** 13; // TODO: adjustable
-    const MAX_FINE_EDGES = 2 ** 15; // TODO: adjustable
+    const MAX_FINE_EDGES = 2 ** 16; // TODO: adjustable
     const MAX_BINS = 2 ** 16; // TODO: adjustable NOTE, need 2 for atomics
 
     /*
@@ -77,12 +81,17 @@ export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
 
     const initializeAddressesModule = new MainTwoPassInitializeAddressesModule( {
       name: `${providedOptions.name} initialize_addresses`,
+
+      log: providedOptions.log, // TODO: how can we avoid needing this forward?
       ...options.mainTwoPassInitializeAddressesModule, // eslint-disable-line no-object-spread-on-non-literals
+
       addresses: addressesPlainSlot
     } );
 
     const coarseModule = new MainTwoPassCoarseModule( {
       name: `${providedOptions.name} coarse`,
+
+      log: providedOptions.log, // TODO: how can we avoid needing this forward?
       ...options.mainTwoPassCoarseModuleOptions, // eslint-disable-line no-object-spread-on-non-literals
 
       // input
@@ -98,6 +107,8 @@ export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
 
     const fineModule = new MainTwoPassFineModule( {
       name: `${providedOptions.name} fine`,
+
+      log: providedOptions.log, // TODO: how can we avoid needing this forward?
       ...options.mainTwoPassFineModuleOptions, // eslint-disable-line no-object-spread-on-non-literals
 
       config: providedOptions.config,
@@ -125,6 +136,10 @@ export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
     this.coarseEdges = providedOptions.coarseEdges;
     this.renderProgramInstructions = providedOptions.renderProgramInstructions;
     this.output = providedOptions.output;
+
+    this.initializeAddressesModule = initializeAddressesModule;
+    this.coarseModule = coarseModule;
+    this.fineModule = fineModule;
   }
 }
 alpenglow.register( 'TwoPassModule', TwoPassModule );

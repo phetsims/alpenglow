@@ -13,7 +13,7 @@ export const evaluateTwoPassFineDual = async (
   deviceContext: DeviceContext
 ): Promise<HTMLCanvasElement> => {
 
-  const filterType = PolygonFilterType.Bilinear;
+  const filterType = PolygonFilterType.Box;
   const filterScale = 1; // 25 box, 17 bilinear (comparison)
   const supportsGridFiltering = true;
   const supportsBilinear = true;
@@ -68,7 +68,7 @@ export const evaluateTwoPassFineDual = async (
   ] ).transformed( phet.dot.Matrix3.scaling( rasterSize / 256 ) );
 
   const renderableFaces = Rasterize.partitionRenderableFaces( program, new Bounds2( 0, 0, rasterSize, rasterSize ), {
-
+    tileSize: 1024 * 1024 // never do tiles
   } );
 
   const binSize = ( supportsGridFiltering && filterScale === 1 ) ? {
@@ -122,6 +122,9 @@ export const evaluateTwoPassFineDual = async (
         if ( renderableFace.bounds.intersectsBounds( new Bounds2( minX, minY, maxX, maxY ) ) ) {
           const maxArea = ( maxX - minX ) * ( maxY - minY );
 
+          // NOTE: Use the below option if needing to remove edge-clipped counts for debugging
+          // TODO: can we replace "some" of them but not ALL?
+          // const face = edgeClippedFace.getClipped( minX, minY, maxX, maxY ).toEdgedFace().toEdgedClippedFaceWithoutCheck( minX, minY, maxX, maxY );
           const face = edgeClippedFace.getClipped( minX, minY, maxX, maxY );
           if ( face.getArea() > 1e-4 ) {
             const tileIndex = tileX + tileY * tileWidth;
@@ -179,7 +182,7 @@ export const evaluateTwoPassFineDual = async (
 
   const mainModule = new TwoPassModule( {
     name: `module_${name}`,
-
+    // log: true,
     config: configSlot,
     coarseRenderableFaces: coarseRenderableFacesSlot,
     coarseEdges: coarseEdgesSlot,
@@ -213,13 +216,16 @@ export const evaluateTwoPassFineDual = async (
     wrapBlitModule,
     [ configSlot, coarseRenderableFacesSlot, coarseEdgesSlot, renderProgramInstructionsSlot ],
     Routine.INDIVIDUAL_LAYOUT_STRATEGY,
-    ( context, execute, input: {
+    async ( context, execute, input: {
       config: TwoPassConfig;
       coarseRenderableFaces: TwoPassCoarseRenderableFace[];
       coarseEdges: LinearEdge[];
       renderProgramInstructions: number[];
       textureBlit: [ GPUTextureView, GPUTextureView ] | null;
     } ) => {
+      // console.log( 'coarse faces', input.coarseRenderableFaces );
+      // console.log( 'coarse edges', input.coarseEdges );
+
       context.setTypedBufferValue( configSlot, input.config );
       context.setTypedBufferValue( coarseRenderableFacesSlot, input.coarseRenderableFaces );
       context.setTypedBufferValue( coarseEdgesSlot, input.coarseEdges );
@@ -230,6 +236,26 @@ export const evaluateTwoPassFineDual = async (
         numCoarseRenderableFaces: input.coarseRenderableFaces.length,
         textureBlit: input.textureBlit
       } );
+
+      // const addressesPromise = context.u32Numbers( mainModule.coarseModule.addresses );
+      // const fineFacesPromise = context.arrayBuffer( mainModule.coarseModule.fineRenderableFaces );
+      // const fineEdgesPromise = context.arrayBuffer( mainModule.coarseModule.fineEdges );
+      //
+      // const addresses = await addressesPromise;
+      // console.log( 'addresses', addresses.slice( 0, numBins + 2 ) );
+      //
+      // const numFineFaces = addresses[ 0 ];
+      // const numFineEdges = addresses[ 1 ];
+      //
+      // // console.log( await context.u32Numbers( mainModule.coarseModule.fineRenderableFaces ) );
+      // const faceEncoder = new ByteEncoder( await fineFacesPromise );
+      // console.log( 'fine faces', getArrayType( TwoPassFineRenderableFaceType, numFineFaces ).decode( faceEncoder, 0 ) );
+      //
+      // const edgesEncoder = new ByteEncoder( await fineEdgesPromise );
+      // console.log( 'fine edges', getArrayType( LinearEdgeType, numFineEdges ).decode( edgesEncoder, 0 ) );
+
+
+      // console.log( await context.arrayBuffer( mainModule.coarseModule.fineRenderableFaces ) );
 
       // TODO: do we need to wait for anything here?
       return Promise.resolve( null );

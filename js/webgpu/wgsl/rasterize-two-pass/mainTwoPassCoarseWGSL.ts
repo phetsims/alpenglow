@@ -49,8 +49,6 @@ const mainTwoPassCoarseWGSL = (
     fineEdgesSlot,
     addressesSlot
   ], wgsl`
-    const oops_inifinite_loop_code = vec4f( 0.5f, 0.5f, 0f, 0.5f );
-    
     const low_area_multiplier = 1e-4f;
     
     var<workgroup> coarse_face: ${TwoPassCoarseRenderableFaceWGSL};
@@ -140,7 +138,7 @@ const mainTwoPassCoarseWGSL = (
       let needs_write_edges = needs_write_face && !is_full_area;
       
       let required_edge_count = select( 0u, num_clipped_edges, needs_write_edges );
-      let required_face_count = select( 0u, 1u, needs_write_edges );
+      let required_face_count = select( 0u, 1u, needs_write_face );
       
       var offsets = vec2( required_edge_count, required_face_count );
       
@@ -184,7 +182,7 @@ const mainTwoPassCoarseWGSL = (
       
       // TODO: see if moving this down further reduces latency?
       fine_renderable_faces[ face_index ] = ${TwoPassFineRenderableFaceWGSL}(
-        coarse_face.bits & select( 0u, 0x80000000u, is_full_area ),
+        coarse_face.bits | select( 0u, 0x80000000u, is_full_area ),
         edges_index,
         required_edge_count,
         pack4xI8( clipped_clip_counts ),
