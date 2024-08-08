@@ -13,8 +13,8 @@ export const evaluateTwoPassFineDual = async (
   deviceContext: DeviceContext
 ): Promise<HTMLCanvasElement> => {
 
-  const filterType = PolygonFilterType.Box;
-  const filterScale = 1; // 25 box, 17 bilinear (comparison)
+  const filterType = PolygonFilterType.Bilinear;
+  const filterScale = 50 as number; // 25 box, 17 bilinear (comparison)
   const supportsGridFiltering = true;
   const supportsBilinear = true;
   const supportsMitchellNetravali = false;
@@ -27,7 +27,7 @@ export const evaluateTwoPassFineDual = async (
 
   const filterExpansion = filterRadius - 0.5; // since our "bounds" already include a radius of 0.5 from the pixel centers
 
-  const outputSize = 256;
+  const outputSize = 1024;
   const rasterSize = Math.ceil( outputSize * window.devicePixelRatio );
   const rasterWidth = rasterSize;
   const rasterHeight = rasterSize;
@@ -265,11 +265,11 @@ export const evaluateTwoPassFineDual = async (
   const canvas = document.createElement( 'canvas' );
   canvas.width = rasterWidth;
   canvas.height = rasterHeight;
-  // canvas.style.width = `${rasterWidth / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
-  // canvas.style.height = `${rasterHeight / window.devicePixelRatio}px`;
-  canvas.style.width = `${256 * 4}px`; // TODO: hopefully integral for tests
-  canvas.style.height = `${256 * 4}px`;
-  canvas.style.imageRendering = 'pixelated';
+  canvas.style.width = `${rasterWidth / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
+  canvas.style.height = `${rasterHeight / window.devicePixelRatio}px`;
+  // canvas.style.width = `${256 * 4}px`; // TODO: hopefully integral for tests
+  // canvas.style.height = `${256 * 4}px`;
+  // canvas.style.imageRendering = 'pixelated';
 
   const canvasContext = deviceContext.getCanvasContext( canvas, 'srgb' );
   const canvasTexture = canvasContext.getCurrentTexture();

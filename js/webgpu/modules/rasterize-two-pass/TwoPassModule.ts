@@ -64,8 +64,8 @@ export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
   ) {
     const options = optionize3<TwoPassModuleOptions, SelfOptions>()( {}, TWO_PASS_MODULE_DEFAULTS, providedOptions );
 
-    const MAX_FINE_FACES = 2 ** 13; // TODO: adjustable
-    const MAX_FINE_EDGES = 2 ** 16; // TODO: adjustable
+    const MAX_FINE_FACES = 2 ** 15; // TODO: adjustable
+    const MAX_FINE_EDGES = 2 ** 18; // TODO: adjustable
     const MAX_BINS = 2 ** 16; // TODO: adjustable NOTE, need 2 for atomics
 
     /*
