@@ -70,8 +70,8 @@ const mainTwoPassCoarseWGSL = (
       workgroupBarrier();
       
       let tile_index_xy = vec2(
-        coarse_face.tileIndex % config.tile_width,
-        coarse_face.tileIndex / config.tile_width
+        coarse_face.tile_index % config.tile_width,
+        coarse_face.tile_index / config.tile_width
       );
       
       let tile_xy = tile_index_xy * vec2( config.tile_size );
@@ -85,6 +85,7 @@ const mainTwoPassCoarseWGSL = (
       
       var area: f32;
       var num_clipped_edges: u32 = 0u;
+      var clipped_clip_counts = unpack4xI8( coarse_face.clip_counts );
       
       let max_area = ( max.x - min.x ) * ( max.y - min.y );
       
@@ -94,17 +95,15 @@ const mainTwoPassCoarseWGSL = (
         area = max_area;
       }
       else {
-      
-        let source_clip_counts = vec4f( unpack4xI8( coarse_face.clip_counts ) );
-        let clipped_clip_counts = source_clip_counts;
+        let source_clip_counts = vec4f( clipped_clip_counts );
         
         // Initialize area partial
         area = 2f * ( max.y - min.y ) * ( source_clip_counts.x * min.x + source_clip_counts.z * max.x ); // double it for when we halve it later
         
         // Accumulate to area partial
-        for ( var edge_offset = 0u; edge_offset < current_face.num_edges; edge_offset++ ) {
+        for ( var edge_offset = 0u; edge_offset < coarse_face.num_edges; edge_offset++ ) {
           // TODO: coalesced reads of this for the future, once we have correctness
-          let linear_edge = edges[ current_face.edges_index + edge_offset ];
+          let linear_edge = coarse_edges[ coarse_face.edges_index + edge_offset ];
           
           let bounds_centroid = 0.5f * ( min + max );
           let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`min.x`, wgsl`min.y`, wgsl`max.x`, wgsl`max.y`, wgsl`bounds_centroid.x`, wgsl`bounds_centroid.y` )};
@@ -143,7 +142,7 @@ const mainTwoPassCoarseWGSL = (
       let required_edge_count = select( 0u, num_clipped_edges, needs_write_edges );
       let required_face_count = select( 0u, 1u, needs_write_edges );
       
-      let offsets = vec2( required_edge_count, required_face_count );
+      var offsets = vec2( required_edge_count, required_face_count );
       
       ${scanWGSL( {
         workgroupSize: 256,
@@ -177,11 +176,11 @@ const mainTwoPassCoarseWGSL = (
         return;
       }
       
-      let bin_index = local_id.x + ( coarse_face.tileIndex << 8u );
+      let bin_index = local_id.x + ( coarse_face.tile_index << 8u );
       
       // bump allocation
       // TODO: detect and record overflow
-      let previous_address = atomicStore( &addresses[ bin_index + 2u ], face_index );
+      let previous_address = atomicExchange( &addresses[ bin_index + 2u ], face_index );
       
       // TODO: see if moving this down further reduces latency?
       fine_renderable_faces[ face_index ] = ${TwoPassFineRenderableFaceWGSL}(
@@ -197,10 +196,10 @@ const mainTwoPassCoarseWGSL = (
       } 
       
       // write edges out
-      let edge_index = edges_index;
-      for ( var edge_offset = 0u; edge_offset < current_face.num_edges; edge_offset++ ) {
+      var edge_index = edges_index;
+      for ( var edge_offset = 0u; edge_offset < coarse_face.num_edges; edge_offset++ ) {
         // TODO: coalesced reads of this for the future, once we have correctness
-        let linear_edge = edges[ current_face.edges_index + edge_offset ];
+        let linear_edge = coarse_edges[ coarse_face.edges_index + edge_offset ];
         
         let bounds_centroid = 0.5f * ( min + max );
         let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`min.x`, wgsl`min.y`, wgsl`max.x`, wgsl`max.y`, wgsl`bounds_centroid.x`, wgsl`bounds_centroid.y` )};
@@ -218,8 +217,8 @@ const mainTwoPassCoarseWGSL = (
     }
     
     fn is_edge_clipped_count( p0: vec2f, p1: vec2f, min: vec2f, max: vec2f ) -> bool {
-      return all( p0 == min || p0 == max ) &&
-             all( p1 == min || p1 == max ) &&
+      return all( ( p0 == min ) | ( p0 == max ) ) &&
+             all( ( p1 == min ) | ( p1 == max ) ) &&
              ( p0.x == p1.x ) != ( p0.y == p1.y );
     }
   ` );
