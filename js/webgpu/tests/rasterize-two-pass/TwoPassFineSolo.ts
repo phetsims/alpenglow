@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferSlot, ByteEncoder, DeviceContext, getArrayType, LinearEdge, LinearEdgeType, MainTwoPassFineModule, PolygonFilterType, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TwoPassConfig, TwoPassConfigType, TwoPassFineRenderableFace, TwoPassFineRenderableFaceType, U32Type } from '../../../imports.js';
+import { alpenglow, BlitShader, BufferArraySlot, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getArrayType, LinearEdge, LinearEdgeType, MainTwoPassFineModule, PolygonFilterType, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TwoPassConfig, TwoPassConfigType, TwoPassFineRenderableFace, TwoPassFineRenderableFaceType, U32Type } from '../../../imports.js';
 import testPolygonalFace from '../testPolygonalFace.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
@@ -194,7 +194,7 @@ export const evaluateTwoPassFineSolo = async (
   const edgesSlot = new BufferArraySlot( getArrayType( LinearEdgeType, edges.length ) ); // TODO: variable size
   const outputSlot = new TextureViewSlot();
 
-  const module = new MainTwoPassFineModule( {
+  const mainModule = new MainTwoPassFineModule( {
     name: `module_${name}`,
 
     config: configSlot,
@@ -209,19 +209,41 @@ export const evaluateTwoPassFineSolo = async (
     supportsMitchellNetravali: supportsMitchellNetravali
   } );
 
+  // Pick the opposite of the storage format, in case we can't write to it directly, and need to blit it over
+  const potentialBlitFormat = deviceContext.preferredStorageFormat === 'bgra8unorm' ? 'rgba8unorm' : 'bgra8unorm';
+  const blitShader = new BlitShader( deviceContext.device, potentialBlitFormat );
+  const wrapBlitModule = new CompositeModule( [ mainModule ], ( context, data: { numBins: number; textureBlit: [ GPUTextureView, GPUTextureView ] | null } ) => {
+    mainModule.execute( context, data.numBins );
+
+    if ( data.textureBlit ) {
+      const encoder = context.getEncoderForCustomRender();
+      blitShader.dispatch( encoder, data.textureBlit[ 1 ], data.textureBlit[ 0 ] );
+    }
+  } );
+
   const routine = await Routine.create(
     deviceContext,
-    module,
+    wrapBlitModule,
     [ configSlot, addressesSlot, fineRenderableFacesSlot, edgesSlot ],
     Routine.INDIVIDUAL_LAYOUT_STRATEGY,
-    ( context, execute, input: { config: TwoPassConfig; addresses: number[]; fineRenderableFaces: TwoPassFineRenderableFace[]; renderProgramInstructions: number[]; edges: LinearEdge[] } ) => {
+    ( context, execute, input: {
+      config: TwoPassConfig;
+      addresses: number[];
+      fineRenderableFaces: TwoPassFineRenderableFace[];
+      renderProgramInstructions: number[];
+      edges: LinearEdge[];
+      textureBlit: [ GPUTextureView, GPUTextureView ] | null;
+    } ) => {
       context.setTypedBufferValue( configSlot, input.config );
       context.setTypedBufferValue( addressesSlot, input.addresses );
       context.setTypedBufferValue( fineRenderableFacesSlot, input.fineRenderableFaces );
       context.setTypedBufferValue( renderProgramInstructionsSlot, input.renderProgramInstructions );
       context.setTypedBufferValue( edgesSlot, input.edges );
 
-      execute( context, numBins );
+      execute( context, {
+        numBins: numBins,
+        textureBlit: input.textureBlit
+      } );
 
       // TODO: do we need to wait for anything here?
       return Promise.resolve( null );
@@ -294,7 +316,8 @@ export const evaluateTwoPassFineSolo = async (
     addresses: [ 0, 0, ...unpaddedAddresses ],
     fineRenderableFaces: fineRenderableFaces,
     renderProgramInstructions: renderProgramInstructions,
-    edges: edges
+    edges: edges,
+    textureBlit: canOutputToCanvas ? null : [ fineOutputTextureView, canvasTextureView ]
   } );
 
   procedure.dispose();

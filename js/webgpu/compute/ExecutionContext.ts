@@ -58,6 +58,13 @@ export default class ExecutionContext {
     }
   }
 
+  // TODO: see if we can get the bind groups to be optimized?
+  public getEncoderForCustomRender(): GPUCommandEncoder {
+    this.releaseComputePass();
+
+    return this.executor.encoder;
+  }
+
   public setTypedBufferValue<T>( bufferSlot: BufferSlot<T>, value: T ): void {
     this.releaseComputePass(); // we can't run this during a compute pass, so we'll interrupt if there is one
 

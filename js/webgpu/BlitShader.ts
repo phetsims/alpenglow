@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
+import { alpenglow, webgpu } from '../imports.js';
 
 export default class BlitShader {
 
@@ -83,8 +83,8 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
     } );
   }
 
-  public dispatch( encoder: GPUCommandEncoder, outTextureView: GPUTextureView, fineOutputTextureView: GPUTextureView ): void {
-    const pass = encoder.beginRenderPass( {
+  public dispatch( encoder: GPUCommandEncoder, outTextureView: GPUTextureView, sourceTextureView: GPUTextureView ): void {
+    const pass = webgpu.encoderBeginRenderPass( encoder, {
       label: 'blit render pass',
       colorAttachments: [
         {
@@ -96,17 +96,19 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
       ]
     } );
 
-    const bindGroup = this.device.createBindGroup( {
+    // TODO: store the bind group(!)
+    const bindGroup = webgpu.deviceCreateBindGroup( this.device, {
       label: 'blit bind group',
       layout: this.bindGroupLayout,
       entries: [
         {
           binding: 0,
-          resource: fineOutputTextureView
+          resource: sourceTextureView
         }
       ]
     } );
 
+    // TODO: get these commands recorded?
     pass.setPipeline( this.pipeline );
     pass.setBindGroup( 0, bindGroup );
     pass.draw( 6 );
