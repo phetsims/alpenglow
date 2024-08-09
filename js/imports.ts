@@ -649,15 +649,17 @@ export type { TwoPassModuleOptions, TwoPassRunSize } from './webgpu/modules/rast
 export { default as TiledTwoPassModule, TILED_TWO_PASS_MODULE_DEFAULTS } from './webgpu/modules/rasterize-two-pass/TiledTwoPassModule.js';
 export type { TiledTwoPassModuleOptions, TiledTwoPassRunSize } from './webgpu/modules/rasterize-two-pass/TiledTwoPassModule.js';
 
-// testing
-export { evaluateTwoPassFineSolo } from './webgpu/tests/rasterize-two-pass/TwoPassFineSolo.js';
-export { evaluateTwoPassFineDual } from './webgpu/tests/rasterize-two-pass/TwoPassFineDual.js';
-export { evaluateTwoPassTiled } from './webgpu/tests/rasterize-two-pass/TwoPassTiled.js';
-
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';
 export { default as GPUProfiling } from './webgpu/GPUProfiling.js';
 export { default as RasterClipper } from './webgpu/old/RasterClipper.js';
 export type { RasterClipperOptions } from './webgpu/old/RasterClipper.js';
+export { default as FaceRasterizer } from './webgpu/FaceRasterizer.js';
+
+// testing
+export { evaluateTwoPassFineSolo } from './webgpu/tests/rasterize-two-pass/TwoPassFineSolo.js';
+export { evaluateTwoPassFineDual } from './webgpu/tests/rasterize-two-pass/TwoPassFineDual.js';
+export { evaluateTwoPassTiled } from './webgpu/tests/rasterize-two-pass/TwoPassTiled.js';
+export { evaluateTwoPassFaceRasterizer } from './webgpu/tests/rasterize-two-pass/TwoPassFaceRasterizer.js';
 
 export { shaderTestDevicePromise, asyncTestWithDevice, asyncTestWithDeviceContext, compareArrays } from './webgpu/tests/ShaderTestUtils.js';

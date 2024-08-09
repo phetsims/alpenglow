@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, DeviceContext, ExecutionContext, Executor, ExecutorOptions, PipelineBlueprint, Resource, ResourceSlot, Routine, webgpu } from '../../imports.js';
+import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, DeviceContext, ExecutionContext, Executor, ExecutorOptions, PipelineBlueprint, Resource, ResourceSlot, Routine, TextureViewResource, TextureViewSlot, webgpu } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import BufferSlot from './BufferSlot.js';
 import { combineOptions } from '../../../../phet-core/js/optionize.js';
@@ -67,6 +67,28 @@ export default class Procedure<In, Out> {
         }
       }
     } );
+
+    return this;
+  }
+
+  // Should be callable repeatedly (TODO test)
+  public bindTexture( textureSlot: TextureViewSlot, resource: TextureViewResource ): this {
+
+    if ( this.resourceMap.has( textureSlot ) ) {
+      // Remove from the resource map
+      this.resourceMap.delete( textureSlot );
+
+      // Remove bind groups that have this texture slot
+      this.routine.bindGroupLayouts.forEach( bindGroupLayout => {
+        if ( this.bindGroupMap.has( bindGroupLayout ) ) {
+          if ( bindGroupLayout.bindings.some( binding => binding.slot === textureSlot ) ) {
+            this.bindGroupMap.delete( bindGroupLayout );
+          }
+        }
+      } );
+    }
+
+    this.bind( textureSlot, resource );
 
     return this;
   }
