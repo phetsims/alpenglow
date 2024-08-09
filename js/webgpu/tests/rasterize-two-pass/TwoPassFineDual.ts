@@ -4,7 +4,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BlitShader, BufferArraySlot, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassCoarseRenderableFaceType, TwoPassConfig, TwoPassConfigType, TwoPassModule, U32Type } from '../../../imports.js';
+import { alpenglow, BlitShader, BufferArraySlot, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassCoarseRenderableFaceType, TwoPassConfig, TwoPassConfigType, TwoPassModule, u32S, U32Type } from '../../../imports.js';
 import testPolygonalFace from '../testPolygonalFace.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
@@ -193,7 +193,8 @@ export const evaluateTwoPassFineDual = async (
       supportsGridFiltering: supportsGridFiltering,
       supportsBilinear: supportsBilinear,
       supportsMitchellNetravali: supportsMitchellNetravali
-    }
+    },
+    numCoarseRenderableFaces: u32S( coarseRenderableFaces.length )
   } );
 
   // Pick the opposite of the storage format, in case we can't write to it directly, and need to blit it over

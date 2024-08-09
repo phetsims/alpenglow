@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getVariableLengthArrayType, LinearEdge, LinearEdgeType, MainTwoPassInitializeAddressesModule, MainTwoPassInitializeAddressesModuleOptions, MainTwoPassTileModule, MainTwoPassTileModuleOptions, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFaceType, TwoPassConfig, TwoPassInitialRenderableFace, TwoPassModule, TwoPassModuleOptions, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, BufferBindingType, BufferSlot, CompositeModule, getVariableLengthArrayType, LinearEdge, LinearEdgeType, MainTwoPassInitializeAddressesModule, MainTwoPassInitializeAddressesModuleOptions, MainTwoPassTileModule, MainTwoPassTileModuleOptions, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFaceType, TwoPassConfig, TwoPassInitialRenderableFace, TwoPassModule, TwoPassModuleOptions, U32AtomicType, U32Type, WGSLExpressionU32, WGSLStringFunction } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions = {
@@ -108,7 +108,13 @@ export default class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunS
       renderProgramInstructions: providedOptions.renderProgramInstructions,
       output: providedOptions.output,
 
-      storageFormat: providedOptions.storageFormat
+      storageFormat: providedOptions.storageFormat,
+
+      numCoarseRenderableFaces: new WGSLStringFunction( pipelineBlueprint => {
+        pipelineBlueprint.addSlot( 'tile_addresses', addressesPlainSlot, BufferBindingType.READ_ONLY_STORAGE );
+
+        return 'tile_addresses[ 0u ]';
+      } )
     } );
 
     super( [
@@ -120,7 +126,7 @@ export default class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunS
       tileModule.execute( context, runSize.numInitialRenderableFaces * runSize.numBins );
       twoPassModule.execute( context, {
         numBins: runSize.numBins,
-        numCoarseRenderableFaces: options.maxCoarseRenderableFaces // TODO: wait, we need to filter things out
+        numCoarseRenderableFaces: options.maxCoarseRenderableFaces
       } );
     } );
 

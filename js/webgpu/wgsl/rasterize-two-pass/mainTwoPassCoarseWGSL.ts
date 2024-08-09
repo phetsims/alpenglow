@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, LinearEdge, scanWGSL, TwoPassCoarseRenderableFace, TwoPassCoarseRenderableFaceWGSL, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, Vec2uAdd, wgsl, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, LinearEdge, scanWGSL, TwoPassCoarseRenderableFace, TwoPassCoarseRenderableFaceWGSL, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, Vec2uAdd, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 import optionize from '../../../../../phet-core/js/optionize.js';
 
 export type mainTwoPassCoarseWGSLOptions = {
@@ -19,6 +19,8 @@ export type mainTwoPassCoarseWGSLOptions = {
   fineRenderableFaces: BufferSlot<TwoPassFineRenderableFace[]>;
   fineEdges: BufferSlot<LinearEdge[]>;
   addresses: BufferSlot<number[]>; // note: first atomic is face-allocation, second is edge-allocation
+
+  numCoarseRenderableFaces: WGSLExpressionU32;
 };
 
 export const MAIN_TWO_PASS_COARSE_DEFAULTS = {
@@ -61,6 +63,11 @@ const mainTwoPassCoarseWGSL = (
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
+      // Ensure we exit early if we don't contain valid data
+      if ( workgroup_id.x >= ${options.numCoarseRenderableFaces} ) {
+        return;
+      }
+    
       if ( local_id.x == 0u ) {
         // TODO: RANGE CHECK this
         coarse_face = coarse_renderable_faces[ workgroup_id.x ];

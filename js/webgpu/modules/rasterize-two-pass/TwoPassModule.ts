@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getVariableLengthArrayType, LinearEdge, LinearEdgeType, MainTwoPassCoarseModule, MainTwoPassCoarseModuleOptions, MainTwoPassFineModule, MainTwoPassFineModuleOptions, MainTwoPassInitializeAddressesModule, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFaceType, U32AtomicType, U32Type } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getVariableLengthArrayType, LinearEdge, LinearEdgeType, MainTwoPassCoarseModule, MainTwoPassCoarseModuleOptions, MainTwoPassFineModule, MainTwoPassFineModuleOptions, MainTwoPassInitializeAddressesModule, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFaceType, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions = {
@@ -17,6 +17,8 @@ type SelfOptions = {
   output: TextureViewSlot;
 
   storageFormat: GPUTextureFormat; // e.g. deviceContext.preferredStorageFormat
+
+  numCoarseRenderableFaces: WGSLExpressionU32;
 
   maxFineFaces?: number;
   maxFineEdges?: number;
@@ -99,7 +101,9 @@ export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
       // output
       fineRenderableFaces: fineRenderableFacesSlot,
       fineEdges: fineEdgesSlot,
-      addresses: addressesAtomicSlot
+      addresses: addressesAtomicSlot,
+
+      numCoarseRenderableFaces: options.numCoarseRenderableFaces
     } );
 
     const fineModule = new MainTwoPassFineModule( {
