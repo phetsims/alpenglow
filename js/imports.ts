@@ -623,8 +623,13 @@ export { default as TwoPassFineRenderableFaceType } from './webgpu/wgsl/rasteriz
 export type { default as TwoPassCoarseRenderableFace } from './webgpu/wgsl/rasterize-two-pass/TwoPassCoarseRenderableFace.js';
 export { default as TwoPassCoarseRenderableFaceWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassCoarseRenderableFaceWGSL.js';
 export { default as TwoPassCoarseRenderableFaceType } from './webgpu/wgsl/rasterize-two-pass/TwoPassCoarseRenderableFaceType.js';
+export type { default as TwoPassInitialRenderableFace } from './webgpu/wgsl/rasterize-two-pass/TwoPassInitialRenderableFace.js';
+export { default as TwoPassInitialRenderableFaceWGSL } from './webgpu/wgsl/rasterize-two-pass/TwoPassInitialRenderableFaceWGSL.js';
+export { default as TwoPassInitialRenderableFaceType } from './webgpu/wgsl/rasterize-two-pass/TwoPassInitialRenderableFaceType.js';
 export { default as mainTwoPassInitializeAddressesWGSL, MAIN_TWO_PASS_INITIALIZE_ADDRESSES_DEFAULTS } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassInitializeAddressesWGSL.js';
 export type { mainTwoPassInitializeAddressesWGSLOptions } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassInitializeAddressesWGSL.js';
+export { default as mainTwoPassTileWGSL, MAIN_TWO_PASS_TILE_DEFAULTS } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassTileWGSL.js';
+export type { mainTwoPassTileWGSLOptions } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassTileWGSL.js';
 export { default as mainTwoPassCoarseWGSL, MAIN_TWO_PASS_COARSE_DEFAULTS } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassCoarseWGSL.js';
 export type { mainTwoPassCoarseWGSLOptions } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassCoarseWGSL.js';
 export { default as mainTwoPassFineWGSL, MAIN_TWO_PASS_FINE_DEFAULTS } from './webgpu/wgsl/rasterize-two-pass/mainTwoPassFineWGSL.js';
@@ -635,14 +640,19 @@ export { default as MainTwoPassFineModule, MAIN_TWO_PASS_FINE_MODULE_DEFAULTS } 
 export type { MainTwoPassFineModuleOptions } from './webgpu/modules/rasterize-two-pass/MainTwoPassFineModule.js';
 export { default as MainTwoPassCoarseModule, MAIN_TWO_PASS_COARSE_MODULE_DEFAULTS } from './webgpu/modules/rasterize-two-pass/MainTwoPassCoarseModule.js';
 export type { MainTwoPassCoarseModuleOptions } from './webgpu/modules/rasterize-two-pass/MainTwoPassCoarseModule.js';
+export { default as MainTwoPassTileModule, MAIN_TWO_PASS_TILE_MODULE_DEFAULTS } from './webgpu/modules/rasterize-two-pass/MainTwoPassTileModule.js';
+export type { MainTwoPassTileModuleOptions } from './webgpu/modules/rasterize-two-pass/MainTwoPassTileModule.js';
 export { default as MainTwoPassInitializeAddressesModule, MAIN_TWO_PASS_INITIALIZE_ADDRESSES_MODULE_DEFAULTS } from './webgpu/modules/rasterize-two-pass/MainTwoPassInitializeAddressesModule.js';
 export type { MainTwoPassInitializeAddressesModuleOptions } from './webgpu/modules/rasterize-two-pass/MainTwoPassInitializeAddressesModule.js';
 export { default as TwoPassModule, TWO_PASS_MODULE_DEFAULTS } from './webgpu/modules/rasterize-two-pass/TwoPassModule.js';
 export type { TwoPassModuleOptions, TwoPassRunSize } from './webgpu/modules/rasterize-two-pass/TwoPassModule.js';
+export { default as TiledTwoPassModule, TILED_TWO_PASS_MODULE_DEFAULTS } from './webgpu/modules/rasterize-two-pass/TiledTwoPassModule.js';
+export type { TiledTwoPassModuleOptions, TiledTwoPassRunSize } from './webgpu/modules/rasterize-two-pass/TiledTwoPassModule.js';
 
 // testing
 export { evaluateTwoPassFineSolo } from './webgpu/tests/rasterize-two-pass/TwoPassFineSolo.js';
 export { evaluateTwoPassFineDual } from './webgpu/tests/rasterize-two-pass/TwoPassFineDual.js';
+export { evaluateTwoPassTiled } from './webgpu/tests/rasterize-two-pass/TwoPassTiled.js';
 
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';

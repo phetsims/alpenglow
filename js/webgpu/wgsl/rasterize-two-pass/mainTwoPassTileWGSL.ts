@@ -6,52 +6,53 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, LinearEdge, scanWGSL, TwoPassCoarseRenderableFace, TwoPassCoarseRenderableFaceWGSL, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, Vec2uAdd, wgsl, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, LinearEdge, scanWGSL, TwoPassCoarseRenderableFace, TwoPassCoarseRenderableFaceWGSL, TwoPassConfig, TwoPassInitialRenderableFace, Vec2uAdd, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 import optionize from '../../../../../phet-core/js/optionize.js';
 
-export type mainTwoPassCoarseWGSLOptions = {
+export type mainTwoPassTileWGSLOptions = {
   // input
   config: BufferSlot<TwoPassConfig>;
-  coarseRenderableFaces: BufferSlot<TwoPassCoarseRenderableFace[]>;
-  coarseEdges: BufferSlot<LinearEdge[]>;
+  initialRenderableFaces: BufferSlot<TwoPassInitialRenderableFace[]>;
+  initialEdges: BufferSlot<LinearEdge[]>;
 
   // output
-  fineRenderableFaces: BufferSlot<TwoPassFineRenderableFace[]>;
-  fineEdges: BufferSlot<LinearEdge[]>;
+  coarseRenderableFaces: BufferSlot<TwoPassCoarseRenderableFace[]>;
+  coarseEdges: BufferSlot<LinearEdge[]>;
   addresses: BufferSlot<number[]>; // note: first atomic is face-allocation, second is edge-allocation
+
+  numInitialRenderableFaces: WGSLExpressionU32;
 };
 
-export const MAIN_TWO_PASS_COARSE_DEFAULTS = {
+export const MAIN_TWO_PASS_TILE_DEFAULTS = {
   // placeholder
 } as const;
 
-const mainTwoPassCoarseWGSL = (
-  providedOptions: mainTwoPassCoarseWGSLOptions
+const mainTwoPassTileWGSL = (
+  providedOptions: mainTwoPassTileWGSLOptions
 ): WGSLMainModule => {
 
-  const options = optionize<mainTwoPassCoarseWGSLOptions>()( {
+  const options = optionize<mainTwoPassTileWGSLOptions>()( {
 
   }, providedOptions );
 
   const configSlot = new WGSLSlot( 'config', options.config, BufferBindingType.UNIFORM );
-  const coarseRenderableFacesSlot = new WGSLSlot( 'coarse_renderable_faces', options.coarseRenderableFaces, BufferBindingType.READ_ONLY_STORAGE );
-  const coarseEdgesSlot = new WGSLSlot( 'coarse_edges', options.coarseEdges, BufferBindingType.READ_ONLY_STORAGE );
+  const initialRenderableFacesSlot = new WGSLSlot( 'initial_renderable_faces', options.initialRenderableFaces, BufferBindingType.READ_ONLY_STORAGE );
+  const initialEdgesSlot = new WGSLSlot( 'initial_edges', options.initialEdges, BufferBindingType.READ_ONLY_STORAGE );
 
-  const fineRenderableFacesSlot = new WGSLSlot( 'fine_renderable_faces', options.fineRenderableFaces, BufferBindingType.STORAGE );
-  const fineEdgesSlot = new WGSLSlot( 'fine_edges', options.fineEdges, BufferBindingType.STORAGE );
+  const coarseRenderableFacesSlot = new WGSLSlot( 'coarse_renderable_faces', options.coarseRenderableFaces, BufferBindingType.STORAGE );
+  const coarseEdgesSlot = new WGSLSlot( 'coarse_edges', options.coarseEdges, BufferBindingType.STORAGE );
   const addressesSlot = new WGSLSlot( 'addresses', options.addresses, BufferBindingType.STORAGE );
 
   return new WGSLMainModule( [
     configSlot,
+    initialRenderableFacesSlot,
+    initialEdgesSlot,
     coarseRenderableFacesSlot,
     coarseEdgesSlot,
-    fineRenderableFacesSlot,
-    fineEdgesSlot,
     addressesSlot
   ], wgsl`
     const low_area_multiplier = 1e-4f;
     
-    var<workgroup> coarse_face: ${TwoPassCoarseRenderableFaceWGSL};
     var<workgroup> scratch_data: array<vec2u, 256>;
     var<workgroup> base_indices: vec2u;
     
@@ -61,47 +62,42 @@ const mainTwoPassCoarseWGSL = (
       @builtin(local_invocation_id) local_id: vec3u,
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
-      if ( local_id.x == 0u ) {
-        coarse_face = coarse_renderable_faces[ workgroup_id.x ];
-      }
+      let num_tiles = config.tile_width * config.tile_height;
+      let source_face_index = global_id.x / num_tiles;
+      let tile_index = global_id.x % num_tiles;
       
-      workgroupBarrier();
+      let skip_tile = source_face_index >= ${options.numInitialRenderableFaces};
       
+      let initial_face = initial_renderable_faces[ select( 0u, source_face_index, !skip_tile ) ];
+    
       let tile_index_xy = vec2(
-        coarse_face.tile_index % config.tile_width,
-        coarse_face.tile_index / config.tile_width
+        tile_index % config.tile_width,
+        tile_index / config.tile_width
       );
-      
-      let tile_xy = tile_index_xy * vec2( config.tile_size );
-      
-      let relative_bin_xy = vec2( local_id.x % 16u, local_id.x / 16u );
       
       let filter_expansion = select( select( 2f, 1f, config.filter_type == 1u ), 0.5f, config.filter_type == 0u ) * config.filter_scale - 0.5f;
       
-      let min = vec2f( tile_xy + vec2( config.bin_size ) * relative_bin_xy ) - vec2( filter_expansion ); 
-      let max = vec2f( tile_xy + vec2( config.bin_size ) * ( vec2( 1u ) + relative_bin_xy ) ) + vec2( filter_expansion );
+      let min = vec2f( tile_index_xy * vec2( config.tile_size ) ) - vec2( filter_expansion );
+      let max = vec2f( ( tile_index_xy + vec2( 1u ) ) * vec2( config.tile_size ) ) + vec2( filter_expansion );
       
       var area: f32;
       var num_clipped_edges: u32 = 0u;
-      var clipped_clip_counts = unpack4xI8( coarse_face.clip_counts );
+      var clipped_clip_counts = vec4i( 0i );
       
       let max_area = ( max.x - min.x ) * ( max.y - min.y );
       
-      let is_source_full_area = ( coarse_face.bits & 0x80000000u ) != 0u;
+      let is_source_full_area = ( initial_face.bits & 0x80000000u ) != 0u;
       
       if ( is_source_full_area ) {
         area = max_area;
       }
-      else {
-        let source_clip_counts = vec4f( clipped_clip_counts );
-        
-        // Initialize area partial
-        area = 2f * ( max.y - min.y ) * ( source_clip_counts.x * min.x + source_clip_counts.z * max.x ); // double it for when we halve it later
-        
+      else if ( !skip_tile ) { // do NOT need uniform control flow inside here
+        area = 0f;
+      
         // Accumulate to area partial
-        for ( var edge_offset = 0u; edge_offset < coarse_face.num_edges; edge_offset++ ) {
+        for ( var edge_offset = 0u; edge_offset < initial_face.num_edges; edge_offset++ ) {
           // TODO: coalesced reads of this for the future, once we have correctness
-          let linear_edge = coarse_edges[ coarse_face.edges_index + edge_offset ];
+          let linear_edge = initial_edges[ initial_face.edges_index + edge_offset ];
           
           let bounds_centroid = 0.5f * ( min + max );
           let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`min.x`, wgsl`min.y`, wgsl`max.x`, wgsl`max.y`, wgsl`bounds_centroid.x`, wgsl`bounds_centroid.y` )};
@@ -116,7 +112,6 @@ const mainTwoPassCoarseWGSL = (
             
             if ( is_edge_clipped_count( p0, p1, min, max ) ) {
               // TODO: consider NOT writing the clip counts in this (hopefully faster) loop?
-              // TODO: would require writing the face AFTER the edges (waiting for 2nd pass)
               
               // sum should only increase if we are adding a count
               let count_delta = select( -1i, 1i, p0.x + p0.y < p1.x + p1.y );
@@ -137,7 +132,7 @@ const mainTwoPassCoarseWGSL = (
       // TODO: don't use low_area_multiplier with full area!
       let is_full_area = is_source_full_area || area + low_area_multiplier >= max_area;
       
-      let needs_write_face = area > low_area_multiplier;
+      let needs_write_face = !skip_tile && area > low_area_multiplier;
       let needs_write_edges = needs_write_face && !is_full_area;
       
       let required_edge_count = select( 0u, num_clipped_edges, needs_write_edges );
@@ -177,19 +172,13 @@ const mainTwoPassCoarseWGSL = (
         return;
       }
       
-      let bin_index = local_id.x + ( coarse_face.tile_index << 8u );
-      
-      // bump allocation
-      // TODO: detect and record overflow
-      let previous_address = atomicExchange( &addresses[ bin_index + 2u ], face_index );
-      
       // TODO: see if moving this down further reduces latency?
-      fine_renderable_faces[ face_index ] = ${TwoPassFineRenderableFaceWGSL}(
-        coarse_face.bits | select( 0u, 0x80000000u, is_full_area ),
+      coarse_renderable_faces[ face_index ] = ${TwoPassCoarseRenderableFaceWGSL}(
+        initial_face.bits | select( 0u, 0x80000000u, is_full_area ),
         edges_index,
         required_edge_count,
         pack4xI8( clipped_clip_counts ),
-        previous_address
+        tile_index
       );
       
       if ( !needs_write_edges ) {
@@ -198,9 +187,9 @@ const mainTwoPassCoarseWGSL = (
       
       // write edges out
       var edge_index = edges_index;
-      for ( var edge_offset = 0u; edge_offset < coarse_face.num_edges; edge_offset++ ) {
+      for ( var edge_offset = 0u; edge_offset < initial_face.num_edges; edge_offset++ ) {
         // TODO: coalesced reads of this for the future, once we have correctness
-        let linear_edge = coarse_edges[ coarse_face.edges_index + edge_offset ];
+        let linear_edge = initial_edges[ initial_face.edges_index + edge_offset ];
         
         let bounds_centroid = 0.5f * ( min + max );
         let result = ${bounds_clip_edgeWGSL( wgsl`linear_edge`, wgsl`min.x`, wgsl`min.y`, wgsl`max.x`, wgsl`max.y`, wgsl`bounds_centroid.x`, wgsl`bounds_centroid.y` )};
@@ -209,7 +198,7 @@ const mainTwoPassCoarseWGSL = (
           let edge = result.edges[ i ];
         
           if ( !is_edge_clipped_count( edge.startPoint, edge.endPoint, min, max ) ) {
-            fine_edges[ edge_index ] = edge;
+            coarse_edges[ edge_index ] = edge;
             
             edge_index += 1u;
           }
@@ -225,4 +214,4 @@ const mainTwoPassCoarseWGSL = (
   ` );
 };
 
-export default mainTwoPassCoarseWGSL;
+export default mainTwoPassTileWGSL;

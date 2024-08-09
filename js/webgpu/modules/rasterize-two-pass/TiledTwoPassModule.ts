@@ -1,0 +1,137 @@
+// Copyright 2024, University of Colorado Boulder
+
+/**
+ * TODO: doc
+ *
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ */
+
+import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getArrayType, LinearEdge, LinearEdgeType, MainTwoPassInitializeAddressesModule, MainTwoPassInitializeAddressesModuleOptions, MainTwoPassTileModule, MainTwoPassTileModuleOptions, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFaceType, TwoPassConfig, TwoPassInitialRenderableFace, TwoPassModule, TwoPassModuleOptions, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+
+type SelfOptions = {
+  config: BufferSlot<TwoPassConfig>;
+  initialRenderableFaces: BufferSlot<TwoPassInitialRenderableFace[]>;
+  initialEdges: BufferSlot<LinearEdge[]>;
+  renderProgramInstructions: BufferSlot<number[]>;
+  output: TextureViewSlot;
+
+  storageFormat: GPUTextureFormat; // e.g. deviceContext.preferredStorageFormat
+
+  numInitialRenderableFaces: WGSLExpressionU32;
+};
+
+type ParentOptions = {
+  mainTwoPassTileModuleOptions?: Partial<MainTwoPassTileModuleOptions>;
+  twoPassModuleOptions?: Partial<TwoPassModuleOptions>;
+  mainTwoPassAtomicInitializeAddressesModuleOptions?: Partial<MainTwoPassInitializeAddressesModuleOptions>;
+} & PipelineBlueprintOptions;
+
+export type TiledTwoPassModuleOptions = SelfOptions & ParentOptions;
+
+export const TILED_TWO_PASS_MODULE_DEFAULTS = {
+  mainTwoPassTileModuleOptions: {},
+  twoPassModuleOptions: {},
+  mainTwoPassAtomicInitializeAddressesModuleOptions: {}
+} as const;
+
+export type TiledTwoPassRunSize = {
+  numBins: number;
+  numInitialRenderableFaces: number;
+};
+
+// inputSize: TiledTwoPassRunSize
+export default class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunSize> {
+
+  public readonly config: BufferSlot<TwoPassConfig>;
+  public readonly initialRenderableFaces: BufferSlot<TwoPassInitialRenderableFace[]>;
+  public readonly initialEdges: BufferSlot<LinearEdge[]>;
+  public readonly renderProgramInstructions: BufferSlot<number[]>;
+  public readonly output: TextureViewSlot;
+
+  public readonly initializeAddressesModule: MainTwoPassInitializeAddressesModule;
+  public readonly tileModule: MainTwoPassTileModule;
+  public readonly twoPassModule: TwoPassModule;
+
+  public constructor(
+    providedOptions: TiledTwoPassModuleOptions
+  ) {
+    const options = optionize3<TiledTwoPassModuleOptions, SelfOptions>()( {}, TILED_TWO_PASS_MODULE_DEFAULTS, providedOptions );
+
+    const MAX_COARSE_FACES = 2 ** 15; // TODO: adjustable
+    const MAX_COARSE_EDGES = 2 ** 18; // TODO: adjustable
+
+    const ATOMIC_SIZE = 4; // padded up so it will be the min of 16 bytes
+
+    const coarseRenderableFacesSlot = new BufferArraySlot( getArrayType( TwoPassCoarseRenderableFaceType, MAX_COARSE_FACES ) );
+    const coarseEdgesSlot = new BufferArraySlot( getArrayType( LinearEdgeType, MAX_COARSE_EDGES ) );
+    const addressesAtomicSlot = new BufferArraySlot( getArrayType( U32AtomicType, ATOMIC_SIZE ) );
+    const addressesPlainSlot = addressesAtomicSlot.castTo( getArrayType( U32Type, ATOMIC_SIZE ) );
+
+    const initializeAddressesModule = new MainTwoPassInitializeAddressesModule( {
+      name: `${providedOptions.name} atomic initialize_addresses`,
+
+      log: providedOptions.log, // TODO: how can we avoid needing this forward?
+      ...options.mainTwoPassAtomicInitializeAddressesModuleOptions, // eslint-disable-line no-object-spread-on-non-literals
+
+      addresses: addressesPlainSlot
+    } );
+
+    const tileModule = new MainTwoPassTileModule( {
+      name: `${providedOptions.name} tile`,
+
+      log: providedOptions.log, // TODO: how can we avoid needing this forward?
+      numInitialRenderableFaces: options.numInitialRenderableFaces,
+      ...options.mainTwoPassTileModuleOptions, // eslint-disable-line no-object-spread-on-non-literals
+
+      // input
+      config: providedOptions.config,
+      initialRenderableFaces: providedOptions.initialRenderableFaces,
+      initialEdges: providedOptions.initialEdges,
+
+      // output
+      coarseRenderableFaces: coarseRenderableFacesSlot,
+      coarseEdges: coarseEdgesSlot,
+      addresses: addressesAtomicSlot
+    } );
+
+    const twoPassModule = new TwoPassModule( {
+      name: `${providedOptions.name} two pass`,
+
+      log: providedOptions.log, // TODO: how can we avoid needing this forward?
+      ...options.twoPassModuleOptions, // eslint-disable-line no-object-spread-on-non-literals
+
+      config: providedOptions.config,
+      coarseRenderableFaces: coarseRenderableFacesSlot,
+      coarseEdges: coarseEdgesSlot,
+      renderProgramInstructions: providedOptions.renderProgramInstructions,
+      output: providedOptions.output,
+
+      storageFormat: providedOptions.storageFormat
+    } );
+
+    super( [
+      initializeAddressesModule,
+      tileModule,
+      twoPassModule
+    ], ( context, runSize: TiledTwoPassRunSize ) => {
+      initializeAddressesModule.execute( context, 0 );
+      tileModule.execute( context, runSize.numInitialRenderableFaces * runSize.numBins );
+      twoPassModule.execute( context, {
+        numBins: runSize.numBins,
+        numCoarseRenderableFaces: MAX_COARSE_FACES // TODO: wait, we need to filter things out
+      } );
+    } );
+
+    this.config = providedOptions.config;
+    this.initialRenderableFaces = providedOptions.initialRenderableFaces;
+    this.initialEdges = providedOptions.initialEdges;
+    this.renderProgramInstructions = providedOptions.renderProgramInstructions;
+    this.output = providedOptions.output;
+
+    this.initializeAddressesModule = initializeAddressesModule;
+    this.tileModule = tileModule;
+    this.twoPassModule = twoPassModule;
+  }
+}
+alpenglow.register( 'TiledTwoPassModule', TiledTwoPassModule );

@@ -16,6 +16,8 @@
  * a full 16x16 grid of integrals (and colors), which will then be combined into the proper (e.g. 15x15) set of pixels.
  * Thus the bin size can be 15x15 (if bilinear and filter_scale=1), or 13x13 (if Mitchell-Netravali and filter_scale=1).
  *
+ * TODO: optimize is_constant
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
