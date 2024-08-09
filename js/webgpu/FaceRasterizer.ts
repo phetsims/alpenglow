@@ -1,6 +1,6 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { alpenglow, BlitShader, BufferArraySlot, BufferBindingType, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, RasterizationOptions, Rasterize, RenderableFace, RenderColor, RenderInstruction, RenderProgram, Routine, TextureViewResource, TextureViewSlot, TiledTwoPassModule, TwoPassConfig, TwoPassConfigType, TwoPassInitialRenderableFace, TwoPassInitialRenderableFaceType, U32Type, WGSLStringFunction } from '../imports.js';
+import { alpenglow, BlitShader, BufferArraySlot, BufferBindingType, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getVariableLengthArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, RasterizationOptions, Rasterize, RenderableFace, RenderColor, RenderInstruction, RenderProgram, Routine, TextureViewResource, TextureViewSlot, TiledTwoPassModule, TwoPassConfig, TwoPassConfigType, TwoPassInitialRenderableFace, TwoPassInitialRenderableFaceType, U32Type, WGSLStringFunction } from '../imports.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 
@@ -21,6 +21,14 @@ export type FaceRasterizerOptions = {
   maxRenderableFaces?: number;
   maxInitialEdges?: number;
   maxRenderProgramInstructions?: number;
+  maxCoarseRenderableFaces?: number;
+  maxCoarseEdges?: number;
+  maxFineFaces?: number;
+  maxFineEdges?: number;
+  maxBins?: number;
+
+  // TODO: range-check in coarse module (coarse_renderable_faces workgroup_id.x might be past the length of what we would use)
+  // TODO: do not want invalid reads (and thus bad writes)
 };
 
 export const FACE_RASTERIZER_DEFAULT_OPTIONS = {
@@ -30,7 +38,12 @@ export const FACE_RASTERIZER_DEFAULT_OPTIONS = {
 
   maxRenderableFaces: 2 ** 12,
   maxInitialEdges: 2 ** 15,
-  maxRenderProgramInstructions: 2 ** 14
+  maxRenderProgramInstructions: 2 ** 14,
+  maxCoarseRenderableFaces: 2 ** 15,
+  maxCoarseEdges: 2 ** 18,
+  maxFineFaces: 2 ** 15,
+  maxFineEdges: 2 ** 18,
+  maxBins: 2 ** 16
 } as const;
 
 export type FaceRasterizerRunOptions = {
@@ -61,7 +74,6 @@ export type FaceRasterizerExecutionInfo = {
 
 export default class FaceRasterizer {
 
-  private readonly device: GPUDevice;
   private readonly deviceContext: DeviceContext;
   private readonly supportsGridFiltering: boolean;
   private readonly supportsBilinear: boolean;
@@ -70,6 +82,11 @@ export default class FaceRasterizer {
   private readonly maxRenderableFaces: number;
   private readonly maxInitialEdges: number;
   private readonly maxRenderProgramInstructions: number;
+  private readonly maxCoarseRenderableFaces: number;
+  private readonly maxCoarseEdges: number;
+  private readonly maxFineFaces: number;
+  private readonly maxFineEdges: number;
+  private readonly maxBins: number;
 
   private readonly initializationPromise: Promise<void>;
 
@@ -82,7 +99,6 @@ export default class FaceRasterizer {
     const options = optionize3<FaceRasterizerOptions>()( {}, FACE_RASTERIZER_DEFAULT_OPTIONS, providedOptions );
 
     this.deviceContext = options.deviceContext;
-    this.device = this.deviceContext.device;
     this.supportsGridFiltering = options.supportsGridFiltering;
     this.supportsBilinear = options.supportsBilinear;
     this.supportsMitchellNetravali = options.supportsMitchellNetravali;
@@ -90,6 +106,11 @@ export default class FaceRasterizer {
     this.maxRenderableFaces = options.maxRenderableFaces;
     this.maxInitialEdges = options.maxInitialEdges;
     this.maxRenderProgramInstructions = options.maxRenderProgramInstructions;
+    this.maxCoarseRenderableFaces = options.maxCoarseRenderableFaces;
+    this.maxCoarseEdges = options.maxCoarseEdges;
+    this.maxFineFaces = options.maxFineFaces;
+    this.maxFineEdges = options.maxFineEdges;
+    this.maxBins = options.maxBins;
 
     this.initializationPromise = this.initialize();
   }
@@ -98,10 +119,9 @@ export default class FaceRasterizer {
 
     const configSlot = new BufferSlot( TwoPassConfigType );
     const runUniformsSlot = new BufferSlot( U32Type );
-    // TODO: variable sizes!!!
-    const initialRenderableFacesSlot = new BufferArraySlot( getArrayType( TwoPassInitialRenderableFaceType, this.maxRenderableFaces ) );
-    const initialEdgesSlot = new BufferArraySlot( getArrayType( LinearEdgeType, this.maxInitialEdges ) );
-    const renderProgramInstructionsSlot = new BufferArraySlot( getArrayType( U32Type, this.maxRenderProgramInstructions ) );
+    const initialRenderableFacesSlot = new BufferArraySlot( getVariableLengthArrayType( TwoPassInitialRenderableFaceType, this.maxRenderableFaces ) );
+    const initialEdgesSlot = new BufferArraySlot( getVariableLengthArrayType( LinearEdgeType, this.maxInitialEdges ) );
+    const renderProgramInstructionsSlot = new BufferArraySlot( getVariableLengthArrayType( U32Type, this.maxRenderProgramInstructions ) );
 
     const mainModule = new TiledTwoPassModule( {
       name: `module_${name}`,
@@ -117,13 +137,18 @@ export default class FaceRasterizer {
           supportsGridFiltering: this.supportsGridFiltering,
           supportsBilinear: this.supportsBilinear,
           supportsMitchellNetravali: this.supportsMitchellNetravali
-        }
+        },
+        maxFineFaces: this.maxFineFaces,
+        maxFineEdges: this.maxFineEdges,
+        maxBins: this.maxBins
       },
       numInitialRenderableFaces: new WGSLStringFunction( pipelineBlueprint => {
         pipelineBlueprint.addSlot( 'run_uniforms', runUniformsSlot, BufferBindingType.UNIFORM );
 
         return 'run_uniforms';
-      } )
+      } ),
+      maxCoarseRenderableFaces: this.maxCoarseRenderableFaces,
+      maxCoarseEdges: this.maxCoarseEdges
     } );
 
     // Pick the opposite of the storage format, in case we can't write to it directly, and need to blit it over

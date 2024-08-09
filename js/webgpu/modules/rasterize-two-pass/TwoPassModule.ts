@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getArrayType, LinearEdge, LinearEdgeType, MainTwoPassCoarseModule, MainTwoPassCoarseModuleOptions, MainTwoPassFineModule, MainTwoPassFineModuleOptions, MainTwoPassInitializeAddressesModule, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFaceType, U32AtomicType, U32Type } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getVariableLengthArrayType, LinearEdge, LinearEdgeType, MainTwoPassCoarseModule, MainTwoPassCoarseModuleOptions, MainTwoPassFineModule, MainTwoPassFineModuleOptions, MainTwoPassInitializeAddressesModule, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFaceType, U32AtomicType, U32Type } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions = {
@@ -17,6 +17,10 @@ type SelfOptions = {
   output: TextureViewSlot;
 
   storageFormat: GPUTextureFormat; // e.g. deviceContext.preferredStorageFormat
+
+  maxFineFaces?: number;
+  maxFineEdges?: number;
+  maxBins?: number;
 
   // Use mainTwoPassFineModuleOptions?
   // supportsGridFiltering?: boolean;
@@ -38,7 +42,10 @@ export type TwoPassModuleOptions = SelfOptions & ParentOptions;
 export const TWO_PASS_MODULE_DEFAULTS = {
   mainTwoPassCoarseModuleOptions: {},
   mainTwoPassFineModuleOptions: {},
-  mainTwoPassInitializeAddressesModule: {}
+  mainTwoPassInitializeAddressesModule: {},
+  maxFineFaces: 2 ** 15,
+  maxFineEdges: 2 ** 18,
+  maxBins: 2 ** 16
 } as const;
 
 export type TwoPassRunSize = {
@@ -64,20 +71,10 @@ export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
   ) {
     const options = optionize3<TwoPassModuleOptions, SelfOptions>()( {}, TWO_PASS_MODULE_DEFAULTS, providedOptions );
 
-    const MAX_FINE_FACES = 2 ** 15; // TODO: adjustable
-    const MAX_FINE_EDGES = 2 ** 18; // TODO: adjustable
-    const MAX_BINS = 2 ** 16; // TODO: adjustable NOTE, need 2 for atomics
-
-    /*
-  addresses: BufferSlot<number[]>; // note: first atomic is face-allocation, second is edge-allocation
-
-  return new BufferArraySlot( getArrayType( options.binaryOp.type, Math.ceil( initialStageInputSize / ( perStageReduction ** ( i + 1 ) ) ), options.binaryOp.identity ) );
-     */
-
-    const fineRenderableFacesSlot = new BufferArraySlot( getArrayType( TwoPassFineRenderableFaceType, MAX_FINE_FACES ) );
-    const fineEdgesSlot = new BufferArraySlot( getArrayType( LinearEdgeType, MAX_FINE_EDGES ) );
-    const addressesAtomicSlot = new BufferArraySlot( getArrayType( U32AtomicType, MAX_BINS ) );
-    const addressesPlainSlot = addressesAtomicSlot.castTo( getArrayType( U32Type, MAX_BINS ) );
+    const fineRenderableFacesSlot = new BufferArraySlot( getVariableLengthArrayType( TwoPassFineRenderableFaceType, options.maxFineFaces ) );
+    const fineEdgesSlot = new BufferArraySlot( getVariableLengthArrayType( LinearEdgeType, options.maxFineEdges ) );
+    const addressesAtomicSlot = new BufferArraySlot( getVariableLengthArrayType( U32AtomicType, options.maxBins + 2 ) );
+    const addressesPlainSlot = addressesAtomicSlot.castTo( getVariableLengthArrayType( U32Type, options.maxBins + 2 ) );
 
     const initializeAddressesModule = new MainTwoPassInitializeAddressesModule( {
       name: `${providedOptions.name} initialize_addresses`,

@@ -173,6 +173,7 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
     },
 
     equalsWGSL( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool {
+      // TODO: this is excessive... we should just do a loop? I guess we need it as an expression?
       return wgslJoin( ' && ', _.range( 0, size ).map( i => {
         return type.equalsWGSL( wgsl`${a}[ ${u32S( i )} ]`, wgsl`${b}[ ${u32S( i )} ]` );
       } ) );
@@ -219,6 +220,86 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
   };
 };
 alpenglow.register( 'getArrayType', getArrayType );
+
+export const getVariableLengthArrayType = <T>( type: ConcreteType<T>, maxSize: number, outOfRangeElement?: T ): ConcreteArrayType<T> => {
+  const u32sPerElement = type.bytesPerElement / 4;
+
+  return {
+    name: `${type.name}[max ${maxSize}]`,
+    bytesPerElement: type.bytesPerElement * maxSize, // TODO: don't define?
+    length: maxSize, // TODO: don't define?
+
+    elementType: type,
+
+    slice( start: number, end: number ): ConcreteArrayType<T> {
+      assert && assert( start === 0, 'We will need more logic to handle offsets' );
+
+      return getVariableLengthArrayType( type, end, outOfRangeElement );
+    },
+
+    // TODO: how to handle? this is a mess
+    equals( a: T[], b: T[] ): boolean {
+      assert && assert( a.length <= maxSize );
+      assert && assert( b.length <= maxSize );
+
+      for ( let i = 0; i < maxSize; i++ ) {
+        if ( !type.equals( a[ i ], b[ i ] ) ) {
+          return false;
+        }
+      }
+
+      return true;
+    },
+
+    equalsWGSL( a: WGSLExpressionT, b: WGSLExpressionT ): WGSLExpressionBool {
+      // TODO: this is excessive... we should just do a loop? I guess we need it as an expression?
+      return wgslJoin( ' && ', _.range( 0, maxSize ).map( i => {
+        return type.equalsWGSL( wgsl`${a}[ ${u32S( i )} ]`, wgsl`${b}[ ${u32S( i )} ]` );
+      } ) );
+    },
+
+    encode( value: T[], encoder: ByteEncoder ): void {
+      assert && assert( outOfRangeElement !== undefined || type.outOfRangeElement !== undefined || value.length <= maxSize );
+
+      for ( let i = 0; i < value.length; i++ ) {
+        type.encode( i < value.length ? value[ i ] : outOfRangeElement === undefined ? type.outOfRangeElement! : outOfRangeElement, encoder );
+      }
+    },
+
+    // TODO: potential manual "length" included?
+    decode( encoder: ByteEncoder, offset: number ): T[] {
+      const array: T[] = [];
+
+      for ( let i = 0; i < maxSize; i++ ) {
+        array.push( type.decode( encoder, offset + i * u32sPerElement ) );
+      }
+
+      return array;
+    },
+
+    valueType: wgsl`array<${type.valueType}>`,
+    writeU32s( storeStatement: StoreStatementCallback, value: WGSLExpression ): WGSLStatements {
+      return wgslJoin( '\n', _.range( 0, maxSize ).map( i => {
+        return type.writeU32s(
+          ( offset, u32expr ) => storeStatement( wgsl`( ${offset} + ${u32S( i * u32sPerElement )} )`, u32expr ),
+          wgsl`${value}[ ${u32S( i )} ]`
+        );
+      } ) );
+    },
+
+    wgslAlign: type.wgslAlign,
+    wgslSize: maxSize * roundUp( type.wgslAlign, type.wgslSize ),
+
+    generateRandom( fullSize = false ): T[] {
+      return _.range( 0, maxSize ).map( () => type.generateRandom( fullSize ) );
+    },
+
+    toDebugString( value: T[] ): string {
+      return `[${value.map( v => type.toDebugString( v ) ).join( ', ' )}]`;
+    }
+  };
+};
+alpenglow.register( 'getVariableLengthArrayType', getVariableLengthArrayType );
 
 export const getCastedType = <T>( type: ConcreteType<T>, valueType: WGSLType ): ConcreteType<T> => {
   return {

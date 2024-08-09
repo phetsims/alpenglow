@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getArrayType, LinearEdge, LinearEdgeType, MainTwoPassInitializeAddressesModule, MainTwoPassInitializeAddressesModuleOptions, MainTwoPassTileModule, MainTwoPassTileModuleOptions, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFaceType, TwoPassConfig, TwoPassInitialRenderableFace, TwoPassModule, TwoPassModuleOptions, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getVariableLengthArrayType, LinearEdge, LinearEdgeType, MainTwoPassInitializeAddressesModule, MainTwoPassInitializeAddressesModuleOptions, MainTwoPassTileModule, MainTwoPassTileModuleOptions, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFaceType, TwoPassConfig, TwoPassInitialRenderableFace, TwoPassModule, TwoPassModuleOptions, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 type SelfOptions = {
@@ -19,6 +19,8 @@ type SelfOptions = {
   storageFormat: GPUTextureFormat; // e.g. deviceContext.preferredStorageFormat
 
   numInitialRenderableFaces: WGSLExpressionU32;
+  maxCoarseRenderableFaces?: number;
+  maxCoarseEdges?: number;
 };
 
 type ParentOptions = {
@@ -32,7 +34,9 @@ export type TiledTwoPassModuleOptions = SelfOptions & ParentOptions;
 export const TILED_TWO_PASS_MODULE_DEFAULTS = {
   mainTwoPassTileModuleOptions: {},
   twoPassModuleOptions: {},
-  mainTwoPassAtomicInitializeAddressesModuleOptions: {}
+  mainTwoPassAtomicInitializeAddressesModuleOptions: {},
+  maxCoarseRenderableFaces: 2 ** 15,
+  maxCoarseEdges: 2 ** 18
 } as const;
 
 export type TiledTwoPassRunSize = {
@@ -58,15 +62,12 @@ export default class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunS
   ) {
     const options = optionize3<TiledTwoPassModuleOptions, SelfOptions>()( {}, TILED_TWO_PASS_MODULE_DEFAULTS, providedOptions );
 
-    const MAX_COARSE_FACES = 2 ** 15; // TODO: adjustable
-    const MAX_COARSE_EDGES = 2 ** 18; // TODO: adjustable
-
     const ATOMIC_SIZE = 4; // padded up so it will be the min of 16 bytes
 
-    const coarseRenderableFacesSlot = new BufferArraySlot( getArrayType( TwoPassCoarseRenderableFaceType, MAX_COARSE_FACES ) );
-    const coarseEdgesSlot = new BufferArraySlot( getArrayType( LinearEdgeType, MAX_COARSE_EDGES ) );
-    const addressesAtomicSlot = new BufferArraySlot( getArrayType( U32AtomicType, ATOMIC_SIZE ) );
-    const addressesPlainSlot = addressesAtomicSlot.castTo( getArrayType( U32Type, ATOMIC_SIZE ) );
+    const coarseRenderableFacesSlot = new BufferArraySlot( getVariableLengthArrayType( TwoPassCoarseRenderableFaceType, options.maxCoarseRenderableFaces ) );
+    const coarseEdgesSlot = new BufferArraySlot( getVariableLengthArrayType( LinearEdgeType, options.maxCoarseEdges ) );
+    const addressesAtomicSlot = new BufferArraySlot( getVariableLengthArrayType( U32AtomicType, ATOMIC_SIZE ) );
+    const addressesPlainSlot = addressesAtomicSlot.castTo( getVariableLengthArrayType( U32Type, ATOMIC_SIZE ) );
 
     const initializeAddressesModule = new MainTwoPassInitializeAddressesModule( {
       name: `${providedOptions.name} atomic initialize_addresses`,
@@ -119,7 +120,7 @@ export default class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunS
       tileModule.execute( context, runSize.numInitialRenderableFaces * runSize.numBins );
       twoPassModule.execute( context, {
         numBins: runSize.numBins,
-        numCoarseRenderableFaces: MAX_COARSE_FACES // TODO: wait, we need to filter things out
+        numCoarseRenderableFaces: options.maxCoarseRenderableFaces // TODO: wait, we need to filter things out
       } );
     } );
 

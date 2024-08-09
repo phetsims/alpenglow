@@ -29,7 +29,7 @@ export const MAIN_TWO_PASS_COARSE_MODULE_DEFAULTS = {
   ...MAIN_TWO_PASS_COARSE_DEFAULTS
 } as const;
 
-// inputSize: number - numRenderableFaces // TODO: likely will need to put this in as something
+// inputSize: number - numRenderableFaces
 export default class MainTwoPassCoarseModule extends DirectModule<number> {
 
   // input

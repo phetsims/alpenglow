@@ -62,6 +62,7 @@ const mainTwoPassCoarseWGSL = (
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
       if ( local_id.x == 0u ) {
+        // TODO: RANGE CHECK this
         coarse_face = coarse_renderable_faces[ workgroup_id.x ];
       }
       
