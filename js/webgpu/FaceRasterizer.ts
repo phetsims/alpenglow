@@ -65,6 +65,7 @@ export const FACE_RASTERIZER_RUN_DEFAULT_OPTIONS = {
 
 export type FaceRasterizerExecutionInfo = {
   config: TwoPassConfig;
+  numTiles: number;
   numBins: number;
   initialRenderableFaces: TwoPassInitialRenderableFace[];
   initialEdges: LinearEdge[];
@@ -154,8 +155,9 @@ export default class FaceRasterizer {
     // Pick the opposite of the storage format, in case we can't write to it directly, and need to blit it over
     const potentialBlitFormat = this.deviceContext.preferredStorageFormat === 'bgra8unorm' ? 'rgba8unorm' : 'bgra8unorm';
     const blitShader = new BlitShader( this.deviceContext.device, potentialBlitFormat );
-    const wrapBlitModule = new CompositeModule( [ mainModule ], ( context, data: { numBins: number; numInitialRenderableFaces: number; textureBlit: [ GPUTextureView, GPUTextureView ] | null } ) => {
+    const wrapBlitModule = new CompositeModule( [ mainModule ], ( context, data: { numTiles: number; numBins: number; numInitialRenderableFaces: number; textureBlit: [ GPUTextureView, GPUTextureView ] | null } ) => {
       mainModule.execute( context, {
+        numTiles: data.numTiles,
         numBins: data.numBins,
         numInitialRenderableFaces: data.numInitialRenderableFaces
       } );
@@ -182,6 +184,7 @@ export default class FaceRasterizer {
         context.setTypedBufferValue( renderProgramInstructionsSlot, input.renderProgramInstructions );
 
         execute( context, {
+          numTiles: input.numTiles,
           numBins: input.numBins,
           numInitialRenderableFaces: input.initialRenderableFaces.length,
           textureBlit: input.textureBlit
@@ -284,7 +287,8 @@ export default class FaceRasterizer {
     const binWidth = Math.ceil( rasterWidth / binSize );
     const binHeight = Math.ceil( rasterHeight / binSize );
 
-    const numBins = 256 * tileWidth * tileHeight;
+    const numTiles = tileWidth * tileHeight;
+    const numBins = 256 * numTiles;
 
     const initialRenderableFaces: TwoPassInitialRenderableFace[] = [];
     const initialEdges: LinearEdge[] = [];
@@ -386,6 +390,7 @@ export default class FaceRasterizer {
       initialEdges: initialEdges,
       renderProgramInstructions: renderProgramInstructions,
       textureBlit: canOutputToCanvas ? null : [ fineOutputTextureView, canvasTextureView ],
+      numTiles: numTiles,
       numBins: numBins
     } );
   }

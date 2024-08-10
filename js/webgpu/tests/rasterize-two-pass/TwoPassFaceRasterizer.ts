@@ -50,7 +50,9 @@ export const evaluateTwoPassFaceRasterizer = async (
     }
 
     const filterType = PolygonFilterType.Bilinear;
-    const filterScale = LOOP ? ( 1 + Math.cos( elapsedTime / 100 ) * 0.5 ) * 30 + 1 : 50; // 25 box, 17 bilinear (comparison)
+    // const filterScale = LOOP ? randomNumbers[ index % ( randomNumbers.length ) ] : 50; // 25 box, 17 bilinear (comparison)
+    const filterScale = ( 1 + Math.cos( elapsedTime / 100 ) * 0.5 ) * 30 + 1; // 25 box, 17 bilinear (comparison)
+    // 50.51805795015657
 
     const clippableFace = testPolygonalFace;
 

@@ -16,12 +16,14 @@
  * a full 16x16 grid of integrals (and colors), which will then be combined into the proper (e.g. 15x15) set of pixels.
  * Thus the bin size can be 15x15 (if bilinear and filter_scale=1), or 13x13 (if Mitchell-Netravali and filter_scale=1).
  *
+ * Should be dispatched with one workgroup PER bin (one thread per grid "pixel")
+ *
  * TODO: optimize is_constant
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, F32Type, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, LinearEdgeWGSL, logValueWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, U32Type, unpremultiplyWGSL, wgsl, wgslBlueprint, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, LinearEdgeWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, unpremultiplyWGSL, wgsl, wgslBlueprint, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mainTwoPassFineWGSLOptions = {
@@ -64,10 +66,6 @@ const mainTwoPassFineWGSL = (
   const stackSize = 10;
   const instructionStackSize = 8;
 
-  // const logIndex = Math.floor( Math.random() * 1000 );
-  const logIndex = 4794;
-  console.log( logIndex );
-
   const getInstructionWGSL = ( index: WGSLExpressionU32 ) => wgsl`render_program_instructions[ ${index} ]`;
 
   // TODO: find a way so that this isn't needed(!)
@@ -87,7 +85,7 @@ const mainTwoPassFineWGSL = (
   ], wgsl`
     const oops_inifinite_loop_code = vec4f( 0.5f, 0.5f, 0f, 0.5f );
     
-    const low_area_multiplier = 1e-4f;
+    const low_area_multiplier = 0.002f;
     
     var<workgroup> bin_xy: vec2<u32>;
     var<workgroup> workgroup_exit: bool;
@@ -134,30 +132,9 @@ const mainTwoPassFineWGSL = (
       
       let pixel_xy = bin_xy * config.bin_size + vec2( local_id.x % 16u, local_id.x / 16u );
       
-      // 21, 13 ish
-      
-      ${logValueWGSL( {
-        value: 'pixel_xy.x',
-        type: U32Type,
-        lineToLog: line => line.dataArray.flat()[ logIndex ]
-      } )}
-      ${logValueWGSL( {
-        value: 'pixel_xy.y',
-        type: U32Type,
-        lineToLog: line => line.dataArray.flat()[ logIndex ]
-      } )}
-              
       let skip_pixel = pixel_xy.x >= config.raster_width || pixel_xy.y >= config.raster_height;
       
       var accumulation = vec4f( 0f, 0f, 0f, 0f );
-
-      //accumulation = vec4( f32( bin_xy.x ) / 16f, 0f, f32( bin_xy.y ) / 16f, 1f ); // TODO: remove
-      
-      ${logValueWGSL( {
-        value: 'next_address',
-        type: U32Type,
-        lineToLog: line => line.dataArray.flat()[ logIndex ]
-      } )}
       
       var oops_count = 0u;
       while ( workgroupUniformLoad( &next_address ) != 0xffffffffu ) {
@@ -173,12 +150,6 @@ const mainTwoPassFineWGSL = (
         }
         
         workgroupBarrier();
-        
-        ${logValueWGSL( {
-          value: 'select( 0u, 1u, skip_pixel )',
-          type: U32Type,
-          lineToLog: line => line.dataArray.flat()[ logIndex ]
-        } )}
         
         let needs_centroid = ( current_face.bits & 0x10000000u ) != 0u;
         let needs_face = ( current_face.bits & 0x20000000u ) != 0u;
@@ -235,30 +206,6 @@ const mainTwoPassFineWGSL = (
         // TODO: compute all of the integrals (for each section) + ?centroid. compute color with ?centroid.
         // TODO: stuff integrals + color in workgroup memory, barrier, then have each pixel (subset of threads) sum up
       }
-      
-      ${logValueWGSL( {
-        value: 'accumulation.r',
-        type: F32Type,
-        lineToLog: line => line.dataArray.flat()[ logIndex ]
-      } )}
-      
-      ${logValueWGSL( {
-        value: 'accumulation.g',
-        type: F32Type,
-        lineToLog: line => line.dataArray.flat()[ logIndex ]
-      } )}
-      
-      ${logValueWGSL( {
-        value: 'accumulation.b',
-        type: F32Type,
-        lineToLog: line => line.dataArray.flat()[ logIndex ]
-      } )}
-      
-      ${logValueWGSL( {
-        value: 'accumulation.a',
-        type: F32Type,
-        lineToLog: line => line.dataArray.flat()[ logIndex ]
-      } )}
       
       var will_store_pixel = !skip_pixel;
       

@@ -51,7 +51,7 @@ const mainTwoPassTileWGSL = (
     coarseEdgesSlot,
     addressesSlot
   ], wgsl`
-    const low_area_multiplier = 1e-4f;
+    const low_area_multiplier = 0.002f;
     
     var<workgroup> scratch_data: array<vec2u, 256>;
     var<workgroup> base_indices: vec2u;
@@ -108,7 +108,8 @@ const mainTwoPassTileWGSL = (
             let p0 = edge.startPoint;
             let p1 = edge.endPoint;
             
-            area += ( p1.x + p0.x ) * ( p1.y - p0.y );
+            // Offset by the centroid, so that our bounds computations are more accurate.
+            area += ( p1.x + p0.x - 2f * bounds_centroid.x ) * ( p1.y - p0.y );
             
             if ( is_edge_clipped_count( p0, p1, min, max ) ) {
               // TODO: consider NOT writing the clip counts in this (hopefully faster) loop?
@@ -132,7 +133,7 @@ const mainTwoPassTileWGSL = (
       // TODO: don't use low_area_multiplier with full area!
       let is_full_area = is_source_full_area || area + low_area_multiplier >= max_area;
       
-      let needs_write_face = !skip_tile && area > low_area_multiplier;
+      let needs_write_face = !skip_tile && area > low_area_multiplier && ( num_clipped_edges > 0u || clipped_clip_counts[ 0u ] != 0i || clipped_clip_counts[ 1u ] != 0i || clipped_clip_counts[ 2u ] != 0i || clipped_clip_counts[ 3u ] != 0i );
       let needs_write_edges = needs_write_face && !is_full_area;
       
       let required_edge_count = select( 0u, num_clipped_edges, needs_write_edges );

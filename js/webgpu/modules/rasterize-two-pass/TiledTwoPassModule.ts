@@ -40,6 +40,7 @@ export const TILED_TWO_PASS_MODULE_DEFAULTS = {
 } as const;
 
 export type TiledTwoPassRunSize = {
+  numTiles: number;
   numBins: number;
   numInitialRenderableFaces: number;
 };
@@ -123,7 +124,7 @@ export default class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunS
       twoPassModule
     ], ( context, runSize: TiledTwoPassRunSize ) => {
       initializeAddressesModule.execute( context, 0 );
-      tileModule.execute( context, runSize.numInitialRenderableFaces * runSize.numBins );
+      tileModule.execute( context, runSize.numInitialRenderableFaces * runSize.numTiles );
       twoPassModule.execute( context, {
         numBins: runSize.numBins,
         numCoarseRenderableFaces: options.maxCoarseRenderableFaces

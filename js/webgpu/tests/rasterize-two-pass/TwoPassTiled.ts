@@ -77,6 +77,7 @@ export const evaluateTwoPassTiled = async (
   const binWidth = Math.ceil( rasterWidth / binSize );
   const binHeight = Math.ceil( rasterHeight / binSize );
 
+  const numTiles = tileWidth * tileHeight;
   const numBins = 256 * tileWidth * tileHeight;
 
   const initialRenderableFaces: TwoPassInitialRenderableFace[] = [];
@@ -151,8 +152,9 @@ export const evaluateTwoPassTiled = async (
   // Pick the opposite of the storage format, in case we can't write to it directly, and need to blit it over
   const potentialBlitFormat = deviceContext.preferredStorageFormat === 'bgra8unorm' ? 'rgba8unorm' : 'bgra8unorm';
   const blitShader = new BlitShader( deviceContext.device, potentialBlitFormat );
-  const wrapBlitModule = new CompositeModule( [ mainModule ], ( context, data: { numBins: number; numInitialRenderableFaces: number; textureBlit: [ GPUTextureView, GPUTextureView ] | null } ) => {
+  const wrapBlitModule = new CompositeModule( [ mainModule ], ( context, data: { numTiles: number; numBins: number; numInitialRenderableFaces: number; textureBlit: [ GPUTextureView, GPUTextureView ] | null } ) => {
     mainModule.execute( context, {
+      numTiles: data.numTiles,
       numBins: data.numBins,
       numInitialRenderableFaces: data.numInitialRenderableFaces
     } );
@@ -184,6 +186,7 @@ export const evaluateTwoPassTiled = async (
       context.setTypedBufferValue( renderProgramInstructionsSlot, input.renderProgramInstructions );
 
       execute( context, {
+        numTiles: numTiles,
         numBins: numBins,
         numInitialRenderableFaces: input.initialRenderableFaces.length,
         textureBlit: input.textureBlit

@@ -3,6 +3,8 @@
 /**
  * TODO: doc
  *
+ * Should be dispatched with one workgroup PER coarse renderable face (one thread per face-X-bin).
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -51,7 +53,7 @@ const mainTwoPassCoarseWGSL = (
     fineEdgesSlot,
     addressesSlot
   ], wgsl`
-    const low_area_multiplier = 1e-4f;
+    const low_area_multiplier = 0.002f;
     
     var<workgroup> coarse_face: ${TwoPassCoarseRenderableFaceWGSL};
     var<workgroup> scratch_data: array<vec2u, 256>;
@@ -145,7 +147,7 @@ const mainTwoPassCoarseWGSL = (
       // TODO: don't use low_area_multiplier with full area!
       let is_full_area = is_source_full_area || area + low_area_multiplier >= max_area;
       
-      let needs_write_face = area > low_area_multiplier;
+      let needs_write_face = area > low_area_multiplier && ( num_clipped_edges > 0u || clipped_clip_counts[ 0u ] != 0i || clipped_clip_counts[ 1u ] != 0i || clipped_clip_counts[ 2u ] != 0i || clipped_clip_counts[ 3u ] != 0i );
       let needs_write_edges = needs_write_face && !is_full_area;
       
       let required_edge_count = select( 0u, num_clipped_edges, needs_write_edges );
