@@ -251,8 +251,24 @@
       </p>
 
       <p class="TODO">
+        Consider keeping CAG in CPU, sweep-line or Vatti like algorithms for intersection (rather than what we do now).
+        We could potentially do CAG "deltas" if not much changes, for scenes with some animated but most is static.
+      </p>
+
+      <p class="TODO">
         Get non-crashing on phones -
         Prioritize demos lazily (either when they are close to the scrolled viewport) or on other threads (web workers).
+      </p>
+
+      <p class="TODO">
+        Run rendering in web worker thread?
+      </p>
+
+      <p class="TODO">
+        Lazy paints with IntersectionObserver API.
+        See <a href="https://macarthur.me/posts/animate-canvas-in-a-worker/">Animate Canvas in a Worker</a> or
+        <a href="https://webgpu.github.io/webgpu-samples/?sample=worker">Web Worker WebGPU</a>.
+        <code>canvas.transferControlToOffscreen()</code> and messaging it to worker seems to work.
       </p>
 
       <p class="TODO">
@@ -2006,7 +2022,16 @@
       </p>
 
       <p class="TODO">
-        Complete TypeScript switch (e.g. testing, raster-clipper, etc.)
+        Try out "unrestricted pointer parameters", can we do things better with this?
+      </p>
+
+      <p class="TODO">
+        Try out subgroups <a href="https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md">https://github.com/gpuweb/gpuweb/blob/main/proposals/subgroups.md</a>,
+        need to opt-in on chrome. Could write specific options to use subgroups where available.
+      </p>
+
+      <p class="TODO">
+        Complete TypeScript switch (e.g. testing, raster-clipper, etc.) -- almost done, get things working with phet-lib build.
       </p>
 
       <p class="TODO">
@@ -2041,7 +2066,9 @@
       </p>
 
       <p class="TODO">
-        Add a JS WGSL parser, so we can do AST manipulations and checks. Lots of assertions possible. Look into peggy.js
+        Add a JS WGSL parser, so we can do AST manipulations and checks. Lots of assertions possible. Look into peggy.js.
+        Or <a href="https://github.com/mehmetoguzderin/tree-sitter-wgsl/blob/main/grammar.js">Tree Sitter WGSL grammar</a>
+        (requires WASM?)
       </p>
 
       <p class="TODO">
@@ -3848,6 +3875,21 @@
       </p>
 
       <p class="TODO">
+        Do hilbert sort (or skip if data allows), segment into workgroup size chunks. Store bounds tree (or compute) for
+        every chunk. At least bounds for total. THEN compute upper triangular grid of intersections by intersecting chunks.
+        Filter by bounds down to... groups of 16? So most workgroups will be no op because of bounds.
+      </p>
+
+      <p class="TODO">
+        Parallel plane-sweep? <a href="https://docs.lib.purdue.edu/cgi/viewcontent.cgi?article=1481&context=cstech">https://docs.lib.purdue.edu/cgi/viewcontent.cgi?article=1481&context=cstech</a>.
+        Or more of a general parallel method (CREW PRAM): <a href="https://dl.acm.org/doi/pdf/10.1145/72935.72950">https://dl.acm.org/doi/pdf/10.1145/72935.72950</a>.
+      </p>
+
+      <p class="TODO">
+        For parallel, could augment merge-sort approaches.
+      </p>
+
+      <p class="TODO">
         We are somewhat solving a "bounding box" intersection problem, but can we filter in a better way that solves the
         "line segment intersection" problem? When we split a line segment, remember it gets split into two smaller
         bounding boxes (not just splitting the large bounding box).
@@ -4068,6 +4110,26 @@
       </p>
 
       <h3 id="stage-rasterize">Rasterize</h3>
+
+      <p class="TODO">
+        Document two-pass rasterization (which is really... three-pass due to tiling split?)
+      </p>
+
+      <p class="TODO">
+        Two-pass: Subdivide grid so that we have 16/32-thread warps more coherent?
+      </p>
+
+      <p class="TODO">
+        Two-pass: If a tile/bin is full-area AND constant, can we short-circuit and have more efficient rasterization?
+      </p>
+
+      <p class="TODO">
+        Two-pass: Add image WGSL, especially the sampled types!
+      </p>
+
+      <p class="TODO">
+        Is it crazy to do delta-based rendering ever? (i.e. figure out which places changed, and render the before/after pixels as a subtraction)
+      </p>
 
       <p class="TODO">
         Can we get our workgroups somehow doing coarse and fine grid splits?
