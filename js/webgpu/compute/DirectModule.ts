@@ -33,6 +33,9 @@ export default class DirectModule<T> extends Module<T> {
 
       options.setDispatchSize( dispatchSize, data );
 
+      assert && assert( dispatchSize.x >= 1 && dispatchSize.y >= 1 && dispatchSize.z >= 1, `dispatch size to small: ${dispatchSize}` );
+      assert && assert( dispatchSize.x <= 65535 && dispatchSize.y <= 65535 && dispatchSize.z <= 65535, `dispatch size too large: ${dispatchSize}` );
+
       context.dispatch( pipelineBlueprint, dispatchSize.x, dispatchSize.y, dispatchSize.z );
     } );
   }

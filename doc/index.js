@@ -2599,13 +2599,6 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
           colorSpace: 'srgb'
         }, {} );
 
-        // await Rasterize.hybridRasterize( program, deviceContext, context, new phet.dot.Bounds2( 0, 0, rasterSize, rasterSize ), 'srgb', {
-        //   rasterClipperOptions: {
-        //     numStages: numStages,
-        //     bufferExponent: 15 // We can get away with 14 on double-pixels, but...
-        //   }
-        // } );
-
         return canvas;
       };
 

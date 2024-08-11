@@ -1577,11 +1577,18 @@ an UI and Display made for visual testing and debugging.
         debugCanvas.width = outputSize;
         debugCanvas.height = outputSize;
 
-        const canvasContext = deviceContext.getCanvasContext( debugCanvas, colorSpace );
-
         const convertedProgram = program.colorConverted( clientColorSpace, gpuColorSpace ).simplified();
 
-        phet.alpenglow.Rasterize.hybridRasterize( convertedProgram, deviceContext, canvasContext, outputBounds, colorSpace, rasterizeOptions );
+        const rasterizer = new phet.alpenglow.FaceRasterizer( {
+          deviceContext: deviceContext
+        } );
+
+        await rasterizer.runRenderProgram( convertedProgram, {
+          canvasContext: rasterizer.getCanvasContext( debugCanvas, colorSpace ),
+          rasterWidth: outputSize,
+          rasterHeight: outputSize,
+          colorSpace: colorSpace
+        }, {} );
       }
       else {
         const raster = new phet.alpenglow.CombinedRaster( outputSize, outputSize, rasterOptions );

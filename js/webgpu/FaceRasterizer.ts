@@ -36,13 +36,13 @@ export const FACE_RASTERIZER_DEFAULT_OPTIONS = {
   supportsBilinear: true,
   supportsMitchellNetravali: false,
 
-  maxRenderableFaces: 2 ** 12,
-  maxInitialEdges: 2 ** 15,
-  maxRenderProgramInstructions: 2 ** 14,
-  maxCoarseRenderableFaces: 2 ** 15,
-  maxCoarseEdges: 2 ** 18,
-  maxFineFaces: 2 ** 15,
-  maxFineEdges: 2 ** 18,
+  maxRenderableFaces: 2 ** 15,
+  maxInitialEdges: 2 ** 16,
+  maxRenderProgramInstructions: 2 ** 21,
+  maxCoarseRenderableFaces: 2 ** 16 - 1,
+  maxCoarseEdges: 2 ** 19,
+  maxFineFaces: 2 ** 16 - 1,
+  maxFineEdges: 2 ** 19,
   maxBins: 2 ** 16
 } as const;
 
