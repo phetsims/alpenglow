@@ -255,16 +255,16 @@
       </p>
 
       <p class="TODO">
+        Phong and radial gradients seem off in WebGPU - rasterTest() reproduces, unit test catches it.
+      </p>
+
+      <p class="TODO">
         Get the scan-based rasterization also working - we are being VERY LIMITED by coarse face limit, since we can't
         dispatch 65536 or more workgroups (and we have one workgroup per coarse face).
       </p>
 
       <p class="TODO">
         Get set up with phet-lib npm module and... vite(?) for our index page? Temporary switch to non-phet-lib (e.g. transpiled) for now.
-      </p>
-
-      <p class="TODO">
-        Replace RasterClipper and old code with the new style - do we need phet-lib working first?
       </p>
 
       <p class="TODO">
@@ -4208,6 +4208,10 @@
       </p>
 
       <p class="TODO">
+        Two-pass deduplication of repeated RenderPrograms? We have an insane number of instructions as output.
+      </p>
+
+      <p class="TODO">
         Is it crazy to do delta-based rendering ever? (i.e. figure out which places changed, and render the before/after pixels as a subtraction)
       </p>
 
@@ -4298,12 +4302,6 @@
       </p>
 
       <p class="TODO">
-        THERE IS SOMETHING WRONG with RasterClipper's completed edge output. It's bugging up actual centroid computation.
-        Create assertions on the "parallel" side for this to track it down.
-        --- This disappeared?!?
-      </p>
-
-      <p class="TODO">
         IMPORTANT! Our resulting edge-clipped counts should be cyclic, right? Only use 2 bits per count!!
         They should wrap around or accumulate as long as we do arithmetic mod 4.
         Right now we are taking up 4x i32 for this, and that's (a) excessive, (b) killing performance, and (c) reducing
@@ -4350,14 +4348,6 @@
         or things where we really need the concept of "centroid" or face. We can't split up the centroid with that, since
         we need the full area in the first place to compute with (so we would have to have the input area for faces?) - that
         is technically possible.
-      </p>
-
-      <p class="TODO">
-        For RasterClipper approach, consider pipeline-overridable constants to change the reduce behavior for the last level.
-      </p>
-
-      <p class="TODO">
-        Measure RasterClipper progression of chunk/edge counts every stage.
       </p>
 
       <p class="TODO">

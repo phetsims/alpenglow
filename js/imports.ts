@@ -652,8 +652,6 @@ export type { TiledTwoPassModuleOptions, TiledTwoPassRunSize } from './webgpu/mo
 export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';
 export { default as GPUProfiling } from './webgpu/GPUProfiling.js';
-export { default as RasterClipper } from './webgpu/old/RasterClipper.js';
-export type { RasterClipperOptions } from './webgpu/old/RasterClipper.js';
 export { default as FaceRasterizer } from './webgpu/FaceRasterizer.js';
 
 // testing
