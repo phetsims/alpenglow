@@ -251,8 +251,25 @@
       </p>
 
       <p class="TODO">
-        Consider keeping CAG in CPU, sweep-line or Vatti like algorithms for intersection (rather than what we do now).
+        Get set up with phet-lib npm module and... vite(?) for our index page? Temporary switch to non-phet-lib (e.g. transpiled) for now.
+      </p>
+
+      <p class="TODO">
+        Replace RasterClipper and old code with the new style - do we need phet-lib working first?
+      </p>
+
+      <p class="TODO">
+        Demo checkerboard / siemens stars, just based on RenderableFaces - project checkers - animate - compare to Canvas/SVG
+      </p>
+
+      <p class="TODO">
+        Consider keeping CAG in CPU, sweep-line or Vatti (Kite) like algorithms for intersection (rather than what we do now).
         We could potentially do CAG "deltas" if not much changes, for scenes with some animated but most is static.
+        Or consider stateful CAG on GPU?
+      </p>
+
+      <p class="TODO">
+        CPU CAG would also enable better "vector canvas" approach. Progressive, where each frame has added edges and removed edges.
       </p>
 
       <p class="TODO">
@@ -276,6 +293,17 @@
       </p>
 
       <p class="TODO">
+        Sub-pixel rendering! Do separate regions for each color channel. Get Loupe for screen inspection.
+        Experiment more with text and readability, see how small we can get text to still be readable!
+        Animated moving siemens stars would help identify the type of subpixel! Animate a bunch of options, see
+        which looks the cleanest without jitter.
+      </p>
+
+      <p class="TODO">
+        Implement SVG full compatibility?
+      </p>
+
+      <p class="TODO">
         Get font changes done with Scenery vello branch, so we can include code improvements and get RenderFromNode working
         better. Also allows showing Vello stuff in demos (will need to see if we can port over the multi branch work).
         Merge multi-work. Remove auto-feature-detect for now, so it doesn't ping shaders on main?
@@ -287,6 +315,19 @@
 
       <p class="TODO">
         Add "(your browser)" on SVG/Canvas demo labels?
+      </p>
+
+      <p class="TODO">
+        Stream out tiles one-by-one (as CPU is ready for it)? We could CAG one tile at a time, and push out the rasterization.
+        Have the CPU and GPU working at the same time! Compatible with web workers even also?
+      </p>
+
+      <p class="TODO">
+        Consider "analytic extension" of the border region, so that manual "extension" not needed for use with filters.
+      </p>
+
+      <p class="TODO">
+        Why did phong rendering break? It was working?
       </p>
 
       <h3 id="overview-mainChallenges">Main Challenges</h3>
@@ -953,6 +994,12 @@
       <p class="TODO">
         Grid clips with bounds-pyramids could be even more efficient on the CPU. Does it really help with the GPU at all?
         When clipped, recompute bounds (will be tighter)? Or at a certain point, do we stop recomputing bounds?
+      </p>
+
+      <p>
+        Edge-clipped form is particularly helpful for repeated subdivision of clipping areas. If you have a polygon
+        clipped to a large rectangle, and then clip that to a smaller rectangle (fully contained by the larger one),
+        the counts from the larger rectangle can be directly copied to the smaller case.
       </p>
 
       <h3 id="clipping">Clipping</h3>
@@ -3890,6 +3937,10 @@
       </p>
 
       <p class="TODO">
+        <a href="https://gpuopen.com/download/publications/HPLOC.pdf">https://gpuopen.com/download/publications/HPLOC.pdf</a>
+      </p>
+
+      <p class="TODO">
         We are somewhat solving a "bounding box" intersection problem, but can we filter in a better way that solves the
         "line segment intersection" problem? When we split a line segment, remember it gets split into two smaller
         bounding boxes (not just splitting the large bounding box).
@@ -4124,7 +4175,27 @@
       </p>
 
       <p class="TODO">
-        Two-pass: Add image WGSL, especially the sampled types!
+        Two-pass: Add image WGSL, especially the sampled types! We might want to do per-edge operations
+      </p>
+
+      <p class="TODO">
+        Two-pass: coalesced edge data loading?
+      </p>
+
+      <p class="TODO">
+        Two-pass: Create ConcreteType improvements for "structs", etc.
+      </p>
+
+      <p class="TODO">
+        Two-pass: Add Mitchell-Netravali filtering (first the general case, then the grid-specific case)
+      </p>
+
+      <p class="TODO">
+        Two-pass alternatives: tiling uses two segmented scans (first one determines area/num-edges, second one determines placement in final array)
+      </p>
+
+      <p class="TODO">
+        Two-pass bind-group optimizations?
       </p>
 
       <p class="TODO">
