@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BasicExecution, ByteEncoder, ExecutableShader, ExecutionMultipleCallback, ExecutionOptions, ExecutionSingleCallback, PreferredCanvasFormat, Unpromised, webgpu } from '../../imports.js';
+import { alpenglow, ByteEncoder, PreferredCanvasFormat, webgpu } from '../../imports.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
-import optionize, { combineOptions } from '../../../../phet-core/js/optionize.js';
+import optionize from '../../../../phet-core/js/optionize.js';
 
 export type DeviceContextDeviceOptions = {
   maxLimits?: boolean;
@@ -159,41 +159,6 @@ export default class DeviceContext {
       alphaMode: 'premultiplied'
     } );
     return context;
-  }
-
-  /**
-   * Executes a callback with a single-promise result.
-   */
-  public async executeSingle<T>(
-    run: ExecutionSingleCallback<T>,
-    options?: ExecutionOptions
-  ): Promise<T> {
-    return new BasicExecution( this, options ).executeSingle( run );
-  }
-
-  /**
-   * Executes a callback with a record-of-promises result, returning a record-of-values.
-   */
-  public async execute<T extends Record<string, Promise<unknown>>>(
-    run: ExecutionMultipleCallback<T>,
-    options?: ExecutionOptions
-  ): Promise<Unpromised<T>> {
-    return new BasicExecution( this, options ).execute( run );
-  }
-
-  public async executeShader<In, Out>(
-    shader: ExecutableShader<In, Out>, input: In,
-    options?: ExecutionOptions
-  ): Promise<Out> {
-
-    // Provide a default for logging (that is whether the shader has been set up with logging).
-    options = combineOptions<ExecutionOptions>( {
-      log: shader.log
-    }, options );
-
-    return this.executeSingle( async ( encoder, execution ) => {
-      return shader.execute( execution, input );
-    }, options );
   }
 
   public static async getDevice( providedOptions?: DeviceContextDeviceOptions ): Promise<GPUDevice | null> {

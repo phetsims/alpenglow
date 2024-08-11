@@ -20,199 +20,6 @@ export { default as i32Hex } from './webgpu/compute/i32Hex.js';
 export { default as f32 } from './webgpu/compute/f32.js';
 export { default as decimal } from './webgpu/compute/decimal.js';
 
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_u64 } from '../wgsl/math/u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_i64 } from '../wgsl/math/i64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_q128 } from '../wgsl/math/q128.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_ZERO_u64 } from '../wgsl/math/ZERO_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_ONE_u64 } from '../wgsl/math/ONE_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_ZERO_q128 } from '../wgsl/math/ZERO_q128.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_ONE_q128 } from '../wgsl/math/ONE_q128.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_u32_to_u64 } from '../wgsl/math/u32_to_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_i32_to_i64 } from '../wgsl/math/i32_to_i64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_add_u32_u32_to_u64 } from '../wgsl/math/add_u32_u32_to_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_mul_u32_u32_to_u64 } from '../wgsl/math/mul_u32_u32_to_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_add_u64_u64 } from '../wgsl/math/add_u64_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_add_i64_i64 } from '../wgsl/math/add_i64_i64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_negate_i64 } from '../wgsl/math/negate_i64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_is_zero_u64 } from '../wgsl/math/is_zero_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_is_negative_i64 } from '../wgsl/math/is_negative_i64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_abs_i64 } from '../wgsl/math/abs_i64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_left_shift_u64 } from '../wgsl/math/left_shift_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_right_shift_u64 } from '../wgsl/math/right_shift_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_first_leading_bit_u64 } from '../wgsl/math/first_leading_bit_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_first_trailing_bit_u64 } from '../wgsl/math/first_trailing_bit_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_subtract_i64_i64 } from '../wgsl/math/subtract_i64_i64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_cmp_u64_u64 } from '../wgsl/math/cmp_u64_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_cmp_i64_i64 } from '../wgsl/math/cmp_i64_i64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_mul_u64_u64 } from '../wgsl/math/mul_u64_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_mul_i64_i64 } from '../wgsl/math/mul_i64_i64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_div_u64_u64 } from '../wgsl/math/div_u64_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_gcd_u64_u64 } from '../wgsl/math/gcd_u64_u64.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_i64_to_q128 } from '../wgsl/math/i64_to_q128.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_whole_i64_to_q128 } from '../wgsl/math/whole_i64_to_q128.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_equals_cross_mul_q128 } from '../wgsl/math/equals_cross_mul_q128.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_is_zero_q128 } from '../wgsl/math/is_zero_q128.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_ratio_test_q128 } from '../wgsl/math/ratio_test_q128.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_reduce_q128 } from '../wgsl/math/reduce_q128.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_IntersectionPoint } from '../wgsl/math/IntersectionPoint.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_LineSegmentIntersection } from '../wgsl/math/LineSegmentIntersection.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_intersect_line_segments } from '../wgsl/math/intersect_line_segments.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_cbrt } from '../wgsl/math/cbrt.js';
-
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_shoelace } from '../wgsl/integrals/shoelace.js';
-
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_LinearEdge } from '../wgsl/cag/LinearEdge.js';
-
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_sRGB_to_linear_sRGB } from '../wgsl/color/sRGB_to_linear_sRGB.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_linear_sRGB_to_sRGB } from '../wgsl/color/linear_sRGB_to_sRGB.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_premultiply } from '../wgsl/color/premultiply.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_unpremultiply } from '../wgsl/color/unpremultiply.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_linear_sRGB_to_oklab } from '../wgsl/color/linear_sRGB_to_oklab.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_oklab_to_linear_sRGB } from '../wgsl/color/oklab_to_linear_sRGB.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_linear_displayP3_to_linear_sRGB } from '../wgsl/color/linear_displayP3_to_linear_sRGB.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_linear_sRGB_to_linear_displayP3 } from '../wgsl/color/linear_sRGB_to_linear_displayP3.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_is_color_in_range } from '../wgsl/color/is_color_in_range.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_gamut_map_linear_sRGB } from '../wgsl/color/gamut_map_linear_sRGB.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_gamut_map_linear_displayP3 } from '../wgsl/color/gamut_map_linear_displayP3.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_gamut_map_premul_sRGB } from '../wgsl/color/gamut_map_premul_sRGB.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_gamut_map_premul_displayP3 } from '../wgsl/color/gamut_map_premul_displayP3.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_blend_compose } from '../wgsl/color/blend_compose.js';
-
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_matthes_drakopoulos_clip } from '../wgsl/clip/matthes_drakopoulos_clip.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_bounds_clip_edge } from '../wgsl/clip/bounds_clip_edge.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_bounds_double_area_edge } from '../wgsl/clip/bounds_double_area_edge.js';
-
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_evaluate_render_program_instructions } from '../wgsl/render-program/evaluate_render_program_instructions.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_extend_f32 } from '../wgsl/render-program/extend_f32.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_extend_i32 } from '../wgsl/render-program/extend_i32.js';
-
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_inclusive_to_exclusive_scan_indices } from '../wgsl/utils/inclusive_to_exclusive_scan_indices.js';
-
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterChunk } from '../wgsl/raster/RasterChunk.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterClippedChunk } from '../wgsl/raster/RasterClippedChunk.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterEdge } from '../wgsl/raster/RasterEdge.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterEdgeClip } from '../wgsl/raster/RasterEdgeClip.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterChunkReduceData } from '../wgsl/raster/RasterChunkReduceData.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterChunkReducePair } from '../wgsl/raster/RasterChunkReducePair.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterChunkReduceQuad } from '../wgsl/raster/RasterChunkReduceQuad.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterCompleteChunk } from '../wgsl/raster/RasterCompleteChunk.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterCompleteEdge } from '../wgsl/raster/RasterCompleteEdge.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterSplitReduceData } from '../wgsl/raster/RasterSplitReduceData.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_RasterStageConfig } from '../wgsl/raster/RasterStageConfig.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_apply_to_clipped_chunk } from '../wgsl/raster/apply_to_clipped_chunk.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_clipped_chunk_info } from '../wgsl/raster/clipped_chunk_info.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_initial_chunk } from '../wgsl/raster/raster_initial_chunk.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_initial_clip } from '../wgsl/raster/raster_initial_clip.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_chunk_reduce } from '../wgsl/raster/raster_chunk_reduce.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_initial_split_reduce } from '../wgsl/raster/raster_initial_split_reduce.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_initial_edge_reduce } from '../wgsl/raster/raster_initial_edge_reduce.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_split_reduce } from '../wgsl/raster/raster_split_reduce.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_split_scan } from '../wgsl/raster/raster_split_scan.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_edge_scan } from '../wgsl/raster/raster_edge_scan.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_chunk_index_patch } from '../wgsl/raster/raster_chunk_index_patch.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_uniform_update } from '../wgsl/raster/raster_uniform_update.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_edge_index_patch } from '../wgsl/raster/raster_edge_index_patch.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_accumulate } from '../wgsl/raster/raster_accumulate.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_raster_to_texture } from '../wgsl/raster/raster_to_texture.js';
-
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_test_to_canvas } from '../wgsl/tests/test_to_canvas.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_test_render_program } from '../wgsl/tests/test_render_program.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_expensive_operation } from '../wgsl/tests/expensive_operation.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_fake_combine_to_texture } from '../wgsl/tests/fake_combine_to_texture.js';
-// @ts-expect-error WILL BE FILLED IN BY TRANSPILER
-export { default as wgsl_copy_storage_operation } from '../wgsl/tests/copy_storage_operation.js';
-
 export { default as PolygonFilterType, getPolygonFilterWidth, getPolygonFilterExtraPixels, getPolygonFilterGridOffset, getPolygonFilterMinExpand, getPolygonFilterMaxExpand, getPolygonFilterGridBounds } from './render-program/PolygonFilterType.js';
 export { default as Mesh } from './render-program/Mesh.js';
 export { default as RenderBlendType, RENDER_BLEND_CONSTANTS } from './render-program/RenderBlendType.js';
@@ -380,16 +187,8 @@ export type { WGSLExpression, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressi
 export { default as WebGPURecorder, WebGPUCommand } from './webgpu/WebGPURecorder.js';
 export { default as WebGPUAPI, webgpu } from './webgpu/WebGPUAPI.js';
 export type { PreferredCanvasFormat } from './webgpu/WebGPUAPI.js';
-export { default as OldSnippet } from './webgpu/old/OldSnippet.js';
-export { default as OldDualSnippet } from './webgpu/old/OldDualSnippet.js';
-export type { OldDualSnippetSource } from './webgpu/old/OldDualSnippet.js';
 export { default as DeviceContext } from './webgpu/compute/DeviceContext.js';
 export type { DeviceContextDeviceOptions } from './webgpu/compute/DeviceContext.js';
-export { BaseExecution, BasicExecution, ExecutableShader } from './webgpu/old/OldExecution.js';
-export type { default as OldExecution, ExecutionOptions, ExecutableShaderTemplate, ExecutableShaderOptions, ExecutionSingleCallback, ExecutionMultipleCallback, Unpromised, ExecutableShaderExternalOptions } from './webgpu/old/OldExecution.js';
-export { default as OldBindingType } from './webgpu/old/OldBindingType.js';
-export { default as OldComputeShader } from './webgpu/old/OldComputeShader.js';
-export type { OldComputeShaderOptions, OldComputeShaderDispatchOptions, OldComputeShaderSourceOptions } from './webgpu/old/OldComputeShader.js';
 export { default as BlitShader } from './webgpu/BlitShader.js';
 export { default as ByteEncoder } from './webgpu/compute/ByteEncoder.js';
 export type { F32, U32, I32, U8 } from './webgpu/compute/ByteEncoder.js';
@@ -649,7 +448,6 @@ export type { TwoPassModuleOptions, TwoPassRunSize } from './webgpu/modules/rast
 export { default as TiledTwoPassModule, TILED_TWO_PASS_MODULE_DEFAULTS } from './webgpu/modules/rasterize-two-pass/TiledTwoPassModule.js';
 export type { TiledTwoPassModuleOptions, TiledTwoPassRunSize } from './webgpu/modules/rasterize-two-pass/TiledTwoPassModule.js';
 
-export { default as TestRenderProgram } from './webgpu/TestRenderProgram.js';
 export { default as PerformanceTesting } from './webgpu/PerformanceTesting.js';
 export { default as GPUProfiling } from './webgpu/GPUProfiling.js';
 export { default as FaceRasterizer } from './webgpu/FaceRasterizer.js';
