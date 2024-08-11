@@ -69,6 +69,7 @@ const RenderNormalize = alpenglow.RenderNormalize;
 const RenderColor = alpenglow.RenderColor;
 const CombinedRaster = alpenglow.CombinedRaster;
 const Rasterize = alpenglow.Rasterize;
+const FaceRasterizer = alpenglow.FaceRasterizer;
 const LinearEdge = alpenglow.LinearEdge;
 const PolygonalBoolean = alpenglow.PolygonalBoolean;
 const RenderColorSpace = alpenglow.RenderColorSpace;
@@ -2578,7 +2579,7 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
     if ( deviceContext ) {
       document.getElementById( 'rasterize-initial-demo-container' ).style.display = 'block';
 
-      const createCanvas = async numStages => {
+      const createCanvas = async () => {
         const canvas = document.createElement( 'canvas' );
         canvas.width = rasterSize;
         canvas.height = rasterSize;
@@ -2587,14 +2588,23 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
         canvas.style.margin = '0 20px';
         // canvas.style.imageRendering = 'pixelated';
 
-        const context = deviceContext.getCanvasContext( canvas, 'srgb' );
-
-        await Rasterize.hybridRasterize( program, deviceContext, context, new phet.dot.Bounds2( 0, 0, rasterSize, rasterSize ), 'srgb', {
-          rasterClipperOptions: {
-            numStages: numStages,
-            bufferExponent: 15 // We can get away with 14 on double-pixels, but...
-          }
+        const rasterizer = new FaceRasterizer( {
+          deviceContext: deviceContext
         } );
+
+        await rasterizer.runRenderProgram( program, {
+          canvasContext: rasterizer.getCanvasContext( canvas, 'srgb' ),
+          rasterWidth: rasterSize,
+          rasterHeight: rasterSize,
+          colorSpace: 'srgb'
+        }, {} );
+
+        // await Rasterize.hybridRasterize( program, deviceContext, context, new phet.dot.Bounds2( 0, 0, rasterSize, rasterSize ), 'srgb', {
+        //   rasterClipperOptions: {
+        //     numStages: numStages,
+        //     bufferExponent: 15 // We can get away with 14 on double-pixels, but...
+        //   }
+        // } );
 
         return canvas;
       };
@@ -2605,41 +2615,7 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
         demoElement.removeChild( demoElement.firstChild );
       }
 
-      demoElement.appendChild( await createCanvas( 16 ) );
-
-      demoElement.appendChild( document.createElement( 'br' ) );
-
-      const transparencyDemoContainer = document.createElement( 'div' );
-      transparencyDemoContainer.style.margin = '10px 20px';
-      transparencyDemoContainer.style.display = 'inline-block';
-      transparencyDemoContainer.style.position = 'relative';
-      transparencyDemoContainer.style.width = `${outputSize}px`;
-      transparencyDemoContainer.style.height = `${outputSize}px`;
-      demoElement.appendChild( transparencyDemoContainer );
-      for ( let i = 16; i > 0; i-- ) {
-        const canvas = await createCanvas( i );
-        canvas.style.position = 'absolute';
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-        canvas.style.opacity = '10%';
-        transparencyDemoContainer.appendChild( canvas );
-      }
-
-      const brightnessDemoContainer = document.createElement( 'div' );
-      brightnessDemoContainer.style.margin = '10px 20px';
-      brightnessDemoContainer.style.display = 'inline-block';
-      brightnessDemoContainer.style.position = 'relative';
-      brightnessDemoContainer.style.width = `${outputSize}px`;
-      brightnessDemoContainer.style.height = `${outputSize}px`;
-      demoElement.appendChild( brightnessDemoContainer );
-      for ( let i = 16; i > 0; i-- ) {
-        const canvas = await createCanvas( i );
-        canvas.style.position = 'absolute';
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-        canvas.style.filter = `contrast(0) brightness(${i * 10}%)`;
-        brightnessDemoContainer.appendChild( canvas );
-      }
+      demoElement.appendChild( await createCanvas() );
     }
   } );
 }
