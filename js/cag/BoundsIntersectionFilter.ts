@@ -48,8 +48,7 @@ export default class BoundsIntersectionFilter {
 
     // Our queue will store entries of { start: boolean, edge: Edge }, representing a sweep line similar to the
     // Bentley-Ottmann approach. We'll track which edges are passing through the sweep line.
-    // @ts-expect-error
-    const queue = new FlatQueue();
+    const queue = new FlatQueue<{ start: boolean; item: Item }>();
 
     // Tracks which edges are through the sweep line, but in a graph structure like a segment/interval tree, so that we
     // can have fast lookup (what edges are in a certain range) and also fast inserts/removals.
@@ -68,7 +67,7 @@ export default class BoundsIntersectionFilter {
     }
 
     while ( queue.length ) {
-      const entry: { start: boolean; item: Item } = queue.pop();
+      const entry = queue.pop()!;
       const item = entry.item;
 
       if ( entry.start ) {
