@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2024, University of Colorado Boulder
 
 /**
  * Includes certain WGSL code only if the blueprint has logging enabled.
