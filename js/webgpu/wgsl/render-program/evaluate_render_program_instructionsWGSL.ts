@@ -309,7 +309,7 @@ export default (
               if ( accuracy == 0u ) {
                 // TODO: evaluate the integral!!!!!
                 let localPoint = inverse_transform * vec3( real_centroid, 1f );
-                average_distance = length( localPoint );
+                average_distance = length( localPoint.xy );
               }
               else {
                 let centroid = select( fake_centroid, real_centroid, accuracy == 1u );

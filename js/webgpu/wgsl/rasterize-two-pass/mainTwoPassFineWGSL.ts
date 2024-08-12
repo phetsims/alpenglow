@@ -23,7 +23,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, LinearEdgeWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, unpremultiplyWGSL, wgsl, wgslBlueprint, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, ifLogWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, LinearEdgeWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, unpremultiplyWGSL, wgsl, wgslBlueprint, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mainTwoPassFineWGSLOptions = {
@@ -97,6 +97,12 @@ const mainTwoPassFineWGSL = (
       var<workgroup> shared_colors: array<vec4<f32>, 256>;
     ` : wgsl``}
     
+    ${ifLogWGSL( wgsl`
+      var<private> log_global_id: vec3u;
+      var<private> log_local_id: vec3u;
+      var<private> log_workgroup_id: vec3u;
+    ` )}
+    
     @compute @workgroup_size(256)
     fn main(
       @builtin(global_invocation_id) global_id: vec3u,
@@ -104,7 +110,13 @@ const mainTwoPassFineWGSL = (
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
       // TODO: see if we should do all of this "workgroup-common" logic in one thread, then barrier.
-    
+      
+      ${ifLogWGSL( wgsl`
+        log_global_id = global_id;
+        log_local_id = local_id;
+        log_workgroup_id = workgroup_id;
+      ` )}
+      
       if ( local_id.x == 0u ) {
         let bin_index = workgroup_id.x;
         
@@ -912,8 +924,8 @@ const mainTwoPassFineWGSL = (
               ) );
               let offset = bitcast<f32>( ${getInstructionWGSL( wgsl`start_address + 6u` )} );
     
-              let centroid = select( bounds_centroid, centroid, accuracy == 0u );
-              let dot_product = dot( scaled_normal, centroid );
+              let selected_centroid = select( bounds_centroid, centroid, accuracy == 0u );
+              let dot_product = dot( scaled_normal, selected_centroid );
               t = dot_product - offset;
             }
             else {
@@ -934,13 +946,13 @@ const mainTwoPassFineWGSL = (
               var average_distance: f32;
     
               if ( accuracy == 0u ) {
-                // TODO: evaluate the integral!!!!!
+                // TODO: evaluate the integral!!!!! See RenderRadialBlend for what is needed
                 let localPoint = inverse_transform * vec3( centroid, 1f );
-                average_distance = length( localPoint );
+                average_distance = length( localPoint.xy );
               }
               else {
-                let centroid = select( bounds_centroid, centroid, accuracy == 1u );
-                let localPoint = inverse_transform * vec3( centroid, 1f );
+                let selected_centroid = select( bounds_centroid, centroid, accuracy == 1u );
+                let localPoint = inverse_transform * vec3( selected_centroid, 1f );
                 average_distance = length( localPoint.xy );
               }
     
@@ -1005,9 +1017,9 @@ const mainTwoPassFineWGSL = (
                   ${getInstructionWGSL( wgsl`start_address + 10u` )}
               ) );
     
-              let centroid = select( bounds_centroid, centroid, accuracy == 0u || accuracy == 2u );
+              let selected_centroid = select( bounds_centroid, centroid, accuracy == 0u || accuracy == 2u );
     
-              let local_point = ( inverse_transform * vec3( centroid, 1f ) ).xy;
+              let local_point = ( inverse_transform * vec3( selected_centroid, 1f ) ).xy;
               let local_delta = local_point - start;
     
               let raw_t = select( 0f, dot( local_delta, grad_delta ) / dot( grad_delta, grad_delta ), length( grad_delta ) > 0f, );
@@ -1029,8 +1041,8 @@ const mainTwoPassFineWGSL = (
               let t_sign = sign( 1f - focal_x );
     
               // TODO: centroid handling for this
-              let centroid = select( bounds_centroid, centroid, accuracy == 0u || accuracy == 1u || accuracy == 3u );
-              let point = centroid;
+              let selected_centroid = select( bounds_centroid, centroid, accuracy == 0u || accuracy == 1u || accuracy == 3u );
+              let point = selected_centroid;
     
               // Pixel-specifics
               // TODO: optimization?

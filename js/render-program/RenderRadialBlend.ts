@@ -58,7 +58,8 @@ export default class RenderRadialBlend extends RenderProgram {
       zero.isFullyOpaque && one.isFullyOpaque,
       accuracy === RenderRadialBlendAccuracy.Accurate,
       accuracy === RenderRadialBlendAccuracy.Accurate,
-      accuracy === RenderRadialBlendAccuracy.Centroid
+      // TODO: Revert this to just Centroid once the we get the WGSL version with integration working!
+      accuracy === RenderRadialBlendAccuracy.Centroid || accuracy === RenderRadialBlendAccuracy.Accurate
     );
 
     this.logic = logic || new RenderRadialBlendLogic( this.transform, this.radius0, this.radius1, this.accuracy );

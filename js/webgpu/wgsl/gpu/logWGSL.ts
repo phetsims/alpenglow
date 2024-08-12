@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, ConcreteType, ConsoleLoggedLine, ConsoleLogger, PipelineBlueprint, u32S, wgsl, wgslBlueprint, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLString, WGSLVariableName } from '../../../imports.js';
+import { alpenglow, BufferBindingType, ConcreteType, ConsoleLoggedLine, ConsoleLogger, PipelineBlueprint, u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLString, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type logWGSLOptions<T> = {
@@ -26,6 +26,9 @@ export type logWGSLOptions<T> = {
 
   // into whatever JS-like format we want to log
   lineToLog?: ( ( line: ConsoleLoggedLine ) => unknown ) | null;
+
+  workgroupId?: WGSLExpression;
+  localId?: WGSLExpression;
 };
 
 export const LOG_DEFAULTS = {
@@ -33,7 +36,9 @@ export const LOG_DEFAULTS = {
   type: null,
   writeData: null,
   dataCount: 0,
-  lineToLog: null
+  lineToLog: null,
+  workgroupId: wgsl`workgroup_id`,
+  localId: wgsl`local_id`
 } as const;
 
 const logWGSL = <T>(
@@ -116,12 +121,12 @@ const logWGSL = <T>(
           }
   
           _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${u32S( id )};
-          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = workgroup_id.x;
-          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = workgroup_id.y;
-          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = workgroup_id.z;
-          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = local_id.x;
-          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = local_id.y;
-          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = local_id.z;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${options.workgroupId}.x;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${options.workgroupId}.y;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${options.workgroupId}.z;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${options.localId}.x;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${options.localId}.y;
+          _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${options.localId}.z;
   
           ${additionalIndex !== null ? wgsl`
             _log.data[ _log_offset + ${u32S( countableIndex++ )} ] = ${additionalIndex};

@@ -255,6 +255,7 @@ export { default as loadMultipleWGSL, LOAD_MULTIPLE_DEFAULTS } from './webgpu/wg
 export type { loadMultipleWGSLOptions } from './webgpu/wgsl/gpu/loadMultipleWGSL.js';
 export { default as loadReducedWGSL, LOAD_REDUCED_DEFAULTS } from './webgpu/wgsl/gpu/loadReducedWGSL.js';
 export type { loadReducedWGSLOptions } from './webgpu/wgsl/gpu/loadReducedWGSL.js';
+export { default as ifLogWGSL } from './webgpu/wgsl/gpu/ifLogWGSL.js';
 export { default as logWGSL, LOG_DEFAULTS } from './webgpu/wgsl/gpu/logWGSL.js';
 export type { logWGSLOptions } from './webgpu/wgsl/gpu/logWGSL.js';
 export { default as logRakedWGSL, LOG_RAKED_OPTIONS } from './webgpu/wgsl/gpu/logRakedWGSL.js';
