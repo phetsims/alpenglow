@@ -125,6 +125,7 @@ export default class RenderPhong extends RenderProgram {
         const viewDirection = position.negated().normalized();
         const reflectedDirection = normal.timesScalar( 2 * dot ).minus( lightDirection );
         const specularContribution = Math.pow( reflectedDirection.dot( viewDirection ), this.alpha );
+        console.log( reflectedDirection.dot( viewDirection ) );
         const specularColorContribution = lightColor.componentTimes( specularColor ).times( specularContribution );
         specularColorContribution.w = lightColor.w * specularColor.w; // keep alpha
         result.add( specularColorContribution );

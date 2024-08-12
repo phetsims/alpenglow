@@ -1246,8 +1246,9 @@ const mainTwoPassFineWGSL = (
               let dot_product = dot( normal, light_direction );
               if ( dot_product > 0f ) {
                 // TODO: consider reflect()? TODO: make sure this isn't reversed (we have different sign convention, no?)
+                // TODO: I just had to add an abs() below because the sign was wrong
                 let reflection = 2f * dot_product * normal - light_direction;
-                let specular_amount = pow( dot( reflection, view_direction ), alpha );
+                let specular_amount = pow( abs( dot( reflection, view_direction ) ), alpha );
     
                 output += light_color * (
                   // keep alphas?
