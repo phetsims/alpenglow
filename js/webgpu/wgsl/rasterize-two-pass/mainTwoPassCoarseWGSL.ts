@@ -53,7 +53,7 @@ const mainTwoPassCoarseWGSL = (
     fineEdgesSlot,
     addressesSlot
   ], wgsl`
-    const low_area_multiplier = 0.002f;
+    const low_area_multiplier = 0.0002f;
     
     var<workgroup> coarse_face: ${TwoPassCoarseRenderableFaceWGSL};
     var<workgroup> scratch_data: array<vec2u, 256>;

@@ -85,7 +85,7 @@ const mainTwoPassFineWGSL = (
   ], wgsl`
     const oops_inifinite_loop_code = vec4f( 0.5f, 0.5f, 0f, 0.5f );
     
-    const low_area_multiplier = 0.002f;
+    const low_area_multiplier = 0.0002f;
     
     var<workgroup> bin_xy: vec2<u32>;
     var<workgroup> workgroup_exit: bool;

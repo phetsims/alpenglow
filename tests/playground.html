@@ -889,6 +889,81 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
+  window.twoPassSiemensTest = function() {
+    setTimeout( async function() {
+      const device = await phet.alpenglow.DeviceContext.getDevice();
+      const deviceContext = new phet.alpenglow.DeviceContext( device );
+
+      const rasterizer = new phet.alpenglow.FaceRasterizer( {
+        deviceContext: deviceContext,
+
+        supportsGridFiltering: true,
+        supportsBilinear: true,
+        supportsMitchellNetravali: false
+      } );
+
+      const colorSpace = 'srgb';
+      const outputSize = 512;
+      const rasterSize = Math.ceil( outputSize * window.devicePixelRatio );
+      const rasterWidth = rasterSize;
+      const rasterHeight = rasterSize;
+
+      const canvas = document.createElement( 'canvas' );
+      canvas.width = rasterWidth;
+      canvas.height = rasterHeight;
+      canvas.style.width = `${rasterWidth / window.devicePixelRatio}px`; // TODO: hopefully integral for tests
+      canvas.style.height = `${rasterHeight / window.devicePixelRatio}px`;
+      // canvas.style.width = `${256 * 4}px`; // TODO: hopefully integral for tests
+      // canvas.style.height = `${256 * 4}px`;
+      // canvas.style.imageRendering = 'pixelated';
+
+      const canvasContext = deviceContext.getCanvasContext( canvas, colorSpace );
+
+      const step = () => {
+
+        const filterType = phet.alpenglow.PolygonFilterType.Bilinear;
+        const filterScale = 20;
+
+        const blackProgram = new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 0, 1 ) );
+        const whiteProgram = new phet.alpenglow.RenderColor( phet.dot.v4( 1, 1, 1, 1 ) );
+
+        const numRadialVertices = 300;
+
+        const centerVertex = phet.dot.v2( rasterSize / 2, rasterSize / 2 );
+        const innerVertices = _.range( 0, numRadialVertices ).map( i => {
+          const theta = i * 2 * Math.PI / numRadialVertices;
+          return phet.dot.Vector2.createPolar( rasterSize * 0.4, theta ).add( centerVertex );
+        } );
+
+        const renderableFaces = _.range( 0, numRadialVertices ).map( i => {
+          return new phet.alpenglow.RenderableFace(
+            new phet.alpenglow.PolygonalFace( [
+              [ centerVertex, innerVertices[ i ], innerVertices[ ( i + 1 ) % numRadialVertices ] ]
+            ] ),
+            i % 2 === 0 ? blackProgram : whiteProgram,
+            new phet.dot.Bounds2( 0, 0, rasterSize, rasterSize )
+          );
+        } );
+
+        rasterizer.run( {
+          renderableFaces: renderableFaces,
+          canvasContext: canvasContext,
+          rasterWidth: rasterWidth,
+          rasterHeight: rasterHeight,
+          colorSpace: colorSpace,
+          filterType: filterType,
+          filterScale: filterScale
+        }, {} ).catch( error => {
+          console.error( error );
+        } );
+      };
+
+      step();
+
+      document.body.appendChild( canvas );
+    } );
+  };
+
   window.rasterTest = function() {
     setTimeout( async function() {
       const boundsRect = bounds => [

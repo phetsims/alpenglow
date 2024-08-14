@@ -283,12 +283,14 @@
       </p>
 
       <p class="TODO">
-        Remove duplication of render-program logic (that was confusing)
+        Remove duplication of render-program logic (that was confusing) - how to do this with potential workgroup variables?
       </p>
 
       <p class="TODO">
         Fix logging so we don't have to patch in forwarding of local/global/workgroup IDs through everything.
         Can we set these things as a var&lt;private&gt;? That should solve all of it, but would need a different naming.
+        Can this be consistently done? Any easy way? Add a WGSLString that goes at start of main(), has a module dependency
+        that adds the var-privates?
       </p>
 
       <p class="TODO">
