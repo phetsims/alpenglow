@@ -292,7 +292,9 @@ export default class FaceRasterizer {
 
     const initialRenderableFaces: TwoPassInitialRenderableFace[] = [];
     const initialEdges: LinearEdge[] = [];
+
     const instructionsEncoder = new ByteEncoder();
+    const instructionsMap = new Map<RenderProgram, number>();
 
     // TODO: faster encoder
     for ( const renderableFace of options.renderableFaces ) {
@@ -307,11 +309,21 @@ export default class FaceRasterizer {
 
       // TODO: could CULL out faces that aren't needed (don't we already do this effectively?)
 
-      const renderProgramIndex = instructionsEncoder.byteLength / 4;
+      let renderProgramIndex: number;
 
-      const instructions: RenderInstruction[] = [];
-      renderableFace.renderProgram.writeInstructions( instructions );
-      RenderInstruction.instructionsToBinary( instructionsEncoder, instructions );
+      // TODO: use hashing of render programs to see what is unique?
+      if ( instructionsMap.has( renderableFace.renderProgram ) ) {
+        renderProgramIndex = instructionsMap.get( renderableFace.renderProgram )!;
+      }
+      else {
+        renderProgramIndex = instructionsEncoder.byteLength / 4;
+
+        const instructions: RenderInstruction[] = [];
+        renderableFace.renderProgram.writeInstructions( instructions );
+        RenderInstruction.instructionsToBinary( instructionsEncoder, instructions );
+
+        instructionsMap.set( renderableFace.renderProgram, renderProgramIndex );
+      }
 
       const needsCentroid = renderableFace.renderProgram.needsCentroid;
       const needsFace = renderableFace.renderProgram.needsFace;
