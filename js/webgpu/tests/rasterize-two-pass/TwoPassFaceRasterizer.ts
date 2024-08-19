@@ -93,7 +93,7 @@ export const evaluateTwoPassFaceRasterizer = async (
       tileSize: 1024 * 1024 // never do tiles
     } );
 
-    rasterizer.runRenderProgram( program, {
+    rasterizer.run( {
       renderableFaces: renderableFaces,
       canvasContext: canvasContext,
       rasterWidth: rasterWidth,
@@ -101,7 +101,7 @@ export const evaluateTwoPassFaceRasterizer = async (
       colorSpace: colorSpace,
       filterType: filterType,
       filterScale: filterScale
-    }, {} ).catch( ( error: Error ) => {
+    } ).catch( ( error: Error ) => {
       console.error( error );
     } );
   };

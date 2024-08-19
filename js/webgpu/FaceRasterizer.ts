@@ -3,6 +3,7 @@
 import { alpenglow, BlitShader, BufferArraySlot, BufferBindingType, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getVariableLengthArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, RasterizationOptions, Rasterize, RenderableFace, RenderColor, RenderInstruction, RenderProgram, Routine, TextureViewResource, TextureViewSlot, TiledTwoPassModule, TwoPassConfig, TwoPassConfigType, TwoPassInitialRenderableFace, TwoPassInitialRenderableFaceType, U32Type, WGSLStringFunction } from '../imports.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
 
 /**
  * TODO: doc
@@ -225,7 +226,7 @@ export default class FaceRasterizer {
     return this.deviceContext.getCanvasContext( canvas, colorSpace );
   }
 
-  private static getFilterExpansion( options: Required<FaceRasterizerRunOptions> ): number {
+  private static getFilterExpansion( options: Required<StrictOmit<FaceRasterizerRunOptions, 'renderableFaces'>> ): number {
 
     const filterRadius = {
       [ PolygonFilterType.Box ]: 0.5,
@@ -238,12 +239,12 @@ export default class FaceRasterizer {
 
   public async runRenderProgram(
     program: RenderProgram,
-    providedRunOptions: FaceRasterizerRunOptions,
+    providedRunOptions: StrictOmit<FaceRasterizerRunOptions, 'renderableFaces'>,
     rasterizeOptions?: RasterizationOptions
   ): Promise<void> {
 
     // TODO: avoid extra optionize somehow?
-    const runOptions = optionize3<FaceRasterizerRunOptions>()( {}, FACE_RASTERIZER_RUN_DEFAULT_OPTIONS, providedRunOptions );
+    const runOptions = optionize3<StrictOmit<FaceRasterizerRunOptions, 'renderableFaces'>>()( {}, FACE_RASTERIZER_RUN_DEFAULT_OPTIONS, providedRunOptions );
     const filterRadius = FaceRasterizer.getFilterExpansion( runOptions );
 
     const bounds = new Bounds2( 0, 0, runOptions.rasterWidth, runOptions.rasterHeight ).dilated( filterRadius ).roundedOut();
