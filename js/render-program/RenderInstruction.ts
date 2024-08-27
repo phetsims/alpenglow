@@ -207,7 +207,7 @@ export default abstract class RenderInstruction {
       if ( locations[ index ] === null ) {
         locations[ index ] = new RenderInstructionLocation();
       }
-      return locations[ index ]!;
+      return locations[ index ];
     };
 
     const getLocationOfAddress = ( address: number ): RenderInstructionLocation => {

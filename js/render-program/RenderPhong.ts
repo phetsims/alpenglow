@@ -88,8 +88,8 @@ export default class RenderPhong extends RenderProgram {
           specularColorProgram.color,
           positionProgram.color,
           normalProgram.color,
-          lightDirectionPrograms.map( program => ( program as RenderColor ).color ),
-          lightColorPrograms.map( program => ( program as RenderColor ).color )
+          lightDirectionPrograms.map( program => program.color ),
+          lightColorPrograms.map( program => program.color )
         )
       );
     }
