@@ -35,6 +35,18 @@
     },
     "ignorePatterns": [
       "doc/lib/"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/*.ts"
+        ],
+        "parserOptions": {
+          "project": [
+            "../alpenglow/tsconfig.json"
+          ]
+        }
+      }
     ]
   }
 }
