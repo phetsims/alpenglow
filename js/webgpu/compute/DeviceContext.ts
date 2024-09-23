@@ -197,7 +197,6 @@ export default class DeviceContext {
       if ( options.maxLimits ) {
         limitNames.forEach( name => {
 
-          // @ts-expect-error
           limits[ name ] = adapter.limits[ name ];
         } );
       }
