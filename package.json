@@ -35,18 +35,6 @@
     },
     "ignorePatterns": [
       "doc/lib/"
-    ],
-    "overrides": [
-      {
-        "files": [
-          "**/*.ts"
-        ],
-        "parserOptions": {
-          "project": [
-            "../chipper/tsconfig/eslint-all/tsconfig.json"
-          ]
-        }
-      }
     ]
   }
 }
