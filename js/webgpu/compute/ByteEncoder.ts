@@ -404,7 +404,6 @@ export default class ByteEncoder {
     let iLow = Math.max( 0, k - n );
     let jLow = Math.max( 0, k - m );
     let delta;
-     // TODO: Where did no-constant-condition go? See https://github.com/phetsims/chipper/issues/1451
     while ( true ) {
       if ( i > 0 && j < n && compare( i - 1, j ) > 0 ) {
         delta = ( i - iLow + 1 ) >> 1;
