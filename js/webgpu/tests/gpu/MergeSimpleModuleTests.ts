@@ -73,28 +73,28 @@ const testMergeSimpleModule = <T>( options: MergeSimpleModuleTestOptions<T> ) =>
   } as const;
 
   testMergeSimpleModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'i32 merge simple',
     order: I32Order
   } );
 
   testMergeSimpleModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'u32 merge simple',
     order: U32Order
   } );
 
   testMergeSimpleModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'u32 reverse merge simple',
     order: U32ReverseOrder
   } );
 
   testMergeSimpleModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'vec2u merge simple',
     order: Vec2uLexicographicalOrder

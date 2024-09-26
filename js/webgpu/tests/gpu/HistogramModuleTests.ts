@@ -66,7 +66,7 @@ const testHistogramModule = <T>( options: HistogramModuleTestOptions<T> ) => {
   } as const;
 
   testHistogramModule<number>( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'u32 histogram mod 256',
     numBins: 256,
@@ -76,7 +76,7 @@ const testHistogramModule = <T>( options: HistogramModuleTestOptions<T> ) => {
   } );
 
   testHistogramModule<Vector2>( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'vec2u histogram custom',
     numBins: 256,

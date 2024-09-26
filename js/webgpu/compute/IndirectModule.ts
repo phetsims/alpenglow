@@ -16,7 +16,7 @@ export type IndirectModuleOptions<T> = {
 } & PipelineBlueprintOptions;
 
 export const INDIRECT_MODULE_DEFAULTS = {
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...PIPELINE_BLUEPRINT_DEFAULTS
 } as const;
 

@@ -11,7 +11,7 @@
 import { ParallelContext, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
-// eslint-disable-next-line bad-sim-text
+// eslint-disable-next-line phet/bad-sim-text
 const random = new Random();
 
 QUnit.module( 'Parallel' );

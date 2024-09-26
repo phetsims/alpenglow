@@ -45,10 +45,10 @@ export const LOAD_MULTIPLE_DEFAULTS = {
   outOfRangeValue: null,
   inputAccessOrder: 'striped',
   factorOutSubexpressions: true,
-  ...GLOBAL_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
-  ...WORKGROUP_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
-  ...LOCAL_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
-  ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
+  ...GLOBAL_INDEXABLE_DEFAULTS, // eslint-disable-line phet/no-object-spread-on-non-literals
+  ...WORKGROUP_INDEXABLE_DEFAULTS, // eslint-disable-line phet/no-object-spread-on-non-literals
+  ...LOCAL_INDEXABLE_DEFAULTS, // eslint-disable-line phet/no-object-spread-on-non-literals
+  ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
 const loadMultipleWGSL = <T>(

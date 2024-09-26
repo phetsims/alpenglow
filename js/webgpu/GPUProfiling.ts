@@ -25,7 +25,7 @@
 import { alpenglow, BufferArraySlot, BufferLogger, DeviceContext, getArrayType, Procedure, RadixSortModule, Routine, TimestampLogger, TimestampLoggerResult, U32Order, u32S } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 
-// eslint-disable-next-line bad-sim-text
+// eslint-disable-next-line phet/bad-sim-text
 const random = new Random();
 
 class GPUProfiler {

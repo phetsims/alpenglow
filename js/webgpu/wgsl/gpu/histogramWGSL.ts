@@ -20,7 +20,7 @@ type SelfOptions = {
 export type histogramWGSLOptions = SelfOptions & StrictOmit<coalescedLoopWGSLOptions, 'callback'>;
 
 export const HISTOGRAM_DEFAULTS = {
-  ...COALESCED_LOOP_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
+  ...COALESCED_LOOP_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
 const histogramWGSL = (

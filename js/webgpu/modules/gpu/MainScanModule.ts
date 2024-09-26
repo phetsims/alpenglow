@@ -20,9 +20,9 @@ export type MainScanModuleOptions<T> = {
 } & mainScanWGSLOptions<T> & PipelineBlueprintOptions;
 
 export const MAIN_SCAN_MODULE_DEFAULTS = {
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...DIRECT_MODULE_DEFAULTS,
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...MAIN_SCAN_DEFAULTS
 } as const;
 

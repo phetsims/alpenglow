@@ -252,12 +252,12 @@ export default class FaceRasterizer {
     const renderableFaces = Rasterize.partitionRenderableFaces( program, bounds, {
       tileSize: 1024 * 1024, // don't do tiles by default
 
-      // eslint-disable-next-line no-object-spread-on-non-literals
+      // eslint-disable-next-line phet/no-object-spread-on-non-literals
       ...rasterizeOptions
     } );
 
     return this.run( {
-      // eslint-disable-next-line no-object-spread-on-non-literals
+      // eslint-disable-next-line phet/no-object-spread-on-non-literals
       ...runOptions,
       renderableFaces: renderableFaces
     } );

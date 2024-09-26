@@ -82,7 +82,7 @@ export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
       name: `${providedOptions.name} initialize_addresses`,
 
       log: providedOptions.log, // TODO: how can we avoid needing this forward?
-      ...options.mainTwoPassInitializeAddressesModule, // eslint-disable-line no-object-spread-on-non-literals
+      ...options.mainTwoPassInitializeAddressesModule, // eslint-disable-line phet/no-object-spread-on-non-literals
 
       addresses: addressesPlainSlot
     } );
@@ -91,7 +91,7 @@ export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
       name: `${providedOptions.name} coarse`,
 
       log: providedOptions.log, // TODO: how can we avoid needing this forward?
-      ...options.mainTwoPassCoarseModuleOptions, // eslint-disable-line no-object-spread-on-non-literals
+      ...options.mainTwoPassCoarseModuleOptions, // eslint-disable-line phet/no-object-spread-on-non-literals
 
       // input
       config: providedOptions.config,
@@ -110,7 +110,7 @@ export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
       name: `${providedOptions.name} fine`,
 
       log: providedOptions.log, // TODO: how can we avoid needing this forward?
-      ...options.mainTwoPassFineModuleOptions, // eslint-disable-line no-object-spread-on-non-literals
+      ...options.mainTwoPassFineModuleOptions, // eslint-disable-line phet/no-object-spread-on-non-literals
 
       config: providedOptions.config,
       addresses: addressesPlainSlot,

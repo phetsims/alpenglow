@@ -27,7 +27,7 @@ export type mergeSimpleWGSLOptions = {
 export const MERGE_SIMPLE_DEFAULTS = {
   greaterThan: null,
   lessThanOrEqual: null,
-  ...GLOBAL_INDEXABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
+  ...GLOBAL_INDEXABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
 const mergeSimpleWGSL = (

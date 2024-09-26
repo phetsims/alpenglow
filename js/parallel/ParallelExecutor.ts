@@ -25,7 +25,7 @@ import { alpenglow, BaseWorkgroupValues, ParallelContext, ParallelKernel, Parall
 import Random from '../../../dot/js/Random.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 
-// eslint-disable-next-line bad-sim-text
+// eslint-disable-next-line phet/bad-sim-text
 const random = new Random();
 
 const LOG = false;

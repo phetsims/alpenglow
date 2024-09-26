@@ -12,7 +12,7 @@ import Random from '../../../../dot/js/Random.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
 
-// eslint-disable-next-line bad-sim-text
+// eslint-disable-next-line phet/bad-sim-text
 const random = new Random();
 
 export type WGSLBinaryStatements = ( value: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => WGSLStatements;
@@ -303,7 +303,7 @@ alpenglow.register( 'getVariableLengthArrayType', getVariableLengthArrayType );
 
 export const getCastedType = <T>( type: ConcreteType<T>, valueType: WGSLType ): ConcreteType<T> => {
   return {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...type,
     valueType: valueType
   };

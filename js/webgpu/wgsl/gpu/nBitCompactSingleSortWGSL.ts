@@ -41,7 +41,7 @@ export type nBitCompactSingleSortWGSLOptions<T> = {
 
 const DEFAULT_OPTIONS = {
   earlyLoad: false,
-  ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
+  ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
 const nBitCompactSingleSortWGSL = <T>(

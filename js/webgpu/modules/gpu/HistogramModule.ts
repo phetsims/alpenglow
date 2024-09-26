@@ -16,9 +16,9 @@ export type HistogramModuleOptions<T> = {
 } & mainHistogramWGSLOptions<T> & PipelineBlueprintOptions;
 
 export const HISTOGRAM_MODULE_DEFAULTS = {
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...DIRECT_MODULE_DEFAULTS,
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...MAIN_HISTOGRAM_DEFAULTS
 } as const;
 

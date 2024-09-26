@@ -83,7 +83,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       const commonString = `scan single-size ${exclusive ? 'exclusive' : 'inclusive'}${inPlace ? ' in-place' : ''}`;
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `u32 add ${commonString}`,
         binaryOp: U32Add,
@@ -92,7 +92,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       } );
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `i32 add ${commonString}`,
         binaryOp: I32Add,
@@ -101,7 +101,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       } );
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `vec2u add ${commonString}`,
         binaryOp: Vec2uAdd,
@@ -110,7 +110,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       } );
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `bicyclic semigroup add ${commonString}`,
         binaryOp: Vec2uBic,
@@ -139,7 +139,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       const commonString = `scan double-size ${exclusive ? 'exclusive' : 'inclusive'}${inPlace ? ' in-place' : ''}`;
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `u32 add ${commonString}`,
         binaryOp: U32Add,
@@ -148,7 +148,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       } );
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `i32 add ${commonString}`,
         binaryOp: I32Add,
@@ -157,7 +157,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       } );
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `vec2u add ${commonString}`,
         binaryOp: Vec2uAdd,
@@ -166,7 +166,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       } );
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `bicyclic semigroup add ${commonString}`,
         binaryOp: Vec2uBic,
@@ -194,7 +194,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       const commonString = `scan triple-size ${exclusive ? 'exclusive' : 'inclusive'}${inPlace ? ' in-place' : ''}`;
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `u32 add ${commonString}`,
         binaryOp: U32Add,
@@ -203,7 +203,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       } );
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `i32 add ${commonString}`,
         binaryOp: I32Add,
@@ -212,7 +212,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       } );
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `vec2u add ${commonString}`,
         binaryOp: Vec2uAdd,
@@ -221,7 +221,7 @@ const testScanModule = <T>( options: ScanModuleTestOptions<T> ) => {
       } );
 
       testScanModule( {
-        // eslint-disable-next-line no-object-spread-on-non-literals
+        // eslint-disable-next-line phet/no-object-spread-on-non-literals
         ...options,
         name: `bicyclic semigroup add ${commonString}`,
         binaryOp: Vec2uBic,

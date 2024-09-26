@@ -47,8 +47,8 @@ export const SCAN_RAKED_DEFAULTS = {
   stripeReducedOutput: false,
   getAddedValue: null,
   addedValueNeedsWorkgroupBarrier: true,
-  ...WORKGROUP_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
-  ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
+  ...WORKGROUP_INDEXABLE_DEFAULTS, // eslint-disable-line phet/no-object-spread-on-non-literals
+  ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
 const scanRakedWGSL = <T>(

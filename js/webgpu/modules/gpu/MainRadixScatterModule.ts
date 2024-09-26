@@ -16,9 +16,9 @@ export type MainRadixScatterModuleOptions<T> = {
 } & mainRadixScatterWGSLOptions<T> & PipelineBlueprintOptions;
 
 export const MAIN_RADIX_SCATTER_MODULE_DEFAULTS = {
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...DIRECT_MODULE_DEFAULTS,
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...MAIN_RADIX_SCATTER_DEFAULTS
 } as const;
 

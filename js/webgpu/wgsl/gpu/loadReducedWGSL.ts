@@ -57,10 +57,10 @@ export const LOAD_REDUCED_DEFAULTS = {
   sequentialReduceStyle: 'factored',
   useSelectIfOptional: false,
   orderOverride: false,
-  ...GLOBAL_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
-  ...WORKGROUP_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
-  ...LOCAL_INDEXABLE_DEFAULTS, // eslint-disable-line no-object-spread-on-non-literals
-  ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
+  ...GLOBAL_INDEXABLE_DEFAULTS, // eslint-disable-line phet/no-object-spread-on-non-literals
+  ...WORKGROUP_INDEXABLE_DEFAULTS, // eslint-disable-line phet/no-object-spread-on-non-literals
+  ...LOCAL_INDEXABLE_DEFAULTS, // eslint-disable-line phet/no-object-spread-on-non-literals
+  ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
 const loadReducedWGSL = <T>(

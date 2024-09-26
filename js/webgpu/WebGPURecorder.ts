@@ -531,7 +531,7 @@ class WebGPUCommandDeviceCreateBuffer extends WebGPUCommand {
     return `${this.getDeclaration( nameMap )}${getName( nameMap, this.device )}.createBuffer( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {
       usage: ( value: IntentionalAny ) => {
         const numberValue = value as number;
-        // eslint-disable-next-line no-simple-type-checking-assertions
+        // eslint-disable-next-line phet/no-simple-type-checking-assertions
         assert && assert( typeof value === 'number' );
         
         return WebGPURecorder.bitfieldToString( numberValue, new Map<number, string>( [

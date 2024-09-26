@@ -39,6 +39,7 @@
 <body>
 
 <script type="module">
+  /* eslint-disable phet/bad-sim-text */
   import '../../chipper/dist/js/scenery/js/main.js';
   import '../../chipper/dist/js/alpenglow/js/main.js';
   import '../../chipper/dist/js/phet-core/js/main.js';
@@ -46,11 +47,11 @@
   import '../../chipper/dist/js/dot/js/main.js';
   import '../../chipper/dist/js/kite/js/main.js';
   import '../../chipper/dist/js/utterance-queue/js/main.js';
-  import { // eslint-disable-line single-line-import
+  import { // eslint-disable-line phet/single-line-import
     benchRunner,
     gpuTiming
   } from 'thimbleberry';
-  import { // eslint-disable-line single-line-import
+  import { // eslint-disable-line phet/single-line-import
     BufferArraySlot,
     getArrayType,
     RadixSortModule,

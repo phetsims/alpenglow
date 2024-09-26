@@ -264,6 +264,8 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
 
       const numbers = [];
       while ( numbers.length < workgroupSize * numWorkgroups ) {
+
+        // eslint-disable-next-line phet/bad-sim-text
         numbers.push( Math.random() - 0.5 );
       }
       const numbersArray = new Float32Array( numbers );

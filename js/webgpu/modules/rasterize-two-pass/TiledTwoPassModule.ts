@@ -74,7 +74,7 @@ export default class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunS
       name: `${providedOptions.name} atomic initialize_addresses`,
 
       log: providedOptions.log, // TODO: how can we avoid needing this forward?
-      ...options.mainTwoPassAtomicInitializeAddressesModuleOptions, // eslint-disable-line no-object-spread-on-non-literals
+      ...options.mainTwoPassAtomicInitializeAddressesModuleOptions, // eslint-disable-line phet/no-object-spread-on-non-literals
 
       addresses: addressesPlainSlot
     } );
@@ -84,7 +84,7 @@ export default class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunS
 
       log: providedOptions.log, // TODO: how can we avoid needing this forward?
       numInitialRenderableFaces: options.numInitialRenderableFaces,
-      ...options.mainTwoPassTileModuleOptions, // eslint-disable-line no-object-spread-on-non-literals
+      ...options.mainTwoPassTileModuleOptions, // eslint-disable-line phet/no-object-spread-on-non-literals
 
       // input
       config: providedOptions.config,
@@ -101,7 +101,7 @@ export default class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunS
       name: `${providedOptions.name} two pass`,
 
       log: providedOptions.log, // TODO: how can we avoid needing this forward?
-      ...options.twoPassModuleOptions, // eslint-disable-line no-object-spread-on-non-literals
+      ...options.twoPassModuleOptions, // eslint-disable-line phet/no-object-spread-on-non-literals
 
       config: providedOptions.config,
       coarseRenderableFaces: coarseRenderableFacesSlot,

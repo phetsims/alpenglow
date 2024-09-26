@@ -18,11 +18,11 @@ if ( window.usePhetLib ) {
 }
 // Otherwise, load from our transpilation (assuming for development mode)
 else {
-  alpenglow = ( await import( '../../chipper/dist/js/alpenglow/js/main.js' ) ).default; // eslint-disable-line bad-sim-text
-  ArrowNode = ( await import( '../../chipper/dist/js/scenery-phet/js/ArrowNode.js' ) ).default; // eslint-disable-line bad-sim-text
-  scenery = ( await import( '../../chipper/dist/js/scenery/js/main.js' ) ).default; // eslint-disable-line bad-sim-text
-  kite = ( await import( '../../chipper/dist/js/kite/js/main.js' ) ).default; // eslint-disable-line bad-sim-text
-  dot = ( await import( '../../chipper/dist/js/dot/js/main.js' ) ).default; // eslint-disable-line bad-sim-text
+  alpenglow = ( await import( '../../chipper/dist/js/alpenglow/js/main.js' ) ).default; // eslint-disable-line phet/bad-sim-text
+  ArrowNode = ( await import( '../../chipper/dist/js/scenery-phet/js/ArrowNode.js' ) ).default; // eslint-disable-line phet/bad-sim-text
+  scenery = ( await import( '../../chipper/dist/js/scenery/js/main.js' ) ).default; // eslint-disable-line phet/bad-sim-text
+  kite = ( await import( '../../chipper/dist/js/kite/js/main.js' ) ).default; // eslint-disable-line phet/bad-sim-text
+  dot = ( await import( '../../chipper/dist/js/dot/js/main.js' ) ).default; // eslint-disable-line phet/bad-sim-text
 }
 
 const Node = scenery.Node;
@@ -246,7 +246,7 @@ window.createRenderProgramSandbox = ( id, func, width, height, providedOptions )
     errorsContainerElement.style.display = 'none';
 
     try {
-      // eslint-disable-next-line bad-sim-text
+      // eslint-disable-next-line phet/bad-sim-text
       const code = `${Math.random()};
       let value = (${options.jsBefore}
         const dot = phet.dot;
@@ -425,7 +425,7 @@ setTimeout( () => {
     }
   };
   window.addDiagram = addDiagram;
-  // eslint-disable-next-line bad-sim-text
+  // eslint-disable-next-line phet/bad-sim-text
   window.pendingDiagrams.forEach( diagram => setTimeout( () => addDiagram( diagram.id, diagram.callback ), 0 ) );
 }, 0 );
 
@@ -2383,7 +2383,7 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
           renderProgram = new RenderNormalDebug( normalProgram );
         }
         else if ( shadeType === 'random' ) {
-          // eslint-disable-next-line bad-sim-text
+          // eslint-disable-next-line phet/bad-sim-text
           renderProgram = new RenderColor( v4( Math.random(), Math.random(), Math.random(), 1 ) );
         }
 

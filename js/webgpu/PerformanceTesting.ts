@@ -19,7 +19,7 @@ export default class PerformanceTesting {
     const inputSize = 4000;
     // const inputSize = workgroupSize * workgroupSize * ( 6 ) - 27 * 301;
     // const inputSize = workgroupSize * workgroupSize * ( workgroupSize - 3 ) - 27 * 301;
-    // eslint-disable-next-line bad-sim-text
+    // eslint-disable-next-line phet/bad-sim-text
     const uintNumbers = new Uint32Array( _.range( 0, inputSize ).map( () => Math.floor( Math.random() * 1000000 ) ) );
 
     const device = ( await DeviceContext.getDevice() )!;

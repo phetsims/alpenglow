@@ -69,28 +69,28 @@ const testReduceModule = <T>( options: ReduceModuleTestOptions<T> ) => {
   } as const;
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'u32 add reduce (atomic) single-size',
     binaryOp: U32Add
   } );
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'i32 add reduce (atomic) single-size',
     binaryOp: I32Add
   } );
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'vec2u add reduce (multi-layer commutative) single-size',
     binaryOp: Vec2uAdd
   } );
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'bicyclic semigroup reduce (multi-layer non-commutative) single-size',
     binaryOp: Vec2uBic
@@ -110,28 +110,28 @@ const testReduceModule = <T>( options: ReduceModuleTestOptions<T> ) => {
   } as const;
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'u32 add reduce (atomic) double-size',
     binaryOp: U32Add
   } );
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'i32 add reduce (atomic) double-size',
     binaryOp: I32Add
   } );
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'vec2u add reduce (multi-layer commutative) double-size',
     binaryOp: Vec2uAdd
   } );
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'bicyclic semigroup reduce (multi-layer non-commutative) double-size',
     binaryOp: Vec2uBic
@@ -151,28 +151,28 @@ const testReduceModule = <T>( options: ReduceModuleTestOptions<T> ) => {
   } as const;
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'u32 add reduce (atomic) triple-size',
     binaryOp: U32Add
   } );
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'i32 add reduce (atomic) triple-size',
     binaryOp: I32Add
   } );
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'vec2u add reduce (multi-layer commutative) triple-size',
     binaryOp: Vec2uAdd
   } );
 
   testReduceModule( {
-    // eslint-disable-next-line no-object-spread-on-non-literals
+    // eslint-disable-next-line phet/no-object-spread-on-non-literals
     ...options,
     name: 'bicyclic semigroup reduce (multi-layer non-commutative) triple-size',
     binaryOp: Vec2uBic

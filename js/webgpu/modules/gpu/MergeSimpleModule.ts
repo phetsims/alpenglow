@@ -17,9 +17,9 @@ export type MergeSimpleModuleOptions<T> = {
 } & mainMergeSimpleWGSLOptions<T> & PipelineBlueprintOptions;
 
 export const MERGE_SIMPLE_MODULE_DEFAULTS = {
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...DIRECT_MODULE_DEFAULTS,
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...MAIN_MERGE_SIMPLE_DEFAULTS
 } as const;
 

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-// eslint-disable-next-line single-line-import
+// eslint-disable-next-line phet/single-line-import
 import {
   alpenglow,
   ClippableFace,

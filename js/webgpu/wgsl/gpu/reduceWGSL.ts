@@ -45,7 +45,7 @@ export const REDUCE_DEFAULTS = {
   convergent: false,
   scratchPreloaded: false,
   valuePreloaded: true,
-  ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line no-object-spread-on-non-literals
+  ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
 const reduceWGSL = <T>(

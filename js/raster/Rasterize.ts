@@ -1060,7 +1060,7 @@ export default class Rasterize {
         }
         else if ( options.edgeIntersectionSortMethod === 'random' ) {
           // NOTE: This is NOT designed for performance (it's for testing)
-          // eslint-disable-next-line bad-sim-text
+          // eslint-disable-next-line phet/bad-sim-text
           const shuffled = _.shuffle( integerEdges );
           integerEdges.length = 0;
           integerEdges.push( ...shuffled );

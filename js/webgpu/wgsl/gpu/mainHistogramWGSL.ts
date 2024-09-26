@@ -16,7 +16,7 @@ export type mainHistogramWGSLOptions<T> = {
 } & OptionalLengthExpressionable & RakedSizable;
 
 export const MAIN_HISTOGRAM_DEFAULTS = {
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS
 } as const;
 

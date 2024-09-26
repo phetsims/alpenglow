@@ -15,9 +15,9 @@ export type MainTwoPassInitializeAddressesModuleOptions = {
 } & mainTwoPassInitializeAddressesWGSLOptions & PipelineBlueprintOptions;
 
 export const MAIN_TWO_PASS_INITIALIZE_ADDRESSES_MODULE_DEFAULTS = {
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...DIRECT_MODULE_DEFAULTS,
-  // eslint-disable-next-line no-object-spread-on-non-literals
+  // eslint-disable-next-line phet/no-object-spread-on-non-literals
   ...MAIN_TWO_PASS_INITIALIZE_ADDRESSES_DEFAULTS
 } as const;
 

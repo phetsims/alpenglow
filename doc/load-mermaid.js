@@ -2,5 +2,5 @@
 
 // @author Jonathan Olson <jonathan.olson@colorado.edu>
 
-import mermaid from '../../sherpa/mermaid/mermaid.esm.min.mjs'; // eslint-disable-line default-import-match-filename
+import mermaid from '../../sherpa/mermaid/mermaid.esm.min.mjs'; // eslint-disable-line phet/default-import-match-filename
 mermaid.initialize( { startOnLoad: true } );

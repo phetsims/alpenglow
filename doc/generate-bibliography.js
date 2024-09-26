@@ -5,9 +5,7 @@
 // Generates the bibliography for the Alpenglow documentation
 // Run with `node js/generate-bibliography.js`
 
-/* eslint-env node */
-
-const Cite = require( 'citation-js' ); // eslint-disable-line require-statement-match
+const Cite = require( 'citation-js' ); // eslint-disable-line phet/require-statement-match
 const fs = require( 'fs' );
 
 ( async () => {
