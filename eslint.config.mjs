@@ -12,10 +12,11 @@ import phetLibraryEslintConfig from '../chipper/eslint/phet-library.eslint.confi
 export default [
   ...phetLibraryEslintConfig,
   {
-    ignores: [ 'doc/lib/**/*' ],
     rules: {
       'no-bitwise': 'off',
       'phet/todo-should-have-issue': 'off'
     }
+  }, {
+    ignores: [ 'doc/lib/**/*' ]
   }
 ];
