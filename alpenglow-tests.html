@@ -31,7 +31,11 @@
         "url": "https://github.com/phetsims/alpenglow.git"
       },
       "devDependencies": {
-        "grunt": "~1.5.3"
+        "grunt": "~1.5.3",
+        "thimbleberry": "^0.2.1",
+        "vite": "^4.5.0",
+        "citation-js": "^0.7.4",
+        "@citation-js/plugin-csl": "^0.7.2"
       },
       "phet": {
         "supportedBrands": [
@@ -46,13 +50,6 @@
           "../sherpa/lib/flatqueue-1.2.1.js"
         ],
         "supportsOutputJS": true
-      },
-      "eslintConfig": {
-        "extends": "../chipper/eslint/phet-library_eslintrc.js",
-        "rules": {
-          "no-bitwise": "off",
-          "todo-should-have-issue": "off"
-        }
       }
     };
   window.phet.chipper.stringRepos =
