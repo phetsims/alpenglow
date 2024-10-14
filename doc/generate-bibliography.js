@@ -517,7 +517,7 @@ const fs = require( 'fs' );
       } )
     };
   } );
-  fs.writeFileSync( 'doc/citations.js', `/* eslint-disable */\n// generated from generate-bibliography.js, do not manually modify.\nwindow.citations = ${JSON.stringify( {
+  fs.writeFileSync( 'doc/citations.js', `/* eslint-disable */\n/* @formatter:off */\n// generated from generate-bibliography.js, do not manually modify.\nwindow.citations = ${JSON.stringify( {
     map: map,
     bibliography: cite.format( 'bibliography', {
       format: 'html',
