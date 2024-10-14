@@ -6,11 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { alpenglow, ClipSimplifier } from '../imports.js';
 import Range from '../../../dot/js/Range.js';
-import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Line, Shape } from '../../../kite/js/imports.js';
-import { alpenglow, ClipSimplifier } from '../imports.js';
+import Utils from '../../../dot/js/Utils.js';
 
 export default class LinearEdge {
 

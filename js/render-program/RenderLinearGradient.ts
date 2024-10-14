@@ -90,12 +90,12 @@ export default class RenderLinearGradient extends RenderProgram {
 
   protected override equalsTyped( other: this ): boolean {
     return this.transform.equals( other.transform ) &&
-           this.start.equals( other.start ) &&
-           this.end.equals( other.end ) &&
-           this.extend === other.extend &&
-           this.accuracy === other.accuracy &&
-           this.stops.length === other.stops.length &&
-           _.every( this.stops, ( stop, i ) => stop.ratio === other.stops[ i ].ratio );
+      this.start.equals( other.start ) &&
+      this.end.equals( other.end ) &&
+      this.extend === other.extend &&
+      this.accuracy === other.accuracy &&
+      this.stops.length === other.stops.length &&
+      _.every( this.stops, ( stop, i ) => stop.ratio === other.stops[ i ].ratio );
   }
 
   protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
@@ -291,8 +291,8 @@ export class RenderLinearGradientLogic {
     assert && useCentroid && assert( context.hasCentroid() );
 
     const localPoint = useCentroid ?
-                       scratchLinearGradientVector0.set( context.centroid ) :
-                       context.writeBoundsCentroid( scratchLinearGradientVector0 );
+      scratchLinearGradientVector0.set( context.centroid ) :
+      context.writeBoundsCentroid( scratchLinearGradientVector0 );
 
     if ( !this.isIdentity ) {
       this.inverseTransform.multiplyVector2( localPoint );

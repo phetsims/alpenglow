@@ -247,7 +247,7 @@ export default class RenderDepthSort extends RenderProgram {
       new Vector3( item.pointA[ 0 ], item.pointA[ 1 ], item.pointA[ 2 ] ),
       new Vector3( item.pointB[ 0 ], item.pointB[ 1 ], item.pointB[ 2 ] ),
       new Vector3( item.pointC[ 0 ], item.pointC[ 1 ], item.pointC[ 2 ]
-      ) ) ) );
+    ) ) ) );
   }
 
   public static getProjectionMatrix( near: number, far: number, minX: number, minY: number, maxX: number, maxY: number ): Matrix4 {

@@ -110,14 +110,14 @@ const mergeWGSL = (
         if ( local_id.x < 2u ) {
           let output_index = select( block_start_output, block_end_output, local_id.x == 1u );
           ${getCorankWGSL( {
-    value: wgsl`block_a`,
-    outputIndex: wgsl`output_index`,
-    lengthA: lengthA,
-    lengthB: lengthB,
-    compare: compare ? ( ( indexA, indexB ) => compare( loadFromA( indexA ), loadFromB( indexB ) ) ) : null,
-    greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan( loadFromA( indexA ), loadFromB( indexB ) ) ) : null,
-    lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual( loadFromA( indexA ), loadFromB( indexB ) ) ) : null
-  } )}
+            value: wgsl`block_a`,
+            outputIndex: wgsl`output_index`,
+            lengthA: lengthA,
+            lengthB: lengthB,
+            compare: compare ? ( ( indexA, indexB ) => compare( loadFromA( indexA ), loadFromB( indexB ) ) ) : null,
+            greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan( loadFromA( indexA ), loadFromB( indexB ) ) ) : null,
+            lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual( loadFromA( indexA ), loadFromB( indexB ) ) ) : null
+          } )}
           if ( local_id.x == 0u ) {
             block_start_a = block_a;
           }
@@ -226,43 +226,43 @@ const mergeWGSL = (
   
             // Get the corank for the start of our thread's input ranges
             ${getCorankWGSL( {
-    value: wgsl`thread_relative_start_a`,
-    outputIndex: wgsl`output_relative_start`,
-    lengthA: wgsl`iteration_length_a`,
-    lengthB: wgsl`iteration_length_b`,
-    compare: compare ? ( ( indexA, indexB ) => compare(
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
-    ) ) : null,
-    greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
-    ) ) : null,
-    lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
-    ) ) : null
-  } )}
+              value: wgsl`thread_relative_start_a`,
+              outputIndex: wgsl`output_relative_start`,
+              lengthA: wgsl`iteration_length_a`,
+              lengthB: wgsl`iteration_length_b`,
+              compare: compare ? ( ( indexA, indexB ) => compare(
+                wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
+                wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
+              ) ) : null,
+              greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
+                wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
+                wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
+              ) ) : null,
+              lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
+                wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
+                wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
+              ) ) : null
+            } )}
   
             // Get the corank for the end of our thread's input ranges
             ${getCorankWGSL( {
-    value: wgsl`thread_relative_end_a`,
-    outputIndex: wgsl`output_relative_end`,
-    lengthA: wgsl`iteration_length_a`,
-    lengthB: wgsl`iteration_length_b`,
-    compare: compare ? ( ( indexA, indexB ) => compare(
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
-    ) ) : null,
-    greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
-    ) ) : null,
-    lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
-    ) ) : null
-  } )}
+              value: wgsl`thread_relative_end_a`,
+              outputIndex: wgsl`output_relative_end`,
+              lengthA: wgsl`iteration_length_a`,
+              lengthB: wgsl`iteration_length_b`,
+              compare: compare ? ( ( indexA, indexB ) => compare(
+                wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
+                wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
+              ) ) : null,
+              greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
+                wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
+                wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
+              ) ) : null,
+              lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
+                wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
+                wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
+              ) ) : null
+            } )}
   
             // Given the A coranks, compute the B coranks
             let thread_relative_start_b = output_relative_start - thread_relative_start_a;
@@ -280,22 +280,22 @@ const mergeWGSL = (
   
             // Actually write things into our output array serially.
             ${mergeSequentialWGSL( {
-    lengthA: wgsl`thread_length_a`,
-    lengthB: wgsl`thread_length_b`,
-    compare: ( indexA, indexB ) => compare(
-      // A/B indices are now relative to 0 (for our thread)
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a + thread_relative_start_a ) % ${u32S( sharedMemorySize )} ]`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b + thread_relative_start_b ) % ${u32S( sharedMemorySize )} ]`
-    ),
-    setFromA: ( indexOutput, indexA ) => storeOutput(
-      wgsl`( ${indexOutput} + thread_start_output )`,
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a + thread_relative_start_a ) % ${u32S( sharedMemorySize )} ]`
-    ),
-    setFromB: ( indexOutput, indexB ) => storeOutput(
-      wgsl`( ${indexOutput} + thread_start_output )`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b + thread_relative_start_b ) % ${u32S( sharedMemorySize )} ]`
-    )
-  } )}
+              lengthA: wgsl`thread_length_a`,
+              lengthB: wgsl`thread_length_b`,
+              compare: ( indexA, indexB ) => compare(
+                // A/B indices are now relative to 0 (for our thread)
+                wgsl`${workgroupA}[ ( ${indexA} + processed_index_a + thread_relative_start_a ) % ${u32S( sharedMemorySize )} ]`,
+                wgsl`${workgroupB}[ ( ${indexB} + processed_index_b + thread_relative_start_b ) % ${u32S( sharedMemorySize )} ]`
+              ),
+              setFromA: ( indexOutput, indexA ) => storeOutput(
+                wgsl`( ${indexOutput} + thread_start_output )`,
+                wgsl`${workgroupA}[ ( ${indexA} + processed_index_a + thread_relative_start_a ) % ${u32S( sharedMemorySize )} ]`
+              ),
+              setFromB: ( indexOutput, indexB ) => storeOutput(
+                wgsl`( ${indexOutput} + thread_start_output )`,
+                wgsl`${workgroupB}[ ( ${indexB} + processed_index_b + thread_relative_start_b ) % ${u32S( sharedMemorySize )} ]`
+              )
+            } )}
   
             // If we don't use atomics, we'll need another corank to determine how many elements we consumed.
             ${!atomicConsumed ? wgsl`
@@ -304,23 +304,23 @@ const mergeWGSL = (
   
               // NOTE: The output will be invalid once we're past the end of the block, but we don't care(?)
               ${getCorankWGSL( {
-    value: wgsl`consumed_a`,
-    outputIndex: u32S( sharedMemorySize ),
-    lengthA: wgsl`iteration_possible_a_length`,
-    lengthB: wgsl`iteration_possible_b_length`,
-    compare: compare ? ( ( indexA, indexB ) => compare(
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
-    ) ) : null,
-    greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
-    ) ) : null,
-    lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
-      wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
-      wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
-    ) ) : null
-  } )}
+                value: wgsl`consumed_a`,
+                outputIndex: u32S( sharedMemorySize ),
+                lengthA: wgsl`iteration_possible_a_length`,
+                lengthB: wgsl`iteration_possible_b_length`,
+                compare: compare ? ( ( indexA, indexB ) => compare(
+                  wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
+                  wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
+                ) ) : null,
+                greaterThan: greaterThan ? ( ( indexA, indexB ) => greaterThan(
+                  wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
+                  wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
+                ) ) : null,
+                lessThanOrEqual: lessThanOrEqual ? ( ( indexA, indexB ) => lessThanOrEqual(
+                  wgsl`${workgroupA}[ ( ${indexA} + processed_index_a ) % ${u32S( sharedMemorySize )} ]`,
+                  wgsl`${workgroupB}[ ( ${indexB} + processed_index_b ) % ${u32S( sharedMemorySize )} ]`
+                ) ) : null
+              } )}
   
               let consumed_b = ${u32S( sharedMemorySize )} - consumed_a;
   

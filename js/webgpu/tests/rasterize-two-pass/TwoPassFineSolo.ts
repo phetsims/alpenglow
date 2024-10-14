@@ -20,10 +20,10 @@ export const evaluateTwoPassFineSolo = async (
   const supportsMitchellNetravali = false;
 
   const filterRadius = {
-                         [ PolygonFilterType.Box ]: 0.5,
-                         [ PolygonFilterType.Bilinear ]: 1,
-                         [ PolygonFilterType.MitchellNetravali ]: 2
-                       }[ filterType ] * filterScale;
+    [ PolygonFilterType.Box ]: 0.5,
+    [ PolygonFilterType.Bilinear ]: 1,
+    [ PolygonFilterType.MitchellNetravali ]: 2
+  }[ filterType ] * filterScale;
 
   const filterExpansion = filterRadius - 0.5; // since our "bounds" already include a radius of 0.5 from the pixel centers
 
@@ -67,7 +67,9 @@ export const evaluateTwoPassFineSolo = async (
     )
   ] ).transformed( phet.dot.Matrix3.scaling( rasterSize / 256 ) );
 
-  const renderableFaces = Rasterize.partitionRenderableFaces( program, new Bounds2( 0, 0, rasterSize, rasterSize ), {} );
+  const renderableFaces = Rasterize.partitionRenderableFaces( program, new Bounds2( 0, 0, rasterSize, rasterSize ), {
+
+  } );
 
   const binSize = ( supportsGridFiltering && filterScale === 1 ) ? {
     [ PolygonFilterType.Box ]: 16,

@@ -70,11 +70,11 @@ const reduceWGSL = <T>(
   const start = convergent ? Math.log2( workgroupSize ) : 0;
   const end = convergent ? 0 : Math.log2( workgroupSize );
   const condition = ( i: number ) => convergent
-                                     ? wgsl`${localIndex} < ${u32S( 1 << ( i - 1 ) )}`
-                                     : wgsl`${localIndex} % ${u32S( 1 << ( i + 1 ) )} == 0u`;
+    ? wgsl`${localIndex} < ${u32S( 1 << ( i - 1 ) )}`
+    : wgsl`${localIndex} % ${u32S( 1 << ( i + 1 ) )} == 0u`;
   const accessIndex = ( i: number ) => convergent
-                                       ? wgsl`${localIndex} + ${u32S( 1 << ( i - 1 ) )}`
-                                       : wgsl`${localIndex} + ${u32S( 1 << i )}`;
+    ? wgsl`${localIndex} + ${u32S( 1 << ( i - 1 ) )}`
+    : wgsl`${localIndex} + ${u32S( 1 << i )}`;
 
   const combineToValue = ( varName: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => {
     return binaryExpressionStatementWGSL( varName, binaryOp.combineExpression || null, binaryOp.combineStatements || null, a, b );
@@ -90,10 +90,10 @@ const reduceWGSL = <T>(
     ` : wgsl``}
     
     ${logValueWGSL( {
-    name: `before reduce convergent:${convergent}`,
-    value: 'value',
-    type: binaryOp.type
-  } )}
+      name: `before reduce convergent:${convergent}`,
+      value: 'value',
+      type: binaryOp.type
+    } )}
     
     ${unrollWGSL( start, end, ( i, isFirst, isLast ) => wgsl`
       // We don't need the first workgroupBarrier() if scratchPreloaded is true

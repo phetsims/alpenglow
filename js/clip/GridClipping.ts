@@ -1,6 +1,5 @@
 // Copyright 2023-2024, University of Colorado Boulder
 
-import Utils from '../../../dot/js/Utils.js';
 /**
  * Clipping arbitrary (degenerate, non-convex, self-intersecting, etc.) polygons to within a grid.
  *
@@ -8,6 +7,7 @@ import Utils from '../../../dot/js/Utils.js';
  */
 import Vector2 from '../../../dot/js/Vector2.js';
 import { alpenglow, LineClipping } from '../imports.js';
+import Utils from '../../../dot/js/Utils.js';
 
 const scratchStartPoint = new Vector2( 0, 0 );
 const scratchEndPoint = new Vector2( 0, 0 );

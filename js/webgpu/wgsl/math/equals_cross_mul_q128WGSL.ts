@@ -18,9 +18,9 @@ export default (
   return new WGSLStringModule( 'equals_cross_mul_q128', wgsl`equals_cross_mul_q128( ${a}, ${b} )`, wgsl`
     fn equals_cross_mul_q128( a: ${q128WGSL}, b: ${q128WGSL} ) -> bool {
       return ${is_zero_u64WGSL( subtract_i64_i64WGSL(
-    mul_i64_i64WGSL( wgsl`a.xy`, wgsl`b.zw` ),
-    mul_i64_i64WGSL( wgsl`a.zw`, wgsl`b.xy` )
-  ) )};
+        mul_i64_i64WGSL( wgsl`a.xy`, wgsl`b.zw` ),
+        mul_i64_i64WGSL( wgsl`a.zw`, wgsl`b.xy` )
+      ) )};
     }
   ` );
 };

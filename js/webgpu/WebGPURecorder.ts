@@ -369,7 +369,7 @@ export default class WebGPURecorder {
       }
     }
     else {
-      const map: Record<string, string | undefined> = {};
+      const map: Record<string, string | undefined > = {};
       Object.keys( value ).forEach( key => {
         if ( objectOverrides && objectOverrides[ key ] ) {
           map[ key ] = objectOverrides[ key ]( value[ key ] );
@@ -463,7 +463,6 @@ export class WebGPUCommandList {
     } ).join( ', ' )} ` : ''}) => {\n${this.toJS( nameMap, level + 1 )}\n}`;
   }
 }
-
 alpenglow.register( 'WebGPUCommandList', WebGPUCommandList );
 
 const getName = ( nameMap: Map<IntentionalAny, string>, obj: IntentionalAny ): string => {
@@ -490,7 +489,6 @@ export abstract class WebGPUCommand {
     }
   }
 }
-
 alpenglow.register( 'WebGPUCommand', WebGPUCommand );
 
 class WebGPUCommandGetAdapter extends WebGPUCommand {
@@ -535,7 +533,7 @@ class WebGPUCommandDeviceCreateBuffer extends WebGPUCommand {
         const numberValue = value as number;
         // eslint-disable-next-line phet/no-simple-type-checking-assertions
         assert && assert( typeof value === 'number' );
-
+        
         return WebGPURecorder.bitfieldToString( numberValue, new Map<number, string>( [
           [ GPUBufferUsage.MAP_READ, 'GPUBufferUsage.MAP_READ' ],
           [ GPUBufferUsage.MAP_WRITE, 'GPUBufferUsage.MAP_WRITE' ],
@@ -797,7 +795,9 @@ class WebGPUCommandEncoderBeginRenderPass extends WebGPUCommand {
   }
 
   public toJS( nameMap: Map<IntentionalAny, string>, level = 0 ): string {
-    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.commandEncoder )}.beginRenderPass( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {} )} );`;
+    return `${this.getDeclaration( nameMap )}${getName( nameMap, this.commandEncoder )}.beginRenderPass( ${WebGPURecorder.rawValue( level, this.descriptor, nameMap, {
+      
+    } )} );`;
   }
 }
 

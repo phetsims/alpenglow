@@ -20,10 +20,10 @@ export const evaluateTwoPassFineDual = async (
   const supportsMitchellNetravali = false;
 
   const filterRadius = {
-                         [ PolygonFilterType.Box ]: 0.5,
-                         [ PolygonFilterType.Bilinear ]: 1,
-                         [ PolygonFilterType.MitchellNetravali ]: 2
-                       }[ filterType ] * filterScale;
+    [ PolygonFilterType.Box ]: 0.5,
+    [ PolygonFilterType.Bilinear ]: 1,
+    [ PolygonFilterType.MitchellNetravali ]: 2
+  }[ filterType ] * filterScale;
 
   const filterExpansion = filterRadius - 0.5; // since our "bounds" already include a radius of 0.5 from the pixel centers
 

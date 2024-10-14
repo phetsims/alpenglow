@@ -12,6 +12,7 @@ export default class RenderLight {
   public constructor(
     // The direction TO the light from the surface
     public readonly directionProgram: RenderProgram,
+
     // The color of the light
     public readonly colorProgram: RenderProgram
   ) {

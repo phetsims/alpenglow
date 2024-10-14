@@ -12,11 +12,13 @@ import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, Para
 export default class ParallelRasterChunkIndexPatch {
   public static async dispatch(
     workgroupSize: number,
+
     // read
     chunkIndexMap: ParallelStorageArray<number>,
     chunkIndices: ParallelStorageArray<number>,
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     numClippedChunks: number,
+
     // read-write
     reducibleChunks: ParallelStorageArray<RasterChunk>,
     completeChunks: ParallelStorageArray<RasterCompleteChunk>

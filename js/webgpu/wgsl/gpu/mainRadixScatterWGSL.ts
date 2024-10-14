@@ -77,31 +77,31 @@ const mainRadixScatterWGSL = <T>(
       let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression, workgroupSize * grainSize )};
 
       ${logValueWGSL( {
-    value: 'num_valid_workgroups',
-    type: U32Type
-  } )}
+        value: 'num_valid_workgroups',
+        type: U32Type
+      } )}
 
       if ( workgroup_id.x < num_valid_workgroups ) {
         ${loadMultipleWGSL( combineOptions<loadMultipleWGSLOptions<T>>( {
-    loadExpression: index => wgsl`input[ ${index} ]`,
-    storeStatements: ( index, value ) => wgsl`value_scratch[ ${index} ] = ${value};`,
-    type: order.type,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    lengthExpression: lengthExpression,
-    outOfRangeValue: null,
-    inputOrder: 'blocked',
-    inputAccessOrder: 'striped'
-  }, loadMultipleOptions ) )}
+          loadExpression: index => wgsl`input[ ${index} ]`,
+          storeStatements: ( index, value ) => wgsl`value_scratch[ ${index} ] = ${value};`,
+          type: order.type,
+          workgroupSize: workgroupSize,
+          grainSize: grainSize,
+          lengthExpression: lengthExpression,
+          outOfRangeValue: null,
+          inputOrder: 'blocked',
+          inputAccessOrder: 'striped'
+        }, loadMultipleOptions ) )}
 
         ${logRakedWGSL( {
-    name: 'initial data',
-    type: order.type,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    lengthExpression: lengthExpression,
-    relativeAccessExpression: index => wgsl`value_scratch[ ${index} ]`
-  } )}
+          name: 'initial data',
+          type: order.type,
+          workgroupSize: workgroupSize,
+          grainSize: grainSize,
+          lengthExpression: lengthExpression,
+          relativeAccessExpression: index => wgsl`value_scratch[ ${index} ]`
+        } )}
 
         ${commentWGSL( 'begin load histogram offsets' )}
         ${unrollWGSL( 0, Math.ceil( ( 1 << bitsPerPass ) / workgroupSize ), i => wgsl`
@@ -115,13 +115,13 @@ const mainRadixScatterWGSL = <T>(
         ${commentWGSL( 'end load histogram offsets' )}
 
         ${logRakedWGSL( {
-    name: 'scanned histogram',
-    type: U32Type,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    relativeLengthExpression: u32S( 1 << bitsPerPass ),
-    relativeAccessExpression: index => wgsl`histogram_offsets[ ${index} ]`
-  } )}
+          name: 'scanned histogram',
+          type: U32Type,
+          workgroupSize: workgroupSize,
+          grainSize: grainSize,
+          relativeLengthExpression: u32S( 1 << bitsPerPass ),
+          relativeAccessExpression: index => wgsl`histogram_offsets[ ${index} ]`
+        } )}
 
         // Our workgroupBarrier will apply for value_scratch AND local_histogram_offsets
         workgroupBarrier();
@@ -131,38 +131,38 @@ const mainRadixScatterWGSL = <T>(
         ` : wgsl``}
 
         ${logValueWGSL( {
-    value: 'reduced_length',
-    type: U32Type
-  } )}
+          value: 'reduced_length',
+          type: U32Type
+        } )}
 
         for ( var srs_i = 0u; srs_i < ${u32S( bitsPerPass )}; srs_i += ${u32S( bitsPerInnerPass )} ) {
           ${logValueWGSL( {
-    value: 'srs_i',
-    type: U32Type
-  } )}
+            value: 'srs_i',
+            type: U32Type
+          } )}
 
           ${nBitCompactSingleSortWGSL( {
-    order: order,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    bitsPerInnerPass: bitsPerInnerPass,
-    bitVectorSize: innerBitVectorSize,
-    bitsScratch: wgsl`bits_scratch`,
-    valueScratch: wgsl`value_scratch`,
-    lengthExpression: wgsl`reduced_length`, // TODO: lengthExpression ? 'reduced_length' : null
-    getBits: value => wgsl`( ( ( ${getBits( value )} ) >> srs_i ) & ${u32S( ( 1 << bitsPerInnerPass ) - 1 )} )`,
-    earlyLoad: earlyLoad
-  } )}
+            order: order,
+            workgroupSize: workgroupSize,
+            grainSize: grainSize,
+            bitsPerInnerPass: bitsPerInnerPass,
+            bitVectorSize: innerBitVectorSize,
+            bitsScratch: wgsl`bits_scratch`,
+            valueScratch: wgsl`value_scratch`,
+            lengthExpression: wgsl`reduced_length`, // TODO: lengthExpression ? 'reduced_length' : null
+            getBits: value => wgsl`( ( ( ${getBits( value )} ) >> srs_i ) & ${u32S( ( 1 << bitsPerInnerPass ) - 1 )} )`,
+            earlyLoad: earlyLoad
+          } )}
 
           ${logRakedWGSL( {
-    name: `after b_bit_sort ${bitsPerInnerPass} ${innerBitVectorSize}`,
-    type: order.type,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    lengthExpression: lengthExpression,
-    relativeAccessExpression: index => wgsl`value_scratch[ ${index} ]`,
-    additionalIndex: wgsl`srs_i`
-  } )}
+            name: `after b_bit_sort ${bitsPerInnerPass} ${innerBitVectorSize}`,
+            type: order.type,
+            workgroupSize: workgroupSize,
+            grainSize: grainSize,
+            lengthExpression: lengthExpression,
+            relativeAccessExpression: index => wgsl`value_scratch[ ${index} ]`,
+            additionalIndex: wgsl`srs_i`
+          } )}
         }
 
         // TODO: we can restructure this so we're not doing all of the reads/bits each time
@@ -186,12 +186,12 @@ const mainRadixScatterWGSL = <T>(
         workgroupBarrier();
 
         ${scanRakedWGSL( {
-    scratch: wgsl`start_indices`,
-    binaryOp: U32Max, // TODO: eeek we need to MAX combine here
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    exclusive: false
-  } )}
+          scratch: wgsl`start_indices`,
+          binaryOp: U32Max, // TODO: eeek we need to MAX combine here
+          workgroupSize: workgroupSize,
+          grainSize: grainSize,
+          exclusive: false
+        } )}
 
         workgroupBarrier();
 
@@ -211,13 +211,13 @@ const mainRadixScatterWGSL = <T>(
         ${commentWGSL( 'end write output' )}
 
         ${logRakedWGSL( {
-    name: 'exit(!) data',
-    type: order.type,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    lengthExpression: lengthExpression,
-    accessExpression: index => wgsl`output[ ${index} ]`
-  } )}
+          name: 'exit(!) data',
+          type: order.type,
+          workgroupSize: workgroupSize,
+          grainSize: grainSize,
+          lengthExpression: lengthExpression,
+          accessExpression: index => wgsl`output[ ${index} ]`
+        } )}
       }
     }
   ` );

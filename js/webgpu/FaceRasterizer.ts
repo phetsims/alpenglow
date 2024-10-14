@@ -229,10 +229,10 @@ export default class FaceRasterizer {
   private static getFilterExpansion( options: Required<StrictOmit<FaceRasterizerRunOptions, 'renderableFaces'>> ): number {
 
     const filterRadius = {
-                           [ PolygonFilterType.Box ]: 0.5,
-                           [ PolygonFilterType.Bilinear ]: 1,
-                           [ PolygonFilterType.MitchellNetravali ]: 2
-                         }[ options.filterType ] * options.filterScale;
+      [ PolygonFilterType.Box ]: 0.5,
+      [ PolygonFilterType.Bilinear ]: 1,
+      [ PolygonFilterType.MitchellNetravali ]: 2
+    }[ options.filterType ] * options.filterScale;
 
     return filterRadius - 0.5; // since our "bounds" already include a radius of 0.5 from the pixel centers
   }

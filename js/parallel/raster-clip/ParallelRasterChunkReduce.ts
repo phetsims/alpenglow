@@ -16,11 +16,14 @@ import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, Para
 export default class ParallelRasterChunkReduce {
   public static async dispatch(
     workgroupSize: number,
+
     // read
     inputChunkReduces: ParallelStorageArray<RasterChunkReduceQuad>,
     numReduces: number,
+
     // read-write
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
+
     // write
     outputChunkReduces: ParallelStorageArray<RasterChunkReduceQuad>
   ): Promise<void> {

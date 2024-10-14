@@ -22,6 +22,7 @@ import { alpenglow, wgsl, WGSLExpressionBool, WGSLStatements } from '../../../im
 const conditionalIfWGSL = (
   // null | string (expr:bool) - if null, trueStatements will be executed. If non-null, it will create an if(else)
   optionalConditional: WGSLExpressionBool | null,
+
   trueStatements: WGSLStatements,
   falseStatements: WGSLStatements | null = null
 ): WGSLStatements => {

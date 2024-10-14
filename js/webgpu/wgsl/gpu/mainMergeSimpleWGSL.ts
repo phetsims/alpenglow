@@ -46,15 +46,15 @@ const mainMergeSimpleWGSL = <T>(
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
       ${mergeSimpleWGSL( {
-    lengthA: lengthExpressionA,
-    lengthB: lengthExpressionB,
-    setFromA: ( indexOutput, indexA ) => wgsl`c[ ${indexOutput} ] = a[ ${indexA} ];`,
-    setFromB: ( indexOutput, indexB ) => wgsl`c[ ${indexOutput} ] = b[ ${indexB} ];`,
-    grainSize: grainSize,
-    compare: ( indexA, indexB ) => order.compareWGSL( wgsl`a[ ${indexA} ]`, wgsl`b[ ${indexB} ]` ),
-    greaterThan: ( indexA, indexB ) => order.greaterThanWGSL( wgsl`a[ ${indexA} ]`, wgsl`b[ ${indexB} ]` ),
-    lessThanOrEqual: ( indexA, indexB ) => order.lessThanOrEqualWGSL( wgsl`a[ ${indexA} ]`, wgsl`b[ ${indexB} ]` )
-  } )}
+        lengthA: lengthExpressionA,
+        lengthB: lengthExpressionB,
+        setFromA: ( indexOutput, indexA ) => wgsl`c[ ${indexOutput} ] = a[ ${indexA} ];`,
+        setFromB: ( indexOutput, indexB ) => wgsl`c[ ${indexOutput} ] = b[ ${indexB} ];`,
+        grainSize: grainSize,
+        compare: ( indexA, indexB ) => order.compareWGSL( wgsl`a[ ${indexA} ]`, wgsl`b[ ${indexB} ]` ),
+        greaterThan: ( indexA, indexB ) => order.greaterThanWGSL( wgsl`a[ ${indexA} ]`, wgsl`b[ ${indexB} ]` ),
+        lessThanOrEqual: ( indexA, indexB ) => order.lessThanOrEqualWGSL( wgsl`a[ ${indexA} ]`, wgsl`b[ ${indexB} ]` )
+      } )}
     }
   ` );
 };

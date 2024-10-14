@@ -54,21 +54,21 @@ const mainMergeWGSL = <T>(
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
       ${mergeWGSL( {
-    workgroupA: wgsl`scratch_a`,
-    workgroupB: wgsl`scratch_b`,
-    loadFromA: indexA => wgsl`a[ ${indexA} ]`,
-    loadFromB: indexB => wgsl`b[ ${indexB} ]`,
-    storeOutput: ( indexOutput, value ) => wgsl`c[ ${indexOutput} ] = ${value};`,
-    lengthA: lengthExpressionA,
-    lengthB: lengthExpressionB,
-    workgroupSize: workgroupSize,
-    blockOutputSize: blockOutputSize,
-    sharedMemorySize: sharedMemorySize,
-    compare: order.compareWGSL,
-    greaterThan: order.greaterThanWGSL,
-    lessThanOrEqual: order.lessThanOrEqualWGSL,
-    atomicConsumed: true // TODO: allow override and things
-  } )}
+        workgroupA: wgsl`scratch_a`,
+        workgroupB: wgsl`scratch_b`,
+        loadFromA: indexA => wgsl`a[ ${indexA} ]`,
+        loadFromB: indexB => wgsl`b[ ${indexB} ]`,
+        storeOutput: ( indexOutput, value ) => wgsl`c[ ${indexOutput} ] = ${value};`,
+        lengthA: lengthExpressionA,
+        lengthB: lengthExpressionB,
+        workgroupSize: workgroupSize,
+        blockOutputSize: blockOutputSize,
+        sharedMemorySize: sharedMemorySize,
+        compare: order.compareWGSL,
+        greaterThan: order.greaterThanWGSL,
+        lessThanOrEqual: order.lessThanOrEqualWGSL,
+        atomicConsumed: true // TODO: allow override and things
+      } )}
     }
   ` );
 };

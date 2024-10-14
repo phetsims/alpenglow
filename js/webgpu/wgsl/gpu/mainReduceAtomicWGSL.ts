@@ -59,19 +59,19 @@ const mainReduceAtomicWGSL = <T>(
     ) {
     
       ${loadReducedWGSL( combineOptions<loadReducedWGSLOptions<T>>( {
-    value: wgsl`value`,
-    binaryOp: binaryOp,
-    loadExpression: i => wgsl`input[ ${i} ]`,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize
-  }, options.loadReducedOptions ) )}
+        value: wgsl`value`,
+        binaryOp: binaryOp,
+        loadExpression: i => wgsl`input[ ${i} ]`,
+        workgroupSize: workgroupSize,
+        grainSize: grainSize
+      }, options.loadReducedOptions ) )}
     
       ${reduceWGSL( combineOptions<reduceWGSLOptions<T>>( {
-    value: wgsl`value`,
-    binaryOp: binaryOp,
-    scratch: wgsl`scratch`,
-    workgroupSize: workgroupSize
-  }, options.reduceOptions ) )}
+        value: wgsl`value`,
+        binaryOp: binaryOp,
+        scratch: wgsl`scratch`,
+        workgroupSize: workgroupSize
+      }, options.reduceOptions ) )}
     
       if ( local_id.x == 0u ) {
         // TODO: better way to handle atomic names

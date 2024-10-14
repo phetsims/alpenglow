@@ -33,7 +33,9 @@ const mainTwoPassCoarseWGSL = (
   providedOptions: mainTwoPassCoarseWGSLOptions
 ): WGSLMainModule => {
 
-  const options = optionize<mainTwoPassCoarseWGSLOptions>()( {}, providedOptions );
+  const options = optionize<mainTwoPassCoarseWGSLOptions>()( {
+
+  }, providedOptions );
 
   const configSlot = new WGSLSlot( 'config', options.config, BufferBindingType.UNIFORM );
   const coarseRenderableFacesSlot = new WGSLSlot( 'coarse_renderable_faces', options.coarseRenderableFaces, BufferBindingType.READ_ONLY_STORAGE );
@@ -154,14 +156,14 @@ const mainTwoPassCoarseWGSL = (
       var offsets = vec2( required_edge_count, required_face_count );
       
       ${scanWGSL( {
-    workgroupSize: 256,
-    value: wgsl`offsets`,
-    scratch: wgsl`scratch_data`,
-    binaryOp: Vec2uAdd,
-    exclusive: false,
-    scratchPreloaded: false,
-    valuePreloaded: true
-  } )}
+        workgroupSize: 256,
+        value: wgsl`offsets`,
+        scratch: wgsl`scratch_data`,
+        binaryOp: Vec2uAdd,
+        exclusive: false,
+        scratchPreloaded: false,
+        valuePreloaded: true
+      } )}
       
       if ( local_id.x == 0xffu ) {
         // inclusive scan, so we'll request the atomics here

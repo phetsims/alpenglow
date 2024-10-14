@@ -11,15 +11,18 @@ import { alpenglow, ByteEncoder, ParallelStorageArray, RasterCompleteEdge } from
 export default class RasterCompleteChunk {
   public constructor(
     public readonly renderProgramIndex: number,
+
     public readonly edgesOffset: number,
     public readonly numEdges: number,
     public readonly isFullArea: boolean,
     public readonly area: number,
+
     // Floating point (typically integral or offset by 0.5) bounds.
     public readonly minX: number,
     public readonly minY: number,
     public readonly maxX: number,
     public readonly maxY: number,
+
     // EdgedClipped counts. See EdgedClippedFace for details.
     public readonly minXCount: number,
     public readonly minYCount: number,

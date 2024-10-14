@@ -77,8 +77,8 @@ const logRakedWGSL = <T>(
           ` : wgsl``}
   
           ${logWGSL( combineOptions<logWGSLOptions<T>>( {
-        dataCount: wgsl`log_length`,
-        writeData: ( write: ( tIndex: WGSLExpressionU32, tValue: WGSLExpression ) => WGSLStatements ) => wgsl`
+            dataCount: wgsl`log_length`,
+            writeData: ( write: ( tIndex: WGSLExpressionU32, tValue: WGSLExpression ) => WGSLStatements ) => wgsl`
               for ( var _i = 0u; _i < log_length; _i++ ) {
                 ${accessExpression ? wgsl`
                   // "global" access
@@ -90,7 +90,7 @@ const logRakedWGSL = <T>(
                 ${write( wgsl`_i * ${u32S( options.type!.bytesPerElement / 4 )}`, wgsl`_expr` )}
               }
             `
-      }, options ) )}
+          }, options ) )}
   
           ${relativeLengthExpression !== null ? wgsl`
             }

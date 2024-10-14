@@ -99,9 +99,9 @@ const loadReducedWGSL = <T>(
     'Unless you know what you are doing (orderOverride), cannot do an out-of-order reduce on non-commutative data' );
 
   const outerDeclarations: WGSLStatements[] = [];
-  const loadDeclarations: ( ( i: number ) => WGSLStatements )[] = [];
-  let loadIndexExpression: ( ( i: number ) => WGSLExpression ) | null = null;
-  let rangeCheckIndexExpression: ( ( i: number ) => WGSLExpression ) | null = null;
+  const loadDeclarations: ( ( i : number ) => WGSLStatements )[] = [];
+  let loadIndexExpression: ( ( i : number ) => WGSLExpression ) | null = null;
+  let rangeCheckIndexExpression: ( ( i : number ) => WGSLExpression ) | null = null;
 
   if ( inputAccessOrder === 'blocked' ) {
     if ( sequentialReduceStyle === 'factored' ) {
@@ -170,8 +170,8 @@ const loadReducedWGSL = <T>(
 
   // TODO: factor out length expression conditionally, since sometimes it might duplicate buffer loads(!)
   const loadWithRangeCheckExpression = ( i: number ) => rangeCheckIndexExpression
-                                                        ? wgsl`select( ${binaryOp.identityWGSL}, ${loadExpression!( loadIndexExpression( i ) )}, ${rangeCheckIndexExpression( i )} < ${lengthExpression!} )`
-                                                        : loadExpression!( loadIndexExpression( i ) );
+    ? wgsl`select( ${binaryOp.identityWGSL}, ${loadExpression!( loadIndexExpression( i ) )}, ${rangeCheckIndexExpression( i )} < ${lengthExpression!} )`
+    : loadExpression!( loadIndexExpression( i ) );
 
   const ifRangeCheck = ( i: number, trueStatements: WGSLStatements, falseStatements: WGSLStatements | null = null ) => {
     return conditionalIfWGSL( rangeCheckIndexExpression ? wgsl`${rangeCheckIndexExpression( i )} < ${lengthExpression!}` : null, trueStatements, falseStatements );

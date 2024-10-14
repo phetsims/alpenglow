@@ -15,10 +15,12 @@ import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, Para
 export default class ParallelRasterEdgeIndexPatch {
   public static async dispatch(
     workgroupSize: number,
+
     // read
     chunkIndexMap: ParallelStorageArray<number>,
     chunkIndices: ParallelStorageArray<number>,
     numEdges: number,
+
     // read-write
     edges: ParallelStorageArray<RasterEdge>
   ): Promise<void> {

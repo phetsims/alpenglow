@@ -86,9 +86,9 @@ const loadMultipleWGSL = <T>(
     'Must provide exactly one of loadExpression or loadStatements' );
 
   const outerDeclarations: WGSLStatements[] = [];
-  const loadDeclarations: ( ( i: number ) => WGSLStatements )[] = [];
-  let loadIndexExpression: ( ( i: number ) => WGSLExpression ) | null = null;
-  let rangeCheckIndexExpression: ( ( i: number ) => WGSLExpression ) | null = null;
+  const loadDeclarations: ( ( i : number ) => WGSLStatements )[] = [];
+  let loadIndexExpression: ( ( i : number ) => WGSLExpression ) | null = null;
+  let rangeCheckIndexExpression: ( ( i : number ) => WGSLExpression ) | null = null;
 
   // TODO: can we extract a general... index-mapping iteration? Note which indices we need (e.g. for instance, base_workgroup would be useful here)
   // TODO: add outputOrder(!)

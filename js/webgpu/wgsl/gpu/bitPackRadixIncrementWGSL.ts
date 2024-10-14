@@ -43,8 +43,8 @@ const bitPackRadixIncrementWGSL = (
 
   return wgsl`
     ${bitVector}${bitVectorSize > 1 ? wgsl`[ ${
-    countsPerComponent === 1 ? bits : wgsl`( ${bits} ) / ${u32S( countsPerComponent )}`
-  } ]` : wgsl``} += 1u${countsPerComponent === 1 ? wgsl`` : wgsl` << ( ( ( ${bits} ) % ${u32S( countsPerComponent )} ) * ${u32S( countBitQuantity )} )`};
+      countsPerComponent === 1 ? bits : wgsl`( ${bits} ) / ${u32S( countsPerComponent )}`
+    } ]` : wgsl``} += 1u${countsPerComponent === 1 ? wgsl`` : wgsl` << ( ( ( ${bits} ) % ${u32S( countsPerComponent )} ) * ${u32S( countBitQuantity )} )`};
   `;
 };
 

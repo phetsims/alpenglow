@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { alpenglow, BigRational, ClippableFace, ClippableFaceAccumulator, isWindingIncluded, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, WindingMap } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, BigRational, ClippableFace, ClippableFaceAccumulator, isWindingIncluded, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, WindingMap } from '../imports.js';
 
 const nanVector = new Vector2( NaN, NaN );
 

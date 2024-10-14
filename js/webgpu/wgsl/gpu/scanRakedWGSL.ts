@@ -99,18 +99,18 @@ const scanRakedWGSL = <T>(
 
     // Scan the last-scanned element of each thread's tile (inclusive)
     ${scanWGSL( {
-    value: wgsl`value`,
-    scratch: scratch,
-    workgroupSize: workgroupSize,
-    binaryOp: binaryOp,
-    mapScratchIndex: index => wgsl`( ${index} ) * ${u32S( grainSize )} + ${u32S( grainSize - 1 )}`,
-    exclusive: false,
-    needsValidScratch: true,
+      value: wgsl`value`,
+      scratch: scratch,
+      workgroupSize: workgroupSize,
+      binaryOp: binaryOp,
+      mapScratchIndex: index => wgsl`( ${index} ) * ${u32S( grainSize )} + ${u32S( grainSize - 1 )}`,
+      exclusive: false,
+      needsValidScratch: true,
 
-    // both wgsl`'`value' and the scratch value should be matching!
-    scratchPreloaded: true,
-    valuePreloaded: true
-  } )}
+      // both wgsl`'`value' and the scratch value should be matching!
+      scratchPreloaded: true,
+      valuePreloaded: true
+    } )}
 
     workgroupBarrier();
 
@@ -120,13 +120,13 @@ const scanRakedWGSL = <T>(
       ${commentWGSL( 'begin (store reduction)' )}
       if ( ${localIndex} == ${u32S( workgroupSize - 1 )} ) {
         ${storeReduction(
-    stripeReducedOutput ? toStripedIndexWGSL( {
-      i: workgroupIndex,
-      workgroupSize: workgroupSize,
-      grainSize: grainSize
-    } ) : workgroupIndex,
-    wgsl`value`
-  )}
+          stripeReducedOutput ? toStripedIndexWGSL( {
+            i: workgroupIndex,
+            workgroupSize: workgroupSize,
+            grainSize: grainSize
+          } ) : workgroupIndex,
+          wgsl`value`
+        )}
       }
       ${commentWGSL( 'end (store reduction)' )}
     ` : wgsl``}

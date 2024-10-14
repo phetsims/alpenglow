@@ -47,19 +47,15 @@ export default class ByteEncoder {
   public get fullU8Array(): Uint8Array {
     return this._u8Array;
   }
-
   public get fullU32Array(): Uint32Array {
     return this._u32Array;
   }
-
   public get fullI32Array(): Int32Array {
     return this._i32Array;
   }
-
   public get fullF32Array(): Float32Array {
     return this._f32Array;
   }
-
   public get fullArrayBuffer(): ArrayBuffer {
     return this._arrayBuffer;
   }
@@ -67,19 +63,15 @@ export default class ByteEncoder {
   public get u8Array(): Uint8Array {
     return new Uint8Array( this._arrayBuffer, 0, this._byteLength );
   }
-
   public get u32Array(): Uint32Array {
     return new Uint32Array( this._arrayBuffer, 0, this._byteLength / 4 );
   }
-
   public get i32Array(): Int32Array {
     return new Int32Array( this._arrayBuffer, 0, this._byteLength / 4 );
   }
-
   public get f32Array(): Float32Array {
     return new Float32Array( this._arrayBuffer, 0, this._byteLength / 4 );
   }
-
   public get arrayBuffer(): ArrayBuffer {
     return this._arrayBuffer.slice( 0, this._byteLength );
   }

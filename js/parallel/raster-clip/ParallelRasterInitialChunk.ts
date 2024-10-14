@@ -13,9 +13,11 @@ import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, Rast
 export default class ParallelRasterInitialChunk {
   public static async dispatch(
     workgroupSize: number,
+
     // read
     chunks: ParallelStorageArray<RasterChunk>,
     numChunks: number,
+
     // write
     clippedChunks: ParallelStorageArray<RasterClippedChunk>
   ): Promise<void> {
@@ -92,8 +94,8 @@ export default class ParallelRasterInitialChunk {
             chunk.maxYCount
           );
         }
-          // If our chunk has NO edges, either we get discarded OR we have full area.
-          // NOTE: This is assuming no negative or doubled area, or other fun facts, since our clipping process should
+        // If our chunk has NO edges, either we get discarded OR we have full area.
+        // NOTE: This is assuming no negative or doubled area, or other fun facts, since our clipping process should
         // output things satisfying these constraints.
         else {
           const hasArea = chunk.minXCount < 0 && chunk.minYCount > 0 && chunk.maxXCount > 0 && chunk.maxYCount < 0;

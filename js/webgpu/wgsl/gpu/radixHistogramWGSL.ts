@@ -34,13 +34,13 @@ const radixHistogramWGSL = (
       ${histogramWGSL( options )}
       
       ${logRakedWGSL( {
-    name: 'histogram_scratch',
-    type: U32Type,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize,
-    relativeLengthExpression: u32S( workgroupSize * grainSize ),
-    relativeAccessExpression: i => wgsl`atomicLoad( &histogram_scratch[ ${i} ] )`
-  } )}
+        name: 'histogram_scratch',
+        type: U32Type,
+        workgroupSize: workgroupSize,
+        grainSize: grainSize,
+        relativeLengthExpression: u32S( workgroupSize * grainSize ),
+        relativeAccessExpression: i => wgsl`atomicLoad( &histogram_scratch[ ${i} ] )`
+      } )}
       
       let num_valid_workgroups = ${ceilDivideConstantDivisorWGSL( lengthExpression, workgroupSize * grainSize )};
       if ( workgroup_id.x < num_valid_workgroups ) {

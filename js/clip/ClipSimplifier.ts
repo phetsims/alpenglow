@@ -14,10 +14,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Matrix3 from '../../../dot/js/Matrix3.js';
-import Utils from '../../../dot/js/Utils.js';
-import Vector2 from '../../../dot/js/Vector2.js';
 import { alpenglow } from '../imports.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import Utils from '../../../dot/js/Utils.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 
 const collinearEpsilon = 1e-9;
 

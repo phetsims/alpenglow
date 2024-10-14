@@ -7,8 +7,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
 import { alpenglow, BigIntVector2, BigRational, IntegerEdge, IntersectionPoint, RasterTileLog, RationalIntersection } from '../imports.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 
 export default class LineIntersector {
   public static processIntegerEdgeIntersection( edgeA: IntegerEdge, edgeB: IntegerEdge, log: RasterTileLog | null ): void {
@@ -249,7 +249,6 @@ abstract class BoundsTreeNode {
   protected constructor( public readonly bounds: Bounds2, public readonly hasHorizontal: boolean, public readonly hasVertical: boolean ) {}
 
   public abstract selfIntersect( log: RasterTileLog | null ): void;
-
   public abstract crossIntersect( other: BoundsTreeNode, log: RasterTileLog | null ): void;
 
   public static fromIntegerEdges( integerEdges: IntegerEdge[] ): BoundsTreeNode {

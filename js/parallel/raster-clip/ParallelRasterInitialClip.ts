@@ -19,10 +19,12 @@ import Vector2 from '../../../../dot/js/Vector2.js';
 export default class ParallelRasterInitialClip {
   public static async dispatch(
     workgroupSize: number,
+
     // read
     chunks: ParallelStorageArray<RasterChunk>,
     edges: ParallelStorageArray<RasterEdge>,
     numEdges: number,
+
     // read-write
     clippedChunks: ParallelStorageArray<RasterClippedChunk>, // Our reduce will "apply" to this, writing associated data
 
@@ -150,8 +152,8 @@ export default class ParallelRasterInitialClip {
       else {
         // There is a single crossing of our x (possibly on a start or end point)
         const secondaryIntersection = isXSplit
-                                      ? startPoint.y + ( endPoint.y - startPoint.y ) * ( split - startPoint.x ) / ( endPoint.x - startPoint.x )
-                                      : startPoint.x + ( endPoint.x - startPoint.x ) * ( split - startPoint.y ) / ( endPoint.y - startPoint.y );
+          ? startPoint.y + ( endPoint.y - startPoint.y ) * ( split - startPoint.x ) / ( endPoint.x - startPoint.x )
+          : startPoint.x + ( endPoint.x - startPoint.x ) * ( split - startPoint.y ) / ( endPoint.y - startPoint.y );
         const intersection = isXSplit ? new Vector2( split, secondaryIntersection ) : new Vector2( secondaryIntersection, split );
 
         const startLess = startPrimaryCmp === -1;
@@ -364,10 +366,13 @@ export default class ParallelRasterInitialClip {
 
   public static validate(
     workgroupSize: number,
+
     chunks: ParallelStorageArray<RasterChunk>,
     edges: ParallelStorageArray<RasterEdge>,
     numEdges: number,
+
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
+
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
     chunkReduces: ParallelStorageArray<RasterChunkReduceQuad>,
     debugFullChunkReduces: ParallelStorageArray<{ min: RasterChunkReduceData; max: RasterChunkReduceData }>

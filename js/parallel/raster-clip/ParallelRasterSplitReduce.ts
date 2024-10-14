@@ -13,8 +13,10 @@ import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, Para
 export default class ParallelRasterSplitReduce {
   public static async dispatch(
     workgroupSize: number,
+
     // read
     numReduces: number,
+
     // read-write
     inputReduces: ParallelStorageArray<RasterSplitReduceData>, // will process into scanned form
 

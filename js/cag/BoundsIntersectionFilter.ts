@@ -1,15 +1,15 @@
 // Copyright 2023-2024, University of Colorado Boulder
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import { SegmentTree } from '../../../kite/js/imports.js';
-import Orientation from '../../../phet-core/js/Orientation.js';
-import OrientationPair from '../../../phet-core/js/OrientationPair.js';
 /**
  * Acceleration of pairwise intersection tests for anything bounds-related
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 import { alpenglow } from '../imports.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
+import Orientation from '../../../phet-core/js/Orientation.js';
+import OrientationPair from '../../../phet-core/js/OrientationPair.js';
+import { SegmentTree } from '../../../kite/js/imports.js';
 
 type Item = {
   bounds: Bounds2;

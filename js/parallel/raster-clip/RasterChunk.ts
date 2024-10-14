@@ -15,14 +15,17 @@ export default class RasterChunk {
     public readonly renderProgramIndex: number,
     public readonly needsFace: boolean,
     public readonly isConstant: boolean,
+
     // TODO: why this parameter order? fix?
     public readonly edgesOffset: number,
     public readonly numEdges: number,
+
     // Floating point (typically integral or offset by 0.5) bounds.
     public readonly minX: number,
     public readonly minY: number,
     public readonly maxX: number,
     public readonly maxY: number,
+
     // EdgedClipped counts. See EdgedClippedFace for details.
     public readonly minXCount: number,
     public readonly minYCount: number,

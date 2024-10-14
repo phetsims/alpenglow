@@ -15,6 +15,7 @@ export default class ExecutionContext {
   // TODO: We might use one compute pass, we might split each into one
   public constructor(
     public readonly executor: Executor,
+
     // TODO: consider just referencing the Procedure
     public readonly computePipelineMap: Map<PipelineBlueprint, ComputePipeline>,
     public readonly bindGroupMap: Map<BindGroupLayout, BindGroup>,

@@ -26,7 +26,6 @@ export class WGSLStringLiteral extends WGSLString {
     return this.value;
   }
 }
-
 alpenglow.register( 'WGSLStringLiteral', WGSLStringLiteral );
 
 export class WGSLStringFunction extends WGSLString {
@@ -40,7 +39,6 @@ export class WGSLStringFunction extends WGSLString {
     return this.value( blueprint );
   }
 }
-
 alpenglow.register( 'WGSLStringFunction', WGSLStringFunction );
 
 export class WGSLStringAccumulator extends WGSLString {
@@ -59,7 +57,6 @@ export class WGSLStringAccumulator extends WGSLString {
     return string;
   }
 }
-
 alpenglow.register( 'WGSLStringAccumulator', WGSLStringAccumulator );
 
 // TODO: use this where we need
@@ -76,7 +73,6 @@ export class WGSLModule extends WGSLString {
     return '';
   }
 }
-
 alpenglow.register( 'WGSLModule', WGSLModule );
 
 export class WGSLMainModule extends WGSLModule {
@@ -95,7 +91,6 @@ export class WGSLMainModule extends WGSLModule {
     return super.withBlueprint( blueprint );
   }
 }
-
 alpenglow.register( 'WGSLMainModule', WGSLMainModule );
 
 export class WGSLReferenceModule extends WGSLString {
@@ -111,7 +106,6 @@ export class WGSLReferenceModule extends WGSLString {
     return this.name;
   }
 }
-
 alpenglow.register( 'WGSLReferenceModule', WGSLReferenceModule );
 
 export class WGSLStringModule extends WGSLString {
@@ -128,14 +122,13 @@ export class WGSLStringModule extends WGSLString {
     return this.string.withBlueprint( blueprint );
   }
 }
-
 alpenglow.register( 'WGSLStringModule', WGSLStringModule );
 
 export class WGSLSlot extends WGSLModule {
   public constructor(
-    name: string,
-    public readonly slot: ResourceSlot,
-    public readonly bindingType: BindingType
+     name: string,
+     public readonly slot: ResourceSlot,
+     public readonly bindingType: BindingType
   ) {
     super( name, wgsl`` );
   }
@@ -145,7 +138,6 @@ export class WGSLSlot extends WGSLModule {
     return '';
   }
 }
-
 alpenglow.register( 'WGSLSlot', WGSLSlot );
 
 export const wgslString = ( value: string ): WGSLStringLiteral => {

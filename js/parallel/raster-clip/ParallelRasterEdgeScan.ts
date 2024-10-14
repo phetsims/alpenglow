@@ -17,6 +17,7 @@ const nanVector = new Vector2( NaN, NaN );
 export default class ParallelRasterEdgeScan {
   public static async dispatch(
     workgroupSize: number,
+
     // read
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     edgeClips: ParallelStorageArray<RasterEdgeClip>,
@@ -24,6 +25,7 @@ export default class ParallelRasterEdgeScan {
     edgeReduces1: ParallelStorageArray<RasterSplitReduceData>,
     edgeReduces2: ParallelStorageArray<RasterSplitReduceData>,
     numEdgeClips: number,
+
     // write
     reducibleEdges: ParallelStorageArray<RasterEdge>,
     completeEdges: ParallelStorageArray<RasterCompleteEdge>,

@@ -29,13 +29,13 @@ export default class RenderImage extends RenderProgram {
     logic?: RenderImageLogic
   ) {
     const needsFace = resampleType === RenderResampleType.AnalyticBox ||
-                      resampleType === RenderResampleType.AnalyticBilinear ||
-                      resampleType === RenderResampleType.AnalyticMitchellNetravali;
+      resampleType === RenderResampleType.AnalyticBilinear ||
+      resampleType === RenderResampleType.AnalyticMitchellNetravali;
 
     // TODO: Consider NOT getting centroid for some filtering, as a performance boost
     const needsCentroid = resampleType === RenderResampleType.NearestNeighbor ||
-                          resampleType === RenderResampleType.Bilinear ||
-                          resampleType === RenderResampleType.MitchellNetravali;
+      resampleType === RenderResampleType.Bilinear ||
+      resampleType === RenderResampleType.MitchellNetravali;
 
     super(
       emptyChildren,
@@ -66,10 +66,10 @@ export default class RenderImage extends RenderProgram {
 
   protected override equalsTyped( other: this ): boolean {
     return this.transform.equals( other.transform ) &&
-           this.image === other.image &&
-           this.extendX === other.extendX &&
-           this.extendY === other.extendY &&
-           this.resampleType === other.resampleType;
+      this.image === other.image &&
+      this.extendX === other.extendX &&
+      this.extendY === other.extendY &&
+      this.resampleType === other.resampleType;
   }
 
   public override evaluate( context: RenderEvaluationContext ): Vector4 {
@@ -259,7 +259,7 @@ export default class RenderImage extends RenderProgram {
         return t - Math.floor( t );
       case RenderExtend.Reflect:
         return Math.abs( t - 2.0 * Utils.roundSymmetric( 0.5 * t ) );
-      // return ( Math.floor( t ) % 2 === 0 ? t : 1 - t ) - Math.floor( t );
+        // return ( Math.floor( t ) % 2 === 0 ? t : 1 - t ) - Math.floor( t );
       default:
         throw new Error( 'Unknown RenderExtend' );
     }
@@ -385,10 +385,10 @@ export class RenderImageLogic {
 
   public equals( other: RenderImageLogic ): boolean {
     return this.transform.equalsEpsilon( other.transform, 1e-6 ) &&
-           this.image === other.image &&
-           this.extendX === other.extendX &&
-           this.extendY === other.extendY &&
-           this.resampleType === other.resampleType;
+      this.image === other.image &&
+      this.extendX === other.extendX &&
+      this.extendY === other.extendY &&
+      this.resampleType === other.resampleType;
   }
 
   public evaluate( context: RenderEvaluationContext ): Vector4 {

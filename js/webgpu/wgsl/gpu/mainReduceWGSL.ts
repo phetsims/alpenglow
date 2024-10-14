@@ -64,12 +64,12 @@ const mainReduceWGSL = <T>(
       ${logStringWGSL( `mainReduceWGSL start ${binaryOp.name}` )}
     
       ${loadReducedWGSL( combineOptions<loadReducedWGSLOptions<T>>( {
-    value: wgsl`value`,
-    binaryOp: binaryOp,
-    loadExpression: i => wgsl`input[ ${i} ]`,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize
-  }, options.loadReducedOptions ) )}
+        value: wgsl`value`,
+        binaryOp: binaryOp,
+        loadExpression: i => wgsl`input[ ${i} ]`,
+        workgroupSize: workgroupSize,
+        grainSize: grainSize
+      }, options.loadReducedOptions ) )}
     
       ${convergentRemap ? wgsl`
         scratch[ ${toConvergentIndexWGSL( { i: wgsl`local_id.x`, size: workgroupSize } )} ] = value;
@@ -78,20 +78,20 @@ const mainReduceWGSL = <T>(
       ` : wgsl``}
     
       ${reduceWGSL( combineOptions<reduceWGSLOptions<T>>( {
-    value: wgsl`value`,
-    binaryOp: binaryOp,
-    scratch: wgsl`scratch`,
-    workgroupSize: workgroupSize,
-    scratchPreloaded: convergentRemap, // if we convergently reloaded, we don't need to update the scratch
-    valuePreloaded: !convergentRemap // if we convergently reloaded, we'll need to load the value from scratch
-  }, options.reduceOptions ) )}
+        value: wgsl`value`,
+        binaryOp: binaryOp,
+        scratch: wgsl`scratch`,
+        workgroupSize: workgroupSize,
+        scratchPreloaded: convergentRemap, // if we convergently reloaded, we don't need to update the scratch
+        valuePreloaded: !convergentRemap // if we convergently reloaded, we'll need to load the value from scratch
+      }, options.reduceOptions ) )}
     
       if ( local_id.x == 0u ) {
         output[ ${stripeOutput ? toStripedIndexWGSL( {
-    i: wgsl`workgroup_id.x`,
-    workgroupSize: workgroupSize,
-    grainSize: grainSize
-  } ) : wgsl`workgroup_id.x`} ] = value;
+          i: wgsl`workgroup_id.x`,
+          workgroupSize: workgroupSize,
+          grainSize: grainSize
+        } ) : wgsl`workgroup_id.x`} ] = value;
       }
     }
   ` );

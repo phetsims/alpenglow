@@ -1,12 +1,12 @@
 // Copyright 2023-2024, University of Colorado Boulder
 
-import Vector2 from '../../../dot/js/Vector2.js';
 /**
  * Utilities for the bilinear/tent filter for polygons
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 import { alpenglow, LinearEdge } from '../imports.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 
 export default class PolygonBilinear {
   public static evaluate( p0x: number, p0y: number, p1x: number, p1y: number ): number {

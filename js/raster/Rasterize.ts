@@ -6,13 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { alpenglow, BoundedSubpath, ClippableFace, ClippableFaceAccumulator, EdgedClippedFace, EdgedFace, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderEvaluator, RenderExecutor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
-import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
-import { alpenglow, BoundedSubpath, ClippableFace, ClippableFaceAccumulator, EdgedClippedFace, EdgedFace, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderEvaluator, RenderExecutor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds } from '../imports.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
+import Utils from '../../../dot/js/Utils.js';
 
 type RenderExecutionMethod = 'evaluation' | 'instructions';
 
@@ -554,7 +554,7 @@ export default class Rasterize {
     }
     // TODO: more experimentation for when to grid clip
     else if ( !context.constClientColor && xDiff <= 8 && yDiff <= 8 ) {
-      // else if ( xDiff <= 16 && yDiff <= 16 ) {
+    // else if ( xDiff <= 16 && yDiff <= 16 ) {
       Rasterize.terminalGridRasterize(
         context,
         clippableFace,

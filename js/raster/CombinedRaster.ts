@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { alpenglow, OutputRaster, RasterColorConverter, Rasterize, RasterPremultipliedConverter } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
-import { alpenglow, OutputRaster, RasterColorConverter, Rasterize, RasterPremultipliedConverter } from '../imports.js';
 
 export type CombinedRasterOptions = {
   colorSpace?: 'srgb' | 'display-p3';

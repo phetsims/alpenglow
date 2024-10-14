@@ -13,16 +13,19 @@ export default class RasterClippedChunk {
     public readonly renderProgramIndex: number,
     public readonly needsFace: boolean,
     public readonly isConstant: boolean,
+
     // Filled in by early steps
     public readonly isReducible: boolean,
     public readonly isComplete: boolean,
     public readonly isFullArea: boolean,
     public readonly area: number,
+
     // Floating point (typically integral or offset by 0.5) bounds.
     public readonly minX: number,
     public readonly minY: number,
     public readonly maxX: number,
     public readonly maxY: number,
+
     // EdgedClipped counts. See EdgedClippedFace for details.
     public readonly minXCount: number,
     public readonly minYCount: number,

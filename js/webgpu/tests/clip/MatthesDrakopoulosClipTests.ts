@@ -36,13 +36,13 @@ const matthesDrakopoulosTest = ( name: string, extractSlope: boolean ) => {
           let p0 = vec2( input[ in + 0u ], input[ in + 1u ] );
           let p1 = vec2( input[ in + 2u ], input[ in + 3u ] );
           let result = ${matthes_drakopoulos_clipWGSL(
-        wgsl`p0`,
-        wgsl`p1`,
-        wgsl`0f`,
-        wgsl`0f`,
-        wgsl`10f`,
-        wgsl`10f`
-      )};
+            wgsl`p0`,
+            wgsl`p1`,
+            wgsl`0f`,
+            wgsl`0f`,
+            wgsl`10f`,
+            wgsl`10f`
+          )};
           let p0out = result.p0;
           let p1out = result.p1;
           let clipped = result.clipped;

@@ -58,52 +58,52 @@ const scanComprehensiveWGSL = <T>(
 
     // Load into workgroup memory
     ${loadMultipleWGSL( {
-    loadExpression: index => wgsl`${input}[ ${index} ]`,
-    storeStatements: ( index, value ) => wgsl`${scratch}[ ${index} ] = ${value};`,
-    workgroupSize: options.workgroupSize,
-    grainSize: options.grainSize,
-    type: binaryOp.type,
-    lengthExpression: options.lengthExpression,
-    globalIndex: options.globalIndex,
-    workgroupIndex: options.workgroupIndex,
-    localIndex: options.localIndex,
-    outOfRangeValue: binaryOp.identityWGSL,
-    inputOrder: options.inputOrder,
-    inputAccessOrder: options.inputAccessOrder,
-    factorOutSubexpressions: options.factorOutSubexpressions
-  } )}
+      loadExpression: index => wgsl`${input}[ ${index} ]`,
+      storeStatements: ( index, value ) => wgsl`${scratch}[ ${index} ] = ${value};`,
+      workgroupSize: options.workgroupSize,
+      grainSize: options.grainSize,
+      type: binaryOp.type,
+      lengthExpression: options.lengthExpression,
+      globalIndex: options.globalIndex,
+      workgroupIndex: options.workgroupIndex,
+      localIndex: options.localIndex,
+      outOfRangeValue: binaryOp.identityWGSL,
+      inputOrder: options.inputOrder,
+      inputAccessOrder: options.inputAccessOrder,
+      factorOutSubexpressions: options.factorOutSubexpressions
+    } )}
 
     workgroupBarrier();
     
     ${scanRakedWGSL( {
-    // TODO: we're missing error checking here? Use optionize3?
-    scratch: scratch,
-    binaryOp: binaryOp,
-    workgroupSize: options.workgroupSize,
-    grainSize: options.grainSize,
-    workgroupIndex: options.workgroupIndex,
-    localIndex: options.localIndex,
-    exclusive: false,
-    getAddedValue: getAddedValue,
-    addedValueNeedsWorkgroupBarrier: options.addedValueNeedsWorkgroupBarrier,
-    storeReduction: options.storeReduction,
-    stripeReducedOutput: options.stripeReducedOutput
-  } )}
+      // TODO: we're missing error checking here? Use optionize3?
+      scratch: scratch,
+      binaryOp: binaryOp,
+      workgroupSize: options.workgroupSize,
+      grainSize: options.grainSize,
+      workgroupIndex: options.workgroupIndex,
+      localIndex: options.localIndex,
+      exclusive: false,
+      getAddedValue: getAddedValue,
+      addedValueNeedsWorkgroupBarrier: options.addedValueNeedsWorkgroupBarrier,
+      storeReduction: options.storeReduction,
+      stripeReducedOutput: options.stripeReducedOutput
+    } )}
 
     workgroupBarrier();
 
     // Write our output in a coalesced order.
     ${commentWGSL( 'begin (output write)' )}
     ${coalescedLoopWGSL( {
-    workgroupSize: options.workgroupSize,
-    grainSize: options.grainSize,
-    lengthExpression: options.lengthExpression,
-    workgroupIndex: options.workgroupIndex,
-    localIndex: options.localIndex,
-    callback: ( localIndex, dataIndex ) => wgsl`
+      workgroupSize: options.workgroupSize,
+      grainSize: options.grainSize,
+      lengthExpression: options.lengthExpression,
+      workgroupIndex: options.workgroupIndex,
+      localIndex: options.localIndex,
+      callback: ( localIndex, dataIndex ) => wgsl`
         ${output}[ ${dataIndex} ] = ${exclusive ? wgsl`select( ${getAddedValue ? wgsl`workgroup_added_value` : binaryOp.identityWGSL}, ${scratch}[ ${localIndex} - 1u ], ${localIndex} > 0u )` : wgsl`${scratch}[ ${localIndex} ]`};
       `
-  } )}
+    } )}
     ${commentWGSL( 'end (output write)' )}
 
     ${commentWGSL( 'end scan_comprehensive' )}
