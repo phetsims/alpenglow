@@ -41,9 +41,9 @@ export default (
       let cdy = ${subtract_i64_i64WGSL( wgsl`p2y`, wgsl`p0y` )};
     
       let denominator = ${subtract_i64_i64WGSL(
-        mul_i64_i64WGSL( wgsl`d0x`, wgsl`d1y` ),
-        mul_i64_i64WGSL( wgsl`d0y`, wgsl`d1x` )
-      )};
+    mul_i64_i64WGSL( wgsl`d0x`, wgsl`d1y` ),
+    mul_i64_i64WGSL( wgsl`d0y`, wgsl`d1x` )
+  )};
     
       if ( ${is_zero_u64WGSL( wgsl`denominator` )} ) {
         // such that p0 + t * ( p1 - p0 ) = p2 + ( a * t + b ) * ( p3 - p2 )
@@ -166,13 +166,13 @@ export default (
       }
       else {
         let t_numerator = ${subtract_i64_i64WGSL(
-          mul_i64_i64WGSL( wgsl`cdx`, wgsl`d1y` ),
-          mul_i64_i64WGSL( wgsl`cdy`, wgsl`d1x` )
-        )};
+    mul_i64_i64WGSL( wgsl`cdx`, wgsl`d1y` ),
+    mul_i64_i64WGSL( wgsl`cdy`, wgsl`d1x` )
+  )};
         let u_numerator = ${subtract_i64_i64WGSL(
-          mul_i64_i64WGSL( wgsl`cdx`, wgsl`d0y` ),
-          mul_i64_i64WGSL( wgsl`cdy`, wgsl`d0x` )
-        )};
+    mul_i64_i64WGSL( wgsl`cdx`, wgsl`d0y` ),
+    mul_i64_i64WGSL( wgsl`cdy`, wgsl`d0x` )
+  )};
     
         // This will move the sign to the numerator, BUT won't do the reduction (let us first see if there is an intersection)
         let t_raw = ${i64_to_q128WGSL( wgsl`t_numerator`, wgsl`denominator` )};
@@ -194,13 +194,13 @@ export default (
           // p0x + t_numerator / denominator * d0x
           // ( denominator * p0x + t_numerator * d0x ) / denominator
           let x_numerator = ${add_i64_i64WGSL(
-            mul_i64_i64WGSL( wgsl`denominator`, wgsl`p0x` ),
-            mul_i64_i64WGSL( wgsl`t_numerator`, wgsl`d0x` )
-          )};
+    mul_i64_i64WGSL( wgsl`denominator`, wgsl`p0x` ),
+    mul_i64_i64WGSL( wgsl`t_numerator`, wgsl`d0x` )
+  )};
           let y_numerator = ${add_i64_i64WGSL(
-            mul_i64_i64WGSL( wgsl`denominator`, wgsl`p0y` ),
-            mul_i64_i64WGSL( wgsl`t_numerator`, wgsl`d0y` )
-          )};
+    mul_i64_i64WGSL( wgsl`denominator`, wgsl`p0y` ),
+    mul_i64_i64WGSL( wgsl`t_numerator`, wgsl`d0y` )
+  )};
     
           let x_raw = ${i64_to_q128WGSL( wgsl`x_numerator`, wgsl`denominator` )};
           let y_raw = ${i64_to_q128WGSL( wgsl`y_numerator`, wgsl`denominator` )};

@@ -13,16 +13,13 @@ export default class RasterChunkReduceData {
   public constructor(
     public readonly clippedChunkIndex: number,
     public readonly area: number,
-
     public readonly isFirstEdge: boolean,
     public readonly isLastEdge: boolean,
-
     // Floating point (typically integral or offset by 0.5) bounds.
     public readonly minX: number,
     public readonly minY: number,
     public readonly maxX: number,
     public readonly maxY: number,
-
     // EdgedClipped counts. See EdgedClippedFace for details.
     public readonly minXCount: number,
     public readonly minYCount: number,

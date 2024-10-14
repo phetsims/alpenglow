@@ -14,13 +14,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryClipping, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, EdgedFace, GridClipCallback, GridClipping, LinearEdge, PolygonalFace, PolygonBilinear, PolygonCompleteCallback, PolygonMitchellNetravali, SerializedLinearEdge, StripeClipping } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import Range from '../../../dot/js/Range.js';
-import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Range from '../../../dot/js/Range.js';
 import Utils from '../../../dot/js/Utils.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
+import { alpenglow, BinaryClipping, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, EdgedFace, GridClipCallback, GridClipping, LinearEdge, PolygonalFace, PolygonBilinear, PolygonCompleteCallback, PolygonMitchellNetravali, SerializedLinearEdge, StripeClipping } from '../imports.js';
 
 const scratchVectorA = new Vector2( 0, 0 );
 const scratchVectorB = new Vector2( 0, 0 );
@@ -37,25 +37,20 @@ export default class EdgedClippedFace implements ClippableFace {
     // Should contain only "internal" edges, not those clipped edges that are corner-to-corner along the edge of the
     // bounding box.
     public readonly edges: LinearEdge[],
-
     // Bounding box
     public readonly minX: number,
     public readonly minY: number,
     public readonly maxX: number,
     public readonly maxY: number,
-
     // Count of edges from (minX,minY) to (minX,maxY) minus count of edges from (minX,maxY) to (minX,minY)
     // (minX, minY=>maxY positive)
     public readonly minXCount: number,
-
     // Count of edges from (minX,minY) to (maxX,minY) minus count of edges from (maxX,minY) to (minX,minY)
     // (minX=>maxX positive, minY)
     public readonly minYCount: number,
-
     // Count of edges from (maxX,minY) to (maxX,maxY) minus count of edges from (maxX,maxY) to (maxX,minY)
     // (maxX, minY=>maxY positive)
     public readonly maxXCount: number,
-
     // Count of edges from (minX,maxY) to (maxX,maxY) minus count of edges from (maxX,maxY) to (minX,maxY)
     // (minX=>maxX positive, maxY)
     public readonly maxYCount: number
@@ -872,20 +867,20 @@ export class EdgedClippedFaceAccumulator implements ClippableFaceAccumulator<Edg
       const end = endPoint || new Vector2( endX, endY );
 
       assertSlow( start.x >= this.minX - 1e-8 && start.x <= this.maxX + 1e-8 &&
-              start.y >= this.minY - 1e-8 && start.y <= this.maxY + 1e-8 &&
-              end.x >= this.minX - 1e-8 && end.x <= this.maxX + 1e-8 &&
-              end.y >= this.minY - 1e-8 && end.y <= this.maxY + 1e-8
+                  start.y >= this.minY - 1e-8 && start.y <= this.maxY + 1e-8 &&
+                  end.x >= this.minX - 1e-8 && end.x <= this.maxX + 1e-8 &&
+                  end.y >= this.minY - 1e-8 && end.y <= this.maxY + 1e-8
       );
     }
 
     if (
       // If all points are on a corner
       ( startX === this.minX || startX === this.maxX ) &&
-       ( startY === this.minY || startY === this.maxY ) &&
-       ( endX === this.minX || endX === this.maxX ) &&
-       ( endY === this.minY || endY === this.maxY ) &&
+      ( startY === this.minY || startY === this.maxY ) &&
+      ( endX === this.minX || endX === this.maxX ) &&
+      ( endY === this.minY || endY === this.maxY ) &&
       // And we're not on opposite corners
-       ( startX === endX || startY === endY )
+      ( startX === endX || startY === endY )
     ) {
       assert && assert( startX !== endX || startY !== endY, 'Points should not be identical' );
 

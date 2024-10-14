@@ -1,7 +1,7 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { ByteEncoder, ConcreteType, StoreStatementCallback, LinearEdge, LinearEdgeWGSL, wgsl, WGSLExpression, WGSLStatements, WGSLExpressionT, WGSLExpressionBool, WGSLStringModule } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
+import { ByteEncoder, ConcreteType, LinearEdge, LinearEdgeWGSL, StoreStatementCallback, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionT, WGSLStatements, WGSLStringModule } from '../../../imports.js';
 
 /**
  * ConcreteType for a LinearEdge

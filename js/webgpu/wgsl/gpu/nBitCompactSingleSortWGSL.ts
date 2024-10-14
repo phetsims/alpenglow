@@ -111,11 +111,11 @@ const nBitCompactSingleSortWGSL = <T>(
 
     {
       var tb_bits_vector = ${{
-        1: wgsl`0u`,
-        2: wgsl`vec2( 0u )`,
-        3: wgsl`vec3( 0u )`,
-        4: wgsl`vec4( 0u )`
-      }[ bitVectorSize ]};
+    1: wgsl`0u`,
+    2: wgsl`vec2( 0u )`,
+    3: wgsl`vec3( 0u )`,
+    4: wgsl`vec4( 0u )`
+  }[ bitVectorSize ]};
 
       ${earlyLoad ? wgsl`
         var tb_values: array<${order.type.valueType}, ${decimalS( grainSize )}>;
@@ -129,24 +129,24 @@ const nBitCompactSingleSortWGSL = <T>(
           let tb_bits = ${getBits( wgsl`tb_value` )};
 
           ${logValueWGSL( {
-            value: 'tb_value',
-            name: `tb_value (raked index ${i})`,
-            type: order.type
-          } )}
+    value: 'tb_value',
+    name: `tb_value (raked index ${i})`,
+    type: order.type
+  } )}
 
           ${logValueWGSL( {
-            value: 'tb_bits',
-            name: `tb_bits (raked index ${i})`,
-            type: U32Type
-          } )}
+    value: 'tb_bits',
+    name: `tb_bits (raked index ${i})`,
+    type: U32Type
+  } )}
 
           ${bitPackRadixIncrementWGSL( {
-            bitVector: wgsl`tb_bits_vector`,
-            bits: wgsl`tb_bits`,
-            bitsPerInnerPass: bitsPerInnerPass,
-            bitVectorSize: bitVectorSize,
-            maxCount: workgroupSize * grainSize
-          } )}
+    bitVector: wgsl`tb_bits_vector`,
+    bits: wgsl`tb_bits`,
+    bitsPerInnerPass: bitsPerInnerPass,
+    bitVectorSize: bitVectorSize,
+    maxCount: workgroupSize * grainSize
+  } )}
 
           ${earlyLoad ? wgsl`
             tb_values[ ${u32S( i )} ] = tb_value;
@@ -157,14 +157,14 @@ const nBitCompactSingleSortWGSL = <T>(
       ${logPackedBits( 'n_bit histogram initial', wgsl`tb_bits_vector` )}
 
       ${scanWGSL( {
-        value: wgsl`tb_bits_vector`,
-        // @ts-expect-error - Hmm, should we actually split this into 4 cases?
-        binaryOp: addBinaryOp,
-        scratch: bitsScratch,
-        workgroupSize: workgroupSize,
-        exclusive: true,
-        needsValidScratch: true
-      } )}
+    value: wgsl`tb_bits_vector`,
+    // @ts-expect-error - Hmm, should we actually split this into 4 cases?
+    binaryOp: addBinaryOp,
+    scratch: bitsScratch,
+    workgroupSize: workgroupSize,
+    exclusive: true,
+    needsValidScratch: true
+  } )}
 
       ${logPackedBits( 'n_bit histogram scanned', wgsl`tb_bits_vector` )}
 
@@ -172,11 +172,11 @@ const nBitCompactSingleSortWGSL = <T>(
       var tb_offsets = ${bitsScratch}[ ${u32S( workgroupSize - 1 )} ];
 
       ${bitPackRadixExclusiveScanWGSL( {
-        bitVector: wgsl`tb_offsets`,
-        bitsPerInnerPass: bitsPerInnerPass,
-        bitVectorSize: bitVectorSize,
-        maxCount: workgroupSize * grainSize
-      } )}
+    bitVector: wgsl`tb_offsets`,
+    bitsPerInnerPass: bitsPerInnerPass,
+    bitVectorSize: bitVectorSize,
+    maxCount: workgroupSize * grainSize
+  } )}
 
       ${!earlyLoad ? wgsl`
         var tb_values: array<${order.type.valueType}, ${decimalS( grainSize )}>;
@@ -197,27 +197,27 @@ const nBitCompactSingleSortWGSL = <T>(
 
           // TODO: a way to compute the index and access both of these efficiently?
           ${valueScratch}[ ( ${bitPackRadixAccessWGSL( {
-            bitVector: wgsl`tb_offsets`,
-            bits: wgsl`tb_bits`,
-            bitsPerInnerPass: bitsPerInnerPass,
-            bitVectorSize: bitVectorSize,
-            maxCount: workgroupSize * grainSize
-          } )} ) + ( ${bitPackRadixAccessWGSL( {
-            bitVector: wgsl`tb_bits_vector`,
-            bits: wgsl`tb_bits`,
-            bitsPerInnerPass: bitsPerInnerPass,
-            bitVectorSize: bitVectorSize,
-            maxCount: workgroupSize * grainSize
-          } )} ) ] = tb_value;
+    bitVector: wgsl`tb_offsets`,
+    bits: wgsl`tb_bits`,
+    bitsPerInnerPass: bitsPerInnerPass,
+    bitVectorSize: bitVectorSize,
+    maxCount: workgroupSize * grainSize
+  } )} ) + ( ${bitPackRadixAccessWGSL( {
+    bitVector: wgsl`tb_bits_vector`,
+    bits: wgsl`tb_bits`,
+    bitsPerInnerPass: bitsPerInnerPass,
+    bitVectorSize: bitVectorSize,
+    maxCount: workgroupSize * grainSize
+  } )} ) ] = tb_value;
 
           // NOTE the increment, so that we'll write to the next location next time
           ${bitPackRadixIncrementWGSL( {
-            bitVector: wgsl`tb_bits_vector`,
-            bits: wgsl`tb_bits`,
-            bitsPerInnerPass: bitsPerInnerPass,
-            bitVectorSize: bitVectorSize,
-            maxCount: workgroupSize * grainSize
-          } )}
+    bitVector: wgsl`tb_bits_vector`,
+    bits: wgsl`tb_bits`,
+    bitsPerInnerPass: bitsPerInnerPass,
+    bitVectorSize: bitVectorSize,
+    maxCount: workgroupSize * grainSize
+  } )}
         }
       ` )}
 

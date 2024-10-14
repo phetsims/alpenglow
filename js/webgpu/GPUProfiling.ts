@@ -11,8 +11,8 @@
  * open -a "Google Chrome Canary" --args --enable-dawn-features=allow_unsafe_apis,dump_shaders --enable-webgpu-developer-features --disable-dawn-features=timestamp_quantization
  *
  * NOTE: Potentially add dump_shaders - Dumped shaders will be log via EmitLog, thus printed "
-      "in Chrome console or consumed by user-defined callback function.",
-      "https://crbug.com/dawn/792"
+ "in Chrome console or consumed by user-defined callback function.",
+ "https://crbug.com/dawn/792"
  *
  * TODO: try disable_workgroup_init sometime, to see if we can get more parallelism, maybe record_detailed_timing_in_trace_events, disable_timestamp_query_conversion
  * TODO: --disable-dawn-features=timestamp_quantization

@@ -13,7 +13,6 @@ export default class RenderLinearRange {
     // TODO: doc
     public readonly start: number,
     public readonly end: number,
-
     // NOTE: equal start/end programs means constant!
     public readonly startProgram: RenderProgram,
     public readonly endProgram: RenderProgram

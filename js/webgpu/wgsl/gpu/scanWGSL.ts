@@ -73,16 +73,16 @@ const scanWGSL = <T>(
   const valuePreloaded = options.valuePreloaded;
 
   const condition = ( i: number ) => direction === 'left'
-    ? wgsl`${localIndex} >= ${u32S( 1 << i )}`
-    : wgsl`${localIndex} < ${u32S( workgroupSize - ( 1 << i ) )}`;
+                                     ? wgsl`${localIndex} >= ${u32S( 1 << i )}`
+                                     : wgsl`${localIndex} < ${u32S( workgroupSize - ( 1 << i ) )}`;
 
   const combineLeft = ( i: number ) => direction === 'left'
-    ? wgsl`${scratch}[ ${mapScratchIndex( wgsl`${localIndex} - ${u32S( 1 << i )}` )} ]`
-    : value;
+                                       ? wgsl`${scratch}[ ${mapScratchIndex( wgsl`${localIndex} - ${u32S( 1 << i )}` )} ]`
+                                       : value;
 
   const combineRight = ( i: number ) => direction === 'left'
-    ? value
-    : wgsl`${scratch}[ ${mapScratchIndex( wgsl`${localIndex} + ${u32S( 1 << i )}` )} ]`;
+                                        ? value
+                                        : wgsl`${scratch}[ ${mapScratchIndex( wgsl`${localIndex} + ${u32S( 1 << i )}` )} ]`;
 
   const combineToValue = ( varName: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => {
     return binaryExpressionStatementWGSL( varName, binaryOp.combineExpression || null, binaryOp.combineStatements || null, a, b );

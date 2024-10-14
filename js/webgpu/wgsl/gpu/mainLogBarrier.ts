@@ -18,8 +18,8 @@ const mainLogBarrier = (): WGSLMainModule => {
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
       ${logWGSL( {
-        name: null
-      } )}
+    name: null
+  } )}
     }
   ` );
 };

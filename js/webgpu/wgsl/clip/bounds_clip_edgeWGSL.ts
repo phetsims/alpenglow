@@ -45,13 +45,13 @@ export default (
       let startPoint = edge.startPoint;
       let endPoint = edge.endPoint;
       let clipResult: MD_ClipResult = ${matthes_drakopoulos_clipWGSL(
-        wgsl`startPoint`,
-        wgsl`endPoint`,
-        wgsl`minX`,
-        wgsl`minY`,
-        wgsl`maxX`,
-        wgsl`maxY`
-      )};
+    wgsl`startPoint`,
+    wgsl`endPoint`,
+    wgsl`minX`,
+    wgsl`minY`,
+    wgsl`maxX`,
+    wgsl`maxY`
+  )};
     
       let clippedStartPoint = clipResult.p0;
       let clippedEndPoint = clipResult.p1;

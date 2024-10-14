@@ -14,19 +14,16 @@ import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, Para
 export default class ParallelRasterSplitScan {
   public static async dispatch(
     workgroupSize: number,
-
     // read
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     splitReduces0: ParallelStorageArray<RasterSplitReduceData>,
     splitReduces1: ParallelStorageArray<RasterSplitReduceData>,
     splitReduces2: ParallelStorageArray<RasterSplitReduceData>,
     numClippedChunks: number,
-
     // write
     reducibleChunks: ParallelStorageArray<RasterChunk>,
     completeChunks: ParallelStorageArray<RasterCompleteChunk>,
     chunkIndexMap: ParallelStorageArray<number>,
-
     debugReduces: ParallelStorageArray<RasterSplitReduceData>
   ): Promise<void> {
     const logWorkgroupSize = Math.log2( workgroupSize );

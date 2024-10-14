@@ -45,7 +45,6 @@ type ConcreteType<T = unknown> = {
   writeU32s(
     // given an expr:u32 offset and expr:u32 value, it will store the value at the offset
     storeStatement: StoreStatementCallback,
-
     // the variable name (e.g. expr:T) that is being stored
     value: WGSLExpression
   ): WGSLStatements;

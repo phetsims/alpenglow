@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { PolygonalBoolean, PolygonalFace, RenderPath } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import { PolygonalBoolean, PolygonalFace, RenderPath } from '../imports.js';
 
 QUnit.module( 'PolygonalBoolean' );
 

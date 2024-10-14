@@ -125,9 +125,9 @@ export default class RenderColor extends RenderProgram {
     const s = s_ * s_ * s_;
 
     return new Vector4(
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
+      4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+      -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+      -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s,
       oklab.w
     );
   }
@@ -465,14 +465,14 @@ export default class RenderColor extends RenderProgram {
   public static xyYToXYZ( xyY: Vector3 ): Vector3 {
     /**
      * ( color.x + color.y + color.z === 0 ) ? new Vector4(
-          // TODO: white point change to the other functions, I think we have some of this duplicated.
-          // TODO: separate out into a function
-          // using white point for D65
-          sRGBWhiteChromaticity.x,
-          sRGBWhiteChromaticity.y,
-          0,
-          color.w
-        )
+     // TODO: white point change to the other functions, I think we have some of this duplicated.
+     // TODO: separate out into a function
+     // using white point for D65
+     sRGBWhiteChromaticity.x,
+     sRGBWhiteChromaticity.y,
+     0,
+     color.w
+     )
      */
     return new Vector3(
       xyY.x * xyY.z / xyY.y,
@@ -548,7 +548,7 @@ export default class RenderColor extends RenderProgram {
       const context = canvas.getContext( '2d', { colorSpace: 'display-p3' } );
       return context!.getContextAttributes().colorSpace === 'display-p3';
     }
-    catch{
+    catch {
       return false;
     }
   }

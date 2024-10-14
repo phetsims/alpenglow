@@ -13,12 +13,10 @@ import Vector2 from '../../../../dot/js/Vector2.js';
 export default class RasterEdgeClip {
   public constructor(
     public readonly clippedChunkIndex: number,
-
     public readonly point0: Vector2,
     public readonly point1: Vector2,
     public readonly point2: Vector2,
     public readonly point3: Vector2,
-
     public readonly isFirstEdge: boolean,
     public readonly isLastEdge: boolean
   ) {}

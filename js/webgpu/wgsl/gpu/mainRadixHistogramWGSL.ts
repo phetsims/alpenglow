@@ -49,14 +49,14 @@ const mainRadixHistogramWGSL = <T>(
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
       ${radixHistogramWGSL( {
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
-        histogramScratch: wgsl`histogram_scratch`,
-        getBin: index => order.getBitsWGSL( wgsl`input[ ${index} ]`, pass * bitsPerPass, bitsPerPass ), // TODO: consider rename of getBin
-        numBins: ( 1 << bitsPerPass ),
-        lengthExpression: lengthExpression,
-        storeHistogram: ( index, value ) => wgsl`output[ ${index} ] = ${value};`
-      } )}
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    histogramScratch: wgsl`histogram_scratch`,
+    getBin: index => order.getBitsWGSL( wgsl`input[ ${index} ]`, pass * bitsPerPass, bitsPerPass ), // TODO: consider rename of getBin
+    numBins: ( 1 << bitsPerPass ),
+    lengthExpression: lengthExpression,
+    storeHistogram: ( index, value ) => wgsl`output[ ${index} ] = ${value};`
+  } )}
     }
   ` );
 };

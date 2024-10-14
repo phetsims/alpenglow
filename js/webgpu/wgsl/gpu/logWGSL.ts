@@ -138,10 +138,10 @@ const logWGSL = <T>(
   
           ${dataCount !== 0 ? wgsl`
             ${writeData!( ( tIndex, tExpr ) => {
-              return type!.writeU32s( ( offset, u32Expr ) => {
-                return wgsl`_log.data[ _log_offset + ${u32S( countableIndex )} + ( ${tIndex} ) * ${u32S( type!.bytesPerElement / 4 )} + ( ${offset} ) ] = ${u32Expr};`;
-              }, tExpr );
-            } )}
+        return type!.writeU32s( ( offset, u32Expr ) => {
+          return wgsl`_log.data[ _log_offset + ${u32S( countableIndex )} + ( ${tIndex} ) * ${u32S( type!.bytesPerElement / 4 )} + ( ${offset} ) ] = ${u32Expr};`;
+        }, tExpr );
+      } )}
           ` : wgsl``}
         }
       `;

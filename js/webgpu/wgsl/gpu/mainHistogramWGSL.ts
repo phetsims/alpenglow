@@ -48,12 +48,12 @@ const mainHistogramWGSL = <T>(
     ) {
     
       ${histogramWGSL( {
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
-        histogramScratch: wgsl`histogram_scratch`,
-        getBin: index => getBin( wgsl`mhist_input[ ${index} ]` ),
-        lengthExpression: lengthExpression
-      } )}
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    histogramScratch: wgsl`histogram_scratch`,
+    getBin: index => getBin( wgsl`mhist_input[ ${index} ]` ),
+    lengthExpression: lengthExpression
+  } )}
     
       workgroupBarrier();
     

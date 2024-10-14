@@ -42,6 +42,7 @@ export default class WebGPUAPI {
 
     return adapter;
   }
+
   public getPreferredCanvasFormat(): PreferredCanvasFormat {
     const preferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat() as PreferredCanvasFormat;
 
@@ -57,6 +58,7 @@ export default class WebGPUAPI {
   ): boolean {
     return adapter.features.has( featureName ) || false;
   }
+
   public async adapterRequestDevice(
     adapter: GPUAdapter,
     descriptor?: GPUDeviceDescriptor
@@ -82,6 +84,7 @@ export default class WebGPUAPI {
 
     return buffer;
   }
+
   public deviceCreateQuerySet(
     device: GPUDevice,
     descriptor: GPUQuerySetDescriptor
@@ -94,6 +97,7 @@ export default class WebGPUAPI {
 
     return querySet;
   }
+
   public deviceCreateBindGroupLayout(
     device: GPUDevice,
     descriptor: GPUBindGroupLayoutDescriptor
@@ -106,6 +110,7 @@ export default class WebGPUAPI {
 
     return bindGroupLayout;
   }
+
   public deviceCreatePipelineLayout(
     device: GPUDevice,
     descriptor: GPUPipelineLayoutDescriptor
@@ -118,6 +123,7 @@ export default class WebGPUAPI {
 
     return pipelineLayout;
   }
+
   public deviceCreateShaderModule(
     device: GPUDevice,
     descriptor: GPUShaderModuleDescriptor
@@ -130,6 +136,7 @@ export default class WebGPUAPI {
 
     return shaderModule;
   }
+
   public deviceCreateComputePipeline(
     device: GPUDevice,
     descriptor: GPUComputePipelineDescriptor
@@ -142,6 +149,7 @@ export default class WebGPUAPI {
 
     return computePipeline;
   }
+
   public async deviceCreateComputePipelineAsync(
     device: GPUDevice,
     descriptor: GPUComputePipelineDescriptor
@@ -154,6 +162,7 @@ export default class WebGPUAPI {
 
     return computePipeline;
   }
+
   public deviceCreateBindGroup(
     device: GPUDevice,
     descriptor: GPUBindGroupDescriptor
@@ -179,6 +188,7 @@ export default class WebGPUAPI {
 
     return commandEncoder;
   }
+
   public deviceWriteBuffer(
     device: GPUDevice,
     buffer: GPUBuffer,
@@ -195,6 +205,7 @@ export default class WebGPUAPI {
       this.recorder.recordDeviceWriteBuffer( device, buffer, bufferOffset, data, dataOffset, size );
     }
   }
+
   public deviceQueueSubmit(
     device: GPUDevice,
     commandBuffers: Iterable<GPUCommandBuffer>
@@ -205,9 +216,11 @@ export default class WebGPUAPI {
       this.recorder.recordDeviceQueueSubmit( device, commandBuffers );
     }
   }
+
   public deviceHasFeature( device: GPUDevice, featureName: string ): boolean {
     return device.features.has( featureName ) || false;
   }
+
   public deviceDestroy( device: GPUDevice ): void {
     device.destroy();
 
@@ -227,6 +240,7 @@ export default class WebGPUAPI {
     }
     return buffer.mapAsync( mode, offset, size );
   }
+
   public bufferUnmap( buffer: GPUBuffer ): void {
     buffer.unmap();
 
@@ -234,9 +248,11 @@ export default class WebGPUAPI {
       this.recorder.recordBufferUnmap( buffer );
     }
   }
+
   public bufferGetMappedRange( buffer: GPUBuffer, offset?: number, size?: number ): ArrayBuffer {
     return buffer.getMappedRange( offset, size );
   }
+
   public bufferDestroy( buffer: GPUBuffer ): void {
     buffer.destroy();
 
@@ -257,6 +273,7 @@ export default class WebGPUAPI {
 
     return renderPassEncoder;
   }
+
   public encoderBeginComputePass(
     encoder: GPUCommandEncoder,
     descriptor?: GPUComputePassDescriptor
@@ -269,6 +286,7 @@ export default class WebGPUAPI {
 
     return computePassEncoder;
   }
+
   public encoderCopyBufferToBuffer(
     encoder: GPUCommandEncoder,
     source: GPUBuffer,
@@ -283,6 +301,7 @@ export default class WebGPUAPI {
       this.recorder.recordEncoderCopyBufferToBuffer( encoder, source, sourceOffset, destination, destinationOffset, size );
     }
   }
+
   public encoderCopyBufferToTexture(
     encoder: GPUCommandEncoder,
     source: GPUImageCopyBuffer,
@@ -295,6 +314,7 @@ export default class WebGPUAPI {
       this.recorder.recordEncoderCopyBufferToTexture( encoder, source, destination, copySize );
     }
   }
+
   public encoderCopyTextureToBuffer(
     encoder: GPUCommandEncoder,
     source: GPUImageCopyTexture,
@@ -307,6 +327,7 @@ export default class WebGPUAPI {
       this.recorder.recordEncoderCopyTextureToBuffer( encoder, source, destination, copySize );
     }
   }
+
   public encoderCopyTextureToTexture(
     encoder: GPUCommandEncoder,
     source: GPUImageCopyTexture,
@@ -319,6 +340,7 @@ export default class WebGPUAPI {
       this.recorder.recordEncoderCopyTextureToTexture( encoder, source, destination, copySize );
     }
   }
+
   public encoderClearBuffer(
     encoder: GPUCommandEncoder,
     buffer: GPUBuffer,
@@ -331,6 +353,7 @@ export default class WebGPUAPI {
       this.recorder.recordEncoderClearBuffer( encoder, buffer, offset, size );
     }
   }
+
   public encoderResolveQuerySet(
     encoder: GPUCommandEncoder,
     querySet: GPUQuerySet,
@@ -345,6 +368,7 @@ export default class WebGPUAPI {
       this.recorder.recordEncoderResolveQuerySet( encoder, querySet, firstQuery, queryCount, destination, destinationOffset );
     }
   }
+
   public encoderFinish(
     encoder: GPUCommandEncoder,
     descriptor?: GPUCommandBufferDescriptor
@@ -368,6 +392,7 @@ export default class WebGPUAPI {
       this.recorder.recordComputePassEncoderSetPipeline( computePassEncoder, pipeline );
     }
   }
+
   public computePassEncoderDispatchWorkgroups(
     computePassEncoder: GPUComputePassEncoder,
     x: number,
@@ -380,6 +405,7 @@ export default class WebGPUAPI {
       this.recorder.recordComputePassEncoderDispatchWorkgroups( computePassEncoder, x, y, z );
     }
   }
+
   public computePassEncoderDispatchWorkgroupsIndirect(
     computePassEncoder: GPUComputePassEncoder,
     indirectBuffer: GPUBuffer,
@@ -391,6 +417,7 @@ export default class WebGPUAPI {
       this.recorder.recordComputePassEncoderDispatchWorkgroupsIndirect( computePassEncoder, indirectBuffer, indirectOffset );
     }
   }
+
   // TODO: consider adding the other approach to dynamic offsets?
   public passEncoderSetBindGroup(
     passEncoder: GPURenderPassEncoder | GPUComputePassEncoder,
@@ -404,6 +431,7 @@ export default class WebGPUAPI {
       this.recorder.recordPassEncoderSetBindGroup( passEncoder, index, bindGroup, dynamicOffsets );
     }
   }
+
   public computePassEncoderEnd( computePassEncoder: GPUComputePassEncoder ): void {
     computePassEncoder.end();
 

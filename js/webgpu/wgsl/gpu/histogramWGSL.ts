@@ -33,15 +33,15 @@ const histogramWGSL = (
     ${commentWGSL( 'begin histogram' )}
     {
       ${coalescedLoopWGSL( {
-        workgroupSize: options.workgroupSize,
-        grainSize: options.grainSize,
-        lengthExpression: options.lengthExpression,
-        workgroupIndex: options.workgroupIndex,
-        localIndex: options.localIndex,
-        callback: ( localIndex, dataIndex ) => wgsl`
+    workgroupSize: options.workgroupSize,
+    grainSize: options.grainSize,
+    lengthExpression: options.lengthExpression,
+    workgroupIndex: options.workgroupIndex,
+    localIndex: options.localIndex,
+    callback: ( localIndex, dataIndex ) => wgsl`
           atomicAdd( &${options.histogramScratch}[ ${options.getBin( dataIndex )} ], 1u );
         `
-      } )}
+  } )}
     }
     ${commentWGSL( 'end histogram' )}
   `;

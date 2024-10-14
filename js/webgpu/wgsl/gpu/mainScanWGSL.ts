@@ -119,19 +119,19 @@ const mainScanWGSL = <T>(
       @builtin(workgroup_id) workgroup_id: vec3u
     ) {
       ${scanComprehensiveWGSL( {
-        input: options.inPlace ? wgsl`data` : wgsl`input`,
-        output: options.inPlace ? wgsl`data` : wgsl`output`,
-        scratch: wgsl`scratch`,
-        binaryOp: binaryOp,
-        workgroupSize: workgroupSize,
-        grainSize: grainSize,
-        exclusive: options.exclusive,
-        lengthExpression: options.lengthExpression,
-        inputOrder: options.inputOrder,
-        inputAccessOrder: options.inputAccessOrder,
-        factorOutSubexpressions: options.factorOutSubexpressions,
-        // TODO: combine these two approaches if possible?
-        getAddedValue: options.addScannedReduction ? ( options.addScannedDoubleReduction ? addedValue => wgsl`
+    input: options.inPlace ? wgsl`data` : wgsl`input`,
+    output: options.inPlace ? wgsl`data` : wgsl`output`,
+    scratch: wgsl`scratch`,
+    binaryOp: binaryOp,
+    workgroupSize: workgroupSize,
+    grainSize: grainSize,
+    exclusive: options.exclusive,
+    lengthExpression: options.lengthExpression,
+    inputOrder: options.inputOrder,
+    inputAccessOrder: options.inputAccessOrder,
+    factorOutSubexpressions: options.factorOutSubexpressions,
+    // TODO: combine these two approaches if possible?
+    getAddedValue: options.addScannedReduction ? ( options.addScannedDoubleReduction ? addedValue => wgsl`
           if ( local_id.x == 0u ) {
             // If our reductions are scanned exclusively, then we can just use the value directly
             ${options.areScannedReductionsExclusive ? wgsl`
@@ -184,8 +184,8 @@ const mainScanWGSL = <T>(
     
           ${addedValue} = reduction_value;
         ` ) : options.getAddedValue,
-        storeReduction: options.storeReduction ? ( index: WGSLExpressionU32, value: WGSLExpressionT ) => wgsl`reduction[ ${index} ] = ${value};` : null
-      } )}
+    storeReduction: options.storeReduction ? ( index: WGSLExpressionU32, value: WGSLExpressionT ) => wgsl`reduction[ ${index} ] = ${value};` : null
+  } )}
     }
   ` );
 };

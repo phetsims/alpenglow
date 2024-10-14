@@ -30,35 +30,35 @@ QUnit.test( 'Reduce step', async assert => {
   type WorkgroupValues = { scratch: ParallelWorkgroupArray<number> };
 
   const kernel = new ParallelKernel<WorkgroupValues>( async ( context: ParallelContext<WorkgroupValues> ) => {
-    await context.start();
+      await context.start();
 
-    let value = await input.get( context, context.globalId.x );
+      let value = await input.get( context, context.globalId.x );
 
-    await context.workgroupValues.scratch.set( context, context.localId.x, value );
+      await context.workgroupValues.scratch.set( context, context.localId.x, value );
 
-    const workgroupSize = context.kernel.workgroupX;
-    const logWorkgroupSize = Math.log2( workgroupSize );
+      const workgroupSize = context.kernel.workgroupX;
+      const logWorkgroupSize = Math.log2( workgroupSize );
 
-    for ( let i = 0; i < logWorkgroupSize; i++ ) {
-      await context.workgroupBarrier();
-      if ( context.localId.x + ( 1 << i ) < workgroupSize ) {
-        const otherValue = await context.workgroupValues.scratch.get( context, context.localId.x + ( 1 << i ) );
-        value = combine( value, otherValue );
+      for ( let i = 0; i < logWorkgroupSize; i++ ) {
+        await context.workgroupBarrier();
+        if ( context.localId.x + ( 1 << i ) < workgroupSize ) {
+          const otherValue = await context.workgroupValues.scratch.get( context, context.localId.x + ( 1 << i ) );
+          value = combine( value, otherValue );
+        }
+
+        await context.workgroupBarrier();
+        await context.workgroupValues.scratch.set( context, context.localId.x, value );
       }
 
-      await context.workgroupBarrier();
-      await context.workgroupValues.scratch.set( context, context.localId.x, value );
-    }
-
-    if ( context.localId.x === 0 ) {
-      await output.set( context, context.workgroupId.x, value );
-    }
-  },
-  () => {
-    return {
-      scratch: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( n => 0 ), NaN )
-    };
-  }, [ input, output ], workgroupSize );
+      if ( context.localId.x === 0 ) {
+        await output.set( context, context.workgroupId.x, value );
+      }
+    },
+    () => {
+      return {
+        scratch: new ParallelWorkgroupArray( _.range( 0, workgroupSize ).map( n => 0 ), NaN )
+      };
+    }, [ input, output ], workgroupSize );
 
   await ( new ParallelExecutor( kernel ).dispatch( 4 ) );
 

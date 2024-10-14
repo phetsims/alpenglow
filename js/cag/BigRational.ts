@@ -143,6 +143,7 @@ export default class BigRational {
   public static whole( numerator: number | bigint ): BigRational {
     return new BigRational( numerator, 1n );
   }
+
   public static inverse( numerator: number | bigint ): BigRational {
     return new BigRational( 1n, numerator );
   }

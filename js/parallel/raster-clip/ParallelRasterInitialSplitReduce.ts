@@ -12,11 +12,9 @@ import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, Para
 export default class ParallelRasterInitialSplitReduce {
   public static async dispatch(
     workgroupSize: number,
-
     // read
     clippedChunks: ParallelStorageArray<RasterClippedChunk>,
     numClippedChunks: number,
-
     // write
     debugFullSplitReduces: ParallelStorageArray<RasterSplitReduceData>,
     splitReduces: ParallelStorageArray<RasterSplitReduceData>

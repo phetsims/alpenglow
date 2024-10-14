@@ -31,9 +31,7 @@ const mainTwoPassTileWGSL = (
   providedOptions: mainTwoPassTileWGSLOptions
 ): WGSLMainModule => {
 
-  const options = optionize<mainTwoPassTileWGSLOptions>()( {
-
-  }, providedOptions );
+  const options = optionize<mainTwoPassTileWGSLOptions>()( {}, providedOptions );
 
   const configSlot = new WGSLSlot( 'config', options.config, BufferBindingType.UNIFORM );
   const initialRenderableFacesSlot = new WGSLSlot( 'initial_renderable_faces', options.initialRenderableFaces, BufferBindingType.READ_ONLY_STORAGE );
@@ -142,14 +140,14 @@ const mainTwoPassTileWGSL = (
       var offsets = vec2( required_edge_count, required_face_count );
       
       ${scanWGSL( {
-        workgroupSize: 256,
-        value: wgsl`offsets`,
-        scratch: wgsl`scratch_data`,
-        binaryOp: Vec2uAdd,
-        exclusive: false,
-        scratchPreloaded: false,
-        valuePreloaded: true
-      } )}
+    workgroupSize: 256,
+    value: wgsl`offsets`,
+    scratch: wgsl`scratch_data`,
+    binaryOp: Vec2uAdd,
+    exclusive: false,
+    scratchPreloaded: false,
+    valuePreloaded: true
+  } )}
       
       if ( local_id.x == 0xffu ) {
         // inclusive scan, so we'll request the atomics here

@@ -57,23 +57,23 @@ const mergeSimpleWGSL = (
   
       if ( start_output != end_output ) {
         ${getCorankWGSL( {
-          value: wgsl`start_a`,
-          outputIndex: wgsl`start_output`,
-          lengthA: lengthA,
-          lengthB: lengthB,
-          compare: compare,
-          greaterThan: greaterThan,
-          lessThanOrEqual: lessThanOrEqual
-        } )}
+    value: wgsl`start_a`,
+    outputIndex: wgsl`start_output`,
+    lengthA: lengthA,
+    lengthB: lengthB,
+    compare: compare,
+    greaterThan: greaterThan,
+    lessThanOrEqual: lessThanOrEqual
+  } )}
         ${getCorankWGSL( {
-          value: wgsl`end_a`,
-          outputIndex: wgsl`end_output`,
-          lengthA: lengthA,
-          lengthB: lengthB,
-          compare: compare,
-          greaterThan: greaterThan,
-          lessThanOrEqual: lessThanOrEqual
-        } )}
+    value: wgsl`end_a`,
+    outputIndex: wgsl`end_output`,
+    lengthA: lengthA,
+    lengthB: lengthB,
+    compare: compare,
+    greaterThan: greaterThan,
+    lessThanOrEqual: lessThanOrEqual
+  } )}
   
         let start_b = start_output - start_a;
         let end_b = end_output - end_a;
@@ -82,12 +82,12 @@ const mergeSimpleWGSL = (
         let span_b = end_b - start_b;
   
         ${mergeSequentialWGSL( {
-          lengthA: wgsl`span_a`,
-          lengthB: wgsl`span_b`,
-          compare: ( indexA, indexB ) => compare( wgsl`start_a + ${indexA}`, wgsl`start_b + ${indexB}` ),
-          setFromA: ( indexOutput, indexA ) => setFromA( wgsl`start_output + ${indexOutput}`, wgsl`start_a + ${indexA}` ),
-          setFromB: ( indexOutput, indexB ) => setFromB( wgsl`start_output + ${indexOutput}`, wgsl`start_b + ${indexB}` )
-        } )}
+    lengthA: wgsl`span_a`,
+    lengthB: wgsl`span_b`,
+    compare: ( indexA, indexB ) => compare( wgsl`start_a + ${indexA}`, wgsl`start_b + ${indexB}` ),
+    setFromA: ( indexOutput, indexA ) => setFromA( wgsl`start_output + ${indexOutput}`, wgsl`start_a + ${indexA}` ),
+    setFromB: ( indexOutput, indexB ) => setFromB( wgsl`start_output + ${indexOutput}`, wgsl`start_b + ${indexB}` )
+  } )}
       }
     }
     ${commentWGSL( 'end merge_simple' )}

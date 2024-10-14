@@ -192,7 +192,6 @@ export class ConsoleLoggedLine<T = unknown> {
     public readonly info: ConsoleLogInfo,
     public readonly additionalIndex: number | null,
     public readonly dataArray: T[],
-
     // Stored so it can be used for display (since our data is matched to these)
     public readonly threads: ConsoleLoggedThread[]
   ) {}

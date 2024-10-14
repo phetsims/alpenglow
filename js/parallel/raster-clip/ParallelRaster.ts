@@ -349,7 +349,6 @@ export default class ParallelRaster {
     workgroupSize: number,
     numInputChunks: number,
     numInputEdges: number,
-
     // input
     inputChunks: ParallelStorageArray<RasterChunk>,
     inputEdges: ParallelStorageArray<RasterEdge>

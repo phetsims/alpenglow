@@ -4,7 +4,67 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, BufferBindingType, BufferSlot, ByteEncoder, ConcreteType, DeviceContext, DirectModule, evaluate_render_program_instructionsWGSL, F32Type, getArrayType, LinearEdge, LinearEdgeWGSL, Procedure, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderExtend, RenderFilter, RenderGradientStop, RenderInstruction, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearGradient, RenderLinearGradientAccuracy, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderRadialGradient, RenderRadialGradientAccuracy, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, Routine, StoreStatementCallback, U32Type, wgsl, WGSLExpression, WGSLMainModule, WGSLReferenceModule, WGSLSlot, WGSLStatements } from '../../../imports.js';
+import {
+  asyncTestWithDevice,
+  BufferArraySlot,
+  BufferBindingType,
+  BufferSlot,
+  ByteEncoder,
+  ConcreteType,
+  DeviceContext,
+  DirectModule,
+  evaluate_render_program_instructionsWGSL,
+  F32Type,
+  getArrayType,
+  LinearEdge,
+  LinearEdgeWGSL,
+  Procedure,
+  RenderAlpha,
+  RenderBarycentricBlend,
+  RenderBarycentricBlendAccuracy,
+  RenderBarycentricPerspectiveBlend,
+  RenderBarycentricPerspectiveBlendAccuracy,
+  RenderBlendCompose,
+  RenderBlendType,
+  RenderColor,
+  RenderComposeType,
+  RenderEvaluationContext,
+  RenderExtend,
+  RenderFilter,
+  RenderGradientStop,
+  RenderInstruction,
+  RenderLight,
+  RenderLinearBlend,
+  RenderLinearBlendAccuracy,
+  RenderLinearDisplayP3ToLinearSRGB,
+  RenderLinearGradient,
+  RenderLinearGradientAccuracy,
+  RenderLinearSRGBToLinearDisplayP3,
+  RenderLinearSRGBToOklab,
+  RenderLinearSRGBToSRGB,
+  RenderNormalDebug,
+  RenderNormalize,
+  RenderOklabToLinearSRGB,
+  RenderPhong,
+  RenderPremultiply,
+  RenderProgram,
+  RenderRadialBlend,
+  RenderRadialBlendAccuracy,
+  RenderRadialGradient,
+  RenderRadialGradientAccuracy,
+  RenderSRGBToLinearSRGB,
+  RenderStack,
+  RenderUnpremultiply,
+  Routine,
+  StoreStatementCallback,
+  U32Type,
+  wgsl,
+  WGSLExpression,
+  WGSLMainModule,
+  WGSLReferenceModule,
+  WGSLSlot,
+  WGSLStatements
+} from '../../../imports.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
@@ -159,25 +219,25 @@ const renderProgramComputeEvaluate = async (
         @builtin(workgroup_id) workgroup_id: vec3u
       ) {
         let result: vec4f = ${evaluate_render_program_instructionsWGSL(
-          wgsl`config.render_program_index`,
-          wgsl`config.edgesOffset`,
-          wgsl`config.numEdges`,
-          wgsl`config.isFullArea != 0u`,
-          wgsl`config.needsFace != 0u`,
-          wgsl`config.area`,
-          wgsl`config.minX`,
-          wgsl`config.minY`,
-          wgsl`config.maxX`,
-          wgsl`config.maxY`,
-          wgsl`config.minXCount`,
-          wgsl`config.minYCount`,
-          wgsl`config.maxXCount`,
-          wgsl`config.maxYCount`,
-          {
-            getRenderProgramInstruction: index => wgsl`render_program_instructions[ ${index} ]`,
-            getLinearEdge: index => wgsl`${LinearEdgeWGSL}( vec2( complete_edges[ 4u * ${index} ], complete_edges[ 4 * ${index} + 1u ] ), vec2( complete_edges[ 4u * ${index} + 2u ], complete_edges[ 4u * ${index} + 3u ] ) )`
-          }
-        )};
+      wgsl`config.render_program_index`,
+      wgsl`config.edgesOffset`,
+      wgsl`config.numEdges`,
+      wgsl`config.isFullArea != 0u`,
+      wgsl`config.needsFace != 0u`,
+      wgsl`config.area`,
+      wgsl`config.minX`,
+      wgsl`config.minY`,
+      wgsl`config.maxX`,
+      wgsl`config.maxY`,
+      wgsl`config.minXCount`,
+      wgsl`config.minYCount`,
+      wgsl`config.maxXCount`,
+      wgsl`config.maxYCount`,
+      {
+        getRenderProgramInstruction: index => wgsl`render_program_instructions[ ${index} ]`,
+        getLinearEdge: index => wgsl`${LinearEdgeWGSL}( vec2( complete_edges[ 4u * ${index} ], complete_edges[ 4 * ${index} + 1u ] ), vec2( complete_edges[ 4u * ${index} + 2u ], complete_edges[ 4u * ${index} + 3u ] ) )`
+      }
+    )};
         
         // TODO: typing
         output[ 0u ] = result.x;

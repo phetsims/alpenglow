@@ -106,14 +106,14 @@ export default class RenderRadialGradient extends RenderProgram {
 
   protected override equalsTyped( other: this ): boolean {
     return this.transform.equals( other.transform ) &&
-      this.start.equals( other.start ) &&
-      this.startRadius === other.startRadius &&
-      this.end.equals( other.end ) &&
-      this.endRadius === other.endRadius &&
-      this.extend === other.extend &&
-      this.accuracy === other.accuracy &&
-      this.stops.length === other.stops.length &&
-      _.every( this.stops, ( stop, i ) => stop.ratio === other.stops[ i ].ratio );
+           this.start.equals( other.start ) &&
+           this.startRadius === other.startRadius &&
+           this.end.equals( other.end ) &&
+           this.endRadius === other.endRadius &&
+           this.extend === other.extend &&
+           this.accuracy === other.accuracy &&
+           this.stops.length === other.stops.length &&
+           _.every( this.stops, ( stop, i ) => stop.ratio === other.stops[ i ].ratio );
   }
 
   protected override getSimplified( children: RenderProgram[] ): RenderProgram | null {
@@ -445,10 +445,10 @@ export class RenderRadialGradientLogic {
     const t_sign = Math.sign( 1 - focalX );
 
     const point = (
-      this.accuracy === RenderRadialGradientAccuracy.UnsplitCentroid ||
-      this.accuracy === RenderRadialGradientAccuracy.SplitCentroid ||
-      this.accuracy === RenderRadialGradientAccuracy.SplitAccurate
-    ) ? context.centroid : context.writeBoundsCentroid( scratchVectorA );
+                    this.accuracy === RenderRadialGradientAccuracy.UnsplitCentroid ||
+                    this.accuracy === RenderRadialGradientAccuracy.SplitCentroid ||
+                    this.accuracy === RenderRadialGradientAccuracy.SplitAccurate
+                  ) ? context.centroid : context.writeBoundsCentroid( scratchVectorA );
 
     // Pixel-specifics
     const local_xy = this.conicTransform.timesVector2( point );

@@ -13,12 +13,12 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
+import { Shape } from '../../../kite/js/imports.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import { EdgedClippedFace, EdgedFace, GridClipCallback, PolygonalFace, PolygonCompleteCallback, SerializedEdgedFace, SerializedPolygonalFace } from '../imports.js';
-import { Shape } from '../../../kite/js/imports.js';
 
 // TODO: assertions that all types of ClippableFace give the same results for the same methods
 

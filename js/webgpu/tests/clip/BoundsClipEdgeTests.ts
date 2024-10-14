@@ -35,14 +35,14 @@ asyncTestWithDevice( 'bounds_clip_edge', async ( device, deviceContext ) => {
         let p0 = vec2( input[ in + 0u ], input[ in + 1u ] );
         let p1 = vec2( input[ in + 2u ], input[ in + 3u ] );
         let result = ${bounds_clip_edgeWGSL(
-          wgsl`${LinearEdgeWGSL}( p0, p1 )`,
-          wgsl`0f`,
-          wgsl`0f`,
-          wgsl`10f`,
-          wgsl`10f`,
-          wgsl`5f`,
-          wgsl`5f`
-        )};
+      wgsl`${LinearEdgeWGSL}( p0, p1 )`,
+      wgsl`0f`,
+      wgsl`0f`,
+      wgsl`10f`,
+      wgsl`10f`,
+      wgsl`5f`,
+      wgsl`5f`
+    )};
         
         let e0p0 = result.edges[ 0u ].startPoint;
         let e0p1 = result.edges[ 0u ].endPoint;

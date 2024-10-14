@@ -68,12 +68,12 @@ const mainReduceNonCommutativeWGSL = <T>(
     
       var value: ${binaryOp.type.valueType};
       ${unrollWGSL( 0, grainSize, ( i, isFirst, isLast ) => {
-        // TODO: factor out combineToValue handling
-        const combineToValue = ( varName: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => {
-          return binaryExpressionStatementWGSL( varName, binaryOp.combineExpression || null, binaryOp.combineStatements || null, a, b );
-        };
-    
-        return wgsl`
+    // TODO: factor out combineToValue handling
+    const combineToValue = ( varName: WGSLVariableName, a: WGSLExpression, b: WGSLExpression ) => {
+      return binaryExpressionStatementWGSL( varName, binaryOp.combineExpression || null, binaryOp.combineStatements || null, a, b );
+    };
+
+    return wgsl`
           {
             let rn_index = workgroup_id.x * ${u32S( workgroupSize * grainSize )} + ${u32S( i * workgroupSize )} + local_id.x;
             ${lengthExpression ? wgsl`
@@ -86,11 +86,11 @@ const mainReduceNonCommutativeWGSL = <T>(
             }
     
             ${reduceWGSL( combineOptions<reduceWGSLOptions<T>>( {
-              value: wgsl`value`,
-              scratch: wgsl`scratch`,
-              binaryOp: binaryOp,
-              workgroupSize: workgroupSize
-            }, options.reduceOptions ) )}
+      value: wgsl`value`,
+      scratch: wgsl`scratch`,
+      binaryOp: binaryOp,
+      workgroupSize: workgroupSize
+    }, options.reduceOptions ) )}
     
             ${!isLast ? wgsl`
               if ( local_id.x == 0u ) {
@@ -99,14 +99,14 @@ const mainReduceNonCommutativeWGSL = <T>(
             ` : wgsl``}
           }
         `;
-      } )}
+  } )}
     
       if ( local_id.x == 0u ) {
         output[ ${stripeOutput ? toStripedIndexWGSL( {
-          i: wgsl`workgroup_id.x`,
-          workgroupSize: workgroupSize,
-          grainSize: grainSize
-        } ) : wgsl`workgroup_id.x`} ] = value;
+    i: wgsl`workgroup_id.x`,
+    workgroupSize: workgroupSize,
+    grainSize: grainSize
+  } ) : wgsl`workgroup_id.x`} ] = value;
       }
     }
   ` );
