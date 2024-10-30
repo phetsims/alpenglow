@@ -8,6 +8,7 @@
  */
 
 import phetLibraryEslintConfig from '../perennial-alias/js/eslint/phet-library.eslint.config.mjs';
+import webGPUGlobals from './webGPUGlobals.mjs';
 
 export default [
   ...phetLibraryEslintConfig,
@@ -18,5 +19,12 @@ export default [
     }
   }, {
     ignores: [ 'doc/lib/**/*' ]
+  },
+  {
+    languageOptions: {
+      globals: {
+        ...webGPUGlobals
+      }
+    }
   }
 ];
