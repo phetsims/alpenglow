@@ -1,8 +1,8 @@
 // Copyright 2024, University of Colorado Boulder
 
 /**
- * TODO: define only where needed https://github.com/phetsims/chipper/issues/1485
- * WebGPU
+ * WebGPU globals for ESLint
+ *
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
