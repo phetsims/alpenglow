@@ -11,6 +11,7 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
 import { SegmentTree } from '../../../kite/js/imports.js';
 
+/* global FlatQueue */
 type Item = {
   bounds: Bounds2;
 };
