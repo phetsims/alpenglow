@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import { alpenglow, ExecutionContext, Module } from '../../imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export default class CompositeModule<T> extends Module<T> {
   public constructor(

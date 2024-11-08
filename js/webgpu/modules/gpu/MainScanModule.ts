@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_SCAN_DEFAULTS, mainScanWGSL, mainScanWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_SCAN_DEFAULTS, mainScanWGSL, mainScanWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
 
 export type MainScanModuleOptions<T> = {
   input?: BufferArraySlot<T> | null;

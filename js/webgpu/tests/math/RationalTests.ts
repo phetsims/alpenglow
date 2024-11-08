@@ -4,8 +4,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Vector3 from '../../../../../dot/js/Vector3.js';
 import { abs_i64WGSL, add_i64_i64WGSL, add_u32_u32_to_u64WGSL, add_u64_u64WGSL, asyncTestWithDevice, BufferArraySlot, BufferBindingType, cmp_i64_i64WGSL, cmp_u64_u64WGSL, compareArrays, ConcreteType, DirectModule, div_u64_u64WGSL, equals_cross_mul_q128WGSL, first_leading_bit_u64WGSL, first_trailing_bit_u64WGSL, gcd_u64_u64WGSL, getArrayType, i32_to_i64WGSL, I32Type, i64_to_q128WGSL, intersect_line_segmentsWGSL, is_negative_i64WGSL, is_zero_u64WGSL, left_shift_u64WGSL, mul_i64_i64WGSL, mul_u32_u32_to_u64WGSL, mul_u64_u64WGSL, negate_i64WGSL, Procedure, ratio_test_q128WGSL, reduce_q128WGSL, right_shift_u64WGSL, Routine, subtract_i64_i64WGSL, u32_to_u64WGSL, U32Type, wgsl, WGSLMainModule, WGSLSlot, WGSLString, whole_i64_to_q128WGSL } from '../../../imports.js';
+import Vector3 from '../../../../../dot/js/Vector3.js';
 
 QUnit.module( 'RationalTests' );
 

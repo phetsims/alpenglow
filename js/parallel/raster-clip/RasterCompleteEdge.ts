@@ -8,8 +8,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Vector2 from '../../../../dot/js/Vector2.js';
 import { alpenglow, ByteEncoder } from '../../imports.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
 
 export default class RasterCompleteEdge {
   public constructor(

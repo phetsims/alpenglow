@@ -4,10 +4,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Vector2 from '../../../../../dot/js/Vector2.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, ConcreteType, getArrayType, HistogramModule, HistogramModuleOptions, Procedure, Routine, U32AtomicType, u32S, U32Type, Vec2uType, wgsl } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, ConcreteType, getArrayType, HistogramModule, HistogramModuleOptions, Procedure, Routine, U32AtomicType, u32S, U32Type, Vec2uType, wgsl } from '../../../imports.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
 
 QUnit.module( 'HistogramModuleTests' );
 

@@ -4,9 +4,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Order, MergeModule, MergeModuleOptions, Procedure, Routine, U32Order, U32ReverseOrder, u32S, Vec2uLexicographicalOrder } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Order, MergeModule, MergeModuleOptions, Procedure, Routine, U32Order, U32ReverseOrder, u32S, Vec2uLexicographicalOrder } from '../../../imports.js';
 
 QUnit.module( 'MergeModuleTests' );
 

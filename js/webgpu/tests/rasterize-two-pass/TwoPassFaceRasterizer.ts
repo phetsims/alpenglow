@@ -4,9 +4,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import { alpenglow, DeviceContext, FaceRasterizer, PolygonFilterType, Rasterize, RenderColor, RenderColorSpace, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack } from '../../../imports.js';
 import testPolygonalFace from '../testPolygonalFace.js';
+import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 export const evaluateTwoPassFaceRasterizer = async (
   deviceContext: DeviceContext

@@ -8,8 +8,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import optionize from '../../../../../phet-core/js/optionize.js';
 import { bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, LinearEdge, scanWGSL, TwoPassCoarseRenderableFace, TwoPassCoarseRenderableFaceWGSL, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, Vec2uAdd, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import optionize from '../../../../../phet-core/js/optionize.js';
 
 export type mainTwoPassCoarseWGSLOptions = {
   // input

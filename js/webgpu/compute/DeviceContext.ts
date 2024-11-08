@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { alpenglow, ByteEncoder, PreferredCanvasFormat, webgpu } from '../../imports.js';
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import { alpenglow, ByteEncoder, PreferredCanvasFormat, webgpu } from '../../imports.js';
 
 export type DeviceContextDeviceOptions = {
   maxLimits?: boolean;

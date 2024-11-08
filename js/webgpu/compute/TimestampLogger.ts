@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Utils from '../../../../dot/js/Utils.js';
 import { alpenglow, BufferLogger, ByteEncoder, DeviceContext, webgpu } from '../../imports.js';
+import Utils from '../../../../dot/js/Utils.js';
 
 export default class TimestampLogger {
 

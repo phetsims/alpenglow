@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
-import { optionize3 } from '../../../../phet-core/js/optionize.js';
 import { alpenglow, BindingType, BufferSlot, ComputePipeline, DeviceContext, getArrayType, getCastedType, PipelineLayout, ResourceSlot, ResourceUsage, U32Type, wgsl, WGSLModule, WGSLModuleDeclarations, wgslWith } from '../../imports.js';
+import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 
 export type PipelineBlueprintOptions = {
   name: string;

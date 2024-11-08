@@ -23,8 +23,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, ifLogWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, LinearEdgeWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, unpremultiplyWGSL, wgsl, wgslBlueprint, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 
 export type mainTwoPassFineWGSLOptions = {
   config: BufferSlot<TwoPassConfig>;

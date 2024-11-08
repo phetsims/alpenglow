@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { alpenglow, ByteEncoder, ConcreteType } from '../../imports.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { alpenglow, ByteEncoder, ConcreteType } from '../../imports.js';
 
 export type ConsoleLogInfo<T = unknown> = {
   // Filled in when registered

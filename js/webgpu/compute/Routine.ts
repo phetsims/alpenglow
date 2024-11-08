@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import { alpenglow, BindGroupLayout, BindingDescriptor, BindingType, BufferSlot, BufferSlotSlice, ComputePipeline, DeviceContext, ExecutionContext, Module, PipelineBlueprint, PipelineLayout, ResourceSlot } from '../../imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 export default class Routine<T, In, Out> {
 

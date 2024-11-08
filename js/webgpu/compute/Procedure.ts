@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { combineOptions } from '../../../../phet-core/js/optionize.js';
-import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, DeviceContext, ExecutionContext, Executor, ExecutorOptions, PipelineBlueprint, Resource, ResourceSlot, Routine, TextureViewResource, TextureViewSlot, webgpu } from '../../imports.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import BufferSlot from './BufferSlot.js';
+import { combineOptions } from '../../../../phet-core/js/optionize.js';
 
 export type ProcedureExecuteOptions = {
   separateComputePasses?: boolean;

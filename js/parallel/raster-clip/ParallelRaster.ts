@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Vector2 from '../../../../dot/js/Vector2.js';
-import Vector4 from '../../../../dot/js/Vector4.js';
 import { alpenglow, ByteEncoder, CombinedRaster, ParallelRasterChunkIndexPatch, ParallelRasterChunkReduce, ParallelRasterEdgeIndexPatch, ParallelRasterEdgeScan, ParallelRasterInitialChunk, ParallelRasterInitialClip, ParallelRasterInitialEdgeReduce, ParallelRasterInitialSplitReduce, ParallelRasterSplitReduce, ParallelRasterSplitScan, ParallelStorageArray, RasterChunk, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterCompleteChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
+import Vector4 from '../../../../dot/js/Vector4.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
 import testPolygonalFace from '../../webgpu/tests/testPolygonalFace.js';
 
 // TODO: move to 256 after testing (64 helps us test more cases here)
