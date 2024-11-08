@@ -2,6 +2,8 @@
 
 // @author Jonathan Olson <jonathan.olson@colorado.edu>
 
+/* global require */
+
 // Generates the bibliography for the Alpenglow documentation
 // Run with `node js/generate-bibliography.js`
 
