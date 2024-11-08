@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferSlot } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow, BufferSlot } from '../../imports.js';
 
 export default class BufferSlotSlice {
   public constructor(

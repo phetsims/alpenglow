@@ -7,8 +7,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
+import { alpenglow, ByteEncoder } from '../../imports.js';
 
 export default class RasterEdgeClip {
   public constructor(

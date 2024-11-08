@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ConcreteType, ExecutionContext, getArrayType, I32AtomicType, I32Type, MainReduceAtomicModule, MainReduceAtomicModuleOptions, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, Module, PipelineBlueprintOptions, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ConcreteType, ExecutionContext, getArrayType, I32AtomicType, I32Type, MainReduceAtomicModule, MainReduceAtomicModuleOptions, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, Module, PipelineBlueprintOptions, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
 
 type SelfOptions<T> = {
   input: BufferArraySlot<T>;

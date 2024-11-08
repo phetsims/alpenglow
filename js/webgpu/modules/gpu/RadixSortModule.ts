@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainRadixHistogramModule, MainRadixHistogramModuleOptions, MainRadixScatterModule, MainRadixScatterModuleOptions, PipelineBlueprintOptions, ScanModule, ScanModuleOptions, U32Add, u32S, U32Type, wgsl, WGSLExpressionU32 } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow, BitOrder, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainRadixHistogramModule, MainRadixHistogramModuleOptions, MainRadixScatterModule, MainRadixScatterModuleOptions, PipelineBlueprintOptions, ScanModule, ScanModuleOptions, U32Add, u32S, U32Type, wgsl, WGSLExpressionU32 } from '../../../imports.js';
 
 type SelfOptions<T> = {
   // NOTE: Can be in-place of input and output point to the same slot

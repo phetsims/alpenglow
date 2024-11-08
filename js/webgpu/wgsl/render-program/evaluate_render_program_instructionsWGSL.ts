@@ -1,7 +1,7 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { blend_composeWGSL, decimalS, extend_f32WGSL, f32S, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, u32S, unpremultiplyWGSL, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionF32, WGSLExpressionI32, WGSLExpressionU32, WGSLStringModule } from '../../../imports.js';
 import optionize from '../../../../../phet-core/js/optionize.js';
+import { blend_composeWGSL, decimalS, extend_f32WGSL, f32S, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, u32S, unpremultiplyWGSL, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionF32, WGSLExpressionI32, WGSLExpressionU32, WGSLStringModule } from '../../../imports.js';
 
 /**
  * Executes a RenderProgram in WGSL.

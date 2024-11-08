@@ -9,8 +9,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelUtils, ParallelWorkgroupArray, RasterClippedChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelUtils, ParallelWorkgroupArray, RasterClippedChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
 
 const nanVector = new Vector2( NaN, NaN );
 

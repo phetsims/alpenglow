@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Module, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, WGSLMainModule } from '../../imports.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
+import { alpenglow, Module, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, WGSLMainModule } from '../../imports.js';
 
 type SelfOptions<T> = {
   main: WGSLMainModule;

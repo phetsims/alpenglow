@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getVariableLengthArrayType, LinearEdge, LinearEdgeType, MainTwoPassCoarseModule, MainTwoPassCoarseModuleOptions, MainTwoPassFineModule, MainTwoPassFineModuleOptions, MainTwoPassInitializeAddressesModule, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFaceType, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getVariableLengthArrayType, LinearEdge, LinearEdgeType, MainTwoPassCoarseModule, MainTwoPassCoarseModuleOptions, MainTwoPassFineModule, MainTwoPassFineModuleOptions, MainTwoPassInitializeAddressesModule, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFaceType, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
 
 type SelfOptions = {
   config: BufferSlot<TwoPassConfig>;

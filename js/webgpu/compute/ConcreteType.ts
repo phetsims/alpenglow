@@ -6,11 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, decimalS, i32S, u32S, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLType, WGSLVariableName } from '../../imports.js';
-import Vector2 from '../../../../dot/js/Vector2.js';
 import Random from '../../../../dot/js/Random.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
+import { alpenglow, ByteEncoder, decimalS, i32S, u32S, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLType, WGSLVariableName } from '../../imports.js';
 
 // eslint-disable-next-line phet/bad-sim-text
 const random = new Random();

@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_MERGE_SIMPLE_DEFAULTS, mainMergeSimpleWGSL, mainMergeSimpleWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
-import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
+import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_MERGE_SIMPLE_DEFAULTS, mainMergeSimpleWGSL, mainMergeSimpleWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
 
 export type MergeSimpleModuleOptions<T> = {
   inputA: BufferArraySlot<T>;

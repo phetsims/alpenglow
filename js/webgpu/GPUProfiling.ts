@@ -22,8 +22,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, BufferLogger, DeviceContext, getArrayType, Procedure, RadixSortModule, Routine, TimestampLogger, TimestampLoggerResult, U32Order, u32S } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
+import { alpenglow, BufferArraySlot, BufferLogger, DeviceContext, getArrayType, Procedure, RadixSortModule, Routine, TimestampLogger, TimestampLoggerResult, U32Order, u32S } from '../imports.js';
 
 // eslint-disable-next-line phet/bad-sim-text
 const random = new Random();
