@@ -58,7 +58,7 @@ export default class LinearEdge {
     const remainingEdges = new Set<LinearEdge>( filteredEdges );
 
     while ( remainingEdges.size > 0 ) {
-      const edge: LinearEdge = remainingEdges.values().next().value;
+      const edge: LinearEdge = remainingEdges.values().next().value!;
 
       const simplifier = new ClipSimplifier( true );
 
@@ -94,7 +94,7 @@ export default class LinearEdge {
     const remainingEdges = new Set<LinearEdge>( edges );
 
     while ( remainingEdges.size > 0 ) {
-      const edge: LinearEdge = remainingEdges.values().next().value;
+      const edge: LinearEdge = remainingEdges.values().next().value!;
       remainingEdges.delete( edge );
 
       const opposite = [ ...remainingEdges ].find( candidateEdge => {
@@ -124,7 +124,7 @@ export default class LinearEdge {
     // Append any edges that are not overlapping. If we detect an overlap, eject the overlapping edges and add their
     // non-overlapped portions.
     while ( remainingEdges.size > 0 ) {
-      const edge: LinearEdge = remainingEdges.values().next().value;
+      const edge: LinearEdge = remainingEdges.values().next().value!;
       remainingEdges.delete( edge );
 
       let overlapped = false;

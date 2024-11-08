@@ -64,7 +64,7 @@ export default class FaceConversion {
 
       for ( let j = 0; j < faceEquivalenceClasses.length; j++ ) {
         const faceEquivalenceClass = faceEquivalenceClasses[ j ];
-        const representative: RationalFace = faceEquivalenceClass.values().next().value;
+        const representative: RationalFace = faceEquivalenceClass.values().next().value!;
         if ( face.renderProgram!.equals( representative.renderProgram! ) ) {
           faceEquivalenceClass.add( face );
           found = true;
