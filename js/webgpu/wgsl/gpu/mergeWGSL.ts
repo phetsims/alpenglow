@@ -9,8 +9,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, getCorankWGSL, mergeSequentialWGSL, u32S, unrollWGSL, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionT, WGSLExpressionU32, WGSLModule, WGSLStatements, WGSLVariableName, wgslWith, WorkgroupSizable } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow, commentWGSL, getCorankWGSL, mergeSequentialWGSL, u32S, unrollWGSL, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionT, WGSLExpressionU32, WGSLModule, WGSLStatements, WGSLVariableName, wgslWith, WorkgroupSizable } from '../../../imports.js';
 
 export type mergeWGSLOptions = {
   lengthA: WGSLExpressionU32;

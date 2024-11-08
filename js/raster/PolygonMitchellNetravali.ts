@@ -1,13 +1,13 @@
 // Copyright 2023-2024, University of Colorado Boulder
 
+import Bounds2 from '../../../dot/js/Bounds2.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 /**
  * Mitchell-Netravali filter (B=1/3, C=1/3 ) contribution given a polygon
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 import { alpenglow, BoundsClipping, LinearEdge } from '../imports.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import Bounds2 from '../../../dot/js/Bounds2.js';
 
 const bounds00 = new Bounds2( 0, 0, 1, 1 );
 const bounds10 = bounds00.shiftedXY( 1, 0 );

@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, logWGSLOptions, wgsl, WGSLStatements, wgslString } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithOptional from '../../../../../phet-core/js/types/WithOptional.js';
+import { alpenglow, logWGSL, logWGSLOptions, wgsl, WGSLStatements, wgslString } from '../../../imports.js';
 
 export type logValueWGSLOptions<T> = {
   value: string; // The name!

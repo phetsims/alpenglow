@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, ConcreteType, ConsoleLoggedLine, ConsoleLogger, PipelineBlueprint, u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLString, WGSLVariableName } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow, BufferBindingType, ConcreteType, ConsoleLoggedLine, ConsoleLogger, PipelineBlueprint, u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLString, WGSLVariableName } from '../../../imports.js';
 
 export type logWGSLOptions<T> = {
   // - if null, we will mark it as a barrier BETWEEN shaders

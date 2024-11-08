@@ -1,5 +1,6 @@
 // Copyright 2023-2024, University of Colorado Boulder
 
+import Utils from '../../../dot/js/Utils.js';
 /**
  * Clipping arbitrary (degenerate, non-convex, self-intersecting, etc.) polygons to the inside/outside of a circle.
  *
@@ -7,7 +8,6 @@
  */
 import Vector2 from '../../../dot/js/Vector2.js';
 import { alpenglow, BinaryClipCallback, BinaryPolygonCompleteCallback, ClipSimplifier, LinearEdge, PolygonalFace } from '../imports.js';
-import Utils from '../../../dot/js/Utils.js';
 
 const simplifier = new ClipSimplifier();
 

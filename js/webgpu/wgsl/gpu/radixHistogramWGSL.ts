@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ceilDivideConstantDivisorWGSL, commentWGSL, histogramWGSL, histogramWGSLOptions, logRakedWGSL, u32S, U32Type, unrollWGSL, wgsl, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import WithoutNull from '../../../../../phet-core/js/types/WithoutNull.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
+import { alpenglow, ceilDivideConstantDivisorWGSL, commentWGSL, histogramWGSL, histogramWGSLOptions, logRakedWGSL, u32S, U32Type, unrollWGSL, wgsl, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 
 export type radixHistogramWGSLOptions = {
   numBins: number;

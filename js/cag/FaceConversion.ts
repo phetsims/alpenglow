@@ -9,9 +9,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ClippableFace, ClippableFaceAccumulator, RationalFace, RenderableFace, RenderProgram } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import { alpenglow, ClippableFace, ClippableFaceAccumulator, RationalFace, RenderableFace, RenderProgram } from '../imports.js';
 
 class AccumulatingFace {
   public faces = new Set<RationalFace>();

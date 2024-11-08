@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, wgsl, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow, commentWGSL, wgsl, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 
 export type mergeSequentialWGSLOptions = {
   lengthA: WGSLExpressionU32;

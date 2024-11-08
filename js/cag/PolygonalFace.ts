@@ -6,13 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BinaryClipping, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedClippedFace, EdgedFace, GridClipCallback, GridClipping, LinearEdge, PolygonBilinear, PolygonCompleteCallback, PolygonMitchellNetravali, StripeClipping } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import Range from '../../../dot/js/Range.js';
-import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Range from '../../../dot/js/Range.js';
 import Utils from '../../../dot/js/Utils.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
+import { alpenglow, BinaryClipping, BoundsClipping, CircularClipping, ClippableFace, ClippableFaceAccumulator, ClipSimplifier, EdgedClippedFace, EdgedFace, GridClipCallback, GridClipping, LinearEdge, PolygonBilinear, PolygonCompleteCallback, PolygonMitchellNetravali, StripeClipping } from '../imports.js';
 
 const scratchVectorA = new Vector2( 0, 0 );
 const scratchVectorB = new Vector2( 0, 0 );

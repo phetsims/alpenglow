@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { EdgedFace } from '../imports.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import { EdgedFace } from '../imports.js';
 
 QUnit.module( 'PolygonClipping' );
 

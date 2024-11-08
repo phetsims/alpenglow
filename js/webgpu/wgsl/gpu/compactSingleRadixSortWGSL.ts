@@ -8,9 +8,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, nBitCompactSingleSortWGSL, nBitCompactSingleSortWGSLOptions, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import optionize from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
+import { alpenglow, commentWGSL, nBitCompactSingleSortWGSL, nBitCompactSingleSortWGSLOptions, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 
 export type compactSingleRadixSortWGSLOptions<T> = {
   // number of bits in the key

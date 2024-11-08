@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, logWGSLOptions, RakedSizable, u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
-import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
 import PickRequired from '../../../../../phet-core/js/types/PickRequired.js';
+import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
+import { alpenglow, logWGSL, logWGSLOptions, RakedSizable, u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
 
 type SelfOptions = {
   lengthExpression?: WGSLExpressionU32 | null;

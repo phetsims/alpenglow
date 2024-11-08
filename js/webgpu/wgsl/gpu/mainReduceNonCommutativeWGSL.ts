@@ -7,9 +7,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, decimalS, OptionalLengthExpressionable, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLMainModule, WGSLSlot, WGSLVariableName } from '../../../imports.js';
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
+import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, decimalS, OptionalLengthExpressionable, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLMainModule, WGSLSlot, WGSLVariableName } from '../../../imports.js';
 
 export type mainReduceNonCommutativeWGSLOptions<T> = {
   input: BufferSlot<T[]>;
