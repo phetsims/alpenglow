@@ -40,9 +40,9 @@ npm install
 cd ../alpenglow
 npm install
 
-# Start transpilation watch process (skip --watch to just run once, if not can Ctrl-C out as desired).
+# Start transpilation watch process (skip --live to just run once, if not can Ctrl-C out as desired).
 cd ../chipper
-grunt transpile --watch
+grunt transpile --live
 ```
 
 ### Viewing Plan and Documentation
