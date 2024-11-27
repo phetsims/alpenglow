@@ -8,7 +8,7 @@
 
 window.assertions.enableAssertSlow();
 
-import qunitStart from '../../chipper/js/sim-tests/qunitStart.js';
+import qunitStart from '../../chipper/js/browser/sim-tests/qunitStart.js';
 import './webgpu/tests/gpu/ReduceModuleTests.js';
 import './webgpu/tests/gpu/ScanModuleTests.js';
 import './webgpu/tests/gpu/RadixSortModuleTests.js';
