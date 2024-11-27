@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ClippableFace, EdgedFace, RenderProgram } from '../imports.js';
-import Range from '../../../dot/js/Range.js';
-import Vector3 from '../../../dot/js/Vector3.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Vector2 from '../../../dot/js/Vector2.js';
 import Plane3 from '../../../dot/js/Plane3.js';
+import Range from '../../../dot/js/Range.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import Vector3 from '../../../dot/js/Vector3.js';
+import { alpenglow, ClippableFace, EdgedFace, RenderProgram } from '../imports.js';
 
 // TODO: better name
 export default class RenderPlanar {

@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, RenderableFace, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderExtend, RenderGradientStop, RenderImage, RenderInstruction, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearRange, RenderProgram, RenderRadialGradientLogic, SerializedRenderGradientStop } from '../imports.js';
-import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow, ByteEncoder, RenderableFace, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderExtend, RenderGradientStop, RenderImage, RenderInstruction, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearRange, RenderProgram, RenderRadialGradientLogic, SerializedRenderGradientStop } from '../imports.js';
 
 export enum RenderLinearGradientAccuracy {
   SplitAccurate = 0,

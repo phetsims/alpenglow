@@ -6,11 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, ClippableFace, PolygonMitchellNetravali, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderExtend, RenderImageable, RenderInstruction, RenderInstructionLocation, RenderProgram, RenderResampleType, SerializedRenderImageable } from '../imports.js';
-import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Vector4 from '../../../dot/js/Vector4.js';
 import Utils from '../../../dot/js/Utils.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow, ByteEncoder, ClippableFace, PolygonMitchellNetravali, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderExtend, RenderImageable, RenderInstruction, RenderInstructionLocation, RenderProgram, RenderResampleType, SerializedRenderImageable } from '../imports.js';
 
 const emptyChildren: RenderProgram[] = [];
 

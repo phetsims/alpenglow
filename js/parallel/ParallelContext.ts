@@ -9,8 +9,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelWorkgroup, ParallelWorkgroupArray } from '../imports.js';
 import Vector3 from '../../../dot/js/Vector3.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelWorkgroup, ParallelWorkgroupArray } from '../imports.js';
 
 export type BaseWorkgroupValues = Record<string, ParallelWorkgroupArray<unknown> | number>;
 

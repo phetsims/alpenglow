@@ -1,9 +1,9 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { alpenglow, BlitShader, BufferArraySlot, BufferBindingType, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getVariableLengthArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, RasterizationOptions, Rasterize, RenderableFace, RenderColor, RenderInstruction, RenderProgram, Routine, TextureViewResource, TextureViewSlot, TiledTwoPassModule, TwoPassConfig, TwoPassConfigType, TwoPassInitialRenderableFace, TwoPassInitialRenderableFaceType, U32Type, WGSLStringFunction } from '../imports.js';
-import { optionize3 } from '../../../phet-core/js/optionize.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import { optionize3 } from '../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
+import { alpenglow, BlitShader, BufferArraySlot, BufferBindingType, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getVariableLengthArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, RasterizationOptions, Rasterize, RenderableFace, RenderColor, RenderInstruction, RenderProgram, Routine, TextureViewResource, TextureViewSlot, TiledTwoPassModule, TwoPassConfig, TwoPassConfigType, TwoPassInitialRenderableFace, TwoPassInitialRenderableFaceType, U32Type, WGSLStringFunction } from '../imports.js';
 
 /**
  * TODO: doc

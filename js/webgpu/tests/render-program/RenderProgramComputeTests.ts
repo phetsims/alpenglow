@@ -4,13 +4,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, BufferBindingType, BufferSlot, ByteEncoder, ConcreteType, DeviceContext, DirectModule, evaluate_render_program_instructionsWGSL, F32Type, getArrayType, LinearEdge, LinearEdgeWGSL, Procedure, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderExtend, RenderFilter, RenderGradientStop, RenderInstruction, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearGradient, RenderLinearGradientAccuracy, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderRadialGradient, RenderRadialGradientAccuracy, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, Routine, StoreStatementCallback, U32Type, wgsl, WGSLExpression, WGSLMainModule, WGSLReferenceModule, WGSLSlot, WGSLStatements } from '../../../imports.js';
-import Vector3 from '../../../../../dot/js/Vector3.js';
-import Vector4 from '../../../../../dot/js/Vector4.js';
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
-import Vector2 from '../../../../../dot/js/Vector2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Matrix4 from '../../../../../dot/js/Matrix4.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
+import Vector3 from '../../../../../dot/js/Vector3.js';
+import Vector4 from '../../../../../dot/js/Vector4.js';
+import {
+  asyncTestWithDevice, BufferArraySlot, BufferBindingType, BufferSlot, ByteEncoder, ConcreteType, DeviceContext, DirectModule, evaluate_render_program_instructionsWGSL, F32Type, getArrayType, LinearEdge, LinearEdgeWGSL, Procedure, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderExtend, RenderFilter, RenderGradientStop, RenderInstruction, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearGradient, RenderLinearGradientAccuracy, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderRadialGradient, RenderRadialGradientAccuracy, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, Routine, StoreStatementCallback, U32Type, wgsl, WGSLExpression, WGSLMainModule, WGSLReferenceModule, WGSLSlot, WGSLStatements
+} from '../../../imports.js';
 
 QUnit.module( 'RenderProgramComputeTests' );
 

@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferArraySlot, DeviceContext, getArrayType, Procedure, RadixSortModule, Routine, U32Order, u32S } from '../imports.js';
 import Utils from '../../../dot/js/Utils.js';
+import { alpenglow, BufferArraySlot, DeviceContext, getArrayType, Procedure, RadixSortModule, Routine, U32Order, u32S } from '../imports.js';
 
 export default class PerformanceTesting {
   public static async loopRadixSortTest(

@@ -13,8 +13,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterChunkReduceData, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
+import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterChunkReduceData, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
 
 export default class ParallelRasterInitialClip {
   public static async dispatch(

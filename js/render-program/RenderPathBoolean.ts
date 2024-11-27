@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, isWindingIncluded, LinearEdge, RenderColor, RenderEvaluationContext, RenderPath, RenderProgram, SerializedRenderPath, SerializedRenderProgram } from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow, isWindingIncluded, LinearEdge, RenderColor, RenderEvaluationContext, RenderPath, RenderProgram, SerializedRenderPath, SerializedRenderProgram } from '../imports.js';
 
 export default class RenderPathBoolean extends RenderProgram {
   public constructor(

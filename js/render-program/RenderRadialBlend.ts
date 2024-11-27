@@ -14,10 +14,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, LinearEdge, RenderColor, RenderEvaluationContext, RenderInstruction, RenderInstructionComputeBlendRatio, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, SerializedRenderProgram } from '../imports.js';
-import Vector2 from '../../../dot/js/Vector2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow, LinearEdge, RenderColor, RenderEvaluationContext, RenderInstruction, RenderInstructionComputeBlendRatio, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, SerializedRenderProgram } from '../imports.js';
 
 const scratchRadialBlendVector = new Vector2( 0, 0 );
 

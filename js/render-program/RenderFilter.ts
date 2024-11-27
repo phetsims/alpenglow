@@ -9,9 +9,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderPathBoolean, RenderProgram, SerializedRenderProgram } from '../imports.js';
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderPathBoolean, RenderProgram, SerializedRenderProgram } from '../imports.js';
 
 export default class RenderFilter extends RenderProgram {
 

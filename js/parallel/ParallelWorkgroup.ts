@@ -8,8 +8,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BaseWorkgroupValues, ParallelKernel } from '../imports.js';
 import Vector3 from '../../../dot/js/Vector3.js';
+import { alpenglow, BaseWorkgroupValues, ParallelKernel } from '../imports.js';
 
 export default class ParallelWorkgroup<WorkgroupValues extends BaseWorkgroupValues> {
 

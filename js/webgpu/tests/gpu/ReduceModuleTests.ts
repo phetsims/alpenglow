@@ -4,9 +4,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Add, Procedure, ReduceModule, ReduceModuleOptions, Routine, U32Add, u32S, Vec2uAdd, Vec2uBic } from '../../../imports.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
+import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Add, Procedure, ReduceModule, ReduceModuleOptions, Routine, U32Add, u32S, Vec2uAdd, Vec2uBic } from '../../../imports.js';
 
 QUnit.module( 'ReduceModuleTests' );
 

@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RenderColor, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderProgram, RenderSRGBToLinearSRGB } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow, RenderColor, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderProgram, RenderSRGBToLinearSRGB } from '../imports.js';
 
 export default class RenderColorSpace {
   protected constructor(

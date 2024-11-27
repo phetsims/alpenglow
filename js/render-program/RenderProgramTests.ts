@@ -7,9 +7,9 @@
  *
  */
 
-import { RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderColor, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean } from '../imports.js';
-import Vector4 from '../../../dot/js/Vector4.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import Vector4 from '../../../dot/js/Vector4.js';
+import { RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderColor, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean } from '../imports.js';
 
 QUnit.module( 'RenderProgram' );
 

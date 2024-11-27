@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow } from '../imports.js';
 
 // TODO: We'll plan to use Float32Array to test WebGPU compatibility and epsilons
 const ExecutionArrayType = Float64Array;

@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RenderColor, RenderEvaluationContext, RenderProgram, SerializedRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow, RenderColor, RenderEvaluationContext, RenderProgram, SerializedRenderProgram } from '../imports.js';
 
 export default class RenderGradientStop {
   public constructor( public readonly ratio: number, public readonly program: RenderProgram ) {

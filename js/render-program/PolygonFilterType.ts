@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import { alpenglow } from '../imports.js';
 
 enum PolygonFilterType {
   Box = 0,

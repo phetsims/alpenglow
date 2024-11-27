@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ConcreteType, DeviceContext, webgpu } from '../../imports.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow, ConcreteType, DeviceContext, webgpu } from '../../imports.js';
 
 webgpu.enableRecording();
 

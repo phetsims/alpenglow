@@ -6,56 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-// eslint-disable-next-line phet/single-line-import
-import {
-  alpenglow,
-  ClippableFace,
-  PolygonalFace,
-  RenderableFace,
-  RenderAlpha,
-  RenderBarycentricBlend,
-  RenderBarycentricPerspectiveBlend,
-  RenderBlendCompose,
-  RenderColor,
-  RenderColorSpace,
-  RenderColorSpaceConversion,
-  RenderDepthSort,
-  RenderEvaluationContext,
-  RenderFilter,
-  RenderImage,
-  RenderInstruction,
-  RenderLinearBlend,
-  RenderLinearGradient,
-  RenderNormalDebug,
-  RenderNormalize,
-  RenderPath,
-  RenderPathBoolean,
-  RenderPhong,
-  RenderProgramNeeds,
-  RenderRadialBlend,
-  RenderRadialGradient,
-  RenderStack,
-  SerializedRenderAlpha,
-  SerializedRenderBarycentricBlend,
-  SerializedRenderBarycentricPerspectiveBlend,
-  SerializedRenderBlendCompose,
-  SerializedRenderColor,
-  SerializedRenderColorSpaceConversion,
-  SerializedRenderDepthSort,
-  SerializedRenderFilter,
-  SerializedRenderImage,
-  SerializedRenderLinearBlend,
-  SerializedRenderLinearGradient,
-  SerializedRenderNormalDebug,
-  SerializedRenderNormalize,
-  SerializedRenderPathBoolean,
-  SerializedRenderPhong,
-  SerializedRenderRadialBlend,
-  SerializedRenderRadialGradient,
-  SerializedRenderStack
-} from '../imports.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+// eslint-disable-next-line phet/single-line-import
+import { alpenglow, ClippableFace, PolygonalFace, RenderableFace, RenderAlpha, RenderBarycentricBlend, RenderBarycentricPerspectiveBlend, RenderBlendCompose, RenderColor, RenderColorSpace, RenderColorSpaceConversion, RenderDepthSort, RenderEvaluationContext, RenderFilter, RenderImage, RenderInstruction, RenderLinearBlend, RenderLinearGradient, RenderNormalDebug, RenderNormalize, RenderPath, RenderPathBoolean, RenderPhong, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderStack, SerializedRenderAlpha, SerializedRenderBarycentricBlend, SerializedRenderBarycentricPerspectiveBlend, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderDepthSort, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderNormalDebug, SerializedRenderNormalize, SerializedRenderPathBoolean, SerializedRenderPhong, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderStack } from '../imports.js';
 
 // Output should be chained (the `output` parameter should be returned, for convenience)
 export type RenderEvaluator = ( context: RenderEvaluationContext, output: Vector4 ) => Vector4;

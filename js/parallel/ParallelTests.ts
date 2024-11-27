@@ -8,8 +8,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { ParallelContext, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
+import { ParallelContext, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray } from '../imports.js';
 
 // eslint-disable-next-line phet/bad-sim-text
 const random = new Random();

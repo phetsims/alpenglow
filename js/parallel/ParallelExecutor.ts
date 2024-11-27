@@ -21,9 +21,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BaseWorkgroupValues, ParallelContext, ParallelKernel, ParallelWorkgroup, ParallelWorkgroupArray } from '../imports.js';
 import Random from '../../../dot/js/Random.js';
 import Vector3 from '../../../dot/js/Vector3.js';
+import { alpenglow, BaseWorkgroupValues, ParallelContext, ParallelKernel, ParallelWorkgroup, ParallelWorkgroupArray } from '../imports.js';
 
 // eslint-disable-next-line phet/bad-sim-text
 const random = new Random();

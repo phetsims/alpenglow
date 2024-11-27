@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, SerializedRenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, SerializedRenderProgram } from '../imports.js';
 
 export default class RenderNormalDebug extends RenderProgram {
   public constructor(

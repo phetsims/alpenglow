@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ComputePass, ConsoleLogger, DeviceContext, TypedBuffer, webgpu } from '../../imports.js';
 import Utils from '../../../../dot/js/Utils.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import { alpenglow, BufferLogger, ComputePass, ConsoleLogger, DeviceContext, TypedBuffer, webgpu } from '../../imports.js';
 
 export type ExecutorOptions = {
   getTimestampWrites?: ( name: string ) => GPUComputePassTimestampWrites | null;

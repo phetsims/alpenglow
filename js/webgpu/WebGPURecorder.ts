@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow } from '../imports.js';
 
 export default class WebGPURecorder {
 

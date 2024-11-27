@@ -4,9 +4,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import { alpenglow, BlitShader, BufferArraySlot, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TiledTwoPassModule, TwoPassConfig, TwoPassConfigType, TwoPassInitialRenderableFace, TwoPassInitialRenderableFaceType, u32S, U32Type } from '../../../imports.js';
 import testPolygonalFace from '../testPolygonalFace.js';
-import Bounds2 from '../../../../../dot/js/Bounds2.js';
 
 export const evaluateTwoPassTiled = async (
   name: string,

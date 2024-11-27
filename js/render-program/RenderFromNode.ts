@@ -6,15 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, CombinedRaster, Rasterize, RenderAlpha, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderExtend, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, RenderResampleType, RenderStack, RenderUnpremultiply } from '../imports.js';
+import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { Shape } from '../../../kite/js/imports.js';
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { isTReadOnlyProperty } from '../../../axon/js/TReadOnlyProperty.js';
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import { Color, ColorMatrixFilter, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Sprites, TColor, Text, TPaint } from '../../../scenery/js/imports.js';
 import ConstructorOf from '../../../phet-core/js/types/ConstructorOf.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { Color, ColorMatrixFilter, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Sprites, TColor, Text, TPaint } from '../../../scenery/js/imports.js';
+import { alpenglow, CombinedRaster, Rasterize, RenderAlpha, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderExtend, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, RenderResampleType, RenderStack, RenderUnpremultiply } from '../imports.js';
 
 // TODO: better for this?
 const piecewiseOptions = {

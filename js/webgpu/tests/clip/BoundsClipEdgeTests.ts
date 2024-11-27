@@ -4,9 +4,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { asyncTestWithDevice, bounds_clip_edgeWGSL, BoundsClipping, BufferArraySlot, BufferBindingType, DirectModule, F32Type, getArrayType, LinearEdge, LinearEdgeWGSL, Procedure, Routine, wgsl, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
+import { asyncTestWithDevice, bounds_clip_edgeWGSL, BoundsClipping, BufferArraySlot, BufferBindingType, DirectModule, F32Type, getArrayType, LinearEdge, LinearEdgeWGSL, Procedure, Routine, wgsl, WGSLMainModule, WGSLSlot } from '../../../imports.js';
 import exampleTestEdges from './exampleTestEdges.js'; // NOTE: DO NOT put in imports, we don't want extra data there
 
 QUnit.module( 'BoundsClipEdgeTests' );

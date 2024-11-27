@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RenderEvaluationContext, RenderEvaluator, RenderExecutionStack, RenderInstruction, RenderInstructionLocation, RenderProgram } from '../imports.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow, RenderEvaluationContext, RenderEvaluator, RenderExecutionStack, RenderInstruction, RenderInstructionLocation, RenderProgram } from '../imports.js';
 
 // Should be kept empty
 const scratchInstructions: RenderInstruction[] = [];

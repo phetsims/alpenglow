@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, RenderStack, SerializedRenderProgram } from '../imports.js';
-import Vector4 from '../../../dot/js/Vector4.js';
 import Vector3 from '../../../dot/js/Vector3.js';
+import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow, ByteEncoder, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, RenderStack, SerializedRenderProgram } from '../imports.js';
 
 export default class RenderBlendCompose extends RenderProgram {
 

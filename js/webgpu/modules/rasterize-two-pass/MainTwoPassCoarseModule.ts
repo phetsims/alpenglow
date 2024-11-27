@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferSlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, LinearEdge, MAIN_TWO_PASS_COARSE_DEFAULTS, mainTwoPassCoarseWGSL, mainTwoPassCoarseWGSLOptions, PipelineBlueprintOptions, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFace } from '../../../imports.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow, BufferSlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, LinearEdge, MAIN_TWO_PASS_COARSE_DEFAULTS, mainTwoPassCoarseWGSL, mainTwoPassCoarseWGSLOptions, PipelineBlueprintOptions, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFace } from '../../../imports.js';
 
 export type MainTwoPassCoarseModuleOptions = {
   // input
