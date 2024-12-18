@@ -184,7 +184,7 @@ export { default as ParallelRaster } from './parallel/raster-clip/ParallelRaster
 export { default as WGSLString, WGSLStringLiteral, WGSLStringFunction, WGSLStringAccumulator, WGSLModule, WGSLMainModule, WGSLReferenceModule, WGSLStringModule, WGSLSlot, wgslString, wgslFunction, wgslBlueprint, wgsl, decimalS, u32S, u32HexS, i32S, i32HexS, f32S, wgslJoin, wgslMapJoin, wgslOneLine, wgslWith } from './webgpu/wgsl/WGSLString.js';
 export type { WGSLExpression, WGSLExpressionU32, WGSLExpressionI32, WGSLExpressionF32, WGSLExpressionBool, WGSLExpressionT, WGSLStatements, WGSLModuleDeclarations, WGSLVariableName, WGSLType, WGSLBinaryExpression } from './webgpu/wgsl/WGSLString.js';
 
-export { default as WebGPURecorder, WebGPUCommand } from './webgpu/WebGPURecorder.js';
+export { default as WebGPURecorder, WebGPUCommand, WebGPUCommandList } from './webgpu/WebGPURecorder.js';
 export { default as WebGPUAPI, webgpu } from './webgpu/WebGPUAPI.js';
 export type { PreferredCanvasFormat } from './webgpu/WebGPUAPI.js';
 export { default as DeviceContext } from './webgpu/compute/DeviceContext.js';

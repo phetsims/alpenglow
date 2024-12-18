@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WebGPURecorder } from '../imports.js';
-import { WebGPUCommandList } from './WebGPURecorder.js';
+import { alpenglow, WebGPURecorder, WebGPUCommandList } from '../imports.js';
 
 export type PreferredCanvasFormat = 'bgra8unorm' | 'rgba8unorm';
 
