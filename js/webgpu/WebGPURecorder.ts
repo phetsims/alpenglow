@@ -784,7 +784,7 @@ class WebGPUCommandEncoderBeginRenderPass extends WebGPUCommand {
   ) {
     super( result, [
       commandEncoder,
-      [ ...descriptor.colorAttachments ].flatMap( attachment => attachment === null ? [] : [
+      [ ...descriptor.colorAttachments ].flatMap( attachment => ( attachment === null || attachment === undefined ) ? [] : [
         attachment.view,
         ...( attachment.resolveTarget ? [ attachment.resolveTarget ] : [] )
       ] ),
