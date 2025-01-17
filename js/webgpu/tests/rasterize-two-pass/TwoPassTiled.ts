@@ -5,6 +5,9 @@
  */
 
 import Bounds2 from '../../../../../dot/js/Bounds2.js';
+import Matrix3 from '../../../../../dot/js/Matrix3.js';
+import Vector2 from '../../../../../dot/js/Vector2.js';
+import Vector4 from '../../../../../dot/js/Vector4.js';
 import { alpenglow, BlitShader, BufferArraySlot, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TiledTwoPassModule, TwoPassConfig, TwoPassConfigType, TwoPassInitialRenderableFace, TwoPassInitialRenderableFaceType, u32S, U32Type } from '../../../imports.js';
 import testPolygonalFace from '../testPolygonalFace.js';
 
@@ -26,38 +29,38 @@ export const evaluateTwoPassTiled = async (
 
   const clippableFace = testPolygonalFace;
 
-  const mainFace = clippableFace.getTransformed( phet.dot.Matrix3.scaling( 0.37 ) );
-  const smallerFace = clippableFace.getTransformed( phet.dot.Matrix3.translation( 16, 165 ).timesMatrix( phet.dot.Matrix3.scaling( 0.15 ) ) );
+  const mainFace = clippableFace.getTransformed( Matrix3.scaling( 0.37 ) );
+  const smallerFace = clippableFace.getTransformed( Matrix3.translation( 16, 165 ).timesMatrix( Matrix3.scaling( 0.15 ) ) );
 
   const clientSpace = RenderColorSpace.premultipliedLinearSRGB;
 
   const program = new RenderStack( [
     new RenderPathBoolean(
-      RenderPath.fromBounds( new phet.dot.Bounds2( 0, 0, 128, 256 ) ),
+      RenderPath.fromBounds( new Bounds2( 0, 0, 128, 256 ) ),
       new RenderColor(
-        new phet.dot.Vector4( 0, 0, 0, 1 )
+        new Vector4( 0, 0, 0, 1 )
       ).colorConverted( RenderColorSpace.sRGB, clientSpace ),
       new RenderColor(
-        new phet.dot.Vector4( 1, 1, 1, 1 )
+        new Vector4( 1, 1, 1, 1 )
       ).colorConverted( RenderColorSpace.sRGB, clientSpace )
     ),
     RenderPathBoolean.fromInside(
       new RenderPath( 'nonzero', smallerFace.toPolygonalFace().polygons ),
       new RenderColor(
-        new phet.dot.Vector4( 1, 1, 1, 1 )
+        new Vector4( 1, 1, 1, 1 )
       ).colorConverted( RenderColorSpace.sRGB, clientSpace )
     ),
     RenderPathBoolean.fromInside(
       new RenderPath( 'nonzero', mainFace.toPolygonalFace().polygons ),
       new RenderLinearBlend(
-        new phet.dot.Vector2( 1 / 256, 0 ),
+        new Vector2( 1 / 256, 0 ),
         0,
         RenderLinearBlendAccuracy.Accurate,
-        new RenderColor( new phet.dot.Vector4( 1, 0, 0, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
-        new RenderColor( new phet.dot.Vector4( 0.5, 0, 1, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
+        new RenderColor( new Vector4( 1, 0, 0, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
+        new RenderColor( new Vector4( 0.5, 0, 1, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
       ).colorConverted( RenderColorSpace.premultipliedOklab, clientSpace )
     )
-  ] ).transformed( phet.dot.Matrix3.scaling( rasterSize / 256 ) );
+  ] ).transformed( Matrix3.scaling( rasterSize / 256 ) );
 
   const renderableFaces = Rasterize.partitionRenderableFaces( program, new Bounds2( 0, 0, rasterSize, rasterSize ), {
     tileSize: 1024 * 1024 // never do tiles

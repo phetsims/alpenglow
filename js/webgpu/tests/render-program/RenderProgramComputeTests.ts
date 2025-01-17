@@ -282,7 +282,7 @@ const renderProgramTest = (
 ) => {
   asyncTestWithDevice( name, async ( device, deviceContext ) => {
     const context = new RenderEvaluationContext().set(
-      null, 1, phet.dot.v2( 0.5, 0.5 ), 0, 0, 1, 1
+      null, 1, new Vector2( 0.5, 0.5 ), 0, 0, 1, 1
     );
 
     const actualValue = await renderProgramComputeEvaluate(
@@ -295,7 +295,7 @@ const renderProgramTest = (
       true, // isFullArea
       false, // needsFace
       1, // area
-      new phet.dot.Bounds2( 0, 0, 1, 1 ), // bounds
+      new Bounds2( 0, 0, 1, 1 ), // bounds
       -1, 1, 1, -1 // counts
     );
     const expectedValue = renderProgram.evaluate( context );
