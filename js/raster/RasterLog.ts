@@ -9,9 +9,14 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, IntegerEdge, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RenderableFace } from './RenderableFace.js';
+import type { IntegerEdge } from '../cag/IntegerEdge.js';
+import type { RationalHalfEdge } from '../cag/RationalHalfEdge.js';
+import type { RationalBoundary } from '../cag/RationalBoundary.js';
+import type { RationalFace } from '../cag/RationalFace.js';
 
-export default class RasterLog {
+export class RasterLog {
   public scale: number | null = null;
   public partialAreas: Bounds2[] = [];
   public fullAreas: Bounds2[] = [];

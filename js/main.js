@@ -13,4 +13,4 @@
 import * as everything from './imports.js';
 
 // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the alpenglow namespace
-export default everything.alpenglow;
+export const alpenglow = everything.alpenglow;

@@ -17,9 +17,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, wgsl, WGSLExpressionBool, WGSLStatements } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { wgsl, WGSLExpressionBool, WGSLStatements } from '../WGSLString.js';
 
-const conditionalIfWGSL = (
+export const conditionalIfWGSL = (
   // null | string (expr:bool) - if null, trueStatements will be executed. If non-null, it will create an if(else)
   optionalConditional: WGSLExpressionBool | null,
 
@@ -42,7 +43,5 @@ const conditionalIfWGSL = (
     `;
   }
 };
-
-export default conditionalIfWGSL;
 
 alpenglow.register( 'conditionalIfWGSL', conditionalIfWGSL );

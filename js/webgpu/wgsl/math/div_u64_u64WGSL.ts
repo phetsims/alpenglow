@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { cmp_u64_u64WGSL, first_leading_bit_u64WGSL, is_zero_u64WGSL, left_shift_u64WGSL, ONE_u64WGSL, right_shift_u64WGSL, subtract_i64_i64WGSL, u64WGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Integer division of two u64s, returning a vec4<u32> with the quotient (result.xy) and remainder (result.zw).
  *
@@ -16,7 +14,17 @@ import { cmp_u64_u64WGSL, first_leading_bit_u64WGSL, is_zero_u64WGSL, left_shift
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { u64WGSL } from './u64WGSL.js';
+import { is_zero_u64WGSL } from './is_zero_u64WGSL.js';
+import { first_leading_bit_u64WGSL } from './first_leading_bit_u64WGSL.js';
+import { left_shift_u64WGSL } from './left_shift_u64WGSL.js';
+import { cmp_u64_u64WGSL } from './cmp_u64_u64WGSL.js';
+import { subtract_i64_i64WGSL } from './subtract_i64_i64WGSL.js';
+import { ONE_u64WGSL } from './ONE_u64WGSL.js';
+import { right_shift_u64WGSL } from './right_shift_u64WGSL.js';
+
+export const div_u64_u64WGSL = (
   a: WGSLExpression,
   b: WGSLExpression
 ): WGSLExpression => {

@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Converts a linear Display-P3 color to the linear sRGB color space
  *
@@ -10,7 +8,9 @@ import { wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+
+export const linear_displayP3_to_linear_sRGBWGSL = (
   vec3: WGSLExpression
 ): WGSLExpression => {
   return new WGSLStringModule( 'linear_displayP3_to_linear_sRGB', wgsl`linear_displayP3_to_linear_sRGB( ${vec3} )`, wgsl`

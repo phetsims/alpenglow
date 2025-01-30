@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { wgsl, WGSLReferenceModule } from '../../../imports.js';
-
 /**
  * Alias for i64, which is not yet supported in WGSL.
  *
@@ -10,6 +8,8 @@ import { wgsl, WGSLReferenceModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default new WGSLReferenceModule( 'i64', wgsl`
+import { wgsl, WGSLReferenceModule } from '../WGSLString.js';
+
+export const i64WGSL = new WGSLReferenceModule( 'i64', wgsl`
   alias i64 = vec2<u32>;
 ` );

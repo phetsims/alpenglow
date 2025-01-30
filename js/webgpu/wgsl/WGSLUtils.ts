@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, wgsl, WGSLExpressionU32 } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { wgsl, WGSLExpressionU32 } from './WGSLString.js';
 
 export type WorkgroupSizable = {
   // the number of threads running this command

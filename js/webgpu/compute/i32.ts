@@ -6,13 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
 
-const i32 = ( n: number ): string => {
+export const i32 = ( n: number ): string => {
   assert && assert( Number.isInteger( n ) && n >= -( 2 ** 31 ) && n < 2 ** 31, `Invalid i32 value: ${n}` );
 
   return `${n >> 0}i`;
 };
 alpenglow.register( 'i32', i32 );
-
-export default i32;

@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { q128WGSL, wgsl, WGSLReferenceModule } from '../../../imports.js';
-
 /**
  * Struct for rational intersection points.
  *
@@ -13,7 +11,10 @@ import { q128WGSL, wgsl, WGSLReferenceModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default new WGSLReferenceModule( 'IntersectionPoint', wgsl`
+import { wgsl, WGSLReferenceModule } from '../WGSLString.js';
+import { q128WGSL } from './q128WGSL.js';
+
+export const IntersectionPointWGSL = new WGSLReferenceModule( 'IntersectionPoint', wgsl`
   struct IntersectionPoint {
     t0: ${q128WGSL},
     t1: ${q128WGSL},

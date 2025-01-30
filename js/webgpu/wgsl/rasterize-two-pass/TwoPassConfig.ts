@@ -1,6 +1,6 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { PolygonFilterType } from '../../../imports.js';
+import { PolygonFilterType } from '../../../render-program/PolygonFilterType.js';
 
 /**
  * Raw type for a TwoPassConfig
@@ -25,7 +25,7 @@ import { PolygonFilterType } from '../../../imports.js';
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-type TwoPassConfig = {
+export type TwoPassConfig = {
   rasterWidth: number;
   rasterHeight: number;
   tileWidth: number;
@@ -38,5 +38,3 @@ type TwoPassConfig = {
   filterScale: number;
   rasterColorSpace: number; // 0: sRGB, 1: Display-P3
 };
-
-export default TwoPassConfig;

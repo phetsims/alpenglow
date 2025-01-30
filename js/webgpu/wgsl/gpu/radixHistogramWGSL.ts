@@ -8,7 +8,14 @@
 
 import WithoutNull from '../../../../../phet-core/js/types/WithoutNull.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
-import { alpenglow, ceilDivideConstantDivisorWGSL, commentWGSL, histogramWGSL, histogramWGSLOptions, logRakedWGSL, u32S, U32Type, unrollWGSL, wgsl, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
+import { histogramWGSL, histogramWGSLOptions } from './histogramWGSL.js';
+import { commentWGSL } from './commentWGSL.js';
+import { logRakedWGSL } from './logRakedWGSL.js';
+import { U32Type } from '../../compute/ConcreteType.js';
+import { ceilDivideConstantDivisorWGSL } from './ceilDivideConstantDivisorWGSL.js';
+import { unrollWGSL } from './unrollWGSL.js';
 
 export type radixHistogramWGSLOptions = {
   numBins: number;
@@ -17,7 +24,7 @@ export type radixHistogramWGSLOptions = {
   storeHistogram: ( index: WGSLExpressionU32, value: WGSLExpressionU32 ) => WGSLStatements;
 } & WithoutNull<WithRequired<histogramWGSLOptions, 'lengthExpression'>, 'lengthExpression'>;
 
-const radixHistogramWGSL = (
+export const radixHistogramWGSL = (
   options: radixHistogramWGSLOptions
 ): WGSLStatements => {
 
@@ -61,7 +68,5 @@ const radixHistogramWGSL = (
     ${commentWGSL( 'end radix_histogram' )}
   `;
 };
-
-export default radixHistogramWGSL;
 
 alpenglow.register( 'radixHistogramWGSL', radixHistogramWGSL );

@@ -9,7 +9,11 @@
  */
 
 import Random from '../../../dot/js/Random.js';
-import { ParallelContext, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray } from '../imports.js';
+import { ParallelStorageArray } from './ParallelStorageArray.js';
+import { ParallelWorkgroupArray } from './ParallelWorkgroupArray.js';
+import { ParallelKernel } from './ParallelKernel.js';
+import { ParallelContext } from './ParallelContext.js';
+import { ParallelExecutor } from './ParallelExecutor.js';
 
 // eslint-disable-next-line phet/bad-sim-text
 const random = new Random();

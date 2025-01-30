@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { wgsl, WGSLReferenceModule } from '../../../imports.js';
-
 /**
  * Alias for q128, which is a rational number with a 64-bit (signed) numerator and a 64-bit (unsigned) denominator.
  *
@@ -11,6 +9,8 @@ import { wgsl, WGSLReferenceModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default new WGSLReferenceModule( 'q128', wgsl`
+import { wgsl, WGSLReferenceModule } from '../WGSLString.js';
+
+export const q128WGSL = new WGSLReferenceModule( 'q128', wgsl`
   alias q128 = vec4<u32>;
 ` );

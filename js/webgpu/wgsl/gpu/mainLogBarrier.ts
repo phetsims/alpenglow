@@ -6,10 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, wgsl, WGSLMainModule } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { wgsl, WGSLMainModule } from '../WGSLString.js';
+import { logWGSL } from './logWGSL.js';
 
 // TODO: remove the function call?
-const mainLogBarrier = (): WGSLMainModule => {
+export const mainLogBarrier = (): WGSLMainModule => {
   return new WGSLMainModule( [], wgsl`
     @compute @workgroup_size(1)
     fn main(
@@ -23,7 +25,5 @@ const mainLogBarrier = (): WGSLMainModule => {
     }
   ` );
 };
-
-export default mainLogBarrier;
 
 alpenglow.register( 'mainLogBarrier', mainLogBarrier );

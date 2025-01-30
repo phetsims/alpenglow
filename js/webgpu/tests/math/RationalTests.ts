@@ -5,7 +5,41 @@
  */
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
-import { abs_i64WGSL, add_i64_i64WGSL, add_u32_u32_to_u64WGSL, add_u64_u64WGSL, asyncTestWithDevice, BufferArraySlot, BufferBindingType, cmp_i64_i64WGSL, cmp_u64_u64WGSL, compareArrays, ConcreteType, DirectModule, div_u64_u64WGSL, equals_cross_mul_q128WGSL, first_leading_bit_u64WGSL, first_trailing_bit_u64WGSL, gcd_u64_u64WGSL, getArrayType, i32_to_i64WGSL, I32Type, i64_to_q128WGSL, intersect_line_segmentsWGSL, is_negative_i64WGSL, is_zero_u64WGSL, left_shift_u64WGSL, mul_i64_i64WGSL, mul_u32_u32_to_u64WGSL, mul_u64_u64WGSL, negate_i64WGSL, Procedure, ratio_test_q128WGSL, reduce_q128WGSL, right_shift_u64WGSL, Routine, subtract_i64_i64WGSL, u32_to_u64WGSL, U32Type, wgsl, WGSLMainModule, WGSLSlot, WGSLString, whole_i64_to_q128WGSL } from '../../../imports.js';
+import { ConcreteType, getArrayType, I32Type, U32Type } from '../../compute/ConcreteType.js';
+import { asyncTestWithDevice, compareArrays } from '../ShaderTestUtils.js';
+import { wgsl, WGSLMainModule, WGSLSlot, WGSLString } from '../../wgsl/WGSLString.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { DirectModule } from '../../compute/DirectModule.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { Routine } from '../../compute/Routine.js';
+import { Procedure } from '../../compute/Procedure.js';
+import { u32_to_u64WGSL } from '../../wgsl/math/u32_to_u64WGSL.js';
+import { i32_to_i64WGSL } from '../../wgsl/math/i32_to_i64WGSL.js';
+import { add_u32_u32_to_u64WGSL } from '../../wgsl/math/add_u32_u32_to_u64WGSL.js';
+import { mul_u32_u32_to_u64WGSL } from '../../wgsl/math/mul_u32_u32_to_u64WGSL.js';
+import { add_u64_u64WGSL } from '../../wgsl/math/add_u64_u64WGSL.js';
+import { add_i64_i64WGSL } from '../../wgsl/math/add_i64_i64WGSL.js';
+import { negate_i64WGSL } from '../../wgsl/math/negate_i64WGSL.js';
+import { is_zero_u64WGSL } from '../../wgsl/math/is_zero_u64WGSL.js';
+import { is_negative_i64WGSL } from '../../wgsl/math/is_negative_i64WGSL.js';
+import { abs_i64WGSL } from '../../wgsl/math/abs_i64WGSL.js';
+import { left_shift_u64WGSL } from '../../wgsl/math/left_shift_u64WGSL.js';
+import { right_shift_u64WGSL } from '../../wgsl/math/right_shift_u64WGSL.js';
+import { first_leading_bit_u64WGSL } from '../../wgsl/math/first_leading_bit_u64WGSL.js';
+import { first_trailing_bit_u64WGSL } from '../../wgsl/math/first_trailing_bit_u64WGSL.js';
+import { subtract_i64_i64WGSL } from '../../wgsl/math/subtract_i64_i64WGSL.js';
+import { cmp_u64_u64WGSL } from '../../wgsl/math/cmp_u64_u64WGSL.js';
+import { cmp_i64_i64WGSL } from '../../wgsl/math/cmp_i64_i64WGSL.js';
+import { mul_u64_u64WGSL } from '../../wgsl/math/mul_u64_u64WGSL.js';
+import { mul_i64_i64WGSL } from '../../wgsl/math/mul_i64_i64WGSL.js';
+import { div_u64_u64WGSL } from '../../wgsl/math/div_u64_u64WGSL.js';
+import { gcd_u64_u64WGSL } from '../../wgsl/math/gcd_u64_u64WGSL.js';
+import { i64_to_q128WGSL } from '../../wgsl/math/i64_to_q128WGSL.js';
+import { whole_i64_to_q128WGSL } from '../../wgsl/math/whole_i64_to_q128WGSL.js';
+import { equals_cross_mul_q128WGSL } from '../../wgsl/math/equals_cross_mul_q128WGSL.js';
+import { ratio_test_q128WGSL } from '../../wgsl/math/ratio_test_q128WGSL.js';
+import { reduce_q128WGSL } from '../../wgsl/math/reduce_q128WGSL.js';
+import { intersect_line_segmentsWGSL } from '../../wgsl/math/intersect_line_segmentsWGSL.js';
 
 QUnit.module( 'RationalTests' );
 

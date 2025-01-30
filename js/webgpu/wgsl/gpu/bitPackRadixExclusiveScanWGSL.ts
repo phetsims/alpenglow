@@ -6,7 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, commentWGSL, u32HexS, u32S, wgsl, WGSLExpressionU32, WGSLStatements, wgslString, WGSLStringAccumulator, WGSLVariableName } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32HexS, u32S, wgsl, WGSLExpressionU32, WGSLStatements, wgslString, WGSLStringAccumulator, WGSLVariableName } from '../WGSLString.js';
+import { commentWGSL } from './commentWGSL.js';
 
 export type bitPackRadixExclusiveScanWGSLOptions = {
   // (u32/vec2u/vec3u/vec4u) name
@@ -23,7 +25,7 @@ export type bitPackRadixExclusiveScanWGSLOptions = {
   maxCount: number;
 };
 
-const bitPackRadixExclusiveScanWGSL = (
+export const bitPackRadixExclusiveScanWGSL = (
   options: bitPackRadixExclusiveScanWGSLOptions
 ): WGSLStatements => {
 
@@ -96,7 +98,5 @@ const bitPackRadixExclusiveScanWGSL = (
     `;
   }
 };
-
-export default bitPackRadixExclusiveScanWGSL;
 
 alpenglow.register( 'bitPackRadixExclusiveScanWGSL', bitPackRadixExclusiveScanWGSL );

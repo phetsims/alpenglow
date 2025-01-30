@@ -1,14 +1,16 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { i64WGSL, q128WGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Converts an i64 to a rational q128 (whole number).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { i64WGSL } from './i64WGSL.js';
+import { q128WGSL } from './q128WGSL.js';
+
+export const whole_i64_to_q128WGSL = (
   i64: WGSLExpression,
   inline = true
 ): WGSLExpression => {

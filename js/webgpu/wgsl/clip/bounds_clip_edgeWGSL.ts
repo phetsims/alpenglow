@@ -1,12 +1,14 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { LinearEdgeWGSL, matthes_drakopoulos_clipWGSL, wgsl, WGSLExpression, WGSLExpressionF32, WGSLReferenceModule, wgslString, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Bounds-clips a specific edge, returning a certain number of edges that are within the bounds.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import { wgsl, WGSLExpression, WGSLExpressionF32, WGSLReferenceModule, wgslString, WGSLStringModule } from '../WGSLString.js';
+import { LinearEdgeWGSL } from '../cag/LinearEdgeWGSL.js';
+import { matthes_drakopoulos_clipWGSL } from './matthes_drakopoulos_clipWGSL.js';
 
 // TODO: for memory, we really should have this be array<vec2f,4>, since we're duplicating the start/end points
 export const bounds_clip_edge_ResultWGSL = new WGSLReferenceModule( 'bounds_clip_edge_Result', wgsl`
@@ -16,7 +18,7 @@ export const bounds_clip_edge_ResultWGSL = new WGSLReferenceModule( 'bounds_clip
   }
 ` );
 
-export default (
+export const bounds_clip_edgeWGSL = (
   edge: WGSLExpression, // LinearEdge
   minX: WGSLExpressionF32,
   minY: WGSLExpressionF32,

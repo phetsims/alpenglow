@@ -9,7 +9,16 @@
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, decimalS, OptionalLengthExpressionable, RakedSizable, reduceWGSL, reduceWGSLOptions, toStripedIndexWGSL, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLMainModule, WGSLSlot, WGSLVariableName } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { BinaryOp } from '../../compute/ConcreteType.js';
+import { reduceWGSL, reduceWGSLOptions } from './reduceWGSL.js';
+import { OptionalLengthExpressionable, RakedSizable } from '../WGSLUtils.js';
+import { decimalS, u32S, wgsl, WGSLExpression, WGSLMainModule, WGSLSlot, WGSLVariableName } from '../WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { unrollWGSL } from './unrollWGSL.js';
+import { binaryExpressionStatementWGSL } from './binaryExpressionStatementWGSL.js';
+import { toStripedIndexWGSL } from './toStripedIndexWGSL.js';
 
 export type mainReduceNonCommutativeWGSLOptions<T> = {
   input: BufferSlot<T[]>;
@@ -32,7 +41,7 @@ export const MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS = {
   reduceOptions: {}
 } as const;
 
-const mainReduceNonCommutativeWGSL = <T>(
+export const mainReduceNonCommutativeWGSL = <T>(
   providedOptions: mainReduceNonCommutativeWGSLOptions<T>
 ): WGSLMainModule => {
 
@@ -111,7 +120,5 @@ const mainReduceNonCommutativeWGSL = <T>(
     }
   ` );
 };
-
-export default mainReduceNonCommutativeWGSL;
 
 alpenglow.register( 'mainReduceNonCommutativeWGSL', mainReduceNonCommutativeWGSL );

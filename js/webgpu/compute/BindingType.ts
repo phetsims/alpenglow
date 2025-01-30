@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
 
-export default abstract class BindingType {
+export abstract class BindingType {
 
   protected abstract mutateBindGroupLayoutEntry( entry: GPUBindGroupLayoutEntry ): void;
 

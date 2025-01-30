@@ -1,6 +1,10 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { ByteEncoder, ConcreteType, StoreStatementCallback, TwoPassCoarseRenderableFace, TwoPassCoarseRenderableFaceWGSL, wgsl, WGSLExpression, WGSLStatements } from '../../../imports.js';
+import { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';
+import { TwoPassCoarseRenderableFace } from './TwoPassCoarseRenderableFace.js';
+import { wgsl, WGSLExpression, WGSLStatements } from '../WGSLString.js';
+import { ByteEncoder } from '../../compute/ByteEncoder.js';
+import { TwoPassCoarseRenderableFaceWGSL } from './TwoPassCoarseRenderableFaceWGSL.js';
 
 /**
  * ConcreteType for a TwoPassCoarseRenderableFace
@@ -12,7 +16,7 @@ import { ByteEncoder, ConcreteType, StoreStatementCallback, TwoPassCoarseRendera
 
 const dwords = 5;
 
-const TwoPassCoarseRenderableFaceType: ConcreteType<TwoPassCoarseRenderableFace> = {
+export const TwoPassCoarseRenderableFaceType: ConcreteType<TwoPassCoarseRenderableFace> = {
   name: 'TwoPassCoarseRenderableFace',
   bytesPerElement: dwords * 4,
 
@@ -86,4 +90,3 @@ const TwoPassCoarseRenderableFaceType: ConcreteType<TwoPassCoarseRenderableFace>
 
   toDebugString: ( value: TwoPassCoarseRenderableFace ) => 'TwoPassCoarseRenderableFace'
 };
-export default TwoPassCoarseRenderableFaceType;

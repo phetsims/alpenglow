@@ -9,11 +9,12 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, FillRule } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { FillRule } from './FillRule.js';
 
 let globalPathId = 0;
 
-export default class RenderPath {
+export class RenderPath {
 
   public readonly id = globalPathId++;
 

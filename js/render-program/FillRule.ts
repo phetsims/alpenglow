@@ -19,9 +19,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-type FillRule = 'nonzero' | 'evenodd' | 'positive' | 'negative';
-
-export default FillRule;
+export type FillRule = 'nonzero' | 'evenodd' | 'positive' | 'negative';
 
 export const isWindingIncluded = ( windingNumber: number, fillRule: FillRule ): boolean => {
   switch( fillRule ) {

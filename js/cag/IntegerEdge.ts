@@ -10,9 +10,13 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, BoundedSubpath, BoundsClipping, RationalIntersection, RenderPath } from '../imports.js';
+import type { RationalIntersection } from './RationalIntersection.js';
+import type { RenderPath } from '../render-program/RenderPath.js';
+import type { BoundedSubpath } from './BoundedSubpath.js';
+import { BoundsClipping } from '../clip/BoundsClipping.js';
+import { alpenglow } from '../alpenglow.js';
 
-export default class IntegerEdge {
+export class IntegerEdge {
 
   public readonly bounds: Bounds2;
   public readonly intersections: RationalIntersection[] = [];

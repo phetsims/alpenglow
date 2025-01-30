@@ -6,9 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RenderExtend, RenderGradientStop, RenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RenderProgram } from './RenderProgram.js';
+import { RenderExtend } from './RenderExtend.js';
+import type { RenderGradientStop } from './RenderGradientStop.js';
 
-export default class RenderLinearRange {
+export class RenderLinearRange {
   public constructor(
     // TODO: doc
     public readonly start: number,

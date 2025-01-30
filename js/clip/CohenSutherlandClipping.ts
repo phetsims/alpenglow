@@ -8,7 +8,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
 type Code = number;
 
@@ -40,7 +40,7 @@ class CodedVector2 extends Vector2 {
   }
 }
 
-export default class CohenSutherlandClipping {
+export class CohenSutherlandClipping {
 
   // Mutates the vectors, returns whether the line segment is at least partially within the bounds
   private static clip( p0: CodedVector2, p1: CodedVector2, bounds: Bounds2 ): boolean {

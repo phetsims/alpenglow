@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-enum RenderBlendType {
+export enum RenderBlendType {
   Normal = 0,
   Multiply = 1,
   Screen = 2,
@@ -27,8 +27,6 @@ enum RenderBlendType {
   Luminosity = 15
   // 4 bits in binary representation
 }
-
-export default RenderBlendType;
 
 alpenglow.register( 'RenderBlendType', RenderBlendType );
 

@@ -795,7 +795,7 @@ an UI and Display made for visual testing and debugging.
       // const outputSize = 768 / 4;
       const scale = 15;
 
-      const program = phet.alpenglow.RenderProgram.deserialize( serialized ).transformed( phet.dot.Matrix3.scaling( scale ) );
+      const program = phet.alpenglow.deserializeRenderProgram( serialized ).transformed( phet.dot.Matrix3.scaling( scale ) );
       const styleCanvas = canvas => {
         canvas.style.width = `${displaySize}px`;
         canvas.style.height = `${displaySize}px`;
@@ -2810,7 +2810,7 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
       console.log( '(binary) instructions' );
       console.log( encoder.getDebug32String() );
 
-      const fromBinaryInstructions = phet.alpenglow.RenderInstruction.binaryToInstructions( encoder, 0 );
+      const fromBinaryInstructions = phet.alpenglow.binaryToRenderInstructions( encoder, 0 );
       console.log( '(object) instructions (from binary)' );
       console.log( fromBinaryInstructions.map( instruction => instruction.toString() ).join( '\n' ) );
 

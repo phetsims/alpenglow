@@ -17,9 +17,26 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
-import { alpenglow, BoundsClipping, CombinedRaster, CombinedRasterOptions, getPolygonFilterGridBounds, LinearEdge, PolygonalBoolean, PolygonalFace, PolygonFilterType, Rasterize, RenderableFace, RenderColor, RenderColorSpace, RenderExtend, RenderGradientStop, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, RenderStack } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderableFace } from './RenderableFace.js';
+import { getPolygonFilterGridBounds, PolygonFilterType } from '../render-program/PolygonFilterType.js';
+import { RenderPath } from '../render-program/RenderPath.js';
+import { RenderExtend } from '../render-program/RenderExtend.js';
+import { RenderLinearGradient, RenderLinearGradientAccuracy } from '../render-program/RenderLinearGradient.js';
+import { RenderRadialGradient, RenderRadialGradientAccuracy } from '../render-program/RenderRadialGradient.js';
+import { RenderProgram } from '../render-program/RenderProgram.js';
+import { BoundsClipping } from '../clip/BoundsClipping.js';
+import { CombinedRaster, CombinedRasterOptions } from './CombinedRaster.js';
+import { RenderGradientStop } from '../render-program/RenderGradientStop.js';
+import { PolygonalBoolean } from '../cag/PolygonalBoolean.js';
+import { PolygonalFace } from '../cag/ClippableFace.js';
+import { RenderColorSpace } from '../render-program/RenderColorSpace.js';
+import { RenderColor } from '../render-program/RenderColor.js';
+import { Rasterize } from './Rasterize.js';
+import { LinearEdge } from '../cag/LinearEdge.js';
+import { RenderStack } from '../render-program/RenderStack.js';
 
-export default class VectorCanvas {
+export class VectorCanvas {
 
   public renderableFaces: RenderableFace[] = [];
   public bounds: Bounds2 = Bounds2.NOTHING;

@@ -10,9 +10,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, wgsl, WGSLBinaryExpression, WGSLBinaryStatements, WGSLExpression, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { wgsl, WGSLBinaryExpression, WGSLExpression, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
+import { WGSLBinaryStatements } from '../../compute/ConcreteType.js';
 
-const binaryExpressionStatementWGSL = (
+export const binaryExpressionStatementWGSL = (
   value: WGSLVariableName,
   binaryExpression: WGSLBinaryExpression | null,
   binaryStatements: WGSLBinaryStatements | null,
@@ -31,7 +33,5 @@ const binaryExpressionStatementWGSL = (
     throw new Error( 'Did not provide binaryExpression or binaryStatements' );
   }
 };
-
-export default binaryExpressionStatementWGSL;
 
 alpenglow.register( 'binaryExpressionStatementWGSL', binaryExpressionStatementWGSL );

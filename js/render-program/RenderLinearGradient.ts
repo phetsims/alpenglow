@@ -9,7 +9,22 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, RenderableFace, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderExtend, RenderGradientStop, RenderImage, RenderInstruction, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearRange, RenderProgram, RenderRadialGradientLogic, SerializedRenderGradientStop } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderGradientStop, SerializedRenderGradientStop } from './RenderGradientStop.js';
+import { RenderProgram } from './RenderProgram.js';
+import { RenderExtend } from './RenderExtend.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation, RenderInstructionReturn } from './RenderInstruction.js';
+import { RenderInstructionLinearBlend, RenderLinearBlend, RenderLinearBlendAccuracy } from './RenderLinearBlend.js';
+import { RenderableFace } from '../raster/RenderableFace.js';
+import { RenderLinearRange } from './RenderLinearRange.js';
+import { RenderRadialGradientLogic } from './RenderRadialGradient.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { RenderColor } from './RenderColor.js';
+import { RenderImage } from './RenderImage.js';
+import { GRADIENT_BEFORE_RATIO_COUNT_BITS } from './GRADIENT_BEFORE_RATIO_COUNT_BITS.js';
 
 export enum RenderLinearGradientAccuracy {
   SplitAccurate = 0,
@@ -25,7 +40,7 @@ const scratchLinearGradientVector0 = new Vector2( 0, 0 );
 
 const toProgram = ( item: RenderGradientStop ): RenderProgram => item.program;
 
-export default class RenderLinearGradient extends RenderProgram {
+export class RenderLinearGradient extends RenderProgram {
 
   public readonly logic: RenderLinearGradientLogic;
 
@@ -223,21 +238,6 @@ export default class RenderLinearGradient extends RenderProgram {
       accuracy: this.accuracy
     };
   }
-
-  public static override deserialize( obj: SerializedRenderLinearGradient ): RenderLinearGradient {
-    return new RenderLinearGradient(
-      Matrix3.rowMajor(
-        obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
-        obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
-        obj.transform[ 6 ], obj.transform[ 7 ], obj.transform[ 8 ]
-      ),
-      new Vector2( obj.start[ 0 ], obj.start[ 1 ] ),
-      new Vector2( obj.end[ 0 ], obj.end[ 1 ] ),
-      obj.stops.map( stop => RenderGradientStop.deserialize( stop ) ),
-      obj.extend,
-      obj.accuracy
-    );
-  }
 }
 
 alpenglow.register( 'RenderLinearGradient', RenderLinearGradient );
@@ -424,8 +424,6 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
     }
   }
 
-  public static readonly GRADIENT_BEFORE_RATIO_COUNT_BITS = 16;
-
   public override writeBinary( encoder: ByteEncoder, getOffset: ( location: RenderInstructionLocation ) => number ): void {
 
     const stopOffsets = this.stopLocations.map( getOffset );
@@ -438,9 +436,9 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
         RenderInstruction.ComputeLinearGradientRatioCode |
         ( this.logic.accuracy << 8 ) | // 2-bit accuracy
         ( this.logic.extend << 11 ) | // 2-bit (extended to match radial case)
-        ( ratioCount << RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS ) // extended to match the radial case
+        ( ratioCount << GRADIENT_BEFORE_RATIO_COUNT_BITS ) // extended to match the radial case
       ); // 0
-      assert && assert( ratioCount < 2 ** ( 32 - RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS ) );
+      assert && assert( ratioCount < 2 ** ( 32 - GRADIENT_BEFORE_RATIO_COUNT_BITS ) );
 
       encoder.pushF32( this.logic.inverseTransform.m00() ); // 1
       encoder.pushF32( this.logic.inverseTransform.m01() ); // 2
@@ -466,9 +464,9 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
         ( this.logic.extend << 11 ) | // 2-bit
         ( this.logic.kind << 13 ) | // 2-bit
         ( this.logic.isSwapped ? 1 << 15 : 0 ) | // 1-bit
-        ( ratioCount << RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS )
+        ( ratioCount << GRADIENT_BEFORE_RATIO_COUNT_BITS )
       ); // 0
-      assert && assert( ratioCount < 2 ** ( 32 - RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS ) );
+      assert && assert( ratioCount < 2 ** ( 32 - GRADIENT_BEFORE_RATIO_COUNT_BITS ) );
 
       encoder.pushF32( this.logic.conicTransform.m00() ); // 1
       encoder.pushF32( this.logic.conicTransform.m01() ); // 2
@@ -497,7 +495,7 @@ export class RenderInstructionComputeGradientRatio extends RenderInstruction {
     const isLinear = ( first & 0xff ) === RenderInstruction.ComputeLinearGradientRatioCode;
     const accuracy = ( first >> 8 ) & 0x7;
     const extend = ( first >> 11 ) & 0x3;
-    const ratioCount = first >> RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS;
+    const ratioCount = first >> GRADIENT_BEFORE_RATIO_COUNT_BITS;
     const transform = Matrix3.rowMajor(
       encoder.fullF32Array[ offset + 1 ],
       encoder.fullF32Array[ offset + 2 ],

@@ -1,14 +1,14 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Converts premultiplied color to unpremultiplied color.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+
+export const unpremultiplyWGSL = (
   vec4: WGSLExpression
 ): WGSLExpression => {
   return new WGSLStringModule( 'unpremultiply', wgsl`unpremultiply( ${vec4} )`, wgsl`

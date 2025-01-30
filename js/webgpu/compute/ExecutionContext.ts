@@ -6,9 +6,19 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroup, BindGroupLayout, BufferSlot, ComputePass, ComputePipeline, Executor, PipelineBlueprint, Resource, ResourceSlot, TypedBuffer } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ComputePass } from './ComputePass.js';
+import type { Executor } from './Executor.js';
+import type { PipelineBlueprint } from './PipelineBlueprint.js';
+import type { ComputePipeline } from './ComputePipeline.js';
+import type { BindGroupLayout } from './BindGroupLayout.js';
+import type { BindGroup } from './BindGroup.js';
+import type { ResourceSlot } from './ResourceSlot.js';
+import type { Resource } from './Resource.js';
+import type { BufferSlot } from './BufferSlot.js';
+import { TypedBuffer } from './TypedBuffer.js';
 
-export default class ExecutionContext {
+export class ExecutionContext {
 
   private computePass: ComputePass | null = null;
 

@@ -1,14 +1,20 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { abs_i64WGSL, div_u64_u64WGSL, gcd_u64_u64WGSL, is_negative_i64WGSL, negate_i64WGSL, q128WGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Reduces a q128 (rational) to its simplest form.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { q128WGSL } from './q128WGSL.js';
+import { abs_i64WGSL } from './abs_i64WGSL.js';
+import { gcd_u64_u64WGSL } from './gcd_u64_u64WGSL.js';
+import { div_u64_u64WGSL } from './div_u64_u64WGSL.js';
+import { is_negative_i64WGSL } from './is_negative_i64WGSL.js';
+import { negate_i64WGSL } from './negate_i64WGSL.js';
+
+export const reduce_q128WGSL = (
   q128: WGSLExpression
 ): WGSLExpression => {
   return new WGSLStringModule( 'reduce_q128', wgsl`reduce_q128( ${q128} )`, wgsl`

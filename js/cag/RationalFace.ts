@@ -9,11 +9,19 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, BigRational, ClippableFace, ClippableFaceAccumulator, isWindingIncluded, RationalBoundary, RationalHalfEdge, RenderPath, RenderProgram, WindingMap } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { isWindingIncluded } from '../render-program/FillRule.js';
+import { BigRational } from './BigRational.js';
+import { RationalBoundary } from './RationalBoundary.js';
+import { WindingMap } from './WindingMap.js';
+import type { RenderProgram } from '../render-program/RenderProgram.js';
+import type { ClippableFace, ClippableFaceAccumulator } from './ClippableFace.js';
+import type { RationalHalfEdge } from './RationalHalfEdge.js';
+import type { RenderPath } from '../render-program/RenderPath.js';
 
 const nanVector = new Vector2( NaN, NaN );
 
-export default class RationalFace {
+export class RationalFace {
   public readonly holes: RationalBoundary[] = [];
   public windingMapMap = new Map<RationalFace, WindingMap>();
   public windingMap: WindingMap | null = null;

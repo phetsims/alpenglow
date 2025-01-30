@@ -7,7 +7,17 @@
  */
 
 import optionize from '../../../../../phet-core/js/optionize.js';
-import { bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, LinearEdge, scanWGSL, TwoPassCoarseRenderableFace, TwoPassCoarseRenderableFaceWGSL, TwoPassConfig, TwoPassInitialRenderableFace, Vec2uAdd, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { TwoPassConfig } from './TwoPassConfig.js';
+import { TwoPassInitialRenderableFace } from './TwoPassInitialRenderableFace.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import { TwoPassCoarseRenderableFace } from './TwoPassCoarseRenderableFace.js';
+import { wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { bounds_clip_edgeWGSL } from '../clip/bounds_clip_edgeWGSL.js';
+import { scanWGSL } from '../gpu/scanWGSL.js';
+import { Vec2uAdd } from '../../compute/ConcreteType.js';
+import { TwoPassCoarseRenderableFaceWGSL } from './TwoPassCoarseRenderableFaceWGSL.js';
 
 export type mainTwoPassTileWGSLOptions = {
   // input
@@ -27,7 +37,7 @@ export const MAIN_TWO_PASS_TILE_DEFAULTS = {
   // placeholder
 } as const;
 
-const mainTwoPassTileWGSL = (
+export const mainTwoPassTileWGSL = (
   providedOptions: mainTwoPassTileWGSLOptions
 ): WGSLMainModule => {
 
@@ -214,5 +224,3 @@ const mainTwoPassTileWGSL = (
     }
   ` );
 };
-
-export default mainTwoPassTileWGSL;

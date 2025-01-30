@@ -9,7 +9,10 @@
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import PickRequired from '../../../../../phet-core/js/types/PickRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { alpenglow, logWGSL, logWGSLOptions, RakedSizable, u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
+import { RakedSizable } from '../WGSLUtils.js';
+import { logWGSL, logWGSLOptions } from './logWGSL.js';
 
 type SelfOptions = {
   lengthExpression?: WGSLExpressionU32 | null;
@@ -29,7 +32,7 @@ export const LOG_RAKED_OPTIONS = {
   relativeAccessExpression: null
 } as const;
 
-const logRakedWGSL = <T>(
+export const logRakedWGSL = <T>(
   providedOptions: logRakedWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -106,7 +109,5 @@ const logRakedWGSL = <T>(
     }
   } );
 };
-
-export default logRakedWGSL;
 
 alpenglow.register( 'logRakedWGSL', logRakedWGSL );

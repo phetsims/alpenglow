@@ -8,8 +8,36 @@ import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
-import { alpenglow, BlitShader, BufferArraySlot, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, Rasterize, RenderColor, RenderColorSpace, RenderInstruction, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack, Routine, TextureViewResource, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassCoarseRenderableFaceType, TwoPassConfig, TwoPassConfigType, TwoPassModule, u32S, U32Type } from '../../../imports.js';
-import testPolygonalFace from '../testPolygonalFace.js';
+import { DeviceContext } from '../../compute/DeviceContext.js';
+import { testPolygonalFace } from '../testPolygonalFace.js';
+import { TwoPassCoarseRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassCoarseRenderableFace.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import { ByteEncoder } from '../../compute/ByteEncoder.js';
+import { RenderInstruction } from '../../../render-program/RenderInstruction.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { TwoPassConfigType } from '../../wgsl/rasterize-two-pass/TwoPassConfigType.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { getArrayType, U32Type } from '../../compute/ConcreteType.js';
+import { TwoPassCoarseRenderableFaceType } from '../../wgsl/rasterize-two-pass/TwoPassCoarseRenderableFaceType.js';
+import { LinearEdgeType } from '../../wgsl/cag/LinearEdgeType.js';
+import { TextureViewSlot } from '../../compute/TextureViewSlot.js';
+import { TwoPassModule } from '../../modules/rasterize-two-pass/TwoPassModule.js';
+import { u32S } from '../../wgsl/WGSLString.js';
+import { BlitShader } from '../../BlitShader.js';
+import { CompositeModule } from '../../compute/CompositeModule.js';
+import { PolygonFilterType } from '../../../render-program/PolygonFilterType.js';
+import { RenderColorSpace } from '../../../render-program/RenderColorSpace.js';
+import { RenderStack } from '../../../render-program/RenderStack.js';
+import { RenderPathBoolean } from '../../../render-program/RenderPathBoolean.js';
+import { RenderPath } from '../../../render-program/RenderPath.js';
+import { RenderColor } from '../../../render-program/RenderColor.js';
+import { RenderLinearBlend, RenderLinearBlendAccuracy } from '../../../render-program/RenderLinearBlend.js';
+import { Rasterize } from '../../../raster/Rasterize.js';
+import { Routine } from '../../compute/Routine.js';
+import { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
+import { Procedure } from '../../compute/Procedure.js';
+import { TextureViewResource } from '../../compute/TextureViewResource.js';
+import { alpenglow } from '../../../alpenglow.js';
 
 export const evaluateTwoPassFineDual = async (
   name: string,

@@ -6,7 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-const webGPUEslintGlobals = {
+export const webGPUEslintGlobals = {
   GPUShaderModule: 'readonly',
   GPUBindGroupLayout: 'readonly',
   GPUDevice: 'readonly',
@@ -60,5 +60,3 @@ const webGPUEslintGlobals = {
   GPUSampler: 'readonly',
   GPUExternalTexture: 'readonly'
 };
-
-export default webGPUEslintGlobals;

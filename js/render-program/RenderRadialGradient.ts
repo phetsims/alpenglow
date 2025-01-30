@@ -9,7 +9,20 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ClippableFace, RenderableFace, RenderColor, RenderEvaluationContext, RenderExtend, RenderGradientStop, RenderImage, RenderInstruction, RenderInstructionComputeGradientRatio, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderLinearRange, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, SerializedRenderGradientStop } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderGradientStop, SerializedRenderGradientStop } from './RenderGradientStop.js';
+import { RenderProgram } from './RenderProgram.js';
+import { RenderExtend } from './RenderExtend.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation, RenderInstructionReturn } from './RenderInstruction.js';
+import { RenderInstructionComputeGradientRatio } from './RenderLinearGradient.js';
+import { RenderInstructionLinearBlend } from './RenderLinearBlend.js';
+import { RenderableFace } from '../raster/RenderableFace.js';
+import { RenderLinearRange } from './RenderLinearRange.js';
+import type { ClippableFace } from '../cag/ClippableFace.js';
+import { RenderColor } from './RenderColor.js';
+import { RenderRadialBlend, RenderRadialBlendAccuracy } from './RenderRadialBlend.js';
+import { RenderImage } from './RenderImage.js';
 
 export enum RenderRadialGradientAccuracy {
   SplitAccurate = 0,
@@ -26,7 +39,7 @@ const scratchVectorA = new Vector2( 0, 0 );
 
 const toProgram = ( item: RenderGradientStop ): RenderProgram => item.program;
 
-export default class RenderRadialGradient extends RenderProgram {
+export class RenderRadialGradient extends RenderProgram {
 
   private logic: RenderRadialGradientLogic;
 
@@ -265,23 +278,6 @@ export default class RenderRadialGradient extends RenderProgram {
       extend: this.extend,
       accuracy: this.accuracy
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderRadialGradient ): RenderRadialGradient {
-    return new RenderRadialGradient(
-      Matrix3.rowMajor(
-        obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
-        obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
-        obj.transform[ 6 ], obj.transform[ 7 ], obj.transform[ 8 ]
-      ),
-      new Vector2( obj.start[ 0 ], obj.start[ 1 ] ),
-      obj.startRadius,
-      new Vector2( obj.end[ 0 ], obj.end[ 1 ] ),
-      obj.endRadius,
-      obj.stops.map( stop => RenderGradientStop.deserialize( stop ) ),
-      obj.extend,
-      obj.accuracy
-    );
   }
 }
 

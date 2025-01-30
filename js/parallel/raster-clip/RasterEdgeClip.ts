@@ -8,9 +8,10 @@
  */
 
 import Vector2 from '../../../../dot/js/Vector2.js';
-import { alpenglow, ByteEncoder } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
 
-export default class RasterEdgeClip {
+export class RasterEdgeClip {
   public constructor(
     public readonly clippedChunkIndex: number,
 

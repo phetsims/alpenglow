@@ -1,14 +1,15 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { q128WGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Checks whether a q128 (rational) is zero
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { q128WGSL } from './q128WGSL.js';
+
+export const is_zero_q128WGSL = (
   q128: WGSLExpression
 ): WGSLExpression => {
   return new WGSLStringModule( 'is_zero_q128', wgsl`is_zero_q128( ${q128} )`, wgsl`

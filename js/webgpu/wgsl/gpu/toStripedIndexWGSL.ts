@@ -6,14 +6,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RakedSizable, u32S, wgsl, WGSLExpressionU32, wgslOneLine, WGSLStatements } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpressionU32, wgslOneLine, WGSLStatements } from '../WGSLString.js';
+import { RakedSizable } from '../WGSLUtils.js';
 
 export type toStripedIndexWGSLOptions = {
   // represents a normal (blocked) index into data. So 0 is the 1st element, 1 is the 2nd, etc.
   i: WGSLExpressionU32;
 } & RakedSizable;
 
-const toStripedIndexWGSL = (
+export const toStripedIndexWGSL = (
   options: toStripedIndexWGSLOptions
 ): WGSLStatements => {
   const i = options.i;
@@ -29,7 +31,5 @@ const toStripedIndexWGSL = (
     )
   ` );
 };
-
-export default toStripedIndexWGSL;
 
 alpenglow.register( 'toStripedIndexWGSL', toStripedIndexWGSL );

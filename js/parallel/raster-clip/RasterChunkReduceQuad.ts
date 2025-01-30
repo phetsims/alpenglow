@@ -19,9 +19,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, RasterChunkReduceData } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { RasterChunkReduceData } from './RasterChunkReduceData.js';
+import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
 
-export default class RasterChunkReduceQuad {
+export class RasterChunkReduceQuad {
   public constructor(
     public leftMin: RasterChunkReduceData,
     public leftMax: RasterChunkReduceData,

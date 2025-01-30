@@ -7,7 +7,23 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, BufferArraySlot, BufferBindingType, BufferSlot, CompositeModule, getVariableLengthArrayType, LinearEdge, LinearEdgeType, MainTwoPassInitializeAddressesModule, MainTwoPassInitializeAddressesModuleOptions, MainTwoPassTileModule, MainTwoPassTileModuleOptions, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFaceType, TwoPassConfig, TwoPassInitialRenderableFace, TwoPassModule, TwoPassModuleOptions, U32AtomicType, U32Type, WGSLExpressionU32, WGSLStringFunction } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { TwoPassInitialRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassInitialRenderableFace.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import { TextureViewSlot } from '../../compute/TextureViewSlot.js';
+import { WGSLExpressionU32, WGSLStringFunction } from '../../wgsl/WGSLString.js';
+import { MainTwoPassTileModule, MainTwoPassTileModuleOptions } from './MainTwoPassTileModule.js';
+import { TwoPassModule, TwoPassModuleOptions } from './TwoPassModule.js';
+import { MainTwoPassInitializeAddressesModule, MainTwoPassInitializeAddressesModuleOptions } from './MainTwoPassInitializeAddressesModule.js';
+import { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { CompositeModule } from '../../compute/CompositeModule.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { getVariableLengthArrayType, U32AtomicType, U32Type } from '../../compute/ConcreteType.js';
+import { TwoPassCoarseRenderableFaceType } from '../../wgsl/rasterize-two-pass/TwoPassCoarseRenderableFaceType.js';
+import { LinearEdgeType } from '../../wgsl/cag/LinearEdgeType.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
 
 type SelfOptions = {
   config: BufferSlot<TwoPassConfig>;
@@ -46,7 +62,7 @@ export type TiledTwoPassRunSize = {
 };
 
 // inputSize: TiledTwoPassRunSize
-export default class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunSize> {
+export class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunSize> {
 
   public readonly config: BufferSlot<TwoPassConfig>;
   public readonly initialRenderableFaces: BufferSlot<TwoPassInitialRenderableFace[]>;

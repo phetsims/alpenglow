@@ -10,11 +10,17 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, BigRational, BigRationalVector2, ClippableFaceAccumulator, RationalBoundary, RationalFace, WindingMap } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RationalFace } from './RationalFace.js';
+import type { RationalBoundary } from './RationalBoundary.js';
+import { WindingMap } from './WindingMap.js';
+import type { BigRational } from './BigRational.js';
+import type { BigRationalVector2 } from './BigRationalVector2.js';
+import type { ClippableFaceAccumulator } from './ClippableFace.js';
 
 // Instead of storing vertices, we can get away with storing half-edges, with a linked list of next/previous and the
 // opposite half edge. This is like a half-edge winged data structure.
-export default class RationalHalfEdge {
+export class RationalHalfEdge {
 
   public face: RationalFace | null = null;
   public nextEdge: RationalHalfEdge | null = null;

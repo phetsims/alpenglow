@@ -6,9 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, RasterClippedChunk, RasterEdgeClip } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
+import type { RasterEdgeClip } from './RasterEdgeClip.js';
+import type { RasterClippedChunk } from './RasterClippedChunk.js';
 
-export default class RasterSplitReduceData {
+export class RasterSplitReduceData {
   public constructor(
     public readonly numReducible: number,
     public readonly numComplete: number

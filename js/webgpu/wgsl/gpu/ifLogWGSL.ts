@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, wgslFunction, WGSLString } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { wgslFunction, WGSLString } from '../WGSLString.js';
 
-const ifLogWGSL = (
+export const ifLogWGSL = (
   string: WGSLString
 ): WGSLString => {
   return wgslFunction( blueprint => {
@@ -20,7 +21,5 @@ const ifLogWGSL = (
     }
   } );
 };
-
-export default ifLogWGSL;
 
 alpenglow.register( 'ifLogWGSL', ifLogWGSL );

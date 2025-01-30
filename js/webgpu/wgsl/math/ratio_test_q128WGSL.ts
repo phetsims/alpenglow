@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { cmp_i64_i64WGSL, q128WGSL, wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule, ZERO_u64WGSL } from '../../../imports.js';
-
 /**
  * Returns a range query on the rational (q128) value:
  *
@@ -12,7 +10,12 @@ import { cmp_i64_i64WGSL, q128WGSL, wgsl, WGSLExpression, WGSLExpressionI32, WGS
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule } from '../WGSLString.js';
+import { q128WGSL } from './q128WGSL.js';
+import { cmp_i64_i64WGSL } from './cmp_i64_i64WGSL.js';
+import { ZERO_u64WGSL } from './ZERO_u64WGSL.js';
+
+export const ratio_test_q128WGSL = (
   q128: WGSLExpression
 ): WGSLExpressionI32 => {
   return new WGSLStringModule( 'ratio_test_q128', wgsl`ratio_test_q128( ${q128} )`, wgsl`

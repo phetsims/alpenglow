@@ -7,9 +7,13 @@
  */
 
 import Utils from '../../../../dot/js/Utils.js';
-import { alpenglow, BufferLogger, ByteEncoder, DeviceContext, webgpu } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { DeviceContext } from './DeviceContext.js';
+import { webgpu } from '../WebGPUAPI.js';
+import type { BufferLogger } from './BufferLogger.js';
+import { ByteEncoder } from './ByteEncoder.js';
 
-export default class TimestampLogger {
+export class TimestampLogger {
 
   private readonly querySet: GPUQuerySet | null = null;
   private readonly queryBuffer: GPUBuffer | null = null;

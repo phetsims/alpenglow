@@ -6,9 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, ConcreteType } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { BindingType } from './BindingType.js';
+import type { ConcreteType } from './ConcreteType.js';
 
-export default class ConcreteBindingType<T = unknown> {
+export class ConcreteBindingType<T = unknown> {
   public constructor(
     public readonly bindingType: BindingType,
     public readonly concreteType: ConcreteType<T>

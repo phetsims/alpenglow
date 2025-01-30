@@ -61,7 +61,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, ClipSimplifier, LinearEdge, LineClipping } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { ClipSimplifier } from './ClipSimplifier.js';
+import { LinearEdge } from '../cag/LinearEdge.js';
+import { LineClipping } from './LineClipping.js';
 
 // TODO: parallelize this (should be possible)
 
@@ -69,7 +72,7 @@ const scratchStartPoint = new Vector2( 0, 0 );
 const scratchEndPoint = new Vector2( 0, 0 );
 const simplifier = new ClipSimplifier();
 
-export default class BoundsClipping {
+export class BoundsClipping {
   /**
    * Clips a single edge to the inside of the given bounding box, and appends the resulting edges to the result array.
    *

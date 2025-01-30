@@ -1,14 +1,15 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { u64WGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Converts a u32 to a u64.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLExpressionU32, WGSLStringModule } from '../WGSLString.js';
+import { u64WGSL } from './u64WGSL.js';
+
+export const u32_to_u64WGSL = (
   u32: WGSLExpressionU32,
   inline = true
 ): WGSLExpression => {

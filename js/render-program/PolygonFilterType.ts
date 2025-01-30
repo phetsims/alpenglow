@@ -7,15 +7,13 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-enum PolygonFilterType {
+export enum PolygonFilterType {
   Box = 0,
   Bilinear = 1,
   MitchellNetravali = 2
 }
-
-export default PolygonFilterType;
 
 export const getPolygonFilterWidth = ( filterType: PolygonFilterType ): number => {
   if ( filterType === PolygonFilterType.Box ) {

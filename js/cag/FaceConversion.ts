@@ -11,7 +11,11 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import { alpenglow, ClippableFace, ClippableFaceAccumulator, RationalFace, RenderableFace, RenderProgram } from '../imports.js';
+import { RationalFace } from './RationalFace.js';
+import { RenderProgram } from '../render-program/RenderProgram.js';
+import { ClippableFace, ClippableFaceAccumulator } from './ClippableFace.js';
+import { RenderableFace } from '../raster/RenderableFace.js';
+import { alpenglow } from '../alpenglow.js';
 
 class AccumulatingFace {
   public faces = new Set<RationalFace>();
@@ -21,7 +25,7 @@ class AccumulatingFace {
   public clippableFace: ClippableFace | null = null;
 }
 
-export default class FaceConversion {
+export class FaceConversion {
   public static toSimpleRenderableFaces(
     faces: RationalFace[],
     fromIntegerMatrix: Matrix3,

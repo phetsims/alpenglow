@@ -6,14 +6,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RakedSizable, u32S, wgsl, WGSLExpressionU32, wgslOneLine, WGSLStatements } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpressionU32, wgslOneLine, WGSLStatements } from '../WGSLString.js';
+import { RakedSizable } from '../WGSLUtils.js';
 
 export type fromStripedIndexWGSLOptions = {
   // represents a striped index into data. So 0 is the 1st element, workgroupSIze is the 2nd element, etc.
   i: WGSLExpressionU32;
 } & RakedSizable;
 
-const fromStripedIndexWGSL = (
+export const fromStripedIndexWGSL = (
   options: fromStripedIndexWGSLOptions
 ): WGSLStatements => {
   const i = options.i;
@@ -29,7 +31,5 @@ const fromStripedIndexWGSL = (
     )
   ` );
 };
-
-export default fromStripedIndexWGSL;
 
 alpenglow.register( 'fromStripedIndexWGSL', fromStripedIndexWGSL );

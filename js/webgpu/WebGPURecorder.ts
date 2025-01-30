@@ -8,9 +8,9 @@
 
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-export default class WebGPURecorder {
+export class WebGPURecorder {
 
   private readonly commandLists: WebGPUCommandList[] = [];
 

@@ -18,9 +18,10 @@
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';
-import { alpenglow, BaseWorkgroupValues, ParallelContext } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { BaseWorkgroupValues, ParallelContext } from './ParallelContext.js';
 
-export default class ParallelWorkgroupArray<T> {
+export class ParallelWorkgroupArray<T> {
 
   private readonly writeLocalIDs: Vector3[][];
 

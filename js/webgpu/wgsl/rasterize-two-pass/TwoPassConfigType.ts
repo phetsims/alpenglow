@@ -1,6 +1,10 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { ByteEncoder, ConcreteType, StoreStatementCallback, TwoPassConfig, TwoPassConfigWGSL, wgsl, WGSLExpression, WGSLStatements } from '../../../imports.js';
+import { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';
+import { TwoPassConfig } from './TwoPassConfig.js';
+import { wgsl, WGSLExpression, WGSLStatements } from '../WGSLString.js';
+import { ByteEncoder } from '../../compute/ByteEncoder.js';
+import { TwoPassConfigWGSL } from './TwoPassConfigWGSL.js';
 
 /**
  * ConcreteType for a TwoPassConfig
@@ -12,7 +16,7 @@ import { ByteEncoder, ConcreteType, StoreStatementCallback, TwoPassConfig, TwoPa
 
 const dwords = 11;
 
-const TwoPassConfigType: ConcreteType<TwoPassConfig> = {
+export const TwoPassConfigType: ConcreteType<TwoPassConfig> = {
   name: 'TwoPassConfig',
   bytesPerElement: dwords * 4,
 
@@ -73,4 +77,3 @@ const TwoPassConfigType: ConcreteType<TwoPassConfig> = {
 
   toDebugString: ( value: TwoPassConfig ) => 'TwoPassConfig'
 };
-export default TwoPassConfigType;

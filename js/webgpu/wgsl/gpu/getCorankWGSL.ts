@@ -15,7 +15,9 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, commentWGSL, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
+import { commentWGSL } from './commentWGSL.js';
 
 export type getCorankWGSLOptions = {
   // output name (u32)
@@ -40,7 +42,7 @@ export const GET_CORANK_DEFAULTS = {
   lessThanOrEqual: null
 } as const;
 
-const getCorankWGSL = (
+export const getCorankWGSL = (
   providedOptions: getCorankWGSLOptions
 ): WGSLStatements => {
 
@@ -102,7 +104,5 @@ const getCorankWGSL = (
     ${commentWGSL( 'end get_corank' )}
   `;
 };
-
-export default getCorankWGSL;
 
 alpenglow.register( 'getCorankWGSL', getCorankWGSL );

@@ -7,9 +7,17 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderLight, RenderProgram, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import { RenderLight } from './RenderLight.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { RenderColor } from './RenderColor.js';
 
-export default class RenderPhong extends RenderProgram {
+export class RenderPhong extends RenderProgram {
   public constructor(
     public readonly alpha: number,
     public readonly ambientColorProgram: RenderProgram,
@@ -186,11 +194,6 @@ export default class RenderPhong extends RenderProgram {
       children: this.children.map( child => child.serialize() ),
       alpha: this.alpha
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderPhong ): RenderPhong {
-    // @ts-expect-error
-    return new RenderPhong( obj.alpha, ...obj.children.map( RenderProgram.deserialize ) );
   }
 }
 

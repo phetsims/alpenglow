@@ -8,7 +8,10 @@
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { alpenglow, COALESCED_LOOP_DEFAULTS, coalescedLoopWGSL, coalescedLoopWGSLOptions, commentWGSL, wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
+import { COALESCED_LOOP_DEFAULTS, coalescedLoopWGSL, coalescedLoopWGSLOptions } from './coalescedLoopWGSL.js';
+import { commentWGSL } from './commentWGSL.js';
 
 type SelfOptions = {
   // var<workgroup> array<atomic<u32>, numBins> // TODO: can we actually get memory-compacted histograms here, instead of using a full u32?
@@ -23,7 +26,7 @@ export const HISTOGRAM_DEFAULTS = {
   ...COALESCED_LOOP_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
-const histogramWGSL = (
+export const histogramWGSL = (
   providedOptions: histogramWGSLOptions
 ): WGSLStatements => {
 
@@ -46,7 +49,5 @@ const histogramWGSL = (
     ${commentWGSL( 'end histogram' )}
   `;
 };
-
-export default histogramWGSL;
 
 alpenglow.register( 'histogramWGSL', histogramWGSL );

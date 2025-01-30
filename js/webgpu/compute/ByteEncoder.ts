@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
 
 export type F32 = number;
 export type U32 = number;
@@ -15,7 +15,7 @@ export type U8 = number;
 
 const scratchForBytes = new Uint8Array( 4 );
 
-export default class ByteEncoder {
+export class ByteEncoder {
 
   private _byteLength: number;
   private _arrayBuffer: ArrayBuffer;

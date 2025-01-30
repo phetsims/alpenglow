@@ -1,13 +1,13 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { wgsl, WGSLExpression, WGSLExpressionF32, WGSLReferenceModule, wgslString, WGSLStringModule } from '../../../imports.js';
-
 /**
  * From "Another Simple but Faster Method for 2D Line Clipping" (2019)
  * by Dimitrios Matthes and Vasileios Drakopoulos
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import { wgsl, WGSLExpression, WGSLExpressionF32, WGSLReferenceModule, wgslString, WGSLStringModule } from '../WGSLString.js';
 
 export const MD_ClipResultWGSL = new WGSLReferenceModule( 'MD_ClipResult', wgsl`
   struct MD_ClipResult {
@@ -17,7 +17,7 @@ export const MD_ClipResultWGSL = new WGSLReferenceModule( 'MD_ClipResult', wgsl`
   }
 ` );
 
-export default (
+export const matthes_drakopoulos_clipWGSL = (
   p0: WGSLExpression, // vec2f
   p1: WGSLExpression, // vec2f
   minX: WGSLExpressionF32,

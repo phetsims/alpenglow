@@ -13,7 +13,20 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, BitOrder, bitPackRadixAccessWGSL, bitPackRadixExclusiveScanWGSL, bitPackRadixIncrementWGSL, commentWGSL, ConsoleLoggedLine, decimalS, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logStringWGSL, logValueWGSL, logWGSL, RakedSizable, scanWGSL, U32Add, u32S, U32Type, unrollWGSL, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BitOrder, U32Add, U32Type, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType } from '../../compute/ConcreteType.js';
+import { decimalS, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
+import { LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, RakedSizable } from '../WGSLUtils.js';
+import { logWGSL } from './logWGSL.js';
+import { ConsoleLoggedLine } from '../../compute/ConsoleLogger.js';
+import { commentWGSL } from './commentWGSL.js';
+import { logStringWGSL } from './logStringWGSL.js';
+import { unrollWGSL } from './unrollWGSL.js';
+import { logValueWGSL } from './logValueWGSL.js';
+import { bitPackRadixIncrementWGSL } from './bitPackRadixIncrementWGSL.js';
+import { scanWGSL } from './scanWGSL.js';
+import { bitPackRadixExclusiveScanWGSL } from './bitPackRadixExclusiveScanWGSL.js';
+import { bitPackRadixAccessWGSL } from './bitPackRadixAccessWGSL.js';
 
 export type nBitCompactSingleSortWGSLOptions<T> = {
   // Currently mostly used for the type, but we might be able to use it for more later. (TODO)
@@ -44,7 +57,7 @@ const DEFAULT_OPTIONS = {
   ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
-const nBitCompactSingleSortWGSL = <T>(
+export const nBitCompactSingleSortWGSL = <T>(
   providedOptions: nBitCompactSingleSortWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -227,7 +240,5 @@ const nBitCompactSingleSortWGSL = <T>(
     ${commentWGSL( 'end n_bit_compact_single_sort' )}
   `;
 };
-
-export default nBitCompactSingleSortWGSL;
 
 alpenglow.register( 'nBitCompactSingleSortWGSL', nBitCompactSingleSortWGSL );

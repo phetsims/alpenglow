@@ -11,9 +11,16 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { RenderColor } from './RenderColor.js';
 
-export default class RenderStack extends RenderProgram {
+export class RenderStack extends RenderProgram {
   /**
    * @param children - Ordered from back to front, like Scenery's Node.children
    */
@@ -169,10 +176,6 @@ export default class RenderStack extends RenderProgram {
       type: 'RenderStack',
       children: this.children.map( child => child.serialize() )
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderStack ): RenderStack {
-    return new RenderStack( obj.children.map( child => RenderProgram.deserialize( child ) ) );
   }
 }
 

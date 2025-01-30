@@ -11,11 +11,9 @@
 
 import Vector4 from '../../../dot/js/Vector4.js';
 
-type RasterColorConverter = {
+export type RasterColorConverter = {
   // NOTE: DO NOT STORE THE VALUES OF THESE RESULTS, THEY ARE MUTATED. Create a copy if needed
   clientToAccumulation( client: Vector4 ): Vector4;
   clientToOutput( client: Vector4 ): Vector4;
   accumulationToOutput( accumulation: Vector4 ): Vector4;
 };
-
-export default RasterColorConverter;

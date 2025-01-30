@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-enum RenderComposeType {
+export enum RenderComposeType {
   Over = 0,
   In = 1,
   Out = 2,
@@ -18,8 +18,6 @@ enum RenderComposeType {
   PlusLighter = 6
   // 3 bits in binary representation
 }
-
-export default RenderComposeType;
 
 alpenglow.register( 'RenderComposeType', RenderComposeType );
 

@@ -8,7 +8,11 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_SCAN_DEFAULTS, mainScanWGSL, mainScanWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import type { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { MAIN_SCAN_DEFAULTS, mainScanWGSL, mainScanWGSLOptions } from '../../wgsl/gpu/mainScanWGSL.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
 
 export type MainScanModuleOptions<T> = {
   input?: BufferArraySlot<T> | null;
@@ -27,7 +31,7 @@ export const MAIN_SCAN_MODULE_DEFAULTS = {
 } as const;
 
 // inputSize: number
-export default class MainScanModule<T> extends DirectModule<number> {
+export class MainScanModule<T> extends DirectModule<number> {
 
   public readonly input: BufferArraySlot<T>;
   public readonly output: BufferArraySlot<T>;

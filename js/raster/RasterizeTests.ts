@@ -10,7 +10,16 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { CombinedRaster, Rasterize, RenderBlendCompose, RenderColor, RenderExtend, RenderGradientStop, RenderPath, RenderPathBoolean, RenderRadialGradient, RenderRadialGradientAccuracy, RenderStack } from '../imports.js';
+import { RenderBlendCompose } from '../render-program/RenderBlendCompose.js';
+import { RenderColor } from '../render-program/RenderColor.js';
+import { RenderExtend } from '../render-program/RenderExtend.js';
+import { RenderGradientStop } from '../render-program/RenderGradientStop.js';
+import { RenderPath } from '../render-program/RenderPath.js';
+import { RenderPathBoolean } from '../render-program/RenderPathBoolean.js';
+import { RenderRadialGradient, RenderRadialGradientAccuracy } from '../render-program/RenderRadialGradient.js';
+import { RenderStack } from '../render-program/RenderStack.js';
+import { CombinedRaster } from './CombinedRaster.js';
+import { Rasterize } from './Rasterize.js';
 
 QUnit.module( 'Rasterize' );
 

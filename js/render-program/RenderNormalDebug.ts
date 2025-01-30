@@ -7,9 +7,16 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { RenderColor } from './RenderColor.js';
 
-export default class RenderNormalDebug extends RenderProgram {
+export class RenderNormalDebug extends RenderProgram {
   public constructor(
     public readonly normalProgram: RenderProgram
   ) {
@@ -74,10 +81,6 @@ export default class RenderNormalDebug extends RenderProgram {
       type: 'RenderNormalDebug',
       normalProgram: this.normalProgram.serialize()
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderNormalDebug ): RenderNormalDebug {
-    return new RenderNormalDebug( RenderProgram.deserialize( obj.normalProgram ) );
   }
 }
 

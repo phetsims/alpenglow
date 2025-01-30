@@ -6,9 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferSlot, ExecutionContext, PipelineBlueprint, ResourceSlot } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { PipelineBlueprint } from './PipelineBlueprint.js';
+import type { ExecutionContext } from './ExecutionContext.js';
+import type { ResourceSlot } from './ResourceSlot.js';
+import { BufferSlot } from './BufferSlot.js';
 
-export default class Module<T> {
+export class Module<T> {
   public constructor(
     public readonly pipelineBlueprints: PipelineBlueprint[],
     public readonly execute: ( context: ExecutionContext, data: T ) => void

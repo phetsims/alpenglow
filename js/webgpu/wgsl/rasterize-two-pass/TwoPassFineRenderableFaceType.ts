@@ -1,6 +1,10 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { ByteEncoder, ConcreteType, StoreStatementCallback, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, wgsl, WGSLExpression, WGSLStatements } from '../../../imports.js';
+import { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';
+import { TwoPassFineRenderableFace } from './TwoPassFineRenderableFace.js';
+import { wgsl, WGSLExpression, WGSLStatements } from '../WGSLString.js';
+import { ByteEncoder } from '../../compute/ByteEncoder.js';
+import { TwoPassFineRenderableFaceWGSL } from './TwoPassFineRenderableFaceWGSL.js';
 
 /**
  * ConcreteType for a TwoPassFineRenderableFace
@@ -12,7 +16,7 @@ import { ByteEncoder, ConcreteType, StoreStatementCallback, TwoPassFineRenderabl
 
 const dwords = 5;
 
-const TwoPassFineRenderableFaceType: ConcreteType<TwoPassFineRenderableFace> = {
+export const TwoPassFineRenderableFaceType: ConcreteType<TwoPassFineRenderableFace> = {
   name: 'TwoPassFineRenderableFace',
   bytesPerElement: dwords * 4,
 
@@ -86,4 +90,3 @@ const TwoPassFineRenderableFaceType: ConcreteType<TwoPassFineRenderableFace> = {
 
   toDebugString: ( value: TwoPassFineRenderableFace ) => 'TwoPassFineRenderableFace'
 };
-export default TwoPassFineRenderableFaceType;

@@ -9,9 +9,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BaseWorkgroupValues, ParallelContext, ParallelStorageArray } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { BaseWorkgroupValues, ParallelContext } from './ParallelContext.js';
+import type { ParallelStorageArray } from './ParallelStorageArray.js';
 
-export default class ParallelKernel<WorkgroupValues extends BaseWorkgroupValues = Record<string, never>> {
+export class ParallelKernel<WorkgroupValues extends BaseWorkgroupValues = Record<string, never>> {
   public constructor(
     public readonly execute: ( context: ParallelContext<WorkgroupValues> ) => Promise<void>,
     public readonly createWorkgroupValues: () => WorkgroupValues,

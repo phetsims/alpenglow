@@ -6,16 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, wgsl, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { wgsl, WGSLExpressionU32 } from '../WGSLString.js';
 
 // Math.ceil( x / y ), but with unsigned numbers
-const ceilDivideWGSL = (
+export const ceilDivideWGSL = (
   x: WGSLExpressionU32,
   y: WGSLExpressionU32
 ): WGSLExpressionU32 => {
   return wgsl`( ( ( ${x} ) + ( ${y} ) - 1u ) / ( ${y} ) )`;
 };
-
-export default ceilDivideWGSL;
 
 alpenglow.register( 'ceilDivideWGSL', ceilDivideWGSL );

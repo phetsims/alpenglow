@@ -8,7 +8,15 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, BufferSlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, LinearEdge, MAIN_TWO_PASS_FINE_DEFAULTS, mainTwoPassFineWGSL, mainTwoPassFineWGSLOptions, PipelineBlueprintOptions, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import type { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
+import type { BufferSlot } from '../../compute/BufferSlot.js';
+import type { TwoPassFineRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassFineRenderableFace.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import { TextureViewSlot } from '../../compute/TextureViewSlot.js';
+import { MAIN_TWO_PASS_FINE_DEFAULTS, mainTwoPassFineWGSL, mainTwoPassFineWGSLOptions } from '../../wgsl/rasterize-two-pass/mainTwoPassFineWGSL.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
 
 export type MainTwoPassFineModuleOptions = {
   config: BufferSlot<TwoPassConfig>;
@@ -27,7 +35,7 @@ export const MAIN_TWO_PASS_FINE_MODULE_DEFAULTS = {
 } as const;
 
 // inputSize: number - numBins (!)
-export default class MainTwoPassFineModule extends DirectModule<number> {
+export class MainTwoPassFineModule extends DirectModule<number> {
 
   public readonly config: BufferSlot<TwoPassConfig>;
   public readonly addresses: BufferSlot<number[]>;

@@ -1,14 +1,17 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { add_u64_u64WGSL, i64WGSL, ONE_u64WGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Negates an i64
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { add_u64_u64WGSL } from './add_u64_u64WGSL.js';
+import { ONE_u64WGSL } from './ONE_u64WGSL.js';
+import { i64WGSL } from './i64WGSL.js';
+
+export const negate_i64WGSL = (
   i64: WGSLExpression,
   inline = true
 ): WGSLExpression => {

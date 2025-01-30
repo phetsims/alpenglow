@@ -8,9 +8,15 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, isWindingIncluded, LinearEdge, RenderColor, RenderEvaluationContext, RenderPath, RenderProgram, SerializedRenderPath, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import { RenderPath, SerializedRenderPath } from './RenderPath.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { isWindingIncluded } from './FillRule.js';
+import { RenderColor } from './RenderColor.js';
+import { LinearEdge } from '../cag/LinearEdge.js';
 
-export default class RenderPathBoolean extends RenderProgram {
+export class RenderPathBoolean extends RenderProgram {
   public constructor(
     public readonly path: RenderPath,
     public readonly inside: RenderProgram,
@@ -102,10 +108,6 @@ export default class RenderPathBoolean extends RenderProgram {
       inside: this.inside.serialize(),
       outside: this.outside.serialize()
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderPathBoolean ): RenderPathBoolean {
-    return new RenderPathBoolean( RenderPath.deserialize( obj.path ), RenderProgram.deserialize( obj.inside ), RenderProgram.deserialize( obj.outside ) );
   }
 
   public static fromInside( path: RenderPath, inside: RenderProgram ): RenderPathBoolean {

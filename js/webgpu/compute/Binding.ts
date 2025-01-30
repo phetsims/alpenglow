@@ -6,9 +6,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingLocation, BindingType, BufferBindingType, BufferSlot, ResourceSlot, StorageTextureBindingType, wgsl, WGSLModuleDeclarations, wgslString } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { BindingLocation } from './BindingLocation.js';
+import type { BindingType } from './BindingType.js';
+import type { ResourceSlot } from './ResourceSlot.js';
+import { wgsl, WGSLModuleDeclarations, wgslString } from '../wgsl/WGSLString.js';
+import { BufferBindingType } from './BufferBindingType.js';
+import { BufferSlot } from './BufferSlot.js';
+import { StorageTextureBindingType } from './StorageTextureBindingType.js';
 
-export default class Binding {
+export class Binding {
   public constructor(
     public readonly location: BindingLocation,
     public readonly bindingType: BindingType,

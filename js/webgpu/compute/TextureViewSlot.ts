@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ResourceSlot } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { ResourceSlot } from './ResourceSlot.js';
 
-export default class TextureViewSlot extends ResourceSlot {
+export class TextureViewSlot extends ResourceSlot {
   public toDebugString(): string {
     return `TextureViewSlot[#${this.id}]`;
   }

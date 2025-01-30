@@ -6,10 +6,13 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, ClipSimplifier, LinearEdge } from '../imports.js';
 
-export default class StripeClipping {
+import Vector2 from '../../../dot/js/Vector2.js';
+import { alpenglow } from '../alpenglow.js';
+import { LinearEdge } from '../cag/LinearEdge.js';
+import { ClipSimplifier } from './ClipSimplifier.js';
+
+export class StripeClipping {
 
   // line where dot( normal, point ) - value = 0. "min" side is dot-products < value, "max" side is dot-products > value
   public static binaryStripeClipEdge(

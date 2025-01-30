@@ -1,14 +1,14 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { wgsl, WGSLExpressionF32, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Fast approximate cube root, see https://www.shadertoy.com/view/wts3RX
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpressionF32, WGSLStringModule } from '../WGSLString.js';
+
+export const cbrtWGSL = (
   f32: WGSLExpressionF32
 ): WGSLExpressionF32 => {
   return new WGSLStringModule( 'cbrt', wgsl`cbrt( ${f32} )`, wgsl`

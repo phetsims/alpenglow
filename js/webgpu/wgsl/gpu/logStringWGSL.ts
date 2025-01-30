@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, logWGSL, WGSLStatements } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { WGSLStatements } from '../WGSLString.js';
+import { logWGSL } from './logWGSL.js';
 
-const logStringWGSL = (
+export const logStringWGSL = (
   str: string
 ): WGSLStatements => logWGSL( {
   name: str
 } );
-
-export default logStringWGSL;
 
 alpenglow.register( 'logStringWGSL', logStringWGSL );

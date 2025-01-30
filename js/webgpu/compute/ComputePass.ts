@@ -6,11 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroup, ComputePipeline, webgpu } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ComputePipeline } from './ComputePipeline.js';
+import type { BindGroup } from './BindGroup.js';
+import { webgpu } from '../WebGPUAPI.js';
 
 let globalId = 1;
 
-export default class ComputePass {
+export class ComputePass {
 
   public readonly id = globalId++;
 

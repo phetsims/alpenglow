@@ -6,14 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, u32S, wgsl, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
 
 export type getConvergentIndexWGSLOptions = {
   i: WGSLExpressionU32;
   size: number;
 };
 
-const getConvergentIndexWGSL = (
+export const getConvergentIndexWGSL = (
   options: getConvergentIndexWGSLOptions
 ): WGSLStatements => {
   const i = options.i;
@@ -21,8 +22,6 @@ const getConvergentIndexWGSL = (
 
   return wgsl`( reverseBits( ${i} ) >> ${u32S( 32 - Math.log2( size ) )} )`;
 };
-
-export default getConvergentIndexWGSL;
 
 alpenglow.register( 'getConvergentIndexWGSL', getConvergentIndexWGSL );
 

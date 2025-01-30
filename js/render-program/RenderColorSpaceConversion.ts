@@ -8,9 +8,22 @@
 
 import Vector4 from '../../../dot/js/Vector4.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
-import { alpenglow, RenderColor, RenderColorSpace, RenderEvaluationContext, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderSRGBToLinearSRGB, RenderUnpremultiply, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import { RenderColorSpace } from './RenderColorSpace.js';
+import { RenderUnpremultiply } from './RenderUnpremultiply.js';
+import { RenderPremultiply } from './RenderPremultiply.js';
+import { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderLinearDisplayP3ToLinearSRGB } from './RenderLinearDisplayP3ToLinearSRGB.js';
+import { RenderSRGBToLinearSRGB } from './RenderSRGBToLinearSRGB.js';
+import { RenderLinearSRGBToLinearDisplayP3 } from './RenderLinearSRGBToLinearDisplayP3.js';
+import { RenderOklabToLinearSRGB } from './RenderOklabToLinearSRGB.js';
+import { RenderLinearSRGBToOklab } from './RenderLinearSRGBToOklab.js';
+import { RenderLinearSRGBToSRGB } from './RenderLinearSRGBToSRGB.js';
+import { RenderPathBoolean } from './RenderPathBoolean.js';
+import { RenderColor } from './RenderColor.js';
 
-export default abstract class RenderColorSpaceConversion extends RenderProgram {
+export abstract class RenderColorSpaceConversion extends RenderProgram {
 
   public inverse?: Constructor<RenderColorSpaceConversion>;
 
@@ -153,38 +166,6 @@ export default abstract class RenderColorSpaceConversion extends RenderProgram {
       subtype: this.getName(),
       program: this.program.serialize()
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderColorSpaceConversion ): RenderColorSpaceConversion {
-    const program = RenderProgram.deserialize( obj.program );
-
-    if ( obj.subtype === 'RenderPremultiply' ) {
-      return new RenderPremultiply( program );
-    }
-    else if ( obj.subtype === 'RenderUnpremultiply' ) {
-      return new RenderUnpremultiply( program );
-    }
-    else if ( obj.subtype === 'RenderLinearSRGBToOklab' ) {
-      return new RenderLinearSRGBToOklab( program );
-    }
-    else if ( obj.subtype === 'RenderLinearSRGBToSRGB' ) {
-      return new RenderLinearSRGBToSRGB( program );
-    }
-    else if ( obj.subtype === 'RenderOklabToLinearSRGB' ) {
-      return new RenderOklabToLinearSRGB( program );
-    }
-    else if ( obj.subtype === 'RenderSRGBToLinearSRGB' ) {
-      return new RenderSRGBToLinearSRGB( program );
-    }
-    else if ( obj.subtype === 'RenderLinearDisplayP3ToLinearSRGB' ) {
-      return new RenderLinearDisplayP3ToLinearSRGB( program );
-    }
-    else if ( obj.subtype === 'RenderLinearSRGBToLinearDisplayP3' ) {
-      return new RenderLinearSRGBToLinearDisplayP3( program );
-    }
-    else {
-      throw new Error( `Unrecognized subtype: ${obj.subtype}` );
-    }
   }
 }
 

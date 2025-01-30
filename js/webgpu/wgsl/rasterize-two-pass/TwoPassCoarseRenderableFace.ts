@@ -5,7 +5,7 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-type TwoPassCoarseRenderableFace = {
+export type TwoPassCoarseRenderableFace = {
   // RenderProgram packed info
   renderProgramIndex: number;
   needsCentroid: boolean;
@@ -21,5 +21,3 @@ type TwoPassCoarseRenderableFace = {
   maxYCount: number;
   tileIndex: number;
 };
-
-export default TwoPassCoarseRenderableFace;

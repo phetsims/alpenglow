@@ -7,9 +7,21 @@
  */
 
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import { alpenglow, BindGroupLayout, BindingDescriptor, BindingType, BufferSlot, BufferSlotSlice, ComputePipeline, DeviceContext, ExecutionContext, Module, PipelineBlueprint, PipelineLayout, ResourceSlot } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { PipelineBlueprint } from './PipelineBlueprint.js';
+import type { ResourceSlot } from './ResourceSlot.js';
+import { BindGroupLayout } from './BindGroupLayout.js';
+import type { DeviceContext } from './DeviceContext.js';
+import type { Module } from './Module.js';
+import { BufferSlot } from './BufferSlot.js';
+import { BufferSlotSlice } from './BufferSlotSlice.js';
+import { PipelineLayout } from './PipelineLayout.js';
+import { ComputePipeline } from './ComputePipeline.js';
+import type { ExecutionContext } from './ExecutionContext.js';
+import { BindingDescriptor } from './BindingDescriptor.js';
+import type { BindingType } from './BindingType.js';
 
-export default class Routine<T, In, Out> {
+export class Routine<T, In, Out> {
 
   public readonly pipelineBlueprints: PipelineBlueprint[];
   public readonly rootResourceSlots: ResourceSlot[];
@@ -74,8 +86,11 @@ export default class Routine<T, In, Out> {
       const pipelineLayout = pipelineLayoutMap.get( pipelineBlueprint )!;
       assert && assert( pipelineLayout, 'Missing pipeline layout' );
 
-      computePipelineMap.set( pipelineBlueprint, await pipelineBlueprint.toComputePipeline(
-        deviceContext, pipelineLayout
+      computePipelineMap.set( pipelineBlueprint, await ComputePipeline.withContextAsync(
+        deviceContext,
+        pipelineBlueprint.name,
+        pipelineBlueprint.toString( pipelineLayout ),
+        pipelineLayout
       ) );
     }
 

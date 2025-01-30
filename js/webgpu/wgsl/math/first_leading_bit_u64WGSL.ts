@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { u64WGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Returns the position of the first leading bit (most significant bit) in a u64.
  *
@@ -10,7 +8,10 @@ import { u64WGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStringModule } fr
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLExpressionU32, WGSLStringModule } from '../WGSLString.js';
+import { u64WGSL } from './u64WGSL.js';
+
+export const first_leading_bit_u64WGSL = (
   u64: WGSLExpression
 ): WGSLExpressionU32 => {
   return new WGSLStringModule( 'first_leading_bit_u64', wgsl`first_leading_bit_u64( ${u64} )`, wgsl`

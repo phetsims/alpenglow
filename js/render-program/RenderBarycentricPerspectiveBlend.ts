@@ -10,7 +10,14 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { RenderColor } from './RenderColor.js';
 
 export enum RenderBarycentricPerspectiveBlendAccuracy {
   // TODO: Accurate should really be the version that runs the perspective correction integral!!!!
@@ -23,7 +30,7 @@ const scratchCentroid = new Vector2( 0, 0 );
 
 alpenglow.register( 'RenderBarycentricPerspectiveBlendAccuracy', RenderBarycentricPerspectiveBlendAccuracy );
 
-export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
+export class RenderBarycentricPerspectiveBlend extends RenderProgram {
 
   public readonly logic: RenderBarycentricPerspectiveBlendLogic;
 
@@ -134,18 +141,6 @@ export default class RenderBarycentricPerspectiveBlend extends RenderProgram {
       b: this.b.serialize(),
       c: this.c.serialize()
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderBarycentricPerspectiveBlend ): RenderBarycentricPerspectiveBlend {
-    return new RenderBarycentricPerspectiveBlend(
-      new Vector3( obj.pointA[ 0 ], obj.pointA[ 1 ], obj.pointA[ 2 ] ),
-      new Vector3( obj.pointB[ 0 ], obj.pointB[ 1 ], obj.pointB[ 2 ] ),
-      new Vector3( obj.pointC[ 0 ], obj.pointC[ 1 ], obj.pointC[ 2 ] ),
-      obj.accuracy,
-      RenderProgram.deserialize( obj.a ),
-      RenderProgram.deserialize( obj.b ),
-      RenderProgram.deserialize( obj.c )
-    );
   }
 }
 

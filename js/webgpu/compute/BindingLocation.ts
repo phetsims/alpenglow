@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, decimalS, wgsl, WGSLString } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { decimalS, wgsl, WGSLString } from '../wgsl/WGSLString.js';
 
-export default class BindingLocation {
+export class BindingLocation {
   public constructor(
     public readonly groupIndex: number,
     public readonly bindingIndex: number

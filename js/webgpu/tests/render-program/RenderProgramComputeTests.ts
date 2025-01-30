@@ -10,10 +10,50 @@ import Matrix4 from '../../../../../dot/js/Matrix4.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
-// eslint-disable-next-line phet/single-line-import
-import {
-  asyncTestWithDevice, BufferArraySlot, BufferBindingType, BufferSlot, ByteEncoder, ConcreteType, DeviceContext, DirectModule, evaluate_render_program_instructionsWGSL, F32Type, getArrayType, LinearEdge, LinearEdgeWGSL, Procedure, RenderAlpha, RenderBarycentricBlend, RenderBarycentricBlendAccuracy, RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderEvaluationContext, RenderExtend, RenderFilter, RenderGradientStop, RenderInstruction, RenderLight, RenderLinearBlend, RenderLinearBlendAccuracy, RenderLinearDisplayP3ToLinearSRGB, RenderLinearGradient, RenderLinearGradientAccuracy, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderNormalDebug, RenderNormalize, RenderOklabToLinearSRGB, RenderPhong, RenderPremultiply, RenderProgram, RenderRadialBlend, RenderRadialBlendAccuracy, RenderRadialGradient, RenderRadialGradientAccuracy, RenderSRGBToLinearSRGB, RenderStack, RenderUnpremultiply, Routine, StoreStatementCallback, U32Type, wgsl, WGSLExpression, WGSLMainModule, WGSLReferenceModule, WGSLSlot, WGSLStatements
-} from '../../../imports.js';
+import { DeviceContext } from '../../compute/DeviceContext.js';
+import { RenderProgram } from '../../../render-program/RenderProgram.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import { ConcreteType, F32Type, getArrayType, StoreStatementCallback, U32Type } from '../../compute/ConcreteType.js';
+import { wgsl, WGSLExpression, WGSLMainModule, WGSLReferenceModule, WGSLSlot, WGSLStatements } from '../../wgsl/WGSLString.js';
+import { ByteEncoder } from '../../compute/ByteEncoder.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { DirectModule } from '../../compute/DirectModule.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { evaluate_render_program_instructionsWGSL } from '../../wgsl/render-program/evaluate_render_program_instructionsWGSL.js';
+import { LinearEdgeWGSL } from '../../wgsl/cag/LinearEdgeWGSL.js';
+import { Routine } from '../../compute/Routine.js';
+import { RenderInstruction } from '../../../render-program/RenderInstruction.js';
+import { Procedure } from '../../compute/Procedure.js';
+import { asyncTestWithDevice } from '../ShaderTestUtils.js';
+import { RenderEvaluationContext } from '../../../render-program/RenderEvaluationContext.js';
+import { RenderColor } from '../../../render-program/RenderColor.js';
+import { RenderPremultiply } from '../../../render-program/RenderPremultiply.js';
+import { RenderUnpremultiply } from '../../../render-program/RenderUnpremultiply.js';
+import { RenderSRGBToLinearSRGB } from '../../../render-program/RenderSRGBToLinearSRGB.js';
+import { RenderLinearSRGBToSRGB } from '../../../render-program/RenderLinearSRGBToSRGB.js';
+import { RenderLinearDisplayP3ToLinearSRGB } from '../../../render-program/RenderLinearDisplayP3ToLinearSRGB.js';
+import { RenderLinearSRGBToLinearDisplayP3 } from '../../../render-program/RenderLinearSRGBToLinearDisplayP3.js';
+import { RenderOklabToLinearSRGB } from '../../../render-program/RenderOklabToLinearSRGB.js';
+import { RenderLinearSRGBToOklab } from '../../../render-program/RenderLinearSRGBToOklab.js';
+import { RenderNormalize } from '../../../render-program/RenderNormalize.js';
+import { RenderAlpha } from '../../../render-program/RenderAlpha.js';
+import { RenderNormalDebug } from '../../../render-program/RenderNormalDebug.js';
+import { RenderStack } from '../../../render-program/RenderStack.js';
+import { RenderLinearBlend, RenderLinearBlendAccuracy } from '../../../render-program/RenderLinearBlend.js';
+import { RenderRadialBlend, RenderRadialBlendAccuracy } from '../../../render-program/RenderRadialBlend.js';
+import { RenderLinearGradient, RenderLinearGradientAccuracy } from '../../../render-program/RenderLinearGradient.js';
+import { RenderGradientStop } from '../../../render-program/RenderGradientStop.js';
+import { RenderExtend } from '../../../render-program/RenderExtend.js';
+import { RenderRadialGradient, RenderRadialGradientAccuracy } from '../../../render-program/RenderRadialGradient.js';
+import { RenderBarycentricBlend, RenderBarycentricBlendAccuracy } from '../../../render-program/RenderBarycentricBlend.js';
+import { RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy } from '../../../render-program/RenderBarycentricPerspectiveBlend.js';
+import { RenderBlendCompose } from '../../../render-program/RenderBlendCompose.js';
+import { RenderComposeType } from '../../../render-program/RenderComposeType.js';
+import { RenderBlendType } from '../../../render-program/RenderBlendType.js';
+import { RenderPhong } from '../../../render-program/RenderPhong.js';
+import { RenderLight } from '../../../render-program/RenderLight.js';
+import { RenderFilter } from '../../../render-program/RenderFilter.js';
 
 QUnit.module( 'RenderProgramComputeTests' );
 

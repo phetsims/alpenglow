@@ -8,9 +8,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, ParallelStorageArray, RasterEdge } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
+import type { ParallelStorageArray } from '../ParallelStorageArray.js';
+import type { RasterEdge } from './RasterEdge.js';
 
-export default class RasterChunk {
+export class RasterChunk {
   public constructor(
     public readonly renderProgramIndex: number,
     public readonly needsFace: boolean,

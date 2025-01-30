@@ -7,9 +7,17 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, RenderColor, RenderColorSpaceConversion, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderColorSpaceConversion } from './RenderColorSpaceConversion.js';
+import type { RenderProgram } from './RenderProgram.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { RenderColor } from './RenderColor.js';
 
-export default class RenderLinearDisplayP3ToLinearSRGB extends RenderColorSpaceConversion {
+export class RenderLinearDisplayP3ToLinearSRGB extends RenderColorSpaceConversion {
   public constructor(
     program: RenderProgram
   ) {

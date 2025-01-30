@@ -6,9 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BigRational, BigRationalVector2 } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { BigRational } from './BigRational.js';
+import type { BigRationalVector2 } from './BigRationalVector2.js';
 
-export default class RationalIntersection {
+export class RationalIntersection {
   public constructor( public readonly t: BigRational, public readonly point: BigRationalVector2 ) {}
 }
 

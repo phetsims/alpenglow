@@ -8,7 +8,12 @@
 
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
-import { alpenglow, BindingType, BufferSlot, ComputePipeline, DeviceContext, getArrayType, getCastedType, PipelineLayout, ResourceSlot, ResourceUsage, U32Type, wgsl, WGSLModule, WGSLModuleDeclarations, wgslWith } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { ResourceUsage } from './ResourceUsage.js';
+import type { PipelineLayout } from './PipelineLayout.js';
+import { WGSLModuleDeclarations } from '../wgsl/WGSLString.js';
+import type { ResourceSlot } from './ResourceSlot.js';
+import type { BindingType } from './BindingType.js';
 
 export type PipelineBlueprintOptions = {
   name: string;
@@ -21,7 +26,7 @@ export const PIPELINE_BLUEPRINT_DEFAULTS = {
   log: false
 } as const;
 
-export default class PipelineBlueprint {
+export class PipelineBlueprint {
 
   public readonly usages: ResourceUsage[] = [];
   public readonly name: string;
@@ -38,30 +43,6 @@ export default class PipelineBlueprint {
     this.name = options.name;
     this.log = options.log;
   }
-
-  public async toComputePipeline(
-    deviceContext: DeviceContext,
-    pipelineLayout: PipelineLayout
-  ): Promise<ComputePipeline> {
-    return ComputePipeline.withContextAsync(
-      deviceContext,
-      this.name,
-      this.toString( pipelineLayout ),
-      pipelineLayout
-    );
-  }
-
-  // TODO: oh no, we need to put the atomic in here(!)
-  // TODO: Or actually, just an ability to put structs of arbitrary types in ConcreteTypes
-  public static readonly LOG_BUFFER_SLOT = new BufferSlot( getCastedType( getArrayType( U32Type, 2 << 24, 0 ), wgslWith(
-    wgsl`_Log`,
-    new WGSLModule( '_Log', wgsl`
-      struct _Log {
-        next_space: atomic<u32>,
-        data: array<u32>
-      };
-    ` )
-  ) ) );
 
   public add(
     name: string,

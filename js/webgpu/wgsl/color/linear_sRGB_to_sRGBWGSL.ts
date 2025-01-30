@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Converts a linear sRGB color to sRGB color space. This applies the gamma correction.
  *
@@ -10,7 +8,9 @@ import { wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+
+export const linear_sRGB_to_sRGBWGSL = (
   vec3: WGSLExpression
 ): WGSLExpression => {
   // https://entropymine.com/imageworsener/srgbformula/ (a more precise formula for sRGB)

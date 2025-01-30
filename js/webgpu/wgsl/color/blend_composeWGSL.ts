@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { premultiplyWGSL, RenderBlendType, RenderComposeType, u32S, unpremultiplyWGSL, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionU32, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Implementation of RenderBlendCompose.blendCompose in WGSL.
  *
@@ -10,6 +8,12 @@ import { premultiplyWGSL, RenderBlendType, RenderComposeType, u32S, unpremultipl
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import { u32S, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionU32, WGSLStringModule } from '../WGSLString.js';
+import { unpremultiplyWGSL } from './unpremultiplyWGSL.js';
+import { premultiplyWGSL } from './premultiplyWGSL.js';
+import { RenderBlendType } from '../../../render-program/RenderBlendType.js';
+import { RenderComposeType } from '../../../render-program/RenderComposeType.js';
 
 /*
 Copyright (c) 2020 Raph Levien
@@ -39,7 +43,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-export default (
+export const blend_composeWGSL = (
   a: WGSLExpression, // vec4f - foreground
   b: WGSLExpression, // vec4f - background
   composeType: WGSLExpressionU32, // u32

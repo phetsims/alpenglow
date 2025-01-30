@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { RenderExtend, u32S, wgsl, WGSLExpression, WGSLExpressionI32, WGSLExpressionU32, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Integer extension for RenderExtend.
  *
@@ -16,7 +14,10 @@ import { RenderExtend, u32S, wgsl, WGSLExpression, WGSLExpressionI32, WGSLExpres
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { u32S, wgsl, WGSLExpression, WGSLExpressionI32, WGSLExpressionU32, WGSLStringModule } from '../WGSLString.js';
+import { RenderExtend } from '../../../render-program/RenderExtend.js';
+
+export const extend_i32WGSL = (
   i: WGSLExpressionI32,
   size: WGSLExpressionI32,
   extend: WGSLExpressionU32

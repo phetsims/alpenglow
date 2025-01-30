@@ -7,7 +7,22 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, BufferArraySlot, BufferSlot, CompositeModule, getVariableLengthArrayType, LinearEdge, LinearEdgeType, MainTwoPassCoarseModule, MainTwoPassCoarseModuleOptions, MainTwoPassFineModule, MainTwoPassFineModuleOptions, MainTwoPassInitializeAddressesModule, PipelineBlueprintOptions, TextureViewSlot, TwoPassCoarseRenderableFace, TwoPassConfig, TwoPassFineRenderableFaceType, U32AtomicType, U32Type, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
+import { TwoPassCoarseRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassCoarseRenderableFace.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import { TextureViewSlot } from '../../compute/TextureViewSlot.js';
+import { MainTwoPassCoarseModule, MainTwoPassCoarseModuleOptions } from './MainTwoPassCoarseModule.js';
+import { MainTwoPassFineModule, MainTwoPassFineModuleOptions } from './MainTwoPassFineModule.js';
+import { MainTwoPassInitializeAddressesModule } from './MainTwoPassInitializeAddressesModule.js';
+import { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { WGSLExpressionU32 } from '../../wgsl/WGSLString.js';
+import { CompositeModule } from '../../compute/CompositeModule.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { getVariableLengthArrayType, U32AtomicType, U32Type } from '../../compute/ConcreteType.js';
+import { TwoPassFineRenderableFaceType } from '../../wgsl/rasterize-two-pass/TwoPassFineRenderableFaceType.js';
+import { LinearEdgeType } from '../../wgsl/cag/LinearEdgeType.js';
 
 type SelfOptions = {
   config: BufferSlot<TwoPassConfig>;
@@ -56,7 +71,7 @@ export type TwoPassRunSize = {
 };
 
 // inputSize: TwoPassRunSize
-export default class TwoPassModule extends CompositeModule<TwoPassRunSize> {
+export class TwoPassModule extends CompositeModule<TwoPassRunSize> {
 
   public readonly config: BufferSlot<TwoPassConfig>;
   public readonly coarseRenderableFaces: BufferSlot<TwoPassCoarseRenderableFace[]>;

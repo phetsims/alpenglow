@@ -4,7 +4,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BitOrder, BufferBindingType, BufferSlot, decimalS, radixHistogramWGSL, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { BitOrder } from '../../compute/ConcreteType.js';
+import { decimalS, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { radixHistogramWGSL } from './radixHistogramWGSL.js';
 
 export type mainRadixHistogramWGSLOptions<T> = {
   input: BufferSlot<T[]>;
@@ -25,7 +30,7 @@ export const MAIN_RADIX_HISTOGRAM_DEFAULTS = {
   // TODO: will need something once we have lengthExpression optional
 } as const;
 
-const mainRadixHistogramWGSL = <T>(
+export const mainRadixHistogramWGSL = <T>(
   options: mainRadixHistogramWGSLOptions<T>
 ): WGSLMainModule => {
 
@@ -60,7 +65,5 @@ const mainRadixHistogramWGSL = <T>(
     }
   ` );
 };
-
-export default mainRadixHistogramWGSL;
 
 alpenglow.register( 'mainRadixHistogramWGSL', mainRadixHistogramWGSL );

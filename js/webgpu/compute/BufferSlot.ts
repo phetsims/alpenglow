@@ -6,9 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferSlotSlice, ConcreteType, ResourceSlot } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { ResourceSlot } from './ResourceSlot.js';
+import { BufferSlotSlice } from './BufferSlotSlice.js';
+import type { ConcreteType } from './ConcreteType.js';
 
-export default class BufferSlot<T = unknown> extends ResourceSlot {
+export class BufferSlot<T = unknown> extends ResourceSlot {
   public readonly bufferSlotSlices: BufferSlotSlice[] = [];
   public readonly size: number;
 

@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { i64WGSL, is_negative_i64WGSL, is_zero_u64WGSL, subtract_i64_i64WGSL, wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Returns a comparison of two i64s:
  *
@@ -12,7 +10,13 @@ import { i64WGSL, is_negative_i64WGSL, is_zero_u64WGSL, subtract_i64_i64WGSL, wg
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule } from '../WGSLString.js';
+import { i64WGSL } from './i64WGSL.js';
+import { subtract_i64_i64WGSL } from './subtract_i64_i64WGSL.js';
+import { is_zero_u64WGSL } from './is_zero_u64WGSL.js';
+import { is_negative_i64WGSL } from './is_negative_i64WGSL.js';
+
+export const cmp_i64_i64WGSL = (
   a: WGSLExpression,
   b: WGSLExpression
 ): WGSLExpressionI32 => {

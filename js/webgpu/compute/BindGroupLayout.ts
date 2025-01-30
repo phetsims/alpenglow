@@ -6,9 +6,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BindingDescriptor, BindingLocation, BufferBinding, BufferSlot, DeviceContext, ResourceSlot, webgpu } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { Binding } from './Binding.js';
+import type { DeviceContext } from './DeviceContext.js';
+import type { BindingDescriptor } from './BindingDescriptor.js';
+import { webgpu } from '../WebGPUAPI.js';
+import { BindingLocation } from './BindingLocation.js';
+import { BufferBinding } from './BufferBinding.js';
+import { BufferSlot } from './BufferSlot.js';
+import type { ResourceSlot } from './ResourceSlot.js';
 
-export default class BindGroupLayout {
+export class BindGroupLayout {
   public readonly layout: GPUBindGroupLayout;
   public readonly bindings: Binding[];
 

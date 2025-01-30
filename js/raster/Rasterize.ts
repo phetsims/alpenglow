@@ -12,7 +12,33 @@ import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
-import { alpenglow, BoundedSubpath, ClippableFace, ClippableFaceAccumulator, EdgedClippedFace, EdgedFace, EdgedFaceAccumulator, FaceConversion, getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, OutputRaster, PolygonalFace, PolygonalFaceAccumulator, PolygonFilterType, PolygonMitchellNetravali, RasterLog, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderableFace, RenderColor, RenderEvaluationContext, RenderEvaluator, RenderExecutor, RenderPath, RenderPathBoolean, RenderPathReplacer, RenderProgram, RenderProgramNeeds } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, PolygonFilterType } from '../render-program/PolygonFilterType.js';
+import { RasterLog, RasterTileLog } from './RasterLog.js';
+import { RenderEvaluationContext } from '../render-program/RenderEvaluationContext.js';
+import type { ClippableFace, ClippableFaceAccumulator } from '../cag/ClippableFace.js';
+import { EdgedFace, EdgedFaceAccumulator } from '../cag/ClippableFace.js';
+import { PolygonalFace, PolygonalFaceAccumulator } from '../cag/ClippableFace.js';
+import type { OutputRaster } from './OutputRaster.js';
+import type { RenderEvaluator, RenderProgram } from '../render-program/RenderProgram.js';
+import { RenderProgramNeeds } from '../render-program/RenderProgramNeeds.js';
+import { RationalFace } from '../cag/RationalFace.js';
+import { RenderPathReplacer } from '../render-program/RenderPathReplacer.js';
+import { PolygonMitchellNetravali } from './PolygonMitchellNetravali.js';
+import { RenderableFace } from './RenderableFace.js';
+import { RenderExecutor } from '../render-program/RenderExecutor.js';
+import { EdgedClippedFace } from '../cag/ClippableFace.js';
+import { RenderPath } from '../render-program/RenderPath.js';
+import { BoundedSubpath } from '../cag/BoundedSubpath.js';
+import { IntegerEdge } from '../cag/IntegerEdge.js';
+import { HilbertMapping } from '../cag/HilbertMapping.js';
+import { LineIntersector } from '../cag/LineIntersector.js';
+import { LineSplitter } from '../cag/LineSplitter.js';
+import { RationalHalfEdge } from '../cag/RationalHalfEdge.js';
+import { RationalBoundary } from '../cag/RationalBoundary.js';
+import { FaceConversion } from '../cag/FaceConversion.js';
+import { RenderColor } from '../render-program/RenderColor.js';
+import { RenderPathBoolean } from '../render-program/RenderPathBoolean.js';
 
 type RenderExecutionMethod = 'evaluation' | 'instructions';
 
@@ -102,7 +128,7 @@ class RasterizationContext {
   }
 }
 
-export default class Rasterize {
+export class Rasterize {
 
   private static getRenderProgrammedFaces( renderProgram: RenderProgram, faces: RationalFace[] ): RationalFace[] {
     const renderProgrammedFaces: RationalFace[] = [];

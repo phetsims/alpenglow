@@ -9,7 +9,15 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, RakedSizable, scanWGSL, toStripedIndexWGSL, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
+import { BinaryOp } from '../../compute/ConcreteType.js';
+import { LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, RakedSizable, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../WGSLUtils.js';
+import { binaryExpressionStatementWGSL } from './binaryExpressionStatementWGSL.js';
+import { commentWGSL } from './commentWGSL.js';
+import { unrollWGSL } from './unrollWGSL.js';
+import { scanWGSL } from './scanWGSL.js';
+import { toStripedIndexWGSL } from './toStripedIndexWGSL.js';
 
 export type scanRakedWGSLOptions<T> = {
   // varname of var<workgroup> array<${binaryOp.type.valueType}, ${workgroupSize * grainSize}>
@@ -51,7 +59,7 @@ export const SCAN_RAKED_DEFAULTS = {
   ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
-const scanRakedWGSL = <T>(
+export const scanRakedWGSL = <T>(
   providedOptions: scanRakedWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -211,7 +219,5 @@ const scanRakedWGSL = <T>(
     ${commentWGSL( 'end scan_raked' )}
   `;
 };
-
-export default scanRakedWGSL;
 
 alpenglow.register( 'scanRakedWGSL', scanRakedWGSL );

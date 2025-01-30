@@ -6,9 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferLogger, ByteEncoder, ConcreteType, DeviceContext, getArrayType, webgpu } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { ConcreteType, getArrayType } from './ConcreteType.js';
+import { ByteEncoder } from './ByteEncoder.js';
+import { webgpu } from '../WebGPUAPI.js';
+import type { BufferLogger } from './BufferLogger.js';
+import type { DeviceContext } from './DeviceContext.js';
 
-export default class TypedBuffer<T = unknown> {
+export class TypedBuffer<T = unknown> {
   public constructor(
     public readonly buffer: GPUBuffer,
     public readonly type: ConcreteType<T>

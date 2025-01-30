@@ -8,7 +8,7 @@
  */
 
 import phetLibraryEslintConfig from '../perennial-alias/js/eslint/config/phet-library.eslint.config.mjs';
-import webGPUEslintGlobals from './js/webgpu/webGPUEslintGlobals.mjs';
+import { webGPUEslintGlobals } from './js/webgpu/webGPUEslintGlobals.mjs';
 
 export default [
   ...phetLibraryEslintConfig,

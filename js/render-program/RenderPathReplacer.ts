@@ -6,11 +6,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RenderDepthSort, RenderPath, RenderPathBoolean, RenderPlanar, RenderProgram, RenderStack, RenderTrail } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RenderPath } from './RenderPath.js';
+import { RenderTrail } from './RenderTrail.js';
+import type { RenderProgram } from './RenderProgram.js';
+import { RenderStack } from './RenderStack.js';
+import { RenderDepthSort } from './RenderDepthSort.js';
+import { RenderPlanar } from './RenderPlanar.js';
+import { RenderPathBoolean } from './RenderPathBoolean.js';
 
 const emptyIndexArray: number[] = [];
 
-export default class RenderPathReplacer {
+export class RenderPathReplacer {
 
   // For a given RenderPath, stores a trail for every place it is found within the RenderProgram
   private readonly trailsMap = new Map<RenderPath, RenderTrail[]>();

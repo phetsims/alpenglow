@@ -8,9 +8,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ParallelStorageArray } from '../ParallelStorageArray.js';
+import { RasterSplitReduceData } from './RasterSplitReduceData.js';
+import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
+import { ParallelKernel } from '../ParallelKernel.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
 
-export default class ParallelRasterSplitReduce {
+export class ParallelRasterSplitReduce {
   public static async dispatch(
     workgroupSize: number,
 

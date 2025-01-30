@@ -7,9 +7,11 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { alpenglow, ClippableFace, RenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { ClippableFace } from '../cag/ClippableFace.js';
+import type { RenderProgram } from '../render-program/RenderProgram.js';
 
-export default class RenderableFace {
+export class RenderableFace {
   public constructor(
     public readonly face: ClippableFace,
     public readonly renderProgram: RenderProgram,

@@ -7,9 +7,14 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, RenderColor, RenderEvaluationContext, RenderInstruction, RenderInstructionMultiplyScalar, RenderPathBoolean, RenderProgram, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionMultiplyScalar } from './RenderInstruction.js';
+import { RenderColor } from './RenderColor.js';
+import { RenderPathBoolean } from './RenderPathBoolean.js';
 
-export default class RenderAlpha extends RenderProgram {
+export class RenderAlpha extends RenderProgram {
   public constructor(
     public readonly program: RenderProgram,
     public readonly alpha: number
@@ -76,10 +81,6 @@ export default class RenderAlpha extends RenderProgram {
       program: this.program.serialize(),
       alpha: this.alpha
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderAlpha ): RenderAlpha {
-    return new RenderAlpha( RenderProgram.deserialize( obj.program ), obj.alpha );
   }
 }
 

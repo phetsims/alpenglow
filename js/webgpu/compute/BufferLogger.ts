@@ -6,14 +6,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, DeviceContext, webgpu } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { DeviceContext } from './DeviceContext.js';
+import { webgpu } from '../WebGPUAPI.js';
 
 const COLLAPSE_LOGS = true;
 
 export type FromArrayBufferable = { fromArrayBuffer: ( arrayBuffer: ArrayBuffer ) => { toString(): string }[] };
 export type FromMultiArrayBufferable = { fromArrayBuffer: ( arrayBuffer: ArrayBuffer ) => { toStrings(): string[] }[] };
 
-export default class BufferLogger {
+export class BufferLogger {
 
   private readonly callbacksOnComplete: ( () => Promise<void> )[] = [];
 

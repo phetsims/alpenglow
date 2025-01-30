@@ -6,10 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferSlot, ConcreteArrayType } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { BufferSlot } from './BufferSlot.js';
+import type { ConcreteArrayType } from './ConcreteType.js';
 
 // TODO: potential labels for buffer slots? (would need to be combined when buffer slots are shared)
-export default class BufferArraySlot<T = unknown> extends BufferSlot<T[]> {
+export class BufferArraySlot<T = unknown> extends BufferSlot<T[]> {
   public constructor(
     public readonly concreteArrayType: ConcreteArrayType<T>
   ) {

@@ -9,9 +9,11 @@
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';
-import { alpenglow, BaseWorkgroupValues, ParallelKernel } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { BaseWorkgroupValues } from './ParallelContext.js';
+import type { ParallelKernel } from './ParallelKernel.js';
 
-export default class ParallelWorkgroup<WorkgroupValues extends BaseWorkgroupValues> {
+export class ParallelWorkgroup<WorkgroupValues extends BaseWorkgroupValues> {
 
   public workgroupResolves: ( () => void )[] = [];
   public storageResolves: ( () => void )[] = [];

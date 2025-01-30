@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RenderProgram } from './RenderProgram.js';
 
-export default class RenderLight {
+export class RenderLight {
   public constructor(
     // The direction TO the light from the surface
     public readonly directionProgram: RenderProgram,

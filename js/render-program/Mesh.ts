@@ -7,9 +7,9 @@
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-export default class Mesh {
+export class Mesh {
 
   public readonly vertices: Vector3[] = [];
   public readonly uvs: Vector3[] = [];

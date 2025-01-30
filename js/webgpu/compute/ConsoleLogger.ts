@@ -8,7 +8,9 @@
 
 import Vector3 from '../../../../dot/js/Vector3.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { alpenglow, ByteEncoder, ConcreteType } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ConcreteType } from './ConcreteType.js';
+import { ByteEncoder } from './ByteEncoder.js';
 
 export type ConsoleLogInfo<T = unknown> = {
   // Filled in when registered
@@ -24,7 +26,7 @@ export type ConsoleLogInfo<T = unknown> = {
   lineToLog: ( line: ConsoleLoggedLine ) => unknown;
 };
 
-export default class ConsoleLogger {
+export class ConsoleLogger {
   private static nextGlobalId = 1;
   private static readonly identifierMap = new Map<number, ConsoleLogInfo>();
 

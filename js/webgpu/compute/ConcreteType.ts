@@ -10,7 +10,9 @@ import Random from '../../../../dot/js/Random.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, decimalS, i32S, u32S, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLType, WGSLVariableName } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { decimalS, i32S, u32S, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLType, WGSLVariableName } from '../wgsl/WGSLString.js';
+import { ByteEncoder } from './ByteEncoder.js';
 
 // eslint-disable-next-line phet/bad-sim-text
 const random = new Random();
@@ -19,7 +21,7 @@ export type WGSLBinaryStatements = ( value: WGSLVariableName, a: WGSLExpression,
 
 export type StoreStatementCallback = ( offset: WGSLExpressionU32, u32expr: WGSLExpressionU32 ) => WGSLStatements;
 
-type ConcreteType<T = unknown> = {
+export type ConcreteType<T = unknown> = {
   name: string;
 
   // TODO: deduplicate with wgslSize/wgslAlign. This is the size of the ENTIRE type, drop the "element" bit
@@ -61,7 +63,6 @@ type ConcreteType<T = unknown> = {
 
   // TODO: reading? (e.g. from structure-of-arrays, but also from just... other types and generic u32 buffers?)
 };
-export default ConcreteType;
 
 // TODO: potential separation of "WGSLType" - and the way to read the "raw" data out, is different than ConcreteType (which includes the JS representation)
 

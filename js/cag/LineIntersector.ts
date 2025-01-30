@@ -8,9 +8,15 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { alpenglow, BigIntVector2, BigRational, IntegerEdge, IntersectionPoint, RasterTileLog, RationalIntersection } from '../imports.js';
+import { BigIntVector2 } from './BigIntVector2.js';
+import { IntersectionPoint } from './IntersectionPoint.js';
+import { BigRational } from './BigRational.js';
+import { RationalIntersection } from './RationalIntersection.js';
+import { IntegerEdge } from './IntegerEdge.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RasterTileLog } from '../raster/RasterLog.js';
 
-export default class LineIntersector {
+export class LineIntersector {
   public static processIntegerEdgeIntersection( edgeA: IntegerEdge, edgeB: IntegerEdge, log: RasterTileLog | null ): void {
     // Some checks that should help out with performance, particularly for mesh-like cases where we have either
     // repeated segments, or repeated opposite segments (with the second one being more likely in those cases).

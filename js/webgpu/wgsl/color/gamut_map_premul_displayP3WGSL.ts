@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { gamut_map_linear_displayP3WGSL, linear_sRGB_to_sRGBWGSL, sRGB_to_linear_sRGBWGSL, unpremultiplyWGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Converts premultiplied Display-P3 => Display-P3, while ensuring the color is within the Display-P3 gamut.
  *
@@ -10,7 +8,13 @@ import { gamut_map_linear_displayP3WGSL, linear_sRGB_to_sRGBWGSL, sRGB_to_linear
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { linear_sRGB_to_sRGBWGSL } from './linear_sRGB_to_sRGBWGSL.js';
+import { gamut_map_linear_displayP3WGSL } from './gamut_map_linear_displayP3WGSL.js';
+import { sRGB_to_linear_sRGBWGSL } from './sRGB_to_linear_sRGBWGSL.js';
+import { unpremultiplyWGSL } from './unpremultiplyWGSL.js';
+
+export const gamut_map_premul_displayP3WGSL = (
   vec4: WGSLExpression
 ): WGSLExpression => {
   return new WGSLStringModule( 'gamut_map_premul_displayP3', wgsl`gamut_map_premul_displayP3( ${vec4} )`, wgsl`

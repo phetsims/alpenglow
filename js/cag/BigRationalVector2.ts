@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BigRational } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { BigRational } from './BigRational.js';
 
-export default class BigRationalVector2 {
+export class BigRationalVector2 {
   public constructor( public x: BigRational, public y: BigRational ) {}
 
   public equals( vector: BigRationalVector2 ): boolean {

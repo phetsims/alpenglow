@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { is_color_in_rangeWGSL, linear_sRGB_to_oklabWGSL, oklab_to_linear_sRGBWGSL, wgsl, WGSLExpression, WGSLExpressionBool, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Maps a linear sRGB color to a color that is within the sRGB gamut, using oklab for measuring perceptual distance.
  *
@@ -16,7 +14,12 @@ import { is_color_in_rangeWGSL, linear_sRGB_to_oklabWGSL, oklab_to_linear_sRGBWG
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLExpressionBool, WGSLStringModule } from '../WGSLString.js';
+import { is_color_in_rangeWGSL } from './is_color_in_rangeWGSL.js';
+import { linear_sRGB_to_oklabWGSL } from './linear_sRGB_to_oklabWGSL.js';
+import { oklab_to_linear_sRGBWGSL } from './oklab_to_linear_sRGBWGSL.js';
+
+export const gamut_map_linear_sRGBWGSL = (
   vec3: WGSLExpression
 ): WGSLExpressionBool => {
   return new WGSLStringModule( 'gamut_map_linear_sRGB', wgsl`gamut_map_linear_sRGB( ${vec3} )`, wgsl`

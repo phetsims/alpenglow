@@ -6,9 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, Resource } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { Resource } from './Resource.js';
+import type { Binding } from './Binding.js';
 
-export default class TextureViewResource extends Resource {
+export class TextureViewResource extends Resource {
   public constructor(
     public readonly textureView: GPUTextureView
   ) {

@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, webgpu } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { webgpu } from './WebGPUAPI.js';
 
-export default class BlitShader {
+export class BlitShader {
 
   public readonly module: GPUShaderModule;
   public readonly bindGroupLayout: GPUBindGroupLayout;

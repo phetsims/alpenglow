@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { add_u64_u64WGSL, mul_u32_u32_to_u64WGSL, u64WGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Multiplies two u64s together, returning a u64 (the low 64 bits of the result)
  *
@@ -10,7 +8,12 @@ import { add_u64_u64WGSL, mul_u32_u32_to_u64WGSL, u64WGSL, wgsl, WGSLExpression,
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { u64WGSL } from './u64WGSL.js';
+import { mul_u32_u32_to_u64WGSL } from './mul_u32_u32_to_u64WGSL.js';
+import { add_u64_u64WGSL } from './add_u64_u64WGSL.js';
+
+export const mul_u64_u64WGSL = (
   a: WGSLExpression,
   b: WGSLExpression
 ): WGSLExpression => {

@@ -6,11 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
 
 let globalId = 1;
 
-export default abstract class ResourceSlot {
+export abstract class ResourceSlot {
   public readonly id: number = globalId++;
 
   public abstract toDebugString(): string;

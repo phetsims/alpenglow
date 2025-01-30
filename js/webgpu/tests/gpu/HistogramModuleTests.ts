@@ -7,7 +7,13 @@
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, ConcreteType, getArrayType, HistogramModule, HistogramModuleOptions, Procedure, Routine, U32AtomicType, u32S, U32Type, Vec2uType, wgsl } from '../../../imports.js';
+import { ConcreteType, getArrayType, U32AtomicType, U32Type, Vec2uType } from '../../compute/ConcreteType.js';
+import { HistogramModule, HistogramModuleOptions } from '../../modules/gpu/HistogramModule.js';
+import { asyncTestWithDevice, compareArrays } from '../ShaderTestUtils.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { u32S, wgsl } from '../../wgsl/WGSLString.js';
+import { Routine } from '../../compute/Routine.js';
+import { Procedure } from '../../compute/Procedure.js';
 
 QUnit.module( 'HistogramModuleTests' );
 

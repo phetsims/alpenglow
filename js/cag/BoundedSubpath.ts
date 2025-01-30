@@ -7,10 +7,11 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, RenderPath } from '../imports.js';
+import type Vector2 from '../../../dot/js/Vector2.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RenderPath } from '../render-program/RenderPath.js';
 
-export default class BoundedSubpath {
+export class BoundedSubpath {
 
   public readonly bounds: Bounds2;
 

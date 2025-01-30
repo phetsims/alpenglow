@@ -6,9 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, BindingLocation, BindingType, BufferSlot } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { Binding } from './Binding.js';
+import type { BindingLocation } from './BindingLocation.js';
+import type { BindingType } from './BindingType.js';
+import type { BufferSlot } from './BufferSlot.js';
 
-export default class BufferBinding<T> extends Binding {
+export class BufferBinding<T> extends Binding {
   public constructor(
     location: BindingLocation,
     bindingType: BindingType,

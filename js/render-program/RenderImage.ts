@@ -10,11 +10,22 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, ClippableFace, PolygonMitchellNetravali, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderExtend, RenderImageable, RenderInstruction, RenderInstructionLocation, RenderProgram, RenderResampleType, SerializedRenderImageable } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram } from './RenderProgram.js';
+import type { RenderImageable, SerializedRenderImageable } from './RenderImageable.js';
+import { RenderExtend } from './RenderExtend.js';
+import { RenderResampleType } from './RenderResampleType.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import type { ClippableFace } from '../cag/ClippableFace.js';
+import { PolygonMitchellNetravali } from '../raster/PolygonMitchellNetravali.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 
 const emptyChildren: RenderProgram[] = [];
 
-export default class RenderImage extends RenderProgram {
+export class RenderImage extends RenderProgram {
 
   public readonly logic: RenderImageLogic;
 
@@ -317,20 +328,6 @@ export default class RenderImage extends RenderProgram {
       extendY: this.extendY,
       resampleType: this.resampleType
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderImage ): RenderImage {
-    return new RenderImage(
-      Matrix3.rowMajor(
-        obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
-        obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
-        obj.transform[ 6 ], obj.transform[ 7 ], obj.transform[ 8 ]
-      ),
-      RenderImage.deserializeRenderImageable( obj.image ),
-      obj.extendX,
-      obj.extendY,
-      obj.resampleType
-    );
   }
 
   public static serializeRenderImageable( imageable: RenderImageable ): SerializedRenderImageable {

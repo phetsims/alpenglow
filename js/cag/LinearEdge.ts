@@ -10,9 +10,10 @@ import Range from '../../../dot/js/Range.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Line, Shape } from '../../../kite/js/imports.js';
-import { alpenglow, ClipSimplifier } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { ClipSimplifier } from '../clip/ClipSimplifier.js';
 
-export default class LinearEdge {
+export class LinearEdge {
 
   // NOTE: We'll flag these, so that we can accurately compute bounds later when desired (and can skip edges with
   // corner vertices).

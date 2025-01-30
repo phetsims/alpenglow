@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { BindingType } from './BindingType.js';
 
-export default class TextureBindingType extends BindingType {
+export class TextureBindingType extends BindingType {
   public constructor(
     public readonly sampleType: GPUTextureSampleType,
     public readonly viewDimension: GPUTextureViewDimension = '2d',

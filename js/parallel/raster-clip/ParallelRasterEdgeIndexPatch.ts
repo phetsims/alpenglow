@@ -10,9 +10,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterEdge, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { ParallelKernel } from '../ParallelKernel.js';
+import { RasterEdge } from './RasterEdge.js';
+import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
+import { RasterSplitReduceData } from './RasterSplitReduceData.js';
+import type { ParallelStorageArray } from '../ParallelStorageArray.js';
 
-export default class ParallelRasterEdgeIndexPatch {
+export class ParallelRasterEdgeIndexPatch {
   public static async dispatch(
     workgroupSize: number,
 

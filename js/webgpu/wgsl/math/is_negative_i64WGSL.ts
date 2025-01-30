@@ -1,14 +1,15 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { i64WGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Checks whether an i64 is negative
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { i64WGSL } from './i64WGSL.js';
+
+export const is_negative_i64WGSL = (
   i64: WGSLExpression,
   inline = true
 ): WGSLExpression => {

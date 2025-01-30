@@ -6,7 +6,27 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
-import { asyncTestWithDevice, BufferArraySlot, BufferBindingType, DirectModule, F32Type, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, gamut_map_premul_displayP3WGSL, gamut_map_premul_sRGBWGSL, getArrayType, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, Procedure, RenderColor, Routine, sRGB_to_linear_sRGBWGSL, unpremultiplyWGSL, wgsl, WGSLMainModule, WGSLSlot, WGSLString } from '../../../imports.js';
+import { wgsl, WGSLMainModule, WGSLSlot, WGSLString } from '../../wgsl/WGSLString.js';
+import { asyncTestWithDevice } from '../ShaderTestUtils.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { DirectModule } from '../../compute/DirectModule.js';
+import { F32Type, getArrayType } from '../../compute/ConcreteType.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { Routine } from '../../compute/Routine.js';
+import { Procedure } from '../../compute/Procedure.js';
+import { sRGB_to_linear_sRGBWGSL } from '../../wgsl/color/sRGB_to_linear_sRGBWGSL.js';
+import { RenderColor } from '../../../render-program/RenderColor.js';
+import { linear_sRGB_to_sRGBWGSL } from '../../wgsl/color/linear_sRGB_to_sRGBWGSL.js';
+import { premultiplyWGSL } from '../../wgsl/color/premultiplyWGSL.js';
+import { unpremultiplyWGSL } from '../../wgsl/color/unpremultiplyWGSL.js';
+import { linear_sRGB_to_oklabWGSL } from '../../wgsl/color/linear_sRGB_to_oklabWGSL.js';
+import { oklab_to_linear_sRGBWGSL } from '../../wgsl/color/oklab_to_linear_sRGBWGSL.js';
+import { linear_displayP3_to_linear_sRGBWGSL } from '../../wgsl/color/linear_displayP3_to_linear_sRGBWGSL.js';
+import { linear_sRGB_to_linear_displayP3WGSL } from '../../wgsl/color/linear_sRGB_to_linear_displayP3WGSL.js';
+import { gamut_map_linear_sRGBWGSL } from '../../wgsl/color/gamut_map_linear_sRGBWGSL.js';
+import { gamut_map_linear_displayP3WGSL } from '../../wgsl/color/gamut_map_linear_displayP3WGSL.js';
+import { gamut_map_premul_sRGBWGSL } from '../../wgsl/color/gamut_map_premul_sRGBWGSL.js';
+import { gamut_map_premul_displayP3WGSL } from '../../wgsl/color/gamut_map_premul_displayP3WGSL.js';
 
 QUnit.module( 'ColorTests' );
 

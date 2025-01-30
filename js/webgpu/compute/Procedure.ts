@@ -8,8 +8,22 @@
 
 import { combineOptions } from '../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import { alpenglow, BindGroup, BindGroupLayout, BufferBindingType, BufferResource, DeviceContext, ExecutionContext, Executor, ExecutorOptions, PipelineBlueprint, Resource, ResourceSlot, Routine, TextureViewResource, TextureViewSlot, webgpu } from '../../imports.js';
-import BufferSlot from './BufferSlot.js';
+import { alpenglow } from '../../alpenglow.js';
+import { Executor, ExecutorOptions } from './Executor.js';
+import type { Routine } from './Routine.js';
+import type { ResourceSlot } from './ResourceSlot.js';
+import type { Resource } from './Resource.js';
+import type { BindGroupLayout } from './BindGroupLayout.js';
+import { BindGroup } from './BindGroup.js';
+import { BufferSlot } from './BufferSlot.js';
+import { BufferResource } from './BufferResource.js';
+import type { TextureViewSlot } from './TextureViewSlot.js';
+import type { TextureViewResource } from './TextureViewResource.js';
+import { BufferBindingType } from './BufferBindingType.js';
+import { webgpu } from '../WebGPUAPI.js';
+import { ExecutionContext } from './ExecutionContext.js';
+import type { DeviceContext } from './DeviceContext.js';
+import { logBufferSlot } from './logBufferSlot.js';
 
 export type ProcedureExecuteOptions = {
   separateComputePasses?: boolean;
@@ -22,7 +36,7 @@ export type ProcedureStandaloneExecuteOptions = {
 
 const emptyOptions = {} as const;
 
-export default class Procedure<In, Out> {
+export class Procedure<In, Out> {
 
   private readonly selfBuffers: GPUBuffer[] = [];
 
@@ -160,7 +174,7 @@ export default class Procedure<In, Out> {
   }
 
   public getLogBuffer(): GPUBuffer | null {
-    const resource = this.resourceMap.get( PipelineBlueprint.LOG_BUFFER_SLOT );
+    const resource = this.resourceMap.get( logBufferSlot );
     if ( resource ) {
       return ( resource as BufferResource ).buffer;
     }

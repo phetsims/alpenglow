@@ -7,7 +7,10 @@
  */
 
 import Vector3 from '../../../../dot/js/Vector3.js';
-import { alpenglow, Module, PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions, WGSLMainModule } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { Module } from './Module.js';
+import type { WGSLMainModule } from '../wgsl/WGSLString.js';
+import { PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions } from './PipelineBlueprint.js';
 
 type SelfOptions<T> = {
   main: WGSLMainModule;
@@ -20,7 +23,7 @@ export const DIRECT_MODULE_DEFAULTS = PIPELINE_BLUEPRINT_DEFAULTS;
 
 const scratchVector3 = Vector3.ZERO.copy();
 
-export default class DirectModule<T> extends Module<T> {
+export class DirectModule<T> extends Module<T> {
   public constructor(
     options: DirectModuleOptions<T>
   ) {

@@ -6,11 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, WebGPURecorder, WebGPUCommandList } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { WebGPUCommandList, WebGPURecorder } from './WebGPURecorder.js';
 
 export type PreferredCanvasFormat = 'bgra8unorm' | 'rgba8unorm';
 
-export default class WebGPUAPI {
+export class WebGPUAPI {
 
   public recorder: WebGPURecorder | null = null;
 

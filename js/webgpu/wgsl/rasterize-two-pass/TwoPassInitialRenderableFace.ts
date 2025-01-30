@@ -5,7 +5,7 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-type TwoPassInitialRenderableFace = {
+export type TwoPassInitialRenderableFace = {
   // RenderProgram packed info
   renderProgramIndex: number;
   needsCentroid: boolean;
@@ -16,5 +16,3 @@ type TwoPassInitialRenderableFace = {
   edgesIndex: number;
   numEdges: number;
 };
-
-export default TwoPassInitialRenderableFace;

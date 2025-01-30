@@ -9,9 +9,10 @@
  */
 
 import Vector2 from '../../../../dot/js/Vector2.js';
-import { alpenglow, ByteEncoder } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
 
-export default class RasterEdge {
+export class RasterEdge {
   public constructor(
     public readonly chunkIndex: number,
     public readonly isFirstEdge: boolean,

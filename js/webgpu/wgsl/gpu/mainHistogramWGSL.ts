@@ -5,7 +5,13 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, BufferBindingType, BufferSlot, decimalS, histogramWGSL, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32S, unrollWGSL, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { decimalS, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
+import { OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable } from '../WGSLUtils.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { histogramWGSL } from './histogramWGSL.js';
+import { unrollWGSL } from './unrollWGSL.js';
 
 export type mainHistogramWGSLOptions<T> = {
   input: BufferSlot<T[]>;
@@ -20,7 +26,7 @@ export const MAIN_HISTOGRAM_DEFAULTS = {
   ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS
 } as const;
 
-const mainHistogramWGSL = <T>(
+export const mainHistogramWGSL = <T>(
   providedOptions: mainHistogramWGSLOptions<T>
 ): WGSLMainModule => {
 
@@ -69,7 +75,5 @@ const mainHistogramWGSL = <T>(
     }
   ` );
 };
-
-export default mainHistogramWGSL;
 
 alpenglow.register( 'mainHistogramWGSL', mainHistogramWGSL );

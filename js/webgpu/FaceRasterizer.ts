@@ -3,7 +3,33 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
-import { alpenglow, BlitShader, BufferArraySlot, BufferBindingType, BufferSlot, ByteEncoder, CompositeModule, DeviceContext, getVariableLengthArrayType, LinearEdge, LinearEdgeType, PolygonFilterType, Procedure, RasterizationOptions, Rasterize, RenderableFace, RenderColor, RenderInstruction, RenderProgram, Routine, TextureViewResource, TextureViewSlot, TiledTwoPassModule, TwoPassConfig, TwoPassConfigType, TwoPassInitialRenderableFace, TwoPassInitialRenderableFaceType, U32Type, WGSLStringFunction } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { DeviceContext } from './compute/DeviceContext.js';
+import type { RenderableFace } from '../raster/RenderableFace.js';
+import { PolygonFilterType } from '../render-program/PolygonFilterType.js';
+import type { TwoPassInitialRenderableFace } from './wgsl/rasterize-two-pass/TwoPassInitialRenderableFace.js';
+import type { TwoPassConfig } from './wgsl/rasterize-two-pass/TwoPassConfig.js';
+import type { LinearEdge } from '../cag/LinearEdge.js';
+import { TextureViewSlot } from './compute/TextureViewSlot.js';
+import { Procedure } from './compute/Procedure.js';
+import { TiledTwoPassModule } from './modules/rasterize-two-pass/TiledTwoPassModule.js';
+import { BufferSlot } from './compute/BufferSlot.js';
+import { TwoPassConfigType } from './wgsl/rasterize-two-pass/TwoPassConfigType.js';
+import { getVariableLengthArrayType, U32Type } from './compute/ConcreteType.js';
+import { BufferArraySlot } from './compute/BufferArraySlot.js';
+import { TwoPassInitialRenderableFaceType } from './wgsl/rasterize-two-pass/TwoPassInitialRenderableFaceType.js';
+import { LinearEdgeType } from './wgsl/cag/LinearEdgeType.js';
+import { WGSLStringFunction } from './wgsl/WGSLString.js';
+import { BufferBindingType } from './compute/BufferBindingType.js';
+import { BlitShader } from './BlitShader.js';
+import { CompositeModule } from './compute/CompositeModule.js';
+import { Routine } from './compute/Routine.js';
+import { RasterizationOptions, Rasterize } from '../raster/Rasterize.js';
+import type { RenderProgram } from '../render-program/RenderProgram.js';
+import { ByteEncoder } from './compute/ByteEncoder.js';
+import { RenderInstruction } from '../render-program/RenderInstruction.js';
+import { RenderColor } from '../render-program/RenderColor.js';
+import { TextureViewResource } from './compute/TextureViewResource.js';
 
 /**
  * TODO: doc
@@ -74,7 +100,7 @@ export type FaceRasterizerExecutionInfo = {
   textureBlit: [ GPUTextureView, GPUTextureView ] | null;
 };
 
-export default class FaceRasterizer {
+export class FaceRasterizer {
 
   private readonly deviceContext: DeviceContext;
   private readonly supportsGridFiltering: boolean;

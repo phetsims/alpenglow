@@ -1,6 +1,10 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { ByteEncoder, ConcreteType, StoreStatementCallback, TwoPassInitialRenderableFace, TwoPassInitialRenderableFaceWGSL, wgsl, WGSLExpression, WGSLStatements } from '../../../imports.js';
+import { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';
+import { TwoPassInitialRenderableFace } from './TwoPassInitialRenderableFace.js';
+import { wgsl, WGSLExpression, WGSLStatements } from '../WGSLString.js';
+import { ByteEncoder } from '../../compute/ByteEncoder.js';
+import { TwoPassInitialRenderableFaceWGSL } from './TwoPassInitialRenderableFaceWGSL.js';
 
 /**
  * ConcreteType for a TwoPassInitialRenderableFace
@@ -12,7 +16,7 @@ import { ByteEncoder, ConcreteType, StoreStatementCallback, TwoPassInitialRender
 
 const dwords = 3;
 
-const TwoPassInitialRenderableFaceType: ConcreteType<TwoPassInitialRenderableFace> = {
+export const TwoPassInitialRenderableFaceType: ConcreteType<TwoPassInitialRenderableFace> = {
   name: 'TwoPassInitialRenderableFace',
   bytesPerElement: dwords * 4,
 
@@ -62,4 +66,3 @@ const TwoPassInitialRenderableFaceType: ConcreteType<TwoPassInitialRenderableFac
 
   toDebugString: ( value: TwoPassInitialRenderableFace ) => 'TwoPassInitialRenderableFace'
 };
-export default TwoPassInitialRenderableFaceType;

@@ -7,7 +7,10 @@
  */
 
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import { alpenglow, ConcreteType, DeviceContext, webgpu } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { webgpu } from '../WebGPUAPI.js';
+import { DeviceContext } from '../compute/DeviceContext.js';
+import { ConcreteType } from '../compute/ConcreteType.js';
 
 webgpu.enableRecording();
 

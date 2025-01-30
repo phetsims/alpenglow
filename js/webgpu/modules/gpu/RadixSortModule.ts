@@ -7,7 +7,17 @@
  */
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, BitOrder, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainRadixHistogramModule, MainRadixHistogramModuleOptions, MainRadixScatterModule, MainRadixScatterModuleOptions, PipelineBlueprintOptions, ScanModule, ScanModuleOptions, U32Add, u32S, U32Type, wgsl, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { BitOrder, getArrayType, U32Add, U32Type } from '../../compute/ConcreteType.js';
+import { u32S, wgsl, WGSLExpressionU32 } from '../../wgsl/WGSLString.js';
+import { MainRadixHistogramModule, MainRadixHistogramModuleOptions } from './MainRadixHistogramModule.js';
+import { MainRadixScatterModule, MainRadixScatterModuleOptions } from './MainRadixScatterModule.js';
+import { ScanModule, ScanModuleOptions } from './ScanModule.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { CompositeModule } from '../../compute/CompositeModule.js';
+import { ceilDivideConstantDivisorWGSL } from '../../wgsl/gpu/ceilDivideConstantDivisorWGSL.js';
+import type { ExecutionContext } from '../../compute/ExecutionContext.js';
 
 type SelfOptions<T> = {
   // NOTE: Can be in-place of input and output point to the same slot
@@ -79,7 +89,7 @@ export const getRadixBitVectorSize = (
 };
 
 // stageInputSize: number
-export default class RadixSortModule<T> extends CompositeModule<number> {
+export class RadixSortModule<T> extends CompositeModule<number> {
 
   public readonly input: BufferArraySlot<T>;
   public readonly output: BufferArraySlot<T>;

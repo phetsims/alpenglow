@@ -8,7 +8,18 @@
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
-import { alpenglow, BinaryOp, BufferArraySlot, ceilDivideConstantDivisorWGSL, CompositeModule, ExecutionContext, getArrayType, MainReduceModule, MainReduceModuleOptions, MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions, MainScanModule, MainScanModuleOptions, Module, PipelineBlueprintOptions, WGSLExpressionU32 } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { BinaryOp, getArrayType } from '../../compute/ConcreteType.js';
+import type { WGSLExpressionU32 } from '../../wgsl/WGSLString.js';
+import { MainScanModule, MainScanModuleOptions } from './MainScanModule.js';
+import { MainReduceModule, MainReduceModuleOptions } from './MainReduceModule.js';
+import { MainReduceNonCommutativeModule, MainReduceNonCommutativeModuleOptions } from './MainReduceNonCommutativeModule.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { CompositeModule } from '../../compute/CompositeModule.js';
+import { Module } from '../../compute/Module.js';
+import { ExecutionContext } from '../../compute/ExecutionContext.js';
+import { ceilDivideConstantDivisorWGSL } from '../../wgsl/gpu/ceilDivideConstantDivisorWGSL.js';
 
 type SelfOptions<T> = {
   // NOTE: Can be in-place of input and output point to the same slot
@@ -54,7 +65,7 @@ export const SCAN_MODULE_DEFAULTS = {
 } as const;
 
 // stageInputSize: number
-export default class ScanModule<T> extends CompositeModule<number> {
+export class ScanModule<T> extends CompositeModule<number> {
 
   public readonly input: BufferArraySlot<T>;
   public readonly output: BufferArraySlot<T>;

@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { u64WGSL, wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Returns a comparison of two u64s:
  *
@@ -12,7 +10,10 @@ import { u64WGSL, wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule } fr
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule } from '../WGSLString.js';
+import { u64WGSL } from './u64WGSL.js';
+
+export const cmp_u64_u64WGSL = (
   a: WGSLExpression,
   b: WGSLExpression
 ): WGSLExpressionI32 => {

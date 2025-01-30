@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-export default class BigRational {
+export class BigRational {
 
   public numerator: bigint;
   public denominator: bigint;

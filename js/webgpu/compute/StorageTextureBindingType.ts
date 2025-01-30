@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { BindingType } from './BindingType.js';
 
-export default class StorageTextureBindingType extends BindingType {
+export class StorageTextureBindingType extends BindingType {
   public constructor(
     public readonly access: GPUStorageTextureAccess,
     public readonly format: GPUTextureFormat,

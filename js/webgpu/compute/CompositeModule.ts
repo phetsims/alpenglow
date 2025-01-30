@@ -7,9 +7,11 @@
  */
 
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import { alpenglow, ExecutionContext, Module } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { Module } from './Module.js';
+import type { ExecutionContext } from './ExecutionContext.js';
 
-export default class CompositeModule<T> extends Module<T> {
+export class CompositeModule<T> extends Module<T> {
   public constructor(
     public readonly modules: Module<IntentionalAny>[],
     execute: ( context: ExecutionContext, data: T ) => void

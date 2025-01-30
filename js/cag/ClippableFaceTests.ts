@@ -11,7 +11,8 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { ClippableFace, PolygonalFace } from '../imports.js';
+import { PolygonalFace } from './ClippableFace.js';
+import type { ClippableFace } from './ClippableFace.js';
 
 QUnit.module( 'ClippableFace' );
 

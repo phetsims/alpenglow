@@ -17,7 +17,13 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, LinearEdge, RenderColor, RenderEvaluationContext, RenderInstruction, RenderInstructionComputeBlendRatio, RenderInstructionLinearBlend, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation, RenderInstructionReturn } from './RenderInstruction.js';
+import { RenderInstructionComputeBlendRatio, RenderInstructionLinearBlend } from './RenderLinearBlend.js';
+import { RenderColor } from './RenderColor.js';
+import { LinearEdge } from '../cag/LinearEdge.js';
 
 const scratchRadialBlendVector = new Vector2( 0, 0 );
 
@@ -34,7 +40,7 @@ export enum RenderRadialBlendAccuracy {
 
 alpenglow.register( 'RenderRadialBlendAccuracy', RenderRadialBlendAccuracy );
 
-export default class RenderRadialBlend extends RenderProgram {
+export class RenderRadialBlend extends RenderProgram {
 
   public readonly logic: RenderRadialBlendLogic;
 
@@ -155,21 +161,6 @@ export default class RenderRadialBlend extends RenderProgram {
       zero: this.zero.serialize(),
       one: this.one.serialize()
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderRadialBlend ): RenderRadialBlend {
-    return new RenderRadialBlend(
-      Matrix3.rowMajor(
-        obj.transform[ 0 ], obj.transform[ 1 ], obj.transform[ 2 ],
-        obj.transform[ 3 ], obj.transform[ 4 ], obj.transform[ 5 ],
-        obj.transform[ 6 ], obj.transform[ 7 ], obj.transform[ 8 ]
-      ),
-      obj.radius0,
-      obj.radius1,
-      obj.accuracy,
-      RenderProgram.deserialize( obj.zero ),
-      RenderProgram.deserialize( obj.one )
-    );
   }
 }
 

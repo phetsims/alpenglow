@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, RenderPath } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RenderPath } from '../render-program/RenderPath.js';
 
-export default class WindingMap {
+export class WindingMap {
   public constructor( public readonly map: Map<RenderPath, number> = new Map() ) {}
 
   public getWindingNumber( renderPath: RenderPath ): number {

@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Converts an oklab color to the linear sRGB color space.
  *
@@ -10,7 +8,9 @@ import { wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+
+export const oklab_to_linear_sRGBWGSL = (
   vec3: WGSLExpression
 ): WGSLExpression => {
   return new WGSLStringModule( 'oklab_to_linear_sRGB', wgsl`oklab_to_linear_sRGB( ${vec3} )`, wgsl`

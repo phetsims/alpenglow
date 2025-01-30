@@ -8,14 +8,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, wgsl, wgslString, WGSLString } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { wgsl, wgslString, WGSLString } from '../WGSLString.js';
 
-const commentWGSL = (
+export const commentWGSL = (
   str: string
 ): WGSLString => {
   return wgsl`/*** ${wgslString( str )} ***/`;
 };
-
-export default commentWGSL;
 
 alpenglow.register( 'commentWGSL', commentWGSL );

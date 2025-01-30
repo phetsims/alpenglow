@@ -6,9 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding, Resource } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { Resource } from './Resource.js';
+import type { Binding } from './Binding.js';
 
-export default class BufferResource extends Resource {
+export class BufferResource extends Resource {
   public constructor(
     public readonly buffer: GPUBuffer,
     public readonly offset = 0,

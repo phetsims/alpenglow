@@ -7,9 +7,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ByteEncoder, RasterClippedChunk } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
+import { RasterClippedChunk } from './RasterClippedChunk.js';
 
-export default class RasterChunkReduceData {
+export class RasterChunkReduceData {
   public constructor(
     public readonly clippedChunkIndex: number,
     public readonly area: number,

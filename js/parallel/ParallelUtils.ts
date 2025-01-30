@@ -7,9 +7,9 @@
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-export default class ParallelUtils {
+export class ParallelUtils {
 
   // Convert to an exclusive scan with the different indices
   public static getInclusiveToExclusiveScanIndices( index: number, workgroupSize: number ): Vector3 {

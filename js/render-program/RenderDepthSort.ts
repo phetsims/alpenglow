@@ -9,13 +9,19 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Range from '../../../dot/js/Range.js';
-import Vector3 from '../../../dot/js/Vector3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ClippableFace, RenderableFace, RenderColor, RenderEvaluationContext, RenderPlanar, RenderProgram, RenderStack, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderPlanar } from './RenderPlanar.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderableFace } from '../raster/RenderableFace.js';
+import { ClippableFace } from '../cag/ClippableFace.js';
+import { RenderColor } from './RenderColor.js';
+import { RenderStack } from './RenderStack.js';
 
 const toProgram = ( item: RenderPlanar ): RenderProgram => item.program;
 
-export default class RenderDepthSort extends RenderProgram {
+export class RenderDepthSort extends RenderProgram {
 
   public constructor(
     public readonly items: RenderPlanar[]
@@ -239,15 +245,6 @@ export default class RenderDepthSort extends RenderProgram {
         };
       } )
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderDepthSort ): RenderDepthSort {
-    return new RenderDepthSort( obj.items.map( item => new RenderPlanar(
-      RenderProgram.deserialize( item.program ),
-      new Vector3( item.pointA[ 0 ], item.pointA[ 1 ], item.pointA[ 2 ] ),
-      new Vector3( item.pointB[ 0 ], item.pointB[ 1 ], item.pointB[ 2 ] ),
-      new Vector3( item.pointC[ 0 ], item.pointC[ 1 ], item.pointC[ 2 ]
-    ) ) ) );
   }
 
   public static getProjectionMatrix( near: number, far: number, minX: number, minY: number, maxX: number, maxY: number ): Matrix4 {

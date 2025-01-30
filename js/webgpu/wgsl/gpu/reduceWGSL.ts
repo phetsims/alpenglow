@@ -7,7 +7,14 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, logValueWGSL, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
+import { BinaryOp } from '../../compute/ConcreteType.js';
+import { LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, WorkgroupSizable } from '../WGSLUtils.js';
+import { binaryExpressionStatementWGSL } from './binaryExpressionStatementWGSL.js';
+import { commentWGSL } from './commentWGSL.js';
+import { logValueWGSL } from './logValueWGSL.js';
+import { unrollWGSL } from './unrollWGSL.js';
 
 export type reduceWGSLOptions<T> = {
   // the "input" and "output" variable name
@@ -48,7 +55,7 @@ export const REDUCE_DEFAULTS = {
   ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
-const reduceWGSL = <T>(
+export const reduceWGSL = <T>(
   providedOptions: reduceWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -113,7 +120,5 @@ const reduceWGSL = <T>(
     ${commentWGSL( 'end reduce' )}
   `;
 };
-
-export default reduceWGSL;
 
 alpenglow.register( 'reduceWGSL', reduceWGSL );

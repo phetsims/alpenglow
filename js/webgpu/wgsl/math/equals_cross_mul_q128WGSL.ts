@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { is_zero_u64WGSL, mul_i64_i64WGSL, q128WGSL, subtract_i64_i64WGSL, wgsl, WGSLExpression, WGSLExpressionBool, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Checks whether two rational numbers are equal (by using cross-multiplication).
  *
@@ -11,7 +9,13 @@ import { is_zero_u64WGSL, mul_i64_i64WGSL, q128WGSL, subtract_i64_i64WGSL, wgsl,
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLExpressionBool, WGSLStringModule } from '../WGSLString.js';
+import { q128WGSL } from './q128WGSL.js';
+import { is_zero_u64WGSL } from './is_zero_u64WGSL.js';
+import { subtract_i64_i64WGSL } from './subtract_i64_i64WGSL.js';
+import { mul_i64_i64WGSL } from './mul_i64_i64WGSL.js';
+
+export const equals_cross_mul_q128WGSL = (
   a: WGSLExpression,
   b: WGSLExpression
 ): WGSLExpressionBool => {

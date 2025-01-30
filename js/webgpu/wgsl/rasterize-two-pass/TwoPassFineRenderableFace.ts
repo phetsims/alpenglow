@@ -5,7 +5,7 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-type TwoPassFineRenderableFace = {
+export type TwoPassFineRenderableFace = {
   // RenderProgram packed info
   renderProgramIndex: number;
   needsCentroid: boolean;
@@ -21,5 +21,3 @@ type TwoPassFineRenderableFace = {
   maxYCount: number;
   nextAddress: number;
 };
-
-export default TwoPassFineRenderableFace;

@@ -1,12 +1,13 @@
 // Copyright 2023-2024, University of Colorado Boulder
 
+import { alpenglow } from '../alpenglow.js';
+import type { IntegerEdge } from './IntegerEdge.js';
+
 /**
  * Utilities for Hilbert space-filling curve mapping
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-
-import { alpenglow, IntegerEdge } from '../imports.js';
 
 type P2 = 'x' | '-x' | 'y' | '-y';
 type P3 = 'x' | '-x' | 'y' | '-y' | 'z' | '-z';
@@ -15,7 +16,7 @@ type P5 = 'x' | '-x' | 'y' | '-y' | 'z' | '-z' | 'w' | '-w' | 'v' | '-v';
 type P6 = 'x' | '-x' | 'y' | '-y' | 'z' | '-z' | 'w' | '-w' | 'v' | '-v' | 'u' | '-u';
 type Hilbert = Hilbert2 | Hilbert3 | Hilbert4 | Hilbert5 | Hilbert6;
 
-export default class HilbertMapping {
+export class HilbertMapping {
 
   public static sortCenterSize( integerEdges: IntegerEdge[], scale: number ): void {
     integerEdges.sort( ( a, b ) => {

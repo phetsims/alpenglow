@@ -7,9 +7,12 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, RenderColor, RenderEvaluationContext, RenderProgram, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderColor } from './RenderColor.js';
 
-export default class RenderGradientStop {
+export class RenderGradientStop {
   public constructor( public readonly ratio: number, public readonly program: RenderProgram ) {
     assert && assert( ratio >= 0 && ratio <= 1 );
   }
@@ -54,10 +57,6 @@ export default class RenderGradientStop {
       ratio: this.ratio,
       program: this.program.serialize()
     };
-  }
-
-  public static deserialize( obj: SerializedRenderGradientStop ): RenderGradientStop {
-    return new RenderGradientStop( obj.ratio, RenderProgram.deserialize( obj.program ) );
   }
 }
 

@@ -7,9 +7,14 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstructionBarycentricBlend, RenderInstructionBarycentricPerspectiveBlend, RenderInstructionBlendCompose, RenderInstructionComputeBlendRatio, RenderInstructionComputeGradientRatio, RenderInstructionFilter, RenderInstructionLinearBlend, RenderInstructionLinearDisplayP3ToLinearSRGB, RenderInstructionLinearSRGBToLinearDisplayP3, RenderInstructionLinearSRGBToOklab, RenderInstructionLinearSRGBToSRGB, RenderInstructionNormalDebug, RenderInstructionNormalize, RenderInstructionOklabToLinearSRGB, RenderInstructionOpaqueJump, RenderInstructionPhong, RenderInstructionPremultiply, RenderInstructionSRGBToLinearSRGB, RenderInstructionStackBlend, RenderInstructionUnpremultiply } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { GRADIENT_BEFORE_RATIO_COUNT_BITS } from './GRADIENT_BEFORE_RATIO_COUNT_BITS.js';
 
-export default abstract class RenderInstruction {
+export abstract class RenderInstruction {
   public abstract execute(
     stack: RenderExecutionStack,
     context: RenderEvaluationContext,
@@ -131,7 +136,7 @@ export default abstract class RenderInstruction {
     // High 2 bits set => variable length
     else if ( code & 0xc0 ) {
       // TODO: factor out a better convention if this becomes more set
-      return code & 0x1f + 2 * ( u32 >> RenderInstructionComputeGradientRatio.GRADIENT_BEFORE_RATIO_COUNT_BITS );
+      return code & 0x1f + 2 * ( u32 >> GRADIENT_BEFORE_RATIO_COUNT_BITS );
     }
     // Just high bit set, we'll read the length in the lower-5 bits
     else {
@@ -169,140 +174,6 @@ export default abstract class RenderInstruction {
     }
 
     encoder.pushU32( RenderInstruction.ExitCode );
-  }
-
-  /**
-   * Reads the binary from from the encoder (at a specific dword offset), and returns the list of instructions.
-   *
-   * NOTE: No final "exit" is generated, since our executor for objects won't need it.
-   */
-  public static binaryToInstructions( encoder: ByteEncoder, offset: number ): RenderInstruction[] {
-
-    // Compute the addresses of every instruction (based on its length), and read through all of the instructions
-    // up through the exit.
-    const instructionAddresses: number[] = [];
-    let address = offset;
-    while ( encoder.fullU32Array[ address ] !== RenderInstruction.ExitCode ) {
-      instructionAddresses.push( address );
-      address += RenderInstruction.getInstructionLength( encoder.fullU32Array[ address ] );
-    }
-    const exitAddress = address;
-
-    // We'll lazy-load locations, since we (a) don't want to create them if they aren't needed, and (b) we only want
-    // one for each "address" (so multiple instructions could potentially point to the same location).
-    const locations: ( RenderInstructionLocation | null )[] = instructionAddresses.map( () => null );
-    locations.push( null ); // Add the exit location
-
-    // Given an instruction address, return its index on our list of non-location instructions
-    const getIndexOfAddress = ( address: number ): number => {
-      if ( address === exitAddress ) {
-        return instructionAddresses.length;
-      }
-      const index = instructionAddresses.indexOf( address );
-      assert && assert( index >= 0 );
-      return index;
-    };
-
-    const getLocation = ( index: number ): RenderInstructionLocation => {
-      if ( locations[ index ] === null ) {
-        locations[ index ] = new RenderInstructionLocation();
-      }
-      return locations[ index ];
-    };
-
-    const getLocationOfAddress = ( address: number ): RenderInstructionLocation => {
-      return getLocation( getIndexOfAddress( address ) );
-    };
-
-    // We'll need to merge together our location-instructions with non-location instructions. Since jumps are only
-    // forward, we can just compute binary instructions in order.
-    const instructions: RenderInstruction[] = [];
-    for ( let i = 0; i < instructionAddresses.length; i++ ) {
-      const address = instructionAddresses[ i ];
-      const instruction = RenderInstruction.binaryToInstruction( encoder, address, addressOffset => {
-        return getLocationOfAddress( address + addressOffset );
-      } );
-
-      // Possible location instruction (takes up zero length) will go first
-      const location = locations[ i ];
-      if ( location ) {
-        instructions.push( location );
-      }
-      instructions.push( instruction );
-    }
-    // Potential ending location instruction (e.g. if there is a jump to the exit at the end).
-    const lastLocation = locations[ instructionAddresses.length ];
-    if ( lastLocation ) {
-      instructions.push( lastLocation );
-    }
-
-    return instructions;
-  }
-
-  /**
-   * Extracts a single instruction from the binary format at a given (32bit dword) offset.
-   */
-  public static binaryToInstruction(
-    encoder: ByteEncoder,
-    offset: number,
-    getLocation: ( offset: number ) => RenderInstructionLocation
-  ): RenderInstruction {
-    const code = encoder.fullU32Array[ offset ] & 0xff;
-
-    switch( code ) {
-      case RenderInstruction.ReturnCode:
-        return RenderInstructionReturn.INSTANCE;
-      case RenderInstruction.PremultiplyCode:
-        return RenderInstructionPremultiply.INSTANCE;
-      case RenderInstruction.UnpremultiplyCode:
-        return RenderInstructionUnpremultiply.INSTANCE;
-      case RenderInstruction.StackBlendCode:
-        return RenderInstructionStackBlend.INSTANCE;
-      case RenderInstruction.LinearBlendCode:
-        return RenderInstructionLinearBlend.INSTANCE;
-      case RenderInstruction.LinearDisplayP3ToLinearSRGBCode:
-        return RenderInstructionLinearDisplayP3ToLinearSRGB.INSTANCE;
-      case RenderInstruction.LinearSRGBToLinearDisplayP3Code:
-        return RenderInstructionLinearSRGBToLinearDisplayP3.INSTANCE;
-      case RenderInstruction.LinearSRGBToOklabCode:
-        return RenderInstructionLinearSRGBToOklab.INSTANCE;
-      case RenderInstruction.LinearSRGBToSRGBCode:
-        return RenderInstructionLinearSRGBToSRGB.INSTANCE;
-      case RenderInstruction.OklabToLinearSRGBCode:
-        return RenderInstructionOklabToLinearSRGB.INSTANCE;
-      case RenderInstruction.SRGBToLinearSRGBCode:
-        return RenderInstructionSRGBToLinearSRGB.INSTANCE;
-      case RenderInstruction.NormalizeCode:
-        return RenderInstructionNormalize.INSTANCE;
-      case RenderInstruction.ExitCode:
-        return RenderInstructionExit.INSTANCE;
-      case RenderInstruction.BlendComposeCode:
-        return RenderInstructionBlendCompose.fromBinary( encoder, offset, getLocation );
-      case RenderInstruction.OpaqueJumpCode:
-        return RenderInstructionOpaqueJump.fromBinary( encoder, offset, getLocation );
-      case RenderInstruction.NormalDebugCode:
-        return RenderInstructionNormalDebug.INSTANCE;
-      case RenderInstruction.MultiplyScalarCode:
-        return RenderInstructionMultiplyScalar.fromBinary( encoder, offset, getLocation );
-      case RenderInstruction.PhongCode:
-        return RenderInstructionPhong.fromBinary( encoder, offset, getLocation );
-      case RenderInstruction.PushCode:
-        return RenderInstructionPush.fromBinary( encoder, offset, getLocation );
-      case RenderInstruction.ComputeLinearBlendRatioCode:
-      case RenderInstruction.ComputeRadialBlendRatioCode:
-        return RenderInstructionComputeBlendRatio.fromBinary( encoder, offset, getLocation );
-      case RenderInstruction.BarycentricBlendCode:
-        return RenderInstructionBarycentricBlend.fromBinary( encoder, offset, getLocation );
-      case RenderInstruction.BarycentricPerspectiveBlendCode:
-        return RenderInstructionBarycentricPerspectiveBlend.fromBinary( encoder, offset, getLocation );
-      case RenderInstruction.FilterCode:
-        return RenderInstructionFilter.fromBinary( encoder, offset, getLocation );
-      case RenderInstruction.ComputeLinearGradientRatioCode:
-      case RenderInstruction.ComputeRadialGradientRatioCode:
-        return RenderInstructionComputeGradientRatio.fromBinary( encoder, offset, getLocation );
-      default:
-        throw new Error( `Unknown/unimplemented instruction code: ${code}` );
-    }
   }
 
   /**

@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-enum RenderResampleType {
+export enum RenderResampleType {
   // TODO: maybe... sort these?
   NearestNeighbor = 0,
   AnalyticMitchellNetravali = 1,
@@ -17,7 +17,5 @@ enum RenderResampleType {
   AnalyticBox = 4,
   AnalyticBilinear = 5
 }
-
-export default RenderResampleType;
 
 alpenglow.register( 'RenderResampleType', RenderResampleType );

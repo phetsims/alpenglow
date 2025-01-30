@@ -13,11 +13,13 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, RasterColorConverter, RenderColor } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderColor } from '../render-program/RenderColor.js';
+import type { RasterColorConverter } from './RasterColorConverter.js';
 
 const scratchVector = Vector4.ZERO.copy();
 
-export default class RasterPremultipliedConverter implements RasterColorConverter {
+export class RasterPremultipliedConverter implements RasterColorConverter {
 
   protected constructor(
     public readonly gamutMap: ( color: Vector4 ) => Vector4

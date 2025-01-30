@@ -1,14 +1,15 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { u64WGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Adds two u32s together, returning a u64.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { u64WGSL } from './u64WGSL.js';
+
+export const add_u32_u32_to_u64WGSL = (
   a: WGSLExpression,
   b: WGSLExpression
 ): WGSLExpression => {

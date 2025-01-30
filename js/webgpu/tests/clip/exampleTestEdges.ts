@@ -6,7 +6,8 @@ import Vector2 from '../../../../../dot/js/Vector2.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default [
+// NOTE: exclude from builds?
+export const exampleTestEdges = [
   [ new Vector2( -5, 5 ), new Vector2( 5, 5 ) ],
   [ new Vector2( -5, 5 ), new Vector2( 5, 7 ) ],
   [ new Vector2( 2, 5 ), new Vector2( 5, 7 ) ],

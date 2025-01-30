@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { abs_i64WGSL, i64WGSL, is_negative_i64WGSL, mul_u64_u64WGSL, negate_i64WGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Multiplies two i64s together, returning an i64 (the low 64 bits of the result)
  *
@@ -10,7 +8,14 @@ import { abs_i64WGSL, i64WGSL, is_negative_i64WGSL, mul_u64_u64WGSL, negate_i64W
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { i64WGSL } from './i64WGSL.js';
+import { mul_u64_u64WGSL } from './mul_u64_u64WGSL.js';
+import { abs_i64WGSL } from './abs_i64WGSL.js';
+import { is_negative_i64WGSL } from './is_negative_i64WGSL.js';
+import { negate_i64WGSL } from './negate_i64WGSL.js';
+
+export const mul_i64_i64WGSL = (
   a: WGSLExpression,
   b: WGSLExpression
 ): WGSLExpression => {

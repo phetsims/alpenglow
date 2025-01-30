@@ -6,9 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { addLineNumbers, alpenglow, DeviceContext, mainLogBarrier, partialWGSLBeautify, PipelineBlueprint, PipelineLayout, stripWGSLComments, webgpu } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { DeviceContext } from './DeviceContext.js';
+import type { PipelineLayout } from './PipelineLayout.js';
+import { addLineNumbers, partialWGSLBeautify, stripWGSLComments } from '../wgsl/WGSLUtils.js';
+import { webgpu } from '../WebGPUAPI.js';
+import { logBufferSlot } from './logBufferSlot.js';
+import { getLogBarrierWGSL } from './getLogBarrierWGSL.js';
 
-export default class ComputePipeline {
+export class ComputePipeline {
   // This will be available by the time it can be accessed publicly
   public pipeline!: GPUComputePipeline;
   public logBarrierPipeline: GPUComputePipeline | null = null;
@@ -48,13 +54,13 @@ export default class ComputePipeline {
       }
     };
 
-    const logBarrierPipelineDescriptor = pipelineLayout.hasBindingWithSlot( PipelineBlueprint.LOG_BUFFER_SLOT ) ? {
+    const logBarrierPipelineDescriptor = pipelineLayout.hasBindingWithSlot( logBufferSlot ) ? {
       label: 'logBarrier pipeline',
       layout: pipelineLayout.layout, // we share the layout
       compute: {
         module: webgpu.deviceCreateShaderModule( deviceContext.device, {
           label: 'logBarrier',
-          code: ComputePipeline.getLogBarrierWGSL( pipelineLayout )
+          code: getLogBarrierWGSL( pipelineLayout )
         } ),
         entryPoint: 'main'
       }
@@ -78,18 +84,6 @@ export default class ComputePipeline {
         this.logBarrierPipeline = webgpu.deviceCreateComputePipeline( deviceContext.device, logBarrierPipelineDescriptor );
       }
     }
-  }
-
-  public static getLogBarrierWGSL(
-    pipelineLayout: PipelineLayout
-  ): string {
-    // TODO: remove the superfluous main add
-    const logBarrierPipelineBlueprint = new PipelineBlueprint( {
-      name: 'logBarrier',
-      log: true
-    } );
-    mainLogBarrier().withBlueprint( logBarrierPipelineBlueprint );
-    return partialWGSLBeautify( stripWGSLComments( logBarrierPipelineBlueprint.toString( pipelineLayout ) ) );
   }
 
   // NOTE: Create the non-async version if we ever REALLY want it.

@@ -7,7 +7,12 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, commentWGSL, getCorankWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, GrainSizable, mergeSequentialWGSL, u32S, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
+import { GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, GrainSizable } from '../WGSLUtils.js';
+import { commentWGSL } from './commentWGSL.js';
+import { getCorankWGSL } from './getCorankWGSL.js';
+import { mergeSequentialWGSL } from './mergeSequentialWGSL.js';
 
 export type mergeSimpleWGSLOptions = {
   lengthA: WGSLExpressionU32;
@@ -30,7 +35,7 @@ export const MERGE_SIMPLE_DEFAULTS = {
   ...GLOBAL_INDEXABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
-const mergeSimpleWGSL = (
+export const mergeSimpleWGSL = (
   providedOptions: mergeSimpleWGSLOptions
 ): WGSLStatements => {
 
@@ -93,7 +98,5 @@ const mergeSimpleWGSL = (
     ${commentWGSL( 'end merge_simple' )}
   `;
 };
-
-export default mergeSimpleWGSL;
 
 alpenglow.register( 'mergeSimpleWGSL', mergeSimpleWGSL );

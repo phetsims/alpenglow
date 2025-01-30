@@ -18,7 +18,14 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, BufferBindingType, BufferSlot, decimalS, RakedSizable, scanComprehensiveWGSL, scanComprehensiveWGSLOptions, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BinaryOp } from '../../compute/ConcreteType.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { scanComprehensiveWGSL, scanComprehensiveWGSLOptions } from './scanComprehensiveWGSL.js';
+import { RakedSizable } from '../WGSLUtils.js';
+import { decimalS, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { binaryExpressionStatementWGSL } from './binaryExpressionStatementWGSL.js';
 
 type SelfOptions<T> = {
   binaryOp: BinaryOp<T>;
@@ -67,7 +74,7 @@ export const MAIN_SCAN_DEFAULTS = {
   getAddedValue: null
 } as const;
 
-const mainScanWGSL = <T>(
+export const mainScanWGSL = <T>(
   providedOptions: mainScanWGSLOptions<T>
 ): WGSLMainModule => {
 
@@ -189,7 +196,5 @@ const mainScanWGSL = <T>(
     }
   ` );
 };
-
-export default mainScanWGSL;
 
 alpenglow.register( 'mainScanWGSL', mainScanWGSL );

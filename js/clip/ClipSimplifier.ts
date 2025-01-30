@@ -17,11 +17,11 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
 const collinearEpsilon = 1e-9;
 
-export default class ClipSimplifier {
+export class ClipSimplifier {
 
   private points: Vector2[] = [];
 

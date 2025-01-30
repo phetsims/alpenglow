@@ -6,11 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, Binding } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { Binding } from './Binding.js';
 
 let globalId = 1;
 
-export default abstract class Resource {
+export abstract class Resource {
   public readonly id: number = globalId++;
 
   public constructor(

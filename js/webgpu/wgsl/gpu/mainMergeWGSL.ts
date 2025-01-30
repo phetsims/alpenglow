@@ -4,7 +4,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BufferBindingType, BufferSlot, CompareOrder, decimalS, mergeWGSL, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { CompareOrder } from '../../compute/ConcreteType.js';
+import { decimalS, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { mergeWGSL } from './mergeWGSL.js';
 
 export type mainMergeWGSLOptions<T> = {
   inputA: BufferSlot<T[]>;
@@ -28,7 +33,7 @@ export const MAIN_MERGE_DEFAULTS = {
   // TODO: will need something once we have lengthExpression optional
 } as const;
 
-const mainMergeWGSL = <T>(
+export const mainMergeWGSL = <T>(
   options: mainMergeWGSLOptions<T>
 ): WGSLMainModule => {
 
@@ -72,7 +77,5 @@ const mainMergeWGSL = <T>(
     }
   ` );
 };
-
-export default mainMergeWGSL;
 
 alpenglow.register( 'mainMergeWGSL', mainMergeWGSL );

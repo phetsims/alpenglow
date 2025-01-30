@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-export default class RenderProgramNeeds {
+export class RenderProgramNeeds {
   public constructor(
     public readonly needsFace: boolean,
     public readonly needsArea: boolean,

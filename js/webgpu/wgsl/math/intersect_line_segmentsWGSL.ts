@@ -1,14 +1,30 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { add_i64_i64WGSL, equals_cross_mul_q128WGSL, i32_to_i64WGSL, i64_to_q128WGSL, IntersectionPointWGSL, is_zero_q128WGSL, is_zero_u64WGSL, LineSegmentIntersectionWGSL, mul_i64_i64WGSL, negate_i64WGSL, ONE_q128WGSL, ratio_test_q128WGSL, reduce_q128WGSL, subtract_i64_i64WGSL, wgsl, WGSLExpression, WGSLStringModule, whole_i64_to_q128WGSL, ZERO_q128WGSL } from '../../../imports.js';
-
 /**
  * Returns a LineSegmentIntersection struct containing information about the intersection point(s).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { IntersectionPointWGSL } from './IntersectionPointWGSL.js';
+import { LineSegmentIntersectionWGSL } from './LineSegmentIntersectionWGSL.js';
+import { i32_to_i64WGSL } from './i32_to_i64WGSL.js';
+import { subtract_i64_i64WGSL } from './subtract_i64_i64WGSL.js';
+import { mul_i64_i64WGSL } from './mul_i64_i64WGSL.js';
+import { is_zero_u64WGSL } from './is_zero_u64WGSL.js';
+import { i64_to_q128WGSL } from './i64_to_q128WGSL.js';
+import { negate_i64WGSL } from './negate_i64WGSL.js';
+import { equals_cross_mul_q128WGSL } from './equals_cross_mul_q128WGSL.js';
+import { is_zero_q128WGSL } from './is_zero_q128WGSL.js';
+import { ratio_test_q128WGSL } from './ratio_test_q128WGSL.js';
+import { ZERO_q128WGSL } from './ZERO_q128WGSL.js';
+import { reduce_q128WGSL } from './reduce_q128WGSL.js';
+import { whole_i64_to_q128WGSL } from './whole_i64_to_q128WGSL.js';
+import { add_i64_i64WGSL } from './add_i64_i64WGSL.js';
+import { ONE_q128WGSL } from './ONE_q128WGSL.js';
+
+export const intersect_line_segmentsWGSL = (
   // vec2i for all points
   p0: WGSLExpression,
   p1: WGSLExpression,

@@ -8,7 +8,11 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS, mainReduceNonCommutativeWGSL, mainReduceNonCommutativeWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import type { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { MAIN_REDUCE_NON_COMMUTATIVE_DEFAULTS, mainReduceNonCommutativeWGSL, mainReduceNonCommutativeWGSLOptions } from '../../wgsl/gpu/mainReduceNonCommutativeWGSL.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
 
 export type MainReduceNonCommutativeModuleOptions<T> = {
   input: BufferArraySlot<T>;
@@ -23,7 +27,7 @@ export const MAIN_REDUCE_NON_COMMUTATIVE_MODULE_DEFAULTS = {
 } as const;
 
 // inputSize: number
-export default class MainReduceNonCommutativeModule<T> extends DirectModule<number> {
+export class MainReduceNonCommutativeModule<T> extends DirectModule<number> {
 
   public readonly input: BufferArraySlot<T>;
   public readonly output: BufferArraySlot<T>;

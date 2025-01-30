@@ -17,7 +17,15 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderInstructionReturn, RenderProgram, RenderRadialBlendLogic, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation, RenderInstructionReturn } from './RenderInstruction.js';
+import { RenderRadialBlendLogic } from './RenderRadialBlend.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { RenderColor } from './RenderColor.js';
 
 export enum RenderLinearBlendAccuracy {
   // Enum used in WGSL
@@ -27,7 +35,7 @@ export enum RenderLinearBlendAccuracy {
 
 alpenglow.register( 'RenderLinearBlendAccuracy', RenderLinearBlendAccuracy );
 
-export default class RenderLinearBlend extends RenderProgram {
+export class RenderLinearBlend extends RenderProgram {
 
   public readonly logic: RenderLinearBlendLogic;
 
@@ -159,16 +167,6 @@ export default class RenderLinearBlend extends RenderProgram {
       zero: this.zero.serialize(),
       one: this.one.serialize()
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderLinearBlend ): RenderLinearBlend {
-    return new RenderLinearBlend(
-      new Vector2( obj.scaledNormal[ 0 ], obj.scaledNormal[ 1 ] ),
-      obj.offset,
-      obj.accuracy,
-      RenderProgram.deserialize( obj.zero ),
-      RenderProgram.deserialize( obj.one )
-    );
   }
 }
 

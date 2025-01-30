@@ -15,4 +15,4 @@ import Namespace from '../../phet-core/js/Namespace.js';
 const alpenglow = new Namespace( 'alpenglow' );
 
 // will be filled in by other modules
-export default alpenglow;
+export { alpenglow };

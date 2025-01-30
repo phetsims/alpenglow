@@ -6,9 +6,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, decimal, f32, i32, i32Hex, PipelineBlueprint, ResourceSlot, u32, u32Hex } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { PipelineBlueprint } from '../compute/PipelineBlueprint.js';
+import type { ResourceSlot } from '../compute/ResourceSlot.js';
+import type { BindingType } from '../compute/BindingType.js';
+import { decimal } from '../compute/decimal.js';
+import { u32 } from '../compute/u32.js';
+import { u32Hex } from '../compute/u32Hex.js';
+import { i32 } from '../compute/i32.js';
+import { i32Hex } from '../compute/i32Hex.js';
+import { f32 } from '../compute/f32.js';
 
-export default abstract class WGSLString {
+export abstract class WGSLString {
   public abstract withBlueprint( blueprint: PipelineBlueprint ): string;
 
   // TODO: consider adding precedence to the expression types, so we can avoid unnecessary parentheses

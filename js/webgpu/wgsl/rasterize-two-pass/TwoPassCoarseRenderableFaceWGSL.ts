@@ -1,6 +1,6 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { wgsl, WGSLReferenceModule } from '../../../imports.js';
+import { wgsl, WGSLReferenceModule } from '../WGSLString.js';
 
 /**
  * Uniforms for a TwoPassCoarseRenderableFace
@@ -23,7 +23,7 @@ import { wgsl, WGSLReferenceModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default new WGSLReferenceModule( 'TwoPassCoarseRenderableFace', wgsl`
+export const TwoPassCoarseRenderableFaceWGSL = new WGSLReferenceModule( 'TwoPassCoarseRenderableFace', wgsl`
   struct TwoPassCoarseRenderableFace {
     bits: u32,
     edges_index: u32,

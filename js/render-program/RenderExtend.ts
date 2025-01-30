@@ -6,15 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-enum RenderExtend {
+export enum RenderExtend {
   Pad = 0,
   Reflect = 1,
   Repeat = 2
 }
-
-export default RenderExtend;
 
 alpenglow.register( 'RenderExtend', RenderExtend );
 

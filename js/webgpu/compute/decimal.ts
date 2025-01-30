@@ -6,13 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
 
-const decimal = ( n: number ): string => {
+export const decimal = ( n: number ): string => {
   assert && assert( Number.isInteger( n ) && n >= 0 && n < 2 ** 32, `Invalid decimal value: ${n}` );
 
   return `${n >>> 0}`;
 };
 alpenglow.register( 'decimal', decimal );
-
-export default decimal;

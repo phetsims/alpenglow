@@ -8,12 +8,22 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ClippableFace, PolygonalFace, RenderableFace, RenderAlpha, RenderBarycentricBlend, RenderBarycentricPerspectiveBlend, RenderBlendCompose, RenderColor, RenderColorSpace, RenderColorSpaceConversion, RenderDepthSort, RenderEvaluationContext, RenderFilter, RenderImage, RenderInstruction, RenderLinearBlend, RenderLinearGradient, RenderNormalDebug, RenderNormalize, RenderPath, RenderPathBoolean, RenderPhong, RenderProgramNeeds, RenderRadialBlend, RenderRadialGradient, RenderStack, SerializedRenderAlpha, SerializedRenderBarycentricBlend, SerializedRenderBarycentricPerspectiveBlend, SerializedRenderBlendCompose, SerializedRenderColor, SerializedRenderColorSpaceConversion, SerializedRenderDepthSort, SerializedRenderFilter, SerializedRenderImage, SerializedRenderLinearBlend, SerializedRenderLinearGradient, SerializedRenderNormalDebug, SerializedRenderNormalize, SerializedRenderPathBoolean, SerializedRenderPhong, SerializedRenderRadialBlend, SerializedRenderRadialGradient, SerializedRenderStack } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { ClippableFace } from '../cag/ClippableFace.js';
+import { PolygonalFace } from '../cag/ClippableFace.js';
+import type { RenderableFace } from '../raster/RenderableFace.js';
+import type { RenderColorSpace } from './RenderColorSpace.js';
+import { RenderColorSpaceConversion } from './RenderColorSpaceConversion.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderInstruction } from './RenderInstruction.js';
+import type { RenderPath } from './RenderPath.js';
+import { RenderPathBoolean } from './RenderPathBoolean.js';
+import { RenderProgramNeeds } from './RenderProgramNeeds.js';
 
 // Output should be chained (the `output` parameter should be returned, for convenience)
 export type RenderEvaluator = ( context: RenderEvaluationContext, output: Vector4 ) => Vector4;
 
-export default abstract class RenderProgram {
+export abstract class RenderProgram {
 
   public readonly children: RenderProgram[];
 
@@ -246,65 +256,6 @@ export default abstract class RenderProgram {
   }
 
   public abstract serialize(): SerializedRenderProgram;
-
-  public static deserialize( obj: SerializedRenderProgram ): RenderProgram {
-    if ( obj.type === 'RenderStack' ) {
-      return RenderStack.deserialize( obj as SerializedRenderStack );
-    }
-    else if ( obj.type === 'RenderColor' ) {
-      return RenderColor.deserialize( obj as SerializedRenderColor );
-    }
-    else if ( obj.type === 'RenderAlpha' ) {
-      return RenderAlpha.deserialize( obj as SerializedRenderAlpha );
-    }
-    else if ( obj.type === 'RenderDepthSort' ) {
-      return RenderDepthSort.deserialize( obj as SerializedRenderDepthSort );
-    }
-    else if ( obj.type === 'RenderBlendCompose' ) {
-      return RenderBlendCompose.deserialize( obj as SerializedRenderBlendCompose );
-    }
-    else if ( obj.type === 'RenderPathBoolean' ) {
-      return RenderPathBoolean.deserialize( obj as SerializedRenderPathBoolean );
-    }
-    else if ( obj.type === 'RenderFilter' ) {
-      return RenderFilter.deserialize( obj as SerializedRenderFilter );
-    }
-    else if ( obj.type === 'RenderImage' ) {
-      return RenderImage.deserialize( obj as SerializedRenderImage );
-    }
-    else if ( obj.type === 'RenderNormalize' ) {
-      return RenderNormalize.deserialize( obj as SerializedRenderNormalize );
-    }
-    else if ( obj.type === 'RenderLinearBlend' ) {
-      return RenderLinearBlend.deserialize( obj as SerializedRenderLinearBlend );
-    }
-    else if ( obj.type === 'RenderBarycentricBlend' ) {
-      return RenderBarycentricBlend.deserialize( obj as SerializedRenderBarycentricBlend );
-    }
-    else if ( obj.type === 'RenderBarycentricPerspectiveBlend' ) {
-      return RenderBarycentricPerspectiveBlend.deserialize( obj as SerializedRenderBarycentricPerspectiveBlend );
-    }
-    else if ( obj.type === 'RenderLinearGradient' ) {
-      return RenderLinearGradient.deserialize( obj as SerializedRenderLinearGradient );
-    }
-    else if ( obj.type === 'RenderRadialBlend' ) {
-      return RenderRadialBlend.deserialize( obj as SerializedRenderRadialBlend );
-    }
-    else if ( obj.type === 'RenderRadialGradient' ) {
-      return RenderRadialGradient.deserialize( obj as SerializedRenderRadialGradient );
-    }
-    else if ( obj.type === 'RenderColorSpaceConversion' ) {
-      return RenderColorSpaceConversion.deserialize( obj as SerializedRenderColorSpaceConversion );
-    }
-    else if ( obj.type === 'RenderPhong' ) {
-      return RenderPhong.deserialize( obj as SerializedRenderPhong );
-    }
-    else if ( obj.type === 'RenderNormalDebug' ) {
-      return RenderNormalDebug.deserialize( obj as SerializedRenderNormalDebug );
-    }
-
-    throw new Error( `Unrecognized RenderProgram type: ${obj.type}` );
-  }
 
   // TODO: Prefer RenderEvaluationContext.getFace()
   // @deprecated

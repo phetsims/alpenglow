@@ -8,7 +8,11 @@
 
 import Vector4 from '../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
-import { alpenglow, OutputRaster, RasterColorConverter, Rasterize, RasterPremultipliedConverter } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { OutputRaster } from './OutputRaster.js';
+import type { RasterColorConverter } from './RasterColorConverter.js';
+import { Rasterize } from './Rasterize.js';
+import { RasterPremultipliedConverter } from './RasterPremultipliedConverter.js';
 
 export type CombinedRasterOptions = {
   colorSpace?: 'srgb' | 'display-p3';
@@ -21,7 +25,7 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 // TODO: consider implementing a raster that JUST uses ImageData, and does NOT do linear (proper) blending
-export default class CombinedRaster implements OutputRaster {
+export class CombinedRaster implements OutputRaster {
   public readonly accumulationArray: Float64Array;
   public readonly imageData: ImageData;
   private combined = false;

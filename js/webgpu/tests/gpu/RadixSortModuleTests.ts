@@ -8,7 +8,13 @@ import Vector2 from '../../../../../dot/js/Vector2.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../../phet-core/js/types/IntentionalAny.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, getMaxRadixBitsPerInnerPass, getRadixBitVectorSize, Order, Procedure, RadixSortModule, RadixSortModuleOptions, Routine, U32Order, U32ReverseOrder, u32S, Vec2uLexicographicalOrder } from '../../../imports.js';
+import { getArrayType, Order, U32Order, U32ReverseOrder, Vec2uLexicographicalOrder } from '../../compute/ConcreteType.js';
+import { getMaxRadixBitsPerInnerPass, getRadixBitVectorSize, RadixSortModule, RadixSortModuleOptions } from '../../modules/gpu/RadixSortModule.js';
+import { asyncTestWithDevice, compareArrays } from '../ShaderTestUtils.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { u32S } from '../../wgsl/WGSLString.js';
+import { Routine } from '../../compute/Routine.js';
+import { Procedure } from '../../compute/Procedure.js';
 
 QUnit.module( 'RadixSortModuleTests' );
 

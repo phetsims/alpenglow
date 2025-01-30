@@ -7,9 +7,18 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, RenderColor, RenderColorSpaceConversion, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderPremultiply, RenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderColorSpaceConversion } from './RenderColorSpaceConversion.js';
+import { RenderProgram } from './RenderProgram.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import { RenderPremultiply } from './RenderPremultiply.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { RenderColor } from './RenderColor.js';
 
-export default class RenderUnpremultiply extends RenderColorSpaceConversion {
+export class RenderUnpremultiply extends RenderColorSpaceConversion {
   public constructor(
     program: RenderProgram
   ) {

@@ -7,7 +7,13 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName, WorkgroupSizable } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
+import { BinaryOp } from '../../compute/ConcreteType.js';
+import { LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, WorkgroupSizable } from '../WGSLUtils.js';
+import { binaryExpressionStatementWGSL } from './binaryExpressionStatementWGSL.js';
+import { commentWGSL } from './commentWGSL.js';
+import { unrollWGSL } from './unrollWGSL.js';
 
 type SelfOptions<T> = {
   // the "input" and "output" variable name
@@ -54,7 +60,7 @@ export const SCAN_DEFAULTS = {
   ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
-const scanWGSL = <T>(
+export const scanWGSL = <T>(
   providedOptions: scanWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -133,7 +139,5 @@ const scanWGSL = <T>(
     ${commentWGSL( 'end scan' )}
   `;
 };
-
-export default scanWGSL;
 
 alpenglow.register( 'scanWGSL', scanWGSL );

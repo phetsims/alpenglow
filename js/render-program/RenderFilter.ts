@@ -11,9 +11,17 @@
 
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, ByteEncoder, RenderColor, RenderEvaluationContext, RenderExecutionStack, RenderExecutor, RenderInstruction, RenderInstructionLocation, RenderPathBoolean, RenderProgram, SerializedRenderProgram } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { RenderColor } from './RenderColor.js';
+import { RenderPathBoolean } from './RenderPathBoolean.js';
 
-export default class RenderFilter extends RenderProgram {
+export class RenderFilter extends RenderProgram {
 
   public readonly logic: RenderFilterLogic;
 
@@ -118,14 +126,6 @@ export default class RenderFilter extends RenderProgram {
         this.colorTranslation.x, this.colorTranslation.y, this.colorTranslation.z, this.colorTranslation.w
       ]
     };
-  }
-
-  public static override deserialize( obj: SerializedRenderFilter ): RenderFilter {
-    return new RenderFilter(
-      RenderProgram.deserialize( obj.program ),
-      new Matrix4( ...obj.colorMatrix ),
-      new Vector4( obj.colorTranslation[ 0 ], obj.colorTranslation[ 1 ], obj.colorTranslation[ 2 ], obj.colorTranslation[ 3 ] )
-    );
   }
 }
 

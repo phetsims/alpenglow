@@ -30,7 +30,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, u32S, wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 
 export type bitPackRadixAccessWGSLOptions = {
   // u32 name
@@ -50,7 +51,7 @@ export type bitPackRadixAccessWGSLOptions = {
   maxCount: number;
 };
 
-const bitPackRadixAccessWGSL = (
+export const bitPackRadixAccessWGSL = (
   options: bitPackRadixAccessWGSLOptions
 ): WGSLStatements => {
 
@@ -76,7 +77,5 @@ const bitPackRadixAccessWGSL = (
     countsPerComponent === 1 ? wgsl`` : wgsl` >> ( ( ( ${bits} ) % ${u32S( countsPerComponent )} ) * ${u32S( countBitQuantity )} ) ) & ${u32S( ( 1 << countBitQuantity ) - 1 )}`
   }`;
 };
-
-export default bitPackRadixAccessWGSL;
 
 alpenglow.register( 'bitPackRadixAccessWGSL', bitPackRadixAccessWGSL );

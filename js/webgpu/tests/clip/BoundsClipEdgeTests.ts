@@ -6,8 +6,19 @@
 
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector3 from '../../../../../dot/js/Vector3.js';
-import { asyncTestWithDevice, bounds_clip_edgeWGSL, BoundsClipping, BufferArraySlot, BufferBindingType, DirectModule, F32Type, getArrayType, LinearEdge, LinearEdgeWGSL, Procedure, Routine, wgsl, WGSLMainModule, WGSLSlot } from '../../../imports.js';
-import exampleTestEdges from './exampleTestEdges.js'; // NOTE: DO NOT put in imports, we don't want extra data there
+import { exampleTestEdges } from './exampleTestEdges.js';
+import { asyncTestWithDevice } from '../ShaderTestUtils.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { F32Type, getArrayType } from '../../compute/ConcreteType.js';
+import { DirectModule } from '../../compute/DirectModule.js';
+import { wgsl, WGSLMainModule, WGSLSlot } from '../../wgsl/WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { bounds_clip_edgeWGSL } from '../../wgsl/clip/bounds_clip_edgeWGSL.js';
+import { LinearEdgeWGSL } from '../../wgsl/cag/LinearEdgeWGSL.js';
+import { Routine } from '../../compute/Routine.js';
+import { Procedure } from '../../compute/Procedure.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import { BoundsClipping } from '../../../clip/BoundsClipping.js';
 
 QUnit.module( 'BoundsClipEdgeTests' );
 

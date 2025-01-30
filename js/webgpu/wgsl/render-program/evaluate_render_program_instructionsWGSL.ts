@@ -1,13 +1,25 @@
 // Copyright 2024, University of Colorado Boulder
 
-import optionize from '../../../../../phet-core/js/optionize.js';
-import { blend_composeWGSL, decimalS, extend_f32WGSL, f32S, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, u32S, unpremultiplyWGSL, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionF32, WGSLExpressionI32, WGSLExpressionU32, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Executes a RenderProgram in WGSL.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import optionize from '../../../../../phet-core/js/optionize.js';
+import { decimalS, f32S, u32S, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionF32, WGSLExpressionI32, WGSLExpressionU32, WGSLStringModule } from '../WGSLString.js';
+import { RenderInstruction } from '../../../render-program/RenderInstruction.js';
+import { premultiplyWGSL } from '../color/premultiplyWGSL.js';
+import { unpremultiplyWGSL } from '../color/unpremultiplyWGSL.js';
+import { sRGB_to_linear_sRGBWGSL } from '../color/sRGB_to_linear_sRGBWGSL.js';
+import { linear_sRGB_to_sRGBWGSL } from '../color/linear_sRGB_to_sRGBWGSL.js';
+import { linear_displayP3_to_linear_sRGBWGSL } from '../color/linear_displayP3_to_linear_sRGBWGSL.js';
+import { linear_sRGB_to_linear_displayP3WGSL } from '../color/linear_sRGB_to_linear_displayP3WGSL.js';
+import { oklab_to_linear_sRGBWGSL } from '../color/oklab_to_linear_sRGBWGSL.js';
+import { linear_sRGB_to_oklabWGSL } from '../color/linear_sRGB_to_oklabWGSL.js';
+import { blend_composeWGSL } from '../color/blend_composeWGSL.js';
+import { extend_f32WGSL } from './extend_f32WGSL.js';
+import { RadialGradientType } from '../../../render-program/RenderRadialGradient.js';
 
 export type evaluate_render_program_instructionsWGSLOptions = {
   getRenderProgramInstruction: ( index: WGSLExpressionU32 ) => WGSLExpression;
@@ -16,7 +28,7 @@ export type evaluate_render_program_instructionsWGSLOptions = {
   instructionStackSize?: number;
 };
 
-export default (
+export const evaluate_render_program_instructionsWGSL = (
   render_program_index: WGSLExpressionU32,
   edgesOffset: WGSLExpressionU32,
   numEdges: WGSLExpressionU32,

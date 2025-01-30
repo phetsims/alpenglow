@@ -9,9 +9,12 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, BigRationalVector2, LinearEdge, RationalHalfEdge } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { LinearEdge } from './LinearEdge.js';
+import type { RationalHalfEdge } from './RationalHalfEdge.js';
+import type { BigRationalVector2 } from './BigRationalVector2.js';
 
-export default class RationalBoundary {
+export class RationalBoundary {
   public readonly edges: RationalHalfEdge[] = [];
   public signedArea!: number;
   public bounds!: Bounds2;

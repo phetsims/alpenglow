@@ -12,7 +12,14 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, binaryExpressionStatementWGSL, BinaryOp, commentWGSL, conditionalIfWGSL, GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32S, unrollWGSL, wgsl, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLVariableName, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
+import { BinaryOp } from '../../compute/ConcreteType.js';
+import { GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../WGSLUtils.js';
+import { conditionalIfWGSL } from './conditionalIfWGSL.js';
+import { binaryExpressionStatementWGSL } from './binaryExpressionStatementWGSL.js';
+import { commentWGSL } from './commentWGSL.js';
+import { unrollWGSL } from './unrollWGSL.js';
 
 // CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
 //       rearranging. We'll use convergent reduce anyway
@@ -63,7 +70,7 @@ export const LOAD_REDUCED_DEFAULTS = {
   ...OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
-const loadReducedWGSL = <T>(
+export const loadReducedWGSL = <T>(
   providedOptions: loadReducedWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -233,7 +240,5 @@ const loadReducedWGSL = <T>(
     ${commentWGSL( 'end load_reduced' )}
   `;
 };
-
-export default loadReducedWGSL;
 
 alpenglow.register( 'loadReducedWGSL', loadReducedWGSL );

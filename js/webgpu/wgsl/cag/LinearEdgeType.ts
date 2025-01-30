@@ -1,8 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import Vector2 from '../../../../../dot/js/Vector2.js';
-import { ByteEncoder, ConcreteType, LinearEdge, LinearEdgeWGSL, StoreStatementCallback, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionT, WGSLStatements, WGSLStringModule } from '../../../imports.js';
-
 /**
  * ConcreteType for a LinearEdge
  *
@@ -11,9 +8,16 @@ import { ByteEncoder, ConcreteType, LinearEdge, LinearEdgeWGSL, StoreStatementCa
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Vector2 from '../../../../../dot/js/Vector2.js';
+import type { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import { wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionT, WGSLStatements, WGSLStringModule } from '../WGSLString.js';
+import { LinearEdgeWGSL } from './LinearEdgeWGSL.js';
+import type { ByteEncoder } from '../../compute/ByteEncoder.js';
+
 const dwords = 4;
 
-const LinearEdgeType: ConcreteType<LinearEdge> = {
+export const LinearEdgeType: ConcreteType<LinearEdge> = {
   name: 'LinearEdge',
   bytesPerElement: dwords * 4,
 
@@ -54,4 +58,3 @@ const LinearEdgeType: ConcreteType<LinearEdge> = {
 
   toDebugString: ( value: LinearEdge ) => 'LinearEdge'
 };
-export default LinearEdgeType;

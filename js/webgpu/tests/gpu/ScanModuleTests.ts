@@ -6,7 +6,13 @@
 
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { asyncTestWithDevice, BufferArraySlot, compareArrays, getArrayType, I32Add, Procedure, Routine, ScanModule, ScanModuleOptions, U32Add, u32S, Vec2uAdd, Vec2uBic } from '../../../imports.js';
+import { ScanModule, ScanModuleOptions } from '../../modules/gpu/ScanModule.js';
+import { asyncTestWithDevice, compareArrays } from '../ShaderTestUtils.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { getArrayType, I32Add, U32Add, Vec2uAdd, Vec2uBic } from '../../compute/ConcreteType.js';
+import { u32S } from '../../wgsl/WGSLString.js';
+import { Routine } from '../../compute/Routine.js';
+import { Procedure } from '../../compute/Procedure.js';
 
 QUnit.module( 'ScanModuleTests' );
 

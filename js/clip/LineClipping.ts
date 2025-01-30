@@ -6,9 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
 
-export default class LineClipping {
+export class LineClipping {
   /**
    * From "Another Simple but Faster Method for 2D Line Clipping" (2019)
    * by Dimitrios Matthes and Vasileios Drakopoulos

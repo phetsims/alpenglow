@@ -8,7 +8,11 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, BufferArraySlot, DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions, MAIN_MERGE_SIMPLE_DEFAULTS, mainMergeSimpleWGSL, mainMergeSimpleWGSLOptions, PipelineBlueprintOptions } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import type { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { MAIN_MERGE_SIMPLE_DEFAULTS, mainMergeSimpleWGSL, mainMergeSimpleWGSLOptions } from '../../wgsl/gpu/mainMergeSimpleWGSL.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
 
 export type MergeSimpleModuleOptions<T> = {
   inputA: BufferArraySlot<T>;
@@ -24,7 +28,7 @@ export const MERGE_SIMPLE_MODULE_DEFAULTS = {
 } as const;
 
 // outputSize: number (sum of inputASize and inputBSize)
-export default class MergeSimpleModule<T> extends DirectModule<number> {
+export class MergeSimpleModule<T> extends DirectModule<number> {
 
   public readonly inputA: BufferArraySlot<T>;
   public readonly inputB: BufferArraySlot<T>;

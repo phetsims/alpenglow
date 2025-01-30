@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { i64WGSL, is_negative_i64WGSL, negate_i64WGSL, q128WGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Converts i64 numerator and denominator to a rational q128.
  *
@@ -10,7 +8,13 @@ import { i64WGSL, is_negative_i64WGSL, negate_i64WGSL, q128WGSL, wgsl, WGSLExpre
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { i64WGSL } from './i64WGSL.js';
+import { q128WGSL } from './q128WGSL.js';
+import { is_negative_i64WGSL } from './is_negative_i64WGSL.js';
+import { negate_i64WGSL } from './negate_i64WGSL.js';
+
+export const i64_to_q128WGSL = (
   numerator: WGSLExpression,
   denominator: WGSLExpression
 ): WGSLExpression => {

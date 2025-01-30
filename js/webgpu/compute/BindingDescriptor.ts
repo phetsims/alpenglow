@@ -6,9 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindingType, ResourceSlot } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { BindingType } from './BindingType.js';
+import type { ResourceSlot } from './ResourceSlot.js';
 
-export default class BindingDescriptor {
+export class BindingDescriptor {
   public constructor(
     public readonly bindingIndex: number,
     public readonly bindingType: BindingType,

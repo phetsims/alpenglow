@@ -6,13 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
 
-const f32 = ( n: number ): string => {
+export const f32 = ( n: number ): string => {
   assert && assert( Number.isFinite( n ), `Invalid f32 value: ${n}` );
 
   return `${n}f`;
 };
 alpenglow.register( 'f32', f32 );
-
-export default f32;

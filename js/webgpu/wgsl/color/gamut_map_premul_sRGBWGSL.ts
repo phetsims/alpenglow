@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { gamut_map_linear_sRGBWGSL, linear_sRGB_to_sRGBWGSL, sRGB_to_linear_sRGBWGSL, unpremultiplyWGSL, wgsl, WGSLExpression, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Converts premultiplied sRGB => sRGB, while ensuring the color is within the sRGB gamut.
  *
@@ -10,7 +8,13 @@ import { gamut_map_linear_sRGBWGSL, linear_sRGB_to_sRGBWGSL, sRGB_to_linear_sRGB
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
+import { linear_sRGB_to_sRGBWGSL } from './linear_sRGB_to_sRGBWGSL.js';
+import { gamut_map_linear_sRGBWGSL } from './gamut_map_linear_sRGBWGSL.js';
+import { sRGB_to_linear_sRGBWGSL } from './sRGB_to_linear_sRGBWGSL.js';
+import { unpremultiplyWGSL } from './unpremultiplyWGSL.js';
+
+export const gamut_map_premul_sRGBWGSL = (
   vec4: WGSLExpression
 ): WGSLExpression => {
   return new WGSLStringModule( 'gamut_map_premul_sRGB', wgsl`gamut_map_premul_sRGB( ${vec4} )`, wgsl`

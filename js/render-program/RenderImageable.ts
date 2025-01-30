@@ -8,7 +8,7 @@
 
 import Vector4 from '../../../dot/js/Vector4.js';
 
-type RenderImageable = {
+export type RenderImageable = {
   width: number;
   height: number;
   isFullyOpaque: boolean;
@@ -16,8 +16,6 @@ type RenderImageable = {
   // TODO: sampling of things, actually have methods that get samples (in any color space)
   evaluate: ( x: number, y: number ) => Vector4;
 };
-
-export default RenderImageable;
 
 export type SerializedRenderImageable = {
   width: number;

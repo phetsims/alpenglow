@@ -6,7 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { BufferBindingType, BufferSlot, wgsl, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { wgsl, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
 
 export type mainTwoPassInitializeAddressesWGSLOptions = {
   addresses: BufferSlot<number[]>;
@@ -16,7 +18,7 @@ export const MAIN_TWO_PASS_INITIALIZE_ADDRESSES_DEFAULTS = {
   // placeholder
 } as const;
 
-const mainTwoPassInitializeAddressesWGSL = (
+export const mainTwoPassInitializeAddressesWGSL = (
   options: mainTwoPassInitializeAddressesWGSLOptions
 ): WGSLMainModule => {
 
@@ -35,5 +37,3 @@ const mainTwoPassInitializeAddressesWGSL = (
     }
   ` );
 };
-
-export default mainTwoPassInitializeAddressesWGSL;

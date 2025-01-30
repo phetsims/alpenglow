@@ -23,14 +23,18 @@
 
 import Random from '../../../dot/js/Random.js';
 import Vector3 from '../../../dot/js/Vector3.js';
-import { alpenglow, BaseWorkgroupValues, ParallelContext, ParallelKernel, ParallelWorkgroup, ParallelWorkgroupArray } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { BaseWorkgroupValues, ParallelContext } from './ParallelContext.js';
+import type { ParallelKernel } from './ParallelKernel.js';
+import { ParallelWorkgroup } from './ParallelWorkgroup.js';
+import { ParallelWorkgroupArray } from './ParallelWorkgroupArray.js';
 
 // eslint-disable-next-line phet/bad-sim-text
 const random = new Random();
 
 const LOG = false;
 
-export default class ParallelExecutor<WorkgroupValues extends BaseWorkgroupValues> {
+export class ParallelExecutor<WorkgroupValues extends BaseWorkgroupValues> {
 
   // A list of functions to call when we're ready to execute the next item.
   // Each one will resolve a promise that one kernel execution thread is waiting on, which SHOULD trigger another

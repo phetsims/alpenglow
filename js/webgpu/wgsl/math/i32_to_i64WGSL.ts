@@ -1,14 +1,15 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { i64WGSL, wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Converts an i32 to an i64.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule } from '../WGSLString.js';
+import { i64WGSL } from './i64WGSL.js';
+
+export const i32_to_i64WGSL = (
   i64: WGSLExpressionI32
 ): WGSLExpression => {
   return new WGSLStringModule( 'i32_to_i64', wgsl`i32_to_i64( ${i64} )`, wgsl`

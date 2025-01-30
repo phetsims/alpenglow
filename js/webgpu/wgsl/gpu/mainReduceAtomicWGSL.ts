@@ -9,7 +9,14 @@
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { alpenglow, BinaryOp, BufferBindingType, BufferSlot, decimalS, loadReducedWGSL, loadReducedWGSLOptions, RakedSizable, reduceWGSL, reduceWGSLOptions, wgsl, WGSLMainModule, WGSLSlot, wgslString } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { BinaryOp } from '../../compute/ConcreteType.js';
+import { loadReducedWGSL, loadReducedWGSLOptions } from './loadReducedWGSL.js';
+import { reduceWGSL, reduceWGSLOptions } from './reduceWGSL.js';
+import { RakedSizable } from '../WGSLUtils.js';
+import { decimalS, wgsl, WGSLMainModule, WGSLSlot, wgslString } from '../WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
 
 export type mainReduceAtomicWGSLOptions<T> = {
   input: BufferSlot<T[]>;
@@ -32,7 +39,7 @@ export const MAIN_REDUCE_ATOMIC_DEFAULTS = {
   }
 } as const;
 
-const mainReduceAtomicWGSL = <T>(
+export const mainReduceAtomicWGSL = <T>(
   providedOptions: mainReduceAtomicWGSLOptions<T>
 ): WGSLMainModule => {
 
@@ -80,7 +87,5 @@ const mainReduceAtomicWGSL = <T>(
     }
   ` );
 };
-
-export default mainReduceAtomicWGSL;
 
 alpenglow.register( 'mainReduceAtomicWGSL', mainReduceAtomicWGSL );

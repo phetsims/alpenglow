@@ -7,7 +7,9 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { PolygonalBoolean, PolygonalFace, RenderPath } from '../imports.js';
+import { RenderPath } from '../render-program/RenderPath.js';
+import { PolygonalBoolean } from './PolygonalBoolean.js';
+import { PolygonalFace } from './ClippableFace.js';
 
 QUnit.module( 'PolygonalBoolean' );
 

@@ -8,7 +8,9 @@
 
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import { alpenglow, ByteEncoder, PreferredCanvasFormat, webgpu } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import { PreferredCanvasFormat, webgpu } from '../WebGPUAPI.js';
+import type { ByteEncoder } from './ByteEncoder.js';
 
 export type DeviceContextDeviceOptions = {
   maxLimits?: boolean;
@@ -51,7 +53,7 @@ const limitNames = [
   'maxComputeWorkgroupsPerDimension'
 ] as const;
 
-export default class DeviceContext {
+export class DeviceContext {
 
   public readonly preferredCanvasFormat: PreferredCanvasFormat;
   public readonly preferredStorageFormat: 'bgra8unorm' | 'rgba8unorm';

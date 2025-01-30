@@ -10,11 +10,21 @@
  */
 
 import Vector2 from '../../../../dot/js/Vector2.js';
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelUtils, ParallelWorkgroupArray, RasterClippedChunk, RasterCompleteEdge, RasterEdge, RasterEdgeClip, RasterSplitReduceData } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ParallelStorageArray } from '../ParallelStorageArray.js';
+import type { RasterClippedChunk } from './RasterClippedChunk.js';
+import type { RasterEdgeClip } from './RasterEdgeClip.js';
+import { RasterSplitReduceData } from './RasterSplitReduceData.js';
+import { RasterEdge } from './RasterEdge.js';
+import { RasterCompleteEdge } from './RasterCompleteEdge.js';
+import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
+import { ParallelKernel } from '../ParallelKernel.js';
+import { ParallelUtils } from '../ParallelUtils.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
 
 const nanVector = new Vector2( NaN, NaN );
 
-export default class ParallelRasterEdgeScan {
+export class ParallelRasterEdgeScan {
   public static async dispatch(
     workgroupSize: number,
 

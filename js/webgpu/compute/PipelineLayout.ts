@@ -6,9 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, BindGroupLayout, Binding, DeviceContext, ResourceSlot, webgpu } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { DeviceContext } from './DeviceContext.js';
+import type { BindGroupLayout } from './BindGroupLayout.js';
+import { webgpu } from '../WebGPUAPI.js';
+import type { ResourceSlot } from './ResourceSlot.js';
+import type { Binding } from './Binding.js';
 
-export default class PipelineLayout {
+export class PipelineLayout {
   public readonly layout: GPUPipelineLayout;
 
   public constructor(

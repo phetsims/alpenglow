@@ -1,7 +1,5 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { is_color_in_rangeWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, oklab_to_linear_sRGBWGSL, wgsl, WGSLExpression, WGSLExpressionBool, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Maps a linear Display-P3 color to a color that is within the Display-P3 gamut, using oklab for measuring perceptual distance.
  *
@@ -16,7 +14,14 @@ import { is_color_in_rangeWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { wgsl, WGSLExpression, WGSLExpressionBool, WGSLStringModule } from '../WGSLString.js';
+import { is_color_in_rangeWGSL } from './is_color_in_rangeWGSL.js';
+import { linear_sRGB_to_oklabWGSL } from './linear_sRGB_to_oklabWGSL.js';
+import { linear_displayP3_to_linear_sRGBWGSL } from './linear_displayP3_to_linear_sRGBWGSL.js';
+import { linear_sRGB_to_linear_displayP3WGSL } from './linear_sRGB_to_linear_displayP3WGSL.js';
+import { oklab_to_linear_sRGBWGSL } from './oklab_to_linear_sRGBWGSL.js';
+
+export const gamut_map_linear_displayP3WGSL = (
   vec3: WGSLExpression
 ): WGSLExpressionBool => {
   return new WGSLStringModule( 'gamut_map_linear_displayP3', wgsl`gamut_map_linear_displayP3( ${vec3} )`, wgsl`

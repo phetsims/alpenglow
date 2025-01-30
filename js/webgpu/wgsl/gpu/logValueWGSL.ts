@@ -8,13 +8,15 @@
 
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
 import WithOptional from '../../../../../phet-core/js/types/WithOptional.js';
-import { alpenglow, logWGSL, logWGSLOptions, wgsl, WGSLStatements, wgslString } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { logWGSL, logWGSLOptions } from './logWGSL.js';
+import { wgsl, WGSLStatements, wgslString } from '../WGSLString.js';
 
 export type logValueWGSLOptions<T> = {
   value: string; // The name!
 } & WithOptional<logWGSLOptions<T>, 'name'>;
 
-const logValueWGSL = <T>(
+export const logValueWGSL = <T>(
   providedOptions: logValueWGSLOptions<T>
 ): WGSLStatements => {
 
@@ -28,7 +30,5 @@ const logValueWGSL = <T>(
 
   return logWGSL( options );
 };
-
-export default logValueWGSL;
 
 alpenglow.register( 'logValueWGSL', logValueWGSL );

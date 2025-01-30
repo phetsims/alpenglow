@@ -6,7 +6,22 @@
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { alpenglow, BitOrder, BufferBindingType, BufferSlot, ceilDivideConstantDivisorWGSL, commentWGSL, conditionalIfWGSL, decimalS, loadMultipleWGSL, loadMultipleWGSLOptions, logRakedWGSL, logStringWGSL, logValueWGSL, nBitCompactSingleSortWGSL, RakedSizable, scanRakedWGSL, U32Max, u32S, U32Type, unrollWGSL, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { BitOrder, U32Max, U32Type } from '../../compute/ConcreteType.js';
+import { decimalS, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
+import { loadMultipleWGSL, loadMultipleWGSLOptions } from './loadMultipleWGSL.js';
+import { RakedSizable } from '../WGSLUtils.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { logStringWGSL } from './logStringWGSL.js';
+import { ceilDivideConstantDivisorWGSL } from './ceilDivideConstantDivisorWGSL.js';
+import { logValueWGSL } from './logValueWGSL.js';
+import { logRakedWGSL } from './logRakedWGSL.js';
+import { commentWGSL } from './commentWGSL.js';
+import { unrollWGSL } from './unrollWGSL.js';
+import { nBitCompactSingleSortWGSL } from './nBitCompactSingleSortWGSL.js';
+import { conditionalIfWGSL } from './conditionalIfWGSL.js';
+import { scanRakedWGSL } from './scanRakedWGSL.js';
 
 export type mainRadixScatterWGSLOptions<T> = {
   input: BufferSlot<T[]>;
@@ -34,7 +49,7 @@ export const MAIN_RADIX_SCATTER_DEFAULTS = {
   loadMultipleOptions: {}
 } as const;
 
-const mainRadixScatterWGSL = <T>(
+export const mainRadixScatterWGSL = <T>(
   providedOptions: mainRadixScatterWGSLOptions<T>
 ): WGSLMainModule => {
 
@@ -222,7 +237,5 @@ const mainRadixScatterWGSL = <T>(
     }
   ` );
 };
-
-export default mainRadixScatterWGSL;
 
 alpenglow.register( 'mainRadixScatterWGSL', mainRadixScatterWGSL );

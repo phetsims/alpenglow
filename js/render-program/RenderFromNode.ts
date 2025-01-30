@@ -14,7 +14,28 @@ import { Shape } from '../../../kite/js/imports.js';
 import ConstructorOf from '../../../phet-core/js/types/ConstructorOf.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import { Color, ColorMatrixFilter, Display, Image, LinearGradient, Node, Path, Pattern, RadialGradient, Sprites, TColor, Text, TPaint } from '../../../scenery/js/imports.js';
-import { alpenglow, CombinedRaster, Rasterize, RenderAlpha, RenderBlendCompose, RenderBlendType, RenderColor, RenderComposeType, RenderExtend, RenderFilter, RenderGradientStop, RenderImage, RenderImageable, RenderLinearGradient, RenderLinearGradientAccuracy, RenderPath, RenderPathBoolean, RenderPremultiply, RenderProgram, RenderRadialGradient, RenderRadialGradientAccuracy, RenderResampleType, RenderStack, RenderUnpremultiply } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { CombinedRaster } from '../raster/CombinedRaster.js';
+import { Rasterize } from '../raster/Rasterize.js';
+import { RenderAlpha } from './RenderAlpha.js';
+import { RenderBlendCompose } from './RenderBlendCompose.js';
+import { RenderBlendType } from './RenderBlendType.js';
+import { RenderColor } from './RenderColor.js';
+import { RenderComposeType } from './RenderComposeType.js';
+import { RenderExtend } from './RenderExtend.js';
+import { RenderGradientStop } from './RenderGradientStop.js';
+import { RenderImage } from './RenderImage.js';
+import { RenderImageable } from './RenderImageable.js';
+import { RenderLinearGradient, RenderLinearGradientAccuracy } from './RenderLinearGradient.js';
+import { RenderPath } from './RenderPath.js';
+import { RenderPathBoolean } from './RenderPathBoolean.js';
+import { RenderProgram } from './RenderProgram.js';
+import { RenderRadialGradient, RenderRadialGradientAccuracy } from './RenderRadialGradient.js';
+import { RenderResampleType } from './RenderResampleType.js';
+import { RenderStack } from './RenderStack.js';
+import { RenderPremultiply } from './RenderPremultiply.js';
+import { RenderFilter } from './RenderFilter.js';
+import { RenderUnpremultiply } from './RenderUnpremultiply.js';
 
 // TODO: better for this?
 const piecewiseOptions = {
@@ -198,7 +219,7 @@ const colorFromTColor = ( paint: TColor ): Vector4 => {
   ) );
 };
 
-export default class RenderFromNode {
+export class RenderFromNode {
   public static nodeToRenderProgram( node: Node, matrix: Matrix3 = Matrix3.IDENTITY ): RenderProgram {
 
     if ( !node.visible ) {

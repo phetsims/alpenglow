@@ -8,9 +8,11 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, ClippableFace, PolygonalFace } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import type { ClippableFace } from '../cag/ClippableFace.js';
+import { PolygonalFace } from '../cag/ClippableFace.js';
 
-export default class RenderEvaluationContext {
+export class RenderEvaluationContext {
 
   // if null AND we have a need set for a face, it is fully covered
   public face: ClippableFace | null = null;

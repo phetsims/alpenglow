@@ -1,14 +1,15 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { RenderExtend, u32S, wgsl, WGSLExpression, WGSLExpressionF32, WGSLExpressionU32, WGSLStringModule } from '../../../imports.js';
-
 /**
  * Floating-point extension for RenderExtend.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default (
+import { u32S, wgsl, WGSLExpression, WGSLExpressionF32, WGSLExpressionU32, WGSLStringModule } from '../WGSLString.js';
+import { RenderExtend } from '../../../render-program/RenderExtend.js';
+
+export const extend_f32WGSL = (
   t: WGSLExpressionF32,
   extend: WGSLExpressionU32
 ): WGSLExpression => {

@@ -7,7 +7,11 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow, conditionalIfWGSL, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, u32S, unrollWGSL, wgsl, WGSLExpressionU32, WGSLStatements, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
+import { LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../WGSLUtils.js';
+import { unrollWGSL } from './unrollWGSL.js';
+import { conditionalIfWGSL } from './conditionalIfWGSL.js';
 
 export type coalescedLoopWGSLOptions = {
   callback: ( localIndex: WGSLExpressionU32, dataIndex: WGSLExpressionU32 ) => WGSLStatements;
@@ -19,7 +23,7 @@ export const COALESCED_LOOP_DEFAULTS = {
   ...LOCAL_INDEXABLE_DEFAULTS // eslint-disable-line phet/no-object-spread-on-non-literals
 } as const;
 
-const coalescedLoopWGSL = (
+export const coalescedLoopWGSL = (
   providedOptions: coalescedLoopWGSLOptions
 ): WGSLStatements => {
 
@@ -42,7 +46,5 @@ const coalescedLoopWGSL = (
     ` )}
   `;
 };
-
-export default coalescedLoopWGSL;
 
 alpenglow.register( 'coalescedLoopWGSL', coalescedLoopWGSL );

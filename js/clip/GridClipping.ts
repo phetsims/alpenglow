@@ -1,13 +1,15 @@
 // Copyright 2023-2024, University of Colorado Boulder
 
-import Utils from '../../../dot/js/Utils.js';
 /**
  * Clipping arbitrary (degenerate, non-convex, self-intersecting, etc.) polygons to within a grid.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, LineClipping } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { LineClipping } from './LineClipping.js';
 
 const scratchStartPoint = new Vector2( 0, 0 );
 const scratchEndPoint = new Vector2( 0, 0 );
@@ -25,7 +27,7 @@ export type GridClipCallback = (
   endPoint: Vector2 | null
 ) => void;
 
-export default class GridClipping {
+export class GridClipping {
 
   // TODO: See if we can get the intercepts to work, since it WOULD be higher performance. Can we perturb the
   // TODO: intercepts to values that will be acceptable?

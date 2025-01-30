@@ -14,9 +14,20 @@
  */
 
 import Vector2 from '../../../../dot/js/Vector2.js';
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, ParallelWorkgroupArray, RasterChunk, RasterChunkReduceData, RasterChunkReducePair, RasterChunkReduceQuad, RasterClippedChunk, RasterEdge, RasterEdgeClip } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ParallelStorageArray } from '../ParallelStorageArray.js';
+import type { RasterChunk } from './RasterChunk.js';
+import type { RasterEdge } from './RasterEdge.js';
+import type { RasterClippedChunk } from './RasterClippedChunk.js';
+import { RasterEdgeClip } from './RasterEdgeClip.js';
+import { RasterChunkReduceQuad } from './RasterChunkReduceQuad.js';
+import { RasterChunkReducePair } from './RasterChunkReducePair.js';
+import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
+import { ParallelKernel } from '../ParallelKernel.js';
+import { RasterChunkReduceData } from './RasterChunkReduceData.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
 
-export default class ParallelRasterInitialClip {
+export class ParallelRasterInitialClip {
   public static async dispatch(
     workgroupSize: number,
 

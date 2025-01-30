@@ -1,6 +1,6 @@
 // Copyright 2024, University of Colorado Boulder
 
-import { wgsl, WGSLReferenceModule } from '../../../imports.js';
+import { wgsl, WGSLReferenceModule } from '../WGSLString.js';
 
 /**
  * Uniforms for a TwoPassConfig
@@ -8,7 +8,7 @@ import { wgsl, WGSLReferenceModule } from '../../../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-export default new WGSLReferenceModule( 'TwoPassConfig', wgsl`
+export const TwoPassConfigWGSL = new WGSLReferenceModule( 'TwoPassConfig', wgsl`
   struct TwoPassConfig {
     raster_width: u32,
     raster_height: u32,

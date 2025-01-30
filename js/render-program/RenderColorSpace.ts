@@ -7,9 +7,17 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow, RenderColor, RenderLinearDisplayP3ToLinearSRGB, RenderLinearSRGBToLinearDisplayP3, RenderLinearSRGBToOklab, RenderLinearSRGBToSRGB, RenderOklabToLinearSRGB, RenderProgram, RenderSRGBToLinearSRGB } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderColor } from './RenderColor.js';
+import { RenderLinearDisplayP3ToLinearSRGB } from './RenderLinearDisplayP3ToLinearSRGB.js';
+import { RenderLinearSRGBToLinearDisplayP3 } from './RenderLinearSRGBToLinearDisplayP3.js';
+import { RenderLinearSRGBToOklab } from './RenderLinearSRGBToOklab.js';
+import { RenderLinearSRGBToSRGB } from './RenderLinearSRGBToSRGB.js';
+import { RenderOklabToLinearSRGB } from './RenderOklabToLinearSRGB.js';
+import type { RenderProgram } from './RenderProgram.js';
+import { RenderSRGBToLinearSRGB } from './RenderSRGBToLinearSRGB.js';
 
-export default class RenderColorSpace {
+export class RenderColorSpace {
   protected constructor(
     public readonly name: string,
     public readonly isPremultiplied: boolean,

@@ -9,11 +9,21 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow, HilbertMapping, IntegerEdge, LineIntersector, LineSplitter, PolygonalFace, RasterTileLog, RationalBoundary, RationalFace, RationalHalfEdge, RenderPath } from '../imports.js';
+import { alpenglow } from '../alpenglow.js';
+import { PolygonalFace } from './ClippableFace.js';
+import { RationalFace } from './RationalFace.js';
+import { RationalHalfEdge } from './RationalHalfEdge.js';
+import { LineSplitter } from './LineSplitter.js';
+import { HilbertMapping } from './HilbertMapping.js';
+import { IntegerEdge } from './IntegerEdge.js';
+import { LineIntersector } from './LineIntersector.js';
+import type { RenderPath } from '../render-program/RenderPath.js';
+import type { RationalBoundary } from './RationalBoundary.js';
+import type { RasterTileLog } from '../raster/RasterLog.js';
 
 const defaultLineIntersector = LineIntersector.edgeIntersectionArrayBoundsTree;
 
-export default class PolygonalBoolean {
+export class PolygonalBoolean {
 
   public static union( ...paths: RenderPath[] ): Vector2[][] {
     return PolygonalBoolean.cag(

@@ -8,9 +8,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, ParallelExecutor, ParallelKernel, ParallelStorageArray, RasterChunk, RasterClippedChunk } from '../../imports.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { ParallelStorageArray } from '../ParallelStorageArray.js';
+import type { RasterChunk } from './RasterChunk.js';
+import { RasterClippedChunk } from './RasterClippedChunk.js';
+import { ParallelKernel } from '../ParallelKernel.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
 
-export default class ParallelRasterInitialChunk {
+export class ParallelRasterInitialChunk {
   public static async dispatch(
     workgroupSize: number,
 

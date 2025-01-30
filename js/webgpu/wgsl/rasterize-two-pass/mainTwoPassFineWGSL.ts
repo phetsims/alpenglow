@@ -24,7 +24,32 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { blend_composeWGSL, bounds_clip_edgeWGSL, BufferBindingType, BufferSlot, decimalS, extend_f32WGSL, f32S, gamut_map_linear_displayP3WGSL, gamut_map_linear_sRGBWGSL, ifLogWGSL, linear_displayP3_to_linear_sRGBWGSL, linear_sRGB_to_linear_displayP3WGSL, linear_sRGB_to_oklabWGSL, linear_sRGB_to_sRGBWGSL, LinearEdge, LinearEdgeWGSL, oklab_to_linear_sRGBWGSL, premultiplyWGSL, RadialGradientType, RenderInstruction, sRGB_to_linear_sRGBWGSL, StorageTextureBindingType, TextureViewSlot, TwoPassConfig, TwoPassFineRenderableFace, TwoPassFineRenderableFaceWGSL, u32S, unpremultiplyWGSL, wgsl, wgslBlueprint, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../../../imports.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
+import { TwoPassConfig } from './TwoPassConfig.js';
+import { TwoPassFineRenderableFace } from './TwoPassFineRenderableFace.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import { TextureViewSlot } from '../../compute/TextureViewSlot.js';
+import { decimalS, f32S, u32S, wgsl, wgslBlueprint, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { StorageTextureBindingType } from '../../compute/StorageTextureBindingType.js';
+import { TwoPassFineRenderableFaceWGSL } from './TwoPassFineRenderableFaceWGSL.js';
+import { unpremultiplyWGSL } from '../color/unpremultiplyWGSL.js';
+import { linear_sRGB_to_sRGBWGSL } from '../color/linear_sRGB_to_sRGBWGSL.js';
+import { gamut_map_linear_sRGBWGSL } from '../color/gamut_map_linear_sRGBWGSL.js';
+import { gamut_map_linear_displayP3WGSL } from '../color/gamut_map_linear_displayP3WGSL.js';
+import { premultiplyWGSL } from '../color/premultiplyWGSL.js';
+import { RenderInstruction } from '../../../render-program/RenderInstruction.js';
+import { bounds_clip_edgeWGSL } from '../clip/bounds_clip_edgeWGSL.js';
+import { LinearEdgeWGSL } from '../cag/LinearEdgeWGSL.js';
+import { linear_displayP3_to_linear_sRGBWGSL } from '../color/linear_displayP3_to_linear_sRGBWGSL.js';
+import { sRGB_to_linear_sRGBWGSL } from '../color/sRGB_to_linear_sRGBWGSL.js';
+import { linear_sRGB_to_linear_displayP3WGSL } from '../color/linear_sRGB_to_linear_displayP3WGSL.js';
+import { oklab_to_linear_sRGBWGSL } from '../color/oklab_to_linear_sRGBWGSL.js';
+import { linear_sRGB_to_oklabWGSL } from '../color/linear_sRGB_to_oklabWGSL.js';
+import { blend_composeWGSL } from '../color/blend_composeWGSL.js';
+import { RadialGradientType } from '../../../render-program/RenderRadialGradient.js';
+import { extend_f32WGSL } from '../render-program/extend_f32WGSL.js';
+import { ifLogWGSL } from '../gpu/ifLogWGSL.js';
 
 export type mainTwoPassFineWGSLOptions = {
   config: BufferSlot<TwoPassConfig>;
@@ -45,7 +70,7 @@ export const MAIN_TWO_PASS_FINE_DEFAULTS = {
   supportsMitchellNetravali: false
 } as const;
 
-const mainTwoPassFineWGSL = (
+export const mainTwoPassFineWGSL = (
   providedOptions: mainTwoPassFineWGSLOptions
 ): WGSLMainModule => {
 
@@ -1286,5 +1311,3 @@ const mainTwoPassFineWGSL = (
     }
   ` );
 };
-
-export default mainTwoPassFineWGSL;

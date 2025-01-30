@@ -6,7 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { alpenglow, u32S, wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../../../imports.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 
 export type bitPackRadixIncrementWGSLOptions = {
   // u32 name
@@ -26,7 +27,7 @@ export type bitPackRadixIncrementWGSLOptions = {
   maxCount: number;
 };
 
-const bitPackRadixIncrementWGSL = (
+export const bitPackRadixIncrementWGSL = (
   options: bitPackRadixIncrementWGSLOptions
 ): WGSLStatements => {
 
@@ -47,7 +48,5 @@ const bitPackRadixIncrementWGSL = (
     } ]` : wgsl``} += 1u${countsPerComponent === 1 ? wgsl`` : wgsl` << ( ( ( ${bits} ) % ${u32S( countsPerComponent )} ) * ${u32S( countBitQuantity )} )`};
   `;
 };
-
-export default bitPackRadixIncrementWGSL;
 
 alpenglow.register( 'bitPackRadixIncrementWGSL', bitPackRadixIncrementWGSL );

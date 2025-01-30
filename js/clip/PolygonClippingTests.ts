@@ -7,7 +7,7 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
-import { EdgedFace } from '../imports.js';
+import { EdgedFace } from '../cag/ClippableFace.js';
 
 QUnit.module( 'PolygonClipping' );
 

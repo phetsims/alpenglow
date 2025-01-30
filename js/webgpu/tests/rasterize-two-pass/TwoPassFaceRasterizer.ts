@@ -8,8 +8,18 @@ import Bounds2 from '../../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../../dot/js/Matrix3.js';
 import Vector2 from '../../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
-import { alpenglow, DeviceContext, FaceRasterizer, PolygonFilterType, Rasterize, RenderColor, RenderColorSpace, RenderLinearBlend, RenderLinearBlendAccuracy, RenderPath, RenderPathBoolean, RenderStack } from '../../../imports.js';
-import testPolygonalFace from '../testPolygonalFace.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { Rasterize } from '../../../raster/Rasterize.js';
+import { PolygonFilterType } from '../../../render-program/PolygonFilterType.js';
+import { RenderColor } from '../../../render-program/RenderColor.js';
+import { RenderColorSpace } from '../../../render-program/RenderColorSpace.js';
+import { RenderLinearBlend, RenderLinearBlendAccuracy } from '../../../render-program/RenderLinearBlend.js';
+import { RenderPath } from '../../../render-program/RenderPath.js';
+import { RenderPathBoolean } from '../../../render-program/RenderPathBoolean.js';
+import { RenderStack } from '../../../render-program/RenderStack.js';
+import { DeviceContext } from '../../compute/DeviceContext.js';
+import { FaceRasterizer } from '../../FaceRasterizer.js';
+import { testPolygonalFace } from '../testPolygonalFace.js';
 
 export const evaluateTwoPassFaceRasterizer = async (
   deviceContext: DeviceContext
