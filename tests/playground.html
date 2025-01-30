@@ -3335,14 +3335,14 @@ new phet.dot.Bounds2( 0, 10, 1, 11 );
     } );
 
     if ( DISPLAY_CONICS ) {
-      const pathA = new phet.scenery.Path( segmentA.toShape(), {
+      const pathA = new phet.scenery.Path( phet.scenery.Shape.fromSegment( segmentA ), {
         stroke: 'rgb(0,200,200)',
         lineWidth: 0.5,
         opacity: CONIC_OPACITY
       } );
       scene.addChild( pathA );
 
-      const pathB = new phet.scenery.Path( segmentB.toShape(), {
+      const pathB = new phet.scenery.Path( phet.scenery.Shape.fromSegment( segmentB ), {
         stroke: 'rgb(255,0,255)',
         lineWidth: 0.5,
         opacity: CONIC_OPACITY
