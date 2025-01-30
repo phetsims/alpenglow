@@ -1205,14 +1205,14 @@ an UI and Display made for visual testing and debugging.
       };
 
       const toPremulClient = ( ...args ) => {
-        return phet.alpenglow.RenderFromNode.colorFrom( ...args ).colorConverted( phet.alpenglow.RenderColorSpace.sRGB, clientColorSpace );
+        return phet.alpenglow.convertColorSpace( phet.alpenglow.RenderFromNode.colorFrom( ...args ), phet.alpenglow.RenderColorSpace.sRGB, clientColorSpace );
       };
 
       const toPremulOklab = ( ...args ) => {
-        return phet.alpenglow.RenderFromNode.colorFrom( ...args ).colorConverted( phet.alpenglow.RenderColorSpace.sRGB, phet.alpenglow.RenderColorSpace.premultipliedOklab );
+        return phet.alpenglow.convertColorSpace( phet.alpenglow.RenderFromNode.colorFrom( ...args ), phet.alpenglow.RenderColorSpace.sRGB, phet.alpenglow.RenderColorSpace.premultipliedOklab );
       };
 
-      const premulLinearToClient = renderProgram => renderProgram.colorConverted( phet.alpenglow.RenderColorSpace.premultipliedLinearSRGB, clientColorSpace );
+      const premulLinearToClient = renderProgram => phet.alpenglow.convertColorSpace( renderProgram, phet.alpenglow.RenderColorSpace.premultipliedLinearSRGB, clientColorSpace );
 
       const a = new phet.alpenglow.RenderAlpha( phet.alpenglow.RenderPathBoolean.fromInside( pathA, premulLinearToClient( new phet.alpenglow.RenderImage(
         // far distance
@@ -1239,18 +1239,18 @@ an UI and Display made for visual testing and debugging.
       ) ) ), 0.8 );
       const bBlendColorSpace = phet.alpenglow.RenderColorSpace.premultipliedOklab;
       // const bBlendColorSpace = phet.alpenglow.RenderColorSpace.premultipliedDisplayP3;
-      // const b = phet.alpenglow.RenderPathBoolean.fromInside( pathB, new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ).colorConverted( phet.alpenglow.RenderColorSpace.displayP3, clientColorSpace ) );
-      const b = phet.alpenglow.RenderColorSpaceConversion.convert( phet.alpenglow.RenderPathBoolean.fromInside( pathB, new phet.alpenglow.RenderRadialGradient(
+      // const b = phet.alpenglow.RenderPathBoolean.fromInside( pathB, phet.alpenglow.convertColorSpace( new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ), phet.alpenglow.RenderColorSpace.displayP3, clientColorSpace ) );
+      const b = phet.alpenglow.convertColorSpace( phet.alpenglow.RenderPathBoolean.fromInside( pathB, new phet.alpenglow.RenderRadialGradient(
         phet.dot.Matrix3.IDENTITY,
         new phet.dot.Vector2( 10, 10 ),
         0,
         new phet.dot.Vector2( 10, 10 ),
         5, [
           // NOTE: LEFT this gradient in sRGB because of the strong colors, perceptual interpolation might go out of gamut
-          new phet.alpenglow.RenderGradientStop( 0, new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ).colorConverted( phet.alpenglow.RenderColorSpace.displayP3, bBlendColorSpace ) ),
-          new phet.alpenglow.RenderGradientStop( 0.3333, new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ).colorConverted( phet.alpenglow.RenderColorSpace.displayP3, bBlendColorSpace ) ),
-          new phet.alpenglow.RenderGradientStop( 0.6666, new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) ).colorConverted( phet.alpenglow.RenderColorSpace.displayP3, bBlendColorSpace ) ),
-          new phet.alpenglow.RenderGradientStop( 1, new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ).colorConverted( phet.alpenglow.RenderColorSpace.displayP3, bBlendColorSpace ) )
+          new phet.alpenglow.RenderGradientStop( 0, phet.alpenglow.convertColorSpace( new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ), phet.alpenglow.RenderColorSpace.displayP3, bBlendColorSpace ) ),
+          new phet.alpenglow.RenderGradientStop( 0.3333, phet.alpenglow.convertColorSpace( new phet.alpenglow.RenderColor( phet.dot.v4( 0, 1, 0, 1 ) ), phet.alpenglow.RenderColorSpace.displayP3, bBlendColorSpace ) ),
+          new phet.alpenglow.RenderGradientStop( 0.6666, phet.alpenglow.convertColorSpace( new phet.alpenglow.RenderColor( phet.dot.v4( 0, 0, 1, 1 ) ), phet.alpenglow.RenderColorSpace.displayP3, bBlendColorSpace ) ),
+          new phet.alpenglow.RenderGradientStop( 1, phet.alpenglow.convertColorSpace( new phet.alpenglow.RenderColor( phet.dot.v4( 1, 0, 0, 1 ) ), phet.alpenglow.RenderColorSpace.displayP3, bBlendColorSpace ) )
         ],
         phet.alpenglow.RenderExtend.Repeat,
         radialGradientAccuracy
@@ -1274,7 +1274,7 @@ an UI and Display made for visual testing and debugging.
         phet.alpenglow.RenderExtend.Repeat,
         radialGradientAccuracy
       ) );
-      const d = phet.alpenglow.RenderPathBoolean.fromInside( pathD, new phet.alpenglow.RenderLinearGradient(
+      const d = phet.alpenglow.RenderPathBoolean.fromInside( pathD, phet.alpenglow.convertColorSpace( new phet.alpenglow.RenderLinearGradient(
         phet.dot.Matrix3.IDENTITY,
         new phet.dot.Vector2( 0, 8 ),
         new phet.dot.Vector2( 9, 0 ),
@@ -1291,7 +1291,7 @@ an UI and Display made for visual testing and debugging.
         ],
         phet.alpenglow.RenderExtend.Repeat,
         linearGradientAccuracy
-      ).colorConverted( phet.alpenglow.RenderColorSpace.premultipliedOklab, clientColorSpace ) );
+      ), phet.alpenglow.RenderColorSpace.premultipliedOklab, clientColorSpace ) );
       const e = phet.alpenglow.RenderPathBoolean.fromInside( pathE, toPremulClient( 255, 255, 255, 1 ) );
       const f = phet.alpenglow.RenderPathBoolean.fromInside( pathF, toPremulClient( 0, 0, 0, 1 ) );
 
@@ -1621,7 +1621,7 @@ an UI and Display made for visual testing and debugging.
         debugCanvas.width = outputSize;
         debugCanvas.height = outputSize;
 
-        const convertedProgram = program.colorConverted( clientColorSpace, gpuColorSpace ).simplified();
+        const convertedProgram = phet.alpenglow.convertColorSpace( program, clientColorSpace, gpuColorSpace ).simplified();
 
         const rasterizer = new phet.alpenglow.FaceRasterizer( {
           deviceContext: deviceContext

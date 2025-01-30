@@ -12,9 +12,10 @@ import Vector4 from '../../../dot/js/Vector4.js';
 import { RenderAlpha } from './RenderAlpha.js';
 import { RenderBarycentricBlend, RenderBarycentricBlendAccuracy } from './RenderBarycentricBlend.js';
 import { RenderColor } from './RenderColor.js';
-import { RenderLinearBlend, RenderLinearBlendAccuracy } from './RenderLinearBlend.js';
+import { RenderLinearBlend } from './RenderLinearBlend.js';
 import { RenderPath } from './RenderPath.js';
 import { RenderPathBoolean } from './RenderPathBoolean.js';
+import { RenderLinearBlendAccuracy } from './RenderLinearBlendAccuracy.js';
 
 QUnit.module( 'RenderProgram' );
 

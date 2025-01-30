@@ -26,16 +26,18 @@ import { RenderExtend } from './RenderExtend.js';
 import { RenderGradientStop } from './RenderGradientStop.js';
 import { RenderImage } from './RenderImage.js';
 import { RenderImageable } from './RenderImageable.js';
-import { RenderLinearGradient, RenderLinearGradientAccuracy } from './RenderLinearGradient.js';
+import { RenderLinearGradient } from './RenderLinearGradient.js';
 import { RenderPath } from './RenderPath.js';
 import { RenderPathBoolean } from './RenderPathBoolean.js';
 import { RenderProgram } from './RenderProgram.js';
-import { RenderRadialGradient, RenderRadialGradientAccuracy } from './RenderRadialGradient.js';
+import { RenderRadialGradient } from './RenderRadialGradient.js';
 import { RenderResampleType } from './RenderResampleType.js';
 import { RenderStack } from './RenderStack.js';
 import { RenderPremultiply } from './RenderPremultiply.js';
 import { RenderFilter } from './RenderFilter.js';
 import { RenderUnpremultiply } from './RenderUnpremultiply.js';
+import { RenderRadialGradientAccuracy } from './RenderRadialGradientAccuracy.js';
+import { RenderLinearGradientAccuracy } from './RenderLinearGradientAccuracy.js';
 
 // TODO: better for this?
 const piecewiseOptions = {

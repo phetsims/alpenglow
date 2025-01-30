@@ -19,7 +19,8 @@ import { oklab_to_linear_sRGBWGSL } from '../color/oklab_to_linear_sRGBWGSL.js';
 import { linear_sRGB_to_oklabWGSL } from '../color/linear_sRGB_to_oklabWGSL.js';
 import { blend_composeWGSL } from '../color/blend_composeWGSL.js';
 import { extend_f32WGSL } from './extend_f32WGSL.js';
-import { RadialGradientType } from '../../../render-program/RenderRadialGradient.js';
+
+import { RadialGradientType } from '../../../render-program/RadialGradientType.js';
 
 export type evaluate_render_program_instructionsWGSLOptions = {
   getRenderProgramInstruction: ( index: WGSLExpressionU32 ) => WGSLExpression;

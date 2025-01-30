@@ -22,8 +22,8 @@ import { RenderableFace } from './RenderableFace.js';
 import { getPolygonFilterGridBounds, PolygonFilterType } from '../render-program/PolygonFilterType.js';
 import { RenderPath } from '../render-program/RenderPath.js';
 import { RenderExtend } from '../render-program/RenderExtend.js';
-import { RenderLinearGradient, RenderLinearGradientAccuracy } from '../render-program/RenderLinearGradient.js';
-import { RenderRadialGradient, RenderRadialGradientAccuracy } from '../render-program/RenderRadialGradient.js';
+import { RenderLinearGradient } from '../render-program/RenderLinearGradient.js';
+import { RenderRadialGradient } from '../render-program/RenderRadialGradient.js';
 import { RenderProgram } from '../render-program/RenderProgram.js';
 import { BoundsClipping } from '../clip/BoundsClipping.js';
 import { CombinedRaster, CombinedRasterOptions } from './CombinedRaster.js';
@@ -35,6 +35,9 @@ import { RenderColor } from '../render-program/RenderColor.js';
 import { Rasterize } from './Rasterize.js';
 import { LinearEdge } from '../cag/LinearEdge.js';
 import { RenderStack } from '../render-program/RenderStack.js';
+import { convertColorSpace } from '../render-program/convertColorSace.js';
+import { RenderRadialGradientAccuracy } from '../render-program/RenderRadialGradientAccuracy.js';
+import { RenderLinearGradientAccuracy } from '../render-program/RenderLinearGradientAccuracy.js';
 
 export class VectorCanvas {
 
@@ -80,7 +83,7 @@ export class VectorCanvas {
   }
 
   private colorToRenderProgram( color: Vector4 ): RenderProgram {
-    return new RenderColor( color ).colorConverted( RenderColorSpace.sRGB, this.colorSpace === 'srgb' ? RenderColorSpace.premultipliedSRGB : RenderColorSpace.premultipliedDisplayP3 );
+    return convertColorSpace( new RenderColor( color ), RenderColorSpace.sRGB, this.colorSpace === 'srgb' ? RenderColorSpace.premultipliedSRGB : RenderColorSpace.premultipliedDisplayP3 );
   }
 
   private fillRenderProgram( renderPath: RenderPath, renderProgram: RenderProgram ): void {

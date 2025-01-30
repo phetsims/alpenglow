@@ -30,13 +30,15 @@ import { RenderStack } from '../../../render-program/RenderStack.js';
 import { RenderPathBoolean } from '../../../render-program/RenderPathBoolean.js';
 import { RenderPath } from '../../../render-program/RenderPath.js';
 import { RenderColor } from '../../../render-program/RenderColor.js';
-import { RenderLinearBlend, RenderLinearBlendAccuracy } from '../../../render-program/RenderLinearBlend.js';
+import { RenderLinearBlend } from '../../../render-program/RenderLinearBlend.js';
 import { Rasterize } from '../../../raster/Rasterize.js';
 import { Routine } from '../../compute/Routine.js';
 import { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
 import { Procedure } from '../../compute/Procedure.js';
 import { TextureViewResource } from '../../compute/TextureViewResource.js';
 import { alpenglow } from '../../../alpenglow.js';
+import { convertColorSpace } from '../../../render-program/convertColorSace.js';
+import { RenderLinearBlendAccuracy } from '../../../render-program/RenderLinearBlendAccuracy.js';
 
 export const evaluateTwoPassFineSolo = async (
   name: string,
@@ -72,28 +74,28 @@ export const evaluateTwoPassFineSolo = async (
   const program = new RenderStack( [
     new RenderPathBoolean(
       RenderPath.fromBounds( new Bounds2( 0, 0, 128, 256 ) ),
-      new RenderColor(
+      convertColorSpace( new RenderColor(
         new Vector4( 0, 0, 0, 1 )
-      ).colorConverted( RenderColorSpace.sRGB, clientSpace ),
-      new RenderColor(
+      ), RenderColorSpace.sRGB, clientSpace ),
+      convertColorSpace( new RenderColor(
         new Vector4( 1, 1, 1, 1 )
-      ).colorConverted( RenderColorSpace.sRGB, clientSpace )
+      ), RenderColorSpace.sRGB, clientSpace )
     ),
     RenderPathBoolean.fromInside(
       new RenderPath( 'nonzero', smallerFace.toPolygonalFace().polygons ),
-      new RenderColor(
+      convertColorSpace( new RenderColor(
         new Vector4( 1, 1, 1, 1 )
-      ).colorConverted( RenderColorSpace.sRGB, clientSpace )
+      ), RenderColorSpace.sRGB, clientSpace )
     ),
     RenderPathBoolean.fromInside(
       new RenderPath( 'nonzero', mainFace.toPolygonalFace().polygons ),
-      new RenderLinearBlend(
+      convertColorSpace( new RenderLinearBlend(
         new Vector2( 1 / 256, 0 ),
         0,
         RenderLinearBlendAccuracy.Accurate,
-        new RenderColor( new Vector4( 1, 0, 0, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
-        new RenderColor( new Vector4( 0.5, 0, 1, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
-      ).colorConverted( RenderColorSpace.premultipliedOklab, clientSpace )
+        convertColorSpace( new RenderColor( new Vector4( 1, 0, 0, 1 ) ), RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
+        convertColorSpace( new RenderColor( new Vector4( 0.5, 0, 1, 1 ) ), RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
+      ), RenderColorSpace.premultipliedOklab, clientSpace )
     )
   ] ).transformed( Matrix3.scaling( rasterSize / 256 ) );
 

@@ -39,6 +39,7 @@ const Circle = scenery.Circle;
 const Shape = kite.Shape;
 const LineStyles = kite.LineStyles;
 
+const convertColorSpace = alpenglow.convertColorSpace;
 const RenderLinearGradientAccuracy = alpenglow.RenderLinearGradientAccuracy;
 const RenderRadialBlend = alpenglow.RenderRadialBlend;
 const RenderRadialBlendAccuracy = alpenglow.RenderRadialBlendAccuracy;
@@ -805,17 +806,17 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
           phet.dot.v2( width, maxY ),
           phet.dot.v2( 0, maxY )
         ] ] ),
-        new RenderLinearGradient(
+        convertColorSpace( new RenderLinearGradient(
           Matrix3.IDENTITY,
           v2( 0, 0 ),
           v2( width, 0 ),
           [
-            new RenderGradientStop( 0, RenderFromNode.colorFrom( color1 ).colorConverted( clientSpace, colorSpace ) ),
-            new RenderGradientStop( 1, RenderFromNode.colorFrom( color2 ).colorConverted( clientSpace, colorSpace ) )
+            new RenderGradientStop( 0, convertColorSpace( RenderFromNode.colorFrom( color1 ), clientSpace, colorSpace ) ),
+            new RenderGradientStop( 1, convertColorSpace( RenderFromNode.colorFrom( color2 ), clientSpace, colorSpace ) )
           ],
           RenderExtend.Pad,
           RenderLinearGradientAccuracy.SplitAccurate
-        ).colorConverted( colorSpace, clientSpace ),
+        ), colorSpace, clientSpace ),
         RenderColor.TRANSPARENT
       );
     };
@@ -867,18 +868,18 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
         new RenderPath( 'nonzero', [ [
           redPoint, greenPoint, bluePoint
         ] ] ),
-        new RenderBarycentricBlend(
+        convertColorSpace( new RenderBarycentricBlend(
           redPoint, greenPoint, bluePoint,
           RenderBarycentricBlendAccuracy.Accurate,
-          new RenderColor( renderType === 'srgb' ? rawRedSRGBColor : rawRedColor ).colorConverted( displayP3, blendSpace ),
-          new RenderColor( renderType === 'srgb' ? rawGreenSRGBColor : rawGreenColor ).colorConverted( displayP3, blendSpace ),
-          new RenderColor( renderType === 'srgb' ? rawBlueSRGBColor : rawBlueColor ).colorConverted( displayP3, blendSpace )
-        ).colorConverted( blendSpace, clientSpace ),
+          convertColorSpace( new RenderColor( renderType === 'srgb' ? rawRedSRGBColor : rawRedColor ), displayP3, blendSpace ),
+          convertColorSpace( new RenderColor( renderType === 'srgb' ? rawGreenSRGBColor : rawGreenColor ), displayP3, blendSpace ),
+          convertColorSpace( new RenderColor( renderType === 'srgb' ? rawBlueSRGBColor : rawBlueColor ), displayP3, blendSpace )
+        ), blendSpace, clientSpace ),
         RenderColor.TRANSPARENT
       ),
       new RenderPathBoolean(
         new RenderPath( 'nonzero', shapeToPolygons( Shape.polygon( [ redPoint, greenPoint, bluePoint ] ).getStrokedShape( new LineStyles( { lineWidth: 0.5 } ) ) ) ),
-        RenderFromNode.colorFrom( 'black' ).colorConverted( sRGB, clientSpace ),
+        convertColorSpace( RenderFromNode.colorFrom( 'black' ), sRGB, clientSpace ),
         RenderColor.TRANSPARENT
       )
     ] );
@@ -911,17 +912,17 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
           phet.dot.v2( width, maxY ),
           phet.dot.v2( 0, maxY )
         ] ] ),
-        new RenderLinearGradient(
+        convertColorSpace( new RenderLinearGradient(
           Matrix3.IDENTITY,
           v2( 0, 0 ),
           v2( width, 0 ),
           [
-            new RenderGradientStop( 0, RenderFromNode.colorFrom( 'rgba(255,0,0,1)' ).colorConverted( colorSpace, blendSpace ) ),
-            new RenderGradientStop( 1, RenderFromNode.colorFrom( 'rgba(0,255,0,1)' ).colorConverted( colorSpace, blendSpace ) )
+            new RenderGradientStop( 0, convertColorSpace( RenderFromNode.colorFrom( 'rgba(255,0,0,1)' ), colorSpace, blendSpace ) ),
+            new RenderGradientStop( 1, convertColorSpace( RenderFromNode.colorFrom( 'rgba(0,255,0,1)' ), colorSpace, blendSpace ) )
           ],
           RenderExtend.Pad,
           RenderLinearGradientAccuracy.SplitAccurate
-        ).colorConverted( blendSpace, clientSpace ),
+        ), blendSpace, clientSpace ),
         RenderColor.TRANSPARENT
       );
     };
@@ -2551,28 +2552,28 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
     const program = new RenderStack( [
       new RenderPathBoolean(
         RenderPath.fromBounds( new phet.dot.Bounds2( 0, 0, 128, 256 ) ),
-        new RenderColor(
+        convertColorSpace( new RenderColor(
           new phet.dot.Vector4( 0, 0, 0, 1 )
-        ).colorConverted( RenderColorSpace.sRGB, clientSpace ),
-        new RenderColor(
+        ), RenderColorSpace.sRGB, clientSpace ),
+        convertColorSpace( new RenderColor(
           new phet.dot.Vector4( 1, 1, 1, 1 )
-        ).colorConverted( RenderColorSpace.sRGB, clientSpace )
+        ), RenderColorSpace.sRGB, clientSpace )
       ),
       RenderPathBoolean.fromInside(
         new RenderPath( 'nonzero', smallerFace.toPolygonalFace().polygons ),
-        new RenderColor(
+        convertColorSpace( new RenderColor(
           new phet.dot.Vector4( 1, 1, 1, 1 )
-        ).colorConverted( RenderColorSpace.sRGB, clientSpace )
+        ), RenderColorSpace.sRGB, clientSpace )
       ),
       RenderPathBoolean.fromInside(
         new RenderPath( 'nonzero', mainFace.toPolygonalFace().polygons ),
-        new RenderLinearBlend(
+        convertColorSpace( new RenderLinearBlend(
           new phet.dot.Vector2( 1 / 256, 0 ),
           0,
           RenderLinearBlendAccuracy.Accurate,
-          new RenderColor( new phet.dot.Vector4( 1, 0, 0, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
-          new RenderColor( new phet.dot.Vector4( 0.5, 0, 1, 1 ) ).colorConverted( RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
-        ).colorConverted( RenderColorSpace.premultipliedOklab, clientSpace )
+          convertColorSpace( new RenderColor( new phet.dot.Vector4( 1, 0, 0, 1 ) ), RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab ),
+          convertColorSpace( new RenderColor( new phet.dot.Vector4( 0.5, 0, 1, 1 ) ), RenderColorSpace.sRGB, RenderColorSpace.premultipliedOklab )
+        ), RenderColorSpace.premultipliedOklab, clientSpace )
       )
     ] ).transformed( phet.dot.Matrix3.scaling( rasterSize / 256 ) );
 

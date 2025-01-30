@@ -12,12 +12,10 @@ import { alpenglow } from '../alpenglow.js';
 import type { ClippableFace } from '../cag/ClippableFace.js';
 import { PolygonalFace } from '../cag/ClippableFace.js';
 import type { RenderableFace } from '../raster/RenderableFace.js';
-import type { RenderColorSpace } from './RenderColorSpace.js';
-import { RenderColorSpaceConversion } from './RenderColorSpaceConversion.js';
 import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
 import type { RenderInstruction } from './RenderInstruction.js';
 import type { RenderPath } from './RenderPath.js';
-import { RenderPathBoolean } from './RenderPathBoolean.js';
+import type { RenderPathBoolean } from './RenderPathBoolean.js';
 import { RenderProgramNeeds } from './RenderProgramNeeds.js';
 
 // Output should be chained (the `output` parameter should be returned, for convenience)
@@ -57,13 +55,16 @@ export abstract class RenderProgram {
     isFullyOpaque: boolean,
     needsFace = false,
     needsArea = false,
-    needsCentroid = false
+    needsCentroid = false,
+
+    // Flag to avoid imports and circular references.
+    public readonly isPathBoolean = false
   ) {
     this.children = children;
     this.isFullyTransparent = isFullyTransparent;
     this.isFullyOpaque = isFullyOpaque;
 
-    let hasPathBoolean = this instanceof RenderPathBoolean;
+    let hasPathBoolean = isPathBoolean;
 
     for ( let i = 0; i < children.length; i++ ) {
       const child = children[ i ];
@@ -206,12 +207,14 @@ export abstract class RenderProgram {
   }
 
   public withPathInclusion( pathTest: ( renderPath: RenderPath ) => boolean ): RenderProgram {
-    if ( this instanceof RenderPathBoolean ) {
-      if ( pathTest( this.path ) ) {
-        return this.inside.withPathInclusion( pathTest );
+    if ( this.isPathBoolean ) {
+      const pathBoolean = this as unknown as RenderPathBoolean;
+
+      if ( pathTest( pathBoolean.path ) ) {
+        return pathBoolean.inside.withPathInclusion( pathTest );
       }
       else {
-        return this.outside.withPathInclusion( pathTest );
+        return pathBoolean.outside.withPathInclusion( pathTest );
       }
     }
     else {
@@ -230,10 +233,6 @@ export abstract class RenderProgram {
 
   public getNeeds(): RenderProgramNeeds {
     return new RenderProgramNeeds( this.needsFace, this.needsArea, this.needsCentroid );
-  }
-
-  public colorConverted( fromSpace: RenderColorSpace, toSpace: RenderColorSpace ): RenderProgram {
-    return RenderColorSpaceConversion.convert( this, fromSpace, toSpace );
   }
 
   public toRecursiveString( indent = '' ): string {

@@ -28,7 +28,9 @@ export class RenderPathBoolean extends RenderProgram {
       inside.isFullyOpaque && outside.isFullyOpaque,
       false,
       false,
-      true // We'll use the centroid as the point for determining whether we are on the interior of our path
+      true,
+      // We'll use the centroid as the point for determining whether we are on the interior of our path
+      true // isPathBoolean
     );
   }
 

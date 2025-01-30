@@ -40,12 +40,12 @@ import { RenderNormalize } from '../../../render-program/RenderNormalize.js';
 import { RenderAlpha } from '../../../render-program/RenderAlpha.js';
 import { RenderNormalDebug } from '../../../render-program/RenderNormalDebug.js';
 import { RenderStack } from '../../../render-program/RenderStack.js';
-import { RenderLinearBlend, RenderLinearBlendAccuracy } from '../../../render-program/RenderLinearBlend.js';
-import { RenderRadialBlend, RenderRadialBlendAccuracy } from '../../../render-program/RenderRadialBlend.js';
-import { RenderLinearGradient, RenderLinearGradientAccuracy } from '../../../render-program/RenderLinearGradient.js';
+import { RenderLinearBlend } from '../../../render-program/RenderLinearBlend.js';
+import { RenderRadialBlend } from '../../../render-program/RenderRadialBlend.js';
+import { RenderLinearGradient } from '../../../render-program/RenderLinearGradient.js';
 import { RenderGradientStop } from '../../../render-program/RenderGradientStop.js';
 import { RenderExtend } from '../../../render-program/RenderExtend.js';
-import { RenderRadialGradient, RenderRadialGradientAccuracy } from '../../../render-program/RenderRadialGradient.js';
+import { RenderRadialGradient } from '../../../render-program/RenderRadialGradient.js';
 import { RenderBarycentricBlend, RenderBarycentricBlendAccuracy } from '../../../render-program/RenderBarycentricBlend.js';
 import { RenderBarycentricPerspectiveBlend, RenderBarycentricPerspectiveBlendAccuracy } from '../../../render-program/RenderBarycentricPerspectiveBlend.js';
 import { RenderBlendCompose } from '../../../render-program/RenderBlendCompose.js';
@@ -54,6 +54,10 @@ import { RenderBlendType } from '../../../render-program/RenderBlendType.js';
 import { RenderPhong } from '../../../render-program/RenderPhong.js';
 import { RenderLight } from '../../../render-program/RenderLight.js';
 import { RenderFilter } from '../../../render-program/RenderFilter.js';
+import { RenderLinearBlendAccuracy } from '../../../render-program/RenderLinearBlendAccuracy.js';
+import { RenderRadialBlendAccuracy } from '../../../render-program/RenderRadialBlendAccuracy.js';
+import { RenderRadialGradientAccuracy } from '../../../render-program/RenderRadialGradientAccuracy.js';
+import { RenderLinearGradientAccuracy } from '../../../render-program/RenderLinearGradientAccuracy.js';
 
 QUnit.module( 'RenderProgramComputeTests' );
 

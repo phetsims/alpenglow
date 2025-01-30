@@ -11,7 +11,7 @@ import { RenderInstruction, RenderInstructionExit, RenderInstructionLocation, Re
 import { RenderInstructionPremultiply } from './RenderPremultiply.js';
 import { RenderInstructionUnpremultiply } from './RenderUnpremultiply.js';
 import { RenderInstructionOpaqueJump, RenderInstructionStackBlend } from './RenderStack.js';
-import { RenderInstructionComputeBlendRatio, RenderInstructionLinearBlend } from './RenderLinearBlend.js';
+import { RenderInstructionLinearBlend } from './RenderLinearBlend.js';
 import { RenderInstructionLinearDisplayP3ToLinearSRGB } from './RenderLinearDisplayP3ToLinearSRGB.js';
 import { RenderInstructionLinearSRGBToLinearDisplayP3 } from './RenderLinearSRGBToLinearDisplayP3.js';
 import { RenderInstructionLinearSRGBToOklab } from './RenderLinearSRGBToOklab.js';
@@ -25,8 +25,9 @@ import { RenderInstructionPhong } from './RenderPhong.js';
 import { RenderInstructionBarycentricBlend } from './RenderBarycentricBlend.js';
 import { RenderInstructionBarycentricPerspectiveBlend } from './RenderBarycentricPerspectiveBlend.js';
 import { RenderInstructionFilter } from './RenderFilter.js';
-import { RenderInstructionComputeGradientRatio } from './RenderLinearGradient.js';
 import { alpenglow } from '../alpenglow.js';
+import { binaryToRenderInstructionComputeBlendRatio } from './binaryToRenderInstructionComputeBlendRatio.js';
+import { binaryToRenderInstructionComputeGradientRatio } from './binaryToRenderInstructionComputeGradientRatio.js';
 
 export const binaryToRenderInstruction = (
   encoder: ByteEncoder,
@@ -76,7 +77,7 @@ export const binaryToRenderInstruction = (
       return RenderInstructionPush.fromBinary( encoder, offset, getLocation );
     case RenderInstruction.ComputeLinearBlendRatioCode:
     case RenderInstruction.ComputeRadialBlendRatioCode:
-      return RenderInstructionComputeBlendRatio.fromBinary( encoder, offset, getLocation );
+      return binaryToRenderInstructionComputeBlendRatio( encoder, offset, getLocation );
     case RenderInstruction.BarycentricBlendCode:
       return RenderInstructionBarycentricBlend.fromBinary( encoder, offset, getLocation );
     case RenderInstruction.BarycentricPerspectiveBlendCode:
@@ -85,7 +86,7 @@ export const binaryToRenderInstruction = (
       return RenderInstructionFilter.fromBinary( encoder, offset, getLocation );
     case RenderInstruction.ComputeLinearGradientRatioCode:
     case RenderInstruction.ComputeRadialGradientRatioCode:
-      return RenderInstructionComputeGradientRatio.fromBinary( encoder, offset, getLocation );
+      return binaryToRenderInstructionComputeGradientRatio( encoder, offset, getLocation );
     default:
       throw new Error( `Unknown/unimplemented instruction code: ${code}` );
   }
