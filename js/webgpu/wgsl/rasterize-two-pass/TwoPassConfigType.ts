@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 import { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';
 import { TwoPassConfig } from './TwoPassConfig.js';

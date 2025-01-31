@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2023-2025, University of Colorado Boulder
 
 /**
  * A specialized raked reduce for when our input is non-commutative AND stored in a blocked (not striped) order.

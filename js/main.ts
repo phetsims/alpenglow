@@ -1,4 +1,4 @@
-// Copyright 2023, University of Colorado Boulder
+// Copyright 2025, University of Colorado Boulder
 
 /**
  * Module that includes all Alpenglow dependencies, so that requiring this module will return an object

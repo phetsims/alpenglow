@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 /**
  * Converts premultiplied Display-P3 => Display-P3, while ensuring the color is within the Display-P3 gamut.

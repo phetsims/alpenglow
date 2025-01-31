@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2023-2025, University of Colorado Boulder
 
 /**
  * Takes the input reductions and computes the inclusive prefix sum (scan) into it, in a form that can be used for

@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2023-2025, University of Colorado Boulder
 
 /**
  * Like RasterChunkReduceQuad, but for the initial case where our left/right values are the same, and we can do a

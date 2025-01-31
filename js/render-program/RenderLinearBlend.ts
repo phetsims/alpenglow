@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2023-2025, University of Colorado Boulder
 
 /**
  * RenderProgram for a linear blend (essentially a chunk of a linear gradient with only a linear transition between

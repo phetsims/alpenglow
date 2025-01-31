@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 /**
  * Meant for reduction on u32/i32 values (could be generalized to things that can be represented with multiple atomic

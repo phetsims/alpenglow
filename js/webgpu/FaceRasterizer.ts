@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';

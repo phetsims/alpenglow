@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2023-2025, University of Colorado Boulder
 
 /**
  * Accesses a count from within a bit-packed histogram. This is used for memory-efficient in-workgroup-memory sorting.

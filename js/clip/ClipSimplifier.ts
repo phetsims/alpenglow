@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2023-2025, University of Colorado Boulder
 
 /**
  * Simplification of a polygon for clipping output (compacts equal or axis-aligned-collinear points).

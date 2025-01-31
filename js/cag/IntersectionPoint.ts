@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2023-2025, University of Colorado Boulder
 
 /**
  * Intersection of two line segments, with t0 and t1 representing the interpolation values for the two segments.

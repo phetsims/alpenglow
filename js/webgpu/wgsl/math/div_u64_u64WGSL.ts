@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 /**
  * Integer division of two u64s, returning a vec4<u32> with the quotient (result.xy) and remainder (result.zw).

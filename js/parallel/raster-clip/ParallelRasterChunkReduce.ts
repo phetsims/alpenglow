@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2023-2025, University of Colorado Boulder
 
 /**
  * We continue the segmented reduction started in ParallelRasterInitialClip, also applying things to RasterClippedChunks,

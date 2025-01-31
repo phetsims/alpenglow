@@ -1,4 +1,4 @@
-// Copyright 2023-2024, University of Colorado Boulder
+// Copyright 2023-2025, University of Colorado Boulder
 
 /**
  * A stack of values (effectively vec4s) that are used by RenderInstructions to evaluate a RenderProgram.

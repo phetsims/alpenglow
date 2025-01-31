@@ -1,4 +1,4 @@
-// Copyright 2024, University of Colorado Boulder
+// Copyright 2024-2025, University of Colorado Boulder
 
 /**
  * Sets up the addresses so we (a) have atomics for the coarse pass, and (b) have the bin addresses for the fine pass
