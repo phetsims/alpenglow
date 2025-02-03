@@ -6,27 +6,27 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import Vector4 from '../../../../../dot/js/Vector4.js';
-import { wgsl, WGSLMainModule, WGSLSlot, WGSLString } from '../../wgsl/WGSLString.js';
-import { asyncTestWithDevice } from '../ShaderTestUtils.js';
-import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
-import { DirectModule } from '../../compute/DirectModule.js';
-import { F32Type, getArrayType } from '../../compute/ConcreteType.js';
-import { BufferBindingType } from '../../compute/BufferBindingType.js';
-import { Routine } from '../../compute/Routine.js';
-import { Procedure } from '../../compute/Procedure.js';
-import { sRGB_to_linear_sRGBWGSL } from '../../wgsl/color/sRGB_to_linear_sRGBWGSL.js';
 import { RenderColor } from '../../../render-program/RenderColor.js';
-import { linear_sRGB_to_sRGBWGSL } from '../../wgsl/color/linear_sRGB_to_sRGBWGSL.js';
-import { premultiplyWGSL } from '../../wgsl/color/premultiplyWGSL.js';
-import { unpremultiplyWGSL } from '../../wgsl/color/unpremultiplyWGSL.js';
-import { linear_sRGB_to_oklabWGSL } from '../../wgsl/color/linear_sRGB_to_oklabWGSL.js';
-import { oklab_to_linear_sRGBWGSL } from '../../wgsl/color/oklab_to_linear_sRGBWGSL.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { F32Type, getArrayType } from '../../compute/ConcreteType.js';
+import { DirectModule } from '../../compute/DirectModule.js';
+import { Procedure } from '../../compute/Procedure.js';
+import { Routine } from '../../compute/Routine.js';
+import { gamut_map_linear_displayP3WGSL } from '../../wgsl/color/gamut_map_linear_displayP3WGSL.js';
+import { gamut_map_linear_sRGBWGSL } from '../../wgsl/color/gamut_map_linear_sRGBWGSL.js';
+import { gamut_map_premul_displayP3WGSL } from '../../wgsl/color/gamut_map_premul_displayP3WGSL.js';
+import { gamut_map_premul_sRGBWGSL } from '../../wgsl/color/gamut_map_premul_sRGBWGSL.js';
 import { linear_displayP3_to_linear_sRGBWGSL } from '../../wgsl/color/linear_displayP3_to_linear_sRGBWGSL.js';
 import { linear_sRGB_to_linear_displayP3WGSL } from '../../wgsl/color/linear_sRGB_to_linear_displayP3WGSL.js';
-import { gamut_map_linear_sRGBWGSL } from '../../wgsl/color/gamut_map_linear_sRGBWGSL.js';
-import { gamut_map_linear_displayP3WGSL } from '../../wgsl/color/gamut_map_linear_displayP3WGSL.js';
-import { gamut_map_premul_sRGBWGSL } from '../../wgsl/color/gamut_map_premul_sRGBWGSL.js';
-import { gamut_map_premul_displayP3WGSL } from '../../wgsl/color/gamut_map_premul_displayP3WGSL.js';
+import { linear_sRGB_to_oklabWGSL } from '../../wgsl/color/linear_sRGB_to_oklabWGSL.js';
+import { linear_sRGB_to_sRGBWGSL } from '../../wgsl/color/linear_sRGB_to_sRGBWGSL.js';
+import { oklab_to_linear_sRGBWGSL } from '../../wgsl/color/oklab_to_linear_sRGBWGSL.js';
+import { premultiplyWGSL } from '../../wgsl/color/premultiplyWGSL.js';
+import { sRGB_to_linear_sRGBWGSL } from '../../wgsl/color/sRGB_to_linear_sRGBWGSL.js';
+import { unpremultiplyWGSL } from '../../wgsl/color/unpremultiplyWGSL.js';
+import { wgsl, WGSLMainModule, WGSLSlot, WGSLString } from '../../wgsl/WGSLString.js';
+import { asyncTestWithDevice } from '../ShaderTestUtils.js';
 
 QUnit.module( 'ColorTests' );
 
@@ -195,7 +195,7 @@ const vec4Test = (
 vec3Test(
   'sRGB_to_linear_sRGB',
   sRGB_to_linear_sRGBWGSL,
-  ( color: Vector3 ) => RenderColor.sRGBToLinear( color.toVector4() ).toVector3(),
+  ( color: Vector3 ) => Vector3.from( RenderColor.sRGBToLinear( Vector4.from( color ) ) ),
   [
     new Vector3( 0.9, 0.0, 0.0001 ),
     new Vector3( 0.99, 0.5, 0.002 )
@@ -205,7 +205,7 @@ vec3Test(
 vec3Test(
   'linear_sRGB_to_sRGBWGSL',
   linear_sRGB_to_sRGBWGSL,
-  ( color: Vector3 ) => RenderColor.linearToSRGB( color.toVector4() ).toVector3(),
+  ( color: Vector3 ) => Vector3.from( RenderColor.linearToSRGB( Vector4.from( color ) ) ),
   [
     new Vector3( 0.9, 0.0, 0.0001 ),
     new Vector3( 0.99, 0.5, 0.002 )
@@ -237,7 +237,7 @@ vec4Test(
 vec3Test(
   'linear_sRGB_to_oklab',
   linear_sRGB_to_oklabWGSL,
-  ( color: Vector3 ) => RenderColor.linearToOklab( color.toVector4() ).toVector3(),
+  ( color: Vector3 ) => Vector3.from( RenderColor.linearToOklab( Vector4.from( color ) ) ),
   [
     new Vector3( 0.9, 0.0, 0.0001 ),
     new Vector3( 0.99, 0.5, 0.002 ),
@@ -253,7 +253,7 @@ vec3Test(
 vec3Test(
   'oklab_to_linear_sRGB',
   oklab_to_linear_sRGBWGSL,
-  ( color: Vector3 ) => RenderColor.oklabToLinear( color.toVector4() ).toVector3(),
+  ( color: Vector3 ) => Vector3.from( RenderColor.oklabToLinear( Vector4.from( color ) ) ),
   [
     new Vector3( 0.9, 0.0, 0.0001 ),
     new Vector3( 0.99, 0.5, 0.002 ),
@@ -269,7 +269,7 @@ vec3Test(
 vec3Test(
   'linear_displayP3_to_linear_sRGB',
   linear_displayP3_to_linear_sRGBWGSL,
-  ( color: Vector3 ) => RenderColor.linearDisplayP3ToLinear( color.toVector4() ).toVector3(),
+  ( color: Vector3 ) => Vector3.from( RenderColor.linearDisplayP3ToLinear( Vector4.from( color ) ) ),
   [
     new Vector3( 0.9, 0.0, 0.0001 ),
     new Vector3( 0.99, 0.5, 0.002 ),
@@ -280,7 +280,7 @@ vec3Test(
 vec3Test(
   'linear_sRGB_to_linear_displayP3',
   linear_sRGB_to_linear_displayP3WGSL,
-  ( color: Vector3 ) => RenderColor.linearToLinearDisplayP3( color.toVector4() ).toVector3(),
+  ( color: Vector3 ) => Vector3.from( RenderColor.linearToLinearDisplayP3( Vector4.from( color ) ) ),
   [
     new Vector3( 0.9, 0.0, 0.0001 ),
     new Vector3( 0.99, 0.5, 0.002 ),
@@ -291,7 +291,7 @@ vec3Test(
 vec3Test(
   'gamut_map_linear_sRGB',
   gamut_map_linear_sRGBWGSL,
-  ( color: Vector3 ) => RenderColor.gamutMapLinearSRGB( color.toVector4() ).toVector3(),
+  ( color: Vector3 ) => Vector3.from( RenderColor.gamutMapLinearSRGB( Vector4.from( color ) ) ),
   [
     new Vector3( 0.2, 0.5, 0.7 ),
     new Vector3( 0, 0, 0 ),
@@ -307,7 +307,7 @@ vec3Test(
 vec3Test(
   'gamut_map_linear_displayP3',
   gamut_map_linear_displayP3WGSL,
-  ( color: Vector3 ) => RenderColor.gamutMapLinearDisplayP3( color.toVector4() ).toVector3(),
+  ( color: Vector3 ) => Vector3.from( RenderColor.gamutMapLinearDisplayP3( Vector4.from( color ) ) ),
   [
     new Vector3( 0.2, 0.5, 0.7 ),
     new Vector3( 0, 0, 0 ),

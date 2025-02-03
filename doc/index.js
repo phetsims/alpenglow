@@ -551,10 +551,10 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
         if ( ( x + z ) % 2 === 0 ) {
           continue;
         }
-        const p0 = matrix.timesVector2( project( v3( x, y, z ) ).toVector2() );
-        const p1 = matrix.timesVector2( project( v3( x + 1, y, z ) ).toVector2() );
-        const p2 = matrix.timesVector2( project( v3( x + 1, y, z + 1 ) ).toVector2() );
-        const p3 = matrix.timesVector2( project( v3( x, y, z + 1 ) ).toVector2() );
+        const p0 = matrix.timesVector2( Vector2.from( project( v3( x, y, z ) ) ) );
+        const p1 = matrix.timesVector2( Vector2.from( project( v3( x + 1, y, z ) ) ) );
+        const p2 = matrix.timesVector2( Vector2.from( project( v3( x + 1, y, z + 1 ) ) ) );
+        const p3 = matrix.timesVector2( Vector2.from( project( v3( x, y, z + 1 ) ) ) );
 
         polygons.push( [ p0, p1, p2, p3 ] );
       }
@@ -2347,9 +2347,9 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
         const positionProgram = new RenderBarycentricPerspectiveBlend(
           projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
           RenderBarycentricPerspectiveBlendAccuracy.Centroid,
-          new RenderColor( transformedVertices[ 0 ].toVector4Zero() ),
-          new RenderColor( transformedVertices[ 1 ].toVector4Zero() ),
-          new RenderColor( transformedVertices[ 2 ].toVector4Zero() )
+          new RenderColor( Vector4.from( transformedVertices[ 0 ], 0 ) ),
+          new RenderColor( Vector4.from( transformedVertices[ 1 ], 0 ) ),
+          new RenderColor( Vector4.from( transformedVertices[ 2 ], 0 ) )
         );
 
         let normalProgram;
@@ -2357,13 +2357,13 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
           normalProgram = new RenderNormalize( new RenderBarycentricPerspectiveBlend(
             projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
             RenderBarycentricPerspectiveBlendAccuracy.Centroid,
-            new RenderColor( normals[ 0 ].toVector4Zero() ),
-            new RenderColor( normals[ 1 ].toVector4Zero() ),
-            new RenderColor( normals[ 2 ].toVector4Zero() )
+            new RenderColor( Vector4.from( normals[ 0 ], 0 ) ),
+            new RenderColor( Vector4.from( normals[ 1 ], 0 ) ),
+            new RenderColor( Vector4.from( normals[ 2 ], 0 ) )
           ) );
         }
         else if ( normalType === 'flat' ) {
-          normalProgram = new RenderColor( normals[ 0 ].plus( normals[ 1 ] ).plus( normals[ 2 ] ).normalized().toVector4Zero() );
+          normalProgram = new RenderColor( Vector4.from( normals[ 0 ].plus( normals[ 1 ] ).plus( normals[ 2 ] ).normalized(), 0 ) );
         }
 
         // const positionProgram = new RenderColor( transformedVertices[ 0 ].plus( transformedVertices[ 1 ] ).plus( transformedVertices[ 2 ] ).timesScalar( 1 / 3 ).toVector4() );
@@ -2390,7 +2390,7 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
 
         return new RenderPlanar(
           RenderPathBoolean.fromInside( new RenderPath( 'nonzero', [ [
-            projectedVertices[ 0 ].toVector2(), projectedVertices[ 1 ].toVector2(), projectedVertices[ 2 ].toVector2()
+            Vector2.from( projectedVertices[ 0 ] ), Vector2.from( projectedVertices[ 1 ] ), Vector2.from( projectedVertices[ 2 ] )
           ] ] ), renderProgram ),
           projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ]
         );
@@ -2474,16 +2474,16 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
             const positionProgram = new RenderBarycentricPerspectiveBlend(
               projected0, projected1, projected2,
               RenderBarycentricPerspectiveBlendAccuracy.Centroid,
-              new RenderColor( point0.toVector4Zero() ),
-              new RenderColor( point1.toVector4Zero() ),
-              new RenderColor( point2.toVector4Zero() )
+              new RenderColor( Vector4.from( point0, 0 ) ),
+              new RenderColor( Vector4.from( point1, 0 ) ),
+              new RenderColor( Vector4.from( point2, 0 ) )
             );
             const normalProgram = new RenderNormalize( new RenderBarycentricPerspectiveBlend(
               projected0, projected1, projected2,
               RenderBarycentricPerspectiveBlendAccuracy.Centroid,
-              new RenderColor( p0.toVector4() ),
-              new RenderColor( p1.toVector4() ),
-              new RenderColor( p2.toVector4() )
+              new RenderColor( Vector4.from( p0 ) ),
+              new RenderColor( Vector4.from( p1 ) ),
+              new RenderColor( Vector4.from( p2 ) )
             ) );
 
             const ambientColorProgram = new RenderColor( v4( 0, 0, 0, alpha ) );
@@ -2499,7 +2499,7 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
 
             return new RenderPlanar(
               RenderPathBoolean.fromInside( new RenderPath( 'nonzero', [ [
-                projected0.toVector2(), projected1.toVector2(), projected2.toVector2()
+                Vector2.from( projected0 ), Vector2.from( projected1 ), Vector2.from( projected2 )
               ] ] ), program ),
               projected0, projected1, projected2
             );

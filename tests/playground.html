@@ -1313,7 +1313,7 @@ an UI and Display made for visual testing and debugging.
       const baryPerspB = phet.dot.v3( 5, 5, 1 );
       const baryPerspC = phet.dot.v3( 0, 10, 1 );
       const baryPersp = phet.alpenglow.RenderPathBoolean.fromInside(
-        new phet.alpenglow.RenderPath( 'nonzero', [ [ baryPerspA.toVector2(), baryPerspB.toVector2(), baryPerspC.toVector2() ] ] ),
+        new phet.alpenglow.RenderPath( 'nonzero', [ [ Vector2.from( baryPerspA ), Vector2.from( baryPerspB ), Vector2.from( baryPerspC ) ] ] ),
         new phet.alpenglow.RenderBarycentricPerspectiveBlend(
           baryPerspA, baryPerspB, baryPerspC,
           phet.alpenglow.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
@@ -1407,9 +1407,9 @@ an UI and Display made for visual testing and debugging.
               const normalProgram = new phet.alpenglow.RenderNormalize( new phet.alpenglow.RenderBarycentricPerspectiveBlend(
                 projected0, projected1, projected2,
                 phet.alpenglow.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
-                new phet.alpenglow.RenderColor( p0.toVector4() ),
-                new phet.alpenglow.RenderColor( p1.toVector4() ),
-                new phet.alpenglow.RenderColor( p2.toVector4() )
+                new phet.alpenglow.RenderColor( Vector4.from( p0 ) ),
+                new phet.alpenglow.RenderColor( Vector4.from( p1 ) ),
+                new phet.alpenglow.RenderColor( Vector4.from( p2 ) )
               ) );
 
               // const normalProgram = new phet.alpenglow.RenderColor( p0.toVector4().plus( p1.toVector4() ).plus( p2.toVector4() ).timesScalar( 1 / 3 ) );
@@ -1418,7 +1418,7 @@ an UI and Display made for visual testing and debugging.
 
               return new phet.alpenglow.RenderPlanar(
                 phet.alpenglow.RenderPathBoolean.fromInside( new phet.alpenglow.RenderPath( 'positive', [ [
-                  projected0.toVector2(), projected1.toVector2(), projected2.toVector2()
+                  Vector2.from( projected0 ), Vector2.from( projected1 ), Vector2.from( projected2 )
                 ] ] ), diffuseProgram ),
                 projected0, projected1, projected2
               );
@@ -1445,7 +1445,7 @@ an UI and Display made for visual testing and debugging.
 
         const tri = ( renderProgram, p0, p1, p2 ) => new phet.alpenglow.RenderPlanar(
           phet.alpenglow.RenderPathBoolean.fromInside( new phet.alpenglow.RenderPath( 'positive', [ [
-            p0.toVector2(), p1.toVector2(), p2.toVector2()
+            Vector2.from( p0 ), Vector2.from( p1 ), Vector2.from( p2 )
           ] ] ), renderProgram ),
           p0, p1, p2
         );
@@ -1513,16 +1513,16 @@ an UI and Display made for visual testing and debugging.
           const positionProgram = new phet.alpenglow.RenderBarycentricPerspectiveBlend(
             projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
             phet.alpenglow.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
-            new phet.alpenglow.RenderColor( transformedVertices[ 0 ].toVector4Zero() ),
-            new phet.alpenglow.RenderColor( transformedVertices[ 1 ].toVector4Zero() ),
-            new phet.alpenglow.RenderColor( transformedVertices[ 2 ].toVector4Zero() )
+            new phet.alpenglow.RenderColor( Vector4.from( transformedVertices[ 0 ], 0 ) ),
+            new phet.alpenglow.RenderColor( Vector4.from( transformedVertices[ 1 ], 0 ) ),
+            new phet.alpenglow.RenderColor( Vector4.from( transformedVertices[ 2 ], 0 ) )
           );
           const normalProgram = new phet.alpenglow.RenderNormalize( new phet.alpenglow.RenderBarycentricPerspectiveBlend(
             projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ],
             phet.alpenglow.RenderBarycentricPerspectiveBlendAccuracy.Centroid,
-            new phet.alpenglow.RenderColor( normals[ 0 ].toVector4Zero() ),
-            new phet.alpenglow.RenderColor( normals[ 1 ].toVector4Zero() ),
-            new phet.alpenglow.RenderColor( normals[ 2 ].toVector4Zero() )
+            new phet.alpenglow.RenderColor( Vector4.from( normals[ 0 ], 0 ) ),
+            new phet.alpenglow.RenderColor( Vector4.from( normals[ 1 ], 0 ) ),
+            new phet.alpenglow.RenderColor( Vector4.from( normals[ 2 ], 0 ) )
           ) );
 
           // const positionProgram = new phet.alpenglow.RenderColor( transformedVertices[ 0 ].plus( transformedVertices[ 1 ] ).plus( transformedVertices[ 2 ] ).timesScalar( 1 / 3 ).toVector4() );
@@ -1549,7 +1549,7 @@ an UI and Display made for visual testing and debugging.
 
           return new phet.alpenglow.RenderPlanar(
             phet.alpenglow.RenderPathBoolean.fromInside( new phet.alpenglow.RenderPath( 'nonzero', [ [
-              projectedVertices[ 0 ].toVector2(), projectedVertices[ 1 ].toVector2(), projectedVertices[ 2 ].toVector2()
+              Vector2.from( projectedVertices[ 0 ] ), Vector2.from( projectedVertices[ 1 ] ), Vector2.from( projectedVertices[ 2 ] )
             ] ] ), diffuseProgram ),
             projectedVertices[ 0 ], projectedVertices[ 1 ], projectedVertices[ 2 ]
           );

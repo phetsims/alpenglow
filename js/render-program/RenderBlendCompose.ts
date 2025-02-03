@@ -9,15 +9,15 @@
 import Vector3 from '../../../dot/js/Vector3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { alpenglow } from '../alpenglow.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
-import { RenderComposeType } from './RenderComposeType.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { RenderBlendType } from './RenderBlendType.js';
+import { RenderColor } from './RenderColor.js';
+import { RenderComposeType } from './RenderComposeType.js';
 import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
 import type { RenderExecutionStack } from './RenderExecutionStack.js';
 import type { RenderExecutor } from './RenderExecutor.js';
-import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
-import { RenderColor } from './RenderColor.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 import { RenderStack } from './RenderStack.js';
 
 export class RenderBlendCompose extends RenderProgram {
@@ -232,8 +232,8 @@ export class RenderBlendCompose extends RenderProgram {
     }
     else {
       // Need to apply blending when not premultiplied
-      const a3 = RenderColor.unpremultiply( a ).toVector3();
-      const b3 = RenderColor.unpremultiply( b ).toVector3();
+      const a3 = Vector3.from( RenderColor.unpremultiply( a ) );
+      const b3 = Vector3.from( RenderColor.unpremultiply( b ) );
       let c3: Vector3;
 
       switch( blendType ) {

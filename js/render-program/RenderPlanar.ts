@@ -12,9 +12,9 @@ import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import { alpenglow } from '../alpenglow.js';
-import type { RenderProgram } from './RenderProgram.js';
 import type { ClippableFace } from '../cag/ClippableFace.js';
 import { EdgedFace } from '../cag/ClippableFace.js';
+import type { RenderProgram } from './RenderProgram.js';
 
 // TODO: better name
 export class RenderPlanar {
@@ -45,7 +45,7 @@ export class RenderPlanar {
    * Returns the range of potential depth values included in the face.
    */
   public getDepthRange( face: ClippableFace ): Range {
-    const normal2 = this.plane.normal.toVector2();
+    const normal2 = Vector2.from( this.plane.normal );
 
     // If our normal x,y is zero, then we are parallel to the z axis, and we can't get a depth range
     if ( normal2.magnitude < 1e-10 ) {
@@ -71,8 +71,8 @@ export class RenderPlanar {
     const intersectionRay = this.plane.getIntersection( planar.plane );
 
     if ( intersectionRay ) {
-      const position = intersectionRay.position.toVector2(); // strip z
-      const direction = intersectionRay.direction.toVector2().normalized(); // strip z
+      const position = Vector2.from( intersectionRay.position ); // strip z
+      const direction = Vector2.from( intersectionRay.direction ).normalized(); // strip z
       const normal = direction.perpendicular;
       const value = position.dot( normal );
       const fakeCornerPerpendicular = face instanceof EdgedFace ? face.getBounds().center.dot( direction ) : 0; // TODO: how to best handle this?

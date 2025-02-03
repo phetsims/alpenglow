@@ -11,13 +11,13 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { alpenglow } from '../alpenglow.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
-import type { RenderExecutionStack } from './RenderExecutionStack.js';
-import type { RenderExecutor } from './RenderExecutor.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { RenderColor } from './RenderColor.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 
 export enum RenderBarycentricPerspectiveBlendAccuracy {
   // TODO: Accurate should really be the version that runs the perspective correction integral!!!!
@@ -47,9 +47,9 @@ export class RenderBarycentricPerspectiveBlend extends RenderProgram {
     assert && assert( pointA.isFinite() );
     assert && assert( pointB.isFinite() );
     assert && assert( pointC.isFinite() );
-    assert && assert( !pointA.toVector2().equals( pointB.toVector2() ) );
-    assert && assert( !pointB.toVector2().equals( pointC.toVector2() ) );
-    assert && assert( !pointC.toVector2().equals( pointA.toVector2() ) );
+    assert && assert( !Vector2.from( pointA ).equals( Vector2.from( pointB ) ) );
+    assert && assert( !Vector2.from( pointB ).equals( Vector2.from( pointC ) ) );
+    assert && assert( !Vector2.from( pointC ).equals( Vector2.from( pointA ) ) );
     assert && assert( pointA.z > 0 && pointB.z > 0 && pointC.z > 0, 'All points must be in front of the camera' );
 
     super(
@@ -74,9 +74,9 @@ export class RenderBarycentricPerspectiveBlend extends RenderProgram {
   }
 
   public override transformed( transform: Matrix3 ): RenderProgram {
-    const xyA = transform.timesVector2( this.pointA.toVector2() );
-    const xyB = transform.timesVector2( this.pointB.toVector2() );
-    const xyC = transform.timesVector2( this.pointC.toVector2() );
+    const xyA = transform.timesVector2( Vector2.from( this.pointA ) );
+    const xyB = transform.timesVector2( Vector2.from( this.pointB ) );
+    const xyC = transform.timesVector2( Vector2.from( this.pointC ) );
 
     return new RenderBarycentricPerspectiveBlend(
       new Vector3( xyA.x, xyA.y, this.pointA.z ),
@@ -178,7 +178,7 @@ export class RenderBarycentricPerspectiveBlendLogic {
     const det = ( pB.y - pC.y ) * ( pA.x - pC.x ) + ( pC.x - pB.x ) * ( pA.y - pC.y );
     const diffA = new Vector2( pB.y - pC.y, pC.x - pB.x );
     const diffB = new Vector2( pC.y - pA.y, pA.x - pC.x );
-    const point2C = pC.toVector2();
+    const point2C = Vector2.from( pC );
     const zInverseA = 1 / pA.z;
     const zInverseB = 1 / pB.z;
     const zInverseC = 1 / pC.z;

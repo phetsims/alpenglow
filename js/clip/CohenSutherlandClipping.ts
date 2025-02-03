@@ -27,10 +27,6 @@ class CodedVector2 extends Vector2 {
     return new CodedVector2( this.x, this.y, this.code );
   }
 
-  public toVector2(): Vector2 {
-    return new Vector2( this.x, this.y );
-  }
-
   public updateCode( bounds: Bounds2 ): void {
     this.code = CohenSutherlandClipping.getCode( this.x, this.y, bounds );
   }
