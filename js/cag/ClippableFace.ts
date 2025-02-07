@@ -12,21 +12,21 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
-import Range from '../../../dot/js/Range.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import { LinearEdge, SerializedLinearEdge } from './LinearEdge.js';
-import { Shape } from '../../../kite/js/imports.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Range from '../../../dot/js/Range.js';
+import Utils from '../../../dot/js/Utils.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import Shape from '../../../kite/js/Shape.js';
+import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow } from '../alpenglow.js';
 import { BoundsClipping } from '../clip/BoundsClipping.js';
-import { StripeClipping } from '../clip/StripeClipping.js';
+import { ClipSimplifier } from '../clip/ClipSimplifier.js';
 import { GridClipCallback, GridClipping } from '../clip/GridClipping.js';
+import { StripeClipping } from '../clip/StripeClipping.js';
 import { PolygonBilinear } from '../raster/PolygonBilinear.js';
 import { PolygonMitchellNetravali } from '../raster/PolygonMitchellNetravali.js';
-import { ClipSimplifier } from '../clip/ClipSimplifier.js';
-import Utils from '../../../dot/js/Utils.js';
-import { alpenglow } from '../alpenglow.js';
+import { LinearEdge, SerializedLinearEdge } from './LinearEdge.js';
 
 // TODO: assertions that all types of ClippableFace give the same results for the same methods
 
