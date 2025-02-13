@@ -22,6 +22,7 @@ import { PolygonMitchellNetravali } from '../raster/PolygonMitchellNetravali.js'
 import type { RenderExecutionStack } from './RenderExecutionStack.js';
 import type { RenderExecutor } from './RenderExecutor.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { clamp } from '../../../dot/js/util/clamp.js';
 
 const emptyChildren: RenderProgram[] = [];
 
@@ -265,7 +266,7 @@ export class RenderImage extends RenderProgram {
   public static extend( extend: RenderExtend, t: number ): number {
     switch( extend ) {
       case RenderExtend.Pad:
-        return Utils.clamp( t, 0, 1 );
+        return clamp( t, 0, 1 );
       case RenderExtend.Repeat:
         return t - Math.floor( t );
       case RenderExtend.Reflect:
@@ -287,7 +288,7 @@ export class RenderImage extends RenderProgram {
   public static extendInteger( i: number, size: number, extend: RenderExtend ): number {
     switch( extend ) {
       case RenderExtend.Pad: {
-        return Utils.clamp( i, 0, size - 1 );
+        return clamp( i, 0, size - 1 );
       }
       case RenderExtend.Repeat: {
         if ( i >= 0 ) {

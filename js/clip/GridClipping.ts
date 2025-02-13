@@ -7,6 +7,7 @@
  */
 
 import Utils from '../../../dot/js/Utils.js';
+import { clamp } from '../../../dot/js/util/clamp.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { alpenglow } from '../alpenglow.js';
 import { LineClipping } from './LineClipping.js';
@@ -318,10 +319,10 @@ export class GridClipping {
             // We go through the cell! Additionally due to previous filtering, we are pretty much guaranteed to touch
             // a cell side.
 
-            const minYX = Utils.clamp( minYXIntercept, cellMinX, cellMaxX );
-            const maxYX = Utils.clamp( maxYXIntercept, cellMinX, cellMaxX );
-            const minXY = Utils.clamp( minXYIntercept, cellMinY, cellMaxY );
-            const maxXY = Utils.clamp( maxXYIntercept, cellMinY, cellMaxY );
+            const minYX = clamp( minYXIntercept, cellMinX, cellMaxX );
+            const maxYX = clamp( maxYXIntercept, cellMinX, cellMaxX );
+            const minXY = clamp( minXYIntercept, cellMinY, cellMaxY );
+            const maxXY = clamp( maxXYIntercept, cellMinY, cellMaxY );
 
             let startX;
             let startY;

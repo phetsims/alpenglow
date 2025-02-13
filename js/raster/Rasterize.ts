@@ -8,7 +8,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Utils from '../../../dot/js/Utils.js';
+import { clamp } from '../../../dot/js/util/clamp.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
@@ -506,8 +506,8 @@ export class Rasterize {
               assertSlow && sanityFace && needsCentroid && assertSlow( centroid.distance( sanityFace.getCentroid( sanityFace.getArea() ) ) < 1 );
 
               // Our centroid computation.... can get inaccuracies from floating-point math. Bleh.
-              centroid.x = Utils.clamp( centroid.x, cellMinX, cellMaxX );
-              centroid.y = Utils.clamp( centroid.y, cellMinY, cellMaxY );
+              centroid.x = clamp( centroid.x, cellMinX, cellMaxX );
+              centroid.y = clamp( centroid.y, cellMinY, cellMaxY );
             }
 
             assert && needsCentroid && assert( new Bounds2( cellMinX, cellMinY, cellMaxX, cellMaxY ).containsPoint( centroid ) );
