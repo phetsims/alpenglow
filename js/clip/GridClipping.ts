@@ -6,11 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Utils from '../../../dot/js/Utils.js';
 import { clamp } from '../../../dot/js/util/clamp.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { alpenglow } from '../alpenglow.js';
 import { LineClipping } from './LineClipping.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 
 const scratchStartPoint = new Vector2( 0, 0 );
 const scratchEndPoint = new Vector2( 0, 0 );
@@ -94,10 +94,10 @@ export class GridClipping {
     const maxRawStartStepX = Math.max( rawStartStepX, rawEndStepX );
     const maxRawStartStepY = Math.max( rawStartStepY, rawEndStepY );
 
-    const roundedMinStepX = Utils.roundSymmetric( minRawStartStepX );
-    const roundedMinStepY = Utils.roundSymmetric( minRawStartStepY );
-    const roundedMaxStepX = Utils.roundSymmetric( maxRawStartStepX );
-    const roundedMaxStepY = Utils.roundSymmetric( maxRawStartStepY );
+    const roundedMinStepX = roundSymmetric( minRawStartStepX );
+    const roundedMinStepY = roundSymmetric( minRawStartStepY );
+    const roundedMaxStepX = roundSymmetric( maxRawStartStepX );
+    const roundedMaxStepY = roundSymmetric( maxRawStartStepY );
 
     // Integral "step" coordinates - with slight perturbation to expand our region to cover points/lines that lie
     // exactly on our grid lines (but not outside of our bounds)
@@ -516,10 +516,10 @@ export class GridClipping {
     const maxRawStartStepX = Math.max( rawStartStepX, rawEndStepX );
     const maxRawStartStepY = Math.max( rawStartStepY, rawEndStepY );
 
-    const roundedMinStepX = Utils.roundSymmetric( minRawStartStepX );
-    const roundedMinStepY = Utils.roundSymmetric( minRawStartStepY );
-    const roundedMaxStepX = Utils.roundSymmetric( maxRawStartStepX );
-    const roundedMaxStepY = Utils.roundSymmetric( maxRawStartStepY );
+    const roundedMinStepX = roundSymmetric( minRawStartStepX );
+    const roundedMinStepY = roundSymmetric( minRawStartStepY );
+    const roundedMaxStepX = roundSymmetric( maxRawStartStepX );
+    const roundedMaxStepY = roundSymmetric( maxRawStartStepY );
 
     // Integral "step" coordinates - with slight perturbation to expand our region to cover points/lines that lie
     // exactly on our grid lines (but not outside of our bounds)

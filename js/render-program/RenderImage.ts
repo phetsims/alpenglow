@@ -7,7 +7,6 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { alpenglow } from '../alpenglow.js';
@@ -23,6 +22,7 @@ import type { RenderExecutionStack } from './RenderExecutionStack.js';
 import type { RenderExecutor } from './RenderExecutor.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { clamp } from '../../../dot/js/util/clamp.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 
 const emptyChildren: RenderProgram[] = [];
 
@@ -270,7 +270,7 @@ export class RenderImage extends RenderProgram {
       case RenderExtend.Repeat:
         return t - Math.floor( t );
       case RenderExtend.Reflect:
-        return Math.abs( t - 2.0 * Utils.roundSymmetric( 0.5 * t ) );
+        return Math.abs( t - 2.0 * roundSymmetric( 0.5 * t ) );
         // return ( Math.floor( t ) % 2 === 0 ? t : 1 - t ) - Math.floor( t );
       default:
         throw new Error( 'Unknown RenderExtend' );
@@ -394,8 +394,8 @@ export class RenderImageLogic {
     switch( this.resampleType ) {
       case RenderResampleType.NearestNeighbor: {
         const localPoint = this.inverseTransformWithHalfOffset.timesVector2( context.centroid );
-        const roundedX = Utils.roundSymmetric( localPoint.x );
-        const roundedY = Utils.roundSymmetric( localPoint.y );
+        const roundedX = roundSymmetric( localPoint.x );
+        const roundedY = roundSymmetric( localPoint.y );
         const x = RenderImage.extendInteger( roundedX, this.image.width, this.extendX );
         const y = RenderImage.extendInteger( roundedY, this.image.height, this.extendY );
 

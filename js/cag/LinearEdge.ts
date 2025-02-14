@@ -7,12 +7,12 @@
  */
 
 import Range from '../../../dot/js/Range.js';
-import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Line } from '../../../kite/js/segments/Segment.js';
 import Shape from '../../../kite/js/Shape.js';
 import { alpenglow } from '../alpenglow.js';
 import { ClipSimplifier } from '../clip/ClipSimplifier.js';
+import { arePointsCollinear } from '../../../dot/js/util/arePointsCollinear.js';
 
 export class LinearEdge {
 
@@ -132,8 +132,8 @@ export class LinearEdge {
       let overlapped = false;
       for ( const outputEdge of outputEdges ) {
         // See if the edges are collinear
-        if ( Utils.arePointsCollinear( edge.startPoint, edge.endPoint, outputEdge.startPoint, epsilon ) &&
-             Utils.arePointsCollinear( edge.startPoint, edge.endPoint, outputEdge.endPoint, epsilon ) ) {
+        if ( arePointsCollinear( edge.startPoint, edge.endPoint, outputEdge.startPoint, epsilon ) &&
+             arePointsCollinear( edge.startPoint, edge.endPoint, outputEdge.endPoint, epsilon ) ) {
           const overlaps = Line.getOverlaps( new Line( edge.startPoint, edge.endPoint ), new Line( outputEdge.startPoint, outputEdge.endPoint ), epsilon );
 
           if ( overlaps.length > 0 ) {

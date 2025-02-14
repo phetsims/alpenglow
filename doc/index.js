@@ -645,9 +645,9 @@ window.createSceneryDiagram = ( scene, width, height, needsWhiteBackground = fal
 
     // Oops, tricky to get these to match up exactly.
     const delta = v2( 108, 10 );
-    const center = phet.dot.Utils.lineLineIntersection( v2( 10, 10 ), v2( 10, 10 ).plus( delta.perpendicular ), v2( 0, 64 ), v2( 128, 64 ) );
+    const center = phet.dot.lineLineIntersection( v2( 10, 10 ), v2( 10, 10 ).plus( delta.perpendicular ), v2( 0, 64 ), v2( 128, 64 ) );
     const radius = delta.magnitude;
-    const rightPoint = phet.dot.Utils.lineLineIntersection( center, center.plus( delta ), v2( 128, 0 ), v2( 128, 128 ) );
+    const rightPoint = phet.dot.lineLineIntersection( center, center.plus( delta ), v2( 128, 0 ), v2( 128, 128 ) );
 
     const radial = new RadialGradient( center.x, center.y, 0, center.x, center.y, radius );
     addColorStops( radial );

@@ -8,13 +8,13 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import type { RationalIntersection } from './RationalIntersection.js';
 import type { RenderPath } from '../render-program/RenderPath.js';
 import type { BoundedSubpath } from './BoundedSubpath.js';
 import { BoundsClipping } from '../clip/BoundsClipping.js';
 import { alpenglow } from '../alpenglow.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 
 export class IntegerEdge {
 
@@ -74,10 +74,10 @@ export class IntegerEdge {
     const m10 = toIntegerMatrix.m10();
     const m11 = toIntegerMatrix.m11();
     const m12 = toIntegerMatrix.m12();
-    const x0 = Utils.roundSymmetric( p0.x * m00 + p0.y * m01 + m02 );
-    const y0 = Utils.roundSymmetric( p0.x * m10 + p0.y * m11 + m12 );
-    const x1 = Utils.roundSymmetric( p1.x * m00 + p1.y * m01 + m02 );
-    const y1 = Utils.roundSymmetric( p1.x * m10 + p1.y * m11 + m12 );
+    const x0 = roundSymmetric( p0.x * m00 + p0.y * m01 + m02 );
+    const y0 = roundSymmetric( p0.x * m10 + p0.y * m11 + m12 );
+    const x1 = roundSymmetric( p1.x * m00 + p1.y * m01 + m02 );
+    const y1 = roundSymmetric( p1.x * m10 + p1.y * m11 + m12 );
     if ( x0 !== x1 || y0 !== y1 ) {
       return new IntegerEdge( path, x0, y0, x1, y1 );
     }

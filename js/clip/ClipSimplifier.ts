@@ -15,9 +15,9 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { alpenglow } from '../alpenglow.js';
+import { arePointsCollinear } from '../../../dot/js/util/arePointsCollinear.js';
 
 const collinearEpsilon = 1e-9;
 
@@ -60,7 +60,7 @@ export class ClipSimplifier {
         const secondLastPoint = this.points[ this.points.length - 2 ];
 
         if ( this.checkGeneralCollinearity ) {
-          if ( Utils.arePointsCollinear( new Vector2( x, y ), lastPoint, secondLastPoint, collinearEpsilon ) ) {
+          if ( arePointsCollinear( new Vector2( x, y ), lastPoint, secondLastPoint, collinearEpsilon ) ) {
             lastPoint.x = x;
             lastPoint.y = y;
             return;
@@ -141,11 +141,11 @@ export class ClipSimplifier {
           const lastPoint = this.points[ this.points.length - 1 ];
           const secondLastPoint = this.points[ this.points.length - 2 ];
 
-          if ( Utils.arePointsCollinear( secondPoint, firstPoint, lastPoint, collinearEpsilon ) ) {
+          if ( arePointsCollinear( secondPoint, firstPoint, lastPoint, collinearEpsilon ) ) {
             this.points.shift();
             changed = true;
           }
-          if ( Utils.arePointsCollinear( firstPoint, lastPoint, secondLastPoint, collinearEpsilon ) ) {
+          if ( arePointsCollinear( firstPoint, lastPoint, secondLastPoint, collinearEpsilon ) ) {
             this.points.pop();
             changed = true;
           }

@@ -15,7 +15,7 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Range from '../../../dot/js/Range.js';
-import Utils from '../../../dot/js/Utils.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
@@ -27,6 +27,7 @@ import { StripeClipping } from '../clip/StripeClipping.js';
 import { PolygonBilinear } from '../raster/PolygonBilinear.js';
 import { PolygonMitchellNetravali } from '../raster/PolygonMitchellNetravali.js';
 import { LinearEdge, SerializedLinearEdge } from './LinearEdge.js';
+import { solveQuadraticRootsReal } from '../../../dot/js/util/solveQuadraticRootsReal.js';
 
 // TODO: assertions that all types of ClippableFace give the same results for the same methods
 
@@ -838,13 +839,13 @@ export class EdgedFace implements ClippableFace {
       const edge = this.edges[ i ];
 
       const startPoint = new Vector2(
-        Utils.roundSymmetric( edge.startPoint.x / epsilon ) * epsilon,
-        Utils.roundSymmetric( edge.startPoint.y / epsilon ) * epsilon
+        roundSymmetric( edge.startPoint.x / epsilon ) * epsilon,
+        roundSymmetric( edge.startPoint.y / epsilon ) * epsilon
       );
 
       const endPoint = new Vector2(
-        Utils.roundSymmetric( edge.endPoint.x / epsilon ) * epsilon,
-        Utils.roundSymmetric( edge.endPoint.y / epsilon ) * epsilon
+        roundSymmetric( edge.endPoint.x / epsilon ) * epsilon,
+        roundSymmetric( edge.endPoint.y / epsilon ) * epsilon
       );
 
       if ( !startPoint.equals( endPoint ) ) {
@@ -1674,13 +1675,13 @@ export class EdgedClippedFace implements ClippableFace {
       const edge = this.edges[ i ];
 
       const startPoint = new Vector2(
-        Utils.roundSymmetric( edge.startPoint.x / epsilon ) * epsilon,
-        Utils.roundSymmetric( edge.startPoint.y / epsilon ) * epsilon
+        roundSymmetric( edge.startPoint.x / epsilon ) * epsilon,
+        roundSymmetric( edge.startPoint.y / epsilon ) * epsilon
       );
 
       const endPoint = new Vector2(
-        Utils.roundSymmetric( edge.endPoint.x / epsilon ) * epsilon,
-        Utils.roundSymmetric( edge.endPoint.y / epsilon ) * epsilon
+        roundSymmetric( edge.endPoint.x / epsilon ) * epsilon,
+        roundSymmetric( edge.endPoint.y / epsilon ) * epsilon
       );
 
       if ( !startPoint.equals( endPoint ) ) {
@@ -1691,13 +1692,13 @@ export class EdgedClippedFace implements ClippableFace {
     // TODO: more code sharing?
     this.forEachImplicitEdge( ( startPoint, endPoint ) => {
       const roundedStartPoint = new Vector2(
-        Utils.roundSymmetric( startPoint.x / epsilon ) * epsilon,
-        Utils.roundSymmetric( startPoint.y / epsilon ) * epsilon
+        roundSymmetric( startPoint.x / epsilon ) * epsilon,
+        roundSymmetric( startPoint.y / epsilon ) * epsilon
       );
 
       const roundedEndPoint = new Vector2(
-        Utils.roundSymmetric( endPoint.x / epsilon ) * epsilon,
-        Utils.roundSymmetric( endPoint.y / epsilon ) * epsilon
+        roundSymmetric( endPoint.x / epsilon ) * epsilon,
+        roundSymmetric( endPoint.y / epsilon ) * epsilon
       );
 
       if ( !roundedStartPoint.equals( roundedEndPoint ) ) {
@@ -1707,10 +1708,10 @@ export class EdgedClippedFace implements ClippableFace {
 
     return EdgedClippedFace.fromEdgesWithoutCheck(
       edges,
-      Utils.roundSymmetric( this.minX / epsilon ) * epsilon,
-      Utils.roundSymmetric( this.minY / epsilon ) * epsilon,
-      Utils.roundSymmetric( this.maxX / epsilon ) * epsilon,
-      Utils.roundSymmetric( this.maxY / epsilon ) * epsilon
+      roundSymmetric( this.minX / epsilon ) * epsilon,
+      roundSymmetric( this.minY / epsilon ) * epsilon,
+      roundSymmetric( this.maxX / epsilon ) * epsilon,
+      roundSymmetric( this.maxY / epsilon ) * epsilon
     );
   }
 
@@ -2440,8 +2441,8 @@ export class PolygonalFace implements ClippableFace {
   public getRounded( epsilon: number ): PolygonalFace {
     return new PolygonalFace( this.polygons.map( polygon => polygon.map( vertex => {
       return new Vector2(
-        Utils.roundSymmetric( vertex.x / epsilon ) * epsilon,
-        Utils.roundSymmetric( vertex.y / epsilon ) * epsilon
+        roundSymmetric( vertex.x / epsilon ) * epsilon,
+        roundSymmetric( vertex.y / epsilon ) * epsilon
       );
     } ) ) );
   }
@@ -2773,7 +2774,7 @@ export class CircularClipping {
 
       assert && assert( a > 0, 'We should have a delta, assumed in code below' );
 
-      const roots = Utils.solveQuadraticRootsReal( a, b, c );
+      const roots = solveQuadraticRootsReal( a, b, c );
 
       let isFullyExternal = false;
 
@@ -3140,7 +3141,7 @@ export class CircularClipping {
 
         assert && assert( a > 0, 'We should have a delta, assumed in code below' );
 
-        const roots = Utils.solveQuadraticRootsReal( a, b, c );
+        const roots = solveQuadraticRootsReal( a, b, c );
 
         let isFullyExternal = false;
 
@@ -3598,7 +3599,7 @@ export class CircularClipping {
 
         assert && assert( a > 0, 'We should have a delta, assumed in code below' );
 
-        const roots = Utils.solveQuadraticRootsReal( a, b, c );
+        const roots = solveQuadraticRootsReal( a, b, c );
 
         let isFullyExternal = false;
 

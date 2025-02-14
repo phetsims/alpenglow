@@ -533,7 +533,7 @@ an UI and Display made for visual testing and debugging.
           const point = matrix.inverted().timesVector2( event.pointer.point );
           const polygon = [
             phet.dot.v2( 48, 48 ),
-            phet.dot.v2( phet.dot.Utils.clamp( point.x, 0, 100 ), phet.dot.Utils.clamp( point.y, 0, 100 ) )
+            phet.dot.v2( phet.dot.clamp( point.x, 0, 100 ), phet.dot.clamp( point.y, 0, 100 ) )
           ];
           scene.children = [ twoPointsToNode( polygon ) ];
         }
@@ -743,7 +743,7 @@ an UI and Display made for visual testing and debugging.
           const polygon = [
             phet.dot.v2( 22, 22 ),
             phet.dot.v2( 36, 78 ),
-            phet.dot.v2( phet.dot.Utils.clamp( point.x, 0, 100 ), phet.dot.Utils.clamp( point.y, 0, 100 ) )
+            phet.dot.v2( phet.dot.clamp( point.x, 0, 100 ), phet.dot.clamp( point.y, 0, 100 ) )
           ];
           scene.children = [ polygonToNode( polygon ) ];
         }
@@ -1713,7 +1713,7 @@ an UI and Display made for visual testing and debugging.
             let r0 = fromIntegerPoint( tileLog, p1 ).plus( offset2 );
             const r1 = fromIntegerPoint( tileLog, mid2 ).plus( offset2 );
 
-            const intersection = phet.dot.Utils.lineLineIntersection( q0, q1, r0, r1 );
+            const intersection = phet.dot.lineLineIntersection( q0, q1, r0, r1 );
             if ( intersection !== null ) {
               q1 = intersection;
               r0 = intersection;
@@ -1796,7 +1796,7 @@ an UI and Display made for visual testing and debugging.
             let r0 = p1.plus( offset2 );
             const r1 = p2.plus( offset2 );
 
-            const intersection = phet.dot.Utils.lineLineIntersection( q0, q1, r0, r1 );
+            const intersection = phet.dot.lineLineIntersection( q0, q1, r0, r1 );
             if ( intersection !== null ) {
               return intersection;
             }

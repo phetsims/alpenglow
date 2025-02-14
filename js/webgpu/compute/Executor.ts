@@ -6,7 +6,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Utils from '../../../../dot/js/Utils.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
 import { alpenglow } from '../../alpenglow.js';
 import type { DeviceContext } from './DeviceContext.js';
@@ -15,6 +14,7 @@ import { ComputePass } from './ComputePass.js';
 import type { TypedBuffer } from './TypedBuffer.js';
 import { webgpu } from '../WebGPUAPI.js';
 import { ConsoleLogger } from './ConsoleLogger.js';
+import { roundSymmetric } from '../../../../dot/js/util/roundSymmetric.js';
 
 export type ExecutorOptions = {
   getTimestampWrites?: ( name: string ) => GPUComputePassTimestampWrites | null;
@@ -137,7 +137,7 @@ export class Executor {
     if ( logResult ) {
       const data = new Uint32Array( logResult );
       const length = data[ 0 ];
-      const usedMessage = `logging used ${length} of ${data.length - 1} u32s (${Utils.roundSymmetric( 100 * length / ( data.length - 1 ) )}%)`;
+      const usedMessage = `logging used ${length} of ${data.length - 1} u32s (${roundSymmetric( 100 * length / ( data.length - 1 ) )}%)`;
       console.log( usedMessage );
 
       const logData = ConsoleLogger.analyze( logResult );

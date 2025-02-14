@@ -6,7 +6,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Utils from '../../../dot/js/Utils.js';
 import { alpenglow } from '../alpenglow.js';
 import { DeviceContext } from './compute/DeviceContext.js';
 import { getArrayType, U32Order } from './compute/ConcreteType.js';
@@ -15,6 +14,7 @@ import { RadixSortModule } from './modules/gpu/RadixSortModule.js';
 import { u32S } from './wgsl/WGSLString.js';
 import { Routine } from './compute/Routine.js';
 import { Procedure } from './compute/Procedure.js';
+import { toFixed } from '../../../dot/js/util/toFixed.js';
 
 export class PerformanceTesting {
   public static async loopRadixSortTest(
@@ -96,7 +96,7 @@ export class PerformanceTesting {
         const elapsed = now - startTime;
         startTime = now;
         elapsedTimes.push( elapsed );
-        console.log( Utils.toFixed( elapsed, 0 ), elapsedTimes.length > 1 ? Utils.toFixed( _.sum( elapsedTimes.slice( 1 ) ) / elapsedTimes.slice( 1 ).length, 0 ) : 0 );
+        console.log( toFixed( elapsed, 0 ), elapsedTimes.length > 1 ? toFixed( _.sum( elapsedTimes.slice( 1 ) ) / elapsedTimes.slice( 1 ).length, 0 ) : 0 );
       }
 
       // TODO: maybe avoid the await on the first frame?

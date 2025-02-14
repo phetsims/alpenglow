@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Utils from '../../../../dot/js/Utils.js';
 import { alpenglow } from '../../alpenglow.js';
 import type { DeviceContext } from './DeviceContext.js';
 import { webgpu } from '../WebGPUAPI.js';
 import type { BufferLogger } from './BufferLogger.js';
 import { ByteEncoder } from './ByteEncoder.js';
+import { roundSymmetric } from '../../../../dot/js/util/roundSymmetric.js';
 
 export class TimestampLogger {
 
@@ -107,7 +107,7 @@ export class TimestampLoggerResult {
   public toString(): string {
     const numToTimestamp = ( n: number ): string => {
       let result = '';
-      let digits = '' + Utils.roundSymmetric( n );
+      let digits = '' + roundSymmetric( n );
 
       while ( digits.length ) {
         if ( digits.length > 3 ) {
