@@ -42,7 +42,7 @@ npm install
 
 # Start transpilation watch process (skip --live to just run once, if not can Ctrl-C out as desired).
 cd ../chipper
-grunt transpile --live
+grunt transpile --all --live
 ```
 
 ### Viewing Plan and Documentation
