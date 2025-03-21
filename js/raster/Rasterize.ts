@@ -481,7 +481,10 @@ export class Rasterize {
         const cellMinX = minX + ix;
         const cellMaxX = cellMinX + 1;
 
-        const sanityFace = assertSlow ? clippableFace.getClipped( cellMinX, cellMinY, cellMaxX, cellMaxY ) : null;
+        let sanityFace = null;
+        if ( assertSlow ) {
+          sanityFace = clippableFace.getClipped( cellMinX, cellMinY, cellMaxX, cellMaxY );
+        }
 
         // We saved the division by 2 for here
         const doubleArea = terminalAreas[ index ];
