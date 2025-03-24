@@ -613,6 +613,7 @@ class WebGPUCommandDeviceCreateShaderModule extends WebGPUCommand {
     public readonly device: GPUDevice,
     public readonly descriptor: GPUShaderModuleDescriptor
   ) {
+    // @ts-expect-error - see https://github.com/phetsims/alpenglow/issues/10
     const compilationHintLayouts = descriptor.compilationHints ? descriptor.compilationHints.map( hint => hint.layout ).filter( hint => hint && hint !== 'auto' ) : [];
     super( result, [ device, ...compilationHintLayouts ] );
   }
