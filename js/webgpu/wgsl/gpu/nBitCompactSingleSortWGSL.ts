@@ -15,18 +15,18 @@
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import { alpenglow } from '../../../alpenglow.js';
 import { BitOrder, U32Add, U32Type, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType } from '../../compute/ConcreteType.js';
+import { ConsoleLoggedLine } from '../../compute/ConsoleLogger.js';
 import { decimalS, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, RakedSizable } from '../WGSLUtils.js';
-import { logWGSL } from './logWGSL.js';
-import { ConsoleLoggedLine } from '../../compute/ConsoleLogger.js';
+import { bitPackRadixAccessWGSL } from './bitPackRadixAccessWGSL.js';
+import { bitPackRadixExclusiveScanWGSL } from './bitPackRadixExclusiveScanWGSL.js';
+import { bitPackRadixIncrementWGSL } from './bitPackRadixIncrementWGSL.js';
 import { commentWGSL } from './commentWGSL.js';
 import { logStringWGSL } from './logStringWGSL.js';
-import { unrollWGSL } from './unrollWGSL.js';
 import { logValueWGSL } from './logValueWGSL.js';
-import { bitPackRadixIncrementWGSL } from './bitPackRadixIncrementWGSL.js';
+import { logWGSL } from './logWGSL.js';
 import { scanWGSL } from './scanWGSL.js';
-import { bitPackRadixExclusiveScanWGSL } from './bitPackRadixExclusiveScanWGSL.js';
-import { bitPackRadixAccessWGSL } from './bitPackRadixAccessWGSL.js';
+import { unrollWGSL } from './unrollWGSL.js';
 
 export type nBitCompactSingleSortWGSLOptions<T> = {
   // Currently mostly used for the type, but we might be able to use it for more later. (TODO)
@@ -120,7 +120,9 @@ export const nBitCompactSingleSortWGSL = <T>(
   return wgsl`
     ${commentWGSL( 'begin n_bit_compact_single_sort' )}
 
-    ${logStringWGSL( `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${lengthExpression ? lengthExpression : null}" earlyLoad:${earlyLoad}` )}
+    ${logStringWGSL( `n_bit_compact_single_sort workgroupSize:${workgroupSize}, grainSize:${
+    grainSize}, bitsPerInnerPass:${bitsPerInnerPass}, bitVectorSize:${bitVectorSize}, length:"${
+    lengthExpression ? JSON.stringify( lengthExpression ) : null}" earlyLoad:${earlyLoad}` )}
 
     {
       var tb_bits_vector = ${{
