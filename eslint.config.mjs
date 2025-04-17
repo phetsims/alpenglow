@@ -15,8 +15,7 @@ export default [
   {
     rules: {
       'no-bitwise': 'off',
-      'phet/todo-should-have-issue': 'off',
-      'phet/documentation-before-imports': 'off'
+      'phet/todo-should-have-issue': 'off'
     },
     languageOptions: {
       globals: {
