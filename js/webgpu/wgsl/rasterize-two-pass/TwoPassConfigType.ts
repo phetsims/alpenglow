@@ -1,11 +1,5 @@
 // Copyright 2024-2025, University of Colorado Boulder
 
-import { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';
-import { TwoPassConfig } from './TwoPassConfig.js';
-import { wgsl, WGSLExpression, WGSLStatements } from '../WGSLString.js';
-import { ByteEncoder } from '../../compute/ByteEncoder.js';
-import { TwoPassConfigWGSL } from './TwoPassConfigWGSL.js';
-
 /**
  * ConcreteType for a TwoPassConfig
  *
@@ -13,6 +7,12 @@ import { TwoPassConfigWGSL } from './TwoPassConfigWGSL.js';
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';
+import { TwoPassConfig } from './TwoPassConfig.js';
+import { wgsl, WGSLExpression, WGSLStatements } from '../WGSLString.js';
+import { ByteEncoder } from '../../compute/ByteEncoder.js';
+import { TwoPassConfigWGSL } from './TwoPassConfigWGSL.js';
 
 const dwords = 11;
 

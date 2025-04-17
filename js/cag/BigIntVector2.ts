@@ -1,12 +1,12 @@
 // Copyright 2023-2025, University of Colorado Boulder
 
-import { alpenglow } from '../alpenglow.js';
-
 /**
  * Like Vector2, but with BigInts
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import { alpenglow } from '../alpenglow.js';
 
 export class BigIntVector2 {
   public constructor( public x: bigint, public y: bigint ) {}

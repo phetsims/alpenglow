@@ -1,11 +1,5 @@
 // Copyright 2024-2025, University of Colorado Boulder
 
-import { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';
-import { TwoPassFineRenderableFace } from './TwoPassFineRenderableFace.js';
-import { wgsl, WGSLExpression, WGSLStatements } from '../WGSLString.js';
-import { ByteEncoder } from '../../compute/ByteEncoder.js';
-import { TwoPassFineRenderableFaceWGSL } from './TwoPassFineRenderableFaceWGSL.js';
-
 /**
  * ConcreteType for a TwoPassFineRenderableFace
  *
@@ -13,6 +7,12 @@ import { TwoPassFineRenderableFaceWGSL } from './TwoPassFineRenderableFaceWGSL.j
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';
+import { TwoPassFineRenderableFace } from './TwoPassFineRenderableFace.js';
+import { wgsl, WGSLExpression, WGSLStatements } from '../WGSLString.js';
+import { ByteEncoder } from '../../compute/ByteEncoder.js';
+import { TwoPassFineRenderableFaceWGSL } from './TwoPassFineRenderableFaceWGSL.js';
 
 const dwords = 5;
 

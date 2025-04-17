@@ -1,12 +1,12 @@
 // Copyright 2024-2025, University of Colorado Boulder
 
-import { wgsl, WGSLReferenceModule } from '../WGSLString.js';
-
 /**
  * Uniforms for a TwoPassConfig
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import { wgsl, WGSLReferenceModule } from '../WGSLString.js';
 
 export const TwoPassConfigWGSL = new WGSLReferenceModule( 'TwoPassConfig', wgsl`
   struct TwoPassConfig {

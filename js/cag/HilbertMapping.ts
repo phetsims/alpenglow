@@ -1,13 +1,13 @@
 // Copyright 2023-2025, University of Colorado Boulder
 
-import { alpenglow } from '../alpenglow.js';
-import type { IntegerEdge } from './IntegerEdge.js';
-
 /**
  * Utilities for Hilbert space-filling curve mapping
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import { alpenglow } from '../alpenglow.js';
+import type { IntegerEdge } from './IntegerEdge.js';
 
 type P2 = 'x' | '-x' | 'y' | '-y';
 type P3 = 'x' | '-x' | 'y' | '-y' | 'z' | '-z';

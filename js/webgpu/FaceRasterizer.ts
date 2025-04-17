@@ -1,5 +1,11 @@
 // Copyright 2024-2025, University of Colorado Boulder
 
+/**
+ * TODO: doc
+ *
+ * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ */
+
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../phet-core/js/types/StrictOmit.js';
@@ -30,12 +36,6 @@ import { ByteEncoder } from './compute/ByteEncoder.js';
 import { RenderInstruction } from '../render-program/RenderInstruction.js';
 import { RenderColor } from '../render-program/RenderColor.js';
 import { TextureViewResource } from './compute/TextureViewResource.js';
-
-/**
- * TODO: doc
- *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
- */
 
 export type FaceRasterizerOptions = {
   deviceContext: DeviceContext;

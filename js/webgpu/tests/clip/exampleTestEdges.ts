@@ -1,10 +1,11 @@
 // Copyright 2023-2025, University of Colorado Boulder
 
-import Vector2 from '../../../../../dot/js/Vector2.js';
-
 /**
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
+
+import Vector2 from '../../../../../dot/js/Vector2.js';
+
 
 // NOTE: exclude from builds?
 export const exampleTestEdges = [
