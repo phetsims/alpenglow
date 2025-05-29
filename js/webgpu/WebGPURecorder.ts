@@ -653,7 +653,7 @@ class WebGPUCommandDeviceCreateBindGroup extends WebGPUCommand {
         return resource;
       }
       else {
-        /* @ts-expect-error */
+        /* @ts-expect-error TODO https://github.com/phetsims/alpenglow/issues/11 */
         return resource.buffer;
       }
     } );
