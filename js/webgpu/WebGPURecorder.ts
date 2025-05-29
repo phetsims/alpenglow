@@ -653,6 +653,7 @@ class WebGPUCommandDeviceCreateBindGroup extends WebGPUCommand {
         return resource;
       }
       else {
+        /* @ts-expect-error */
         return resource.buffer;
       }
     } );
