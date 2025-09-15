@@ -27,13 +27,13 @@ export class RationalHalfEdge {
   public previousEdge: RationalHalfEdge | null = null; // exists so we can enumerate edges at a vertex
   public boundary: RationalBoundary | null = null;
 
-  public reversed!: RationalHalfEdge; // We will fill this in immediately
+  declare public reversed: RationalHalfEdge; // We will fill this in immediately
   public windingMap = new WindingMap();
 
   // 0 for straight +x, 1 for +y, 2 for straight -x, 3 for -y
-  public discriminator!: number; // filled in immediately
+  declare public discriminator: number; // filled in immediately
 
-  public slope!: BigRational; // filled in immediately
+  declare public slope: BigRational; // filled in immediately
 
   public p0float: Vector2;
   public p1float: Vector2;

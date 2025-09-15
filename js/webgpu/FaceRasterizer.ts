@@ -119,7 +119,7 @@ export class FaceRasterizer {
   private readonly initializationPromise: Promise<void>;
 
   private readonly outputSlot = new TextureViewSlot();
-  private procedure!: Procedure<FaceRasterizerExecutionInfo, null>; // created in initialize
+  declare private procedure: Procedure<FaceRasterizerExecutionInfo, null>; // created in initialize
 
   public constructor(
     providedOptions: FaceRasterizerOptions

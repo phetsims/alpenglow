@@ -16,7 +16,7 @@ import { getLogBarrierWGSL } from './getLogBarrierWGSL.js';
 
 export class ComputePipeline {
   // This will be available by the time it can be accessed publicly
-  public pipeline!: GPUComputePipeline;
+  declare public pipeline: GPUComputePipeline;
   public logBarrierPipeline: GPUComputePipeline | null = null;
 
   private readonly pipelinePromise: Promise<GPUComputePipeline>;

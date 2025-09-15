@@ -16,9 +16,9 @@ import type { BigRationalVector2 } from './BigRationalVector2.js';
 
 export class RationalBoundary {
   public readonly edges: RationalHalfEdge[] = [];
-  public signedArea!: number;
-  public bounds!: Bounds2;
-  public minimalXRationalPoint!: BigRationalVector2;
+  declare public signedArea: number;
+  declare public bounds: Bounds2;
+  declare public minimalXRationalPoint: BigRationalVector2;
 
   public computeProperties(): void {
     let signedArea = 0;

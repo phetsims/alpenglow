@@ -19,10 +19,10 @@ export class ByteEncoder {
 
   private _byteLength: number;
   private _arrayBuffer: ArrayBuffer;
-  private _f32Array!: Float32Array;
-  private _i32Array!: Int32Array;
-  private _u32Array!: Uint32Array;
-  private _u8Array!: Uint8Array;
+  declare private _f32Array: Float32Array;
+  declare private _i32Array: Int32Array;
+  declare private _u32Array: Uint32Array;
+  declare private _u8Array: Uint8Array;
 
   public constructor(
     // Allow creating it with an existing ArrayBuffer (which can have a specific starting length)
