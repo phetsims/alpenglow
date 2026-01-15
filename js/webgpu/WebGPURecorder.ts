@@ -302,8 +302,10 @@ export class WebGPURecorder {
   }
 
   // TODO: consider how we're handling this
-  public static arrayBufferLikeString( data: ArrayLike<number> | ArrayBufferLike ): string {
-    return `new Uint8Array( [ ${new Uint8Array( data ).join( ', ' )} ] ).buffer`;
+  public static arrayBufferLikeString( data: ArrayLike<number> | ArrayBuffer | SharedArrayBuffer ): string {
+
+    // Cast needed because TypeScript's Uint8Array overloads don't include SharedArrayBuffer
+    return `new Uint8Array( [ ${new Uint8Array( data as ArrayBuffer ).join( ', ' )} ] ).buffer`;
   }
 
   public static objectToString(

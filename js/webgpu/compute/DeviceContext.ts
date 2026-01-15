@@ -271,7 +271,7 @@ export class DeviceContext {
     return outputArray;
   }
 
-  public static async getMappedArrayBuffer( buffer: GPUBuffer ): Promise<ArrayBuffer> {
+  public static async getMappedArrayBuffer( buffer: GPUBuffer ): Promise<ArrayBufferLike> {
     return ( await DeviceContext.getMappedByteArray( buffer ) ).buffer;
   }
 }

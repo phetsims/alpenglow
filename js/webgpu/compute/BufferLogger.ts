@@ -45,7 +45,7 @@ export class BufferLogger {
     this.callbacksOnComplete.push( async () => {
       const arrayBuffer = await DeviceContext.getMappedArrayBuffer( mappableBuffer );
 
-      await callback( arrayBuffer );
+      await callback( arrayBuffer as ArrayBuffer );
 
       webgpu.bufferDestroy( mappableBuffer );
     } );
