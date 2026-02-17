@@ -3,7 +3,7 @@
 /**
  * A single level of standalone reduction.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';

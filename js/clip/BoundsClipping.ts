@@ -58,7 +58,7 @@
  * flush), since we will conditionally generate the "to-corner" edges based on whether the start/end points are
  * on the border or outside.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 import Vector2 from '../../../dot/js/Vector2.js';
 import { alpenglow } from '../alpenglow.js';

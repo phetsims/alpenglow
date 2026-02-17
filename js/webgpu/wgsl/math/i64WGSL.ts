@@ -5,7 +5,7 @@
  *
  * Two's complement, with v.x being the lower 32 bits and v.y being the upper 32 bits.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLReferenceModule } from '../WGSLString.js';

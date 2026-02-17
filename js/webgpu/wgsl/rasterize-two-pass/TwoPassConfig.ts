@@ -21,7 +21,7 @@
  * filter-radius (how much we need to expand by)
  * [defer] tile/bin enabled mask (whether it should compute or write out)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { PolygonFilterType } from '../../../render-program/PolygonFilterType.js';

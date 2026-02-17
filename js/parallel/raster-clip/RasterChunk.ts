@@ -5,7 +5,7 @@
  *
  * Used for the raster-clip input, and the output for reducible chunks (that will be fed back in)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

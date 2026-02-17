@@ -18,7 +18,7 @@
  *
  * (needs a working knowledge of the WGSL execution model to understand)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Random from '../../../dot/js/Random.js';

@@ -3,7 +3,7 @@
 /**
  * Converts an index from a normal (blocked) order to a striped order (for improved memory coherence).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../../alpenglow.js';

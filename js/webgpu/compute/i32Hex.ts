@@ -3,7 +3,7 @@
 /**
  * Utility for converting a number into a signed 32-bit integer string (in hexadecimal)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

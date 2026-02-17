@@ -3,7 +3,7 @@
 /**
  * Computes the gradient ratio for a linear or radial gradient
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';

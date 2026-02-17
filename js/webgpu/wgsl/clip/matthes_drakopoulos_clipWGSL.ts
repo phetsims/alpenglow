@@ -4,7 +4,7 @@
  * From "Another Simple but Faster Method for 2D Line Clipping" (2019)
  * by Dimitrios Matthes and Vasileios Drakopoulos
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLExpressionF32, WGSLReferenceModule, wgslString, WGSLStringModule } from '../WGSLString.js';

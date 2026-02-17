@@ -3,7 +3,7 @@
 /**
  * Supports "console logging" from shaders. See log.wgsl.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector3 from '../../../../dot/js/Vector3.js';

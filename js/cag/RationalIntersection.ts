@@ -3,7 +3,7 @@
 /**
  * Represents a point of an intersection (with rational t and point) along a segment.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

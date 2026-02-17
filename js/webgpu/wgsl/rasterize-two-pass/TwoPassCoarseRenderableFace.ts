@@ -3,7 +3,7 @@
 /**
  * Raw type for a TwoPassCoarseRenderableFace
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 export type TwoPassCoarseRenderableFace = {
   // RenderProgram packed info

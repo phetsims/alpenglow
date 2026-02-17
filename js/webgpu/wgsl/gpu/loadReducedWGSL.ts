@@ -8,7 +8,7 @@
  *
  * For each thread, it will essentially load the first value, and then combine that with subsequently loaded values.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';

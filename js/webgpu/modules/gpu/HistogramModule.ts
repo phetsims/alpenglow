@@ -3,7 +3,7 @@
 /**
  * Applies a histogram operation to an array.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector3 from '../../../../../dot/js/Vector3.js';

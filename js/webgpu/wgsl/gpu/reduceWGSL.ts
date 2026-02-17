@@ -3,7 +3,7 @@
 /**
  * A template that performs a reduce operation on a single workgroup. The value will be valid at local_id.x === 0.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';

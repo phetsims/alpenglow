@@ -3,7 +3,7 @@
 /**
  * Handle resources and settings connected to a GPUDevice
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';

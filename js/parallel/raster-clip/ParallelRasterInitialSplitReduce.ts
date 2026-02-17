@@ -4,7 +4,7 @@
  * Calculates the initial splits (reducible/complete counts) for each clipped chunk, and applies the first level of
  * reduction.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

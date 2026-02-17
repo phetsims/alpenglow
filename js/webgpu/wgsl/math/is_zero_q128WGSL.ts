@@ -3,7 +3,7 @@
 /**
  * Checks whether a q128 (rational) is zero
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';

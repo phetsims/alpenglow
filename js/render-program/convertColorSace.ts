@@ -3,7 +3,7 @@
 /**
  * Convenience method for converting a RenderProgram from one color space to another.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { RenderColorSpace } from './RenderColorSpace.js';

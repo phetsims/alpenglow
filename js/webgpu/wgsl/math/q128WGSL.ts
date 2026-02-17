@@ -6,7 +6,7 @@
  * v.xy: i64 numerator
  * v.zw: u64 denominator
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLReferenceModule } from '../WGSLString.js';

@@ -6,7 +6,7 @@
  * They mostly differ on whether they combine faces with equivalent RenderPrograms, WHICH cases they do so, and
  * whether they output polygonal or unsorted-edge formats (PolygonalFace/EdgedFace).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

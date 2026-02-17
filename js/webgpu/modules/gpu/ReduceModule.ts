@@ -3,7 +3,7 @@
 /**
  * A full reduction, with the method of reduction chosen based on the type and configuration.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';

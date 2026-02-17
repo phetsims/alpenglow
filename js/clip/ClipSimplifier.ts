@@ -11,7 +11,7 @@
  * TODO: Like, enable general collinearity, and inspect cases to see if it changes how many pixels get partials?
  * TODO: Or improves performance
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';

@@ -8,7 +8,7 @@
  *
  * NOTE: The reduction is also completed in ParallelRasterInitialClip, so if changing this file, please check there too
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

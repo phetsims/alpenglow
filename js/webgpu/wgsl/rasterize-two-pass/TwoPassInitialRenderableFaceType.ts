@@ -5,7 +5,7 @@
  *
  * TODO auto create?
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { ConcreteType, StoreStatementCallback } from '../../compute/ConcreteType.js';

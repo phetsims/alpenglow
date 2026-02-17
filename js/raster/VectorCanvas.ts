@@ -9,7 +9,7 @@
  * TODO: We really would want to "cache" all of the commands at once, build up a "pending" RenderProgram, and then
  * TODO: handle all the paths at once.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

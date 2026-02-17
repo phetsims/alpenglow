@@ -3,7 +3,7 @@
 /**
  * Convert a RenderProgram from Display P3 to linear sRGB color space.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { RenderProgram } from '../RenderProgram.js';

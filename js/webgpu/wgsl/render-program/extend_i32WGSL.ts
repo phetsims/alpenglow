@@ -11,7 +11,7 @@
  * repeat:  2,  3,  0,  1,  2,  3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1
  * reflect: 2,  3,  3,  2,  1,  0, 0, 1, 2, 3, 3, 2, 1, 0, 0, 1
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { u32S, wgsl, WGSLExpression, WGSLExpressionI32, WGSLExpressionU32, WGSLStringModule } from '../WGSLString.js';

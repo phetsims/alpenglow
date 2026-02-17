@@ -3,7 +3,7 @@
 /**
  * RenderColor displays a single solid color everywhere, and is a basic building-block for many other RenderPrograms.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';

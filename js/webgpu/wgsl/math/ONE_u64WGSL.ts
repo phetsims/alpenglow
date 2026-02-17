@@ -3,7 +3,7 @@
 /**
  * One constant for u64
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLReferenceModule } from '../WGSLString.js';

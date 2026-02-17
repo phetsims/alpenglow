@@ -3,7 +3,7 @@
 /**
  * Represents an instruction to execute part of a RenderProgram based on an execution stack
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';

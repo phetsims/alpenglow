@@ -3,7 +3,7 @@
 /**
  * Accuracy for radial blends
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 export enum RenderRadialBlendAccuracy {

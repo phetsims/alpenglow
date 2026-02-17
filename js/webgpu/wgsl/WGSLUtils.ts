@@ -3,7 +3,7 @@
 /**
  * Represents a compiled shader and associated data.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';
@@ -86,7 +86,7 @@ alpenglow.register( 'addLineNumbers', addLineNumbers );
 /**
  * Strips comments from a WGSL string (in an opinionated way, to potentially leave some in for help with debugging).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 export const stripWGSLComments = (
   str: string,

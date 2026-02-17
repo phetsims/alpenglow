@@ -3,7 +3,7 @@
 /**
  * Extracts a single instruction from the binary format at a given (32bit dword) offset.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';

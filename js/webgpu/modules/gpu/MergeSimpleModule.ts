@@ -3,7 +3,7 @@
 /**
  * Merges two sorted arrays into a single sorted array (with a simpler algorithm than MergeModule).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector3 from '../../../../../dot/js/Vector3.js';

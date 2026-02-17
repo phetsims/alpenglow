@@ -3,7 +3,7 @@
 /**
  * Struct for an intersection between two line segments. Two points needed, in case of partial overlap.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLReferenceModule } from '../WGSLString.js';

@@ -6,7 +6,7 @@
  *
  * See ParallelExecutor for more high-level documentation.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

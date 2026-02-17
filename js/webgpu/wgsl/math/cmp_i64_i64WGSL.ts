@@ -7,7 +7,7 @@
  * 0 if a == b
  * 1 if a > b
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule } from '../WGSLString.js';

@@ -3,7 +3,7 @@
 /**
  * Convert a RenderProgram from premultiplied Display P3 to premultiplied Oklab color space.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { RenderProgram } from '../RenderProgram.js';

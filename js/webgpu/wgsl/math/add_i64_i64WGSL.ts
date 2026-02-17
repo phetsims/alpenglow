@@ -3,7 +3,7 @@
 /**
  * Adds two i64s together, returning an i64.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { add_u64_u64WGSL } from './add_u64_u64WGSL.js';

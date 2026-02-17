@@ -4,7 +4,7 @@
  * Meant for reduction on u32/i32 values (could be generalized to things that can be represented with multiple atomic
  * values, haven't run into that yet).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector3 from '../../../../../dot/js/Vector3.js';

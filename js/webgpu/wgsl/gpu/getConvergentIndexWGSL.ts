@@ -3,7 +3,7 @@
 /**
  * Returns the bit-reversed version of the given value, such that it is sufficient for the convergent-indexed reduce.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../../alpenglow.js';

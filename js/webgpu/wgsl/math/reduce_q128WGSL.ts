@@ -3,7 +3,7 @@
 /**
  * Reduces a q128 (rational) to its simplest form.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';

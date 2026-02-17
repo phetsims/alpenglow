@@ -5,7 +5,7 @@
  *
  * NOTE: Does not apply perspective correction, is purely a 2d blend.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';

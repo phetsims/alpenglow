@@ -3,7 +3,7 @@
 /**
  * WGSL form for a LinearEdge, with a start and end point.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLReferenceModule } from '../WGSLString.js';

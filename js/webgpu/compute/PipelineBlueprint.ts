@@ -3,7 +3,7 @@
 /**
  * TODO: doc
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';

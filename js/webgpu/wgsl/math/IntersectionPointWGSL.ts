@@ -8,7 +8,7 @@
  * px: The x-coordinate of the intersection point
  * py: The y-coordinate of the intersection point
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLReferenceModule } from '../WGSLString.js';

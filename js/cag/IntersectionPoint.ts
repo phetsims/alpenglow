@@ -3,7 +3,7 @@
 /**
  * Intersection of two line segments, with t0 and t1 representing the interpolation values for the two segments.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

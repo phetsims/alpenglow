@@ -3,7 +3,7 @@
 /**
  * A template that performs a scan operation using workgroup memory on a single workgroup (one value per thread).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';

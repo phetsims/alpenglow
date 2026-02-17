@@ -5,7 +5,7 @@
  *
  * Supports both forward and backward iteration (start < end, or start > end).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../../alpenglow.js';

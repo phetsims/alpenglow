@@ -3,7 +3,7 @@
 /**
  * Returns whether a color is in the standard (0-1) range for every color channel.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLExpressionBool, WGSLStringModule } from '../WGSLString.js';

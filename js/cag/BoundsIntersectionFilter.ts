@@ -3,7 +3,7 @@
 /**
  * Acceleration of pairwise intersection tests for anything bounds-related
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

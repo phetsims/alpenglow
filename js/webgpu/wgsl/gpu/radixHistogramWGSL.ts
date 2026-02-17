@@ -3,7 +3,7 @@
 /**
  * Calculates a histogram for a section, then writes the histogram out in a striped manner ready for a prefix sum.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import WithoutNull from '../../../../../phet-core/js/types/WithoutNull.js';

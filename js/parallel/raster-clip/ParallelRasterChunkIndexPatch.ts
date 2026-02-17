@@ -4,7 +4,7 @@
  * Updates the reducible/complete chunks with proper destination edge indices (so the chunk references the range of
  * edges it is comprised of).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

@@ -3,7 +3,7 @@
 /**
  * Shader for blitting things to a Canvas if needed
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

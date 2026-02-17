@@ -5,7 +5,7 @@
  *
  * NOTE: These only fill in certain values, and leave a lot blank to be filled in by the upcoming reduce.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

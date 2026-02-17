@@ -3,7 +3,7 @@
 /**
  * Converts premultiplied color to unpremultiplied color.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';

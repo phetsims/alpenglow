@@ -5,7 +5,7 @@
  *
  * WILL NEED workgroupBarrier() before/after (before if needed for scratch, after for scratch)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';

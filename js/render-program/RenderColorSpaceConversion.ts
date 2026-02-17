@@ -3,7 +3,7 @@
 /**
  * RenderProgram to convert between color spaces. Should not change whether something is transparent or opaque
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';

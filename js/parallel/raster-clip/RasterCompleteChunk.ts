@@ -3,7 +3,7 @@
 /**
  * Output chunk for the raster-clip algorithm
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

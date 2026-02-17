@@ -9,7 +9,7 @@
  * This works well to share code, since the only difference is the gamut mapping (sRGB and Display P3 have the same
  * transfer curve), and we want the same 0-255 non-premultiplied output.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';

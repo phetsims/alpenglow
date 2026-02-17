@@ -4,7 +4,7 @@
  * A specialized raked reduce for when our input is non-commutative AND stored in a blocked (not striped) order.
  * We essentially serialize some of it (reading a workgroup-size chunk at a time, reducing it, then loading the next).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';

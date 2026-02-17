@@ -3,7 +3,7 @@
 /**
  * Rasterization prototype for WebGPU, but using the parallel (debuggable) API.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector2 from '../../../../dot/js/Vector2.js';

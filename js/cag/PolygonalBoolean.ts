@@ -3,7 +3,7 @@
 /**
  * Allows computing boolean operations on polygons (e.g. union, intersection, difference/complement)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

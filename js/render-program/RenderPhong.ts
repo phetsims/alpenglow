@@ -3,7 +3,7 @@
 /**
  * RenderProgram for a phong 3d reflection model
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';

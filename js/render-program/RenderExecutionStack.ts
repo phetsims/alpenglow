@@ -3,7 +3,7 @@
 /**
  * A stack of values (effectively vec4s) that are used by RenderInstructions to evaluate a RenderProgram.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';

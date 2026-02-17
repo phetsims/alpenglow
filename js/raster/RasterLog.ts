@@ -3,7 +3,7 @@
 /**
  * Allows logging of data from the rasterization process, for display or debugging purposes
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

@@ -3,7 +3,7 @@
 /**
  * Code to split integer edges into rational edges
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

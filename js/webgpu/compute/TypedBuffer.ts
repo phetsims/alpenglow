@@ -3,7 +3,7 @@
 /**
  * A GPUBuffer that is typed to a specific type, and can be used to encode/decode values to/from it.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

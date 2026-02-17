@@ -3,7 +3,7 @@
 /**
  * Convert a RenderProgram from sRGB to Oklab color space.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { RenderProgram } from '../RenderProgram.js';

@@ -3,7 +3,7 @@
 /**
  * Deserializes RenderPrograms
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { RenderAlpha, SerializedRenderAlpha } from './RenderAlpha.js';

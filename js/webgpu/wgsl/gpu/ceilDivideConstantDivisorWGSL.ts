@@ -3,7 +3,7 @@
 /**
  * See https://stackoverflow.com/questions/2745074/fast-ceiling-of-an-integer-division-in-c-c
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../../alpenglow.js';

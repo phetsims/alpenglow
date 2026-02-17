@@ -4,7 +4,7 @@
  * (Partial) data for a single clipped chunk, which is reduced and then when complete (isFirstEdge && isLastEdge) is
  * applied to the clipped chunk.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

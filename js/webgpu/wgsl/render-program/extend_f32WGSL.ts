@@ -3,7 +3,7 @@
 /**
  * Floating-point extension for RenderExtend.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { u32S, wgsl, WGSLExpression, WGSLExpressionF32, WGSLExpressionU32, WGSLStringModule } from '../WGSLString.js';

@@ -3,7 +3,7 @@
 /**
  * Represents a string of WGSL code (which may have dependencies which it can add to a blueprint).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

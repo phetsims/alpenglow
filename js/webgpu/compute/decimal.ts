@@ -3,7 +3,7 @@
 /**
  * Utility for converting a number into a decimal string for WGSL
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

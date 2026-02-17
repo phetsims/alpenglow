@@ -5,7 +5,7 @@
  *
  * Should be dispatched with one workgroup PER coarse renderable face (one thread per face-X-bin).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import optionize from '../../../../../phet-core/js/optionize.js';

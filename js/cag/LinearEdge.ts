@@ -3,7 +3,7 @@
 /**
  * A line segment (between two points).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Range from '../../../dot/js/Range.js';

@@ -3,7 +3,7 @@
 /**
  * Reads a RenderInstructionComputeGradientRatio from a binary source.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';

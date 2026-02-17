@@ -3,7 +3,7 @@
 /**
  * Adds two u32s together, returning a u64.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';

@@ -3,7 +3,7 @@
 /**
  * A simple unrolled loop that provides both a "blocked" and "striped" (coalesced) index for each iteration.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';

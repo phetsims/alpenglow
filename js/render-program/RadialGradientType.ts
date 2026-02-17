@@ -3,7 +3,7 @@
 /**
  * Internal gradient types
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 export enum RadialGradientType {

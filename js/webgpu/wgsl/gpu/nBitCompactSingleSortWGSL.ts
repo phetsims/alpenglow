@@ -9,7 +9,7 @@
  * full sort). You'll want to run this multiple times (giving different sections of bits each time, from lower to higher)
  * in order to achieve a full sort.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';

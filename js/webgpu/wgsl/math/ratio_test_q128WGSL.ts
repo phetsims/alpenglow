@@ -7,7 +7,7 @@
  * 1i: on an endpoint (q=0 or q=1)
  * 0i: totally external (q<0 or q>1)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLExpressionI32, WGSLStringModule } from '../WGSLString.js';

@@ -3,7 +3,7 @@
 /**
  * Shader to bump a shader "barrier" note into the log buffer
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../../alpenglow.js';

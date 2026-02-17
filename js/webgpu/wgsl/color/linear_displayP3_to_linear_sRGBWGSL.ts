@@ -5,7 +5,7 @@
  *
  * See RenderColor.linearDisplayP3ToLinear for more information.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';

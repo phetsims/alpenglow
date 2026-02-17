@@ -3,7 +3,7 @@
 /**
  * RenderProgram for alpha (an opacity) applied to a RenderProgram
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';

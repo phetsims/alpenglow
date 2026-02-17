@@ -6,7 +6,7 @@
  * IMPORTANT NOTE: this only works if we have the bits to spare (where numerator * denominator does NOT overflow)
  * to avoid reduction. Reduction would also work.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLExpressionBool, WGSLStringModule } from '../WGSLString.js';

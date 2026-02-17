@@ -3,7 +3,7 @@
 /**
  * Absolute value of an i64 (yes, it will probably just be an u64 after)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';

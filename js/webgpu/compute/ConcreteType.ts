@@ -3,7 +3,7 @@
 /**
  * Represents a data type that can be serialized/deserialized to/from a binary form, both in TypeScript and in WGSL.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Random from '../../../../dot/js/Random.js';

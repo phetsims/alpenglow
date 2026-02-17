@@ -3,7 +3,7 @@
 /**
  * Assists in logging out timestamps for WebGPU profiling.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

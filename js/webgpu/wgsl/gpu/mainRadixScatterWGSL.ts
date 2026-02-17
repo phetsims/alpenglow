@@ -1,7 +1,7 @@
 // Copyright 2023-2025, University of Colorado Boulder
 
 /**
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';

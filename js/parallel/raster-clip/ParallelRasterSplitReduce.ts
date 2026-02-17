@@ -5,7 +5,7 @@
  * computing the exclusive prefix sum (zeros the last element). Outputs the reduction of the entire input into the
  * output reduces.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

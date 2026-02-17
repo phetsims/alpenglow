@@ -11,7 +11,7 @@
  * It can be used in a standalone way, however it is primarily meant to be used when a `RenderRadialGradient`
  * is circular, and is split into each radial-linear partition.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';

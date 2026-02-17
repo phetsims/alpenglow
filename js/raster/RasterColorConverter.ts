@@ -6,7 +6,7 @@
  * - accumulation space (e.g. premultiplied linear sRGB)
  * - output space (e.g. sRGB255, so we can write to ImageData)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';

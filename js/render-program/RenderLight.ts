@@ -3,7 +3,7 @@
 /**
  * Stores a RenderProgram for light direction and color
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

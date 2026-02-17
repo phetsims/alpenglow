@@ -3,7 +3,7 @@
 /**
  * Computes the blend ratio between two RenderPrograms based on a linear or radial blend.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';

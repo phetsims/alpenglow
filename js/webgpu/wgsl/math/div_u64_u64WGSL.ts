@@ -11,7 +11,7 @@
  * TODO: omg, are we going to overflow?
  * TODO: we can ignore division with https://en.wikipedia.org/wiki/Binary_GCD_algorithm perhaps?
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';

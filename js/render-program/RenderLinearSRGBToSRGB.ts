@@ -3,7 +3,7 @@
 /**
  * RenderProgram to convert linear sRGB => sRGB
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';

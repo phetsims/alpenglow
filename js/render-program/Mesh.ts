@@ -3,7 +3,7 @@
 /**
  * Represents mesh data that can be handled in different ways.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';

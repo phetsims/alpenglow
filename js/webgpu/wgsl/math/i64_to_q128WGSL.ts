@@ -5,7 +5,7 @@
  *
  * Basically, we just ensure the denominator is positive (negating both if it is negative).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';

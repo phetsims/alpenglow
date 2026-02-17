@@ -3,7 +3,7 @@
 /**
  * A optimized form for constructing RenderPrograms with their RenderPathBooleans simplified.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

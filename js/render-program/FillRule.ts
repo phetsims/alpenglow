@@ -16,7 +16,7 @@
  * will be filled in the positive fill rule (facing the camera). Paths with clockwise orientations will be filled in
  * the negative fill rule (away from the camera).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 export type FillRule = 'nonzero' | 'evenodd' | 'positive' | 'negative';

@@ -3,7 +3,7 @@
 /**
  * Utilities for Hilbert space-filling curve mapping
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

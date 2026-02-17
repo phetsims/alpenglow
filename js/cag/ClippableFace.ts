@@ -9,7 +9,7 @@
  * edges that go OUTSIDE of the resulting bounds, so if we need to access bounds of the ClippableFace, we'll need to
  * ignore these "fake" corners.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
@@ -374,7 +374,7 @@ const emptyArray: LinearEdge[] = [];
  * A ClippableFace based on a set of line segment edges. Should still represent multiple closed loops, but it is not
  * explicit.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 export class EdgedFace implements ClippableFace {
   public constructor( public readonly edges: LinearEdge[], skipValidation = false ) {
@@ -1013,7 +1013,7 @@ export type SerializedEdgedFace = {
  * "implicit" edges/vertices are those defined by the clipped counts (minXCount, etc.)
  * "explicit" edges/vertices are those in the edges list
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 export class EdgedClippedFace implements ClippableFace {
 
@@ -1967,7 +1967,7 @@ export type SerializedEdgedClippedFace = {
  *
  * Relies on the main boundary being positive-oriented, and the holes being negative-oriented and non-overlapping
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 export class PolygonalFace implements ClippableFace {
   public constructor( public readonly polygons: Vector2[][] ) {}
@@ -2604,7 +2604,7 @@ const simplifier = new ClipSimplifier();
 /**
  * Clipping arbitrary (degenerate, non-convex, self-intersecting, etc.) polygons to the inside/outside of a circle.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 export class CircularClipping {
 
@@ -3853,7 +3853,7 @@ export type BinaryPolygonCompleteCallback = (
  * Clipping arbitrary (degenerate, non-convex, self-intersecting, etc.) polygons based on binary criteria (e.g.
  * left/right, inside/outside).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 export class BinaryClipping {
 

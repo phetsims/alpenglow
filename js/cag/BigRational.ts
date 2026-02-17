@@ -3,7 +3,7 @@
 /**
  * Contains an import-style snippet of shader code, with dependencies on other snippets.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

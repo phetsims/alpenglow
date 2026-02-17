@@ -3,7 +3,7 @@
 /**
  * Returns a LineSegmentIntersection struct containing information about the intersection point(s).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';

@@ -6,7 +6,7 @@
  * NOTE: This operates on unpremultiplied colors. Presumably for most operations, you'll want to wrap it in
  * the corresponding conversions.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Matrix4 from '../../../dot/js/Matrix4.js';

@@ -27,7 +27,7 @@
  * TODO: that much memory. ACTUALLY this depends on... the length? Likely unless we know our data is shorter, this is
  * TODO: NOT the case
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../../alpenglow.js';

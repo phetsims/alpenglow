@@ -3,7 +3,7 @@
 /**
  * WebGPU commands should be run through here, so we can record them for later playback (and possibly other reasons).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

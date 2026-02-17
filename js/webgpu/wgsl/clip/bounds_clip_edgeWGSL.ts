@@ -3,7 +3,7 @@
 /**
  * Bounds-clips a specific edge, returning a certain number of edges that are within the bounds.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { wgsl, WGSLExpression, WGSLExpressionF32, WGSLReferenceModule, wgslString, WGSLStringModule } from '../WGSLString.js';

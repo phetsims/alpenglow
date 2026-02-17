@@ -3,7 +3,7 @@
 /**
  * Test path for rendering tests, from fontawesome 4 (SIL license, as noted elsewhere)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { PolygonalFace } from '../../cag/ClippableFace.js';

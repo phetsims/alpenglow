@@ -3,7 +3,7 @@
 /**
  * Mitchell-Netravali filter (B=1/3, C=1/3 ) contribution given a polygon
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

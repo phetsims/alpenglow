@@ -5,7 +5,7 @@
  * the typical process that removes comments. Useful for noting templates used, or really anything else that can
  * benefit from seeing debugging comments in the generated shader code.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../../alpenglow.js';

@@ -4,7 +4,7 @@
  * Like RasterChunkReduceQuad, but for the initial case where our left/right values are the same, and we can do a
  * slightly different optimized reduce.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

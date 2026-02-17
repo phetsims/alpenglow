@@ -3,7 +3,7 @@
 /**
  * A line-segment edge with integer coordinates, as part of the rendering
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

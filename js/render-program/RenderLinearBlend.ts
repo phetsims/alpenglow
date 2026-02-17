@@ -11,7 +11,7 @@
  * It can be used in a standalone way, however it is primarily meant to be used when a `RenderLinearGradient`
  * is split into each linear segment.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';

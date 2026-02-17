@@ -7,7 +7,7 @@
  * more traversal for edges that were fully clipped at the start/end (so they didn't contribute at all). We would
  * instead have to find the first/last "non-degenerate" EdgeClip, so it's just easier to do it here.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../../alpenglow.js';

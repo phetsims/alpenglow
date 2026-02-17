@@ -14,7 +14,7 @@
  * Additionally, reductions can be stored in a separate array (for use in multi-level scans), AND/OR
  * scanned reductions can be added into final results (also for use in multi-level scans).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';

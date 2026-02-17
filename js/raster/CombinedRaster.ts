@@ -3,7 +3,7 @@
 /**
  * An OutputRaster that tries to efficiently write straight to ImageData when possible, and otherwise accumulates.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';

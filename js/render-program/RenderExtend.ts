@@ -3,7 +3,7 @@
 /**
  * How things can extend outside of their normal bounds (images, gradients, etc.)
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

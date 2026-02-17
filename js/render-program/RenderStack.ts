@@ -7,7 +7,7 @@
  * RenderStack will apply normal compositing/blending to a list of RenderPrograms, where each RenderProgram in the
  * list is drawn "on top" of all of the previous ones.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';

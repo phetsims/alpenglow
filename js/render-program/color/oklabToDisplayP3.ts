@@ -3,7 +3,7 @@
 /**
  * Convert a RenderProgram from Oklab to Display P3 color space.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { RenderLinearSRGBToSRGB } from '../RenderLinearSRGBToSRGB.js';

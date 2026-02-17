@@ -3,7 +3,7 @@
 /**
  * All of the needed logic for a raked workgroup scan (including the logic to load and store the data).
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';

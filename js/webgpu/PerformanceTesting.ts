@@ -3,7 +3,7 @@
 /**
  * For testing overlapping (parallel) execution of shader stages that don't write to the same memory.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

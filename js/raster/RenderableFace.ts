@@ -3,7 +3,7 @@
 /**
  * Represents a face with a RenderProgram/bounds, that can potentially be split into multiples, or optimized
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';

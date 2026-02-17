@@ -5,7 +5,7 @@
  *
  * NOTE: No final "exit" is generated, since our executor for objects won't need it.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { alpenglow } from '../alpenglow.js';

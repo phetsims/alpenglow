@@ -3,7 +3,7 @@
 /**
  * Clipping arbitrary (degenerate, non-convex, self-intersecting, etc.) polygons to within a grid.
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { clamp } from '../../../dot/js/util/clamp.js';

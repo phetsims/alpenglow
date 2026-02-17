@@ -3,7 +3,7 @@
 /**
  * Sets up the addresses so we (a) have atomics for the coarse pass, and (b) have the bin addresses for the fine pass
  *
- * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
 import { BufferSlot } from '../../compute/BufferSlot.js';
