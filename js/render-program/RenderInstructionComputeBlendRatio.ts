@@ -1,4 +1,4 @@
-// Copyright 2025, University of Colorado Boulder
+// Copyright 2025-2026, University of Colorado Boulder
 
 /**
  * Computes the blend ratio between two RenderPrograms based on a linear or radial blend.

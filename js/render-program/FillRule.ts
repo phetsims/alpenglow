@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Fill rules, for determining how to fill a path (given the winding number of a face)

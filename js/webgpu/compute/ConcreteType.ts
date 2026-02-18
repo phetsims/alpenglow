@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Represents a data type that can be serialized/deserialized to/from a binary form, both in TypeScript and in WGSL.

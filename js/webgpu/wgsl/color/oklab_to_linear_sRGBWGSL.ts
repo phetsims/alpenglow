@@ -1,4 +1,4 @@
-// Copyright 2024-2025, University of Colorado Boulder
+// Copyright 2024-2026, University of Colorado Boulder
 
 /**
  * Converts an oklab color to the linear sRGB color space.

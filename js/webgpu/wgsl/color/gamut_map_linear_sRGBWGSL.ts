@@ -1,4 +1,4 @@
-// Copyright 2024-2025, University of Colorado Boulder
+// Copyright 2024-2026, University of Colorado Boulder
 
 /**
  * Maps a linear sRGB color to a color that is within the sRGB gamut, using oklab for measuring perceptual distance.

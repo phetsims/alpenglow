@@ -1,4 +1,4 @@
-// Copyright 2025, University of Colorado Boulder
+// Copyright 2025-2026, University of Colorado Boulder
 
 /**
  * Reads the binary from from the encoder (at a specific dword offset), and returns the list of instructions.

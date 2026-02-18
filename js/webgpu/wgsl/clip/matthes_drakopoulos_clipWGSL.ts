@@ -1,4 +1,4 @@
-// Copyright 2024-2025, University of Colorado Boulder
+// Copyright 2024-2026, University of Colorado Boulder
 
 /**
  * From "Another Simple but Faster Method for 2D Line Clipping" (2019)

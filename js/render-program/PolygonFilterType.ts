@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Controls how polygons get filtered when output

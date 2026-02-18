@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Multiple stream compaction for chunks: distributes the relevant data from the clipped chunks to the reducible and

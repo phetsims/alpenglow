@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * RenderProgram for repeated compositing of multiple RenderPrograms in a row with normal blending and source-over

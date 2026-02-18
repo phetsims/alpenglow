@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * RenderProgram for a radial blend (essentially a chunk of a radial gradient with only a linear transition between

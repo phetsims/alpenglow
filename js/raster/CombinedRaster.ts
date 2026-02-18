@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * An OutputRaster that tries to efficiently write straight to ImageData when possible, and otherwise accumulates.

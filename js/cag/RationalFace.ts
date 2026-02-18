@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Represents a face with a main (positive-oriented) boundary and zero or more (negative-oriented) holes.

@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Co-rank function, that determines the indices into two arrays that would be at a given rank if they were sorted

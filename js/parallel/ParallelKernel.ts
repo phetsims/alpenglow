@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Represents a WGPU-like kernel that can be executed in parallel. Designed so that we can test WGPU-like code, but use

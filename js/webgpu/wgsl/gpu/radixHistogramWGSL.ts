@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Calculates a histogram for a section, then writes the histogram out in a striped manner ready for a prefix sum.

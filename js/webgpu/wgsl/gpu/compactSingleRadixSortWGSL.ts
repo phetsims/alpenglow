@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Performs a full radix-sort of an array in workgroup memory (which can be of length workgroupSize * grainSize),

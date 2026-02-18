@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Increments a count from within a bit-packed histogram. See bit_pack_radix_access for more documentation.

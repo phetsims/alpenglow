@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Contains all the data/methods needed by a kernel to run in parallel. Passed to the kernel execution function, so that

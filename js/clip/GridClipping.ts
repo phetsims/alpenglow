@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Clipping arbitrary (degenerate, non-convex, self-intersecting, etc.) polygons to within a grid.

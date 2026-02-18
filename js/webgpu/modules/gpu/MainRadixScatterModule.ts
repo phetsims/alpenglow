@@ -1,4 +1,4 @@
-// Copyright 2024-2025, University of Colorado Boulder
+// Copyright 2024-2026, University of Colorado Boulder
 
 /**
  * Uses a scanned histogram to perform a step of the radix sort.

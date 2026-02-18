@@ -1,4 +1,4 @@
-// Copyright 2024-2025, University of Colorado Boulder
+// Copyright 2024-2026, University of Colorado Boulder
 
 /**
  * Converts premultiplied sRGB => sRGB, while ensuring the color is within the sRGB gamut.

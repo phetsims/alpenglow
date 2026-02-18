@@ -1,4 +1,4 @@
-// Copyright 2024-2025, University of Colorado Boulder
+// Copyright 2024-2026, University of Colorado Boulder
 
 /**
  * Maps a linear Display-P3 color to a color that is within the Display-P3 gamut, using oklab for measuring perceptual distance.

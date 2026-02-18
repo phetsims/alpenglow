@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Handles finding intersections between IntegerEdges (will push RationalIntersections into the edge's intersections

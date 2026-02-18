@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * A template that performs a scan operation using workgroup memory on a single workgroup (one value per thread).

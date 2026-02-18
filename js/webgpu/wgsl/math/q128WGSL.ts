@@ -1,4 +1,4 @@
-// Copyright 2024-2025, University of Colorado Boulder
+// Copyright 2024-2026, University of Colorado Boulder
 
 /**
  * Alias for q128, which is a rational number with a 64-bit (signed) numerator and a 64-bit (unsigned) denominator.

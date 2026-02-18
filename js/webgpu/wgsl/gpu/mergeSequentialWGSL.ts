@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * A template that merges together two sorted arrays into a single sorted array (in a fully sequential single-thread way)

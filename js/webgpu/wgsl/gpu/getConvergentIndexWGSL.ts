@@ -1,4 +1,4 @@
-// Copyright 2023-2025, University of Colorado Boulder
+// Copyright 2023-2026, University of Colorado Boulder
 
 /**
  * Returns the bit-reversed version of the given value, such that it is sufficient for the convergent-indexed reduce.
