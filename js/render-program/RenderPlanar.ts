@@ -11,7 +11,6 @@ import Plane3 from '../../../dot/js/Plane3.js';
 import Range from '../../../dot/js/Range.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
-import { alpenglow } from '../alpenglow.js';
 import type { ClippableFace } from '../cag/ClippableFace.js';
 import { EdgedFace } from '../cag/ClippableFace.js';
 import type { RenderProgram } from './RenderProgram.js';
@@ -141,5 +140,3 @@ export class RenderPlanar {
     return new RenderPlanar( program, this.pointA, this.pointB, this.pointC );
   }
 }
-
-alpenglow.register( 'RenderPlanar', RenderPlanar );

@@ -10,10 +10,9 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow } from '../alpenglow.js';
-import { RenderProgram } from './RenderProgram.js';
 import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
 import { RenderInstruction, RenderInstructionPush } from './RenderInstruction.js';
+import { RenderProgram } from './RenderProgram.js';
 
 // TODO: consider transforms as a node itself? Meh probably excessive?
 
@@ -580,8 +579,6 @@ export class RenderColor extends RenderProgram {
     };
   }
 }
-
-alpenglow.register( 'RenderColor', RenderColor );
 
 export type SerializedRenderColor = {
   type: 'RenderColor';

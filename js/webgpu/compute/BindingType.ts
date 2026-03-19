@@ -6,8 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
-
 export abstract class BindingType {
 
   protected abstract mutateBindGroupLayoutEntry( entry: GPUBindGroupLayoutEntry ): void;
@@ -28,4 +26,3 @@ export abstract class BindingType {
     return entry;
   }
 }
-alpenglow.register( 'BindingType', BindingType );

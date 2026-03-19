@@ -8,7 +8,6 @@
 
 import Vector3 from '../../../dot/js/Vector3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow } from '../alpenglow.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { RenderBlendType } from './RenderBlendType.js';
 import { RenderColor } from './RenderColor.js';
@@ -527,8 +526,6 @@ export class RenderBlendCompose extends RenderProgram {
     };
   }
 }
-
-alpenglow.register( 'RenderBlendCompose', RenderBlendCompose );
 
 export class RenderBlendComposeLogic {
   public constructor(

@@ -6,15 +6,14 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
-import { DeviceContext } from './compute/DeviceContext.js';
-import { getArrayType, U32Order } from './compute/ConcreteType.js';
+import { toFixed } from '../../../dot/js/util/toFixed.js';
 import { BufferArraySlot } from './compute/BufferArraySlot.js';
+import { getArrayType, U32Order } from './compute/ConcreteType.js';
+import { DeviceContext } from './compute/DeviceContext.js';
+import { Procedure } from './compute/Procedure.js';
+import { Routine } from './compute/Routine.js';
 import { RadixSortModule } from './modules/gpu/RadixSortModule.js';
 import { u32S } from './wgsl/WGSLString.js';
-import { Routine } from './compute/Routine.js';
-import { Procedure } from './compute/Procedure.js';
-import { toFixed } from '../../../dot/js/util/toFixed.js';
 
 export class PerformanceTesting {
   public static async loopRadixSortTest(
@@ -111,5 +110,3 @@ export class PerformanceTesting {
     await step();
   }
 }
-
-alpenglow.register( 'PerformanceTesting', PerformanceTesting );

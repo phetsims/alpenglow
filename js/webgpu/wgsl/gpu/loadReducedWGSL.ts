@@ -12,13 +12,12 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow } from '../../../alpenglow.js';
-import { u32S, wgsl, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { BinaryOp } from '../../compute/ConcreteType.js';
+import { u32S, wgsl, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../WGSLUtils.js';
-import { conditionalIfWGSL } from './conditionalIfWGSL.js';
 import { binaryExpressionStatementWGSL } from './binaryExpressionStatementWGSL.js';
 import { commentWGSL } from './commentWGSL.js';
+import { conditionalIfWGSL } from './conditionalIfWGSL.js';
 import { unrollWGSL } from './unrollWGSL.js';
 
 // CASE: if commutative reduce, we want to load coalesced, keep striped, so we can skip extra workgroupBarriers and
@@ -240,5 +239,3 @@ export const loadReducedWGSL = <T>(
     ${commentWGSL( 'end load_reduced' )}
   `;
 };
-
-alpenglow.register( 'loadReducedWGSL', loadReducedWGSL );

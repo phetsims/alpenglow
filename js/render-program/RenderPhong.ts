@@ -7,15 +7,14 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow } from '../alpenglow.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
-import { RenderLight } from './RenderLight.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
-import type { RenderExecutionStack } from './RenderExecutionStack.js';
-import type { RenderExecutor } from './RenderExecutor.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { RenderColor } from './RenderColor.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import { RenderLight } from './RenderLight.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 
 export class RenderPhong extends RenderProgram {
   public constructor(
@@ -196,8 +195,6 @@ export class RenderPhong extends RenderProgram {
     };
   }
 }
-
-alpenglow.register( 'RenderPhong', RenderPhong );
 
 const scratchAmbientVector = new Vector4( 0, 0, 0, 0 );
 const scratchDiffuseVector = new Vector4( 0, 0, 0, 0 );

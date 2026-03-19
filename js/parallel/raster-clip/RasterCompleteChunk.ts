@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
 import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
 import type { ParallelStorageArray } from '../ParallelStorageArray.js';
 import type { RasterCompleteEdge } from './RasterCompleteEdge.js';
@@ -192,5 +191,3 @@ export class RasterCompleteChunk {
     }
   }
 }
-
-alpenglow.register( 'RasterCompleteChunk', RasterCompleteChunk );

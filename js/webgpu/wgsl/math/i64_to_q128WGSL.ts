@@ -10,9 +10,9 @@
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
 import { i64WGSL } from './i64WGSL.js';
-import { q128WGSL } from './q128WGSL.js';
 import { is_negative_i64WGSL } from './is_negative_i64WGSL.js';
 import { negate_i64WGSL } from './negate_i64WGSL.js';
+import { q128WGSL } from './q128WGSL.js';
 
 export const i64_to_q128WGSL = (
   numerator: WGSLExpression,

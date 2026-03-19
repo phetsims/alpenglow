@@ -6,15 +6,14 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { roundSymmetric } from '../../../../dot/js/util/roundSymmetric.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
-import { alpenglow } from '../../alpenglow.js';
-import type { DeviceContext } from './DeviceContext.js';
+import { webgpu } from '../WebGPUAPI.js';
 import { BufferLogger } from './BufferLogger.js';
 import { ComputePass } from './ComputePass.js';
-import type { TypedBuffer } from './TypedBuffer.js';
-import { webgpu } from '../WebGPUAPI.js';
 import { ConsoleLogger } from './ConsoleLogger.js';
-import { roundSymmetric } from '../../../../dot/js/util/roundSymmetric.js';
+import type { DeviceContext } from './DeviceContext.js';
+import type { TypedBuffer } from './TypedBuffer.js';
 
 export type ExecutorOptions = {
   getTimestampWrites?: ( name: string ) => GPUComputePassTimestampWrites | null;
@@ -158,4 +157,3 @@ export class Executor {
     return outputPromise;
   }
 }
-alpenglow.register( 'Executor', Executor );

@@ -15,14 +15,14 @@
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
-import { u64WGSL } from './u64WGSL.js';
-import { is_zero_u64WGSL } from './is_zero_u64WGSL.js';
-import { first_leading_bit_u64WGSL } from './first_leading_bit_u64WGSL.js';
-import { left_shift_u64WGSL } from './left_shift_u64WGSL.js';
 import { cmp_u64_u64WGSL } from './cmp_u64_u64WGSL.js';
-import { subtract_i64_i64WGSL } from './subtract_i64_i64WGSL.js';
+import { first_leading_bit_u64WGSL } from './first_leading_bit_u64WGSL.js';
+import { is_zero_u64WGSL } from './is_zero_u64WGSL.js';
+import { left_shift_u64WGSL } from './left_shift_u64WGSL.js';
 import { ONE_u64WGSL } from './ONE_u64WGSL.js';
 import { right_shift_u64WGSL } from './right_shift_u64WGSL.js';
+import { subtract_i64_i64WGSL } from './subtract_i64_i64WGSL.js';
+import { u64WGSL } from './u64WGSL.js';
 
 export const div_u64_u64WGSL = (
   a: WGSLExpression,

@@ -6,8 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
-
 export enum RenderComposeType {
   Over = 0,
   In = 1,
@@ -18,8 +16,6 @@ export enum RenderComposeType {
   PlusLighter = 6
   // 3 bits in binary representation
 }
-
-alpenglow.register( 'RenderComposeType', RenderComposeType );
 
 export const RENDER_COMPOSE_CONSTANTS = {
   ComposeOver: RenderComposeType.Over,

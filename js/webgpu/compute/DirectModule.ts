@@ -7,9 +7,8 @@
  */
 
 import Vector3 from '../../../../dot/js/Vector3.js';
-import { alpenglow } from '../../alpenglow.js';
-import { Module } from './Module.js';
 import type { WGSLMainModule } from '../wgsl/WGSLString.js';
+import { Module } from './Module.js';
 import { PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions } from './PipelineBlueprint.js';
 
 type SelfOptions<T> = {
@@ -43,4 +42,3 @@ export class DirectModule<T> extends Module<T> {
     } );
   }
 }
-alpenglow.register( 'DirectModule', DirectModule );

@@ -11,14 +11,13 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow } from '../alpenglow.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
-import type { RenderExecutionStack } from './RenderExecutionStack.js';
-import type { RenderExecutor } from './RenderExecutor.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { RenderColor } from './RenderColor.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 
 export class RenderStack extends RenderProgram {
   /**
@@ -178,8 +177,6 @@ export class RenderStack extends RenderProgram {
     };
   }
 }
-
-alpenglow.register( 'RenderStack', RenderStack );
 
 const scratchVector = new Vector4( 0, 0, 0, 0 );
 const scratchVector2 = new Vector4( 0, 0, 0, 0 );

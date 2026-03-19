@@ -7,7 +7,6 @@
  */
 
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import { alpenglow } from '../../alpenglow.js';
 import type { BufferSlot } from './BufferSlot.js';
 
 export class BufferSlotSlice {
@@ -16,4 +15,3 @@ export class BufferSlotSlice {
     public readonly offset: number
   ) {}
 }
-alpenglow.register( 'BufferSlotSlice', BufferSlotSlice );

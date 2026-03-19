@@ -7,14 +7,13 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow } from '../../../alpenglow.js';
-import { wgsl, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { BinaryOp } from '../../compute/ConcreteType.js';
+import { wgsl, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { GlobalIndexable, LocalIndexable, OptionalLengthExpressionable, RakedSizable, WorkgroupIndexable } from '../WGSLUtils.js';
-import { scanRakedWGSL, scanRakedWGSLOptions } from './scanRakedWGSL.js';
-import { loadMultipleWGSL, loadMultipleWGSLOptions } from './loadMultipleWGSL.js';
-import { commentWGSL } from './commentWGSL.js';
 import { coalescedLoopWGSL } from './coalescedLoopWGSL.js';
+import { commentWGSL } from './commentWGSL.js';
+import { loadMultipleWGSL, loadMultipleWGSLOptions } from './loadMultipleWGSL.js';
+import { scanRakedWGSL, scanRakedWGSLOptions } from './scanRakedWGSL.js';
 
 type SelfOptions<T> = {
   // varname of input var<storage> array<{valueType}>
@@ -116,5 +115,3 @@ export const scanComprehensiveWGSL = <T>(
     ${commentWGSL( 'end scan_comprehensive' )}
   `;
 };
-
-alpenglow.register( 'scanComprehensiveWGSL', scanComprehensiveWGSL );

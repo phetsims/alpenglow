@@ -8,15 +8,14 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow } from '../../../alpenglow.js';
-import type { BufferSlot } from '../../compute/BufferSlot.js';
-import { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
-import { TwoPassCoarseRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassCoarseRenderableFace.js';
 import { LinearEdge } from '../../../cag/LinearEdge.js';
-import { TwoPassFineRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassFineRenderableFace.js';
-import { MAIN_TWO_PASS_COARSE_DEFAULTS, mainTwoPassCoarseWGSL, mainTwoPassCoarseWGSLOptions } from '../../wgsl/rasterize-two-pass/mainTwoPassCoarseWGSL.js';
-import { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import type { BufferSlot } from '../../compute/BufferSlot.js';
 import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
+import { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { MAIN_TWO_PASS_COARSE_DEFAULTS, mainTwoPassCoarseWGSL, mainTwoPassCoarseWGSLOptions } from '../../wgsl/rasterize-two-pass/mainTwoPassCoarseWGSL.js';
+import { TwoPassCoarseRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassCoarseRenderableFace.js';
+import { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
+import { TwoPassFineRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassFineRenderableFace.js';
 
 export type MainTwoPassCoarseModuleOptions = {
   // input
@@ -70,4 +69,3 @@ export class MainTwoPassCoarseModule extends DirectModule<number> {
     this.addresses = options.addresses;
   }
 }
-alpenglow.register( 'MainTwoPassCoarseModule', MainTwoPassCoarseModule );

@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
 import { BufferSlot } from './BufferSlot.js';
 import type { ConcreteArrayType } from './ConcreteType.js';
 
@@ -22,4 +21,3 @@ export class BufferArraySlot<T = unknown> extends BufferSlot<T[]> {
     return this.concreteArrayType.length;
   }
 }
-alpenglow.register( 'BufferArraySlot', BufferArraySlot );

@@ -6,14 +6,13 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
+import { RenderDepthSort } from './RenderDepthSort.js';
 import type { RenderPath } from './RenderPath.js';
-import { RenderTrail } from './RenderTrail.js';
+import { RenderPathBoolean } from './RenderPathBoolean.js';
+import { RenderPlanar } from './RenderPlanar.js';
 import type { RenderProgram } from './RenderProgram.js';
 import { RenderStack } from './RenderStack.js';
-import { RenderDepthSort } from './RenderDepthSort.js';
-import { RenderPlanar } from './RenderPlanar.js';
-import { RenderPathBoolean } from './RenderPathBoolean.js';
+import { RenderTrail } from './RenderTrail.js';
 
 const emptyIndexArray: number[] = [];
 
@@ -177,8 +176,6 @@ export class RenderPathReplacer {
     return program instanceof RenderPathBoolean && program.outside.isFullyTransparent;
   }
 }
-
-alpenglow.register( 'RenderPathReplacer', RenderPathReplacer );
 
 class RenderScaffold {
 

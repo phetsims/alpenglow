@@ -10,11 +10,10 @@
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';
-import { alpenglow } from '../alpenglow.js';
-import type { ParallelWorkgroupArray } from './ParallelWorkgroupArray.js';
+import type { ParallelExecutor } from './ParallelExecutor.js';
 import type { ParallelKernel } from './ParallelKernel.js';
 import type { ParallelWorkgroup } from './ParallelWorkgroup.js';
-import type { ParallelExecutor } from './ParallelExecutor.js';
+import type { ParallelWorkgroupArray } from './ParallelWorkgroupArray.js';
 
 export type BaseWorkgroupValues = Record<string, ParallelWorkgroupArray<unknown> | number>;
 
@@ -71,5 +70,3 @@ export class ParallelContext<WorkgroupValues extends BaseWorkgroupValues> {
     return this.executor.afterGet();
   }
 }
-
-alpenglow.register( 'ParallelContext', ParallelContext );

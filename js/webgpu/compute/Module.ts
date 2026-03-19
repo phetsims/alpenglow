@@ -6,11 +6,10 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
-import type { PipelineBlueprint } from './PipelineBlueprint.js';
-import type { ExecutionContext } from './ExecutionContext.js';
-import type { ResourceSlot } from './ResourceSlot.js';
 import { BufferSlot } from './BufferSlot.js';
+import type { ExecutionContext } from './ExecutionContext.js';
+import type { PipelineBlueprint } from './PipelineBlueprint.js';
+import type { ResourceSlot } from './ResourceSlot.js';
 
 export class Module<T> {
   public constructor(
@@ -45,4 +44,3 @@ export class Module<T> {
     ];
   }
 }
-alpenglow.register( 'Module', Module );

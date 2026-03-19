@@ -8,12 +8,11 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
+import { ParallelKernel } from '../ParallelKernel.js';
 import type { ParallelStorageArray } from '../ParallelStorageArray.js';
 import type { RasterChunk } from './RasterChunk.js';
 import { RasterClippedChunk } from './RasterClippedChunk.js';
-import { ParallelKernel } from '../ParallelKernel.js';
-import { ParallelExecutor } from '../ParallelExecutor.js';
 
 export class ParallelRasterInitialChunk {
   public static async dispatch(
@@ -172,5 +171,3 @@ export class ParallelRasterInitialChunk {
     }
   }
 }
-
-alpenglow.register( 'ParallelRasterInitialChunk', ParallelRasterInitialChunk );

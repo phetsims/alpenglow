@@ -10,10 +10,9 @@
 
 import optionize from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { alpenglow } from '../../../alpenglow.js';
 import { u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
-import { nBitCompactSingleSortWGSL, nBitCompactSingleSortWGSLOptions } from './nBitCompactSingleSortWGSL.js';
 import { commentWGSL } from './commentWGSL.js';
+import { nBitCompactSingleSortWGSL, nBitCompactSingleSortWGSLOptions } from './nBitCompactSingleSortWGSL.js';
 
 export type compactSingleRadixSortWGSLOptions<T> = {
   // number of bits in the key
@@ -45,5 +44,3 @@ export const compactSingleRadixSortWGSL = <T>(
     ${commentWGSL( 'end compact_single_radix_sort' )}
   `;
 };
-
-alpenglow.register( 'compactSingleRadixSortWGSL', compactSingleRadixSortWGSL );

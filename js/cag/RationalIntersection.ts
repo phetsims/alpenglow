@@ -6,12 +6,9 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
 import type { BigRational } from './BigRational.js';
 import type { BigRationalVector2 } from './BigRationalVector2.js';
 
 export class RationalIntersection {
   public constructor( public readonly t: BigRational, public readonly point: BigRationalVector2 ) {}
 }
-
-alpenglow.register( 'RationalIntersection', RationalIntersection );

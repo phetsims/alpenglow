@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
 import type { RenderProgram } from './RenderProgram.js';
 
 export class RenderTrail {
@@ -38,5 +37,3 @@ export class RenderTrail {
     return a.compare( b );
   }
 }
-
-alpenglow.register( 'RenderTrail', RenderTrail );

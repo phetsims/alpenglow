@@ -11,15 +11,14 @@
 
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow } from '../alpenglow.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
-import type { RenderExecutionStack } from './RenderExecutionStack.js';
-import type { RenderExecutor } from './RenderExecutor.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { RenderColor } from './RenderColor.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
 import { RenderPathBoolean } from './RenderPathBoolean.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 
 export class RenderFilter extends RenderProgram {
 
@@ -128,8 +127,6 @@ export class RenderFilter extends RenderProgram {
     };
   }
 }
-
-alpenglow.register( 'RenderFilter', RenderFilter );
 
 export class RenderFilterLogic {
   public constructor(

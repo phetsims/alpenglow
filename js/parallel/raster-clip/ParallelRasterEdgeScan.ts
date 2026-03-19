@@ -10,17 +10,16 @@
  */
 
 import Vector2 from '../../../../dot/js/Vector2.js';
-import { alpenglow } from '../../alpenglow.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
+import { ParallelKernel } from '../ParallelKernel.js';
 import type { ParallelStorageArray } from '../ParallelStorageArray.js';
+import { ParallelUtils } from '../ParallelUtils.js';
+import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
 import type { RasterClippedChunk } from './RasterClippedChunk.js';
+import { RasterCompleteEdge } from './RasterCompleteEdge.js';
+import { RasterEdge } from './RasterEdge.js';
 import type { RasterEdgeClip } from './RasterEdgeClip.js';
 import { RasterSplitReduceData } from './RasterSplitReduceData.js';
-import { RasterEdge } from './RasterEdge.js';
-import { RasterCompleteEdge } from './RasterCompleteEdge.js';
-import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
-import { ParallelKernel } from '../ParallelKernel.js';
-import { ParallelUtils } from '../ParallelUtils.js';
-import { ParallelExecutor } from '../ParallelExecutor.js';
 
 const nanVector = new Vector2( NaN, NaN );
 
@@ -192,5 +191,3 @@ export class ParallelRasterEdgeScan {
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdgeClips / workgroupSize ) ) );
   }
 }
-
-alpenglow.register( 'ParallelRasterEdgeScan', ParallelRasterEdgeScan );

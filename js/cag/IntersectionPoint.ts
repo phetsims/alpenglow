@@ -6,9 +6,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
-import { BigRational } from './BigRational.js';
 import type { BigIntVector2 } from './BigIntVector2.js';
+import { BigRational } from './BigRational.js';
 import { BigRationalVector2 } from './BigRationalVector2.js';
 
 export class IntersectionPoint {
@@ -209,5 +208,3 @@ export class IntersectionPoint {
     }
   }
 }
-
-alpenglow.register( 'IntersectionPoint', IntersectionPoint );

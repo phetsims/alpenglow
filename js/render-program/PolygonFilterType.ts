@@ -7,7 +7,6 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { alpenglow } from '../alpenglow.js';
 
 export enum PolygonFilterType {
   Box = 0,
@@ -105,5 +104,3 @@ export const getPolygonFilterGridBounds = ( bounds: Bounds2, filterType: Polygon
 
   return bounds.dilated( filterExtension );
 };
-
-alpenglow.register( 'PolygonFilterType', PolygonFilterType );

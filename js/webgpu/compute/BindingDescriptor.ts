@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
 import type { BindingType } from './BindingType.js';
 import type { ResourceSlot } from './ResourceSlot.js';
 
@@ -21,4 +20,3 @@ export class BindingDescriptor {
     return this.bindingType.getBindGroupLayoutEntry( this.bindingIndex );
   }
 }
-alpenglow.register( 'BindingDescriptor', BindingDescriptor );

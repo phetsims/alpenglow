@@ -13,7 +13,6 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow } from '../alpenglow.js';
 import { RenderColor } from '../render-program/RenderColor.js';
 import type { RasterColorConverter } from './RasterColorConverter.js';
 
@@ -126,5 +125,3 @@ export class RasterPremultipliedConverter implements RasterColorConverter {
     return new Vector4( scale, scale, scale, 255 * color.w );
   }
 }
-
-alpenglow.register( 'RasterPremultipliedConverter', RasterPremultipliedConverter );

@@ -7,7 +7,6 @@
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';
-import { alpenglow } from '../alpenglow.js';
 
 export class Mesh {
 
@@ -154,5 +153,3 @@ export class MeshLine {
   public readonly vertexIndices: number[] = [];
   public readonly uvIndices: number[] = [];
 }
-
-alpenglow.register( 'Mesh', Mesh );

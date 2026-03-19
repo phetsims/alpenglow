@@ -8,7 +8,6 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow } from '../alpenglow.js';
 import type { ClippableFace } from '../cag/ClippableFace.js';
 import { PolygonalFace } from '../cag/ClippableFace.js';
 import type { RenderableFace } from '../raster/RenderableFace.js';
@@ -274,8 +273,6 @@ export abstract class RenderProgram {
     return renderProgram.simplified();
   }
 }
-
-alpenglow.register( 'RenderProgram', RenderProgram );
 
 export type SerializedRenderProgram = {
   type: string;

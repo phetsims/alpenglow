@@ -8,9 +8,8 @@
 
 import Vector3 from '../../../../dot/js/Vector3.js';
 import StrictOmit from '../../../../phet-core/js/types/StrictOmit.js';
-import { alpenglow } from '../../alpenglow.js';
-import type { ConcreteType } from './ConcreteType.js';
 import { ByteEncoder } from './ByteEncoder.js';
+import type { ConcreteType } from './ConcreteType.js';
 
 export type ConsoleLogInfo<T = unknown> = {
   // Filled in when registered
@@ -335,5 +334,3 @@ export class ConsoleLoggedShader {
     this.threads.sort( ( a, b ) => a.compare( b ) );
   }
 }
-
-alpenglow.register( 'ConsoleLogger', ConsoleLogger );

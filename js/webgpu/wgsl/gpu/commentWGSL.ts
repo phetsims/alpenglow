@@ -8,7 +8,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../../alpenglow.js';
 import { wgsl, wgslString, WGSLString } from '../WGSLString.js';
 
 export const commentWGSL = (
@@ -16,5 +15,3 @@ export const commentWGSL = (
 ): WGSLString => {
   return wgsl`/*** ${wgslString( str )} ***/`;
 };
-
-alpenglow.register( 'commentWGSL', commentWGSL );

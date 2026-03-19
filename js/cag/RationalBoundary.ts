@@ -9,10 +9,9 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow } from '../alpenglow.js';
+import type { BigRationalVector2 } from './BigRationalVector2.js';
 import { LinearEdge } from './LinearEdge.js';
 import type { RationalHalfEdge } from './RationalHalfEdge.js';
-import type { BigRationalVector2 } from './BigRationalVector2.js';
 
 export class RationalBoundary {
   public readonly edges: RationalHalfEdge[] = [];
@@ -76,5 +75,3 @@ export class RationalBoundary {
     return result;
   }
 }
-
-alpenglow.register( 'RationalBoundary', RationalBoundary );

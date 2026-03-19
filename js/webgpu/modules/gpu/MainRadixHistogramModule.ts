@@ -8,11 +8,10 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow } from '../../../alpenglow.js';
 import type { BufferArraySlot } from '../../compute/BufferArraySlot.js';
-import { MAIN_RADIX_HISTOGRAM_DEFAULTS, mainRadixHistogramWGSL, mainRadixHistogramWGSLOptions } from '../../wgsl/gpu/mainRadixHistogramWGSL.js';
-import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
 import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { MAIN_RADIX_HISTOGRAM_DEFAULTS, mainRadixHistogramWGSL, mainRadixHistogramWGSLOptions } from '../../wgsl/gpu/mainRadixHistogramWGSL.js';
 
 export type MainRadixHistogramModuleOptions<T> = {
   input: BufferArraySlot<T>;
@@ -48,4 +47,3 @@ export class MainRadixHistogramModule<T> extends DirectModule<number> {
     this.output = options.output;
   }
 }
-alpenglow.register( 'MainRadixHistogramModule', MainRadixHistogramModule );

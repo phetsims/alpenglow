@@ -17,10 +17,10 @@ import { RenderGradientStop } from '../render-program/RenderGradientStop.js';
 import { RenderPath } from '../render-program/RenderPath.js';
 import { RenderPathBoolean } from '../render-program/RenderPathBoolean.js';
 import { RenderRadialGradient } from '../render-program/RenderRadialGradient.js';
+import { RenderRadialGradientAccuracy } from '../render-program/RenderRadialGradientAccuracy.js';
 import { RenderStack } from '../render-program/RenderStack.js';
 import { CombinedRaster } from './CombinedRaster.js';
 import { Rasterize } from './Rasterize.js';
-import { RenderRadialGradientAccuracy } from '../render-program/RenderRadialGradientAccuracy.js';
 
 QUnit.module( 'Rasterize' );
 

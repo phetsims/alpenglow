@@ -11,14 +11,13 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow } from '../alpenglow.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
-import type { RenderExecutionStack } from './RenderExecutionStack.js';
-import type { RenderExecutor } from './RenderExecutor.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { RenderColor } from './RenderColor.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderExecutor } from './RenderExecutor.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 
 // REVIEW: What does the accuracy do?
 export enum RenderBarycentricBlendAccuracy {
@@ -27,8 +26,6 @@ export enum RenderBarycentricBlendAccuracy {
 }
 
 const scratchCentroid = new Vector2( 0, 0 );
-
-alpenglow.register( 'RenderBarycentricBlendAccuracy', RenderBarycentricBlendAccuracy );
 
 export class RenderBarycentricBlend extends RenderProgram {
 
@@ -138,8 +135,6 @@ export class RenderBarycentricBlend extends RenderProgram {
     };
   }
 }
-
-alpenglow.register( 'RenderBarycentricBlend', RenderBarycentricBlend );
 
 export class RenderBarycentricBlendLogic {
 

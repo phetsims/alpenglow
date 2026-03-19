@@ -7,9 +7,8 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow } from '../../../alpenglow.js';
-import { u32S, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { BinaryOp } from '../../compute/ConcreteType.js';
+import { u32S, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, WorkgroupSizable } from '../WGSLUtils.js';
 import { binaryExpressionStatementWGSL } from './binaryExpressionStatementWGSL.js';
 import { commentWGSL } from './commentWGSL.js';
@@ -120,5 +119,3 @@ export const reduceWGSL = <T>(
     ${commentWGSL( 'end reduce' )}
   `;
 };
-
-alpenglow.register( 'reduceWGSL', reduceWGSL );

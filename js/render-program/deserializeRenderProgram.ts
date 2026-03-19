@@ -6,6 +6,11 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import Matrix3 from '../../../dot/js/Matrix3.js';
+import Matrix4 from '../../../dot/js/Matrix4.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import Vector3 from '../../../dot/js/Vector3.js';
+import Vector4 from '../../../dot/js/Vector4.js';
 import { RenderAlpha, SerializedRenderAlpha } from './RenderAlpha.js';
 import { RenderBarycentricBlend, SerializedRenderBarycentricBlend } from './RenderBarycentricBlend.js';
 import { RenderBarycentricPerspectiveBlend, SerializedRenderBarycentricPerspectiveBlend } from './RenderBarycentricPerspectiveBlend.js';
@@ -14,34 +19,28 @@ import { RenderColor, SerializedRenderColor } from './RenderColor.js';
 import { RenderColorSpaceConversion, SerializedRenderColorSpaceConversion } from './RenderColorSpaceConversion.js';
 import { RenderDepthSort, SerializedRenderDepthSort } from './RenderDepthSort.js';
 import { RenderFilter, SerializedRenderFilter } from './RenderFilter.js';
+import { RenderGradientStop, SerializedRenderGradientStop } from './RenderGradientStop.js';
 import { RenderImage, SerializedRenderImage } from './RenderImage.js';
 import { RenderLinearBlend, SerializedRenderLinearBlend } from './RenderLinearBlend.js';
+import { RenderLinearDisplayP3ToLinearSRGB } from './RenderLinearDisplayP3ToLinearSRGB.js';
 import { RenderLinearGradient, SerializedRenderLinearGradient } from './RenderLinearGradient.js';
+import { RenderLinearSRGBToLinearDisplayP3 } from './RenderLinearSRGBToLinearDisplayP3.js';
+import { RenderLinearSRGBToOklab } from './RenderLinearSRGBToOklab.js';
+import { RenderLinearSRGBToSRGB } from './RenderLinearSRGBToSRGB.js';
 import { RenderNormalDebug, SerializedRenderNormalDebug } from './RenderNormalDebug.js';
 import { RenderNormalize, SerializedRenderNormalize } from './RenderNormalize.js';
+import { RenderOklabToLinearSRGB } from './RenderOklabToLinearSRGB.js';
+import { RenderPath } from './RenderPath.js';
 import { RenderPathBoolean, SerializedRenderPathBoolean } from './RenderPathBoolean.js';
 import { RenderPhong, SerializedRenderPhong } from './RenderPhong.js';
+import { RenderPlanar } from './RenderPlanar.js';
+import { RenderPremultiply } from './RenderPremultiply.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 import { RenderRadialBlend, SerializedRenderRadialBlend } from './RenderRadialBlend.js';
 import { RenderRadialGradient, SerializedRenderRadialGradient } from './RenderRadialGradient.js';
-import { RenderStack, SerializedRenderStack } from './RenderStack.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import Vector3 from '../../../dot/js/Vector3.js';
-import { RenderPremultiply } from './RenderPremultiply.js';
-import { RenderUnpremultiply } from './RenderUnpremultiply.js';
-import { RenderLinearSRGBToOklab } from './RenderLinearSRGBToOklab.js';
-import { RenderOklabToLinearSRGB } from './RenderOklabToLinearSRGB.js';
 import { RenderSRGBToLinearSRGB } from './RenderSRGBToLinearSRGB.js';
-import { RenderLinearDisplayP3ToLinearSRGB } from './RenderLinearDisplayP3ToLinearSRGB.js';
-import { RenderLinearSRGBToLinearDisplayP3 } from './RenderLinearSRGBToLinearDisplayP3.js';
-import { RenderLinearSRGBToSRGB } from './RenderLinearSRGBToSRGB.js';
-import { RenderPlanar } from './RenderPlanar.js';
-import Matrix4 from '../../../dot/js/Matrix4.js';
-import Vector4 from '../../../dot/js/Vector4.js';
-import { RenderGradientStop, SerializedRenderGradientStop } from './RenderGradientStop.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
-import { RenderPath } from './RenderPath.js';
-import { alpenglow } from '../alpenglow.js';
+import { RenderStack, SerializedRenderStack } from './RenderStack.js';
+import { RenderUnpremultiply } from './RenderUnpremultiply.js';
 
 export const deserializeRenderProgram = ( obj: SerializedRenderProgram ): RenderProgram => {
   if ( obj.type === 'RenderStack' ) {
@@ -101,7 +100,6 @@ export const deserializeRenderProgram = ( obj: SerializedRenderProgram ): Render
 
   throw new Error( `Unrecognized RenderProgram type: ${obj.type}` );
 };
-alpenglow.register( 'deserializeRenderProgram', deserializeRenderProgram );
 
 export const deserializeRenderAlpha = ( obj: SerializedRenderAlpha ): RenderAlpha => {
   return new RenderAlpha( deserializeRenderProgram( obj.program ), obj.alpha );

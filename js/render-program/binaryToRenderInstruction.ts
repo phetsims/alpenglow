@@ -7,27 +7,26 @@
  */
 
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { binaryToRenderInstructionComputeBlendRatio } from './binaryToRenderInstructionComputeBlendRatio.js';
+import { binaryToRenderInstructionComputeGradientRatio } from './binaryToRenderInstructionComputeGradientRatio.js';
+import { RenderInstructionBarycentricBlend } from './RenderBarycentricBlend.js';
+import { RenderInstructionBarycentricPerspectiveBlend } from './RenderBarycentricPerspectiveBlend.js';
+import { RenderInstructionBlendCompose } from './RenderBlendCompose.js';
+import { RenderInstructionFilter } from './RenderFilter.js';
 import { RenderInstruction, RenderInstructionExit, RenderInstructionLocation, RenderInstructionMultiplyScalar, RenderInstructionPush, RenderInstructionReturn } from './RenderInstruction.js';
-import { RenderInstructionPremultiply } from './RenderPremultiply.js';
-import { RenderInstructionUnpremultiply } from './RenderUnpremultiply.js';
-import { RenderInstructionOpaqueJump, RenderInstructionStackBlend } from './RenderStack.js';
 import { RenderInstructionLinearBlend } from './RenderLinearBlend.js';
 import { RenderInstructionLinearDisplayP3ToLinearSRGB } from './RenderLinearDisplayP3ToLinearSRGB.js';
 import { RenderInstructionLinearSRGBToLinearDisplayP3 } from './RenderLinearSRGBToLinearDisplayP3.js';
 import { RenderInstructionLinearSRGBToOklab } from './RenderLinearSRGBToOklab.js';
 import { RenderInstructionLinearSRGBToSRGB } from './RenderLinearSRGBToSRGB.js';
-import { RenderInstructionOklabToLinearSRGB } from './RenderOklabToLinearSRGB.js';
-import { RenderInstructionSRGBToLinearSRGB } from './RenderSRGBToLinearSRGB.js';
-import { RenderInstructionNormalize } from './RenderNormalize.js';
-import { RenderInstructionBlendCompose } from './RenderBlendCompose.js';
 import { RenderInstructionNormalDebug } from './RenderNormalDebug.js';
+import { RenderInstructionNormalize } from './RenderNormalize.js';
+import { RenderInstructionOklabToLinearSRGB } from './RenderOklabToLinearSRGB.js';
 import { RenderInstructionPhong } from './RenderPhong.js';
-import { RenderInstructionBarycentricBlend } from './RenderBarycentricBlend.js';
-import { RenderInstructionBarycentricPerspectiveBlend } from './RenderBarycentricPerspectiveBlend.js';
-import { RenderInstructionFilter } from './RenderFilter.js';
-import { alpenglow } from '../alpenglow.js';
-import { binaryToRenderInstructionComputeBlendRatio } from './binaryToRenderInstructionComputeBlendRatio.js';
-import { binaryToRenderInstructionComputeGradientRatio } from './binaryToRenderInstructionComputeGradientRatio.js';
+import { RenderInstructionPremultiply } from './RenderPremultiply.js';
+import { RenderInstructionSRGBToLinearSRGB } from './RenderSRGBToLinearSRGB.js';
+import { RenderInstructionOpaqueJump, RenderInstructionStackBlend } from './RenderStack.js';
+import { RenderInstructionUnpremultiply } from './RenderUnpremultiply.js';
 
 export const binaryToRenderInstruction = (
   encoder: ByteEncoder,
@@ -91,4 +90,3 @@ export const binaryToRenderInstruction = (
       throw new Error( `Unknown/unimplemented instruction code: ${code}` );
   }
 };
-alpenglow.register( 'binaryToRenderInstruction', binaryToRenderInstruction );

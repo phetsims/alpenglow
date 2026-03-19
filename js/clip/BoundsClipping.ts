@@ -61,9 +61,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow } from '../alpenglow.js';
-import { ClipSimplifier } from './ClipSimplifier.js';
 import { LinearEdge } from '../cag/LinearEdge.js';
+import { ClipSimplifier } from './ClipSimplifier.js';
 import { LineClipping } from './LineClipping.js';
 
 // TODO: parallelize this (should be possible)
@@ -257,5 +256,3 @@ export class BoundsClipping {
     return simplifier.finalize();
   }
 }
-
-alpenglow.register( 'BoundsClipping', BoundsClipping );

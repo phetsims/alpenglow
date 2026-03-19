@@ -18,7 +18,6 @@
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';
-import { alpenglow } from '../alpenglow.js';
 import type { BaseWorkgroupValues, ParallelContext } from './ParallelContext.js';
 
 export class ParallelWorkgroupArray<T> {
@@ -79,5 +78,3 @@ export class ParallelWorkgroupArray<T> {
     } );
   }
 }
-
-alpenglow.register( 'ParallelWorkgroupArray', ParallelWorkgroupArray );

@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../../alpenglow.js';
 import { u32S, wgsl, WGSLExpressionU32, wgslOneLine, WGSLStatements } from '../WGSLString.js';
 import { RakedSizable } from '../WGSLUtils.js';
 
@@ -31,5 +30,3 @@ export const fromStripedIndexWGSL = (
     )
   ` );
 };
-
-alpenglow.register( 'fromStripedIndexWGSL', fromStripedIndexWGSL );

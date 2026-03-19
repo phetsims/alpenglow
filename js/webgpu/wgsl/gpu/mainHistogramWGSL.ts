@@ -5,11 +5,10 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow } from '../../../alpenglow.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
 import { BufferSlot } from '../../compute/BufferSlot.js';
 import { decimalS, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
 import { OPTIONAL_LENGTH_EXPRESSIONABLE_DEFAULTS, OptionalLengthExpressionable, RakedSizable } from '../WGSLUtils.js';
-import { BufferBindingType } from '../../compute/BufferBindingType.js';
 import { histogramWGSL } from './histogramWGSL.js';
 import { unrollWGSL } from './unrollWGSL.js';
 
@@ -75,5 +74,3 @@ export const mainHistogramWGSL = <T>(
     }
   ` );
 };
-
-alpenglow.register( 'mainHistogramWGSL', mainHistogramWGSL );

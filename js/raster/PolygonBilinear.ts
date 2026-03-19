@@ -7,7 +7,6 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow } from '../alpenglow.js';
 import type { LinearEdge } from '../cag/LinearEdge.js';
 
 export class PolygonBilinear {
@@ -70,5 +69,3 @@ export class PolygonBilinear {
     return sum * PolygonBilinear.getSign( pointX, pointY, minX, minY );
   }
 }
-
-alpenglow.register( 'PolygonBilinear', PolygonBilinear );

@@ -6,13 +6,12 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
+import { wgsl, WGSLModuleDeclarations, wgslString } from '../wgsl/WGSLString.js';
 import type { BindingLocation } from './BindingLocation.js';
 import type { BindingType } from './BindingType.js';
-import type { ResourceSlot } from './ResourceSlot.js';
-import { wgsl, WGSLModuleDeclarations, wgslString } from '../wgsl/WGSLString.js';
 import { BufferBindingType } from './BufferBindingType.js';
 import { BufferSlot } from './BufferSlot.js';
+import type { ResourceSlot } from './ResourceSlot.js';
 import { StorageTextureBindingType } from './StorageTextureBindingType.js';
 
 export class Binding {
@@ -47,4 +46,3 @@ export class Binding {
     }
   }
 }
-alpenglow.register( 'Binding', Binding );

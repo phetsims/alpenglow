@@ -8,15 +8,14 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow } from '../../../alpenglow.js';
-import type { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
-import type { BufferSlot } from '../../compute/BufferSlot.js';
-import type { TwoPassFineRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassFineRenderableFace.js';
 import { LinearEdge } from '../../../cag/LinearEdge.js';
+import type { BufferSlot } from '../../compute/BufferSlot.js';
+import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
 import { TextureViewSlot } from '../../compute/TextureViewSlot.js';
 import { MAIN_TWO_PASS_FINE_DEFAULTS, mainTwoPassFineWGSL, mainTwoPassFineWGSLOptions } from '../../wgsl/rasterize-two-pass/mainTwoPassFineWGSL.js';
-import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
-import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
+import type { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
+import type { TwoPassFineRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassFineRenderableFace.js';
 
 export type MainTwoPassFineModuleOptions = {
   config: BufferSlot<TwoPassConfig>;
@@ -64,4 +63,3 @@ export class MainTwoPassFineModule extends DirectModule<number> {
     this.output = options.output;
   }
 }
-alpenglow.register( 'MainTwoPassFineModule', MainTwoPassFineModule );

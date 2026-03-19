@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
 import { decimalS, wgsl, WGSLString } from '../wgsl/WGSLString.js';
 
 export class BindingLocation {
@@ -19,5 +18,3 @@ export class BindingLocation {
     return wgsl`@group(${decimalS( this.groupIndex )}) @binding(${decimalS( this.bindingIndex )})`;
   }
 }
-
-alpenglow.register( 'BindingLocation', BindingLocation );

@@ -10,9 +10,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../../alpenglow.js';
-import { wgsl, WGSLBinaryExpression, WGSLExpression, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { WGSLBinaryStatements } from '../../compute/ConcreteType.js';
+import { wgsl, WGSLBinaryExpression, WGSLExpression, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 
 export const binaryExpressionStatementWGSL = (
   value: WGSLVariableName,
@@ -33,5 +32,3 @@ export const binaryExpressionStatementWGSL = (
     throw new Error( 'Did not provide binaryExpression or binaryStatements' );
   }
 };
-
-alpenglow.register( 'binaryExpressionStatementWGSL', binaryExpressionStatementWGSL );

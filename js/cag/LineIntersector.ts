@@ -8,13 +8,12 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { BigIntVector2 } from './BigIntVector2.js';
-import { IntersectionPoint } from './IntersectionPoint.js';
-import { BigRational } from './BigRational.js';
-import { RationalIntersection } from './RationalIntersection.js';
-import { IntegerEdge } from './IntegerEdge.js';
-import { alpenglow } from '../alpenglow.js';
 import type { RasterTileLog } from '../raster/RasterLog.js';
+import { BigIntVector2 } from './BigIntVector2.js';
+import { BigRational } from './BigRational.js';
+import { IntegerEdge } from './IntegerEdge.js';
+import { IntersectionPoint } from './IntersectionPoint.js';
+import { RationalIntersection } from './RationalIntersection.js';
 
 export class LineIntersector {
   public static processIntegerEdgeIntersection( edgeA: IntegerEdge, edgeB: IntegerEdge, log: RasterTileLog | null ): void {
@@ -335,5 +334,3 @@ class BoundsTreeBinary extends BoundsTreeNode {
     }
   }
 }
-
-alpenglow.register( 'LineIntersector', LineIntersector );

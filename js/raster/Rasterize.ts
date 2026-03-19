@@ -12,33 +12,30 @@ import { clamp } from '../../../dot/js/util/clamp.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
-import { alpenglow } from '../alpenglow.js';
-import { getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, PolygonFilterType } from '../render-program/PolygonFilterType.js';
-import { RasterLog, RasterTileLog } from './RasterLog.js';
-import { RenderEvaluationContext } from '../render-program/RenderEvaluationContext.js';
-import type { ClippableFace, ClippableFaceAccumulator } from '../cag/ClippableFace.js';
-import { EdgedFace, EdgedFaceAccumulator } from '../cag/ClippableFace.js';
-import { PolygonalFace, PolygonalFaceAccumulator } from '../cag/ClippableFace.js';
-import type { OutputRaster } from './OutputRaster.js';
-import type { RenderEvaluator, RenderProgram } from '../render-program/RenderProgram.js';
-import { RenderProgramNeeds } from '../render-program/RenderProgramNeeds.js';
-import { RationalFace } from '../cag/RationalFace.js';
-import { RenderPathReplacer } from '../render-program/RenderPathReplacer.js';
-import { PolygonMitchellNetravali } from './PolygonMitchellNetravali.js';
-import { RenderableFace } from './RenderableFace.js';
-import { RenderExecutor } from '../render-program/RenderExecutor.js';
-import { EdgedClippedFace } from '../cag/ClippableFace.js';
-import { RenderPath } from '../render-program/RenderPath.js';
 import { BoundedSubpath } from '../cag/BoundedSubpath.js';
-import { IntegerEdge } from '../cag/IntegerEdge.js';
+import type { ClippableFace, ClippableFaceAccumulator } from '../cag/ClippableFace.js';
+import { EdgedClippedFace, EdgedFace, EdgedFaceAccumulator, PolygonalFace, PolygonalFaceAccumulator } from '../cag/ClippableFace.js';
+import { FaceConversion } from '../cag/FaceConversion.js';
 import { HilbertMapping } from '../cag/HilbertMapping.js';
+import { IntegerEdge } from '../cag/IntegerEdge.js';
 import { LineIntersector } from '../cag/LineIntersector.js';
 import { LineSplitter } from '../cag/LineSplitter.js';
-import { RationalHalfEdge } from '../cag/RationalHalfEdge.js';
 import { RationalBoundary } from '../cag/RationalBoundary.js';
-import { FaceConversion } from '../cag/FaceConversion.js';
+import { RationalFace } from '../cag/RationalFace.js';
+import { RationalHalfEdge } from '../cag/RationalHalfEdge.js';
+import { getPolygonFilterGridBounds, getPolygonFilterGridOffset, getPolygonFilterWidth, PolygonFilterType } from '../render-program/PolygonFilterType.js';
 import { RenderColor } from '../render-program/RenderColor.js';
+import { RenderEvaluationContext } from '../render-program/RenderEvaluationContext.js';
+import { RenderExecutor } from '../render-program/RenderExecutor.js';
+import { RenderPath } from '../render-program/RenderPath.js';
 import { RenderPathBoolean } from '../render-program/RenderPathBoolean.js';
+import { RenderPathReplacer } from '../render-program/RenderPathReplacer.js';
+import type { RenderEvaluator, RenderProgram } from '../render-program/RenderProgram.js';
+import { RenderProgramNeeds } from '../render-program/RenderProgramNeeds.js';
+import type { OutputRaster } from './OutputRaster.js';
+import { PolygonMitchellNetravali } from './PolygonMitchellNetravali.js';
+import { RasterLog, RasterTileLog } from './RasterLog.js';
+import { RenderableFace } from './RenderableFace.js';
 
 type RenderExecutionMethod = 'evaluation' | 'instructions';
 
@@ -1259,5 +1256,3 @@ export class Rasterize {
     context.putImageData( imageData, 0, 0 );
   }
 }
-
-alpenglow.register( 'Rasterize', Rasterize );

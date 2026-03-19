@@ -9,12 +9,11 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow } from '../alpenglow.js';
-import type { RenderableFace } from './RenderableFace.js';
 import type { IntegerEdge } from '../cag/IntegerEdge.js';
-import type { RationalHalfEdge } from '../cag/RationalHalfEdge.js';
 import type { RationalBoundary } from '../cag/RationalBoundary.js';
 import type { RationalFace } from '../cag/RationalFace.js';
+import type { RationalHalfEdge } from '../cag/RationalHalfEdge.js';
+import type { RenderableFace } from './RenderableFace.js';
 
 export class RasterLog {
   public scale: number | null = null;
@@ -50,5 +49,3 @@ export class RasterTileLog {
 
 
 }
-
-alpenglow.register( 'RasterLog', RasterLog );

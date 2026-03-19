@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../../alpenglow.js';
 import { u32S, wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 
 export type bitPackRadixIncrementWGSLOptions = {
@@ -48,5 +47,3 @@ export const bitPackRadixIncrementWGSL = (
     } ]` : wgsl``} += 1u${countsPerComponent === 1 ? wgsl`` : wgsl` << ( ( ( ${bits} ) % ${u32S( countsPerComponent )} ) * ${u32S( countBitQuantity )} )`};
   `;
 };
-
-alpenglow.register( 'bitPackRadixIncrementWGSL', bitPackRadixIncrementWGSL );

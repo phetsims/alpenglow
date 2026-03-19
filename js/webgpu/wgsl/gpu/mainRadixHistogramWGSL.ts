@@ -4,11 +4,10 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../../alpenglow.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
 import { BufferSlot } from '../../compute/BufferSlot.js';
 import { BitOrder } from '../../compute/ConcreteType.js';
 import { decimalS, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
-import { BufferBindingType } from '../../compute/BufferBindingType.js';
 import { radixHistogramWGSL } from './radixHistogramWGSL.js';
 
 export type mainRadixHistogramWGSLOptions<T> = {
@@ -65,5 +64,3 @@ export const mainRadixHistogramWGSL = <T>(
     }
   ` );
 };
-
-alpenglow.register( 'mainRadixHistogramWGSL', mainRadixHistogramWGSL );

@@ -8,7 +8,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../../alpenglow.js';
 import { wgslJoin, WGSLStatements } from '../WGSLString.js';
 
 export const unrollWGSL = (
@@ -18,5 +17,3 @@ export const unrollWGSL = (
 ): WGSLStatements => {
   return wgslJoin( '\n', _.range( start, end ).map( i => callback( i, i === start, i === end + ( start < end ? -1 : 1 ) ) ) );
 };
-
-alpenglow.register( 'unrollWGSL', unrollWGSL );

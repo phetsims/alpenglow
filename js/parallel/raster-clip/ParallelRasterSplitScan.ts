@@ -9,16 +9,15 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
-import type { ParallelStorageArray } from '../ParallelStorageArray.js';
-import type { RasterClippedChunk } from './RasterClippedChunk.js';
-import { RasterSplitReduceData } from './RasterSplitReduceData.js';
-import { RasterChunk } from './RasterChunk.js';
-import { RasterCompleteChunk } from './RasterCompleteChunk.js';
-import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
-import { ParallelKernel } from '../ParallelKernel.js';
-import { ParallelUtils } from '../ParallelUtils.js';
 import { ParallelExecutor } from '../ParallelExecutor.js';
+import { ParallelKernel } from '../ParallelKernel.js';
+import type { ParallelStorageArray } from '../ParallelStorageArray.js';
+import { ParallelUtils } from '../ParallelUtils.js';
+import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
+import { RasterChunk } from './RasterChunk.js';
+import type { RasterClippedChunk } from './RasterClippedChunk.js';
+import { RasterCompleteChunk } from './RasterCompleteChunk.js';
+import { RasterSplitReduceData } from './RasterSplitReduceData.js';
 
 export class ParallelRasterSplitScan {
   public static async dispatch(
@@ -159,5 +158,3 @@ export class ParallelRasterSplitScan {
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numClippedChunks / workgroupSize ) ) );
   }
 }
-
-alpenglow.register( 'ParallelRasterSplitScan', ParallelRasterSplitScan );

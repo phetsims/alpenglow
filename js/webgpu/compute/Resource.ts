@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
 import type { Binding } from './Binding.js';
 
 let globalId = 1;
@@ -23,4 +22,3 @@ export abstract class Resource {
 
   public abstract toDebugString(): string;
 }
-alpenglow.register( 'Resource', Resource );

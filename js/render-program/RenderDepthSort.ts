@@ -10,13 +10,12 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Matrix4 from '../../../dot/js/Matrix4.js';
 import Range from '../../../dot/js/Range.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow } from '../alpenglow.js';
+import { ClippableFace } from '../cag/ClippableFace.js';
+import { RenderableFace } from '../raster/RenderableFace.js';
+import { RenderColor } from './RenderColor.js';
+import { RenderEvaluationContext } from './RenderEvaluationContext.js';
 import { RenderPlanar } from './RenderPlanar.js';
 import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
-import { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import { RenderableFace } from '../raster/RenderableFace.js';
-import { ClippableFace } from '../cag/ClippableFace.js';
-import { RenderColor } from './RenderColor.js';
 import { RenderStack } from './RenderStack.js';
 
 const toProgram = ( item: RenderPlanar ): RenderProgram => item.program;
@@ -264,8 +263,6 @@ export class RenderDepthSort extends RenderProgram {
     );
   }
 }
-
-alpenglow.register( 'RenderDepthSort', RenderDepthSort );
 
 class SortedPartial {
   public constructor(

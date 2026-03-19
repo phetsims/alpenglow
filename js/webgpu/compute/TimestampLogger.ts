@@ -6,12 +6,11 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
-import type { DeviceContext } from './DeviceContext.js';
+import { roundSymmetric } from '../../../../dot/js/util/roundSymmetric.js';
 import { webgpu } from '../WebGPUAPI.js';
 import type { BufferLogger } from './BufferLogger.js';
 import { ByteEncoder } from './ByteEncoder.js';
-import { roundSymmetric } from '../../../../dot/js/util/roundSymmetric.js';
+import type { DeviceContext } from './DeviceContext.js';
 
 export class TimestampLogger {
 
@@ -154,5 +153,3 @@ export class TimestampLoggerResult {
     return new TimestampLoggerResult( timestamps, results[ 0 ].timestampNames );
   }
 }
-
-alpenglow.register( 'TimestampLogger', TimestampLogger );

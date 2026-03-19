@@ -8,7 +8,6 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow } from '../alpenglow.js';
 
 type Code = number;
 
@@ -121,5 +120,3 @@ export class CohenSutherlandClipping {
     }
   }
 }
-
-alpenglow.register( 'CohenSutherlandClipping', CohenSutherlandClipping );

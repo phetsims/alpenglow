@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../../alpenglow.js';
 import { wgsl, WGSLMainModule } from '../WGSLString.js';
 import { logWGSL } from './logWGSL.js';
 
@@ -25,5 +24,3 @@ export const mainLogBarrier = (): WGSLMainModule => {
     }
   ` );
 };
-
-alpenglow.register( 'mainLogBarrier', mainLogBarrier );

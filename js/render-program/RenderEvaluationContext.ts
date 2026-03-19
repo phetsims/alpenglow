@@ -8,7 +8,6 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { alpenglow } from '../alpenglow.js';
 import type { ClippableFace } from '../cag/ClippableFace.js';
 import { PolygonalFace } from '../cag/ClippableFace.js';
 
@@ -77,5 +76,3 @@ export class RenderEvaluationContext {
     return centroid;
   }
 }
-
-alpenglow.register( 'RenderEvaluationContext', RenderEvaluationContext );

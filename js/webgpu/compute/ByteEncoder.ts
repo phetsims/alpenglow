@@ -6,8 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
-
 export type F32 = number;
 export type U32 = number;
 export type I32 = number;
@@ -424,5 +422,3 @@ export class ByteEncoder {
     return i;
   }
 }
-
-alpenglow.register( 'ByteEncoder', ByteEncoder );

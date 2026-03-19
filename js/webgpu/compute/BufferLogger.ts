@@ -6,9 +6,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
-import { DeviceContext } from './DeviceContext.js';
 import { webgpu } from '../WebGPUAPI.js';
+import { DeviceContext } from './DeviceContext.js';
 
 const COLLAPSE_LOGS = true;
 
@@ -205,5 +204,3 @@ export class BufferLogger {
     console.groupEnd();
   }
 }
-
-alpenglow.register( 'BufferLogger', BufferLogger );

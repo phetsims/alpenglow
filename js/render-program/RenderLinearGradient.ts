@@ -9,22 +9,19 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { alpenglow } from '../alpenglow.js';
-import { RenderGradientStop, SerializedRenderGradientStop } from './RenderGradientStop.js';
-import { RenderProgram } from './RenderProgram.js';
-import { RenderExtend } from './RenderExtend.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import { RenderInstruction, RenderInstructionLocation, RenderInstructionReturn } from './RenderInstruction.js';
-import { RenderInstructionLinearBlend, RenderLinearBlend } from './RenderLinearBlend.js';
 import { RenderableFace } from '../raster/RenderableFace.js';
-import { RenderLinearRange } from './RenderLinearRange.js';
 import { RenderColor } from './RenderColor.js';
-import { RenderLinearBlendAccuracy } from './RenderLinearBlendAccuracy.js';
-import { RenderLinearGradientLogic } from './RenderLinearGradientLogic.js';
-import { RenderLinearGradientAccuracy } from './RenderLinearGradientAccuracy.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderExtend } from './RenderExtend.js';
+import { RenderGradientStop, SerializedRenderGradientStop } from './RenderGradientStop.js';
+import { RenderInstruction, RenderInstructionLocation, RenderInstructionReturn } from './RenderInstruction.js';
 import { RenderInstructionComputeGradientRatio } from './RenderInstructionComputeGradientRatio.js';
-
-alpenglow.register( 'RenderLinearGradientAccuracy', RenderLinearGradientAccuracy );
+import { RenderInstructionLinearBlend, RenderLinearBlend } from './RenderLinearBlend.js';
+import { RenderLinearBlendAccuracy } from './RenderLinearBlendAccuracy.js';
+import { RenderLinearGradientAccuracy } from './RenderLinearGradientAccuracy.js';
+import { RenderLinearGradientLogic } from './RenderLinearGradientLogic.js';
+import { RenderLinearRange } from './RenderLinearRange.js';
+import { RenderProgram } from './RenderProgram.js';
 
 const toProgram = ( item: RenderGradientStop ): RenderProgram => item.program;
 
@@ -227,8 +224,6 @@ export class RenderLinearGradient extends RenderProgram {
     };
   }
 }
-
-alpenglow.register( 'RenderLinearGradient', RenderLinearGradient );
 
 export type SerializedRenderLinearGradient = {
   type: 'RenderLinearGradient';

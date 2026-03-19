@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
 import type { BigRational } from './BigRational.js';
 
 export class BigRationalVector2 {
@@ -22,5 +21,3 @@ export class BigRationalVector2 {
 
   // TODO
 }
-
-alpenglow.register( 'BigRationalVector2', BigRationalVector2 );

@@ -10,7 +10,6 @@ import Random from '../../../../dot/js/Random.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Vector3 from '../../../../dot/js/Vector3.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
-import { alpenglow } from '../../alpenglow.js';
 import { decimalS, i32S, u32S, wgsl, WGSLExpression, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionT, WGSLExpressionU32, wgslJoin, WGSLStatements, WGSLType, WGSLVariableName } from '../wgsl/WGSLString.js';
 import { ByteEncoder } from './ByteEncoder.js';
 
@@ -220,7 +219,6 @@ export const getArrayType = <T>( type: ConcreteType<T>, size: number, outOfRange
     }
   };
 };
-alpenglow.register( 'getArrayType', getArrayType );
 
 export const getVariableLengthArrayType = <T>( type: ConcreteType<T>, maxSize: number, outOfRangeElement?: T ): ConcreteArrayType<T> => {
   const u32sPerElement = type.bytesPerElement / 4;
@@ -300,7 +298,6 @@ export const getVariableLengthArrayType = <T>( type: ConcreteType<T>, maxSize: n
     }
   };
 };
-alpenglow.register( 'getVariableLengthArrayType', getVariableLengthArrayType );
 
 export const getCastedType = <T>( type: ConcreteType<T>, valueType: WGSLType ): ConcreteType<T> => {
   return {
@@ -344,7 +341,6 @@ export const U32Type: ConcreteType<number> = {
 
   toDebugString: ( value: number ) => value.toString()
 };
-alpenglow.register( 'U32Type', U32Type );
 
 export const U32AtomicType: ConcreteType<number> = {
   name: 'u32 atomic',
@@ -378,7 +374,6 @@ export const U32AtomicType: ConcreteType<number> = {
 
   toDebugString: ( value: number ) => value.toString()
 };
-alpenglow.register( 'U32AtomicType', U32AtomicType );
 
 export const U32Add: BinaryOp<number> = {
   name: 'u32 addition',
@@ -393,7 +388,6 @@ export const U32Add: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
-alpenglow.register( 'U32Add', U32Add );
 
 export const U32Min: BinaryOp<number> = {
   name: 'u32 min',
@@ -408,7 +402,6 @@ export const U32Min: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = min( ${a} + ${b} );`,
   atomicName: 'atomicMin'
 };
-alpenglow.register( 'U32Min', U32Min );
 
 export const U32Max: BinaryOp<number> = {
   name: 'u32 max',
@@ -423,7 +416,6 @@ export const U32Max: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = max( ${a} + ${b} );`,
   atomicName: 'atomicMax'
 };
-alpenglow.register( 'U32Max', U32Max );
 
 export const U32And: BinaryOp<number> = {
   name: 'u32 and',
@@ -438,7 +430,6 @@ export const U32And: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} & ${b} );`,
   atomicName: 'atomicAnd'
 };
-alpenglow.register( 'U32And', U32And );
 
 export const U32Or: BinaryOp<number> = {
   name: 'u32 or',
@@ -453,7 +444,6 @@ export const U32Or: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} | ${b} );`,
   atomicName: 'atomicOr'
 };
-alpenglow.register( 'U32Or', U32Or );
 
 export const U32Xor: BinaryOp<number> = {
   name: 'u32 xor',
@@ -468,7 +458,6 @@ export const U32Xor: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} ^ ${b} );`,
   atomicName: 'atomicXor'
 };
-alpenglow.register( 'U32Xor', U32Xor );
 
 export const U32Order: Order<number> = {
   name: 'u32 order',
@@ -501,7 +490,6 @@ export const U32Order: Order<number> = {
     return wgsl`( ( ${value} >> ${u32S( bitOffset )} ) & ${u32S( ( 1 << bitQuantity ) - 1 )} )`;
   }
 };
-alpenglow.register( 'U32Order', U32Order );
 
 export const U32ReverseOrder: Order<number> = {
   name: 'u32 reverse order',
@@ -532,7 +520,6 @@ export const U32ReverseOrder: Order<number> = {
     return wgsl`( ( ( 0xffffffffu - ${value} ) >> ${u32S( bitOffset )} ) & ${u32S( ( 1 << bitQuantity ) - 1 )} )`;
   }
 };
-alpenglow.register( 'U32ReverseOrder', U32ReverseOrder );
 
 export const I32Type: ConcreteType<number> = {
   name: 'i32',
@@ -568,7 +555,6 @@ export const I32Type: ConcreteType<number> = {
 
   toDebugString: ( value: number ) => value.toString()
 };
-alpenglow.register( 'I32Type', I32Type );
 
 export const I32AtomicType: ConcreteType<number> = {
   name: 'i32 atomic',
@@ -602,7 +588,6 @@ export const I32AtomicType: ConcreteType<number> = {
 
   toDebugString: ( value: number ) => value.toString()
 };
-alpenglow.register( 'I32AtomicType', I32AtomicType );
 
 export const I32Add: BinaryOp<number> = {
   name: 'i32 addition',
@@ -617,7 +602,6 @@ export const I32Add: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b};`,
   atomicName: 'atomicAdd'
 };
-alpenglow.register( 'I32Add', I32Add );
 
 export const I32Min: BinaryOp<number> = {
   name: 'i32 min',
@@ -632,7 +616,6 @@ export const I32Min: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = min( ${a} + ${b} );`,
   atomicName: 'atomicMin'
 };
-alpenglow.register( 'I32Min', I32Min );
 
 export const I32Max: BinaryOp<number> = {
   name: 'i32 max',
@@ -647,7 +630,6 @@ export const I32Max: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = max( ${a} + ${b} );`,
   atomicName: 'atomicMax'
 };
-alpenglow.register( 'I32Max', I32Max );
 
 export const I32And: BinaryOp<number> = {
   name: 'i32 and',
@@ -662,7 +644,6 @@ export const I32And: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} & ${b} );`,
   atomicName: 'atomicAnd'
 };
-alpenglow.register( 'I32And', I32And );
 
 export const I32Or: BinaryOp<number> = {
   name: 'i32 or',
@@ -677,7 +658,6 @@ export const I32Or: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} | ${b} );`,
   atomicName: 'atomicOr'
 };
-alpenglow.register( 'I32Or', I32Or );
 
 export const I32Xor: BinaryOp<number> = {
   name: 'i32 xor',
@@ -692,7 +672,6 @@ export const I32Xor: BinaryOp<number> = {
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ( ${a} ^ ${b} );`,
   atomicName: 'atomicXor'
 };
-alpenglow.register( 'I32Xor', I32Xor );
 
 // TODO: Do a full order, with bit sorts(!)
 export const I32Order: CompareOrder<number> = {
@@ -715,7 +694,6 @@ export const I32Order: CompareOrder<number> = {
     return wgsl`( ${a} <= ${b} )`;
   }
 };
-alpenglow.register( 'I32Order', I32Order );
 
 export const F32Type: ConcreteType<number> = {
   name: 'f32',
@@ -751,7 +729,6 @@ export const F32Type: ConcreteType<number> = {
 
   toDebugString: ( value: number ) => value.toString()
 };
-alpenglow.register( 'F32Type', F32Type );
 
 // TODO: Do a full order, with bit sorts(!)
 export const F32Order: CompareOrder<number> = {
@@ -774,7 +751,6 @@ export const F32Order: CompareOrder<number> = {
     return wgsl`( ${a} <= ${b} )`;
   }
 };
-alpenglow.register( 'F32Order', F32Order );
 
 export const Vec2uType: ConcreteType<Vector2> = {
   name: 'vec2u',
@@ -816,7 +792,6 @@ export const Vec2uType: ConcreteType<Vector2> = {
 
   toDebugString: ( value: Vector2 ) => `vec2u(${value.x}, ${value.y})`
 };
-alpenglow.register( 'Vec2uType', Vec2uType );
 
 export const Vec2uAdd: BinaryOp<Vector2> = {
   name: 'vec2u addition',
@@ -830,7 +805,6 @@ export const Vec2uAdd: BinaryOp<Vector2> = {
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} + ${b} )`,
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b};`
 };
-alpenglow.register( 'Vec2uAdd', Vec2uAdd );
 
 export const Vec2uBic: BinaryOp<Vector2> = {
   name: 'vec2u bicyclic semigroup',
@@ -850,7 +824,6 @@ export const Vec2uBic: BinaryOp<Vector2> = {
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} + ${b} - min( ${a}.y, ${b}.x ) )`,
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b} - min( ${a}.y, ${b}.x );`
 };
-alpenglow.register( 'Vec2uBic', Vec2uBic );
 
 export const Vec2uLexicographicalOrder: Order<Vector2> = {
   name: 'vec2u lexicographical order',
@@ -897,7 +870,6 @@ export const Vec2uLexicographicalOrder: Order<Vector2> = {
     }
   }
 };
-alpenglow.register( 'Vec2uLexicographicalOrder', Vec2uLexicographicalOrder );
 
 export const Vec3uType: ConcreteType<Vector3> = {
   name: 'vec3u',
@@ -942,7 +914,6 @@ export const Vec3uType: ConcreteType<Vector3> = {
 
   toDebugString: ( value: Vector3 ) => `vec3u(${value.x}, ${value.y}, ${value.z})`
 };
-alpenglow.register( 'Vec3uType', Vec3uType );
 
 export const Vec3uAdd: BinaryOp<Vector3> = {
   name: 'vec3u addition',
@@ -956,7 +927,6 @@ export const Vec3uAdd: BinaryOp<Vector3> = {
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} + ${b} )`,
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b};`
 };
-alpenglow.register( 'Vec3uAdd', Vec3uAdd );
 
 export const Vec4uType: ConcreteType<Vector4> = {
   name: 'vec4u',
@@ -1005,7 +975,6 @@ export const Vec4uType: ConcreteType<Vector4> = {
 
   toDebugString: ( value: Vector4 ) => `vec4u(${value.x}, ${value.y}, ${value.z}, ${value.w})`
 };
-alpenglow.register( 'Vec4uType', Vec4uType );
 
 export const Vec4uAdd: BinaryOp<Vector4> = {
   name: 'vec4u addition',
@@ -1019,4 +988,3 @@ export const Vec4uAdd: BinaryOp<Vector4> = {
   combineExpression: ( a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`( ${a} + ${b} )`,
   combineStatements: ( varName: WGSLVariableName, a: WGSLExpressionT, b: WGSLExpressionT ) => wgsl`${varName} = ${a} + ${b};`
 };
-alpenglow.register( 'Vec4uAdd', Vec4uAdd );

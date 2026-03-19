@@ -8,30 +8,29 @@
 
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Vector4 from '../../../../dot/js/Vector4.js';
-import { alpenglow } from '../../alpenglow.js';
-import { testPolygonalFace } from '../../webgpu/tests/testPolygonalFace.js';
-import { RasterChunk } from './RasterChunk.js';
-import { RasterEdge } from './RasterEdge.js';
-import { ParallelStorageArray } from '../ParallelStorageArray.js';
 import { CombinedRaster } from '../../raster/CombinedRaster.js';
 import { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
-import { ParallelRasterInitialChunk } from './ParallelRasterInitialChunk.js';
-import { RasterClippedChunk } from './RasterClippedChunk.js';
-import { RasterEdgeClip } from './RasterEdgeClip.js';
-import { RasterChunkReducePair } from './RasterChunkReducePair.js';
-import { RasterChunkReduceQuad } from './RasterChunkReduceQuad.js';
-import { ParallelRasterInitialClip } from './ParallelRasterInitialClip.js';
+import { testPolygonalFace } from '../../webgpu/tests/testPolygonalFace.js';
+import { ParallelStorageArray } from '../ParallelStorageArray.js';
+import { ParallelRasterChunkIndexPatch } from './ParallelRasterChunkIndexPatch.js';
 import { ParallelRasterChunkReduce } from './ParallelRasterChunkReduce.js';
+import { ParallelRasterEdgeIndexPatch } from './ParallelRasterEdgeIndexPatch.js';
+import { ParallelRasterEdgeScan } from './ParallelRasterEdgeScan.js';
+import { ParallelRasterInitialChunk } from './ParallelRasterInitialChunk.js';
+import { ParallelRasterInitialClip } from './ParallelRasterInitialClip.js';
+import { ParallelRasterInitialEdgeReduce } from './ParallelRasterInitialEdgeReduce.js';
 import { ParallelRasterInitialSplitReduce } from './ParallelRasterInitialSplitReduce.js';
-import { RasterSplitReduceData } from './RasterSplitReduceData.js';
 import { ParallelRasterSplitReduce } from './ParallelRasterSplitReduce.js';
 import { ParallelRasterSplitScan } from './ParallelRasterSplitScan.js';
+import { RasterChunk } from './RasterChunk.js';
+import { RasterChunkReducePair } from './RasterChunkReducePair.js';
+import { RasterChunkReduceQuad } from './RasterChunkReduceQuad.js';
+import { RasterClippedChunk } from './RasterClippedChunk.js';
 import { RasterCompleteChunk } from './RasterCompleteChunk.js';
-import { ParallelRasterInitialEdgeReduce } from './ParallelRasterInitialEdgeReduce.js';
 import { RasterCompleteEdge } from './RasterCompleteEdge.js';
-import { ParallelRasterEdgeScan } from './ParallelRasterEdgeScan.js';
-import { ParallelRasterChunkIndexPatch } from './ParallelRasterChunkIndexPatch.js';
-import { ParallelRasterEdgeIndexPatch } from './ParallelRasterEdgeIndexPatch.js';
+import { RasterEdge } from './RasterEdge.js';
+import { RasterEdgeClip } from './RasterEdgeClip.js';
+import { RasterSplitReduceData } from './RasterSplitReduceData.js';
 
 // TODO: move to 256 after testing (64 helps us test more cases here)
 // const WORKGROUP_SIZE = 64;
@@ -701,5 +700,3 @@ export class ParallelRaster {
     };
   }
 }
-
-alpenglow.register( 'ParallelRaster', ParallelRaster );

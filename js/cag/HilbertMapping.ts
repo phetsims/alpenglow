@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
 import type { IntegerEdge } from './IntegerEdge.js';
 
 type P2 = 'x' | '-x' | 'y' | '-y';
@@ -198,8 +197,6 @@ export class HilbertMapping {
   }
 }
 
-alpenglow.register( 'HilbertMapping', HilbertMapping );
-
 export class Hilbert2 {
   public n = 0;
   public i = 0;
@@ -258,8 +255,6 @@ export class Hilbert2 {
     this.y = y;
   }
 }
-
-alpenglow.register( 'Hilbert2', Hilbert2 );
 
 export class Hilbert3 {
   public n = 0;
@@ -335,8 +330,6 @@ export class Hilbert3 {
     this.z = z;
   }
 }
-
-alpenglow.register( 'Hilbert3', Hilbert3 );
 
 export class Hilbert4 {
   public n = 0;
@@ -431,8 +424,6 @@ export class Hilbert4 {
     this.w = w;
   }
 }
-
-alpenglow.register( 'Hilbert4', Hilbert4 );
 
 export class Hilbert5 {
   public n = 0;
@@ -554,8 +545,6 @@ export class Hilbert5 {
     this.v = v;
   }
 }
-
-alpenglow.register( 'Hilbert5', Hilbert5 );
 
 export class Hilbert6 {
   public n = 0;
@@ -720,8 +709,6 @@ export class Hilbert6 {
     this.u = u;
   }
 }
-
-alpenglow.register( 'Hilbert6', Hilbert6 );
 
 const scratch2a = new Hilbert2( 0, 0 );
 const scratch3a = new Hilbert3( 0, 0, 0 );

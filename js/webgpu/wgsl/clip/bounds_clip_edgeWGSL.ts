@@ -6,8 +6,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { wgsl, WGSLExpression, WGSLExpressionF32, WGSLReferenceModule, wgslString, WGSLStringModule } from '../WGSLString.js';
 import { LinearEdgeWGSL } from '../cag/LinearEdgeWGSL.js';
+import { wgsl, WGSLExpression, WGSLExpressionF32, WGSLReferenceModule, wgslString, WGSLStringModule } from '../WGSLString.js';
 import { matthes_drakopoulos_clipWGSL } from './matthes_drakopoulos_clipWGSL.js';
 
 // TODO: for memory, we really should have this be array<vec2f,4>, since we're duplicating the start/end points

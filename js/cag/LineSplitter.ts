@@ -6,11 +6,10 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
-import { BigRationalVector2 } from './BigRationalVector2.js';
 import { BigRational } from './BigRational.js';
-import { RationalHalfEdge } from './RationalHalfEdge.js';
+import { BigRationalVector2 } from './BigRationalVector2.js';
 import type { IntegerEdge } from './IntegerEdge.js';
+import { RationalHalfEdge } from './RationalHalfEdge.js';
 
 export class LineSplitter {
   public static splitIntegerEdges( integerEdges: IntegerEdge[] ): RationalHalfEdge[] {
@@ -79,5 +78,3 @@ export class LineSplitter {
     return rationalHalfEdges;
   }
 }
-
-alpenglow.register( 'LineSplitter', LineSplitter );

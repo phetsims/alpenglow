@@ -6,10 +6,9 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
-import type { RenderProgram } from './RenderProgram.js';
 import { RenderExtend } from './RenderExtend.js';
 import type { RenderGradientStop } from './RenderGradientStop.js';
+import type { RenderProgram } from './RenderProgram.js';
 
 export class RenderLinearRange {
   public constructor(
@@ -133,5 +132,3 @@ export class RenderLinearRange {
     return linearRanges;
   }
 }
-
-alpenglow.register( 'RenderLinearRange', RenderLinearRange );

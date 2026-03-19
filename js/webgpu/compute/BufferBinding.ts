@@ -6,7 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
 import { Binding } from './Binding.js';
 import type { BindingLocation } from './BindingLocation.js';
 import type { BindingType } from './BindingType.js';
@@ -21,4 +20,3 @@ export class BufferBinding<T> extends Binding {
     super( location, bindingType, bufferSlot );
   }
 }
-alpenglow.register( 'BufferBinding', BufferBinding );

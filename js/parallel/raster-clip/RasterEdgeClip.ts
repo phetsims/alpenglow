@@ -8,7 +8,6 @@
  */
 
 import Vector2 from '../../../../dot/js/Vector2.js';
-import { alpenglow } from '../../alpenglow.js';
 import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
 
 export class RasterEdgeClip {
@@ -104,5 +103,3 @@ export class RasterEdgeClip {
     false
   );
 }
-
-alpenglow.register( 'RasterEdgeClip', RasterEdgeClip );

@@ -7,7 +7,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
 import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
 import { RasterClippedChunk } from './RasterClippedChunk.js';
 
@@ -210,5 +209,3 @@ export class RasterChunkReduceData {
     -1, NaN, false, false, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN
   );
 }
-
-alpenglow.register( 'RasterChunkReduceData', RasterChunkReduceData );

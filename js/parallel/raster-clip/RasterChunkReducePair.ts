@@ -7,9 +7,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../../alpenglow.js';
-import { RasterChunkReduceData } from './RasterChunkReduceData.js';
 import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
+import { RasterChunkReduceData } from './RasterChunkReduceData.js';
 
 export class RasterChunkReducePair {
   public constructor(
@@ -77,5 +76,3 @@ export class RasterChunkReducePair {
     RasterChunkReduceData.OUT_OF_RANGE
   );
 }
-
-alpenglow.register( 'RasterChunkReducePair', RasterChunkReducePair );

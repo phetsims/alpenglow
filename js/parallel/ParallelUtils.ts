@@ -7,7 +7,6 @@
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';
-import { alpenglow } from '../alpenglow.js';
 
 export class ParallelUtils {
 
@@ -20,5 +19,3 @@ export class ParallelUtils {
     return new Vector3( index0 - 1, index1 - 1, index2 - 1 );
   }
 }
-
-alpenglow.register( 'ParallelUtils', ParallelUtils );

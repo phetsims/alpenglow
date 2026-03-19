@@ -8,11 +8,10 @@
 
 import Vector4 from '../../../dot/js/Vector4.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
-import { alpenglow } from '../alpenglow.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import { RenderColor } from './RenderColor.js';
 import { RenderEvaluationContext } from './RenderEvaluationContext.js';
 import { RenderPathBoolean } from './RenderPathBoolean.js';
-import { RenderColor } from './RenderColor.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 
 export abstract class RenderColorSpaceConversion extends RenderProgram {
 
@@ -64,8 +63,6 @@ export abstract class RenderColorSpaceConversion extends RenderProgram {
     };
   }
 }
-
-alpenglow.register( 'RenderColorSpaceConversion', RenderColorSpaceConversion );
 
 export type SerializedRenderColorSpaceConversion = {
   type: 'RenderColorSpaceConversion';

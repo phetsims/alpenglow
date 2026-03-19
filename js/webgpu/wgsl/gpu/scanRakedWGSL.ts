@@ -9,15 +9,14 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { alpenglow } from '../../../alpenglow.js';
-import { u32S, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { BinaryOp } from '../../compute/ConcreteType.js';
+import { u32S, wgsl, WGSLExpression, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { LOCAL_INDEXABLE_DEFAULTS, LocalIndexable, RakedSizable, WORKGROUP_INDEXABLE_DEFAULTS, WorkgroupIndexable } from '../WGSLUtils.js';
 import { binaryExpressionStatementWGSL } from './binaryExpressionStatementWGSL.js';
 import { commentWGSL } from './commentWGSL.js';
-import { unrollWGSL } from './unrollWGSL.js';
 import { scanWGSL } from './scanWGSL.js';
 import { toStripedIndexWGSL } from './toStripedIndexWGSL.js';
+import { unrollWGSL } from './unrollWGSL.js';
 
 export type scanRakedWGSLOptions<T> = {
   // varname of var<workgroup> array<${binaryOp.type.valueType}, ${workgroupSize * grainSize}>
@@ -219,5 +218,3 @@ export const scanRakedWGSL = <T>(
     ${commentWGSL( 'end scan_raked' )}
   `;
 };
-
-alpenglow.register( 'scanRakedWGSL', scanRakedWGSL );

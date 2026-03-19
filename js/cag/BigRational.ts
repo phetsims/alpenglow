@@ -6,8 +6,6 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { alpenglow } from '../alpenglow.js';
-
 export class BigRational {
 
   public numerator: bigint;
@@ -156,5 +154,3 @@ export class BigRational {
     return a;
   }
 }
-
-alpenglow.register( 'BigRational', BigRational );
