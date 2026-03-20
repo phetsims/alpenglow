@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../alpenglow.js';
 import type { RenderPath } from '../render-program/RenderPath.js';
 
 export class WindingMap {
@@ -38,3 +39,5 @@ export class WindingMap {
     return true;
   }
 }
+
+alpenglow.register( 'WindingMap', WindingMap );

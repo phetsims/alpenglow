@@ -7,11 +7,12 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { alpenglow } from '../../../alpenglow.js';
+import { u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLString, WGSLVariableName } from '../WGSLString.js';
 import { ConcreteType } from '../../compute/ConcreteType.js';
 import { ConsoleLoggedLine, ConsoleLogger } from '../../compute/ConsoleLogger.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
 import { logBufferSlot } from '../../compute/logBufferSlot.js';
-import { u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLString, WGSLVariableName } from '../WGSLString.js';
 
 export type logWGSLOptions<T> = {
   // - if null, we will mark it as a barrier BETWEEN shaders
@@ -152,3 +153,5 @@ export const logWGSL = <T>(
     }
   } );
 };
+
+alpenglow.register( 'logWGSL', logWGSL );

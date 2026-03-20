@@ -7,11 +7,12 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutor } from './RenderExecutor.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { GRADIENT_BEFORE_RATIO_COUNT_BITS } from './GRADIENT_BEFORE_RATIO_COUNT_BITS.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import type { RenderExecutionStack } from './RenderExecutionStack.js';
-import type { RenderExecutor } from './RenderExecutor.js';
 
 export abstract class RenderInstruction {
   public abstract execute(
@@ -424,3 +425,5 @@ export class RenderInstructionMultiplyScalar extends RenderInstruction {
     return 2;
   }
 }
+
+alpenglow.register( 'RenderInstruction', RenderInstruction );

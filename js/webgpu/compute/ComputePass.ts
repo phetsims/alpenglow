@@ -6,9 +6,10 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { webgpu } from '../WebGPUAPI.js';
-import type { BindGroup } from './BindGroup.js';
+import { alpenglow } from '../../alpenglow.js';
 import type { ComputePipeline } from './ComputePipeline.js';
+import type { BindGroup } from './BindGroup.js';
+import { webgpu } from '../WebGPUAPI.js';
 
 let globalId = 1;
 
@@ -95,3 +96,4 @@ export class ComputePass {
     webgpu.computePassEncoderEnd( this.computePassEncoder );
   }
 }
+alpenglow.register( 'ComputePass', ComputePass );

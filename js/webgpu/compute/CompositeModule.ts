@@ -7,8 +7,9 @@
  */
 
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import type { ExecutionContext } from './ExecutionContext.js';
+import { alpenglow } from '../../alpenglow.js';
 import { Module } from './Module.js';
+import type { ExecutionContext } from './ExecutionContext.js';
 
 export class CompositeModule<T> extends Module<T> {
   public constructor(
@@ -18,3 +19,4 @@ export class CompositeModule<T> extends Module<T> {
     super( modules.flatMap( module => module.pipelineBlueprints ), execute );
   }
 }
+alpenglow.register( 'CompositeModule', CompositeModule );

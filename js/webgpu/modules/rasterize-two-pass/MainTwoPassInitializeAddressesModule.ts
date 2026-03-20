@@ -8,10 +8,11 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow } from '../../../alpenglow.js';
 import type { BufferSlot } from '../../compute/BufferSlot.js';
-import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
-import { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
 import { MAIN_TWO_PASS_INITIALIZE_ADDRESSES_DEFAULTS, mainTwoPassInitializeAddressesWGSL, mainTwoPassInitializeAddressesWGSLOptions } from '../../wgsl/rasterize-two-pass/mainTwoPassInitializeAddressesWGSL.js';
+import { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
 
 export type MainTwoPassInitializeAddressesModuleOptions = {
   addresses: BufferSlot<number[]>;
@@ -45,3 +46,4 @@ export class MainTwoPassInitializeAddressesModule extends DirectModule<number> {
     this.addresses = options.addresses;
   }
 }
+alpenglow.register( 'MainTwoPassInitializeAddressesModule', MainTwoPassInitializeAddressesModule );

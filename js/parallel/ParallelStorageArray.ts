@@ -20,6 +20,7 @@
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';
+import { alpenglow } from '../alpenglow.js';
 import type { BaseWorkgroupValues, ParallelContext } from './ParallelContext.js';
 
 export class ParallelStorageArray<T> {
@@ -91,3 +92,5 @@ export class ParallelStorageArray<T> {
     } );
   }
 }
+
+alpenglow.register( 'ParallelStorageArray', ParallelStorageArray );

@@ -6,21 +6,23 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import type { BindingType } from '../compute/BindingType.js';
-import { decimal } from '../compute/decimal.js';
-import { f32 } from '../compute/f32.js';
-import { i32 } from '../compute/i32.js';
-import { i32Hex } from '../compute/i32Hex.js';
+import { alpenglow } from '../../alpenglow.js';
 import type { PipelineBlueprint } from '../compute/PipelineBlueprint.js';
 import type { ResourceSlot } from '../compute/ResourceSlot.js';
+import type { BindingType } from '../compute/BindingType.js';
+import { decimal } from '../compute/decimal.js';
 import { u32 } from '../compute/u32.js';
 import { u32Hex } from '../compute/u32Hex.js';
+import { i32 } from '../compute/i32.js';
+import { i32Hex } from '../compute/i32Hex.js';
+import { f32 } from '../compute/f32.js';
 
 export abstract class WGSLString {
   public abstract withBlueprint( blueprint: PipelineBlueprint ): string;
 
   // TODO: consider adding precedence to the expression types, so we can avoid unnecessary parentheses
 }
+alpenglow.register( 'WGSLString', WGSLString );
 
 export class WGSLStringLiteral extends WGSLString {
   public constructor(
@@ -33,6 +35,7 @@ export class WGSLStringLiteral extends WGSLString {
     return this.value;
   }
 }
+alpenglow.register( 'WGSLStringLiteral', WGSLStringLiteral );
 
 export class WGSLStringFunction extends WGSLString {
   public constructor(
@@ -45,6 +48,7 @@ export class WGSLStringFunction extends WGSLString {
     return this.value( blueprint );
   }
 }
+alpenglow.register( 'WGSLStringFunction', WGSLStringFunction );
 
 export class WGSLStringAccumulator extends WGSLString {
 
@@ -62,6 +66,7 @@ export class WGSLStringAccumulator extends WGSLString {
     return string;
   }
 }
+alpenglow.register( 'WGSLStringAccumulator', WGSLStringAccumulator );
 
 // TODO: use this where we need
 export class WGSLModule extends WGSLString {
@@ -77,6 +82,7 @@ export class WGSLModule extends WGSLString {
     return '';
   }
 }
+alpenglow.register( 'WGSLModule', WGSLModule );
 
 export class WGSLMainModule extends WGSLModule {
   public constructor(
@@ -94,6 +100,7 @@ export class WGSLMainModule extends WGSLModule {
     return super.withBlueprint( blueprint );
   }
 }
+alpenglow.register( 'WGSLMainModule', WGSLMainModule );
 
 export class WGSLReferenceModule extends WGSLString {
   public constructor(
@@ -108,6 +115,7 @@ export class WGSLReferenceModule extends WGSLString {
     return this.name;
   }
 }
+alpenglow.register( 'WGSLReferenceModule', WGSLReferenceModule );
 
 export class WGSLStringModule extends WGSLString {
   public constructor(
@@ -123,6 +131,7 @@ export class WGSLStringModule extends WGSLString {
     return this.string.withBlueprint( blueprint );
   }
 }
+alpenglow.register( 'WGSLStringModule', WGSLStringModule );
 
 export class WGSLSlot extends WGSLModule {
   public constructor(
@@ -138,18 +147,22 @@ export class WGSLSlot extends WGSLModule {
     return '';
   }
 }
+alpenglow.register( 'WGSLSlot', WGSLSlot );
 
 export const wgslString = ( value: string ): WGSLStringLiteral => {
   return new WGSLStringLiteral( value );
 };
+alpenglow.register( 'wgslString', wgslString );
 
 export const wgslFunction = ( value: ( blueprint: PipelineBlueprint ) => string ): WGSLStringFunction => {
   return new WGSLStringFunction( value );
 };
+alpenglow.register( 'wgslFunction', wgslFunction );
 
 export const wgslBlueprint = ( value: ( blueprint: PipelineBlueprint ) => WGSLString ): WGSLStringFunction => {
   return new WGSLStringFunction( blueprint => value( blueprint ).withBlueprint( blueprint ) );
 };
+alpenglow.register( 'wgslBlueprint', wgslBlueprint );
 
 // For tagged template literals
 export const wgsl = ( strings: TemplateStringsArray, ...values: WGSLString[] ): WGSLString => {
@@ -166,6 +179,7 @@ export const wgsl = ( strings: TemplateStringsArray, ...values: WGSLString[] ): 
     return string;
   } );
 };
+alpenglow.register( 'wgsl', wgsl );
 
 export type WGSLExpression = WGSLString;
 export type WGSLExpressionU32 = WGSLExpression;
@@ -184,16 +198,22 @@ export type WGSLBinaryExpression = ( a: WGSLExpression, b: WGSLExpression ) => W
 // TODO: also, hopefully we can rename them (so we work with the good type) before then
 
 export const decimalS = ( n: number ): WGSLString => wgslString( decimal( n ) );
+alpenglow.register( 'decimalS', decimalS );
 
 export const u32S = ( n: number ): WGSLExpressionU32 => wgslString( u32( n ) );
+alpenglow.register( 'u32S', u32S );
 
 export const u32HexS = ( n: number ): WGSLExpressionU32 => wgslString( u32Hex( n ) );
+alpenglow.register( 'u32HexS', u32HexS );
 
 export const i32S = ( n: number ): WGSLExpressionI32 => wgslString( i32( n ) );
+alpenglow.register( 'i32S', i32S );
 
 export const i32HexS = ( n: number ): WGSLExpressionI32 => wgslString( i32Hex( n ) );
+alpenglow.register( 'i32HexS', i32HexS );
 
 export const f32S = ( n: number ): WGSLExpressionF32 => wgslString( f32( n ) );
+alpenglow.register( 'f32S', f32S );
 
 export const wgslJoin = ( separator: string, values: WGSLString[] ): WGSLString => {
   return new WGSLStringFunction( blueprint => {
@@ -207,6 +227,7 @@ export const wgslJoin = ( separator: string, values: WGSLString[] ): WGSLString 
     return string;
   } );
 };
+alpenglow.register( 'wgslJoin', wgslJoin );
 
 export const wgslMapJoin = <T>( separator: string, values: T[], mapper: ( value: T ) => WGSLString ): WGSLString => {
   return new WGSLStringFunction( blueprint => {
@@ -220,12 +241,14 @@ export const wgslMapJoin = <T>( separator: string, values: T[], mapper: ( value:
     return string;
   } );
 };
+alpenglow.register( 'wgslMapJoin', wgslMapJoin );
 
 export const wgslOneLine = ( value: WGSLString ): WGSLString => {
   return new WGSLStringFunction( blueprint => {
     return value.withBlueprint( blueprint ).replace( /\n/g, ' ' );
   } );
 };
+alpenglow.register( 'wgslOneLine', wgslOneLine );
 
 export const wgslWith = ( value: WGSLString, ...modules: WGSLModule[] ): WGSLString => {
   return new WGSLStringFunction( blueprint => {
@@ -236,3 +259,4 @@ export const wgslWith = ( value: WGSLString, ...modules: WGSLModule[] ): WGSLStr
     return value.withBlueprint( blueprint );
   } );
 };
+alpenglow.register( 'wgslWith', wgslWith );

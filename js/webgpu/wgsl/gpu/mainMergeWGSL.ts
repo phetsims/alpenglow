@@ -4,10 +4,11 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { BufferSlot } from '../../compute/BufferSlot.js';
 import { CompareOrder } from '../../compute/ConcreteType.js';
 import { decimalS, wgsl, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
 import { mergeWGSL } from './mergeWGSL.js';
 
 export type mainMergeWGSLOptions<T> = {
@@ -76,3 +77,5 @@ export const mainMergeWGSL = <T>(
     }
   ` );
 };
+
+alpenglow.register( 'mainMergeWGSL', mainMergeWGSL );

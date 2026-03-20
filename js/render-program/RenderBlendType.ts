@@ -6,6 +6,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../alpenglow.js';
+
 export enum RenderBlendType {
   Normal = 0,
   Multiply = 1,
@@ -25,6 +27,8 @@ export enum RenderBlendType {
   Luminosity = 15
   // 4 bits in binary representation
 }
+
+alpenglow.register( 'RenderBlendType', RenderBlendType );
 
 export const RENDER_BLEND_CONSTANTS = {
   BlendNormal: RenderBlendType.Normal,

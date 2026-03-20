@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../alpenglow.js';
 import { WebGPUCommandList, WebGPURecorder } from './WebGPURecorder.js';
 
 export type PreferredCanvasFormat = 'bgra8unorm' | 'rgba8unorm';
@@ -419,5 +420,7 @@ export class WebGPUAPI {
     }
   }
 }
+alpenglow.register( 'WebGPUAPI', WebGPUAPI );
 
 export const webgpu = new WebGPUAPI();
+alpenglow.register( 'webgpu', webgpu );

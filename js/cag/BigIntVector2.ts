@@ -6,6 +6,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../alpenglow.js';
+
 export class BigIntVector2 {
   public constructor( public x: bigint, public y: bigint ) {}
 
@@ -19,3 +21,5 @@ export class BigIntVector2 {
 
   // TODO
 }
+
+alpenglow.register( 'BigIntVector2', BigIntVector2 );

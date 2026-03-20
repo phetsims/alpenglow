@@ -10,12 +10,13 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import { alpenglow } from '../alpenglow.js';
+import type { RationalFace } from './RationalFace.js';
+import type { RationalBoundary } from './RationalBoundary.js';
+import { WindingMap } from './WindingMap.js';
 import type { BigRational } from './BigRational.js';
 import type { BigRationalVector2 } from './BigRationalVector2.js';
 import type { ClippableFaceAccumulator } from './ClippableFace.js';
-import type { RationalBoundary } from './RationalBoundary.js';
-import type { RationalFace } from './RationalFace.js';
-import { WindingMap } from './WindingMap.js';
 
 // Instead of storing vertices, we can get away with storing half-edges, with a linked list of next/previous and the
 // opposite half edge. This is like a half-edge winged data structure.
@@ -189,3 +190,5 @@ export class RationalHalfEdge {
     return filteredRationalHalfEdges;
   }
 }
+
+alpenglow.register( 'RationalHalfEdge', RationalHalfEdge );

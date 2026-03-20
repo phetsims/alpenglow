@@ -9,6 +9,7 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import { alpenglow } from '../alpenglow.js';
 import type { FillRule } from './FillRule.js';
 
 let globalPathId = 0;
@@ -71,6 +72,8 @@ export class RenderPath {
     ] );
   }
 }
+
+alpenglow.register( 'RenderPath', RenderPath );
 
 export type SerializedRenderPath = {
   fillRule: FillRule;

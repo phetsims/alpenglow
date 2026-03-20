@@ -8,14 +8,15 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
-import { LinearEdge } from '../../../cag/LinearEdge.js';
-import type { BufferSlot } from '../../compute/BufferSlot.js';
-import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
-import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
-import { MAIN_TWO_PASS_TILE_DEFAULTS, mainTwoPassTileWGSL, mainTwoPassTileWGSLOptions } from '../../wgsl/rasterize-two-pass/mainTwoPassTileWGSL.js';
-import type { TwoPassCoarseRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassCoarseRenderableFace.js';
+import { alpenglow } from '../../../alpenglow.js';
 import type { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
+import type { BufferSlot } from '../../compute/BufferSlot.js';
 import type { TwoPassInitialRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassInitialRenderableFace.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import type { TwoPassCoarseRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassCoarseRenderableFace.js';
+import { MAIN_TWO_PASS_TILE_DEFAULTS, mainTwoPassTileWGSL, mainTwoPassTileWGSLOptions } from '../../wgsl/rasterize-two-pass/mainTwoPassTileWGSL.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
 
 export type MainTwoPassTileModuleOptions = {
   // input
@@ -69,3 +70,4 @@ export class MainTwoPassTileModule extends DirectModule<number> {
     this.addresses = options.addresses;
   }
 }
+alpenglow.register( 'MainTwoPassTileModule', MainTwoPassTileModule );

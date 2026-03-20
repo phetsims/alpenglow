@@ -7,14 +7,15 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { ParallelExecutor } from '../ParallelExecutor.js';
+import { alpenglow } from '../../alpenglow.js';
 import { ParallelKernel } from '../ParallelKernel.js';
-import type { ParallelStorageArray } from '../ParallelStorageArray.js';
 import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
-import type { RasterChunk } from './RasterChunk.js';
-import type { RasterClippedChunk } from './RasterClippedChunk.js';
-import type { RasterCompleteChunk } from './RasterCompleteChunk.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
 import { RasterSplitReduceData } from './RasterSplitReduceData.js';
+import type { ParallelStorageArray } from '../ParallelStorageArray.js';
+import type { RasterClippedChunk } from './RasterClippedChunk.js';
+import type { RasterChunk } from './RasterChunk.js';
+import type { RasterCompleteChunk } from './RasterCompleteChunk.js';
 
 export class ParallelRasterChunkIndexPatch {
   public static async dispatch(
@@ -64,3 +65,5 @@ export class ParallelRasterChunkIndexPatch {
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numClippedChunks / workgroupSize ) ) );
   }
 }
+
+alpenglow.register( 'ParallelRasterChunkIndexPatch', ParallelRasterChunkIndexPatch );

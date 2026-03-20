@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../alpenglow.js';
 import type { RenderProgram } from './RenderProgram.js';
 
 export class RenderLight {
@@ -20,3 +21,5 @@ export class RenderLight {
     assert && assert( colorProgram );
   }
 }
+
+alpenglow.register( 'RenderLight', RenderLight );

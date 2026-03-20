@@ -9,16 +9,17 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import type { RasterTileLog } from '../raster/RasterLog.js';
-import type { RenderPath } from '../render-program/RenderPath.js';
+import { alpenglow } from '../alpenglow.js';
 import { PolygonalFace } from './ClippableFace.js';
+import { RationalFace } from './RationalFace.js';
+import { RationalHalfEdge } from './RationalHalfEdge.js';
+import { LineSplitter } from './LineSplitter.js';
 import { HilbertMapping } from './HilbertMapping.js';
 import { IntegerEdge } from './IntegerEdge.js';
 import { LineIntersector } from './LineIntersector.js';
-import { LineSplitter } from './LineSplitter.js';
+import type { RenderPath } from '../render-program/RenderPath.js';
 import type { RationalBoundary } from './RationalBoundary.js';
-import { RationalFace } from './RationalFace.js';
-import { RationalHalfEdge } from './RationalHalfEdge.js';
+import type { RasterTileLog } from '../raster/RasterLog.js';
 
 const defaultLineIntersector = LineIntersector.edgeIntersectionArrayBoundsTree;
 
@@ -166,3 +167,5 @@ export class PolygonalBoolean {
     );
   }
 }
+
+alpenglow.register( 'PolygonalBoolean', PolygonalBoolean );

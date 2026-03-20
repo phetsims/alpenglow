@@ -7,11 +7,12 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import { RenderColor } from './RenderColor.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
 import { RenderInstruction, RenderInstructionMultiplyScalar } from './RenderInstruction.js';
+import { RenderColor } from './RenderColor.js';
 import { RenderPathBoolean } from './RenderPathBoolean.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 
 export class RenderAlpha extends RenderProgram {
   public constructor(
@@ -82,6 +83,8 @@ export class RenderAlpha extends RenderProgram {
     };
   }
 }
+
+alpenglow.register( 'RenderAlpha', RenderAlpha );
 
 export type SerializedRenderAlpha = {
   type: 'RenderAlpha';

@@ -6,8 +6,9 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import type { Binding } from './Binding.js';
+import { alpenglow } from '../../alpenglow.js';
 import { Resource } from './Resource.js';
+import type { Binding } from './Binding.js';
 
 export class BufferResource extends Resource {
   public constructor(
@@ -39,3 +40,4 @@ export class BufferResource extends Resource {
     return `BufferResource[#${this.id}${this.buffer.label ? ` label:${this.buffer.label}` : ''} bufsize:${this.buffer.size}${this.offset !== 0 ? ` offset:${this.offset}` : ''}${this.size !== 0 ? ` size:${this.size}` : ''}]`;
   }
 }
+alpenglow.register( 'BufferResource', BufferResource );

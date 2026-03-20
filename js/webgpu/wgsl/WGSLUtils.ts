@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../alpenglow.js';
 import { wgsl, WGSLExpressionU32 } from './WGSLString.js';
 
 export type WorkgroupSizable = {
@@ -74,9 +75,13 @@ export const partialWGSLBeautify = ( wgsl: string ): string => {
   return beautified;
 };
 
+alpenglow.register( 'partialWGSLBeautify', partialWGSLBeautify );
+
 export const addLineNumbers = ( wgsl: string ): string => {
   return wgsl.split( '\n' ).map( ( s, i ) => `${i + 1} ${s}` ).join( '\n' );
 };
+
+alpenglow.register( 'addLineNumbers', addLineNumbers );
 
 /**
  * Strips comments from a WGSL string (in an opinionated way, to potentially leave some in for help with debugging).
@@ -92,3 +97,5 @@ export const stripWGSLComments = (
     return index >= 0 ? line.substring( 0, index ) : line;
   } ).join( '\n' );
 };
+
+alpenglow.register( 'stripWGSLComments', stripWGSLComments );

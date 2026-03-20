@@ -7,16 +7,17 @@
  */
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
-import { CompositeModule } from '../../compute/CompositeModule.js';
 import { BitOrder, getArrayType, U32Add, U32Type } from '../../compute/ConcreteType.js';
-import type { ExecutionContext } from '../../compute/ExecutionContext.js';
-import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
-import { ceilDivideConstantDivisorWGSL } from '../../wgsl/gpu/ceilDivideConstantDivisorWGSL.js';
 import { u32S, wgsl, WGSLExpressionU32 } from '../../wgsl/WGSLString.js';
 import { MainRadixHistogramModule, MainRadixHistogramModuleOptions } from './MainRadixHistogramModule.js';
 import { MainRadixScatterModule, MainRadixScatterModuleOptions } from './MainRadixScatterModule.js';
 import { ScanModule, ScanModuleOptions } from './ScanModule.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { CompositeModule } from '../../compute/CompositeModule.js';
+import { ceilDivideConstantDivisorWGSL } from '../../wgsl/gpu/ceilDivideConstantDivisorWGSL.js';
+import type { ExecutionContext } from '../../compute/ExecutionContext.js';
 
 type SelfOptions<T> = {
   // NOTE: Can be in-place of input and output point to the same slot
@@ -316,6 +317,7 @@ export class RadixSortModule<T> extends CompositeModule<number> {
     return ( radixWorkgroupSize * radixGrainSize ) * Math.floor( ( ( scanWorkgroupSize * scanGrainSize ) ** scanLevels ) / ( 1 << bitsPerPass ) );
   }
 }
+alpenglow.register( 'RadixSortModule', RadixSortModule );
 
 class BufferPair<T> {
   public constructor(

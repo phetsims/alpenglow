@@ -6,6 +6,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../alpenglow.js';
+
 let globalId = 1;
 
 export abstract class ResourceSlot {
@@ -13,3 +15,4 @@ export abstract class ResourceSlot {
 
   public abstract toDebugString(): string;
 }
+alpenglow.register( 'ResourceSlot', ResourceSlot );

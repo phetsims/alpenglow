@@ -8,12 +8,13 @@
 
 import WithoutNull from '../../../../../phet-core/js/types/WithoutNull.js';
 import WithRequired from '../../../../../phet-core/js/types/WithRequired.js';
-import { U32Type } from '../../compute/ConcreteType.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { u32S, wgsl, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
-import { ceilDivideConstantDivisorWGSL } from './ceilDivideConstantDivisorWGSL.js';
-import { commentWGSL } from './commentWGSL.js';
 import { histogramWGSL, histogramWGSLOptions } from './histogramWGSL.js';
+import { commentWGSL } from './commentWGSL.js';
 import { logRakedWGSL } from './logRakedWGSL.js';
+import { U32Type } from '../../compute/ConcreteType.js';
+import { ceilDivideConstantDivisorWGSL } from './ceilDivideConstantDivisorWGSL.js';
 import { unrollWGSL } from './unrollWGSL.js';
 
 export type radixHistogramWGSLOptions = {
@@ -67,3 +68,5 @@ export const radixHistogramWGSL = (
     ${commentWGSL( 'end radix_histogram' )}
   `;
 };
+
+alpenglow.register( 'radixHistogramWGSL', radixHistogramWGSL );

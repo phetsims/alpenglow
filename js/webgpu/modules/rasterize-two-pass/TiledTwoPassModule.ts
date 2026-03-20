@@ -7,22 +7,23 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
-import { LinearEdge } from '../../../cag/LinearEdge.js';
-import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
-import { BufferBindingType } from '../../compute/BufferBindingType.js';
-import { BufferSlot } from '../../compute/BufferSlot.js';
-import { CompositeModule } from '../../compute/CompositeModule.js';
-import { getVariableLengthArrayType, U32AtomicType, U32Type } from '../../compute/ConcreteType.js';
-import { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
-import { TextureViewSlot } from '../../compute/TextureViewSlot.js';
-import { LinearEdgeType } from '../../wgsl/cag/LinearEdgeType.js';
-import { TwoPassCoarseRenderableFaceType } from '../../wgsl/rasterize-two-pass/TwoPassCoarseRenderableFaceType.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { TwoPassConfig } from '../../wgsl/rasterize-two-pass/TwoPassConfig.js';
+import { BufferSlot } from '../../compute/BufferSlot.js';
 import { TwoPassInitialRenderableFace } from '../../wgsl/rasterize-two-pass/TwoPassInitialRenderableFace.js';
+import { LinearEdge } from '../../../cag/LinearEdge.js';
+import { TextureViewSlot } from '../../compute/TextureViewSlot.js';
 import { WGSLExpressionU32, WGSLStringFunction } from '../../wgsl/WGSLString.js';
-import { MainTwoPassInitializeAddressesModule, MainTwoPassInitializeAddressesModuleOptions } from './MainTwoPassInitializeAddressesModule.js';
 import { MainTwoPassTileModule, MainTwoPassTileModuleOptions } from './MainTwoPassTileModule.js';
 import { TwoPassModule, TwoPassModuleOptions } from './TwoPassModule.js';
+import { MainTwoPassInitializeAddressesModule, MainTwoPassInitializeAddressesModuleOptions } from './MainTwoPassInitializeAddressesModule.js';
+import { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { CompositeModule } from '../../compute/CompositeModule.js';
+import { BufferArraySlot } from '../../compute/BufferArraySlot.js';
+import { getVariableLengthArrayType, U32AtomicType, U32Type } from '../../compute/ConcreteType.js';
+import { TwoPassCoarseRenderableFaceType } from '../../wgsl/rasterize-two-pass/TwoPassCoarseRenderableFaceType.js';
+import { LinearEdgeType } from '../../wgsl/cag/LinearEdgeType.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
 
 type SelfOptions = {
   config: BufferSlot<TwoPassConfig>;
@@ -157,3 +158,4 @@ export class TiledTwoPassModule extends CompositeModule<TiledTwoPassRunSize> {
     this.twoPassModule = twoPassModule;
   }
 }
+alpenglow.register( 'TiledTwoPassModule', TiledTwoPassModule );

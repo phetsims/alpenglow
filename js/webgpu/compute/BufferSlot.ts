@@ -6,9 +6,10 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../alpenglow.js';
+import { ResourceSlot } from './ResourceSlot.js';
 import { BufferSlotSlice } from './BufferSlotSlice.js';
 import type { ConcreteType } from './ConcreteType.js';
-import { ResourceSlot } from './ResourceSlot.js';
 
 export class BufferSlot<T = unknown> extends ResourceSlot {
   public readonly bufferSlotSlices: BufferSlotSlice[] = [];
@@ -45,3 +46,4 @@ export class BufferSlot<T = unknown> extends ResourceSlot {
     return slot;
   }
 }
+alpenglow.register( 'BufferSlot', BufferSlot );

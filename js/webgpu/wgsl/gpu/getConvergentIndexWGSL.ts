@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../../alpenglow.js';
 import { u32S, wgsl, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
 
 export type getConvergentIndexWGSLOptions = {
@@ -22,6 +23,12 @@ export const getConvergentIndexWGSL = (
   return wgsl`( reverseBits( ${i} ) >> ${u32S( 32 - Math.log2( size ) )} )`;
 };
 
+alpenglow.register( 'getConvergentIndexWGSL', getConvergentIndexWGSL );
+
 export const toConvergentIndexWGSL = getConvergentIndexWGSL;
 
+alpenglow.register( 'toConvergentIndexWGSL', toConvergentIndexWGSL );
+
 export const fromConvergentIndexWGSL = getConvergentIndexWGSL;
+
+alpenglow.register( 'fromConvergentIndexWGSL', fromConvergentIndexWGSL );

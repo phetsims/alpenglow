@@ -6,10 +6,11 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../alpenglow.js';
+import { ConcreteType, getArrayType } from './ConcreteType.js';
+import { ByteEncoder } from './ByteEncoder.js';
 import { webgpu } from '../WebGPUAPI.js';
 import type { BufferLogger } from './BufferLogger.js';
-import { ByteEncoder } from './ByteEncoder.js';
-import { ConcreteType, getArrayType } from './ConcreteType.js';
 import type { DeviceContext } from './DeviceContext.js';
 
 export class TypedBuffer<T = unknown> {
@@ -68,3 +69,5 @@ export class TypedBuffer<T = unknown> {
     return new TypedBuffer( buffer, getArrayType( type, size, outOfRangeElement ) );
   }
 }
+
+alpenglow.register( 'TypedBuffer', TypedBuffer );

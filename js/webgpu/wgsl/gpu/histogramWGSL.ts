@@ -8,6 +8,7 @@
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { wgsl, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
 import { COALESCED_LOOP_DEFAULTS, coalescedLoopWGSL, coalescedLoopWGSLOptions } from './coalescedLoopWGSL.js';
 import { commentWGSL } from './commentWGSL.js';
@@ -48,3 +49,5 @@ export const histogramWGSL = (
     ${commentWGSL( 'end histogram' )}
   `;
 };
+
+alpenglow.register( 'histogramWGSL', histogramWGSL );

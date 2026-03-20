@@ -13,6 +13,7 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { BitOrder, U32Add, U32Type, Vec2uAdd, Vec2uType, Vec3uAdd, Vec3uType, Vec4uAdd, Vec4uType } from '../../compute/ConcreteType.js';
 import { ConsoleLoggedLine } from '../../compute/ConsoleLogger.js';
 import { decimalS, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLStatements, WGSLVariableName } from '../WGSLString.js';
@@ -241,3 +242,5 @@ export const nBitCompactSingleSortWGSL = <T>(
     ${commentWGSL( 'end n_bit_compact_single_sort' )}
   `;
 };
+
+alpenglow.register( 'nBitCompactSingleSortWGSL', nBitCompactSingleSortWGSL );

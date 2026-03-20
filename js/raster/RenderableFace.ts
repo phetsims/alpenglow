@@ -7,6 +7,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import { alpenglow } from '../alpenglow.js';
 import type { ClippableFace } from '../cag/ClippableFace.js';
 import type { RenderProgram } from '../render-program/RenderProgram.js';
 
@@ -72,3 +73,5 @@ export class RenderableFace {
     return faces;
   }
 }
+
+alpenglow.register( 'RenderableFace', RenderableFace );

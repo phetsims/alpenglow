@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../alpenglow.js';
 import { webgpu } from './WebGPUAPI.js';
 
 export class BlitShader {
@@ -115,3 +116,5 @@ fn fs_main(@builtin(position) pos: vec4<f32>) -> @location(0) vec4<f32> {
     pass.end();
   }
 }
+
+alpenglow.register( 'BlitShader', BlitShader );

@@ -16,14 +16,17 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { RenderColor } from './RenderColor.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
 import { RenderEvaluationContext } from './RenderEvaluationContext.js';
 import { RenderInstruction, RenderInstructionLocation, RenderInstructionReturn } from './RenderInstruction.js';
-import { RenderInstructionComputeBlendRatio } from './RenderInstructionComputeBlendRatio.js';
 import { RenderInstructionLinearBlend } from './RenderLinearBlend.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
-import { RenderRadialBlendAccuracy } from './RenderRadialBlendAccuracy.js';
+import { RenderColor } from './RenderColor.js';
+import { RenderInstructionComputeBlendRatio } from './RenderInstructionComputeBlendRatio.js';
 import { RenderRadialBlendLogic } from './RenderRadialBlendLogic.js';
+import { RenderRadialBlendAccuracy } from './RenderRadialBlendAccuracy.js';
+
+alpenglow.register( 'RenderRadialBlendAccuracy', RenderRadialBlendAccuracy );
 
 export class RenderRadialBlend extends RenderProgram {
 
@@ -148,6 +151,8 @@ export class RenderRadialBlend extends RenderProgram {
     };
   }
 }
+
+alpenglow.register( 'RenderRadialBlend', RenderRadialBlend );
 
 export type SerializedRenderRadialBlend = {
   type: 'RenderRadialBlend';

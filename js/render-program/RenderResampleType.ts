@@ -6,6 +6,8 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../alpenglow.js';
+
 export enum RenderResampleType {
   // TODO: maybe... sort these?
   NearestNeighbor = 0,
@@ -15,3 +17,5 @@ export enum RenderResampleType {
   AnalyticBox = 4,
   AnalyticBilinear = 5
 }
+
+alpenglow.register( 'RenderResampleType', RenderResampleType );

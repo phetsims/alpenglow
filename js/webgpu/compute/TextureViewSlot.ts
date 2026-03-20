@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../alpenglow.js';
 import { ResourceSlot } from './ResourceSlot.js';
 
 export class TextureViewSlot extends ResourceSlot {
@@ -13,3 +14,4 @@ export class TextureViewSlot extends ResourceSlot {
     return `TextureViewSlot[#${this.id}]`;
   }
 }
+alpenglow.register( 'TextureViewSlot', TextureViewSlot );

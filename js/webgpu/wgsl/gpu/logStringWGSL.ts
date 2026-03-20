@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../../alpenglow.js';
 import { WGSLStatements } from '../WGSLString.js';
 import { logWGSL } from './logWGSL.js';
 
@@ -14,3 +15,5 @@ export const logStringWGSL = (
 ): WGSLStatements => logWGSL( {
   name: str
 } );
+
+alpenglow.register( 'logStringWGSL', logStringWGSL );

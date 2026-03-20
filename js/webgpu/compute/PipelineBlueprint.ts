@@ -8,11 +8,12 @@
 
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
-import { WGSLModuleDeclarations } from '../wgsl/WGSLString.js';
-import type { BindingType } from './BindingType.js';
-import type { PipelineLayout } from './PipelineLayout.js';
-import type { ResourceSlot } from './ResourceSlot.js';
+import { alpenglow } from '../../alpenglow.js';
 import { ResourceUsage } from './ResourceUsage.js';
+import type { PipelineLayout } from './PipelineLayout.js';
+import { WGSLModuleDeclarations } from '../wgsl/WGSLString.js';
+import type { ResourceSlot } from './ResourceSlot.js';
+import type { BindingType } from './BindingType.js';
 
 export type PipelineBlueprintOptions = {
   name: string;
@@ -95,6 +96,7 @@ export class PipelineBlueprint {
     } ).join( '\n' )}`;
   }
 }
+alpenglow.register( 'PipelineBlueprint', PipelineBlueprint );
 
 class WGSLInternalDeclaration {
   public constructor(

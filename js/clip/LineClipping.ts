@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 import Vector2 from '../../../dot/js/Vector2.js';
+import { alpenglow } from '../alpenglow.js';
 
 export class LineClipping {
   /**
@@ -81,3 +82,5 @@ export class LineClipping {
     return false;
   }
 }
+
+alpenglow.register( 'LineClipping', LineClipping );

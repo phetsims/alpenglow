@@ -7,6 +7,7 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow } from '../alpenglow.js';
 import { RenderColor } from './RenderColor.js';
 import { RenderLinearDisplayP3ToLinearSRGB } from './RenderLinearDisplayP3ToLinearSRGB.js';
 import { RenderLinearSRGBToLinearDisplayP3 } from './RenderLinearSRGBToLinearDisplayP3.js';
@@ -186,3 +187,5 @@ export class RenderColorSpace {
     _.identity
   );
 }
+
+alpenglow.register( 'RenderColorSpace', RenderColorSpace );

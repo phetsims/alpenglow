@@ -6,8 +6,11 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../alpenglow.js';
+
 export const i32Hex = ( n: number ): string => {
   assert && assert( Number.isInteger( n ) && n >= -( 2 ** 31 ) && n < 2 ** 31, `Invalid i32 value: ${n}` );
 
   return `0x${( n >> 0 ).toString( 16 )}i`;
 };
+alpenglow.register( 'i32Hex', i32Hex );

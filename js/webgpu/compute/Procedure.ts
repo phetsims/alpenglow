@@ -8,21 +8,22 @@
 
 import { combineOptions } from '../../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import { webgpu } from '../WebGPUAPI.js';
-import { BindGroup } from './BindGroup.js';
-import type { BindGroupLayout } from './BindGroupLayout.js';
-import { BufferBindingType } from './BufferBindingType.js';
-import { BufferResource } from './BufferResource.js';
-import { BufferSlot } from './BufferSlot.js';
-import type { DeviceContext } from './DeviceContext.js';
-import { ExecutionContext } from './ExecutionContext.js';
+import { alpenglow } from '../../alpenglow.js';
 import { Executor, ExecutorOptions } from './Executor.js';
-import { logBufferSlot } from './logBufferSlot.js';
-import type { Resource } from './Resource.js';
-import type { ResourceSlot } from './ResourceSlot.js';
 import type { Routine } from './Routine.js';
-import type { TextureViewResource } from './TextureViewResource.js';
+import type { ResourceSlot } from './ResourceSlot.js';
+import type { Resource } from './Resource.js';
+import type { BindGroupLayout } from './BindGroupLayout.js';
+import { BindGroup } from './BindGroup.js';
+import { BufferSlot } from './BufferSlot.js';
+import { BufferResource } from './BufferResource.js';
 import type { TextureViewSlot } from './TextureViewSlot.js';
+import type { TextureViewResource } from './TextureViewResource.js';
+import { BufferBindingType } from './BufferBindingType.js';
+import { webgpu } from '../WebGPUAPI.js';
+import { ExecutionContext } from './ExecutionContext.js';
+import type { DeviceContext } from './DeviceContext.js';
+import { logBufferSlot } from './logBufferSlot.js';
 
 export type ProcedureExecuteOptions = {
   separateComputePasses?: boolean;
@@ -186,3 +187,4 @@ export class Procedure<In, Out> {
     this.selfBuffers.forEach( buffer => webgpu.bufferDestroy( buffer ) );
   }
 }
+alpenglow.register( 'Procedure', Procedure );

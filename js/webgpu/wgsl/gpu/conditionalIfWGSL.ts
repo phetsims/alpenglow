@@ -17,6 +17,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../../alpenglow.js';
 import { wgsl, WGSLExpressionBool, WGSLStatements } from '../WGSLString.js';
 
 export const conditionalIfWGSL = (
@@ -42,3 +43,5 @@ export const conditionalIfWGSL = (
     `;
   }
 };
+
+alpenglow.register( 'conditionalIfWGSL', conditionalIfWGSL );

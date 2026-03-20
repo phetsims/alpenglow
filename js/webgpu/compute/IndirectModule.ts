@@ -7,9 +7,10 @@
  */
 
 import { optionize3 } from '../../../../phet-core/js/optionize.js';
+import { alpenglow } from '../../alpenglow.js';
+import { PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions } from './PipelineBlueprint.js';
 import type { ExecutionContext } from './ExecutionContext.js';
 import { Module } from './Module.js';
-import { PIPELINE_BLUEPRINT_DEFAULTS, PipelineBlueprint, PipelineBlueprintOptions } from './PipelineBlueprint.js';
 
 export type IndirectModuleOptions<T> = {
   create: ( blueprint: PipelineBlueprint ) => void;
@@ -40,3 +41,4 @@ export class IndirectModule<T> extends Module<T> {
     } );
   }
 }
+alpenglow.register( 'IndirectModule', IndirectModule );

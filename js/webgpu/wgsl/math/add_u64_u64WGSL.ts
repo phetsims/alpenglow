@@ -7,8 +7,8 @@
  */
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
-import { add_u32_u32_to_u64WGSL } from './add_u32_u32_to_u64WGSL.js';
 import { u64WGSL } from './u64WGSL.js';
+import { add_u32_u32_to_u64WGSL } from './add_u32_u32_to_u64WGSL.js';
 
 export const add_u64_u64WGSL = (
   a: WGSLExpression,

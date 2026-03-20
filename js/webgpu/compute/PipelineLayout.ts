@@ -6,11 +6,12 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { webgpu } from '../WebGPUAPI.js';
-import type { BindGroupLayout } from './BindGroupLayout.js';
-import type { Binding } from './Binding.js';
+import { alpenglow } from '../../alpenglow.js';
 import type { DeviceContext } from './DeviceContext.js';
+import type { BindGroupLayout } from './BindGroupLayout.js';
+import { webgpu } from '../WebGPUAPI.js';
 import type { ResourceSlot } from './ResourceSlot.js';
+import type { Binding } from './Binding.js';
 
 export class PipelineLayout {
   public readonly layout: GPUPipelineLayout;
@@ -46,3 +47,4 @@ export class PipelineLayout {
     return binding!;
   }
 }
+alpenglow.register( 'PipelineLayout', PipelineLayout );

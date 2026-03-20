@@ -8,12 +8,13 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { BoundsClipping } from '../clip/BoundsClipping.js';
+import type { RationalIntersection } from './RationalIntersection.js';
 import type { RenderPath } from '../render-program/RenderPath.js';
 import type { BoundedSubpath } from './BoundedSubpath.js';
-import type { RationalIntersection } from './RationalIntersection.js';
+import { BoundsClipping } from '../clip/BoundsClipping.js';
+import { alpenglow } from '../alpenglow.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 
 export class IntegerEdge {
 
@@ -156,3 +157,5 @@ export class IntegerEdge {
     return integerEdges;
   }
 }
+
+alpenglow.register( 'IntegerEdge', IntegerEdge );

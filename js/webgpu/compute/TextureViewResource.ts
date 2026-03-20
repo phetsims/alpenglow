@@ -6,8 +6,9 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import type { Binding } from './Binding.js';
+import { alpenglow } from '../../alpenglow.js';
 import { Resource } from './Resource.js';
+import type { Binding } from './Binding.js';
 
 export class TextureViewResource extends Resource {
   public constructor(
@@ -27,3 +28,4 @@ export class TextureViewResource extends Resource {
     return `TextureViewResource[#${this.id}${this.textureView.label ? ` label:${this.textureView.label}` : ''}]`;
   }
 }
+alpenglow.register( 'TextureViewResource', TextureViewResource );

@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../alpenglow.js';
 import { BindingType } from './BindingType.js';
 
 export class BufferBindingType extends BindingType {
@@ -52,3 +53,4 @@ export class BufferBindingType extends BindingType {
   public static readonly READ_ONLY_STORAGE = new BufferBindingType( 'read-only-storage' );
   public static readonly STORAGE = new BufferBindingType( 'storage' );
 }
+alpenglow.register( 'BufferBindingType', BufferBindingType );

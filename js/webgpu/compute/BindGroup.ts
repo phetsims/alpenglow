@@ -6,11 +6,12 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { webgpu } from '../WebGPUAPI.js';
-import type { BindGroupLayout } from './BindGroupLayout.js';
+import { alpenglow } from '../../alpenglow.js';
 import type { DeviceContext } from './DeviceContext.js';
+import type { BindGroupLayout } from './BindGroupLayout.js';
 import type { Resource } from './Resource.js';
 import type { ResourceSlot } from './ResourceSlot.js';
+import { webgpu } from '../WebGPUAPI.js';
 
 export class BindGroup {
 
@@ -35,3 +36,4 @@ export class BindGroup {
     } );
   }
 }
+alpenglow.register( 'BindGroup', BindGroup );

@@ -11,12 +11,13 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { ParallelExecutor } from '../ParallelExecutor.js';
+import { alpenglow } from '../../alpenglow.js';
 import { ParallelKernel } from '../ParallelKernel.js';
-import type { ParallelStorageArray } from '../ParallelStorageArray.js';
-import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
-import { RasterChunkReduceData } from './RasterChunkReduceData.js';
 import { RasterChunkReduceQuad } from './RasterChunkReduceQuad.js';
+import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
+import { RasterChunkReduceData } from './RasterChunkReduceData.js';
+import type { ParallelStorageArray } from '../ParallelStorageArray.js';
 import type { RasterClippedChunk } from './RasterClippedChunk.js';
 
 export class ParallelRasterChunkReduce {
@@ -133,3 +134,5 @@ export class ParallelRasterChunkReduce {
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numReduces / workgroupSize ) ) );
   }
 }
+
+alpenglow.register( 'ParallelRasterChunkReduce', ParallelRasterChunkReduce );

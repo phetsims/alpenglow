@@ -7,18 +7,19 @@
  */
 
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow } from '../../alpenglow.js';
+import type { PipelineBlueprint } from './PipelineBlueprint.js';
+import type { ResourceSlot } from './ResourceSlot.js';
 import { BindGroupLayout } from './BindGroupLayout.js';
-import { BindingDescriptor } from './BindingDescriptor.js';
-import type { BindingType } from './BindingType.js';
+import type { DeviceContext } from './DeviceContext.js';
+import type { Module } from './Module.js';
 import { BufferSlot } from './BufferSlot.js';
 import { BufferSlotSlice } from './BufferSlotSlice.js';
-import { ComputePipeline } from './ComputePipeline.js';
-import type { DeviceContext } from './DeviceContext.js';
-import type { ExecutionContext } from './ExecutionContext.js';
-import type { Module } from './Module.js';
-import type { PipelineBlueprint } from './PipelineBlueprint.js';
 import { PipelineLayout } from './PipelineLayout.js';
-import type { ResourceSlot } from './ResourceSlot.js';
+import { ComputePipeline } from './ComputePipeline.js';
+import type { ExecutionContext } from './ExecutionContext.js';
+import { BindingDescriptor } from './BindingDescriptor.js';
+import type { BindingType } from './BindingType.js';
 
 export class Routine<T, In, Out> {
 
@@ -165,3 +166,4 @@ export class Routine<T, In, Out> {
     return map;
   };
 }
+alpenglow.register( 'Routine', Routine );

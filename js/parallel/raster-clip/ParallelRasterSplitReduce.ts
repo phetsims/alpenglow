@@ -8,11 +8,12 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { ParallelExecutor } from '../ParallelExecutor.js';
-import { ParallelKernel } from '../ParallelKernel.js';
+import { alpenglow } from '../../alpenglow.js';
 import type { ParallelStorageArray } from '../ParallelStorageArray.js';
-import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
 import { RasterSplitReduceData } from './RasterSplitReduceData.js';
+import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
+import { ParallelKernel } from '../ParallelKernel.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
 
 export class ParallelRasterSplitReduce {
   public static async dispatch(
@@ -73,3 +74,5 @@ export class ParallelRasterSplitReduce {
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numReduces / workgroupSize ) ) );
   }
 }
+
+alpenglow.register( 'ParallelRasterSplitReduce', ParallelRasterSplitReduce );

@@ -7,10 +7,11 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { alpenglow } from '../alpenglow.js';
 import { RenderExecutionStack } from './RenderExecutionStack.js';
 import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
 import type { RenderEvaluator, RenderProgram } from './RenderProgram.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
 
 // Should be kept empty
 const scratchInstructions: RenderInstruction[] = [];
@@ -107,3 +108,5 @@ export class RenderExecutor {
     }
   }
 }
+
+alpenglow.register( 'RenderExecutor', RenderExecutor );

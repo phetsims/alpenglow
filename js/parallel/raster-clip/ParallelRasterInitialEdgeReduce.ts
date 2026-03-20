@@ -6,13 +6,14 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { ParallelExecutor } from '../ParallelExecutor.js';
-import { ParallelKernel } from '../ParallelKernel.js';
+import { alpenglow } from '../../alpenglow.js';
 import type { ParallelStorageArray } from '../ParallelStorageArray.js';
-import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
 import type { RasterClippedChunk } from './RasterClippedChunk.js';
 import type { RasterEdgeClip } from './RasterEdgeClip.js';
 import { RasterSplitReduceData } from './RasterSplitReduceData.js';
+import { ParallelWorkgroupArray } from '../ParallelWorkgroupArray.js';
+import { ParallelKernel } from '../ParallelKernel.js';
+import { ParallelExecutor } from '../ParallelExecutor.js';
 
 export class ParallelRasterInitialEdgeReduce {
   public static async dispatch(
@@ -70,3 +71,5 @@ export class ParallelRasterInitialEdgeReduce {
     await ( new ParallelExecutor( kernel ).dispatch( Math.ceil( numEdgeClips / workgroupSize ) ) );
   }
 }
+
+alpenglow.register( 'ParallelRasterInitialEdgeReduce', ParallelRasterInitialEdgeReduce );

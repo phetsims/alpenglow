@@ -10,6 +10,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import SegmentTree from '../../../kite/js/ops/SegmentTree.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
+import { alpenglow } from '../alpenglow.js';
 
 /* global FlatQueue */
 type Item = {
@@ -345,3 +346,5 @@ export class BoundsIntersectionFilter {
     }
   }
 }
+
+alpenglow.register( 'BoundsIntersectionFilter', BoundsIntersectionFilter );

@@ -8,6 +8,7 @@
 
 import Vector4 from '../../../dot/js/Vector4.js';
 import { optionize3 } from '../../../phet-core/js/optionize.js';
+import { alpenglow } from '../alpenglow.js';
 import type { OutputRaster } from './OutputRaster.js';
 import type { RasterColorConverter } from './RasterColorConverter.js';
 import { Rasterize } from './Rasterize.js';
@@ -177,3 +178,5 @@ export class CombinedRaster implements OutputRaster {
     Rasterize.writeImageDataToCanvas( this.toImageData(), canvas, context );
   }
 }
+
+alpenglow.register( 'CombinedRaster', CombinedRaster );

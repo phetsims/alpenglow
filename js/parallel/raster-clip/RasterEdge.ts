@@ -9,6 +9,7 @@
  */
 
 import Vector2 from '../../../../dot/js/Vector2.js';
+import { alpenglow } from '../../alpenglow.js';
 import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
 
 export class RasterEdge {
@@ -73,3 +74,5 @@ export class RasterEdge {
     NaN, false, false, new Vector2( NaN, NaN ), new Vector2( NaN, NaN )
   );
 }
+
+alpenglow.register( 'RasterEdge', RasterEdge );

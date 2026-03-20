@@ -6,13 +6,14 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { webgpu } from '../WebGPUAPI.js';
+import { alpenglow } from '../../alpenglow.js';
 import { Binding } from './Binding.js';
+import type { DeviceContext } from './DeviceContext.js';
 import type { BindingDescriptor } from './BindingDescriptor.js';
+import { webgpu } from '../WebGPUAPI.js';
 import { BindingLocation } from './BindingLocation.js';
 import { BufferBinding } from './BufferBinding.js';
 import { BufferSlot } from './BufferSlot.js';
-import type { DeviceContext } from './DeviceContext.js';
 import type { ResourceSlot } from './ResourceSlot.js';
 
 export class BindGroupLayout {
@@ -54,3 +55,4 @@ export class BindGroupLayout {
     return this.bindings.find( binding => binding.slot === slot ) || null;
   }
 }
+alpenglow.register( 'BindGroupLayout', BindGroupLayout );

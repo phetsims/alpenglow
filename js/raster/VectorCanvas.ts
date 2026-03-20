@@ -17,26 +17,27 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
 import { combineOptions } from '../../../phet-core/js/optionize.js';
-import { PolygonalFace } from '../cag/ClippableFace.js';
-import { LinearEdge } from '../cag/LinearEdge.js';
-import { PolygonalBoolean } from '../cag/PolygonalBoolean.js';
-import { BoundsClipping } from '../clip/BoundsClipping.js';
-import { convertColorSpace } from '../render-program/convertColorSace.js';
-import { getPolygonFilterGridBounds, PolygonFilterType } from '../render-program/PolygonFilterType.js';
-import { RenderColor } from '../render-program/RenderColor.js';
-import { RenderColorSpace } from '../render-program/RenderColorSpace.js';
-import { RenderExtend } from '../render-program/RenderExtend.js';
-import { RenderGradientStop } from '../render-program/RenderGradientStop.js';
-import { RenderLinearGradient } from '../render-program/RenderLinearGradient.js';
-import { RenderLinearGradientAccuracy } from '../render-program/RenderLinearGradientAccuracy.js';
-import { RenderPath } from '../render-program/RenderPath.js';
-import { RenderProgram } from '../render-program/RenderProgram.js';
-import { RenderRadialGradient } from '../render-program/RenderRadialGradient.js';
-import { RenderRadialGradientAccuracy } from '../render-program/RenderRadialGradientAccuracy.js';
-import { RenderStack } from '../render-program/RenderStack.js';
-import { CombinedRaster, CombinedRasterOptions } from './CombinedRaster.js';
-import { Rasterize } from './Rasterize.js';
+import { alpenglow } from '../alpenglow.js';
 import { RenderableFace } from './RenderableFace.js';
+import { getPolygonFilterGridBounds, PolygonFilterType } from '../render-program/PolygonFilterType.js';
+import { RenderPath } from '../render-program/RenderPath.js';
+import { RenderExtend } from '../render-program/RenderExtend.js';
+import { RenderLinearGradient } from '../render-program/RenderLinearGradient.js';
+import { RenderRadialGradient } from '../render-program/RenderRadialGradient.js';
+import { RenderProgram } from '../render-program/RenderProgram.js';
+import { BoundsClipping } from '../clip/BoundsClipping.js';
+import { CombinedRaster, CombinedRasterOptions } from './CombinedRaster.js';
+import { RenderGradientStop } from '../render-program/RenderGradientStop.js';
+import { PolygonalBoolean } from '../cag/PolygonalBoolean.js';
+import { PolygonalFace } from '../cag/ClippableFace.js';
+import { RenderColorSpace } from '../render-program/RenderColorSpace.js';
+import { RenderColor } from '../render-program/RenderColor.js';
+import { Rasterize } from './Rasterize.js';
+import { LinearEdge } from '../cag/LinearEdge.js';
+import { RenderStack } from '../render-program/RenderStack.js';
+import { convertColorSpace } from '../render-program/convertColorSace.js';
+import { RenderRadialGradientAccuracy } from '../render-program/RenderRadialGradientAccuracy.js';
+import { RenderLinearGradientAccuracy } from '../render-program/RenderLinearGradientAccuracy.js';
 
 export class VectorCanvas {
 
@@ -213,3 +214,6 @@ export class VectorCanvas {
     return Rasterize.imageDataToCanvas( this.getImageData( options ) );
   }
 }
+
+
+alpenglow.register( 'VectorCanvas', VectorCanvas );

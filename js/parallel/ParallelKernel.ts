@@ -9,6 +9,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../alpenglow.js';
 import { BaseWorkgroupValues, ParallelContext } from './ParallelContext.js';
 import type { ParallelStorageArray } from './ParallelStorageArray.js';
 
@@ -22,3 +23,5 @@ export class ParallelKernel<WorkgroupValues extends BaseWorkgroupValues = Record
     public readonly workgroupZ = 1
   ) {}
 }
+
+alpenglow.register( 'ParallelKernel', ParallelKernel );

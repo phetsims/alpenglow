@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../alpenglow.js';
 import { BindingType } from './BindingType.js';
 
 export class StorageTextureBindingType extends BindingType {
@@ -42,3 +43,4 @@ export class StorageTextureBindingType extends BindingType {
     };
   }
 }
+alpenglow.register( 'StorageTextureBindingType', StorageTextureBindingType );

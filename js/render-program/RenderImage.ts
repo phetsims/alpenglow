@@ -7,21 +7,22 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import { clamp } from '../../../dot/js/util/clamp.js';
-import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram } from './RenderProgram.js';
+import type { RenderImageable, SerializedRenderImageable } from './RenderImageable.js';
+import { RenderExtend } from './RenderExtend.js';
+import { RenderResampleType } from './RenderResampleType.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
 import type { ClippableFace } from '../cag/ClippableFace.js';
 import { PolygonMitchellNetravali } from '../raster/PolygonMitchellNetravali.js';
-import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
 import type { RenderExecutionStack } from './RenderExecutionStack.js';
 import type { RenderExecutor } from './RenderExecutor.js';
-import { RenderExtend } from './RenderExtend.js';
-import type { RenderImageable, SerializedRenderImageable } from './RenderImageable.js';
-import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
-import { RenderProgram } from './RenderProgram.js';
-import { RenderResampleType } from './RenderResampleType.js';
+import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
+import { clamp } from '../../../dot/js/util/clamp.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 
 const emptyChildren: RenderProgram[] = [];
 
@@ -361,6 +362,8 @@ export class RenderImage extends RenderProgram {
     };
   }
 }
+
+alpenglow.register( 'RenderImage', RenderImage );
 
 export class RenderImageLogic {
 

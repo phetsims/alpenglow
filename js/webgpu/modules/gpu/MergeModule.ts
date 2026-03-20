@@ -8,10 +8,11 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow } from '../../../alpenglow.js';
 import type { BufferArraySlot } from '../../compute/BufferArraySlot.js';
-import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
-import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
 import { MAIN_MERGE_DEFAULTS, mainMergeWGSL, mainMergeWGSLOptions } from '../../wgsl/gpu/mainMergeWGSL.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
 
 export type MergeModuleOptions<T> = {
   inputA: BufferArraySlot<T>;
@@ -50,3 +51,4 @@ export class MergeModule<T> extends DirectModule<number> {
     this.output = providedOptions.output;
   }
 }
+alpenglow.register( 'MergeModule', MergeModule );

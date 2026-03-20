@@ -7,14 +7,15 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderColorSpaceConversion } from './RenderColorSpaceConversion.js';
+import { RenderProgram } from './RenderProgram.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutor } from './RenderExecutor.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { RenderColor } from './RenderColor.js';
-import { RenderColorSpaceConversion } from './RenderColorSpaceConversion.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import type { RenderExecutionStack } from './RenderExecutionStack.js';
-import type { RenderExecutor } from './RenderExecutor.js';
-import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
-import { RenderProgram } from './RenderProgram.js';
 
 export class RenderSRGBToLinearSRGB extends RenderColorSpaceConversion {
   public constructor(
@@ -37,6 +38,8 @@ export class RenderSRGBToLinearSRGB extends RenderColorSpaceConversion {
     instructions.push( RenderInstructionSRGBToLinearSRGB.INSTANCE );
   }
 }
+
+alpenglow.register( 'RenderSRGBToLinearSRGB', RenderSRGBToLinearSRGB );
 
 const scratchVector = new Vector4( 0, 0, 0, 0 );
 

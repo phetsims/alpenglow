@@ -6,15 +6,16 @@
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { BufferSlot } from '../../compute/BufferSlot.js';
 import { BinaryOp } from '../../compute/ConcreteType.js';
-import { decimalS, wgsl, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
-import { RakedSizable } from '../WGSLUtils.js';
-import { toConvergentIndexWGSL } from './getConvergentIndexWGSL.js';
 import { loadReducedWGSL, loadReducedWGSLOptions } from './loadReducedWGSL.js';
-import { logStringWGSL } from './logStringWGSL.js';
 import { reduceWGSL, reduceWGSLOptions } from './reduceWGSL.js';
+import { RakedSizable } from '../WGSLUtils.js';
+import { decimalS, wgsl, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { logStringWGSL } from './logStringWGSL.js';
+import { toConvergentIndexWGSL } from './getConvergentIndexWGSL.js';
 import { toStripedIndexWGSL } from './toStripedIndexWGSL.js';
 
 export type mainReduceWGSLOptions<T> = {
@@ -105,3 +106,5 @@ export const mainReduceWGSL = <T>(
     }
   ` );
 };
+
+alpenglow.register( 'mainReduceWGSL', mainReduceWGSL );

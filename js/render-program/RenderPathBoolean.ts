@@ -8,12 +8,13 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector4 from '../../../dot/js/Vector4.js';
-import { LinearEdge } from '../cag/LinearEdge.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import { RenderPath, SerializedRenderPath } from './RenderPath.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
 import { isWindingIncluded } from './FillRule.js';
 import { RenderColor } from './RenderColor.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import { RenderPath, SerializedRenderPath } from './RenderPath.js';
-import { RenderProgram, SerializedRenderProgram } from './RenderProgram.js';
+import { LinearEdge } from '../cag/LinearEdge.js';
 
 export class RenderPathBoolean extends RenderProgram {
   public constructor(
@@ -115,6 +116,8 @@ export class RenderPathBoolean extends RenderProgram {
     return new RenderPathBoolean( path, inside, RenderColor.TRANSPARENT );
   }
 }
+
+alpenglow.register( 'RenderPathBoolean', RenderPathBoolean );
 
 export type SerializedRenderPathBoolean = {
   type: 'RenderPathBoolean';

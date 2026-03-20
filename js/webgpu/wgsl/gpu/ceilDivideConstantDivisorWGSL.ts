@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../../alpenglow.js';
 import { u32S, wgsl, WGSLExpressionU32 } from '../WGSLString.js';
 
 // Math.ceil( x / y ), but with unsigned numbers
@@ -20,3 +21,5 @@ export const ceilDivideConstantDivisorWGSL = (
     return wgsl`( ( ( ${x} ) + ${u32S( y - 1 )} ) / ${u32S( y )} )`;
   }
 };
+
+alpenglow.register( 'ceilDivideConstantDivisorWGSL', ceilDivideConstantDivisorWGSL );

@@ -11,10 +11,11 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import { RenderableFace } from '../raster/RenderableFace.js';
+import { RationalFace } from './RationalFace.js';
 import { RenderProgram } from '../render-program/RenderProgram.js';
 import { ClippableFace, ClippableFaceAccumulator } from './ClippableFace.js';
-import { RationalFace } from './RationalFace.js';
+import { RenderableFace } from '../raster/RenderableFace.js';
+import { alpenglow } from '../alpenglow.js';
 
 class AccumulatingFace {
   public faces = new Set<RationalFace>();
@@ -208,3 +209,5 @@ export class FaceConversion {
     );
   }
 }
+
+alpenglow.register( 'FaceConversion', FaceConversion );

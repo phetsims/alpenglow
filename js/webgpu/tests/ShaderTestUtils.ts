@@ -7,9 +7,10 @@
  */
 
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import { ConcreteType } from '../compute/ConcreteType.js';
-import { DeviceContext } from '../compute/DeviceContext.js';
+import { alpenglow } from '../../alpenglow.js';
 import { webgpu } from '../WebGPUAPI.js';
+import { DeviceContext } from '../compute/DeviceContext.js';
+import { ConcreteType } from '../compute/ConcreteType.js';
 
 webgpu.enableRecording();
 
@@ -22,7 +23,9 @@ export const shaderTestDevicePromise: Promise<GPUDevice | null> = ( async () => 
     return null;
   }
 } )();
- 
+
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+alpenglow.register( 'shaderTestDevicePromise', shaderTestDevicePromise );
 
 export const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, deviceContext: DeviceContext ) => Promise<string | null> ): void => {
   QUnit.test( name, async assert => {
@@ -53,9 +56,13 @@ export const asyncTestWithDevice = ( name: string, test: ( device: GPUDevice, de
   } );
 };
 
+alpenglow.register( 'asyncTestWithDevice', asyncTestWithDevice );
+
 export const asyncTestWithDeviceContext = ( name: string, test: ( deviceContext: DeviceContext ) => Promise<string | null> ): void => {
   asyncTestWithDevice( name, ( device, deviceContext ) => test( deviceContext ) );
 };
+
+alpenglow.register( 'asyncTestWithDeviceContext', asyncTestWithDeviceContext );
 
 export const compareArrays = <T>( type: ConcreteType<T>, inputValues: IntentionalAny, expectedValues: T[], actualValues: T[] ): string | null => {
   for ( let i = 0; i < expectedValues.length; i++ ) {
@@ -78,3 +85,5 @@ export const compareArrays = <T>( type: ConcreteType<T>, inputValues: Intentiona
 
   return null;
 };
+
+alpenglow.register( 'compareArrays', compareArrays );

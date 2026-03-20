@@ -6,21 +6,22 @@
 
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
-import { BufferBindingType } from '../../compute/BufferBindingType.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { BufferSlot } from '../../compute/BufferSlot.js';
 import { BitOrder, U32Max, U32Type } from '../../compute/ConcreteType.js';
 import { decimalS, u32S, wgsl, WGSLExpressionT, WGSLExpressionU32, WGSLMainModule, WGSLSlot } from '../WGSLString.js';
-import { RakedSizable } from '../WGSLUtils.js';
-import { ceilDivideConstantDivisorWGSL } from './ceilDivideConstantDivisorWGSL.js';
-import { commentWGSL } from './commentWGSL.js';
-import { conditionalIfWGSL } from './conditionalIfWGSL.js';
 import { loadMultipleWGSL, loadMultipleWGSLOptions } from './loadMultipleWGSL.js';
-import { logRakedWGSL } from './logRakedWGSL.js';
+import { RakedSizable } from '../WGSLUtils.js';
+import { BufferBindingType } from '../../compute/BufferBindingType.js';
 import { logStringWGSL } from './logStringWGSL.js';
+import { ceilDivideConstantDivisorWGSL } from './ceilDivideConstantDivisorWGSL.js';
 import { logValueWGSL } from './logValueWGSL.js';
-import { nBitCompactSingleSortWGSL } from './nBitCompactSingleSortWGSL.js';
-import { scanRakedWGSL } from './scanRakedWGSL.js';
+import { logRakedWGSL } from './logRakedWGSL.js';
+import { commentWGSL } from './commentWGSL.js';
 import { unrollWGSL } from './unrollWGSL.js';
+import { nBitCompactSingleSortWGSL } from './nBitCompactSingleSortWGSL.js';
+import { conditionalIfWGSL } from './conditionalIfWGSL.js';
+import { scanRakedWGSL } from './scanRakedWGSL.js';
 
 export type mainRadixScatterWGSLOptions<T> = {
   input: BufferSlot<T[]>;
@@ -236,3 +237,5 @@ export const mainRadixScatterWGSL = <T>(
     }
   ` );
 };
+
+alpenglow.register( 'mainRadixScatterWGSL', mainRadixScatterWGSL );

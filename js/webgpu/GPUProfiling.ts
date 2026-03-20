@@ -23,15 +23,16 @@
  */
 
 import Random from '../../../dot/js/Random.js';
-import { BufferArraySlot } from './compute/BufferArraySlot.js';
-import { BufferLogger } from './compute/BufferLogger.js';
-import { getArrayType, U32Order } from './compute/ConcreteType.js';
-import { DeviceContext } from './compute/DeviceContext.js';
-import { Procedure } from './compute/Procedure.js';
-import { Routine } from './compute/Routine.js';
+import { alpenglow } from '../alpenglow.js';
 import { TimestampLogger, TimestampLoggerResult } from './compute/TimestampLogger.js';
+import { DeviceContext } from './compute/DeviceContext.js';
+import { getArrayType, U32Order } from './compute/ConcreteType.js';
+import { BufferArraySlot } from './compute/BufferArraySlot.js';
 import { RadixSortModule } from './modules/gpu/RadixSortModule.js';
 import { u32S } from './wgsl/WGSLString.js';
+import { Routine } from './compute/Routine.js';
+import { Procedure } from './compute/Procedure.js';
+import { BufferLogger } from './compute/BufferLogger.js';
 
 // eslint-disable-next-line phet/bad-sim-text
 const random = new Random();
@@ -228,3 +229,5 @@ export class GPUProfiling {
     } );
   }
 }
+
+alpenglow.register( 'GPUProfiling', GPUProfiling );

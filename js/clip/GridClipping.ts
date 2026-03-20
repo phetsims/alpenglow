@@ -7,9 +7,10 @@
  */
 
 import { clamp } from '../../../dot/js/util/clamp.js';
-import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import { alpenglow } from '../alpenglow.js';
 import { LineClipping } from './LineClipping.js';
+import { roundSymmetric } from '../../../dot/js/util/roundSymmetric.js';
 
 const scratchStartPoint = new Vector2( 0, 0 );
 const scratchEndPoint = new Vector2( 0, 0 );
@@ -913,3 +914,5 @@ export class GridClipping {
     yIntercepts.length = 0;
   }
 }
+
+alpenglow.register( 'GridClipping', GridClipping );

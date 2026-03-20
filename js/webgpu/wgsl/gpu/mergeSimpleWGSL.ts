@@ -7,6 +7,7 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { u32S, wgsl, WGSLExpressionBool, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
 import { GLOBAL_INDEXABLE_DEFAULTS, GlobalIndexable, GrainSizable } from '../WGSLUtils.js';
 import { commentWGSL } from './commentWGSL.js';
@@ -97,3 +98,5 @@ export const mergeSimpleWGSL = (
     ${commentWGSL( 'end merge_simple' )}
   `;
 };
+
+alpenglow.register( 'mergeSimpleWGSL', mergeSimpleWGSL );

@@ -7,6 +7,7 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow } from '../alpenglow.js';
 
 // TODO: We'll plan to use Float32Array to test WebGPU compatibility and epsilons
 const ExecutionArrayType = Float64Array;
@@ -121,3 +122,5 @@ export class RenderExecutionStack {
     return vector;
   }
 }
+
+alpenglow.register( 'RenderExecutionStack', RenderExecutionStack );

@@ -8,6 +8,7 @@
 
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import { alpenglow } from '../alpenglow.js';
 
 export class WebGPURecorder {
 
@@ -404,6 +405,7 @@ export class WebGPURecorder {
     }
   }
 }
+alpenglow.register( 'WebGPURecorder', WebGPURecorder );
 
 export class WebGPUCommandList {
 
@@ -463,6 +465,7 @@ export class WebGPUCommandList {
     } ).join( ', ' )} ` : ''}) => {\n${this.toJS( nameMap, level + 1 )}\n}`;
   }
 }
+alpenglow.register( 'WebGPUCommandList', WebGPUCommandList );
 
 const getName = ( nameMap: Map<IntentionalAny, string>, obj: IntentionalAny ): string => {
   const name = nameMap.get( obj );
@@ -488,6 +491,7 @@ export abstract class WebGPUCommand {
     }
   }
 }
+alpenglow.register( 'WebGPUCommand', WebGPUCommand );
 
 class WebGPUCommandGetAdapter extends WebGPUCommand {
   public constructor(

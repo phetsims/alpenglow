@@ -8,6 +8,7 @@
 
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import optionize from '../../../../phet-core/js/optionize.js';
+import { alpenglow } from '../../alpenglow.js';
 import { PreferredCanvasFormat, webgpu } from '../WebGPUAPI.js';
 import type { ByteEncoder } from './ByteEncoder.js';
 
@@ -274,3 +275,5 @@ export class DeviceContext {
     return ( await DeviceContext.getMappedByteArray( buffer ) ).buffer;
   }
 }
+
+alpenglow.register( 'DeviceContext', DeviceContext );

@@ -7,11 +7,12 @@
  */
 
 import Range from '../../../dot/js/Range.js';
-import { arePointsCollinear } from '../../../dot/js/util/arePointsCollinear.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Line } from '../../../kite/js/segments/Segment.js';
 import Shape from '../../../kite/js/Shape.js';
+import { alpenglow } from '../alpenglow.js';
 import { ClipSimplifier } from '../clip/ClipSimplifier.js';
+import { arePointsCollinear } from '../../../dot/js/util/arePointsCollinear.js';
 
 export class LinearEdge {
 
@@ -529,6 +530,8 @@ export class LinearEdge {
     return `${this.startPoint.x},${this.startPoint.y} => ${this.endPoint.x},${this.endPoint.y}`;
   }
 }
+
+alpenglow.register( 'LinearEdge', LinearEdge );
 
 export type SerializedLinearEdge = {
   startPoint: { x: number; y: number };

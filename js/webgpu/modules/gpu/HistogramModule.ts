@@ -8,10 +8,11 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow } from '../../../alpenglow.js';
 import type { BufferArraySlot } from '../../compute/BufferArraySlot.js';
-import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
-import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
 import { MAIN_HISTOGRAM_DEFAULTS, mainHistogramWGSL, mainHistogramWGSLOptions } from '../../wgsl/gpu/mainHistogramWGSL.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
 
 export type HistogramModuleOptions<T> = {
   input: BufferArraySlot<T>;
@@ -47,3 +48,4 @@ export class HistogramModule<T> extends DirectModule<number> {
     this.output = options.output;
   }
 }
+alpenglow.register( 'HistogramModule', HistogramModule );

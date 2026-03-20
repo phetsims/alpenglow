@@ -8,8 +8,8 @@
 
 import { wgsl, WGSLExpression, WGSLStringModule } from '../WGSLString.js';
 import { add_u64_u64WGSL } from './add_u64_u64WGSL.js';
-import { i64WGSL } from './i64WGSL.js';
 import { ONE_u64WGSL } from './ONE_u64WGSL.js';
+import { i64WGSL } from './i64WGSL.js';
 
 export const negate_i64WGSL = (
   i64: WGSLExpression,

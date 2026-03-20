@@ -8,9 +8,10 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../alpenglow.js';
 import { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
-import { binaryToRenderInstruction } from './binaryToRenderInstruction.js';
 import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import { binaryToRenderInstruction } from './binaryToRenderInstruction.js';
 
 export const binaryToRenderInstructions = ( encoder: ByteEncoder, offset: number ): RenderInstruction[] => {
 
@@ -74,3 +75,4 @@ export const binaryToRenderInstructions = ( encoder: ByteEncoder, offset: number
 
   return instructions;
 };
+alpenglow.register( 'binaryToRenderInstructions', binaryToRenderInstructions );

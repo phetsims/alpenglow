@@ -7,6 +7,7 @@
  */
 
 import { optionize3 } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { wgsl, WGSLExpressionI32, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
 import { commentWGSL } from './commentWGSL.js';
 
@@ -93,3 +94,5 @@ export const mergeSequentialWGSL = (
     ${commentWGSL( 'end merge_sequential' )}
   `;
 };
+
+alpenglow.register( 'mergeSequentialWGSL', mergeSequentialWGSL );

@@ -9,11 +9,12 @@
 
 import Vector3 from '../../../../../dot/js/Vector3.js';
 import { combineOptions } from '../../../../../phet-core/js/optionize.js';
+import { alpenglow } from '../../../alpenglow.js';
 import type { BufferArraySlot } from '../../compute/BufferArraySlot.js';
 import { BufferSlot } from '../../compute/BufferSlot.js';
-import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
-import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
 import { MAIN_REDUCE_ATOMIC_DEFAULTS, mainReduceAtomicWGSL, mainReduceAtomicWGSLOptions } from '../../wgsl/gpu/mainReduceAtomicWGSL.js';
+import type { PipelineBlueprintOptions } from '../../compute/PipelineBlueprint.js';
+import { DIRECT_MODULE_DEFAULTS, DirectModule, DirectModuleOptions } from '../../compute/DirectModule.js';
 
 export type MainReduceAtomicModuleOptions<T> = {
   input: BufferArraySlot<T>;
@@ -49,3 +50,4 @@ export class MainReduceAtomicModule<T> extends DirectModule<number> {
     this.output = options.output;
   }
 }
+alpenglow.register( 'MainReduceAtomicModule', MainReduceAtomicModule );

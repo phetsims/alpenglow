@@ -9,6 +9,7 @@
 import { combineOptions, optionize3 } from '../../../../../phet-core/js/optionize.js';
 import PickRequired from '../../../../../phet-core/js/types/PickRequired.js';
 import StrictOmit from '../../../../../phet-core/js/types/StrictOmit.js';
+import { alpenglow } from '../../../alpenglow.js';
 import { u32S, wgsl, wgslBlueprint, WGSLExpression, WGSLExpressionU32, WGSLStatements } from '../WGSLString.js';
 import { RakedSizable } from '../WGSLUtils.js';
 import { logWGSL, logWGSLOptions } from './logWGSL.js';
@@ -108,3 +109,5 @@ export const logRakedWGSL = <T>(
     }
   } );
 };
+
+alpenglow.register( 'logRakedWGSL', logRakedWGSL );

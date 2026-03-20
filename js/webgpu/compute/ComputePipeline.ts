@@ -6,12 +6,13 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
-import { webgpu } from '../WebGPUAPI.js';
-import { addLineNumbers, partialWGSLBeautify, stripWGSLComments } from '../wgsl/WGSLUtils.js';
+import { alpenglow } from '../../alpenglow.js';
 import type { DeviceContext } from './DeviceContext.js';
-import { getLogBarrierWGSL } from './getLogBarrierWGSL.js';
-import { logBufferSlot } from './logBufferSlot.js';
 import type { PipelineLayout } from './PipelineLayout.js';
+import { addLineNumbers, partialWGSLBeautify, stripWGSLComments } from '../wgsl/WGSLUtils.js';
+import { webgpu } from '../WebGPUAPI.js';
+import { logBufferSlot } from './logBufferSlot.js';
+import { getLogBarrierWGSL } from './getLogBarrierWGSL.js';
 
 export class ComputePipeline {
   // This will be available by the time it can be accessed publicly
@@ -99,3 +100,4 @@ export class ComputePipeline {
     return computePipeline;
   }
 }
+alpenglow.register( 'ComputePipeline', ComputePipeline );

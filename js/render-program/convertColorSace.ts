@@ -7,9 +7,10 @@
  */
 
 import { RenderColorSpace } from './RenderColorSpace.js';
-import { RenderPremultiply } from './RenderPremultiply.js';
 import { RenderProgram } from './RenderProgram.js';
+import { alpenglow } from '../alpenglow.js';
 import { RenderUnpremultiply } from './RenderUnpremultiply.js';
+import { RenderPremultiply } from './RenderPremultiply.js';
 
 export const convertColorSpace = (
   renderProgram: RenderProgram,
@@ -36,3 +37,4 @@ export const convertColorSpace = (
   }
   return renderProgram.simplified();
 };
+alpenglow.register( 'convertColorSpace', convertColorSpace );

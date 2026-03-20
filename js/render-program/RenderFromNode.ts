@@ -26,6 +26,7 @@ import Pattern from '../../../scenery/js/util/Pattern.js';
 import RadialGradient from '../../../scenery/js/util/RadialGradient.js';
 import TColor from '../../../scenery/js/util/TColor.js';
 import TPaint from '../../../scenery/js/util/TPaint.js';
+import { alpenglow } from '../alpenglow.js';
 import { CombinedRaster } from '../raster/CombinedRaster.js';
 import { Rasterize } from '../raster/Rasterize.js';
 import { RenderAlpha } from './RenderAlpha.js';
@@ -449,3 +450,5 @@ export class RenderFromNode {
     ) );
   }
 }
+
+alpenglow.register( 'RenderFromNode', RenderFromNode );

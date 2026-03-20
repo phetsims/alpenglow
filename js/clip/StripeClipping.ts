@@ -8,6 +8,7 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
+import { alpenglow } from '../alpenglow.js';
 import { LinearEdge } from '../cag/LinearEdge.js';
 import { ClipSimplifier } from './ClipSimplifier.js';
 
@@ -226,3 +227,5 @@ export class StripeClipping {
     return simplifiers.map( simplifier => simplifier.finalize() );
   }
 }
+
+alpenglow.register( 'StripeClipping', StripeClipping );

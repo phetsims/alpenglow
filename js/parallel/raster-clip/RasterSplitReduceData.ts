@@ -6,9 +6,10 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../alpenglow.js';
 import type { ByteEncoder } from '../../webgpu/compute/ByteEncoder.js';
-import type { RasterClippedChunk } from './RasterClippedChunk.js';
 import type { RasterEdgeClip } from './RasterEdgeClip.js';
+import type { RasterClippedChunk } from './RasterClippedChunk.js';
 
 export class RasterSplitReduceData {
   public constructor(
@@ -72,3 +73,5 @@ export class RasterSplitReduceData {
     0, 0
   );
 }
+
+alpenglow.register( 'RasterSplitReduceData', RasterSplitReduceData );

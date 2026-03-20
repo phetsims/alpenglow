@@ -6,6 +6,7 @@
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
 
+import { alpenglow } from '../../../alpenglow.js';
 import { u32HexS, u32S, wgsl, WGSLExpressionU32, WGSLStatements, wgslString, WGSLStringAccumulator, WGSLVariableName } from '../WGSLString.js';
 import { commentWGSL } from './commentWGSL.js';
 
@@ -97,3 +98,5 @@ export const bitPackRadixExclusiveScanWGSL = (
     `;
   }
 };
+
+alpenglow.register( 'bitPackRadixExclusiveScanWGSL', bitPackRadixExclusiveScanWGSL );

@@ -7,15 +7,16 @@
  */
 
 import Vector4 from '../../../dot/js/Vector4.js';
+import { alpenglow } from '../alpenglow.js';
+import { RenderColorSpaceConversion } from './RenderColorSpaceConversion.js';
+import type { RenderProgram } from './RenderProgram.js';
+import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
+import { RenderSRGBToLinearSRGB } from './RenderSRGBToLinearSRGB.js';
+import type { RenderExecutionStack } from './RenderExecutionStack.js';
+import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
+import type { RenderExecutor } from './RenderExecutor.js';
 import type { ByteEncoder } from '../webgpu/compute/ByteEncoder.js';
 import { RenderColor } from './RenderColor.js';
-import { RenderColorSpaceConversion } from './RenderColorSpaceConversion.js';
-import type { RenderEvaluationContext } from './RenderEvaluationContext.js';
-import type { RenderExecutionStack } from './RenderExecutionStack.js';
-import type { RenderExecutor } from './RenderExecutor.js';
-import { RenderInstruction, RenderInstructionLocation } from './RenderInstruction.js';
-import type { RenderProgram } from './RenderProgram.js';
-import { RenderSRGBToLinearSRGB } from './RenderSRGBToLinearSRGB.js';
 
 export class RenderLinearSRGBToSRGB extends RenderColorSpaceConversion {
   public constructor(
@@ -41,6 +42,8 @@ export class RenderLinearSRGBToSRGB extends RenderColorSpaceConversion {
 
 RenderLinearSRGBToSRGB.prototype.inverse = RenderSRGBToLinearSRGB;
 RenderSRGBToLinearSRGB.prototype.inverse = RenderLinearSRGBToSRGB;
+
+alpenglow.register( 'RenderLinearSRGBToSRGB', RenderLinearSRGBToSRGB );
 
 const scratchVector = new Vector4( 0, 0, 0, 0 );
 

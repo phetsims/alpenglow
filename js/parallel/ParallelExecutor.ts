@@ -23,6 +23,7 @@
 
 import Random from '../../../dot/js/Random.js';
 import Vector3 from '../../../dot/js/Vector3.js';
+import { alpenglow } from '../alpenglow.js';
 import { BaseWorkgroupValues, ParallelContext } from './ParallelContext.js';
 import type { ParallelKernel } from './ParallelKernel.js';
 import { ParallelWorkgroup } from './ParallelWorkgroup.js';
@@ -201,3 +202,5 @@ export class ParallelExecutor<WorkgroupValues extends BaseWorkgroupValues> {
     } );
   }
 }
+
+alpenglow.register( 'ParallelExecutor', ParallelExecutor );
